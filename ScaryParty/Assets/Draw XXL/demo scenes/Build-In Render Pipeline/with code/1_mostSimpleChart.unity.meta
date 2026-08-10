@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 0ebd0be105eab1448a524a993271cfc4
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 246836
+  packageName: Draw XXL
+  packageVersion: 1.0.6
+  assetPath: Assets/Draw XXL/demo scenes/Build-In Render Pipeline/with code/1_mostSimpleChart.unity
+  uploadId: 920770

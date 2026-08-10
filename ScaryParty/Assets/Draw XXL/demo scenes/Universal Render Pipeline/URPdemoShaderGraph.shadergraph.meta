@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: e1a772af9806f784da2ff3820475c600
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 246836
+  packageName: Draw XXL
+  packageVersion: 1.0.6
+  assetPath: Assets/Draw XXL/demo scenes/Universal Render Pipeline/URPdemoShaderGraph.shadergraph
+  uploadId: 920770

@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 315f04ee816f05143ac966bc16136e27
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Editor/Scripts/IllustrateEditor.cs
+  uploadId: 603293

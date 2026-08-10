@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bb97510c8be630341bfab8916341eea8
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Shaders/Illustrate
+    Alpha Clipped.shader
+  uploadId: 603293

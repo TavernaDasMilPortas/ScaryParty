@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: eaa67ae056de48c409a4c7c505c87da7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Outline Render
+    Feature/Outine Setup Example Universal Renderer Data.asset
+  uploadId: 603293

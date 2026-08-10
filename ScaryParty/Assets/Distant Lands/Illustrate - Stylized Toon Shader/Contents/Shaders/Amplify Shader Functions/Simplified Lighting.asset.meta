@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 8a64bd153167aa84c907871c36032f98
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Shaders/Amplify
+    Shader Functions/Simplified Lighting.asset
+  uploadId: 603293

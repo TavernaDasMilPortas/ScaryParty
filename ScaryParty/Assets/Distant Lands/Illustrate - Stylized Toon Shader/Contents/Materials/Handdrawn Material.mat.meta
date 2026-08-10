@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b623135e4d88b404aa901d4935ce1040
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Materials/Handdrawn
+    Material.mat
+  uploadId: 603293

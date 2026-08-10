@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e539f590a5e815b489995ba66a64d9b0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 246836
+  packageName: Draw XXL
+  packageVersion: 1.0.6
+  assetPath: Assets/Draw XXL/demo scenes/Universal Render Pipeline/URPdemoMaterial.mat
+  uploadId: 920770

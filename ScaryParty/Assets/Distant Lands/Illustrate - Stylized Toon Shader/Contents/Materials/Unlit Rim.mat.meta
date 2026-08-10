@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e3a2bcade616496468f8dd210c57927f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Materials/Unlit
+    Rim.mat
+  uploadId: 603293

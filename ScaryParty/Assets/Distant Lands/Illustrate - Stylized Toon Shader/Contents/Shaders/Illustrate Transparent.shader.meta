@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2b0250d0dc7b0b14995a44d95448b053
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 256762
+  packageName: 'Illustrate: Stylized Toon Shader'
+  packageVersion: 1.2
+  assetPath: Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Shaders/Illustrate
+    Transparent.shader
+  uploadId: 603293
