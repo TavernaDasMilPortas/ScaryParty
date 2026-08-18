@@ -5,6 +5,8 @@ using System.Collections;
 using ParrelSync;
 #endif
 using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using Unity.Netcode.Transports.UTP;
 
 public class AutoStartNetwork : MonoBehaviour
@@ -16,16 +18,6 @@ public class AutoStartNetwork : MonoBehaviour
     private void Start()
     {
         StartCoroutine(AutoConnectRoutine());
-    }
-
-    // Flag setada pelos callbacks do Netcode quando a conexão como cliente falha
-    private bool _clientConnectionFailed = false;
-
-    private void OnClientDisconnected(ulong clientId)
-    {
-        // Só nos importa se ainda não estamos conectados (ou seja, foi uma falha de conexão)
-        if (!NetworkManager.Singleton.IsConnectedClient)
-            _clientConnectionFailed = true;
     }
 
     private IEnumerator AutoConnectRoutine()
@@ -74,47 +66,30 @@ public class AutoStartNetwork : MonoBehaviour
                     status = $"Falha ao iniciar Host na porta {portToConnect}. Tentando novamente...";
             }
 #else
-            // Na Build: tenta conectar como cliente no IP do arquivo
-            if (transport != null)
-                transport.SetConnectionData(ipToConnect, portToConnect);
+            // Na Build: compara o IP do arquivo com os IPs locais desta máquina.
+            // Se o IP do arquivo pertence a ESTA máquina → sou o Host.
+            // Se pertence a OUTRA máquina → sou o Cliente.
+            bool isThisMachineTheHost = IsLocalIP(ipToConnect);
 
-            // Registra o callback para saber quando a conexão falhar de verdade
-            _clientConnectionFailed = false;
-            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
-
-            status = $"Tentando conectar como Cliente em {ipToConnect}:{portToConnect}...";
-            NetworkManager.Singleton.StartClient();
-
-            // Aguarda até conectar com sucesso OU até o Netcode confirmar a falha
-            // Timeout de segurança de 10 segundos para não travar para sempre
-            float timeout = 10f;
-            while (!NetworkManager.Singleton.IsConnectedClient && !_clientConnectionFailed && timeout > 0f)
+            if (isThisMachineTheHost)
             {
-                timeout -= Time.deltaTime;
-                status = $"Aguardando conexão em {ipToConnect}:{portToConnect}... ({timeout:F0}s)";
-                yield return null;
-            }
-
-            // Remove o callback para não acumular listeners
-            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
-
-            if (!NetworkManager.Singleton.IsConnectedClient)
-            {
-                string motivo = _clientConnectionFailed ? "recusada pelo servidor" : "tempo esgotado";
-                status = $"Conexão {motivo}. Desligando cliente...";
-
-                NetworkManager.Singleton.Shutdown();
-                yield return new WaitWhile(() => NetworkManager.Singleton.ShutdownInProgress);
-
-                // Aguarda o Windows liberar o socket (evita WinError:0000271d WSAEACCES)
-                yield return new WaitForSeconds(0.5f);
-
-                // Configura o transport para escutar em 0.0.0.0 (qualquer IP local) antes de criar o Host
                 if (transport != null)
                     transport.SetConnectionData("0.0.0.0", portToConnect, "0.0.0.0");
 
-                status = $"Iniciando como Host na porta {portToConnect}...";
-                NetworkManager.Singleton.StartHost();
+                status = $"Este PC é o Host! Abrindo servidor na porta {portToConnect}...";
+                bool ok = NetworkManager.Singleton.StartHost();
+                if (!ok)
+                    status = $"Falha ao abrir Host na porta {portToConnect}. Tentando novamente...";
+            }
+            else
+            {
+                if (transport != null)
+                    transport.SetConnectionData(ipToConnect, portToConnect);
+
+                status = $"Conectando como Cliente em {ipToConnect}:{portToConnect}...";
+                bool ok = NetworkManager.Singleton.StartClient();
+                if (!ok)
+                    status = $"Falha ao iniciar cliente. Tentando novamente...";
             }
 #endif
             yield return new WaitForSeconds(1f);
@@ -123,6 +98,41 @@ public class AutoStartNetwork : MonoBehaviour
         status = "Conectado como: " + (NetworkManager.Singleton.IsServer ? "Host" : "Client");
     }
 
+    /// <summary>
+    /// Retorna true se o IP informado pertence a esta máquina (incluindo loopback).
+    /// </summary>
+    private bool IsLocalIP(string ip)
+    {
+        // Loopback sempre é local
+        if (ip == "127.0.0.1" || ip == "localhost" || ip == "0.0.0.0")
+            return true;
+
+        try
+        {
+            // Obtém todos os IPs de todas as interfaces de rede desta máquina
+            string hostName = Dns.GetHostName();
+            IPAddress[] localAddresses = Dns.GetHostAddresses(hostName);
+
+            foreach (IPAddress addr in localAddresses)
+            {
+                if (addr.AddressFamily == AddressFamily.InterNetwork) // Só IPv4
+                {
+                    if (addr.ToString() == ip)
+                    {
+                        Debug.Log($"[AutoStartNetwork] IP '{ip}' pertence a esta máquina → iniciando como Host.");
+                        return true;
+                    }
+                }
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[AutoStartNetwork] Erro ao obter IPs locais: {e.Message}");
+        }
+
+        Debug.Log($"[AutoStartNetwork] IP '{ip}' não pertence a esta máquina → iniciando como Cliente.");
+        return false;
+    }
 
     private void OnGUI()
     {
