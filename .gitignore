@@ -48,3 +48,7 @@ sysinfo.txt
 
 # ParrelSync Clones
 *_clone_*
+
+
+# Arquivos de solução gerados localmente
+*.slnx
