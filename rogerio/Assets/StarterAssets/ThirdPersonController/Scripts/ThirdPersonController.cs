@@ -172,6 +172,35 @@ namespace StarterAssets
 
                 var cc = GetComponent<CharacterController>();
                 if (cc != null) cc.enabled = true;
+
+                // Faz a câmera (Cinemachine ou normal) seguir este personagem (o jogador local)
+                if (CinemachineCameraTarget != null)
+                {
+                    var virtualCamera = GameObject.Find("PlayerFollowCamera");
+                    if (virtualCamera != null)
+                    {
+                        // Tenta pegar o componente por nome para evitar erro de compilação caso o Cinemachine não esteja referenciado no Assembly
+                        Component cmCamera = virtualCamera.GetComponent("CinemachineVirtualCamera");
+                        if (cmCamera == null) cmCamera = virtualCamera.GetComponent("CinemachineCamera"); // Suporte para Cinemachine 3.x
+                        
+                        if (cmCamera != null)
+                        {
+                            var prop = cmCamera.GetType().GetProperty("Follow");
+                            if (prop != null)
+                            {
+                                prop.SetValue(cmCamera, CinemachineCameraTarget.transform, null);
+                            }
+                        }
+                    }
+                    else if (_mainCamera != null)
+                    {
+                        // Fallback: se não achar a câmera do Cinemachine, faz a MainCamera seguir o alvo sendo filha dele
+                        // Nota: StarterAssets foi projetado para usar Cinemachine, mas isso funciona como quebra-galho.
+                        _mainCamera.transform.SetParent(CinemachineCameraTarget.transform);
+                        _mainCamera.transform.localPosition = new Vector3(0, 0, -4f); // Distância aproximada de third-person
+                        _mainCamera.transform.localRotation = Quaternion.identity;
+                    }
+                }
             }
             else
             {
