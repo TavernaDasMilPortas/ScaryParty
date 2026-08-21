@@ -1,0 +1,50 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="MainGameUI.uss" />
+    <ui:VisualElement name="HUD-Container" class="hud-container">
+        <!-- Top Section -->
+        <ui:VisualElement class="top-section">
+            <!-- Top Left: Stats -->
+            <ui:VisualElement class="stats-container">
+                <ui:Label name="MoneyLabel" text="$0" class="money-label" />
+                <ui:Label name="ScoreLabel" text="Deliveries: 0" class="score-label" />
+            </ui:VisualElement>
+
+            
+            <!-- Top Right: Orders -->
+            <ui:VisualElement class="orders-container">
+                <ui:Label text="Active Orders" class="orders-title" />
+                <ui:ScrollView name="OrdersList" class="orders-list">
+                    <!-- Orders will be injected here dynamically -->
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Center Section: Interaction Prompt -->
+        <ui:VisualElement class="center-section">
+            <ui:Label name="InteractionPrompt" text="Press [E] to Interact" class="interaction-prompt hidden" />
+        </ui:VisualElement>
+
+        <!-- Bottom Section: Hands/Inventory -->
+        <ui:VisualElement class="bottom-section">
+            <ui:VisualElement class="hands-container">
+                <!-- Left Hand -->
+                <ui:VisualElement class="hand-slot">
+                    <ui:Label text="Left Hand" class="hand-title" />
+                    <ui:Label name="LeftHandContent" text="Empty" class="hand-content" />
+                </ui:VisualElement>
+                
+                <!-- Right Hand -->
+                <ui:VisualElement class="hand-slot">
+                    <ui:Label text="Right Hand" class="hand-title" />
+                    <ui:Label name="RightHandContent" text="Empty" class="hand-content" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Bottom Right: Minimap -->
+        <ui:VisualElement class="minimap-container">
+            <ui:VisualElement name="MinimapImage" class="minimap-image" />
+            <ui:Label text="CITY MAP" class="minimap-title" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

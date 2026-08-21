@@ -1,0 +1,70 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="LobbyScreen.uss" />
+    <ui:VisualElement class="lobby-container">
+        
+        <!-- Header -->
+        <ui:Label text="🎃 SCARY PARTY — LOBBY" class="header-title" />
+        
+        <!-- Main Content (3 columns) -->
+        <ui:VisualElement class="main-content">
+            
+            <!-- Left Column: Player Profile -->
+            <ui:VisualElement class="panel column-left">
+                <ui:Label text="SEU PERFIL" class="panel-title" />
+                
+                <ui:Label text="Nome:" class="field-label" />
+                <ui:TextField name="PlayerNameInput" class="input-field" />
+                
+                <ui:Label text="Cor:" class="field-label" />
+                <ui:VisualElement name="ColorPreview" class="color-preview" />
+                
+                <ui:VisualElement class="color-palette">
+                    <ui:Button name="BtnColor1" class="color-btn color-orange" />
+                    <ui:Button name="BtnColor2" class="color-btn color-green" />
+                    <ui:Button name="BtnColor3" class="color-btn color-blue" />
+                    <ui:Button name="BtnColor4" class="color-btn color-purple" />
+                </ui:VisualElement>
+                
+                <ui:Button name="BtnSaveProfile" text="Salvar Perfil" class="action-btn" />
+            </ui:VisualElement>
+            
+            <!-- Center Column: Room List -->
+            <ui:VisualElement class="panel column-center">
+                <ui:Label text="SALAS DISPONÍVEIS" class="panel-title" />
+                
+                <ui:ScrollView name="RoomList" class="room-list">
+                    <!-- Rooms injected here -->
+                    <ui:Label text="Nenhuma sala encontrada..." class="no-rooms-label" />
+                </ui:ScrollView>
+                
+                <ui:Button name="BtnRefreshRooms" text="🔄 Atualizar" class="action-btn secondary-btn" />
+            </ui:VisualElement>
+            
+            <!-- Right Column: Create / Join Manual -->
+            <ui:VisualElement class="panel column-right">
+                <ui:Label text="CRIAR SALA" class="panel-title" />
+                
+                <ui:Label text="Nome da Sala:" class="field-label" />
+                <ui:TextField name="RoomNameInput" class="input-field" />
+                
+                <ui:Label text="Porta:" class="field-label" />
+                <ui:TextField name="RoomPortInput" text="7777" class="input-field" />
+                
+                <ui:Button name="BtnCreateRoom" text="CRIAR SALA" class="action-btn create-btn" />
+                
+                <ui:VisualElement class="divider" />
+                
+                <ui:Label text="ENTRAR POR IP" class="panel-title" />
+                
+                <ui:Label text="IP:" class="field-label" />
+                <ui:TextField name="ManualIpInput" text="127.0.0.1" class="input-field" />
+                
+                <ui:Label text="Porta:" class="field-label" />
+                <ui:TextField name="ManualPortInput" text="7777" class="input-field" />
+                
+                <ui:Button name="BtnJoinManual" text="ENTRAR" class="action-btn join-manual-btn" />
+            </ui:VisualElement>
+            
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

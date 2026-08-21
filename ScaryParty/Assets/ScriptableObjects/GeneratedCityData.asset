@@ -1,0 +1,143 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d3ad04db5cecbf409f08bc586d5a562, type: 3}
+  m_Name: GeneratedCityData
+  m_EditorClassIdentifier: Assembly-CSharp::CityData
+  streetGraph:
+    nodes:
+    - id: 0
+      worldPosition: {x: 0, y: 0, z: 0}
+      connectedEdges: 0100000007000000
+    - id: 1
+      worldPosition: {x: 52, y: 0, z: 0}
+      connectedEdges: 00000000010000000a000000
+    - id: 2
+      worldPosition: {x: 104, y: 0, z: 0}
+      connectedEdges: 0a000000
+    - id: 3
+      worldPosition: {x: 0, y: 0, z: 52}
+      connectedEdges: 060000000700000009000000
+    - id: 4
+      worldPosition: {x: 52, y: 0, z: 52}
+      connectedEdges: 00000000030000000500000009000000
+    - id: 5
+      worldPosition: {x: 104, y: 0, z: 52}
+      connectedEdges: 0200000003000000
+    - id: 6
+      worldPosition: {x: 0, y: 0, z: 104}
+      connectedEdges: 0600000008000000
+    - id: 7
+      worldPosition: {x: 52, y: 0, z: 104}
+      connectedEdges: 040000000500000008000000
+    - id: 8
+      worldPosition: {x: 104, y: 0, z: 104}
+      connectedEdges: 0200000004000000
+    edges:
+    - id: 0
+      nodeA: 1
+      nodeB: 4
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 1
+      nodeA: 0
+      nodeB: 1
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 2
+      nodeA: 5
+      nodeB: 8
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 3
+      nodeA: 4
+      nodeB: 5
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 4
+      nodeA: 7
+      nodeB: 8
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 5
+      nodeA: 4
+      nodeB: 7
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 6
+      nodeA: 3
+      nodeB: 6
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 7
+      nodeA: 0
+      nodeB: 3
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 8
+      nodeA: 6
+      nodeB: 7
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 9
+      nodeA: 3
+      nodeB: 4
+      length: 52
+      isBlocked: 0
+      streetType: 1
+    - id: 10
+      nodeA: 1
+      nodeB: 2
+      length: 52
+      isBlocked: 0
+      streetType: 1
+  blocks:
+  - gridX: 0
+    gridY: 0
+    worldCenter: {x: 26, y: 0, z: 26}
+    size: {x: 40, y: 0, z: 40}
+    zoneType: 2
+    deliveryPointIndices: 
+  - gridX: 1
+    gridY: 0
+    worldCenter: {x: 78, y: 0, z: 26}
+    size: {x: 40, y: 0, z: 40}
+    zoneType: 1
+    deliveryPointIndices: 
+  - gridX: 0
+    gridY: 1
+    worldCenter: {x: 26, y: 0, z: 78}
+    size: {x: 40, y: 0, z: 40}
+    zoneType: 2
+    deliveryPointIndices: 
+  - gridX: 1
+    gridY: 1
+    worldCenter: {x: 78, y: 0, z: 78}
+    size: {x: 40, y: 0, z: 40}
+    zoneType: 1
+    deliveryPointIndices: 
+  pizzariaPosition: {x: 52, y: 0, z: 52}
+  bancadaPosition: {x: 52, y: 1, z: 43.5}
+  _gridWidth: 2
+  _gridHeight: 2
+  _blockWidth: 40
+  _blockDepth: 40
+  _streetWidth: 12
+  _deliveryPointCount: 4

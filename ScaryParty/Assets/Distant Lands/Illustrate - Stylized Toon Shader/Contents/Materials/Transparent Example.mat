@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords:
+  - _CLIPTRIPLANAR_ON
   - _NORMALSURFACEOUTLINE_ON
   - _USECOLORADJUSTMENTS_ON
   - _USEOUTLINES_ON
@@ -114,6 +115,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SnowTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -123,6 +128,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TextureSample0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TriplanarTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -156,6 +165,7 @@ Material:
     - _ClampAdjustments: 0
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
+    - _ClipTriplanar: 1
     - _ColorNumbers: 4.11
     - _Cull: 2
     - _CullMode: 2
@@ -163,6 +173,8 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _Direction: 1
+    - _DissolveAmount: 0
+    - _DissolveScale: 1
     - _Dither: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
@@ -224,6 +236,7 @@ Material:
     - _Parallax: 0.005
     - _PosterizeColors: 0
     - _PosterizeLight: 0
+    - _PuddleScale: 0.4
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Range: 0
@@ -239,6 +252,7 @@ Material:
     - _Shininess: 0.1
     - _Smoothness: 0.5
     - _SmoothnessTextureChannel: 0
+    - _SnowScale: 10
     - _Space: 1
     - _SpakleSpeed: 0
     - _SparklesBrightness: 2
@@ -270,8 +284,13 @@ Material:
     - _TailHeadFalloff: 0.5
     - _TessValue: 16
     - _Threshold: 0.5
+    - _TriplanarMultiplier: 2
+    - _TriplanarOffset: 0
+    - _TriplanarSpace: 1
     - _UVSec: 0
+    - _UseCOZYPrecipitation: 0
     - _UseColorAdjustments: 1
+    - _UseDissolve: 0
     - _UseEmission: 0
     - _UseFlutter: 0
     - _UseGlint: 0
@@ -286,6 +305,7 @@ Material:
     - _UseSpecular: 0
     - _UseSway: 0
     - _UseSwirl: 0
+    - _UseTriplanar: 0
     - _UseWave: 0
     - _ValueShift: 0
     - _ValueVariation: 0
@@ -320,14 +340,16 @@ Material:
     - _GradientChannelMask: {r: 0, g: 1, b: 0, a: 0}
     - _GradientPositionalOffset: {r: 0, g: 0, b: 0, a: 0}
     - _LightColor: {r: 1, g: 1, b: 1, a: 0}
-    - _MainColor: {r: 1, g: 1, b: 1, a: 0.43137255}
+    - _MainColor: {r: 1, g: 1, b: 1, a: 0.56078434}
     - _MainColor1: {r: 1, g: 1, b: 1, a: 0}
     - _MainGlowFresnel: {r: 0, g: 0, b: 0, a: 0}
     - _NearColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 0}
+    - _PuddleColor: {r: 0.19475657, g: 0.34486926, b: 0.43396226, a: 0}
     - _RimLightColor: {r: 0.3921569, g: 0.3921569, b: 0.3921569, a: 1}
     - _ShadowColor: {r: 0.5377358, g: 0.5377358, b: 0.5377358, a: 0}
     - _SizeSpeedInterval: {r: 1, g: 1, b: 1, a: 0}
+    - _SnowColor: {r: 1, g: 1, b: 1, a: 0}
     - _SparkleColor: {r: 1, g: 1, b: 1, a: 1}
     - _SparkleFresnel: {r: 0, g: 0, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
@@ -336,11 +358,14 @@ Material:
     - _SwayMask: {r: 0, g: 0, b: 0, a: 0}
     - _SwirlDirection: {r: 0, g: 1, b: 0, a: 0}
     - _SwirlMask: {r: 0, g: 0, b: 0, a: 0}
+    - _TriplanarColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TriplanarDirection: {r: 0, g: 1, b: 0, a: 0}
     - _WaveDirection1: {r: 0, g: 1, b: 0, a: 0}
     - _WaveDirection2: {r: 0, g: 1, b: 0, a: 0}
     - _WaveInfluenceDirection: {r: 0, g: 1, b: 0, a: 0}
     - _WaveMask: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &4282165583113974682
 MonoBehaviour:
   m_ObjectHideFlags: 11
