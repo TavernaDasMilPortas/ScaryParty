@@ -83,14 +83,17 @@ public class MinimapRouteManager : MonoBehaviour
 
     private void Update()
     {
-        // Follow player with minimap camera
+        // Follow player with minimap camera if not dragging
         if (_playerTransform != null && worldImage != null)
         {
             if (!_isFullscreen)
             {
                 _panOffset = Vector3.zero; // Recenter correctly when returning to HUD
             }
-            worldImage.CameraLookAtPosition = _playerTransform.position + _panOffset;
+
+            // O WorldImage já usa o transform do player como centro se ele for adicionado como WorldObject.
+            // Portanto, a posição de LookAt deve ser apenas o OFFSET local (panOffset).
+            worldImage.CameraLookAtPosition = _panOffset;
         }
 
         // Update player icon position and rotation
@@ -120,6 +123,15 @@ public class MinimapRouteManager : MonoBehaviour
     public void TrackPlayer(Transform playerTransform)
     {
         _playerTransform = playerTransform;
+
+        if (worldImage != null)
+        {
+            worldImage.CameraOrigin = _playerTransform; // Define a âncora da câmera diretamente no jogador
+            worldImage.CameraFollowBoundsCenter = false;
+            worldImage.CameraUseBoundsToClip = false; // MANTÉM A VISÃO LONGA PARA VER A CIDADE, senão ele corta tudo que não for o player
+            worldImage.CameraOrthographic = true;
+            worldImage.CameraOffset = new Vector3(0f, 100f, 0f); // Strict top-down
+        }
 
         // Show the minimap now that we have a player
         SetMinimapVisible(true);

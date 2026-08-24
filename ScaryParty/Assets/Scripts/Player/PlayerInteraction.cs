@@ -102,7 +102,11 @@ public class PlayerInteraction : NetworkBehaviour
 
     private void HandleRaycast()
     {
-        if (mainCamera == null) return;
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null) return;
+        }
 
         // Shoot a thick beam (SphereCast) from the player's chest, pointing where the camera looks
         Vector3 rayOrigin = transform.position + Vector3.up * 1.0f; // Approx chest height

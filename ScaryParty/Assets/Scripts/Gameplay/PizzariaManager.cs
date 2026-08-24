@@ -81,13 +81,22 @@ public class PizzariaManager : NetworkBehaviour
 
         _cityReady = true;
         _orderTimer = 2f; // Small delay after city is ready before first pizza
-        Debug.Log("[PizzariaManager] City is ready — pizza orders will start in 2 seconds.");
+        Debug.Log("[PizzariaManager] City is ready — pizza orders will start in 2 seconds. Starting game for all players.");
+
+        var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+        foreach (var pState in allPlayers)
+        {
+            if (pState != null) pState.IsGameStarted.Value = true;
+        }
     }
 
     private void Update()
     {
         if (!IsServer) return;
         if (!_cityReady) return;
+
+        // Não gera pedidos até que o jogo tenha começado
+        if (!IsGameActuallyStarted()) return;
 
         if (_activeOrders.Count < maxActiveOrders)
         {
@@ -255,5 +264,16 @@ public class PizzariaManager : NetworkBehaviour
             UIManager.Instance.AddMoney(amount);
             UIManager.Instance.AddCompletedDelivery();
         }
+    }
+
+    private bool IsGameActuallyStarted()
+    {
+        var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+        foreach (var pState in allPlayers)
+        {
+            if (pState != null && pState.IsGameStarted.Value)
+                return true;
+        }
+        return false;
     }
 }

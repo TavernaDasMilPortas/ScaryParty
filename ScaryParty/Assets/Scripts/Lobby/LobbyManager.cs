@@ -54,8 +54,8 @@ public class LobbyManager : MonoBehaviour
             Debug.Log($"[LobbyManager] ✅ StartHost successful! Starting broadcast as '{roomName}'.");
             DiscoveryService.StartHosting(roomName, port, 4); // Max 4 players
             
-            Debug.Log("[LobbyManager] Loading Playground scene...");
-            NetworkManager.Singleton.SceneManager.LoadScene("Playground", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            Debug.Log("[LobbyManager] Loading ReadyScene...");
+            NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
         }
         else
         {

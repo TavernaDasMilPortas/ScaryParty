@@ -53,6 +53,18 @@ public class PlayerState : NetworkBehaviour
             {
                 SubmitProfileServerRpc(pd.PlayerName, pd.PlayerColor);
             }
+            else
+            {
+                // Fallback direto do PlayerPrefs caso o ScriptableObject não persista no build
+                string pName = PlayerPrefs.GetString("PlayerName", "Player" + Random.Range(1000, 9999));
+                Color pColor = new Color(
+                    PlayerPrefs.GetFloat("PlayerColorR", 1f),
+                    PlayerPrefs.GetFloat("PlayerColorG", 1f),
+                    PlayerPrefs.GetFloat("PlayerColorB", 1f),
+                    1f
+                );
+                SubmitProfileServerRpc(pName, pColor);
+            }
         }
     }
 
@@ -122,6 +134,10 @@ public class PlayerState : NetworkBehaviour
         // Bloqueia ou libera inputs dependendo se o jogo começou
         if (_tpc != null) _tpc.enabled = started;
         
+        // Congela o CharacterController para evitar queda livre durante a espera
+        var cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = started;
+        
         if (_inputs != null)
         {
             _inputs.cursorLocked = started;
@@ -130,13 +146,11 @@ public class PlayerState : NetworkBehaviour
 
         if (started)
         {
-            if (_playerInput != null) _playerInput.ActivateInput();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
         else
         {
-            if (_playerInput != null) _playerInput.DeactivateInput();
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
@@ -151,7 +165,10 @@ public class PlayerState : NetworkBehaviour
             {
                 // Clona o material pra não mudar o de todo mundo
                 Material mat = new Material(smr.material);
-                mat.color = c;
+                if (mat.HasProperty("_BaseColor"))
+                    mat.SetColor("_BaseColor", c);
+                else
+                    mat.color = c;
                 smr.material = mat;
             }
         }

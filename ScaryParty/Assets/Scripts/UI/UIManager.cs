@@ -228,20 +228,23 @@ public class UIManager : MonoBehaviour
 
         if (isFullscreen)
         {
-            // Center and expand the CONTAINER (which has fixed width/height in USS)
+            // Center and expand the CONTAINER
             container.style.width = Length.Percent(80);
             container.style.height = Length.Percent(80);
             container.style.bottom = Length.Percent(10);
             container.style.right = Length.Percent(10);
+            container.style.top = Length.Percent(10);
+            container.style.left = Length.Percent(10);
         }
         else
         {
-            // Restore to original HUD position (assuming bottom-right, size defined by USS class)
-            // Setting to Null restores USS rules
+            // Restore to original HUD position
             container.style.width = StyleKeyword.Null;
             container.style.height = StyleKeyword.Null;
             container.style.bottom = StyleKeyword.Null;
             container.style.right = StyleKeyword.Null;
+            container.style.top = StyleKeyword.Null;
+            container.style.left = StyleKeyword.Null;
         }
     }
 

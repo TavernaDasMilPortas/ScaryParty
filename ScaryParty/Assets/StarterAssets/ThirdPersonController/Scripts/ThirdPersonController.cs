@@ -190,7 +190,14 @@ namespace StarterAssets
 
         private void Update()
         {
+            if (this == null || !gameObject) return;
             if (!IsOwner) return;
+
+            // Se a câmera foi destruída (ex: transição de cena), busca a nova câmera principal
+            if (_mainCamera == null)
+            {
+                _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+            }
 
             _hasAnimator = TryGetComponent(out _animator);
 
@@ -293,7 +300,7 @@ namespace StarterAssets
 
             // note: Vector2's != operator uses approximation so is not floating point error prone, and is cheaper than magnitude
             // if there is a move input rotate player when the player is moving
-            if (_input.move != Vector2.zero)
+            if (_input.move != Vector2.zero && _mainCamera != null)
             {
                 _targetRotation = Mathf.Atan2(inputDirection.x, inputDirection.z) * Mathf.Rad2Deg +
                                   _mainCamera.transform.eulerAngles.y;
