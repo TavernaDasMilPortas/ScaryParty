@@ -131,14 +131,20 @@ public class RoomDiscoveryService : MonoBehaviour
 
     private void BroadcastRoom()
     {
-        if (_udpClient == null || !_isHosting) return;
+        if (!_isHosting) return;
 
         try
         {
             string json = JsonUtility.ToJson(_myRoomInfo);
             byte[] bytes = Encoding.UTF8.GetBytes(json);
             IPEndPoint endPoint = new IPEndPoint(IPAddress.Broadcast, BROADCAST_PORT);
-            _udpClient.Send(bytes, bytes.Length, endPoint);
+            
+            using (UdpClient broadcastClient = new UdpClient())
+            {
+                broadcastClient.EnableBroadcast = true;
+                broadcastClient.Send(bytes, bytes.Length, endPoint);
+            }
+            
             Debug.Log($"[RoomDiscovery] Broadcasted room '{_myRoomInfo.RoomName}' at {_myRoomInfo.HostIP}:{_myRoomInfo.Port}");
         }
         catch (Exception e)
@@ -203,13 +209,12 @@ public class RoomDiscoveryService : MonoBehaviour
     {
         try 
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
-                {
-                    return ip.ToString();
-                }
+                // Conectar a um IP externo forca o SO a usar a placa de rede com internet (ignora adaptadores virtuais)
+                socket.Connect("8.8.8.8", 65530);
+                IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
+                return endPoint.Address.ToString();
             }
         } 
         catch(Exception e) 

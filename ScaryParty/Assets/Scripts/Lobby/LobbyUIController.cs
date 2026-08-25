@@ -200,6 +200,11 @@ public class LobbyUIController : MonoBehaviour
     {
         Debug.Log("[LobbyUI] Join Manual clicked.");
         string ip = _manualIpInput.value;
+        if (string.IsNullOrEmpty(ip))
+        {
+            ip = "127.0.0.1";
+        }
+        
         if (ushort.TryParse(_manualPortInput.value, out ushort port))
         {
             SaveProfileData();
