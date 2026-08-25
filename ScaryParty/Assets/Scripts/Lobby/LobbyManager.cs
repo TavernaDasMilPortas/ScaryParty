@@ -1,15 +1,18 @@
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Netcode.Transports.UTP;
-using System.Net;
-using System.Net.Sockets;
+using Unity.Services.Core;
+using Unity.Services.Authentication;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using System.Threading.Tasks;
 
 public class LobbyManager : MonoBehaviour
 {
-    public RoomDiscoveryService DiscoveryService;
+    public RoomDiscoveryService DiscoveryService; 
     public PlayerData PlayerData;
 
-    private void Start()
+    private async void Start()
     {
         Debug.Log("[LobbyManager] Start called. Loading PlayerData...");
         if (PlayerData == null)
@@ -17,79 +20,123 @@ public class LobbyManager : MonoBehaviour
             PlayerData = Resources.Load<PlayerData>("PlayerData");
         }
         Debug.Log($"[LobbyManager] PlayerData loaded: {PlayerData?.PlayerName}");
-    }
 
-    public static ushort GetAvailablePort()
-    {
-        // Pega uma porta UDP aleatória que esteja livre no sistema
-        using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+        if (NetworkManager.Singleton != null)
         {
-            socket.Bind(new IPEndPoint(IPAddress.Any, 0));
-            ushort port = (ushort)((IPEndPoint)socket.LocalEndPoint).Port;
-            Debug.Log($"[LobbyManager] Found available random port: {port}");
-            return port;
-        }
-    }
-
-    public void CreateRoom(string roomName, ushort port)
-    {
-        if (NetworkManager.Singleton == null)
-        {
-            Debug.LogError("[LobbyManager] NetworkManager.Singleton is null! Cannot create room.");
-            return;
-        }
-
-        Debug.Log($"[LobbyManager] Attempting to create room '{roomName}' on port {port}...");
-        
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        string localIp = RoomDiscoveryService.GetLocalIPAddress();
-        
-        // Host escuta em todas as interfaces (0.0.0.0)
-        // E conecta-se a si mesmo localmente via 127.0.0.1 ou o IP LAN
-        Debug.Log($"[LobbyManager] Setting UnityTransport: Connection IP={localIp}, Listen IP=0.0.0.0, Port={port}");
-        transport.SetConnectionData(localIp, port, "0.0.0.0"); 
-
-        if (NetworkManager.Singleton.StartHost())
-        {
-            Debug.Log($"[LobbyManager] ✅ StartHost successful! Starting broadcast as '{roomName}'.");
-            DiscoveryService.StartHosting(roomName, port, 4); // Max 4 players
+            NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
+            {
+                Debug.Log($"[LobbyManager] 🟢 Client Connected! Client ID: {id}");
+            };
             
-            Debug.Log("[LobbyManager] Loading ReadyScene...");
-            NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            NetworkManager.Singleton.OnClientDisconnectCallback += (id) =>
+            {
+                Debug.Log($"[LobbyManager] 🔴 Client Disconnected or failed to connect! Client ID: {id}");
+            };
         }
-        else
+
+        await InitializeUnityServices();
+    }
+
+    private async Task InitializeUnityServices()
+    {
+        try
         {
-            Debug.LogError("[LobbyManager] ❌ Failed to start host. Unity Netcode blocked it (port in use or misconfigured).");
+            await UnityServices.InitializeAsync();
+            if (!AuthenticationService.Instance.IsSignedIn)
+            {
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                Debug.Log($"[LobbyManager] Autenticado na Unity Services com ID: {AuthenticationService.Instance.PlayerId}");
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[LobbyManager] Falha ao inicializar Unity Services: {e.Message}");
         }
     }
 
-    public void JoinRoom(RoomInfo info)
+    public async void CreateRelayRoom(string roomName)
     {
-        Debug.Log($"[LobbyManager] Joining selected room: {info.RoomName} at {info.HostIP}:{info.Port}");
-        JoinByAddress(info.HostIP, info.Port);
+        if (NetworkManager.Singleton == null) return;
+
+        Debug.Log($"[LobbyManager] Tentando criar sala Relay na nuvem...");
+
+        try
+        {
+            // Pede para a Unity um servidor Relay para até 4 jogadores
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
+            
+            // Pega o código curto para compartilhar com os amigos
+            string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
+
+            // Configura o Unity Transport usando a API bruta para evitar conflitos de struct
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            bool isSecure = true; // dtls
+            transport.SetRelayServerData(
+                allocation.RelayServer.IpV4,
+                (ushort)allocation.RelayServer.Port,
+                allocation.AllocationIdBytes,
+                allocation.Key,
+                allocation.ConnectionData,
+                null,
+                isSecure
+            );
+
+            if (NetworkManager.Singleton.StartHost())
+            {
+                Debug.Log("[LobbyManager] Host iniciado com sucesso. Carregando ReadyScene...");
+                NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            }
+            else
+            {
+                Debug.LogError("[LobbyManager] ❌ Falha ao iniciar Host.");
+            }
+        }
+        catch (RelayServiceException e)
+        {
+            Debug.LogError($"[LobbyManager] Falha no Relay: {e.Message}");
+        }
     }
 
-    public void JoinByAddress(string ip, ushort port)
+    public async void JoinRelayRoom(string joinCode)
     {
-        if (NetworkManager.Singleton == null)
+        if (NetworkManager.Singleton == null) return;
+        if (string.IsNullOrEmpty(joinCode)) return;
+
+        Debug.Log($"[LobbyManager] Tentando entrar na sala com o código: {joinCode}...");
+
+        try
         {
-            Debug.LogError("[LobbyManager] NetworkManager.Singleton is null! Cannot join.");
-            return;
+            // Entra na alocação usando o código curto
+            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+            
+            // Configura o Transport usando a API bruta
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            bool isSecure = true; // dtls
+            transport.SetRelayServerData(
+                joinAllocation.RelayServer.IpV4,
+                (ushort)joinAllocation.RelayServer.Port,
+                joinAllocation.AllocationIdBytes,
+                joinAllocation.Key,
+                joinAllocation.ConnectionData,
+                joinAllocation.HostConnectionData,
+                isSecure
+            );
+
+            if (NetworkManager.Singleton.StartClient())
+            {
+                Debug.Log($"[LobbyManager] ✅ StartClient executado! Aguardando o Host...");
+            }
+            else
+            {
+                Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente.");
+            }
         }
-
-        Debug.Log($"[LobbyManager] Attempting to join {ip}:{port} as Client...");
-
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        transport.SetConnectionData(ip, port);
-
-        if (NetworkManager.Singleton.StartClient())
+        catch (RelayServiceException e)
         {
-            Debug.Log($"[LobbyManager] ✅ StartClient successful! Waiting for host to transition scene...");
-        }
-        else
-        {
-            Debug.LogError("[LobbyManager] ❌ Failed to start client.");
+            Debug.LogError($"[LobbyManager] Código inválido ou falha ao conectar: {e.Message}");
         }
     }
 }
+
 

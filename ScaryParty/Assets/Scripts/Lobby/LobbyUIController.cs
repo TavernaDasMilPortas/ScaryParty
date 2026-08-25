@@ -154,8 +154,8 @@ public class LobbyUIController : MonoBehaviour
             roomDetailsLabel.AddToClassList("room-details");
 
             var joinBtn = new Button(() => {
-                Debug.Log($"[LobbyUI] Clicked Join on {room.RoomName}");
-                LobbyManager.JoinRoom(room);
+                Debug.Log($"[LobbyUI] Clicked Join on {room.RoomName} - UDP local discovery disabled for Relay!");
+                // LobbyManager.JoinRoom(room); // Obsoleto, agora usamos JoinRelayRoom(joinCode)
             });
             joinBtn.text = "ENTRAR";
             joinBtn.AddToClassList("join-btn");
@@ -177,43 +177,25 @@ public class LobbyUIController : MonoBehaviour
         string roomName = _roomNameInput.value;
         if (string.IsNullOrEmpty(roomName)) roomName = $"{_playerNameInput.value}'s Party";
         
-        ushort port = 0;
-        string portStr = _roomPortInput.value;
-        
-        // Permite "auto", "0" ou vazio para escolher uma porta aleatória do sistema
-        if (string.IsNullOrEmpty(portStr) || portStr.ToLower() == "auto" || portStr == "0")
-        {
-            port = LobbyManager.GetAvailablePort();
-            Debug.Log($"[LobbyUI] Auto-selected port {port} for the new room.");
-        }
-        else if (!ushort.TryParse(portStr, out port))
-        {
-            Debug.LogError($"[LobbyUI] Invalid port number: {portStr}");
-            return;
-        }
-
         SaveProfileData();
-        LobbyManager.CreateRoom(roomName, port);
+        LobbyManager.CreateRelayRoom(roomName);
     }
 
     private void OnJoinManualClicked()
     {
         Debug.Log("[LobbyUI] Join Manual clicked.");
-        string ip = _manualIpInput.value;
-        if (string.IsNullOrEmpty(ip))
-        {
-            ip = "127.0.0.1";
-        }
         
-        if (ushort.TryParse(_manualPortInput.value, out ushort port))
+        // Vamos usar o campo que antes era o IP Manual para receber o Join Code do Relay!
+        string joinCode = _manualIpInput.value;
+        
+        if (string.IsNullOrEmpty(joinCode))
         {
-            SaveProfileData();
-            LobbyManager.JoinByAddress(ip, port);
+            Debug.LogError("[LobbyUI] Join Code está vazio!");
+            return;
         }
-        else
-        {
-            Debug.LogError($"[LobbyUI] Invalid manual port number: {_manualPortInput.value}");
-        }
+
+        SaveProfileData();
+        LobbyManager.JoinRelayRoom(joinCode);
     }
 }
 
