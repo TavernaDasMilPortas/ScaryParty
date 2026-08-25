@@ -47,22 +47,16 @@
                 <ui:Label text="Nome da Sala:" class="field-label" />
                 <ui:TextField name="RoomNameInput" class="input-field" />
                 
-                <ui:Label text="Porta:" class="field-label" />
-                <ui:TextField name="RoomPortInput" text="7777" class="input-field" />
-                
                 <ui:Button name="BtnCreateRoom" text="CRIAR SALA" class="action-btn create-btn" />
                 
                 <ui:VisualElement class="divider" />
                 
-                <ui:Label text="ENTRAR POR IP" class="panel-title" />
+                <ui:Label text="ENTRAR POR CÓDIGO" class="panel-title" />
                 
-                <ui:Label text="IP:" class="field-label" />
-                <ui:TextField name="ManualIpInput" text="127.0.0.1" class="input-field" />
+                <ui:Label text="Join Code:" class="field-label" />
+                <ui:TextField name="ManualIpInput" text="" class="input-field" />
                 
-                <ui:Label text="Porta:" class="field-label" />
-                <ui:TextField name="ManualPortInput" text="7777" class="input-field" />
-                
-                <ui:Button name="BtnJoinManual" text="ENTRAR" class="action-btn join-manual-btn" />
+                <ui:Button name="BtnJoinManual" text="ENTRAR NA SALA" class="action-btn join-manual-btn" />
             </ui:VisualElement>
             
         </ui:VisualElement>

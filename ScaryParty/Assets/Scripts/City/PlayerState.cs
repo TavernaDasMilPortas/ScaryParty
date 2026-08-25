@@ -161,16 +161,28 @@ public class PlayerState : NetworkBehaviour
         if (_meshRenderers == null) return;
         foreach (var smr in _meshRenderers)
         {
-            if (smr.material != null)
+            if (smr == null || smr.materials == null) continue;
+            
+            Material[] originalMats = smr.materials;
+            for (int i = 0; i < originalMats.Length; i++)
             {
+                if (originalMats[i] == null) continue;
+                
                 // Clona o material pra não mudar o de todo mundo
-                Material mat = new Material(smr.material);
+                Material mat = new Material(originalMats[i]);
+                
                 if (mat.HasProperty("_BaseColor"))
-                    mat.SetColor("_BaseColor", c);
-                else
-                    mat.color = c;
-                smr.material = mat;
+                    mat.SetColor("_BaseColor", c); // URP Lit
+                
+                if (mat.HasProperty("_Color"))
+                    mat.SetColor("_Color", c); // Standard / Unlit
+                
+                if (mat.HasProperty("_MainColor"))
+                    mat.SetColor("_MainColor", c); // Toon shaders like Distant Lands
+                
+                originalMats[i] = mat;
             }
+            smr.materials = originalMats;
         }
     }
 }

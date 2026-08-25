@@ -17,11 +17,9 @@ public class LobbyUIController : MonoBehaviour
     private Button _btnRefreshRooms;
 
     private TextField _roomNameInput;
-    private TextField _roomPortInput;
     private Button _btnCreateRoom;
 
     private TextField _manualIpInput;
-    private TextField _manualPortInput;
     private Button _btnJoinManual;
 
     private void OnEnable()
@@ -56,12 +54,10 @@ public class LobbyUIController : MonoBehaviour
 
         // Criar Sala
         _roomNameInput = root.Q<TextField>("RoomNameInput");
-        _roomPortInput = root.Q<TextField>("RoomPortInput");
         _btnCreateRoom = root.Q<Button>("BtnCreateRoom");
 
         // Entrada Manual
         _manualIpInput = root.Q<TextField>("ManualIpInput");
-        _manualPortInput = root.Q<TextField>("ManualPortInput");
         _btnJoinManual = root.Q<Button>("BtnJoinManual");
 
         Debug.Log("[LobbyUI] Elements queried, registering callbacks...");
@@ -82,10 +78,16 @@ public class LobbyUIController : MonoBehaviour
 
         _btnSaveProfile.clicked += SaveProfileData;
 
-        _btnRefreshRooms.clicked += () => 
+        _btnRefreshRooms.clicked += async () => 
         { 
             Debug.Log("[LobbyUI] Refresh clicked.");
             _roomList.Clear(); 
+            var noRoomsLabel = new Label("Buscando salas...");
+            noRoomsLabel.AddToClassList("no-rooms-label");
+            _roomList.Add(noRoomsLabel);
+
+            var lobbies = await LobbyManager.QueryLobbiesAsync();
+            UpdateLobbyList(lobbies);
         };
 
         _btnCreateRoom.clicked += OnCreateRoomClicked;
@@ -120,11 +122,11 @@ public class LobbyUIController : MonoBehaviour
         }
     }
 
-    private void UpdateRoomList(List<RoomInfo> rooms)
+    private void UpdateLobbyList(List<Unity.Services.Lobbies.Models.Lobby> lobbies)
     {
         _roomList.Clear();
 
-        if (rooms.Count == 0)
+        if (lobbies == null || lobbies.Count == 0)
         {
             var noRoomsLabel = new Label("Nenhuma sala encontrada...");
             noRoomsLabel.AddToClassList("no-rooms-label");
@@ -132,23 +134,32 @@ public class LobbyUIController : MonoBehaviour
             return;
         }
 
-        foreach (var room in rooms)
+        foreach (var lobby in lobbies)
         {
             var roomElement = new VisualElement();
             roomElement.AddToClassList("room-entry");
 
-            var roomNameLabel = new Label($"🎃 {room.RoomName}");
+            var roomNameLabel = new Label($"🎃 {lobby.Name}");
             roomNameLabel.AddToClassList("room-name");
 
-            var roomDetailsLabel = new Label($"{room.HostIP}:{room.Port} | Players: {room.PlayerCount}/{room.MaxPlayers}");
+            int players = lobby.MaxPlayers - lobby.AvailableSlots;
+            var roomDetailsLabel = new Label($"Players: {players}/{lobby.MaxPlayers}");
             roomDetailsLabel.AddToClassList("room-details");
 
+            string joinCode = "";
+            if (lobby.Data != null && lobby.Data.ContainsKey("JoinCode"))
+            {
+                joinCode = lobby.Data["JoinCode"].Value;
+            }
+
             var joinBtn = new Button(() => {
-                Debug.Log($"[LobbyUI] Clicked Join on {room.RoomName} - UDP local discovery disabled for Relay!");
-                // LobbyManager.JoinRoom(room); // Obsoleto, agora usamos JoinRelayRoom(joinCode)
+                Debug.Log($"[LobbyUI] Clicked Join on {lobby.Name} with Code {joinCode}");
+                SaveProfileData();
+                LobbyManager.JoinRelayRoom(joinCode);
             });
             joinBtn.text = "ENTRAR";
             joinBtn.AddToClassList("join-btn");
+            if (string.IsNullOrEmpty(joinCode)) joinBtn.SetEnabled(false);
 
             var infoContainer = new VisualElement();
             infoContainer.Add(roomNameLabel);
