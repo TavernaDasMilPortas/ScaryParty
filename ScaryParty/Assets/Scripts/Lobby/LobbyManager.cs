@@ -70,10 +70,26 @@ public class LobbyManager : MonoBehaviour
 
             // Configura o Unity Transport usando a API bruta para evitar conflitos de struct
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            bool isSecure = false; // udp padrão
+            
+            string host = allocation.RelayServer.IpV4;
+            ushort port = (ushort)allocation.RelayServer.Port;
+            bool isSecure = false;
+
+            // Busca o endpoint DTLS correto (exigido por algumas regiões do Relay)
+            foreach (var endpoint in allocation.ServerEndpoints)
+            {
+                if (endpoint.ConnectionType == "dtls")
+                {
+                    host = endpoint.Host;
+                    port = (ushort)endpoint.Port;
+                    isSecure = endpoint.Secure;
+                    break;
+                }
+            }
+
             transport.SetRelayServerData(
-                allocation.RelayServer.IpV4,
-                (ushort)allocation.RelayServer.Port,
+                host,
+                port,
                 allocation.AllocationIdBytes,
                 allocation.Key,
                 allocation.ConnectionData,
@@ -111,10 +127,25 @@ public class LobbyManager : MonoBehaviour
             
             // Configura o Transport usando a API bruta
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            bool isSecure = false; // udp padrão
+            
+            string host = joinAllocation.RelayServer.IpV4;
+            ushort port = (ushort)joinAllocation.RelayServer.Port;
+            bool isSecure = false;
+
+            foreach (var endpoint in joinAllocation.ServerEndpoints)
+            {
+                if (endpoint.ConnectionType == "dtls")
+                {
+                    host = endpoint.Host;
+                    port = (ushort)endpoint.Port;
+                    isSecure = endpoint.Secure;
+                    break;
+                }
+            }
+
             transport.SetRelayServerData(
-                joinAllocation.RelayServer.IpV4,
-                (ushort)joinAllocation.RelayServer.Port,
+                host,
+                port,
                 joinAllocation.AllocationIdBytes,
                 joinAllocation.Key,
                 joinAllocation.ConnectionData,
