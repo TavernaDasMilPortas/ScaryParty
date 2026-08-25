@@ -6,6 +6,7 @@ using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using System.Threading.Tasks;
+using System.Linq;
 
 public class LobbyManager : MonoBehaviour
 {
@@ -68,9 +69,7 @@ public class LobbyManager : MonoBehaviour
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
 
-            // Configura o Unity Transport usando a API bruta para evitar conflitos de struct
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            
             string host = allocation.RelayServer.IpV4;
             ushort port = (ushort)allocation.RelayServer.Port;
             bool isSecure = false;
@@ -125,9 +124,8 @@ public class LobbyManager : MonoBehaviour
             // Entra na alocação usando o código curto
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
             
-            // Configura o Transport usando a API bruta
+            // Configura o Transport usando a API do Netcode
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            
             string host = joinAllocation.RelayServer.IpV4;
             ushort port = (ushort)joinAllocation.RelayServer.Port;
             bool isSecure = false;
