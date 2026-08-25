@@ -272,10 +272,8 @@ public class CitySceneBuilder : EditorWindow
 
         // 5. Lobby Logic
         var lobbyManager = lobbyRoot.AddComponent<LobbyManager>();
-        var discovery = lobbyRoot.AddComponent<RoomDiscoveryService>();
         var uiController = lobbyRoot.AddComponent<LobbyUIController>();
 
-        lobbyManager.DiscoveryService = discovery;
         uiController.LobbyManager = lobbyManager;
 
         // Create PlayerData if it doesn't exist

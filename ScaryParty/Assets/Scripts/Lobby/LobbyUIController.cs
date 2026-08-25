@@ -67,20 +67,10 @@ public class LobbyUIController : MonoBehaviour
         Debug.Log("[LobbyUI] Elements queried, registering callbacks...");
         RegisterCallbacks();
         LoadProfileData();
-        
-        if (LobbyManager.DiscoveryService != null)
-        {
-            LobbyManager.DiscoveryService.OnRoomsUpdated += UpdateRoomList;
-            Debug.Log("[LobbyUI] Bound to RoomDiscoveryService events.");
-        }
     }
 
     private void OnDisable()
     {
-        if (LobbyManager != null && LobbyManager.DiscoveryService != null)
-        {
-            LobbyManager.DiscoveryService.OnRoomsUpdated -= UpdateRoomList;
-        }
     }
 
     private void RegisterCallbacks()

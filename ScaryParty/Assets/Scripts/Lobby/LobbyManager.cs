@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 public class LobbyManager : MonoBehaviour
 {
-    public RoomDiscoveryService DiscoveryService; 
     public PlayerData PlayerData;
 
     private async void Start()
@@ -71,7 +70,7 @@ public class LobbyManager : MonoBehaviour
 
             // Configura o Unity Transport usando a API bruta para evitar conflitos de struct
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            bool isSecure = true; // dtls
+            bool isSecure = false; // udp padrão
             transport.SetRelayServerData(
                 allocation.RelayServer.IpV4,
                 (ushort)allocation.RelayServer.Port,
@@ -112,7 +111,7 @@ public class LobbyManager : MonoBehaviour
             
             // Configura o Transport usando a API bruta
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            bool isSecure = true; // dtls
+            bool isSecure = false; // udp padrão
             transport.SetRelayServerData(
                 joinAllocation.RelayServer.IpV4,
                 (ushort)joinAllocation.RelayServer.Port,
