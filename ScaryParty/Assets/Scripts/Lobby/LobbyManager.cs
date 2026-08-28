@@ -79,6 +79,13 @@ public class LobbyManager : MonoBehaviour
             ushort port = (ushort)allocation.RelayServer.Port;
             bool isSecure = false;
 
+            Debug.Log("[LobbyManager] --- AVAILABLE HOST ENDPOINTS ---");
+            foreach (var ep in allocation.ServerEndpoints)
+            {
+                Debug.Log($"[LobbyManager] Endpoint: {ep.ConnectionType} -> {ep.Host}:{ep.Port} | Secure: {ep.Secure}");
+            }
+            Debug.Log("[LobbyManager] ----------------------------------");
+
             foreach (var endpoint in allocation.ServerEndpoints)
             {
                 if (endpoint.ConnectionType == "wss")
@@ -86,8 +93,12 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
-                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
-                    break;
+                    // Note: If we find one on port 443, we should definitely prefer it
+                    if (port == 443) 
+                    {
+                        Debug.Log($"[LobbyManager] Preferring WSS endpoint on port 443: {host}:{port}");
+                        break;
+                    }
                 }
             }
 
@@ -167,6 +178,13 @@ public class LobbyManager : MonoBehaviour
             ushort port = (ushort)joinAllocation.RelayServer.Port;
             bool isSecure = false;
 
+            Debug.Log("[LobbyManager] --- AVAILABLE JOIN ENDPOINTS ---");
+            foreach (var ep in joinAllocation.ServerEndpoints)
+            {
+                Debug.Log($"[LobbyManager] Endpoint: {ep.ConnectionType} -> {ep.Host}:{ep.Port} | Secure: {ep.Secure}");
+            }
+            Debug.Log("[LobbyManager] ----------------------------------");
+
             foreach (var endpoint in joinAllocation.ServerEndpoints)
             {
                 if (endpoint.ConnectionType == "wss")
@@ -174,8 +192,11 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
-                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
-                    break;
+                    if (port == 443) 
+                    {
+                        Debug.Log($"[LobbyManager] Preferring WSS endpoint on port 443: {host}:{port}");
+                        break;
+                    }
                 }
             }
 

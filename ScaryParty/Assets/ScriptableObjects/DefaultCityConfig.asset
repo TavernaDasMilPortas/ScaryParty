@@ -15,7 +15,7 @@ MonoBehaviour:
   gerarEmTempoReal: 1
   generateBorderWalls: 1
   generateSolidCore: 0
-  seed: 1076190910
+  seed: 1281972184
   gridWidth: 15
   gridHeight: 12
   minStreetBranchLength: 30
