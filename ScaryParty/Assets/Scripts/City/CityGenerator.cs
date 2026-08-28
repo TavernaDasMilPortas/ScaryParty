@@ -5,131 +5,125 @@ using System.Collections.Generic;
 
 /// <summary>
 /// Main orchestrator for procedural city generation.
-/// Place on a GameObject in the scene. Coordinates all sub-generators.
-/// In networked sessions, the host generates seed and clients generate locally.
-/// Requires a NetworkObject component on the same GameObject.
 /// </summary>
 public class CityGenerator : NetworkBehaviour
 {
     [Header("Configuration")]
-    [Tooltip("The city configuration asset")]
     public CityConfig config;
 
     [Header("Materials — Streets")]
-    [Tooltip("Material for road surfaces")]
     public Material streetMaterial;
-
-    [Tooltip("Material for sidewalks")]
     public Material sidewalkMaterial;
-
-    [Tooltip("Material for intersections")]
     public Material intersectionMaterial;
 
     [Header("Materials — Buildings")]
-    [Tooltip("Materials used for buildings (selected randomly per building)")]
     public Material[] buildingMaterials;
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Runtime State
-    // ─────────────────────────────────────────────────────────────────────
 
     [SerializeField, HideInInspector]
     private CityData _cityData;
 
-    /// <summary>
-    /// The generated city data. Null if no city has been generated.
-    /// </summary>
     public CityData CityData 
     { 
         get => _cityData; 
         private set => _cityData = value; 
     }
 
-    /// <summary>
-    /// The seed used for the current generation.
-    /// </summary>
     public int CurrentSeed { get; private set; }
 
-    // Events
     public event Action OnCityGenerated;
     public event Action OnCityCleared;
 
-    // Sub-generators (created at runtime)
     private StreetGridGenerator _streetGridGen;
     private BlockFiller _blockFiller;
     private IntersectionBuilder _intersectionBuilder;
     private DeliveryPointPlacer _deliveryPointPlacer;
     private CityGraphPathfinder _pathfinder;
+    private EnemySpawnPointGenerator _enemySpawnGen;
+    private TrafficManager _trafficManager;
+    private CityEventManager _eventManager;
 
-    // Hierarchy roots
     private GameObject _cityRoot;
     private GameObject _streetsRoot;
     private GameObject _blocksRoot;
     private GameObject _intersectionsRoot;
     private GameObject _deliveryPointsRoot;
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Public API
-    // ─────────────────────────────────────────────────────────────────────
+    private GameObject _trafficRoot;
+    private GameObject _eventsRoot;
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
-            if (config == null)
-            {
-                Debug.LogError("[CityGenerator] OnNetworkSpawn: Missing CityConfig! Assign one in the Inspector.");
-                return;
-            }
-            int useSeed = config.seed;
-            if (useSeed == 0) useSeed = UnityEngine.Random.Range(1, int.MaxValue);
-            
-            // Destroy the editor-baked static city before generating fresh
+            if (config == null) return;
+            int useSeed = config.seed == 0 ? UnityEngine.Random.Range(1, int.MaxValue) : config.seed;
             DestroyStaticCity();
-
             GenerateLocally(useSeed);
             ClientGenerateCityClientRpc(useSeed);
         }
         else
         {
-            // Clients wait for the RPC from server — destroy their static city too
             DestroyStaticCity();
         }
     }
 
-    /// <summary>
-    /// Finds and destroys the editor-baked static city objects in the scene,
-    /// so the runtime-generated city can take over cleanly.
-    /// </summary>
+    private void OnEnable()
+    {
+        if (config != null) config.OnConfigChanged += HandleConfigChanged;
+#if UNITY_EDITOR
+        UnityEditor.AssemblyReloadEvents.afterAssemblyReload += ReSubscribeAfterReload;
+#endif
+    }
+
+    private void OnDisable()
+    {
+        if (config != null) config.OnConfigChanged -= HandleConfigChanged;
+#if UNITY_EDITOR
+        UnityEditor.AssemblyReloadEvents.afterAssemblyReload -= ReSubscribeAfterReload;
+#endif
+    }
+
+#if UNITY_EDITOR
+    private void ReSubscribeAfterReload()
+    {
+        if (config != null) 
+        {
+            config.OnConfigChanged -= HandleConfigChanged;
+            config.OnConfigChanged += HandleConfigChanged;
+        }
+    }
+#endif
+
+    private void HandleConfigChanged()
+    {
+        if (config != null && config.gerarEmTempoReal && !Application.isPlaying)
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.delayCall -= GenerateCity;
+            UnityEditor.EditorApplication.delayCall += GenerateCity;
+#endif
+        }
+    }
+
     private void DestroyStaticCity()
     {
-        // The editor-baked city is stored under "__City__" if generated via ContextMenu
         GameObject staticCity = GameObject.Find("__City__");
-        if (staticCity != null)
-        {
-            Debug.Log("[CityGenerator] Destroying editor-baked static city before runtime generation.");
-            Destroy(staticCity);
-        }
+        if (staticCity != null) Destroy(staticCity);
     }
 
     [ContextMenu("Generate City")]
     public void GenerateCity()
     {
-        if (config == null)
-        {
-            Debug.LogError("[CityGenerator] Missing CityConfig! Assign one in the Inspector.");
-            return;
-        }
-
+        if (config == null) return;
         ClearCity();
 
+        // Sempre gerar uma nova seed no Quick Rebuild
+        config.seed = UnityEngine.Random.Range(1, int.MaxValue);
+        #if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(config);
+        #endif
+        
         int useSeed = config.seed;
-        if (useSeed == 0)
-        {
-            useSeed = UnityEngine.Random.Range(1, int.MaxValue);
-        }
 
-        // Networking: if in a network session, use RPCs
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
         {
             if (IsServer)
@@ -140,7 +134,6 @@ public class CityGenerator : NetworkBehaviour
         }
         else
         {
-            // Editor / Offline generation
             GenerateLocally(useSeed);
         }
     }
@@ -150,30 +143,22 @@ public class CityGenerator : NetworkBehaviour
     {
         if (_cityRoot != null)
         {
-            if (Application.isPlaying)
-                Destroy(_cityRoot);
-            else
-                DestroyImmediate(_cityRoot);
+            if (Application.isPlaying) Destroy(_cityRoot);
+            else DestroyImmediate(_cityRoot);
         }
 
-        // Catch-all for orphaned city roots
         GameObject oldCity = GameObject.Find("__City__");
         if (oldCity != null)
         {
-            if (Application.isPlaying)
-                Destroy(oldCity);
-            else
-                DestroyImmediate(oldCity);
+            if (Application.isPlaying) Destroy(oldCity);
+            else DestroyImmediate(oldCity);
         }
 
         CityData = null;
-        _cityRoot = null;
-        _streetsRoot = null;
-        _blocksRoot = null;
-        _intersectionsRoot = null;
-        _deliveryPointsRoot = null;
+        _cityRoot = _streetsRoot = _blocksRoot = _intersectionsRoot = _deliveryPointsRoot = _trafficRoot = _eventsRoot = null;
+        _trafficManager = null;
+        _eventManager = null;
 
-        Debug.Log("[CityGenerator] City cleared.");
         OnCityCleared?.Invoke();
     }
 
@@ -184,42 +169,27 @@ public class CityGenerator : NetworkBehaviour
         GenerateCity();
     }
 
-    /// <summary>
-    /// Returns the pathfinder for GPS route calculations.
-    /// </summary>
-    public CityGraphPathfinder GetPathfinder()
-    {
-        return _pathfinder;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Network RPCs
-    // ─────────────────────────────────────────────────────────────────────
+    public CityGraphPathfinder GetPathfinder() => _pathfinder;
+    public TrafficManager GetTrafficManager() => _trafficManager;
+    public CityEventManager GetEventManager() => _eventManager;
 
     [ClientRpc]
     private void ClientGenerateCityClientRpc(int seed)
     {
-        if (IsServer) return; // Server already generated
+        if (IsServer) return; 
         GenerateLocally(seed);
     }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // Generation Pipeline
-    // ─────────────────────────────────────────────────────────────────────
 
     private void GenerateLocally(int seed)
     {
         CurrentSeed = seed;
-        Debug.Log($"[CityGenerator] Starting generation with seed {seed} | Grid: {config.gridWidth}x{config.gridHeight}");
         System.Random rng = new System.Random(seed);
 
-        // 0. Create hierarchy
         CreateHierarchy();
         EnsureSubGenerators();
 
-        // 1. Initialize CityData
         CityData = ScriptableObject.CreateInstance<CityData>();
-        CityData.Initialize(config.gridWidth, config.gridHeight, config.blockWidth, config.blockDepth, config.streetWidth);
+        CityData.Initialize(config.gridWidth, config.gridHeight, config.maxStreetBranchLength, config.maxStreetBranchLength, config.streetWidth);
 
 #if UNITY_EDITOR
         if (!Application.isPlaying)
@@ -228,89 +198,45 @@ public class CityGenerator : NetworkBehaviour
                 UnityEditor.AssetDatabase.CreateFolder("Assets", "ScriptableObjects");
 
             string assetPath = "Assets/ScriptableObjects/GeneratedCityData.asset";
-            // Check if it already exists to overwrite, otherwise create new
             CityData existingData = UnityEditor.AssetDatabase.LoadAssetAtPath<CityData>(assetPath);
-            if (existingData != null)
-            {
-                // We overwrite properties or just create a new one. Creating new is easier if we overwrite the asset
-                UnityEditor.AssetDatabase.DeleteAsset(assetPath);
-            }
+            if (existingData != null) UnityEditor.AssetDatabase.DeleteAsset(assetPath);
+            
             UnityEditor.AssetDatabase.CreateAsset(CityData, assetPath);
             UnityEditor.AssetDatabase.SaveAssets();
-            _cityData = CityData; // link the serialized field
-            
-            UnityEditor.EditorUtility.SetDirty(this); // CRITICAL: Save the reference in the scene!
+            _cityData = CityData;
+            UnityEditor.EditorUtility.SetDirty(this);
         }
 #endif
 
-        // 2. Generate Street Grid
-        Debug.Log("[CityGenerator] Phase 1/4: Generating street grid...");
         StreetGraph graph = _streetGridGen.Generate(
-            config.gridWidth + 1, // +1 because intersections = blocks + 1
-            config.gridHeight + 1,
-            config.blockWidth,
-            config.blockDepth,
-            config.streetWidth,
-            config.sidewalkWidth,
-            config.streetRemovalChance,
-            rng,
-            _streetsRoot.transform,
-            streetMaterial,
-            sidewalkMaterial
+            config, rng, _streetsRoot.transform,
+            streetMaterial, sidewalkMaterial, out List<Vector3[]> blockPolygons
         );
         CityData.streetGraph = graph;
-        Debug.Log($"[CityGenerator] Street grid done: {graph.nodes.Count} nodes, {graph.edges.Count} edges");
 
-        // 3. Generate Blocks (zone assignment + building fill)
-        Debug.Log("[CityGenerator] Phase 2/4: Generating blocks...");
-        GenerateBlocks(rng);
-        Debug.Log($"[CityGenerator] Blocks done: {CityData.BlockCount} blocks");
+        GenerateBlocks(rng, blockPolygons);
 
-        // 4. Generate Intersections
-        Debug.Log("[CityGenerator] Phase 3/4: Generating intersections...");
-        _intersectionBuilder.BuildIntersections(
-            graph,
-            config,
-            rng,
-            _intersectionsRoot.transform,
-            intersectionMaterial
-        );
-        Debug.Log("[CityGenerator] Intersections done.");
+        _intersectionBuilder.BuildIntersections(graph, config, rng, _intersectionsRoot.transform, intersectionMaterial);
 
-        // 5. Place Delivery Points
-        Debug.Log("[CityGenerator] Phase 4/4: Placing delivery points...");
         CityBuilding[] allBuildings = _blocksRoot.GetComponentsInChildren<CityBuilding>();
-        List<DeliveryPoint> points = _deliveryPointPlacer.PlaceDeliveryPoints(
-            CityData.blocks,
-            allBuildings,
-            config,
-            rng,
-            _deliveryPointsRoot.transform
-        );
+        List<DeliveryPoint> points = _deliveryPointPlacer.PlaceDeliveryPoints(CityData.blocks.ToArray(), allBuildings, config, rng, _deliveryPointsRoot.transform);
         CityData.DeliveryPointCount = points.Count;
-        Debug.Log($"[CityGenerator] Delivery points done: {CityData.DeliveryPointCount} points");
 
-        // 6. Initialize pathfinder
         _pathfinder.Initialize(graph);
 
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
-        if (routeManager != null)
-        {
-            routeManager.Initialize(_pathfinder);
-        }
+        if (routeManager != null) routeManager.Initialize(_pathfinder);
+
+        if (config.pizzariaInsideBlock) PlacePizzariaInBlock(rng);
         else
         {
-            Debug.LogWarning("[CityGenerator] MinimapRouteManager not found in scene — routes will not be drawn. Add it via Scene Builder.");
+            CityData.pizzariaPosition = Vector3.zero;
+            GeneratePizzariaLegacy();
         }
 
-        // 7. Set pizzaria position (center of grid)
-        CityData.pizzariaPosition = new Vector3(
-            config.gridWidth * config.SpacingX / 2f,
-            0f,
-            config.gridHeight * config.SpacingZ / 2f
-        );
+        _enemySpawnGen.GenerateSpawnPoints(CityData, config, rng);
 
-        GeneratePizzaria();
+        if (Application.isPlaying) InitializeRuntimeSystems(seed, graph);
 
 #if UNITY_EDITOR
         if (!Application.isPlaying && CityData != null)
@@ -320,9 +246,17 @@ public class CityGenerator : NetworkBehaviour
         }
 #endif
 
-        Debug.Log("[CityGenerator] ✅ City generation complete!");
         TeleportPlayersToSpawn();
         OnCityGenerated?.Invoke();
+    }
+
+    private void InitializeRuntimeSystems(int seed, StreetGraph graph)
+    {
+        if (config.maxTrafficVehicles > 0)
+        {
+            _trafficManager.Initialize(_pathfinder, graph, seed + 1000, config.maxTrafficVehicles, config.trafficBaseSpeed);
+        }
+        _eventManager.Initialize(_pathfinder, graph, _trafficManager, config, seed + 2000, _eventsRoot.transform);
     }
 
     private void TeleportPlayersToSpawn()
@@ -335,7 +269,6 @@ public class CityGenerator : NetworkBehaviour
             foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
             {
                 if (client.PlayerObject == null) continue;
-                // Only teleport local player to avoid NetworkTransform fighting (if client authoritative)
                 if (client.PlayerObject.IsOwner)
                 {
                     var cc = client.PlayerObject.GetComponent<CharacterController>();
@@ -350,38 +283,89 @@ public class CityGenerator : NetworkBehaviour
         }
     }
 
-    private void GeneratePizzaria()
+    private void PlacePizzariaInBlock(System.Random rng)
     {
-        Vector3 pos = CityData.pizzariaPosition;
-        Transform blocksRoot = _blocksRoot.transform;
+        int bestBlock = FindBestPizzariaBlock();
+        if (bestBlock < 0)
+        {
+            CityData.pizzariaPosition = Vector3.zero;
+            GeneratePizzariaLegacy();
+            return;
+        }
 
-        // Create a visual Pizzaria building
+        BlockInfo pBlock = CityData.blocks[bestBlock];
+        CityData.pizzariaBlockIndex = bestBlock;
+        pBlock.hasPizzaria = true;
+        CityData.blocks[bestBlock] = pBlock; 
+
+        string blockParentName = $"Block_{bestBlock}";
+        Transform blockTransform = _blocksRoot.transform.Find(blockParentName);
+
+        Vector3 pizzariaPos = pBlock.worldCenter;
+        Vector3 entranceDir = Vector3.forward; 
+        Quaternion pizzariaRot = Quaternion.identity;
+        Vector3 pizzariaScale = new Vector3(12f, 6f, 12f);
+
+        if (blockTransform != null)
+        {
+            CityBuilding largestBuilding = null;
+            float largestVolume = 0f;
+
+            foreach (Transform child in blockTransform)
+            {
+                CityBuilding building = child.GetComponent<CityBuilding>();
+                if (building == null) continue;
+
+                Vector3 scale = child.localScale;
+                float volume = scale.x * scale.y * scale.z;
+                if (volume > largestVolume)
+                {
+                    largestVolume = volume;
+                    largestBuilding = building;
+                }
+            }
+
+            if (largestBuilding != null)
+            {
+                pizzariaPos = largestBuilding.transform.position;
+                pizzariaRot = largestBuilding.transform.rotation;
+                pizzariaScale = largestBuilding.transform.localScale;
+                
+                entranceDir = (largestBuilding.entrancePosition - largestBuilding.transform.position).normalized;
+                entranceDir.y = 0;
+                if (entranceDir.sqrMagnitude < 0.01f) entranceDir = Vector3.forward;
+
+                if (Application.isPlaying) Destroy(largestBuilding.gameObject);
+                else DestroyImmediate(largestBuilding.gameObject);
+            }
+        }
+
+        CityData.pizzariaPosition = pizzariaPos;
+
         GameObject pizzariaBuilding = GameObject.CreatePrimitive(PrimitiveType.Cube);
         pizzariaBuilding.name = "The_Pizzaria_Building";
-        pizzariaBuilding.transform.position = pos + new Vector3(0, 3f, 0);
-        pizzariaBuilding.transform.localScale = new Vector3(15f, 6f, 15f);
-        pizzariaBuilding.transform.SetParent(blocksRoot);
+        pizzariaBuilding.transform.position = pizzariaPos;
+        pizzariaBuilding.transform.rotation = pizzariaRot;
+        pizzariaBuilding.transform.localScale = pizzariaScale;
+        pizzariaBuilding.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
 
         Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-        mat.color = new Color(0.8f, 0.1f, 0.1f); // Red Pizzaria
+        mat.color = new Color(0.8f, 0.1f, 0.1f);
         pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
 
-        // Create the Bancada (Workbench) outside the Pizzaria
-        Vector3 bancadaPos = pos + new Vector3(0, 0.5f, -8.5f); // On the sidewalk in front
+        Vector3 bancadaPos = pizzariaPos + entranceDir * 8.5f + Vector3.up * 0.5f;
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
         bancada.transform.position = bancadaPos;
         bancada.transform.localScale = new Vector3(3f, 1f, 1.5f);
-        bancada.transform.SetParent(blocksRoot);
+        bancada.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
 
         Material bancadaMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-        bancadaMat.color = new Color(0.4f, 0.2f, 0.1f); // Brown Wood
+        bancadaMat.color = new Color(0.4f, 0.2f, 0.1f);
         bancada.GetComponent<Renderer>().sharedMaterial = bancadaMat;
 
-        // Save position for Pizza Spawning (Top of the bancada)
         CityData.bancadaPosition = bancadaPos + new Vector3(0, 0.5f, 0);
 
-        // Add a sign
         GameObject sign = GameObject.CreatePrimitive(PrimitiveType.Cube);
         sign.name = "Pizzaria_Sign";
         sign.transform.SetParent(pizzariaBuilding.transform);
@@ -392,11 +376,86 @@ public class CityGenerator : NetworkBehaviour
         sign.GetComponent<Renderer>().sharedMaterial = signMat;
         sign.GetComponent<Collider>().enabled = false;
 
-        // Create Spawn Point marker for players
+        GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
+        spawnPoint.transform.SetParent(pizzariaBuilding.transform);
+        // Posicionar na frente da entrada
+        spawnPoint.transform.position = pizzariaPos + entranceDir * ((pizzariaScale.z / 2f) + 2f) + Vector3.up * 0.1f;
+        spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
+    }
+
+    private int FindBestPizzariaBlock()
+    {
+        if (CityData == null || CityData.blocks == null || CityData.blocks.Count == 0) return -1;
+
+        Vector3 gridCenter = Vector3.zero; // Origem orgânica é 0,0,0
+        int bestIndex = -1;
+        float bestScore = float.MaxValue;
+
+        for (int i = 0; i < CityData.blocks.Count; i++)
+        {
+            BlockInfo block = CityData.blocks[i];
+            float distToCenter = Vector3.Distance(block.worldCenter, gridCenter);
+
+            float zoneBonus = 0f;
+            switch (block.zoneType)
+            {
+                case ZoneType.Commercial: zoneBonus = 0f; break;
+                case ZoneType.Residential: zoneBonus = 20f; break;
+                case ZoneType.Industrial: zoneBonus = 50f; break;
+                case ZoneType.MonsterZone: zoneBonus = 100f; break;
+            }
+
+            float score = distToCenter + zoneBonus;
+            if (score < bestScore)
+            {
+                bestScore = score;
+                bestIndex = i;
+            }
+        }
+        return bestIndex;
+    }
+
+    private void GeneratePizzariaLegacy()
+    {
+        Vector3 pos = CityData.pizzariaPosition;
+        Transform blocksRoot = _blocksRoot.transform;
+
+        GameObject pizzariaBuilding = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        pizzariaBuilding.name = "The_Pizzaria_Building";
+        pizzariaBuilding.transform.position = pos + new Vector3(0, 3f, 0);
+        pizzariaBuilding.transform.localScale = new Vector3(15f, 6f, 15f);
+        pizzariaBuilding.transform.SetParent(blocksRoot);
+
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        mat.color = new Color(0.8f, 0.1f, 0.1f);
+        pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
+
+        Vector3 bancadaPos = pos + new Vector3(0, 0.5f, -8.5f);
+        GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        bancada.name = "Bancada_Pizzas";
+        bancada.transform.position = bancadaPos;
+        bancada.transform.localScale = new Vector3(3f, 1f, 1.5f);
+        bancada.transform.SetParent(blocksRoot);
+
+        Material bancadaMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        bancadaMat.color = new Color(0.4f, 0.2f, 0.1f);
+        bancada.GetComponent<Renderer>().sharedMaterial = bancadaMat;
+
+        CityData.bancadaPosition = bancadaPos + new Vector3(0, 0.5f, 0);
+
+        GameObject sign = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        sign.name = "Pizzaria_Sign";
+        sign.transform.SetParent(pizzariaBuilding.transform);
+        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f);
+        sign.transform.localScale = new Vector3(0.8f, 0.2f, 0.1f);
+        Material signMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        signMat.color = Color.yellow;
+        sign.GetComponent<Renderer>().sharedMaterial = signMat;
+        sign.GetComponent<Collider>().enabled = false;
+
         GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
         spawnPoint.transform.SetParent(pizzariaBuilding.transform);
         spawnPoint.transform.position = pos + new Vector3(0, 0.1f, -12f);
-        // Face outwards from the pizzaria
         spawnPoint.transform.rotation = Quaternion.Euler(0, 180, 0);
     }
 
@@ -407,109 +466,137 @@ public class CityGenerator : NetworkBehaviour
         _blocksRoot = new GameObject("Blocks");
         _intersectionsRoot = new GameObject("Intersections");
         _deliveryPointsRoot = new GameObject("DeliveryPoints");
+        _trafficRoot = new GameObject("Traffic");
+        _eventsRoot = new GameObject("Events");
 
         _streetsRoot.transform.SetParent(_cityRoot.transform);
         _blocksRoot.transform.SetParent(_cityRoot.transform);
         _intersectionsRoot.transform.SetParent(_cityRoot.transform);
         _deliveryPointsRoot.transform.SetParent(_cityRoot.transform);
+        _trafficRoot.transform.SetParent(_cityRoot.transform);
+        _eventsRoot.transform.SetParent(_cityRoot.transform);
     }
 
     private void EnsureSubGenerators()
     {
-        // Create sub-generators as components on the city root
         _streetGridGen = _cityRoot.AddComponent<StreetGridGenerator>();
         _blockFiller = _cityRoot.AddComponent<BlockFiller>();
         _intersectionBuilder = _cityRoot.AddComponent<IntersectionBuilder>();
         _deliveryPointPlacer = _cityRoot.AddComponent<DeliveryPointPlacer>();
         _pathfinder = _cityRoot.AddComponent<CityGraphPathfinder>();
+        _enemySpawnGen = _cityRoot.AddComponent<EnemySpawnPointGenerator>();
+        _trafficManager = _cityRoot.AddComponent<TrafficManager>();
+        _eventManager = _cityRoot.AddComponent<CityEventManager>();
     }
 
-    private void GenerateBlocks(System.Random rng)
+    private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons)
     {
-        for (int x = 0; x < config.gridWidth; x++)
+        CityData.blocks = new List<BlockInfo>();
+        int blockIndex = 0;
+
+        foreach (Vector3[] poly in blockPolygons)
         {
-            for (int y = 0; y < config.gridHeight; y++)
-            {
-                // Calculate block center position
-                // Blocks sit between intersections, offset by half spacing + half street
-                Vector3 centerPos = new Vector3(
-                    x * config.SpacingX + config.SpacingX / 2f,
-                    0f,
-                    y * config.SpacingZ + config.SpacingZ / 2f
-                );
+            Vector3[] insetPoly = InsetPolygon(poly, config.streetWidth * 0.5f);
+            
+            float area = CalculatePolygonArea(insetPoly);
+            if (area < 10f) continue;
 
-                // Determine zone type based on weighted probabilities
-                double rand = rng.NextDouble();
-                ZoneType zone;
-                if (rand < config.residentialProb)
-                    zone = ZoneType.Residential;
-                else if (rand < config.residentialProb + config.commercialProb)
-                    zone = ZoneType.Commercial;
-                else if (rand < config.residentialProb + config.commercialProb + config.industrialProb)
-                    zone = ZoneType.Industrial;
-                else
-                    zone = ZoneType.MonsterZone;
+            Vector3 centerPos = CalculatePolygonCentroid(insetPoly);
+            Vector3 size = CalculatePolygonExtents(insetPoly);
 
-                BlockInfo block = new BlockInfo
-                {
-                    gridX = x,
-                    gridY = y,
-                    worldCenter = centerPos,
-                    size = new Vector3(config.blockWidth, 0f, config.blockDepth),
-                    zoneType = zone,
-                    deliveryPointIndices = new List<int>()
-                };
-
-                CityData.SetBlockAt(x, y, block);
-
-                // Fill block with buildings
-                _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials);
+            // Zonas baseadas em "Chunks" quadrados (Chebyshev distance para não formar círculos)
+            float maxAbsDist = Mathf.Max(Mathf.Abs(centerPos.x), Mathf.Abs(centerPos.z));
+            float chunkSize = config.maxStreetBranchLength;
+            
+            ZoneType zone;
+            if (maxAbsDist <= chunkSize * 0.5f) {
+                zone = ZoneType.Commercial; // Chunk 1x1 (Centro Seguro)
+            } else if (maxAbsDist <= chunkSize * 1.5f) {
+                zone = ZoneType.Residential; // Chunks 3x3 (Bairros)
+            } else if (maxAbsDist <= chunkSize * 2.5f) {
+                zone = ZoneType.Industrial; // Chunks 5x5 (Zona Afastada)
+            } else {
+                zone = ZoneType.MonsterZone; // Bordas (Perigo Máximo)
             }
+
+            BlockInfo block = new BlockInfo
+            {
+                worldCenter = centerPos,
+                size = size,
+                zoneType = zone,
+                deliveryPointIndices = new List<int>(),
+                polygon = insetPoly,
+                area = area,
+                hasPizzaria = false
+            };
+
+            CityData.blocks.Add(block);
+            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, blockIndex);
+            
+            blockIndex++;
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────
-    // Gizmos
-    // ─────────────────────────────────────────────────────────────────────
+    private Vector3[] InsetPolygon(Vector3[] poly, float inset)
+    {
+        Vector3 center = CalculatePolygonCentroid(poly);
+        Vector3[] insetPoly = new Vector3[poly.Length];
+        for (int i = 0; i < poly.Length; i++)
+        {
+            Vector3 dir = (center - poly[i]);
+            dir.y = 0;
+            if (dir.sqrMagnitude < 0.01f) insetPoly[i] = poly[i];
+            else insetPoly[i] = poly[i] + dir.normalized * inset;
+        }
+        return insetPoly;
+    }
+
+    private Vector3 CalculatePolygonCentroid(Vector3[] polygon)
+    {
+        Vector3 center = Vector3.zero;
+        if (polygon == null || polygon.Length == 0) return center;
+        foreach (var p in polygon) center += p;
+        return center / polygon.Length;
+    }
+
+    private float CalculatePolygonArea(Vector3[] polygon)
+    {
+        if (polygon == null || polygon.Length < 3) return 0f;
+        float area = 0f;
+        int n = polygon.Length;
+        for (int i = 0; i < n; i++)
+        {
+            int j = (i + 1) % n;
+            area += polygon[i].x * polygon[j].z;
+            area -= polygon[j].x * polygon[i].z;
+        }
+        return Mathf.Abs(area) * 0.5f;
+    }
+
+    private Vector3 CalculatePolygonExtents(Vector3[] polygon)
+    {
+        if (polygon == null || polygon.Length == 0) return Vector3.zero;
+        float minX = float.MaxValue, maxX = float.MinValue;
+        float minZ = float.MaxValue, maxZ = float.MinValue;
+
+        foreach (var p in polygon)
+        {
+            if (p.x < minX) minX = p.x;
+            if (p.x > maxX) maxX = p.x;
+            if (p.z < minZ) minZ = p.z;
+            if (p.z > maxZ) maxZ = p.z;
+        }
+        return new Vector3(maxX - minX, 0f, maxZ - minZ);
+    }
 
     private void OnDrawGizmosSelected()
     {
-        if (CityData == null || config == null) return;
-
-        // Draw block zones
-        for (int x = 0; x < config.gridWidth; x++)
+        if (CityData == null || config == null || CityData.blocks == null) return;
+        
+        Gizmos.color = new Color(0, 1, 0, 0.3f);
+        foreach (var b in CityData.blocks)
         {
-            for (int y = 0; y < config.gridHeight; y++)
-            {
-                BlockInfo block = CityData.GetBlockAt(x, y);
-
-                switch (block.zoneType)
-                {
-                    case ZoneType.Residential: Gizmos.color = new Color(0.2f, 0.6f, 1f, 0.2f); break;
-                    case ZoneType.Commercial: Gizmos.color = new Color(1f, 0.9f, 0.2f, 0.2f); break;
-                    case ZoneType.Industrial: Gizmos.color = new Color(0.8f, 0.4f, 0.1f, 0.2f); break;
-                    case ZoneType.MonsterZone: Gizmos.color = new Color(0.6f, 0.1f, 0.6f, 0.2f); break;
-                }
-
-                Gizmos.DrawCube(block.worldCenter + Vector3.up * 0.5f, new Vector3(config.blockWidth, 1f, config.blockDepth));
-                Gizmos.DrawWireCube(block.worldCenter + Vector3.up * 0.5f, new Vector3(config.blockWidth, 1f, config.blockDepth));
-            }
-        }
-
-        // Draw street nodes
-        Gizmos.color = Color.cyan;
-        foreach (var node in CityData.streetGraph.nodes)
-        {
-            Gizmos.DrawSphere(node.worldPosition, 1.5f);
-        }
-
-        // Draw street edges
-        foreach (var edge in CityData.streetGraph.edges)
-        {
-            Gizmos.color = edge.isBlocked ? Color.red : Color.green;
-            Vector3 a = CityData.streetGraph.nodes[edge.nodeA].worldPosition;
-            Vector3 b = CityData.streetGraph.nodes[edge.nodeB].worldPosition;
-            Gizmos.DrawLine(a + Vector3.up * 0.3f, b + Vector3.up * 0.3f);
+            Gizmos.DrawWireCube(b.worldCenter, b.size);
         }
     }
 }

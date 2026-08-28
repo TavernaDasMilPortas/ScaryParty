@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 430e9ba39915b2e44951f1bf1984dc11
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scriptable Objects/Buildable Grid Object
+    Type SO/2D Grid Buildings/2D Grid Building 1x1 - Buildable Grid Object Type SO.asset
+  uploadId: 809274

@@ -51,11 +51,11 @@ public class DeliveryPointPlacer : MonoBehaviour
                 CityBuilding building = blockBuildings[i];
 
                 // Create delivery point marker
-                GameObject markerObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                GameObject markerObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 markerObj.name = $"DeliveryPoint_{pointIndex}";
                 markerObj.transform.SetParent(parent);
-                markerObj.transform.position = building.entrancePosition + Vector3.up * 3f;
-                markerObj.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                markerObj.transform.position = building.entrancePosition + Vector3.up * 0.1f;
+                markerObj.transform.localScale = new Vector3(4f, 0.1f, 4f);
 
                 // Set collider as trigger so it doesn't block player movement, but can still be Raycasted!
                 var col = markerObj.GetComponent<Collider>();

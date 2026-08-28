@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 8796976f45c23ff4a90b9798265cd196
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2655988077585873504
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Settings/EGBP PhysicsManager.preset
+  uploadId: 809274

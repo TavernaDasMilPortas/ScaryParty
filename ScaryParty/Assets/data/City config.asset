@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feac8bcb4368c4f4aa9d4af8784768cc, type: 3}
+  m_Name: City config
+  m_EditorClassIdentifier: Assembly-CSharp::CityConfig
+  gerarEmTempoReal: 1
+  generateBorderWalls: 1
+  generateSolidCore: 0
+  seed: 1136560998
+  gridWidth: 5
+  gridHeight: 10
+  minStreetBranchLength: 50
+  maxStreetBranchLength: 70
+  streetWidth: 15
+  sidewalkWidth: 2
+  minBuildingWidth: 3
+  maxBuildingWidth: 15
+  minBuildingDepth: 8
+  maxBuildingDepth: 12
+  blockCornerMargin: 2
+  buildingGap: 0.1
+  minBuildingHeight: 5
+  maxBuildingHeight: 50
+  pizzariaInsideBlock: 1
+  maxEnemySpawnPointsPerZone: 3
+  minDeliveryPointsPerBlock: 0
+  maxDeliveryPointsPerBlock: 3
+  maxTrafficVehicles: 10
+  trafficBaseSpeed: 8
+  trafficLightProbability: 0.5
+  minEventInterval: 30
+  maxEventInterval: 90
+  blockadeDuration: 45

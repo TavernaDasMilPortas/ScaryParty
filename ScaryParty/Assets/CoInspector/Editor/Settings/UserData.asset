@@ -162,13 +162,18 @@ MonoBehaviour:
   - tracker:
       mostClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/Street_V_0_3[0]/Road[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
       recentlyClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/Street_V_0_3[0]/Road[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
@@ -202,8 +207,8 @@ MonoBehaviour:
       mostClickedContents: []
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
-    sceneName: Playground
-    lastSaveTimePrint: 11:22 AM (August 25, 2026)
+    sceneName: GameScene
+    lastSaveTimePrint: 10:15 PM (August 27, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -212,21 +217,21 @@ MonoBehaviour:
     maximizedAssetView: 0
     showImportSettings: 0
     suggestedHeight: 0
-    userAssetViewSize: -1
+    userAssetViewSize: 133
     previewHeight: 0
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 123
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/Street_V_0_3[0]/Road[0]"}'
+    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
       paths: []
-      tabWidth: 0
-      name: Road
+      tabWidth: 120
+      name: BorderWall_7
       icon: {fileID: 2244882685325231567, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: Road
+      shortName: "SolidCore_Maci\xE7o"
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -235,10 +240,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: 
+        m_Text: "SolidCore_Maci\xE7o"
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: 
+        m_TextWithWhitespace: "SolidCore_Maci\xE7o\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -282,59 +287,55 @@ MonoBehaviour:
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: transform
+        niceComponentName: transform
       - index: 0
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: meshfilter
+        niceComponentName: mesh filter
       - index: 0
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
-      - index: 0
-        component: {fileID: 0}
-        missingComponentID:
-          m_Data: 0
-        foldout: 0
-        focusAfter: 0
-        awaitingScroll: 0
-        hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: meshrenderer
+        niceComponentName: mesh renderer
       historyPaths:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/Street_V_0_3[0]/Road[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
         prefab: 0
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_0_0[0]/Building_0_0[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
         prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
-    - assetGUIDs: []
+    - assetGUIDs:
+      - 02777a14baeca144daf0e7889211a3e2
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
       - 8105016687592461f977c054a80ce2f2
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 11400000, guid: 02777a14baeca144daf0e7889211a3e2, type: 2}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/data/City config.asset
     lastClickedTab: -1
     previousTab: 3
   - tracker:
@@ -344,7 +345,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 10:47 AM (August 25, 2026)
+    lastSaveTimePrint: 09:54 PM (August 27, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -353,12 +354,12 @@ MonoBehaviour:
     maximizedAssetView: 0
     showImportSettings: 0
     suggestedHeight: 0
-    userAssetViewSize: -1
+    userAssetViewSize: 133
     previewHeight: 0
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 123
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
@@ -424,12 +425,15 @@ MonoBehaviour:
     closedTabs: []
     playModeTransforms: []
     historyAssets:
-    - assetGUIDs: []
+    - assetGUIDs:
+      - 02777a14baeca144daf0e7889211a3e2
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
       - 8105016687592461f977c054a80ce2f2
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 11400000, guid: 02777a14baeca144daf0e7889211a3e2, type: 2}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/data/City config.asset
     lastClickedTab: -1
     previousTab: 3
   - tracker:
@@ -439,7 +443,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 10:48 AM (August 25, 2026)
+    lastSaveTimePrint: 09:54 PM (August 27, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -448,12 +452,12 @@ MonoBehaviour:
     maximizedAssetView: 0
     showImportSettings: 0
     suggestedHeight: 0
-    userAssetViewSize: -1
+    userAssetViewSize: 133
     previewHeight: 0
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 123
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
@@ -519,14 +523,17 @@ MonoBehaviour:
     closedTabs: []
     playModeTransforms: []
     historyAssets:
-    - assetGUIDs: []
+    - assetGUIDs:
+      - 02777a14baeca144daf0e7889211a3e2
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
       - 8105016687592461f977c054a80ce2f2
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 11400000, guid: 02777a14baeca144daf0e7889211a3e2, type: 2}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/data/City config.asset
     lastClickedTab: -1
     previousTab: 3
-  tipsShown: 01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  tipsShown: 01000000000000000100000000000000000000000100000001000000010000000000000001000000010000000100000001000000010000000100000000000000000000000000000001000000010000000000000000000000010000000100000000000000000000000000000000000000000000000100000000000000010000000100000000000000010000000100000000000000000000000000000001000000010000000000000001000000010000000100000000000000
   playModeStartScene: {}
   enteringPlayMode: 0

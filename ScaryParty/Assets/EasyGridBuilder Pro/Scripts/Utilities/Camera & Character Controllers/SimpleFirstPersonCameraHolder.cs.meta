@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2bbf9d626fc360c4f9a68e6560caaeeb
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scripts/Utilities/Camera & Character Controllers/SimpleFirstPersonCameraHolder.cs
+  uploadId: 809274

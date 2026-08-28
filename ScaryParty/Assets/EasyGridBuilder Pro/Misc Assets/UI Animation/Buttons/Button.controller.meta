@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 218bb5ffd30e3944b856c69ce58b529a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Misc Assets/UI Animation/Buttons/Button.controller
+  uploadId: 809274

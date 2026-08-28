@@ -121,29 +121,29 @@ public class CitySceneBuilder : EditorWindow
         GUI.backgroundColor = Color.white;
         
         EditorGUILayout.Space(10);
-        EditorGUILayout.LabelField("Playground Cleaner", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("GameScene Cleaner", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox(
-            "Use this in the StarterAssets Playground scene to remove demo environment while keeping the Player and Network logic.",
+            "Use this in the StarterAssets GameScene scene to remove demo environment while keeping the Player and Network logic.",
             MessageType.Info);
         
         GUI.backgroundColor = new Color(1f, 0.6f, 0.2f);
-        if (GUILayout.Button("🧹 Clean Playground Scene", GUILayout.Height(35)))
+        if (GUILayout.Button("🧹 Clean GameScene Scene", GUILayout.Height(35)))
         {
-            CleanPlaygroundScene();
+            CleanGameSceneScene();
         }
         
         EditorGUILayout.Space(5);
         GUI.backgroundColor = new Color(1f, 0.4f, 0.6f);
-        if (GUILayout.Button("🛠️ Fix Playground Bugs (AI Diagnostics)", GUILayout.Height(35)))
+        if (GUILayout.Button("🛠️ Fix GameScene Bugs (AI Diagnostics)", GUILayout.Height(35)))
         {
-            FixPlaygroundBugs();
+            FixGameSceneBugs();
         }
         GUI.backgroundColor = Color.white;
 
         EditorGUILayout.EndScrollView();
     }
 
-    private void FixPlaygroundBugs()
+    private void FixGameSceneBugs()
     {
         // 1. Ensure NetworkManager + PlayerPrefab
         SetupNetworkManager();
@@ -196,7 +196,7 @@ public class CitySceneBuilder : EditorWindow
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-        EditorUtility.DisplayDialog("🛠️ Playground Bugs Fixed",
+        EditorUtility.DisplayDialog("🛠️ GameScene Bugs Fixed",
             "✅ NetworkObject adicionado ao CITY\n" +
             "✅ MinimapRouteManager configurado\n" +
             "✅ Layer 'MinimapOnly' verificada\n" +
@@ -1018,9 +1018,9 @@ public class CitySceneBuilder : EditorWindow
         Debug.Log("[SceneBuilder] ✅ In-Game Lobby UI Setup complete in active scene.");
     }
 
-    private void CleanPlaygroundScene()
+    private void CleanGameSceneScene()
     {
-        // Define names of root objects that we want to explicitly destroy from the Playground scene
+        // Define names of root objects that we want to explicitly destroy from the GameScene scene
         string[] objectsToRemove = new string[] 
         {
             "Environment",
@@ -1073,6 +1073,6 @@ public class CitySceneBuilder : EditorWindow
             }
         }
 
-        Debug.Log($"[SceneBuilder] 🧹 Playground cleaned! Removed {removedCount} environment objects.");
+        Debug.Log($"[SceneBuilder] 🧹 GameScene cleaned! Removed {removedCount} environment objects.");
     }
 }

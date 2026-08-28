@@ -9,9 +9,11 @@ public class InteractableHighlight : MonoBehaviour
     private Material[] _originalMaterials;
     private Material[] _highlightMaterials;
     private Renderer _renderer;
+    private Vector3 _originalScale;
 
     private void Awake()
     {
+        _originalScale = transform.localScale;
         _renderer = GetComponentInChildren<Renderer>();
         if (_renderer != null)
         {
@@ -48,7 +50,7 @@ public class InteractableHighlight : MonoBehaviour
         {
             _renderer.sharedMaterials = _highlightMaterials;
             // Also pulse scale slightly
-            transform.localScale = Vector3.one * 1.1f;
+            transform.localScale = _originalScale * 1.1f;
         }
     }
 
@@ -58,7 +60,7 @@ public class InteractableHighlight : MonoBehaviour
         {
             _renderer.sharedMaterials = _originalMaterials;
             // Restore scale
-            transform.localScale = Vector3.one;
+            transform.localScale = _originalScale;
         }
     }
 }

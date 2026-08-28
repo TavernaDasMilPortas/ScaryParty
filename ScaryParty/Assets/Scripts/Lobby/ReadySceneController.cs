@@ -137,10 +137,10 @@ public class ReadySceneController : MonoBehaviour
         Debug.Log("[ReadyScene] Botão START clicado");
         if (!NetworkManager.Singleton.IsServer) return;
 
-        // Carrega o Playground para todos via NetworkSceneManager.
-        // O PlayerState detecta automaticamente que está no Playground e libera os controles.
+        // Carrega o GameScene para todos via NetworkSceneManager.
+        // O PlayerState detecta automaticamente que está no GameScene e libera os controles.
         NetworkManager.Singleton.SceneManager.LoadScene(
-            "Playground",
+            "GameScene",
             UnityEngine.SceneManagement.LoadSceneMode.Single
         );
     }

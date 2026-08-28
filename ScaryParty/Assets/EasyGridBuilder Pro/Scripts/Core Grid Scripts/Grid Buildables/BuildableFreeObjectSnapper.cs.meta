@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4b54dd9288728f6458ea52b19593b42c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {fileID: 2800000, guid: 0897667b1e3d80244a6dcc1ca20e4be4, type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scripts/Core Grid Scripts/Grid Buildables/BuildableFreeObjectSnapper.cs
+  uploadId: 809274

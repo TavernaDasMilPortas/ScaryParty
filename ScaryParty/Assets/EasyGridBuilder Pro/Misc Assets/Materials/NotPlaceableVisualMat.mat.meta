@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1fb75a46b45af6e49a32883c3bcb026a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Misc Assets/Materials/NotPlaceableVisualMat.mat
+  uploadId: 809274

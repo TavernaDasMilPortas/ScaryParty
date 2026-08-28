@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 53c87c233139ad74f939693a794aaa6a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scriptable Objects/Modular Buildalbe Object
+    Type SO (Grid & Edge Objects)/Wall Buildable Edge Object Type SO.asset
+  uploadId: 809274

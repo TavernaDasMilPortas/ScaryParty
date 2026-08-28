@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b008e2f959515844dac4c16b66bf9c2b
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Prefabs/Canvas Grid Samples/Grid Canvas.prefab
+  uploadId: 809274

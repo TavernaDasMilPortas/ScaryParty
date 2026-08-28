@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 62ab3ce756ade434da56680983bb6bfd
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scripts/Utilities/Camera & Character Controllers/SwitchControllers.cs
+  uploadId: 809274

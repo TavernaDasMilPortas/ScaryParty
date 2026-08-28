@@ -10,8 +10,8 @@ public class SetupMultiplayerEditor : EditorWindow
     [MenuItem("Tools/Setup Multiplayer (Passos 4 a 6)")]
     public static void SetupMultiplayer()
     {
-        // 1. Open the Playground scene
-        string scenePath = "Assets/StarterAssets/ThirdPersonController/Scenes/Playground.unity";
+        // 1. Open the GameScene scene
+        string scenePath = "Assets/StarterAssets/ThirdPersonController/Scenes/GameScene.unity";
         var scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
 
         // 2. Setup NetworkManager in the scene
@@ -110,6 +110,6 @@ public class SetupMultiplayerEditor : EditorWindow
             EditorBuildSettings.scenes = newScenes;
         }
 
-        Debug.Log("Passos 4, 5 e 6 concluídos com sucesso! Abra a cena Playground, selecione o NetworkManager e clique em Start Host no Play Mode.");
+        Debug.Log("Passos 4, 5 e 6 concluídos com sucesso! Abra a cena GameScene, selecione o NetworkManager e clique em Start Host no Play Mode.");
     }
 }

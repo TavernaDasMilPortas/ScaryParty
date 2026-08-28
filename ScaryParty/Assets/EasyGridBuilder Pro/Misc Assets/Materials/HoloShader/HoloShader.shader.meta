@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 29fed12d8547e354e90be987488147c1
+timeCreated: 1502942856
+licenseType: Store
+ShaderImporter:
+  defaultTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Misc Assets/Materials/HoloShader/HoloShader.shader
+  uploadId: 809274

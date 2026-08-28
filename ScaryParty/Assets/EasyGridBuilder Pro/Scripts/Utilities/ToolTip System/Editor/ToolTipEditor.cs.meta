@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 4617f452b69d2d9449adaa420df1bebe
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scripts/Utilities/ToolTip System/Editor/ToolTipEditor.cs
+  uploadId: 809274

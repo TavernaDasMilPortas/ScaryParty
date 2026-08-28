@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 5a292f71ac671064a880c976c3594f10
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 239234
+  packageName: Easy Grid Builder Pro
+  packageVersion: 1.1.2
+  assetPath: Assets/EasyGridBuilder Pro/Scriptable Objects/Build Condition SO/LowLevelObjects
+    Sample Build Condition SO.asset
+  uploadId: 809274

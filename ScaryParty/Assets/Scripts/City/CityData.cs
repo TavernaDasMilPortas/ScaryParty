@@ -7,10 +7,6 @@ using UnityEngine;
 /// This is the single source of truth — all other city scripts reference these types.
 /// </summary>
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Enums
-// ─────────────────────────────────────────────────────────────────────────────
-
 public enum ZoneType
 {
     Residential,
@@ -25,10 +21,6 @@ public enum StreetType
     Street,
     Alley
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Structs
-// ─────────────────────────────────────────────────────────────────────────────
 
 [Serializable]
 public struct StreetNode
@@ -52,17 +44,43 @@ public struct StreetEdge
 [Serializable]
 public struct BlockInfo
 {
-    public int gridX;
-    public int gridY;
     public Vector3 worldCenter;
     public Vector3 size;
     public ZoneType zoneType;
     public List<int> deliveryPointIndices;
+
+    /// <summary>
+    /// Vertices of the block polygon boundary.
+    /// </summary>
+    public Vector3[] polygon;
+
+    /// <summary>
+    /// Calculated area of the block polygon in square meters.
+    /// </summary>
+    public float area;
+
+    /// <summary>
+    /// Whether this block contains the Pizzaria.
+    /// </summary>
+    public bool hasPizzaria;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// StreetGraph
-// ─────────────────────────────────────────────────────────────────────────────
+[Serializable]
+public struct EnemySpawnPoint
+{
+    public Vector3 position;
+    public int blockIndex;
+    public ZoneType zone;
+}
+
+[Serializable]
+public struct StreetEvent
+{
+    public int affectedEdgeId;
+    public float startTime;
+    public float duration;
+    public string eventType; 
+}
 
 [Serializable]
 public class StreetGraph
@@ -71,21 +89,24 @@ public class StreetGraph
     public List<StreetEdge> edges = new List<StreetEdge>();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CityData — runtime data for the generated city
-// ─────────────────────────────────────────────────────────────────────────────
-
 /// <summary>
 /// Runtime data representing the generated city state.
-/// Not a MonoBehaviour — instantiated by CityGenerator.
 /// </summary>
 [Serializable]
 public class CityData : ScriptableObject
 {
     public StreetGraph streetGraph = new StreetGraph();
-    public BlockInfo[] blocks;
+    public List<BlockInfo> blocks = new List<BlockInfo>();
     public Vector3 pizzariaPosition;
     public Vector3 bancadaPosition;
+
+    /// <summary>
+    /// Index into the blocks list indicating which block contains the Pizzaria.
+    /// -1 if no block has been assigned yet.
+    /// </summary>
+    public int pizzariaBlockIndex = -1;
+
+    public List<EnemySpawnPoint> enemySpawnPoints = new List<EnemySpawnPoint>();
 
     [SerializeField] private int _gridWidth;
     [SerializeField] private int _gridHeight;
@@ -103,35 +124,11 @@ public class CityData : ScriptableObject
         _blockWidth = blockWidth;
         _blockDepth = blockDepth;
         _streetWidth = streetWidth;
-        blocks = new BlockInfo[width * height];
+        blocks = new List<BlockInfo>();
+        pizzariaBlockIndex = -1;
+        enemySpawnPoints.Clear();
     }
 
-    /// <summary>
-    /// Gets the block at the specified grid coordinates.
-    /// </summary>
-    public BlockInfo GetBlockAt(int x, int y)
-    {
-        if (x >= 0 && x < _gridWidth && y >= 0 && y < _gridHeight)
-        {
-            return blocks[x + y * _gridWidth];
-        }
-        throw new IndexOutOfRangeException($"Block coordinates ({x}, {y}) out of bounds.");
-    }
-
-    /// <summary>
-    /// Sets the block at the specified grid coordinates.
-    /// </summary>
-    public void SetBlockAt(int x, int y, BlockInfo block)
-    {
-        if (x >= 0 && x < _gridWidth && y >= 0 && y < _gridHeight)
-        {
-            blocks[x + y * _gridWidth] = block;
-        }
-    }
-
-    /// <summary>
-    /// Finds the nearest street intersection node to a given world position.
-    /// </summary>
     public StreetNode GetNearestIntersection(Vector3 pos)
     {
         if (streetGraph.nodes.Count == 0) return default;
@@ -151,9 +148,6 @@ public class CityData : ScriptableObject
         return nearest;
     }
 
-    /// <summary>
-    /// Checks if a world position is located on a street (approximate).
-    /// </summary>
     public bool IsStreetAt(Vector3 pos)
     {
         float spacingX = _blockWidth + _streetWidth;
@@ -171,21 +165,11 @@ public class CityData : ScriptableObject
         return distToX <= halfStreet || distToZ <= halfStreet;
     }
 
-    /// <summary>
-    /// Returns total number of blocks.
-    /// </summary>
-    public int BlockCount => blocks?.Length ?? 0;
+    public int BlockCount => blocks?.Count ?? 0;
 
-    /// <summary>
-    /// Returns total number of street segments.
-    /// </summary>
     public int StreetCount => streetGraph?.edges?.Count ?? 0;
 
     [SerializeField] private int _deliveryPointCount;
-
-    /// <summary>
-    /// Returns total number of delivery points across all blocks.
-    /// </summary>
     public int DeliveryPointCount
     {
         get => _deliveryPointCount;
