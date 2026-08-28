@@ -34,7 +34,7 @@ public class LobbyManager : MonoBehaviour
             {
                 Debug.Log($"[LobbyManager] 🟢 Client Connected! Client ID: {id}");
             };
-            
+
             NetworkManager.Singleton.OnClientDisconnectCallback += (id) =>
             {
                 Debug.Log($"[LobbyManager] 🔴 Client Disconnected or failed to connect! Client ID: {id}");
@@ -65,14 +65,15 @@ public class LobbyManager : MonoBehaviour
     {
         if (NetworkManager.Singleton == null) return;
 
-        Debug.Log($"[LobbyManager] Tentando criar sala Relay na nuvem...");
+        Debug.Log("[LobbyManager] Tentando criar sala Relay (WSS)...");
 
         try
         {
-            // Pede para a Unity um servidor Relay para até 4 jogadores
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
-            
-            // Pega o código curto para compartilhar com os amigos
+            // CORREÇÃO PRINCIPAL: a alocação precisa ser criada com connectionType "wss" no servidor.
+            // Sem isso, o Unity Relay cria uma alocação UDP e o transport WSS entra em conflito.
+            // WSS (WebSocket Secure) usa TCP/443 — funciona em redes domésticas e com firewalls de faculdade.
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3, connectionType: "wss");
+
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
 
@@ -80,15 +81,8 @@ public class LobbyManager : MonoBehaviour
             string host = allocation.RelayServer.IpV4;
             ushort port = (ushort)allocation.RelayServer.Port;
             bool isSecure = false;
-            bool useWebSockets = false;
 
-            // Loga todos os endpoints disponíveis para diagnóstico
-            Debug.Log($"[LobbyManager] Endpoints disponíveis no Relay ({allocation.ServerEndpoints.Count}):");
-            foreach (var ep in allocation.ServerEndpoints)
-                Debug.Log($"  -> ConnectionType: {ep.ConnectionType} | Host: {ep.Host} | Port: {ep.Port} | Secure: {ep.Secure}");
-
-            // Prefere WSS (passa por firewalls de faculdade via porta 443)
-            // Se não houver WSS, tenta DTLS, senão usa o padrão UDP
+            // Busca o endpoint WSS retornado pelo servidor (agora garantido, pois pedimos wss)
             foreach (var endpoint in allocation.ServerEndpoints)
             {
                 if (endpoint.ConnectionType == "wss")
@@ -96,35 +90,21 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
-                    useWebSockets = true;
-                    Debug.Log("[LobbyManager] Usando endpoint WSS.");
+                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
                     break;
-                }
-            }
-            if (!useWebSockets)
-            {
-                foreach (var endpoint in allocation.ServerEndpoints)
-                {
-                    if (endpoint.ConnectionType == "dtls")
-                    {
-                        host = endpoint.Host;
-                        port = (ushort)endpoint.Port;
-                        isSecure = endpoint.Secure;
-                        Debug.Log("[LobbyManager] WSS não encontrado, usando endpoint DTLS.");
-                        break;
-                    }
                 }
             }
 
             // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
             if (NetworkManager.Singleton.IsListening)
             {
-                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown antes de criar Host.");
+                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown...");
                 NetworkManager.Singleton.Shutdown();
-                await System.Threading.Tasks.Task.Delay(500);
+                await Task.Delay(500);
             }
 
-            transport.UseWebSockets = useWebSockets;
+            // UseWebSockets deve estar em sincronia com o connectionType da alocação (wss = true)
+            transport.UseWebSockets = true;
             transport.SetRelayServerData(
                 host,
                 port,
@@ -138,7 +118,7 @@ public class LobbyManager : MonoBehaviour
             if (NetworkManager.Singleton.StartHost())
             {
                 Debug.Log("[LobbyManager] Host iniciado com sucesso. Carregando ReadyScene...");
-                
+
                 try
                 {
                     var lobbyOptions = new CreateLobbyOptions
@@ -151,7 +131,7 @@ public class LobbyManager : MonoBehaviour
                     };
                     _currentLobby = await LobbyService.Instance.CreateLobbyAsync(roomName, 4, lobbyOptions);
                     Debug.Log($"[LobbyManager] ✅ Lobby criado: {_currentLobby.Id}");
-                    
+
                     _heartbeatCoroutine = StartCoroutine(HeartbeatLobbyCoroutine(_currentLobby.Id, 15f));
                 }
                 catch (LobbyServiceException e)
@@ -177,25 +157,18 @@ public class LobbyManager : MonoBehaviour
         if (NetworkManager.Singleton == null) return;
         if (string.IsNullOrEmpty(joinCode)) return;
 
-        Debug.Log($"[LobbyManager] Tentando entrar na sala com o código: {joinCode}...");
+        Debug.Log($"[LobbyManager] Tentando entrar na sala com o código: {joinCode} (WSS)...");
 
         try
         {
-            // Entra na alocação usando o código curto
-            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
-            
-            // Configura o Transport usando a API do Netcode
+            // CORREÇÃO PRINCIPAL: cliente também precisa entrar com connectionType "wss"
+            // para coincidir com o tipo de alocação criada pelo host.
+            JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode, connectionType: "wss");
+
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             string host = joinAllocation.RelayServer.IpV4;
             ushort port = (ushort)joinAllocation.RelayServer.Port;
             bool isSecure = false;
-
-            bool useWebSockets = false;
-
-            // Loga todos os endpoints disponíveis para diagnóstico
-            Debug.Log($"[LobbyManager] Endpoints disponíveis no Relay ({joinAllocation.ServerEndpoints.Count}):");
-            foreach (var ep in joinAllocation.ServerEndpoints)
-                Debug.Log($"  -> ConnectionType: {ep.ConnectionType} | Host: {ep.Host} | Port: {ep.Port} | Secure: {ep.Secure}");
 
             foreach (var endpoint in joinAllocation.ServerEndpoints)
             {
@@ -204,35 +177,20 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
-                    useWebSockets = true;
-                    Debug.Log("[LobbyManager] Usando endpoint WSS.");
+                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
                     break;
-                }
-            }
-            if (!useWebSockets)
-            {
-                foreach (var endpoint in joinAllocation.ServerEndpoints)
-                {
-                    if (endpoint.ConnectionType == "dtls")
-                    {
-                        host = endpoint.Host;
-                        port = (ushort)endpoint.Port;
-                        isSecure = endpoint.Secure;
-                        Debug.Log("[LobbyManager] WSS não encontrado, usando endpoint DTLS.");
-                        break;
-                    }
                 }
             }
 
             // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
             if (NetworkManager.Singleton.IsListening)
             {
-                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown antes de entrar na sala.");
+                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown...");
                 NetworkManager.Singleton.Shutdown();
-                await System.Threading.Tasks.Task.Delay(500);
+                await Task.Delay(500);
             }
 
-            transport.UseWebSockets = useWebSockets;
+            transport.UseWebSockets = true;
             transport.SetRelayServerData(
                 host,
                 port,
@@ -245,7 +203,7 @@ public class LobbyManager : MonoBehaviour
 
             if (NetworkManager.Singleton.StartClient())
             {
-                Debug.Log($"[LobbyManager] ✅ StartClient executado! Aguardando o Host...");
+                Debug.Log("[LobbyManager] ✅ StartClient executado! Aguardando o Host...");
             }
             else
             {
@@ -296,7 +254,7 @@ public class LobbyManager : MonoBehaviour
             StopCoroutine(_heartbeatCoroutine);
             _heartbeatCoroutine = null;
         }
-        
+
         if (_currentLobby != null)
         {
             LobbyService.Instance.DeleteLobbyAsync(_currentLobby.Id);
@@ -304,5 +262,3 @@ public class LobbyManager : MonoBehaviour
         }
     }
 }
-
-
