@@ -12,39 +12,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feac8bcb4368c4f4aa9d4af8784768cc, type: 3}
   m_Name: DefaultCityConfig
   m_EditorClassIdentifier: Assembly-CSharp::CityConfig
+  gerarEmTempoReal: 1
+  generateBorderWalls: 1
+  generateSolidCore: 0
+  seed: 253837046
   gridWidth: 15
   gridHeight: 12
-  blockWidth: 40
-  blockDepth: 40
+  minStreetBranchLength: 30
+  maxStreetBranchLength: 80
   streetWidth: 12
   sidewalkWidth: 2
-  seed: 1782898222
-  buildingDensity: 0.8
-  minBuildingHeight: 5
-  maxBuildingHeight: 30
-  minBuildingsPerBlock: 1
-  maxBuildingsPerBlock: 10
   minBuildingWidth: 5
   maxBuildingWidth: 15
   minBuildingDepth: 8
   maxBuildingDepth: 20
   blockCornerMargin: 10
   buildingGap: 1.5
-  residentialProb: 0.4
-  commercialProb: 0.3
-  industrialProb: 0.2
-  monsterZoneProb: 0.1
-  streetRemovalChance: 0.1
-  trafficLightProbability: 0.5
+  minBuildingHeight: 5
+  maxBuildingHeight: 30
+  pizzariaInsideBlock: 1
+  maxEnemySpawnPointsPerZone: 3
   minDeliveryPointsPerBlock: 0
   maxDeliveryPointsPerBlock: 3
-  gridJitter: 0.35
-  voronoiRelaxIterations: 2
-  diagonalAvenueChance: 0.15
-  pizzariaInsideBlock: 1
   maxTrafficVehicles: 10
   trafficBaseSpeed: 8
+  trafficLightProbability: 0.5
   minEventInterval: 30
   maxEventInterval: 90
   blockadeDuration: 45
-  maxEnemySpawnPointsPerZone: 3

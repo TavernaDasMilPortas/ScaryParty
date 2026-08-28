@@ -80,8 +80,15 @@ public class LobbyManager : MonoBehaviour
             string host = allocation.RelayServer.IpV4;
             ushort port = (ushort)allocation.RelayServer.Port;
             bool isSecure = false;
+            bool useWebSockets = false;
 
-            // Busca o endpoint WSS para contornar firewalls de faculdades (porta 443 HTTPS)
+            // Loga todos os endpoints disponíveis para diagnóstico
+            Debug.Log($"[LobbyManager] Endpoints disponíveis no Relay ({allocation.ServerEndpoints.Count}):");
+            foreach (var ep in allocation.ServerEndpoints)
+                Debug.Log($"  -> ConnectionType: {ep.ConnectionType} | Host: {ep.Host} | Port: {ep.Port} | Secure: {ep.Secure}");
+
+            // Prefere WSS (passa por firewalls de faculdade via porta 443)
+            // Se não houver WSS, tenta DTLS, senão usa o padrão UDP
             foreach (var endpoint in allocation.ServerEndpoints)
             {
                 if (endpoint.ConnectionType == "wss")
@@ -89,11 +96,35 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
+                    useWebSockets = true;
+                    Debug.Log("[LobbyManager] Usando endpoint WSS.");
                     break;
                 }
             }
+            if (!useWebSockets)
+            {
+                foreach (var endpoint in allocation.ServerEndpoints)
+                {
+                    if (endpoint.ConnectionType == "dtls")
+                    {
+                        host = endpoint.Host;
+                        port = (ushort)endpoint.Port;
+                        isSecure = endpoint.Secure;
+                        Debug.Log("[LobbyManager] WSS não encontrado, usando endpoint DTLS.");
+                        break;
+                    }
+                }
+            }
 
-            transport.UseWebSockets = true;
+            // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
+            if (NetworkManager.Singleton.IsListening)
+            {
+                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown antes de criar Host.");
+                NetworkManager.Singleton.Shutdown();
+                await System.Threading.Tasks.Task.Delay(500);
+            }
+
+            transport.UseWebSockets = useWebSockets;
             transport.SetRelayServerData(
                 host,
                 port,
@@ -159,6 +190,13 @@ public class LobbyManager : MonoBehaviour
             ushort port = (ushort)joinAllocation.RelayServer.Port;
             bool isSecure = false;
 
+            bool useWebSockets = false;
+
+            // Loga todos os endpoints disponíveis para diagnóstico
+            Debug.Log($"[LobbyManager] Endpoints disponíveis no Relay ({joinAllocation.ServerEndpoints.Count}):");
+            foreach (var ep in joinAllocation.ServerEndpoints)
+                Debug.Log($"  -> ConnectionType: {ep.ConnectionType} | Host: {ep.Host} | Port: {ep.Port} | Secure: {ep.Secure}");
+
             foreach (var endpoint in joinAllocation.ServerEndpoints)
             {
                 if (endpoint.ConnectionType == "wss")
@@ -166,11 +204,35 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
+                    useWebSockets = true;
+                    Debug.Log("[LobbyManager] Usando endpoint WSS.");
                     break;
                 }
             }
+            if (!useWebSockets)
+            {
+                foreach (var endpoint in joinAllocation.ServerEndpoints)
+                {
+                    if (endpoint.ConnectionType == "dtls")
+                    {
+                        host = endpoint.Host;
+                        port = (ushort)endpoint.Port;
+                        isSecure = endpoint.Secure;
+                        Debug.Log("[LobbyManager] WSS não encontrado, usando endpoint DTLS.");
+                        break;
+                    }
+                }
+            }
 
-            transport.UseWebSockets = true;
+            // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
+            if (NetworkManager.Singleton.IsListening)
+            {
+                Debug.LogWarning("[LobbyManager] NetworkManager ainda estava ativo. Fazendo Shutdown antes de entrar na sala.");
+                NetworkManager.Singleton.Shutdown();
+                await System.Threading.Tasks.Task.Delay(500);
+            }
+
+            transport.UseWebSockets = useWebSockets;
             transport.SetRelayServerData(
                 host,
                 port,
