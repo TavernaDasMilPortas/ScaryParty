@@ -75,11 +75,33 @@ public class LobbyManager : MonoBehaviour
             Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
 
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            string host = allocation.RelayServer.IpV4;
+            ushort port = (ushort)allocation.RelayServer.Port;
+            bool isSecure = false;
 
-            // CORREÇÃO: RelayServerData(allocation, "wss") seleciona internamente o endpoint WSS
-            // da lista retornada pelo servidor, garantindo sincronia entre alocação e transport.
-            // Isso resolve o erro "Mismatched Relay configuration and network interface".
-            var relayServerData = new RelayServerData(allocation, "wss");
+            foreach (var endpoint in allocation.ServerEndpoints)
+            {
+                if (endpoint.ConnectionType == "wss")
+                {
+                    host = endpoint.Host;
+                    port = (ushort)endpoint.Port;
+                    isSecure = endpoint.Secure;
+                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
+                    break;
+                }
+            }
+
+            // Constrói RelayServerData manualmente passando isWebSocket = true (último argumento)
+            var relayServerData = new RelayServerData(
+                host,
+                port,
+                allocation.AllocationIdBytes,
+                allocation.ConnectionData,
+                allocation.ConnectionData,
+                allocation.Key,
+                isSecure,
+                true // isWebSocket
+            );
 
             // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
             if (NetworkManager.Singleton.IsListening)
@@ -141,9 +163,33 @@ public class LobbyManager : MonoBehaviour
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
 
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            string host = joinAllocation.RelayServer.IpV4;
+            ushort port = (ushort)joinAllocation.RelayServer.Port;
+            bool isSecure = false;
 
-            // CORREÇÃO: mesmo padrão do host — RelayServerData com "wss" seleciona o endpoint correto
-            var relayServerData = new RelayServerData(joinAllocation, "wss");
+            foreach (var endpoint in joinAllocation.ServerEndpoints)
+            {
+                if (endpoint.ConnectionType == "wss")
+                {
+                    host = endpoint.Host;
+                    port = (ushort)endpoint.Port;
+                    isSecure = endpoint.Secure;
+                    Debug.Log($"[LobbyManager] Endpoint WSS → {host}:{port} | Secure: {isSecure}");
+                    break;
+                }
+            }
+
+            // Constrói RelayServerData manualmente passando isWebSocket = true (último argumento)
+            var relayServerData = new RelayServerData(
+                host,
+                port,
+                joinAllocation.AllocationIdBytes,
+                joinAllocation.ConnectionData,
+                joinAllocation.HostConnectionData, // HostConnectionData é usado no Join!
+                joinAllocation.Key,
+                isSecure,
+                true // isWebSocket
+            );
 
             // Garante que o NetworkManager não esteja em estado inválido de tentativa anterior
             if (NetworkManager.Singleton.IsListening)
