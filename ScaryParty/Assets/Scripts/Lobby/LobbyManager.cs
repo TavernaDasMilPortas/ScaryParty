@@ -81,10 +81,10 @@ public class LobbyManager : MonoBehaviour
             ushort port = (ushort)allocation.RelayServer.Port;
             bool isSecure = false;
 
-            // Busca o endpoint DTLS correto (exigido por algumas regiões do Relay)
+            // Busca o endpoint WSS para contornar firewalls de faculdades (porta 443 HTTPS)
             foreach (var endpoint in allocation.ServerEndpoints)
             {
-                if (endpoint.ConnectionType == "dtls")
+                if (endpoint.ConnectionType == "wss")
                 {
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
@@ -93,6 +93,7 @@ public class LobbyManager : MonoBehaviour
                 }
             }
 
+            transport.UseWebSockets = true;
             transport.SetRelayServerData(
                 host,
                 port,
@@ -160,7 +161,7 @@ public class LobbyManager : MonoBehaviour
 
             foreach (var endpoint in joinAllocation.ServerEndpoints)
             {
-                if (endpoint.ConnectionType == "dtls")
+                if (endpoint.ConnectionType == "wss")
                 {
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
@@ -169,6 +170,7 @@ public class LobbyManager : MonoBehaviour
                 }
             }
 
+            transport.UseWebSockets = true;
             transport.SetRelayServerData(
                 host,
                 port,
