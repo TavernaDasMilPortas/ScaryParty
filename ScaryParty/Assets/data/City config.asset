@@ -13,21 +13,22 @@ MonoBehaviour:
   m_Name: City config
   m_EditorClassIdentifier: Assembly-CSharp::CityConfig
   gerarEmTempoReal: 1
-  generateBorderWalls: 1
+  generateBorderWalls: 0
   generateSolidCore: 0
-  seed: 1136560998
+  seed: 0
   gridWidth: 5
-  gridHeight: 10
+  gridHeight: 5
   minStreetBranchLength: 50
   maxStreetBranchLength: 70
-  streetWidth: 15
+  streetWidth: 10
   sidewalkWidth: 2
   minBuildingWidth: 3
   maxBuildingWidth: 15
-  minBuildingDepth: 8
+  minBuildingDepth: 2
   maxBuildingDepth: 12
   blockCornerMargin: 2
   buildingGap: 0.1
+  buildingInnerSafetyMargin: 1.5
   minBuildingHeight: 5
   maxBuildingHeight: 50
   pizzariaInsideBlock: 1

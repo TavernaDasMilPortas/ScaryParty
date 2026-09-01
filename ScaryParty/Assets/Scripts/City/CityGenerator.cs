@@ -499,10 +499,16 @@ public class CityGenerator : NetworkBehaviour
             Vector3[] insetPoly = InsetPolygon(poly, config.streetWidth * 0.5f);
             
             float area = CalculatePolygonArea(insetPoly);
-            if (area < 10f) continue;
+            float minViableArea = (config.minBuildingWidth + config.blockCornerMargin * 2f) 
+                                * (config.minBuildingDepth * 2f + config.buildingGap);
+            minViableArea = Mathf.Max(minViableArea, 50f);
+            if (area < minViableArea) continue;
 
             Vector3 centerPos = CalculatePolygonCentroid(insetPoly);
             Vector3 size = CalculatePolygonExtents(insetPoly);
+            
+            float minDimension = Mathf.Min(size.x, size.z);
+            if (minDimension < config.minBuildingDepth * 2f) continue;
 
             // Zonas baseadas em "Chunks" quadrados (Chebyshev distance para não formar círculos)
             float maxAbsDist = Mathf.Max(Mathf.Abs(centerPos.x), Mathf.Abs(centerPos.z));

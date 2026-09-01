@@ -293,7 +293,10 @@ public class StreetGridGenerator : MonoBehaviour
                 
                 float wallThickness = 10f;
                 float wallHeight = config.maxBuildingHeight * 1.5f;
-                float offsetOutward = (config.streetWidth / 2f) + config.sidewalkWidth + (wallThickness / 2f);
+                
+                // Espaço para os prédios da borda
+                float buildingSpace = config.maxBuildingDepth + 5f; 
+                float offsetOutward = (config.streetWidth / 2f) + config.sidewalkWidth + buildingSpace + (wallThickness / 2f);
                 
                 Vector3 center = (p1 + p2) / 2f + normal * offsetOutward;
                 
@@ -302,9 +305,55 @@ public class StreetGridGenerator : MonoBehaviour
                 wall.transform.SetParent(borderParent.transform);
                 wall.transform.position = center + new Vector3(0, wallHeight / 2f, 0);
                 wall.transform.rotation = Quaternion.LookRotation(dir);
-                // Extend length slightly to overlap corners
-                wall.transform.localScale = new Vector3(wallThickness, wallHeight, length + wallThickness); 
+                
+                // Estender muito o tamanho da muralha para que os cantos se encontrem
+                wall.transform.localScale = new Vector3(wallThickness, wallHeight, length + offsetOutward * 3f); 
                 wall.GetComponent<Renderer>().sharedMaterial = wallMat;
+
+                // --- GERAÇÃO DOS PRÉDIOS DO PAREDÃO ---
+                float currentDist = config.blockCornerMargin;
+                float maxDist = length - config.blockCornerMargin;
+                float buildingOffset = (config.streetWidth / 2f) + config.sidewalkWidth;
+                MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+
+                while (currentDist < maxDist)
+                {
+                    float bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
+                    if (currentDist + bWidth > maxDist)
+                    {
+                        bWidth = maxDist - currentDist;
+                        if (bWidth < 2f) break;
+                    }
+
+                    float bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
+                    float bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
+
+                    // Casas apontam para a rua (-normal)
+                    Vector3 bCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
+                    
+                    GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    bObj.name = $"BorderBuilding_{i}_{currentDist}";
+                    bObj.transform.SetParent(borderParent.transform);
+                    bObj.transform.position = bCenter + new Vector3(0, bHeight * 0.5f, 0);
+                    bObj.transform.rotation = Quaternion.LookRotation(-normal, Vector3.up);
+                    bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
+
+                    Renderer r = bObj.GetComponent<Renderer>();
+                    r.sharedMaterial = wallMat; // Reaproveita o material base neutro
+                    
+                    // Cores orgânicas e sombrias para não chamar muita atenção
+                    float hue = (float)rng.NextDouble();
+                    float sat = (float)rng.NextDouble() * 0.2f;
+                    float val = 0.2f + (float)rng.NextDouble() * 0.4f;
+                    Color c = Color.HSVToRGB(hue, sat, val);
+                    
+                    propBlock.SetColor("_Color", c);
+                    propBlock.SetColor("_BaseColor", c);
+                    propBlock.SetColor("_MainColor", c);
+                    r.SetPropertyBlock(propBlock);
+
+                    currentDist += bWidth;
+                }
             }
         }
 

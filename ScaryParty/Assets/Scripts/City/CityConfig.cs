@@ -83,6 +83,11 @@ public class CityConfig : ScriptableObject
     public float buildingGap = 0.5f;
 
     [TabGroup("Construções (Perímetro)")]
+    [LabelText("Margem Interna de Segurança")]
+    [PropertyTooltip("Distância mínima entre prédios de arestas opostas. Evita sobreposição em quadras estreitas.")]
+    public float buildingInnerSafetyMargin = 1.5f;
+
+    [TabGroup("Construções (Perímetro)")]
     [LabelText("Altura Mínima (Prédios)")]
     public float minBuildingHeight = 5f;
 

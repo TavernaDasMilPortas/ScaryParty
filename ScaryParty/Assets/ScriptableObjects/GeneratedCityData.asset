@@ -18,2585 +18,2615 @@ MonoBehaviour:
       worldPosition: {x: 0, y: 0, z: 0}
       connectedEdges: 
     - id: 1
-      worldPosition: {x: 8.624617, y: 0, z: 119.68967}
-      connectedEdges: 000000000100000002000000
+      worldPosition: {x: -72.180336, y: 0, z: 95.86449}
+      connectedEdges: 
     - id: 2
-      worldPosition: {x: 59.58616, y: 0, z: 127.5791}
-      connectedEdges: 000000000300000006000000
+      worldPosition: {x: -75.348915, y: 0, z: 215.82265}
+      connectedEdges: 
     - id: 3
-      worldPosition: {x: 128.35468, y: 0, z: 111.64526}
-      connectedEdges: 010000000300000004000000
+      worldPosition: {x: -18.896992, y: 0, z: 250.23012}
+      connectedEdges: 0000000001000000
     - id: 4
-      worldPosition: {x: 10.741679, y: 0, z: 153.0026}
-      connectedEdges: 020000000500000006000000
+      worldPosition: {x: 24.845524, y: 0, z: 246.51729}
+      connectedEdges: 
     - id: 5
-      worldPosition: {x: 119.10434, y: 0, z: 182.69244}
-      connectedEdges: 040000000700000008000000
+      worldPosition: {x: 40.41822, y: 0, z: 284.79886}
+      connectedEdges: 000000000200000004000000
     - id: 6
-      worldPosition: {x: 0.41695976, y: 0, z: 208.26917}
-      connectedEdges: 05000000090000000a000000
+      worldPosition: {x: -39.70807, y: 0, z: 280.5143}
+      connectedEdges: 010000000300000004000000
     - id: 7
-      worldPosition: {x: 198.02779, y: 0, z: 185.66975}
-      connectedEdges: 070000000b0000000c000000
+      worldPosition: {x: 10.950569, y: 0, z: 328.00604}
+      connectedEdges: 020000000500000006000000
     - id: 8
-      worldPosition: {x: 119.35966, y: 0, z: 254.80344}
-      connectedEdges: 08000000090000000d0000000e000000
+      worldPosition: {x: -79.7292, y: 0, z: 328.77267}
+      connectedEdges: 0300000007000000
     - id: 9
-      worldPosition: {x: 0.86374605, y: 0, z: 239.91356}
-      connectedEdges: 0a0000000f00000010000000
+      worldPosition: {x: 82.9556, y: 0, z: 334.97745}
+      connectedEdges: 0500000008000000
     - id: 10
-      worldPosition: {x: 316.26013, y: 0, z: 206.19069}
-      connectedEdges: 0b00000011000000
+      worldPosition: {x: 9.13724, y: 0, z: 391.01395}
+      connectedEdges: 06000000090000000a000000
     - id: 11
-      worldPosition: {x: 195.36151, y: 0, z: 305.64014}
-      connectedEdges: 0c0000001200000013000000
+      worldPosition: {x: -81.609985, y: 0, z: 380.56876}
+      connectedEdges: 070000000b0000000c000000
     - id: 12
-      worldPosition: {x: 181.33243, y: 0, z: 248.65953}
-      connectedEdges: 0d00000013000000
+      worldPosition: {x: 121.542145, y: 0, z: 335.1804}
+      connectedEdges: 080000000d000000
     - id: 13
-      worldPosition: {x: 108.75642, y: 0, z: 374.33405}
-      connectedEdges: 0e00000014000000
+      worldPosition: {x: 39.347088, y: 0, z: 413.75903}
+      connectedEdges: 090000000d0000000e0000000f000000
     - id: 14
-      worldPosition: {x: 35.25027, y: 0, z: 240.93504}
-      connectedEdges: 0f0000001500000016000000
+      worldPosition: {x: -28.112461, y: 0, z: 446.4939}
+      connectedEdges: 0a000000100000001100000012000000
     - id: 15
-      worldPosition: {x: 1.6920662, y: 0, z: 277.71283}
-      connectedEdges: 100000001600000017000000
+      worldPosition: {x: -81.67425, y: 0, z: 429.99246}
+      connectedEdges: 0b0000001200000013000000
     - id: 16
-      worldPosition: {x: 295.4922, y: 0, z: 324.3799}
-      connectedEdges: 110000001800000019000000
+      worldPosition: {x: -122.68118, y: 0, z: 443.97437}
+      connectedEdges: 0c000000130000001400000015000000
     - id: 17
-      worldPosition: {x: 257.3731, y: 0, z: 307.13492}
-      connectedEdges: 12000000190000001a0000001b000000
+      worldPosition: {x: 39.74989, y: 0, z: 463.7071}
+      connectedEdges: 0e0000001100000016000000
     - id: 18
-      worldPosition: {x: 228.35434, y: 0, z: 364.51877}
-      connectedEdges: 140000001b0000001c000000
+      worldPosition: {x: 118.41208, y: 0, z: 418.72617}
+      connectedEdges: 0f0000001700000018000000
     - id: 19
-      worldPosition: {x: 19.309387, y: 0, z: 359.87152}
-      connectedEdges: 150000001d0000001e000000
+      worldPosition: {x: -67.96736, y: 0, z: 496.36652}
+      connectedEdges: 100000001500000019000000
     - id: 20
-      worldPosition: {x: -0.30047846, y: 0, z: 397.6963}
-      connectedEdges: 170000001d0000001f000000
+      worldPosition: {x: -148.15572, y: 0, z: 474.5723}
+      connectedEdges: 140000001a000000
     - id: 21
-      worldPosition: {x: 332.09265, y: 0, z: 328.51337}
-      connectedEdges: 180000002000000021000000
+      worldPosition: {x: 71.1402, y: 0, z: 484.26624}
+      connectedEdges: 16000000170000001b0000001c0000001d000000
     - id: 22
-      worldPosition: {x: 238.9933, y: 0, z: 425.719}
-      connectedEdges: 1a0000001c000000220000003b000000
+      worldPosition: {x: 163.00418, y: 0, z: 444.83228}
+      connectedEdges: 180000001e000000
     - id: 23
-      worldPosition: {x: 19.78858, y: 0, z: 437.56555}
-      connectedEdges: 1e0000001f000000230000002400000025000000
+      worldPosition: {x: -69.40944, y: 0, z: 569.0934}
+      connectedEdges: 190000001f00000020000000
     - id: 24
-      worldPosition: {x: 328.47217, y: 0, z: 373.1068}
-      connectedEdges: 2000000026000000
+      worldPosition: {x: -189.53093, y: 0, z: 531.4155}
+      connectedEdges: 1a00000021000000
     - id: 25
-      worldPosition: {x: 407.2995, y: 0, z: 337.31284}
-      connectedEdges: 210000002700000028000000
+      worldPosition: {x: 71.365456, y: 0, z: 604.266}
+      connectedEdges: 1b00000022000000
     - id: 26
-      worldPosition: {x: 234.00592, y: 0, z: 545.6153}
-      connectedEdges: 22000000290000002a0000002b00000054000000
+      worldPosition: {x: 75.5152, y: 0, z: 548.84485}
+      connectedEdges: 1c00000023000000
     - id: 27
-      worldPosition: {x: 22.208908, y: 0, z: 475.51538}
-      connectedEdges: 230000002c0000002d000000
+      worldPosition: {x: 191.05264, y: 0, z: 488.84927}
+      connectedEdges: 1d00000024000000
     - id: 28
-      worldPosition: {x: 139.69214, y: 0, z: 442.37546}
-      connectedEdges: 240000002e000000
+      worldPosition: {x: 210.76593, y: 0, z: 446.45908}
+      connectedEdges: 1e00000025000000
     - id: 29
-      worldPosition: {x: 93.20705, y: 0, z: 440.84213}
-      connectedEdges: 250000002f000000
+      worldPosition: {x: -71.80273, y: 0, z: 605.45874}
+      connectedEdges: 1f000000260000002700000028000000
     - id: 30
-      worldPosition: {x: 329.03452, y: 0, z: 415.73108}
-      connectedEdges: 
+      worldPosition: {x: -3.00074, y: 0, z: 569.03937}
+      connectedEdges: 200000002800000029000000
     - id: 31
-      worldPosition: {x: 368.53238, y: 0, z: 371.53122}
-      connectedEdges: 26000000280000003000000031000000
+      worldPosition: {x: -251.87825, y: 0, z: 633.9475}
+      connectedEdges: 210000002a000000
     - id: 32
-      worldPosition: {x: 471.11835, y: 0, z: 346.8709}
-      connectedEdges: 27000000320000003f000000
+      worldPosition: {x: 104.16279, y: 0, z: 600.97894}
+      connectedEdges: 
     - id: 33
-      worldPosition: {x: 353.90802, y: 0, z: 550.4614}
-      connectedEdges: 2900000033000000340000003d000000
+      worldPosition: {x: 44.83935, y: 0, z: 635.56287}
+      connectedEdges: 220000002b000000
     - id: 34
-      worldPosition: {x: 274.17285, y: 0, z: 543.375}
-      connectedEdges: 2a00000034000000
+      worldPosition: {x: 145.39667, y: 0, z: 548.56274}
+      connectedEdges: 230000002c000000
     - id: 35
-      worldPosition: {x: 232.11806, y: 0, z: 665.60046}
-      connectedEdges: 2b0000003500000036000000
+      worldPosition: {x: 232.81705, y: 0, z: 518.00116}
+      connectedEdges: 240000002d0000002e000000
     - id: 36
-      worldPosition: {x: 61.80598, y: 0, z: 477.49847}
-      connectedEdges: 2c0000003700000038000000
+      worldPosition: {x: 269.5399, y: 0, z: 440.8141}
+      connectedEdges: 250000002f0000003000000031000000
     - id: 37
-      worldPosition: {x: 17.478554, y: 0, z: 539.60895}
-      connectedEdges: 2d00000038000000390000003a000000
+      worldPosition: {x: -67.62483, y: 0, z: 663.9301}
+      connectedEdges: 260000003200000035000000
     - id: 38
-      worldPosition: {x: 180.30502, y: 0, z: 444.70767}
-      connectedEdges: 2e0000003b000000
+      worldPosition: {x: -108.451454, y: 0, z: 650.98773}
+      connectedEdges: 2700000033000000
     - id: 39
-      worldPosition: {x: 87.518555, y: 0, z: 515.86316}
-      connectedEdges: 2f000000370000003c000000
+      worldPosition: {x: -26.91692, y: 0, z: 597.62463}
+      connectedEdges: 290000003400000035000000
     - id: 40
-      worldPosition: {x: 359.30164, y: 0, z: 417.11993}
-      connectedEdges: 
+      worldPosition: {x: -270.88312, y: 0, z: 659.0507}
+      connectedEdges: 2a0000003600000037000000
     - id: 41
-      worldPosition: {x: 374.444, y: 0, z: 491.3855}
-      connectedEdges: 300000003d0000003e000000
+      worldPosition: {x: 44.720257, y: 0, z: 674.6417}
+      connectedEdges: 2b0000003800000039000000
     - id: 42
-      worldPosition: {x: 424.44275, y: 0, z: 375.3751}
-      connectedEdges: 310000003f00000040000000
+      worldPosition: {x: 183.59006, y: 0, z: 545.75616}
+      connectedEdges: 2c0000003a000000
     - id: 43
-      worldPosition: {x: 591.0998, y: 0, z: 348.9821}
-      connectedEdges: 320000004100000042000000
+      worldPosition: {x: 258.04013, y: 0, z: 537.5254}
+      connectedEdges: 2d0000003b000000
     - id: 44
-      worldPosition: {x: 473.40216, y: 0, z: 539.4546}
-      connectedEdges: 3300000043000000440000004b000000
+      worldPosition: {x: 305.25058, y: 0, z: 517.251}
+      connectedEdges: 2e0000003c000000
     - id: 45
-      worldPosition: {x: 286.92136, y: 0, z: 665.69696}
-      connectedEdges: 350000004500000046000000
+      worldPosition: {x: 363.5703, y: 0, z: 515.368}
+      connectedEdges: 2f0000003b0000003c0000003d0000003e00000040000000
     - id: 46
-      worldPosition: {x: 229.28943, y: 0, z: 720.3496}
-      connectedEdges: 3600000047000000
+      worldPosition: {x: 340.82574, y: 0, z: 438.31607}
+      connectedEdges: 300000003f000000
     - id: 47
-      worldPosition: {x: 51.647343, y: 0, z: 540.71967}
-      connectedEdges: 390000003c0000004800000049000000
+      worldPosition: {x: 273.06818, y: 0, z: 476.62885}
+      connectedEdges: 3100000040000000
     - id: 48
-      worldPosition: {x: 13.688057, y: 0, z: 577.23694}
-      connectedEdges: 3a00000049000000
+      worldPosition: {x: -18.029495, y: 0, z: 702.8073}
+      connectedEdges: 32000000390000004100000043000000
     - id: 49
-      worldPosition: {x: 416.78317, y: 0, z: 492.3185}
-      connectedEdges: 3e0000004a0000004b000000
+      worldPosition: {x: -143.73221, y: 0, z: 695.0001}
+      connectedEdges: 3300000042000000
     - id: 50
-      worldPosition: {x: 423.22427, y: 0, z: 405.99048}
-      connectedEdges: 400000004c000000
+      worldPosition: {x: -23.600718, y: 0, z: 660.5757}
+      connectedEdges: 3400000043000000
     - id: 51
-      worldPosition: {x: 710.5856, y: 0, z: 360.0793}
-      connectedEdges: 410000004d0000004e000000
+      worldPosition: {x: -294.56052, y: 0, z: 694.0794}
+      connectedEdges: 3600000044000000
     - id: 52
-      worldPosition: {x: 663.86993, y: 0, z: 343.87848}
-      connectedEdges: 420000004e000000
+      worldPosition: {x: -219.04489, y: 0, z: 697.22687}
+      connectedEdges: 3700000045000000
     - id: 53
-      worldPosition: {x: 468.9194, y: 0, z: 659.37085}
-      connectedEdges: 430000004f00000052000000
+      worldPosition: {x: 86.48855, y: 0, z: 705.5909}
+      connectedEdges: 3800000046000000
     - id: 54
-      worldPosition: {x: 543.8256, y: 0, z: 541.00195}
-      connectedEdges: 4400000050000000560000005e000000
+      worldPosition: {x: 25.568798, y: 0, z: 700.12506}
+      connectedEdges: 
     - id: 55
-      worldPosition: {x: 348.2835, y: 0, z: 677.37286}
-      connectedEdges: 4500000051000000
+      worldPosition: {x: 179.8041, y: 0, z: 665.6964}
+      connectedEdges: 3a00000047000000
     - id: 56
-      worldPosition: {x: 406.91245, y: 0, z: 664.2353}
-      connectedEdges: 4600000052000000
+      worldPosition: {x: 332.09192, y: 0, z: 563.2802}
+      connectedEdges: 3d00000048000000
     - id: 57
-      worldPosition: {x: 265.36862, y: 0, z: 717.0594}
-      connectedEdges: 4700000053000000
+      worldPosition: {x: 413.58783, y: 0, z: 547.26025}
+      connectedEdges: 3e00000049000000
     - id: 58
-      worldPosition: {x: 171.224, y: 0, z: 550.7905}
-      connectedEdges: 4800000054000000
+      worldPosition: {x: 385.581, y: 0, z: 434.10233}
+      connectedEdges: 3f0000004a000000
     - id: 59
-      worldPosition: {x: 15.429968, y: 0, z: 629.5394}
-      connectedEdges: 
+      worldPosition: {x: 72.02221, y: 0, z: 782.1212}
+      connectedEdges: 41000000460000004b0000004c000000
     - id: 60
-      worldPosition: {x: 535.30255, y: 0, z: 511.11093}
-      connectedEdges: 4a0000005500000056000000
+      worldPosition: {x: -103.83063, y: 0, z: 730.1597}
+      connectedEdges: 420000004d0000004e000000
     - id: 61
-      worldPosition: {x: 499.31653, y: 0, z: 407.6237}
-      connectedEdges: 4c00000057000000
+      worldPosition: {x: -323.37143, y: 0, z: 742.1596}
+      connectedEdges: 440000004f000000
     - id: 62
-      worldPosition: {x: 427.0533, y: 0, z: 451.97473}
-      connectedEdges: 
+      worldPosition: {x: -223.2353, y: 0, z: 765.2507}
+      connectedEdges: 45000000500000005100000052000000
     - id: 63
-      worldPosition: {x: 696.39484, y: 0, z: 479.2373}
-      connectedEdges: 4d00000058000000
+      worldPosition: {x: 235.26833, y: 0, z: 665.7937}
+      connectedEdges: 4700000053000000
     - id: 64
-      worldPosition: {x: 509.3897, y: 0, z: 663.8849}
-      connectedEdges: 4f000000590000005a000000
+      worldPosition: {x: 109.02424, y: 0, z: 762.5995}
+      connectedEdges: 
     - id: 65
-      worldPosition: {x: 539.8358, y: 0, z: 608.8559}
-      connectedEdges: 500000005b000000
+      worldPosition: {x: 333.08783, y: 0, z: 612.23254}
+      connectedEdges: 480000005400000055000000
     - id: 66
-      worldPosition: {x: 348.41678, y: 0, z: 752.78925}
-      connectedEdges: 510000005c000000
+      worldPosition: {x: 408.30707, y: 0, z: 606.09357}
+      connectedEdges: 4900000056000000
     - id: 67
-      worldPosition: {x: 260.65454, y: 0, z: 770.83606}
-      connectedEdges: 530000005d000000
+      worldPosition: {x: 413.0981, y: 0, z: 452.37122}
+      connectedEdges: 4a00000057000000
     - id: 68
-      worldPosition: {x: 134.84383, y: 0, z: 617.69336}
-      connectedEdges: 
+      worldPosition: {x: 106.19667, y: 0, z: 810.5635}
+      connectedEdges: 4b00000058000000
     - id: 69
-      worldPosition: {x: 575.2152, y: 0, z: 513.2975}
-      connectedEdges: 550000005e0000006b000000
+      worldPosition: {x: 74.4921, y: 0, z: 859.71234}
+      connectedEdges: 4c00000058000000590000008c000000
     - id: 70
-      worldPosition: {x: 563.54407, y: 0, z: 409.94446}
-      connectedEdges: 570000005f00000060000000
+      worldPosition: {x: -100.058235, y: 0, z: 850.1004}
+      connectedEdges: 4d0000005a000000
     - id: 71
-      worldPosition: {x: 770.1649, y: 0, z: 492.9162}
-      connectedEdges: 5800000061000000
+      worldPosition: {x: -4.8086777, y: 0, z: 797.9436}
+      connectedEdges: 4e0000005b000000
     - id: 72
-      worldPosition: {x: 578.11755, y: 0, z: 657.2062}
-      connectedEdges: 590000006200000063000000
+      worldPosition: {x: -322.24298, y: 0, z: 820.9411}
+      connectedEdges: 4f0000005c000000
     - id: 73
-      worldPosition: {x: 495.4354, y: 0, z: 783.0708}
-      connectedEdges: 5a0000006400000065000000
+      worldPosition: {x: -158.1095, y: 0, z: 806.21063}
+      connectedEdges: 500000005f000000
     - id: 74
-      worldPosition: {x: 613.57697, y: 0, z: 614.62006}
-      connectedEdges: 5b00000066000000
+      worldPosition: {x: -290.7037, y: 0, z: 864.48785}
+      connectedEdges: 510000005d0000005e0000006a0000007b000000
     - id: 75
-      worldPosition: {x: 343.1993, y: 0, z: 811.40424}
-      connectedEdges: 5c00000067000000
+      worldPosition: {x: -217.49155, y: 0, z: 836.4708}
+      connectedEdges: 520000005e0000005f000000
     - id: 76
-      worldPosition: {x: 421.33026, y: 0, z: 762.81116}
-      connectedEdges: 
+      worldPosition: {x: 189.49155, y: 0, z: 727.91595}
+      connectedEdges: 530000006000000061000000
     - id: 77
-      worldPosition: {x: 257.28177, y: 0, z: 831.5199}
-      connectedEdges: 5d0000006800000069000000
+      worldPosition: {x: 284.73267, y: 0, z: 668.2235}
+      connectedEdges: 5400000062000000
     - id: 78
-      worldPosition: {x: 597.2239, y: 0, z: 412.28302}
-      connectedEdges: 5f0000006a000000
+      worldPosition: {x: 370.7213, y: 0, z: 636.30804}
+      connectedEdges: 5500000063000000
     - id: 79
-      worldPosition: {x: 557.4133, y: 0, z: 449.6459}
-      connectedEdges: 600000006a0000006b000000
+      worldPosition: {x: 456.5161, y: 0, z: 648.73145}
+      connectedEdges: 5600000064000000
     - id: 80
-      worldPosition: {x: 845.0382, y: 0, z: 504.06082}
-      connectedEdges: 610000006c000000
+      worldPosition: {x: 504.3711, y: 0, z: 530.27655}
+      connectedEdges: 5700000065000000
     - id: 81
-      worldPosition: {x: 612.6511, y: 0, z: 657.8353}
-      connectedEdges: 62000000660000006d000000
+      worldPosition: {x: 133.9767, y: 0, z: 854.62805}
+      connectedEdges: 5900000066000000
     - id: 82
-      worldPosition: {x: 556.5029, y: 0, z: 775.24347}
-      connectedEdges: 63000000650000006e000000
+      worldPosition: {x: -98.89287, y: 0, z: 893.40326}
+      connectedEdges: 5a00000067000000
     - id: 83
-      worldPosition: {x: 496.12274, y: 0, z: 846.1615}
-      connectedEdges: 640000006f000000
+      worldPosition: {x: -46.96235, y: 0, z: 854.5665}
+      connectedEdges: 5b00000068000000
     - id: 84
-      worldPosition: {x: 664.6751, y: 0, z: 615.62885}
-      connectedEdges: 
+      worldPosition: {x: -287.1913, y: 0, z: 818.30365}
+      connectedEdges: 5c000000690000006a000000
     - id: 85
-      worldPosition: {x: 345.15375, y: 0, z: 859.31055}
-      connectedEdges: 6700000069000000
+      worldPosition: {x: -363.67633, y: 0, z: 959.7506}
+      connectedEdges: 5d0000006b0000008d000000
     - id: 86
-      worldPosition: {x: 462.72156, y: 0, z: 822.1015}
-      connectedEdges: 
+      worldPosition: {x: 186.5818, y: 0, z: 781.98193}
+      connectedEdges: 600000006c0000006e000000
     - id: 87
-      worldPosition: {x: 418.37607, y: 0, z: 799.9901}
-      connectedEdges: 
+      worldPosition: {x: 239.7893, y: 0, z: 770.1553}
+      connectedEdges: 610000006d0000006e000000
     - id: 88
-      worldPosition: {x: 250.85806, y: 0, z: 910.8797}
-      connectedEdges: 6800000070000000
+      worldPosition: {x: 340.5393, y: 0, z: 705.6428}
+      connectedEdges: 620000006f000000
     - id: 89
-      worldPosition: {x: 843.7054, y: 0, z: 560.2759}
-      connectedEdges: 6c0000007100000072000000
+      worldPosition: {x: 371.83026, y: 0, z: 756.3029}
+      connectedEdges: 63000000700000007100000073000000
     - id: 90
-      worldPosition: {x: 732.4013, y: 0, z: 665.5747}
-      connectedEdges: 6d00000073000000
+      worldPosition: {x: 416.95892, y: 0, z: 702.4292}
+      connectedEdges: 640000007200000073000000
     - id: 91
-      worldPosition: {x: 555.7882, y: 0, z: 844.54004}
-      connectedEdges: 6e00000074000000
+      worldPosition: {x: 557.4521, y: 0, z: 571.3746}
+      connectedEdges: 6500000074000000
     - id: 92
-      worldPosition: {x: 486.46243, y: 0, z: 905.32745}
-      connectedEdges: 6f00000075000000
+      worldPosition: {x: 167.91763, y: 0, z: 874.85187}
+      connectedEdges: 6600000075000000
     - id: 93
-      worldPosition: {x: 736.91626, y: 0, z: 619.60236}
-      connectedEdges: 
+      worldPosition: {x: -130.3827, y: 0, z: 941.9656}
+      connectedEdges: 67000000760000007700000078000000
     - id: 94
-      worldPosition: {x: 465.05377, y: 0, z: 854.4132}
-      connectedEdges: 
+      worldPosition: {x: -49.452568, y: 0, z: 888.5545}
+      connectedEdges: 68000000790000007a000000
     - id: 95
-      worldPosition: {x: 322.45737, y: 0, z: 919.8231}
-      connectedEdges: 7000000076000000
+      worldPosition: {x: -330.15323, y: 0, z: 874.26514}
+      connectedEdges: 690000007b0000007c000000
     - id: 96
-      worldPosition: {x: 836.7844, y: 0, z: 630.4619}
-      connectedEdges: 7100000077000000
+      worldPosition: {x: -392.7655, y: 0, z: 1003.24023}
+      connectedEdges: 6b0000007d000000
     - id: 97
-      worldPosition: {x: 880.1932, y: 0, z: 565.981}
-      connectedEdges: 7200000078000000
+      worldPosition: {x: 288.95325, y: 0, z: 844.5925}
+      connectedEdges: 6c0000007e0000007f00000086000000
     - id: 98
-      worldPosition: {x: 727.34717, y: 0, z: 785.4682}
-      connectedEdges: 7300000079000000
+      worldPosition: {x: 287.59973, y: 0, z: 766.8254}
+      connectedEdges: 6d0000006f000000
     - id: 99
-      worldPosition: {x: 616.69696, y: 0, z: 843.14215}
-      connectedEdges: 740000007a000000
+      worldPosition: {x: 277.71735, y: 0, z: 807.8847}
+      connectedEdges: 
     - id: 100
-      worldPosition: {x: 555.23773, y: 0, z: 891.8487}
-      connectedEdges: 
+      worldPosition: {x: 415.6645, y: 0, z: 793.23267}
+      connectedEdges: 700000007200000080000000
     - id: 101
-      worldPosition: {x: 604.83325, y: 0, z: 925.03406}
-      connectedEdges: 750000007a0000007b000000
+      worldPosition: {x: 377.89233, y: 0, z: 824.3623}
+      connectedEdges: 710000007f00000081000000
     - id: 102
-      worldPosition: {x: 319.10477, y: 0, z: 992.9071}
-      connectedEdges: 760000007c000000
+      worldPosition: {x: 586.6343, y: 0, z: 588.81696}
+      connectedEdges: 740000008200000083000000
     - id: 103
-      worldPosition: {x: 832.6519, y: 0, z: 683.5158}
-      connectedEdges: 770000007d000000
+      worldPosition: {x: 210.17554, y: 0, z: 872.34576}
+      connectedEdges: 75000000840000008500000086000000
     - id: 104
-      worldPosition: {x: 1000.0594, y: 0, z: 571.64545}
-      connectedEdges: 780000007e0000007f000000
+      worldPosition: {x: -85.507385, y: 0, z: 940.43744}
+      connectedEdges: 76000000790000008700000088000000
     - id: 105
-      worldPosition: {x: 721.51855, y: 0, z: 905.32654}
-      connectedEdges: 7900000080000000820000008d000000
+      worldPosition: {x: -129.60066, y: 0, z: 1061.963}
+      connectedEdges: 77000000890000008a0000009b000000
     - id: 106
-      worldPosition: {x: 653.9646, y: 0, z: 848.4168}
-      connectedEdges: 
+      worldPosition: {x: -131.89073, y: 0, z: 1001.14197}
+      connectedEdges: 780000008a000000
     - id: 107
-      worldPosition: {x: 643.6559, y: 0, z: 930.38904}
-      connectedEdges: 7b000000810000008200000083000000
+      worldPosition: {x: 0.49683762, y: 0, z: 888.40796}
+      connectedEdges: 7a0000008b0000008c000000
     - id: 108
-      worldPosition: {x: 375.16888, y: 0, z: 988.7761}
-      connectedEdges: 7c0000008400000085000000
+      worldPosition: {x: -328.85455, y: 0, z: 906.8748}
+      connectedEdges: 7c0000008d000000
     - id: 109
-      worldPosition: {x: 875.99615, y: 0, z: 687.7444}
-      connectedEdges: 7d0000008600000087000000
+      worldPosition: {x: -437.36194, y: 0, z: 1064.2892}
+      connectedEdges: 
     - id: 110
-      worldPosition: {x: 1056.5618, y: 0, z: 573.2573}
-      connectedEdges: 7e00000088000000
+      worldPosition: {x: -344.39938, y: 0, z: 1039.7963}
+      connectedEdges: 7d0000008e0000008f000000
     - id: 111
-      worldPosition: {x: 997.76953, y: 0, z: 635.1752}
-      connectedEdges: 7f00000089000000
+      worldPosition: {x: 346.55795, y: 0, z: 888.4304}
+      connectedEdges: 7e00000090000000
     - id: 112
-      worldPosition: {x: 770.82324, y: 0, z: 906.55396}
-      connectedEdges: 800000008a0000008b000000
+      worldPosition: {x: 535.5986, y: 0, z: 797.21027}
+      connectedEdges: 800000009100000092000000
     - id: 113
-      worldPosition: {x: 640.9405, y: 0, z: 972.018}
-      connectedEdges: 810000008c000000
+      worldPosition: {x: 425.09613, y: 0, z: 863.3094}
+      connectedEdges: 810000009300000094000000
     - id: 114
-      worldPosition: {x: 692.01, y: 0, z: 936.81165}
-      connectedEdges: 830000008d000000
+      worldPosition: {x: 590.3182, y: 0, z: 649.4636}
+      connectedEdges: 820000009500000096000000
     - id: 115
-      worldPosition: {x: 378.81543, y: 0, z: 1037.1375}
-      connectedEdges: 840000008e0000008f000000
+      worldPosition: {x: 516.15393, y: 0, z: 685.9381}
+      connectedEdges: 8300000097000000
     - id: 116
-      worldPosition: {x: 411.3253, y: 0, z: 992.2725}
-      connectedEdges: 850000009000000091000000
+      worldPosition: {x: 241.57149, y: 0, z: 899.91034}
+      connectedEdges: 840000009800000099000000
     - id: 117
-      worldPosition: {x: 947.5684, y: 0, z: 685.5416}
-      connectedEdges: 8600000092000000
+      worldPosition: {x: 172.48798, y: 0, z: 934.25}
+      connectedEdges: 850000009a000000ad000000bd000000
     - id: 118
-      worldPosition: {x: 875.3454, y: 0, z: 743.25226}
-      connectedEdges: 8700000093000000
+      worldPosition: {x: -46.02592, y: 0, z: 971.12885}
+      connectedEdges: 870000009b0000009c000000
     - id: 119
-      worldPosition: {x: 1116.5687, y: 0, z: 577.14813}
-      connectedEdges: 8800000094000000
+      worldPosition: {x: 33.96547, y: 0, z: 929.2019}
+      connectedEdges: 880000008b0000009d0000009e000000
     - id: 120
-      worldPosition: {x: 1043.1979, y: 0, z: 636.5386}
-      connectedEdges: 890000009500000096000000
+      worldPosition: {x: -99.41513, y: 0, z: 1061.4047}
+      connectedEdges: 890000009f000000
     - id: 121
-      worldPosition: {x: 771.55035, y: 0, z: 961.2587}
-      connectedEdges: 8a0000009700000098000000
+      worldPosition: {x: -407.24414, y: 0, z: 1085.3885}
+      connectedEdges: 
     - id: 122
-      worldPosition: {x: 888.80255, y: 0, z: 928.4831}
-      connectedEdges: 8b00000099000000
+      worldPosition: {x: -285.9933, y: 0, z: 1045.3663}
+      connectedEdges: 8e000000a0000000
     - id: 123
-      worldPosition: {x: 685.57336, y: 0, z: 978.751}
-      connectedEdges: 8c0000009a000000
+      worldPosition: {x: -339.99057, y: 0, z: 1159.7152}
+      connectedEdges: 8f000000a1000000b0000000
     - id: 124
-      worldPosition: {x: 380.477, y: 0, z: 1110.1294}
-      connectedEdges: 8e0000009b000000
+      worldPosition: {x: 349.2365, y: 0, z: 937.3844}
+      connectedEdges: 90000000a2000000a3000000a8000000
     - id: 125
-      worldPosition: {x: 449.0707, y: 0, z: 1049.8635}
-      connectedEdges: 8f0000009c0000009d000000a0000000b1000000
+      worldPosition: {x: 595.1859, y: 0, z: 792.8348}
+      connectedEdges: 9100000095000000a4000000
     - id: 126
-      worldPosition: {x: 531.2069, y: 0, z: 986.9437}
-      connectedEdges: 900000009e0000009f000000
+      worldPosition: {x: 501.18436, y: 0, z: 848.83185}
+      connectedEdges: 9200000093000000a5000000
     - id: 127
-      worldPosition: {x: 443.1617, y: 0, z: 993.53094}
-      connectedEdges: 91000000a0000000a1000000
-    - id: 128
-      worldPosition: {x: 996.438, y: 0, z: 688.51416}
-      connectedEdges: 9200000095000000a2000000a3000000
-    - id: 129
-      worldPosition: {x: 949.201, y: 0, z: 746.02765}
-      connectedEdges: 93000000a4000000a5000000
-    - id: 130
-      worldPosition: {x: 1112.0796, y: 0, z: 635.1589}
+      worldPosition: {x: 428.57852, y: 0, z: 914.2534}
       connectedEdges: 94000000a6000000
+    - id: 128
+      worldPosition: {x: 566.6322, y: 0, z: 677.25903}
+      connectedEdges: 9600000097000000
+    - id: 129
+      worldPosition: {x: 275.7869, y: 0, z: 919.8802}
+      connectedEdges: 98000000a7000000a8000000
+    - id: 130
+      worldPosition: {x: 242.03833, y: 0, z: 974.5457}
+      connectedEdges: 99000000a9000000aa000000b6000000
     - id: 131
-      worldPosition: {x: 1170.6168, y: 0, z: 571.9751}
-      connectedEdges: 
+      worldPosition: {x: 169.20903, y: 0, z: 988.08276}
+      connectedEdges: 9a000000bc000000
     - id: 132
-      worldPosition: {x: 1043.1232, y: 0, z: 671.4832}
-      connectedEdges: 96000000a2000000a7000000
+      worldPosition: {x: 9.488079, y: 0, z: 970.14374}
+      connectedEdges: 9c0000009e000000ab000000
     - id: 133
-      worldPosition: {x: 765.14185, y: 0, z: 1037.655}
-      connectedEdges: 97000000a8000000aa000000
+      worldPosition: {x: 71.872894, y: 0, z: 927.80066}
+      connectedEdges: 9d000000ac000000ad000000ae000000
     - id: 134
-      worldPosition: {x: 891.5499, y: 0, z: 961.56976}
-      connectedEdges: 9800000099000000a9000000
+      worldPosition: {x: -143.11752, y: 0, z: 1111.4109}
+      connectedEdges: 9f000000af000000
     - id: 135
-      worldPosition: {x: 686.59784, y: 0, z: 1034.7477}
-      connectedEdges: 9a000000aa000000
-    - id: 136
-      worldPosition: {x: 382.04404, y: 0, z: 1230.1191}
-      connectedEdges: 9b000000ab000000
-    - id: 137
-      worldPosition: {x: 378.7596, y: 0, z: 1168.6758}
+      worldPosition: {x: -436.95578, y: 0, z: 1127.0521}
       connectedEdges: 
-    - id: 138
-      worldPosition: {x: 442.7012, y: 0, z: 1169.6943}
-      connectedEdges: 9c000000ac000000ad000000
-    - id: 139
-      worldPosition: {x: 510.00552, y: 0, z: 1048.6472}
-      connectedEdges: 9d0000009f000000ae000000af000000
-    - id: 140
-      worldPosition: {x: 562.9678, y: 0, z: 985.07776}
-      connectedEdges: 9e000000b0000000
-    - id: 141
-      worldPosition: {x: 477.36252, y: 0, z: 993.1001}
+    - id: 136
+      worldPosition: {x: -250.78488, y: 0, z: 1046.1979}
+      connectedEdges: a0000000b0000000
+    - id: 137
+      worldPosition: {x: -280.1142, y: 0, z: 1158.9515}
       connectedEdges: a1000000b1000000
+    - id: 138
+      worldPosition: {x: 351.99545, y: 0, z: 996.1934}
+      connectedEdges: a2000000a6000000
+    - id: 139
+      worldPosition: {x: 310.91046, y: 0, z: 987.02814}
+      connectedEdges: a3000000a9000000b2000000
+    - id: 140
+      worldPosition: {x: 589.22437, y: 0, z: 861.8394}
+      connectedEdges: a4000000b3000000b5000000
+    - id: 141
+      worldPosition: {x: 475.37103, y: 0, z: 882.38464}
+      connectedEdges: a5000000b4000000b5000000
     - id: 142
-      worldPosition: {x: 997.8801, y: 0, z: 735.6308}
-      connectedEdges: a3000000a5000000b2000000
+      worldPosition: {x: 395.02325, y: 0, z: 954.353}
+      connectedEdges: 
     - id: 143
-      worldPosition: {x: 941.629, y: 0, z: 795.3007}
-      connectedEdges: a4000000b3000000b4000000
+      worldPosition: {x: 308.7208, y: 0, z: 946.5677}
+      connectedEdges: a7000000b6000000
     - id: 144
-      worldPosition: {x: 1111.276, y: 0, z: 668.0437}
-      connectedEdges: a6000000a7000000
+      worldPosition: {x: 340.36606, y: 0, z: 1043.3328}
+      connectedEdges: aa000000b2000000b7000000b8000000
     - id: 145
-      worldPosition: {x: 1248.2222, y: 0, z: 584.5864}
+      worldPosition: {x: 227.41862, y: 0, z: 1039.3754}
       connectedEdges: 
     - id: 146
-      worldPosition: {x: 808.2768, y: 0, z: 1037.793}
-      connectedEdges: a8000000b5000000
+      worldPosition: {x: 99.62123, y: 0, z: 1049.365}
+      connectedEdges: ab000000b9000000ba000000
     - id: 147
-      worldPosition: {x: 894.67426, y: 0, z: 1018.075}
-      connectedEdges: a9000000b6000000b7000000
+      worldPosition: {x: 67.60772, y: 0, z: 979.1443}
+      connectedEdges: ac000000bb000000bc000000
     - id: 148
-      worldPosition: {x: 415.7007, y: 0, z: 1235.5956}
-      connectedEdges: ab000000ac000000b8000000b9000000
+      worldPosition: {x: 112.37686, y: 0, z: 953.94}
+      connectedEdges: ae000000bd000000
     - id: 149
-      worldPosition: {x: 481.9943, y: 0, z: 1175.0734}
-      connectedEdges: ad000000ba000000bb000000
+      worldPosition: {x: -53.359413, y: 0, z: 1191.0569}
+      connectedEdges: 
     - id: 150
-      worldPosition: {x: 513.9361, y: 0, z: 1091.1666}
-      connectedEdges: ae000000bc000000bd000000
+      worldPosition: {x: -179.59795, y: 0, z: 1153.3243}
+      connectedEdges: af000000be000000
     - id: 151
-      worldPosition: {x: 551.9822, y: 0, z: 1056.472}
-      connectedEdges: af000000b0000000bc000000be000000
+      worldPosition: {x: -440.34186, y: 0, z: 1194.5991}
+      connectedEdges: 
     - id: 152
-      worldPosition: {x: 1029.7911, y: 0, z: 738.29596}
-      connectedEdges: b2000000bf000000
+      worldPosition: {x: -177.21841, y: 0, z: 1220.6967}
+      connectedEdges: b1000000be000000
     - id: 153
-      worldPosition: {x: 935.3383, y: 0, z: 831.0647}
-      connectedEdges: b3000000c0000000c1000000
+      worldPosition: {x: -300.48334, y: 0, z: 1183.9735}
+      connectedEdges: 
     - id: 154
-      worldPosition: {x: 990.07635, y: 0, z: 792.21936}
-      connectedEdges: b4000000c0000000
+      worldPosition: {x: 567.6048, y: 0, z: 886.3372}
+      connectedEdges: b3000000bf000000c0000000
     - id: 155
-      worldPosition: {x: 1105.98, y: 0, z: 714.72174}
+      worldPosition: {x: 667.1724, y: 0, z: 857.0219}
       connectedEdges: 
     - id: 156
-      worldPosition: {x: 1367.8472, y: 0, z: 575.1078}
-      connectedEdges: 
+      worldPosition: {x: 505.7402, y: 0, z: 901.3774}
+      connectedEdges: b4000000c0000000c1000000
     - id: 157
-      worldPosition: {x: 1244.7236, y: 0, z: 637.85223}
+      worldPosition: {x: 434.43222, y: 0, z: 980.4784}
       connectedEdges: 
     - id: 158
-      worldPosition: {x: 807.32056, y: 0, z: 1077.1401}
-      connectedEdges: b5000000c2000000
+      worldPosition: {x: 292.72665, y: 0, z: 1107.1299}
+      connectedEdges: b7000000c2000000
     - id: 159
-      worldPosition: {x: 938.5667, y: 0, z: 1022.72205}
-      connectedEdges: b6000000c3000000
+      worldPosition: {x: 377.21472, y: 0, z: 1074.2944}
+      connectedEdges: b8000000c3000000
     - id: 160
-      worldPosition: {x: 896.95966, y: 0, z: 1052.5913}
-      connectedEdges: b7000000c2000000c3000000
+      worldPosition: {x: 100.99262, y: 0, z: 1124.7269}
+      connectedEdges: b9000000c4000000c5000000
     - id: 161
-      worldPosition: {x: 460.56058, y: 0, z: 1233.4464}
-      connectedEdges: b8000000ba000000c4000000
+      worldPosition: {x: 73.04722, y: 0, z: 1093.6134}
+      connectedEdges: ba000000c5000000
     - id: 162
-      worldPosition: {x: 404.3485, y: 0, z: 1301.121}
-      connectedEdges: b9000000c5000000
+      worldPosition: {x: 158.42871, y: 0, z: 1057.576}
+      connectedEdges: bb000000c6000000
     - id: 163
-      worldPosition: {x: 473.90234, y: 0, z: 1294.8002}
-      connectedEdges: bb000000c4000000c5000000
+      worldPosition: {x: -21.047604, y: 0, z: 1192.6388}
+      connectedEdges: 
     - id: 164
-      worldPosition: {x: 561.18994, y: 0, z: 1096.4694}
-      connectedEdges: bd000000be000000
+      worldPosition: {x: -114.121056, y: 0, z: 1192.2766}
+      connectedEdges: 
     - id: 165
-      worldPosition: {x: 1041.0975, y: 0, z: 857.76215}
-      connectedEdges: bf000000c1000000
+      worldPosition: {x: -458.59167, y: 0, z: 1221.2944}
+      connectedEdges: 
     - id: 166
-      worldPosition: {x: 1073.9117, y: 0, z: 741.57336}
+      worldPosition: {x: -404.8758, y: 0, z: 1223.5149}
       connectedEdges: 
     - id: 167
-      worldPosition: {x: 938.6966, y: 0, z: 951.0177}
+      worldPosition: {x: -218.61182, y: 0, z: 1272.0012}
       connectedEdges: 
     - id: 168
-      worldPosition: {x: 1020.351, y: 0, z: 796.48206}
+      worldPosition: {x: -231.651, y: 0, z: 1188.7238}
       connectedEdges: 
     - id: 169
-      worldPosition: {x: 1092.8225, y: 0, z: 783.94336}
-      connectedEdges: 
+      worldPosition: {x: 525.3998, y: 0, z: 937.41376}
+      connectedEdges: bf000000c1000000
     - id: 170
-      worldPosition: {x: 1414.8538, y: 0, z: 583.21826}
+      worldPosition: {x: 614.0416, y: 0, z: 925.9242}
       connectedEdges: 
     - id: 171
-      worldPosition: {x: 1362.6515, y: 0, z: 630.55615}
+      worldPosition: {x: 702.2042, y: 0, z: 856.1486}
       connectedEdges: 
     - id: 172
-      worldPosition: {x: 1238.7833, y: 0, z: 674.627}
+      worldPosition: {x: 464.96432, y: 0, z: 1003.2781}
       connectedEdges: 
     - id: 173
-      worldPosition: {x: 818.9242, y: 0, z: 1196.5778}
+      worldPosition: {x: 506.64783, y: 0, z: 983.0184}
       connectedEdges: 
     - id: 174
-      worldPosition: {x: 800.61316, y: 0, z: 1133.6195}
-      connectedEdges: 
+      worldPosition: {x: 362.0245, y: 0, z: 1113.3557}
+      connectedEdges: c2000000c3000000
     - id: 175
-      worldPosition: {x: 970.0509, y: 0, z: 1023.60443}
+      worldPosition: {x: 439.0511, y: 0, z: 1070.8749}
       connectedEdges: 
     - id: 176
-      worldPosition: {x: 939.4159, y: 0, z: 1142.719}
+      worldPosition: {x: 51.04155, y: 0, z: 1185.1584}
       connectedEdges: 
     - id: 177
-      worldPosition: {x: 881.51, y: 0, z: 1171.5927}
+      worldPosition: {x: 111.02991, y: 0, z: 1244.3064}
       connectedEdges: 
     - id: 178
-      worldPosition: {x: 902.30316, y: 0, z: 1116.0593}
-      connectedEdges: 
+      worldPosition: {x: 131.27065, y: 0, z: 1124.2731}
+      connectedEdges: c4000000c6000000
     - id: 179
-      worldPosition: {x: 472.75375, y: 0, z: 1330.5366}
+      worldPosition: {x: -20.983198, y: 0, z: 1264.4388}
       connectedEdges: 
     edges:
     - id: 0
-      nodeA: 1
-      nodeB: 2
-      length: 51.56861
+      nodeA: 3
+      nodeB: 5
+      length: 68.65342
       isBlocked: 0
       streetType: 1
     - id: 1
-      nodeA: 1
-      nodeB: 3
-      length: 119.99999
+      nodeA: 3
+      nodeB: 6
+      length: 36.74552
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 2
-      nodeA: 1
-      nodeB: 4
-      length: 33.38013
+      nodeA: 5
+      nodeB: 7
+      length: 52.29917
       isBlocked: 0
       streetType: 1
     - id: 3
-      nodeA: 2
-      nodeB: 3
-      length: 70.59034
+      nodeA: 6
+      nodeB: 8
+      length: 62.694183
       isBlocked: 0
       streetType: 1
     - id: 4
-      nodeA: 3
+      nodeA: 6
       nodeB: 5
-      length: 71.64684
+      length: 80.24076
       isBlocked: 0
       streetType: 1
     - id: 5
-      nodeA: 4
-      nodeB: 6
-      length: 56.222713
+      nodeA: 7
+      nodeB: 9
+      length: 72.34172
       isBlocked: 0
       streetType: 1
     - id: 6
-      nodeA: 4
-      nodeB: 2
-      length: 55.064842
+      nodeA: 7
+      nodeB: 10
+      length: 63.033993
       isBlocked: 0
       streetType: 1
     - id: 7
-      nodeA: 5
-      nodeB: 7
-      length: 78.97958
+      nodeA: 8
+      nodeB: 11
+      length: 51.830215
       isBlocked: 0
       streetType: 1
     - id: 8
-      nodeA: 5
-      nodeB: 8
-      length: 72.11144
+      nodeA: 9
+      nodeB: 12
+      length: 38.587082
       isBlocked: 0
       streetType: 1
     - id: 9
-      nodeA: 6
-      nodeB: 8
-      length: 127.72159
+      nodeA: 10
+      nodeB: 13
+      length: 37.814995
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 10
-      nodeA: 6
-      nodeB: 9
-      length: 31.647549
+      nodeA: 10
+      nodeB: 14
+      length: 66.82488
       isBlocked: 0
       streetType: 1
     - id: 11
-      nodeA: 7
-      nodeB: 10
-      length: 119.999985
-      isBlocked: 0
-      streetType: 0
-    - id: 12
-      nodeA: 7
-      nodeB: 11
-      length: 120.00001
-      isBlocked: 0
-      streetType: 0
-    - id: 13
-      nodeA: 8
-      nodeB: 12
-      length: 62.276577
+      nodeA: 11
+      nodeB: 15
+      length: 49.423748
       isBlocked: 0
       streetType: 1
-    - id: 14
-      nodeA: 8
+    - id: 12
+      nodeA: 11
+      nodeB: 16
+      length: 75.54545
+      isBlocked: 0
+      streetType: 1
+    - id: 13
+      nodeA: 12
       nodeB: 13
-      length: 119.99998
+      length: 113.71293
       isBlocked: 0
       streetType: 0
+    - id: 14
+      nodeA: 13
+      nodeB: 17
+      length: 49.949684
+      isBlocked: 0
+      streetType: 1
     - id: 15
-      nodeA: 9
-      nodeB: 14
-      length: 34.40169
+      nodeA: 13
+      nodeB: 18
+      length: 79.22086
       isBlocked: 0
       streetType: 1
     - id: 16
-      nodeA: 9
-      nodeB: 15
-      length: 37.808346
+      nodeA: 14
+      nodeB: 19
+      length: 63.84114
       isBlocked: 0
       streetType: 1
     - id: 17
-      nodeA: 10
-      nodeB: 16
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 18
-      nodeA: 11
+      nodeA: 14
       nodeB: 17
-      length: 62.02961
+      length: 70.011375
+      isBlocked: 0
+      streetType: 1
+    - id: 18
+      nodeA: 15
+      nodeB: 14
+      length: 56.046074
       isBlocked: 0
       streetType: 1
     - id: 19
-      nodeA: 12
-      nodeB: 11
-      length: 58.682236
+      nodeA: 15
+      nodeB: 16
+      length: 43.325077
       isBlocked: 0
       streetType: 1
     - id: 20
-      nodeA: 13
-      nodeB: 18
-      length: 120.000015
+      nodeA: 16
+      nodeB: 20
+      length: 39.814384
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 21
-      nodeA: 14
+      nodeA: 16
       nodeB: 19
-      length: 119.99999
+      length: 75.75315
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 22
-      nodeA: 15
-      nodeB: 14
-      length: 49.787132
+      nodeA: 17
+      nodeB: 21
+      length: 37.523724
       isBlocked: 0
       streetType: 1
     - id: 23
-      nodeA: 15
-      nodeB: 20
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 24
-      nodeA: 16
+      nodeA: 18
       nodeB: 21
-      length: 36.83313
+      length: 80.80923
+      isBlocked: 0
+      streetType: 1
+    - id: 24
+      nodeA: 18
+      nodeB: 22
+      length: 51.671894
       isBlocked: 0
       streetType: 1
     - id: 25
-      nodeA: 17
-      nodeB: 16
-      length: 41.83843
+      nodeA: 19
+      nodeB: 23
+      length: 72.741165
       isBlocked: 0
       streetType: 1
     - id: 26
-      nodeA: 17
-      nodeB: 22
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 27
-      nodeA: 17
-      nodeB: 18
-      length: 64.303925
+      nodeA: 20
+      nodeB: 24
+      length: 70.30691
       isBlocked: 0
       streetType: 1
+    - id: 27
+      nodeA: 21
+      nodeB: 25
+      length: 119.99997
+      isBlocked: 0
+      streetType: 0
     - id: 28
-      nodeA: 18
-      nodeB: 22
-      length: 62.118073
+      nodeA: 21
+      nodeB: 26
+      length: 64.72664
       isBlocked: 0
       streetType: 1
     - id: 29
-      nodeA: 19
-      nodeB: 20
-      length: 42.605865
+      nodeA: 21
+      nodeB: 27
+      length: 119.99999
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 30
-      nodeA: 19
-      nodeB: 23
-      length: 77.69551
+      nodeA: 22
+      nodeB: 28
+      length: 47.789448
       isBlocked: 0
       streetType: 1
     - id: 31
-      nodeA: 20
-      nodeB: 23
-      length: 44.644466
+      nodeA: 23
+      nodeB: 29
+      length: 36.444027
       isBlocked: 0
       streetType: 1
     - id: 32
-      nodeA: 21
-      nodeB: 24
-      length: 44.740173
+      nodeA: 23
+      nodeB: 30
+      length: 66.40872
       isBlocked: 0
       streetType: 1
     - id: 33
-      nodeA: 21
-      nodeB: 25
-      length: 75.71988
-      isBlocked: 0
-      streetType: 1
-    - id: 34
-      nodeA: 22
-      nodeB: 26
+      nodeA: 24
+      nodeB: 31
       length: 119.999985
       isBlocked: 0
       streetType: 0
+    - id: 34
+      nodeA: 25
+      nodeB: 33
+      length: 41.02595
+      isBlocked: 0
+      streetType: 1
     - id: 35
-      nodeA: 23
-      nodeB: 27
-      length: 38.02693
+      nodeA: 26
+      nodeB: 34
+      length: 69.88204
       isBlocked: 0
       streetType: 1
     - id: 36
-      nodeA: 23
-      nodeB: 28
-      length: 119.99999
+      nodeA: 27
+      nodeB: 35
+      length: 50.93229
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 37
-      nodeA: 23
-      nodeB: 29
-      length: 73.49155
+      nodeA: 28
+      nodeB: 36
+      length: 59.044422
       isBlocked: 0
       streetType: 1
     - id: 38
-      nodeA: 24
-      nodeB: 31
-      length: 40.091183
+      nodeA: 29
+      nodeB: 37
+      length: 58.620445
       isBlocked: 0
       streetType: 1
     - id: 39
-      nodeA: 25
-      nodeB: 32
-      length: 64.53063
+      nodeA: 29
+      nodeB: 38
+      length: 58.446712
       isBlocked: 0
       streetType: 1
     - id: 40
-      nodeA: 25
-      nodeB: 31
-      length: 51.70868
+      nodeA: 29
+      nodeB: 30
+      length: 77.84654
       isBlocked: 0
       streetType: 1
     - id: 41
-      nodeA: 26
-      nodeB: 33
-      length: 119.99999
+      nodeA: 30
+      nodeB: 39
+      length: 37.270645
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 42
-      nodeA: 26
-      nodeB: 34
-      length: 40.22936
+      nodeA: 31
+      nodeB: 40
+      length: 31.48581
       isBlocked: 0
       streetType: 1
     - id: 43
-      nodeA: 26
-      nodeB: 35
-      length: 120.00002
+      nodeA: 33
+      nodeB: 41
+      length: 39.07904
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 44
-      nodeA: 27
-      nodeB: 36
-      length: 39.6467
+      nodeA: 34
+      nodeB: 42
+      length: 38.296368
       isBlocked: 0
       streetType: 1
     - id: 45
-      nodeA: 27
-      nodeB: 37
-      length: 64.26789
+      nodeA: 35
+      nodeB: 43
+      length: 31.896702
       isBlocked: 0
       streetType: 1
     - id: 46
-      nodeA: 28
-      nodeB: 38
-      length: 40.679794
+      nodeA: 35
+      nodeB: 44
+      length: 72.437416
       isBlocked: 0
       streetType: 1
     - id: 47
-      nodeA: 29
-      nodeB: 39
-      length: 75.23638
-      isBlocked: 0
-      streetType: 1
-    - id: 48
-      nodeA: 31
-      nodeB: 41
-      length: 119.99998
+      nodeA: 36
+      nodeB: 45
+      length: 120.000015
       isBlocked: 0
       streetType: 0
+    - id: 48
+      nodeA: 36
+      nodeB: 46
+      length: 71.32961
+      isBlocked: 0
+      streetType: 1
     - id: 49
-      nodeA: 31
-      nodeB: 42
-      length: 56.042347
+      nodeA: 36
+      nodeB: 47
+      length: 35.988132
       isBlocked: 0
       streetType: 1
     - id: 50
-      nodeA: 32
-      nodeB: 43
-      length: 120.000015
+      nodeA: 37
+      nodeB: 48
+      length: 63.016933
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 51
-      nodeA: 33
-      nodeB: 44
-      length: 120
+      nodeA: 38
+      nodeB: 49
+      length: 56.407642
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 52
-      nodeA: 34
-      nodeB: 33
-      length: 80.04945
+      nodeA: 39
+      nodeB: 50
+      length: 63.038338
       isBlocked: 0
       streetType: 1
     - id: 53
-      nodeA: 35
-      nodeB: 45
-      length: 54.803383
+      nodeA: 39
+      nodeB: 37
+      length: 77.804565
       isBlocked: 0
       streetType: 1
     - id: 54
-      nodeA: 35
-      nodeB: 46
-      length: 54.822166
+      nodeA: 40
+      nodeB: 51
+      length: 42.28035
       isBlocked: 0
       streetType: 1
     - id: 55
-      nodeA: 36
-      nodeB: 39
-      length: 46.184258
+      nodeA: 40
+      nodeB: 52
+      length: 64.37872
       isBlocked: 0
       streetType: 1
     - id: 56
-      nodeA: 36
-      nodeB: 37
-      length: 76.30617
+      nodeA: 41
+      nodeB: 53
+      length: 51.985004
       isBlocked: 0
       streetType: 1
     - id: 57
-      nodeA: 37
-      nodeB: 47
-      length: 34.186836
+      nodeA: 41
+      nodeB: 48
+      length: 68.781044
       isBlocked: 0
       streetType: 1
     - id: 58
-      nodeA: 37
-      nodeB: 48
-      length: 37.818428
+      nodeA: 42
+      nodeB: 55
+      length: 119.999985
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 59
-      nodeA: 38
-      nodeB: 22
-      length: 61.683743
+      nodeA: 43
+      nodeB: 45
+      length: 107.831215
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 60
-      nodeA: 39
-      nodeB: 47
-      length: 43.641605
+      nodeA: 44
+      nodeB: 45
+      length: 58.350124
       isBlocked: 0
       streetType: 1
     - id: 61
-      nodeA: 41
-      nodeB: 33
-      length: 62.543518
+      nodeA: 45
+      nodeB: 56
+      length: 57.32775
       isBlocked: 0
       streetType: 1
     - id: 62
-      nodeA: 41
-      nodeB: 49
-      length: 42.349453
+      nodeA: 45
+      nodeB: 57
+      length: 59.320057
       isBlocked: 0
       streetType: 1
     - id: 63
-      nodeA: 42
-      nodeB: 32
-      length: 54.69095
+      nodeA: 46
+      nodeB: 58
+      length: 44.953175
       isBlocked: 0
       streetType: 1
     - id: 64
-      nodeA: 42
-      nodeB: 50
-      length: 30.639626
+      nodeA: 47
+      nodeB: 45
+      length: 98.444695
       isBlocked: 0
       streetType: 1
     - id: 65
-      nodeA: 43
-      nodeB: 51
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 66
-      nodeA: 43
-      nodeB: 52
-      length: 72.94889
-      isBlocked: 0
-      streetType: 1
-    - id: 67
-      nodeA: 44
-      nodeB: 53
-      length: 120.000015
-      isBlocked: 0
-      streetType: 0
-    - id: 68
-      nodeA: 44
-      nodeB: 54
-      length: 70.44046
-      isBlocked: 0
-      streetType: 1
-    - id: 69
-      nodeA: 45
-      nodeB: 55
-      length: 62.46311
-      isBlocked: 0
-      streetType: 1
-    - id: 70
-      nodeA: 45
-      nodeB: 56
-      length: 119.99999
-      isBlocked: 0
-      streetType: 0
-    - id: 71
-      nodeA: 46
-      nodeB: 57
-      length: 36.22891
-      isBlocked: 0
-      streetType: 1
-    - id: 72
-      nodeA: 47
-      nodeB: 58
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 73
-      nodeA: 47
-      nodeB: 48
-      length: 52.67275
-      isBlocked: 0
-      streetType: 1
-    - id: 74
-      nodeA: 49
-      nodeB: 60
-      length: 119.99999
-      isBlocked: 0
-      streetType: 0
-    - id: 75
-      nodeA: 49
-      nodeB: 44
-      length: 73.6717
-      isBlocked: 0
-      streetType: 1
-    - id: 76
-      nodeA: 50
-      nodeB: 61
-      length: 76.10978
-      isBlocked: 0
-      streetType: 1
-    - id: 77
-      nodeA: 51
-      nodeB: 63
-      length: 120.000015
-      isBlocked: 0
-      streetType: 0
-    - id: 78
-      nodeA: 52
-      nodeB: 51
-      length: 49.4451
-      isBlocked: 0
-      streetType: 1
-    - id: 79
-      nodeA: 53
-      nodeB: 64
-      length: 40.721275
-      isBlocked: 0
-      streetType: 1
-    - id: 80
-      nodeA: 54
-      nodeB: 65
-      length: 67.971146
-      isBlocked: 0
-      streetType: 1
-    - id: 81
-      nodeA: 55
-      nodeB: 66
-      length: 75.4165
-      isBlocked: 0
-      streetType: 1
-    - id: 82
-      nodeA: 56
-      nodeB: 53
-      length: 62.19747
-      isBlocked: 0
-      streetType: 1
-    - id: 83
-      nodeA: 57
-      nodeB: 67
-      length: 53.982895
-      isBlocked: 0
-      streetType: 1
-    - id: 84
-      nodeA: 58
-      nodeB: 26
-      length: 62.99486
-      isBlocked: 0
-      streetType: 1
-    - id: 85
-      nodeA: 60
-      nodeB: 69
-      length: 39.972507
-      isBlocked: 0
-      streetType: 1
-    - id: 86
-      nodeA: 60
-      nodeB: 54
-      length: 31.082405
-      isBlocked: 0
-      streetType: 1
-    - id: 87
-      nodeA: 61
-      nodeB: 70
-      length: 64.269455
-      isBlocked: 0
-      streetType: 1
-    - id: 88
-      nodeA: 63
-      nodeB: 71
-      length: 75.02757
-      isBlocked: 0
-      streetType: 1
-    - id: 89
-      nodeA: 64
-      nodeB: 72
-      length: 69.05159
-      isBlocked: 0
-      streetType: 1
-    - id: 90
-      nodeA: 64
-      nodeB: 73
+      nodeA: 48
+      nodeB: 59
       length: 120.00002
       isBlocked: 0
       streetType: 0
-    - id: 91
-      nodeA: 65
-      nodeB: 74
-      length: 73.966095
+    - id: 66
+      nodeA: 49
+      nodeB: 60
+      length: 53.182083
       isBlocked: 0
       streetType: 1
-    - id: 92
-      nodeA: 66
-      nodeB: 75
-      length: 58.84674
+    - id: 67
+      nodeA: 50
+      nodeB: 48
+      length: 42.597523
       isBlocked: 0
       streetType: 1
-    - id: 93
-      nodeA: 67
-      nodeB: 77
-      length: 60.777493
+    - id: 68
+      nodeA: 51
+      nodeB: 61
+      length: 56.051533
       isBlocked: 0
       streetType: 1
-    - id: 94
-      nodeA: 69
-      nodeB: 54
-      length: 41.866978
+    - id: 69
+      nodeA: 52
+      nodeB: 62
+      length: 68.15275
       isBlocked: 0
       streetType: 1
-    - id: 95
-      nodeA: 70
-      nodeB: 78
-      length: 33.760902
+    - id: 70
+      nodeA: 53
+      nodeB: 59
+      length: 77.885605
       isBlocked: 0
       streetType: 1
-    - id: 96
-      nodeA: 70
-      nodeB: 79
-      length: 40.172016
+    - id: 71
+      nodeA: 55
+      nodeB: 63
+      length: 55.464317
       isBlocked: 0
       streetType: 1
-    - id: 97
-      nodeA: 71
-      nodeB: 80
-      length: 75.698166
+    - id: 72
+      nodeA: 56
+      nodeB: 65
+      length: 48.96246
       isBlocked: 0
       streetType: 1
-    - id: 98
-      nodeA: 72
-      nodeB: 81
-      length: 34.5393
+    - id: 73
+      nodeA: 57
+      nodeB: 66
+      length: 59.06983
       isBlocked: 0
       streetType: 1
-    - id: 99
-      nodeA: 72
-      nodeB: 82
-      length: 119.99998
+    - id: 74
+      nodeA: 58
+      nodeB: 67
+      length: 33.029446
+      isBlocked: 0
+      streetType: 1
+    - id: 75
+      nodeA: 59
+      nodeB: 68
+      length: 44.46185
+      isBlocked: 0
+      streetType: 1
+    - id: 76
+      nodeA: 59
+      nodeB: 69
+      length: 77.630424
+      isBlocked: 0
+      streetType: 1
+    - id: 77
+      nodeA: 60
+      nodeB: 70
+      length: 119.999985
       isBlocked: 0
       streetType: 0
-    - id: 100
-      nodeA: 73
-      nodeB: 83
-      length: 63.09444
+    - id: 78
+      nodeA: 60
+      nodeB: 71
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 79
+      nodeA: 61
+      nodeB: 72
+      length: 78.78957
       isBlocked: 0
       streetType: 1
-    - id: 101
-      nodeA: 73
-      nodeB: 82
-      length: 61.567127
+    - id: 80
+      nodeA: 62
+      nodeB: 73
+      length: 76.935616
       isBlocked: 0
       streetType: 1
-    - id: 102
-      nodeA: 74
-      nodeB: 81
-      length: 43.22519
-      isBlocked: 0
-      streetType: 1
-    - id: 103
-      nodeA: 75
-      nodeB: 85
-      length: 47.946163
-      isBlocked: 0
-      streetType: 1
-    - id: 104
-      nodeA: 77
-      nodeB: 88
-      length: 79.61936
-      isBlocked: 0
-      streetType: 1
-    - id: 105
-      nodeA: 77
-      nodeB: 85
-      length: 92.16184
-      isBlocked: 0
-      streetType: 1
-    - id: 106
-      nodeA: 78
-      nodeB: 79
-      length: 54.597298
-      isBlocked: 0
-      streetType: 1
-    - id: 107
-      nodeA: 79
-      nodeB: 69
-      length: 66.0941
-      isBlocked: 0
-      streetType: 1
-    - id: 108
-      nodeA: 80
-      nodeB: 89
-      length: 56.230854
-      isBlocked: 0
-      streetType: 1
-    - id: 109
-      nodeA: 81
-      nodeB: 90
+    - id: 81
+      nodeA: 62
+      nodeB: 74
       length: 120.000015
       isBlocked: 0
       streetType: 0
-    - id: 110
-      nodeA: 82
+    - id: 82
+      nodeA: 62
+      nodeB: 75
+      length: 71.45139
+      isBlocked: 0
+      streetType: 1
+    - id: 83
+      nodeA: 63
+      nodeB: 76
+      length: 77.166626
+      isBlocked: 0
+      streetType: 1
+    - id: 84
+      nodeA: 65
+      nodeB: 77
+      length: 73.98115
+      isBlocked: 0
+      streetType: 1
+    - id: 85
+      nodeA: 65
+      nodeB: 78
+      length: 44.675594
+      isBlocked: 0
+      streetType: 1
+    - id: 86
+      nodeA: 66
+      nodeB: 79
+      length: 64.35915
+      isBlocked: 0
+      streetType: 1
+    - id: 87
+      nodeA: 67
+      nodeB: 80
+      length: 119.99999
+      isBlocked: 0
+      streetType: 0
+    - id: 88
+      nodeA: 68
+      nodeB: 69
+      length: 58.487526
+      isBlocked: 0
+      streetType: 1
+    - id: 89
+      nodeA: 69
+      nodeB: 81
+      length: 59.701485
+      isBlocked: 0
+      streetType: 1
+    - id: 90
+      nodeA: 70
+      nodeB: 82
+      length: 43.318535
+      isBlocked: 0
+      streetType: 1
+    - id: 91
+      nodeA: 71
+      nodeB: 83
+      length: 70.59099
+      isBlocked: 0
+      streetType: 1
+    - id: 92
+      nodeA: 72
+      nodeB: 84
+      length: 35.150753
+      isBlocked: 0
+      streetType: 1
+    - id: 93
+      nodeA: 74
+      nodeB: 85
+      length: 119.999985
+      isBlocked: 0
+      streetType: 0
+    - id: 94
+      nodeA: 75
+      nodeB: 74
+      length: 78.389885
+      isBlocked: 0
+      streetType: 1
+    - id: 95
+      nodeA: 75
+      nodeB: 73
+      length: 66.64764
+      isBlocked: 0
+      streetType: 1
+    - id: 96
+      nodeA: 76
+      nodeB: 86
+      length: 54.144222
+      isBlocked: 0
+      streetType: 1
+    - id: 97
+      nodeA: 76
+      nodeB: 87
+      length: 65.68124
+      isBlocked: 0
+      streetType: 1
+    - id: 98
+      nodeA: 77
+      nodeB: 88
+      length: 67.19067
+      isBlocked: 0
+      streetType: 1
+    - id: 99
+      nodeA: 78
+      nodeB: 89
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 100
+      nodeA: 79
+      nodeB: 90
+      length: 66.69498
+      isBlocked: 0
+      streetType: 1
+    - id: 101
+      nodeA: 80
       nodeB: 91
-      length: 69.300255
+      length: 67.13151
+      isBlocked: 0
+      streetType: 1
+    - id: 102
+      nodeA: 81
+      nodeB: 92
+      length: 39.50936
+      isBlocked: 0
+      streetType: 1
+    - id: 103
+      nodeA: 82
+      nodeB: 93
+      length: 57.878395
+      isBlocked: 0
+      streetType: 1
+    - id: 104
+      nodeA: 83
+      nodeB: 94
+      length: 34.07908
+      isBlocked: 0
+      streetType: 1
+    - id: 105
+      nodeA: 84
+      nodeB: 95
+      length: 70.55079
+      isBlocked: 0
+      streetType: 1
+    - id: 106
+      nodeA: 84
+      nodeB: 74
+      length: 46.317574
+      isBlocked: 0
+      streetType: 1
+    - id: 107
+      nodeA: 85
+      nodeB: 96
+      length: 52.321384
+      isBlocked: 0
+      streetType: 1
+    - id: 108
+      nodeA: 86
+      nodeB: 97
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 109
+      nodeA: 87
+      nodeB: 98
+      length: 47.926243
+      isBlocked: 0
+      streetType: 1
+    - id: 110
+      nodeA: 87
+      nodeB: 86
+      length: 54.50604
       isBlocked: 0
       streetType: 1
     - id: 111
-      nodeA: 83
-      nodeB: 92
-      length: 59.94941
+      nodeA: 88
+      nodeB: 98
+      length: 80.90676
       isBlocked: 0
       streetType: 1
     - id: 112
-      nodeA: 88
-      nodeB: 95
-      length: 72.1557
+      nodeA: 89
+      nodeB: 100
+      length: 57.317066
       isBlocked: 0
       streetType: 1
     - id: 113
       nodeA: 89
-      nodeB: 96
-      length: 70.52644
+      nodeB: 101
+      length: 68.32883
       isBlocked: 0
       streetType: 1
     - id: 114
-      nodeA: 89
-      nodeB: 97
-      length: 36.93112
+      nodeA: 90
+      nodeB: 100
+      length: 90.81269
       isBlocked: 0
       streetType: 1
     - id: 115
       nodeA: 90
-      nodeB: 98
-      length: 119.99998
+      nodeB: 89
+      length: 70.27783
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 116
       nodeA: 91
-      nodeB: 99
-      length: 60.924793
+      nodeB: 102
+      length: 33.9976
       isBlocked: 0
       streetType: 1
     - id: 117
       nodeA: 92
-      nodeB: 101
-      length: 120.00001
+      nodeB: 103
+      length: 42.33215
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 118
-      nodeA: 95
-      nodeB: 102
-      length: 73.16084
+      nodeA: 93
+      nodeB: 104
+      length: 44.901333
       isBlocked: 0
       streetType: 1
     - id: 119
-      nodeA: 96
-      nodeB: 103
-      length: 53.214596
+      nodeA: 93
+      nodeB: 105
+      length: 119.999985
+      isBlocked: 0
+      streetType: 0
+    - id: 120
+      nodeA: 93
+      nodeB: 106
+      length: 59.195602
       isBlocked: 0
       streetType: 1
-    - id: 120
-      nodeA: 97
-      nodeB: 104
-      length: 119.99998
-      isBlocked: 0
-      streetType: 0
     - id: 121
-      nodeA: 98
-      nodeB: 105
-      length: 119.99998
+      nodeA: 94
+      nodeB: 104
+      length: 63.180603
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 122
-      nodeA: 99
-      nodeB: 101
-      length: 82.746796
+      nodeA: 94
+      nodeB: 107
+      length: 49.94962
       isBlocked: 0
       streetType: 1
     - id: 123
-      nodeA: 101
-      nodeB: 107
-      length: 39.19021
+      nodeA: 95
+      nodeB: 74
+      length: 40.64308
       isBlocked: 0
       streetType: 1
     - id: 124
-      nodeA: 102
+      nodeA: 95
       nodeB: 108
-      length: 56.216103
+      length: 32.63553
       isBlocked: 0
       streetType: 1
     - id: 125
-      nodeA: 103
-      nodeB: 109
-      length: 43.550014
+      nodeA: 96
+      nodeB: 110
+      length: 60.62693
       isBlocked: 0
       streetType: 1
     - id: 126
-      nodeA: 104
-      nodeB: 110
-      length: 56.525368
+      nodeA: 97
+      nodeB: 111
+      length: 72.388275
       isBlocked: 0
       streetType: 1
     - id: 127
-      nodeA: 104
-      nodeB: 111
-      length: 63.57098
+      nodeA: 97
+      nodeB: 101
+      length: 91.21087
       isBlocked: 0
       streetType: 1
     - id: 128
-      nodeA: 105
+      nodeA: 100
       nodeB: 112
-      length: 49.31996
+      length: 120.00002
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 129
-      nodeA: 107
+      nodeA: 101
       nodeB: 113
-      length: 41.717434
+      length: 61.197006
       isBlocked: 0
       streetType: 1
     - id: 130
-      nodeA: 107
-      nodeB: 105
-      length: 81.79685
+      nodeA: 102
+      nodeB: 114
+      length: 60.75845
       isBlocked: 0
       streetType: 1
     - id: 131
-      nodeA: 107
-      nodeB: 114
-      length: 48.7788
-      isBlocked: 0
-      streetType: 1
-    - id: 132
-      nodeA: 108
+      nodeA: 102
       nodeB: 115
-      length: 48.49861
+      length: 119.99999
+      isBlocked: 0
+      streetType: 0
+    - id: 132
+      nodeA: 103
+      nodeB: 116
+      length: 41.77932
       isBlocked: 0
       streetType: 1
     - id: 133
-      nodeA: 108
-      nodeB: 116
-      length: 36.325066
+      nodeA: 103
+      nodeB: 117
+      length: 72.474045
       isBlocked: 0
       streetType: 1
     - id: 134
-      nodeA: 109
-      nodeB: 117
-      length: 71.606155
+      nodeA: 103
+      nodeB: 97
+      length: 83.52347
       isBlocked: 0
       streetType: 1
     - id: 135
-      nodeA: 109
+      nodeA: 104
       nodeB: 118
-      length: 55.51169
+      length: 50.007484
       isBlocked: 0
       streetType: 1
     - id: 136
-      nodeA: 110
+      nodeA: 104
       nodeB: 119
-      length: 60.132965
-      isBlocked: 0
-      streetType: 1
-    - id: 137
-      nodeA: 111
-      nodeB: 120
-      length: 45.4488
-      isBlocked: 0
-      streetType: 1
-    - id: 138
-      nodeA: 112
-      nodeB: 121
-      length: 54.709606
-      isBlocked: 0
-      streetType: 1
-    - id: 139
-      nodeA: 112
-      nodeB: 122
-      length: 120.000015
-      isBlocked: 0
-      streetType: 0
-    - id: 140
-      nodeA: 113
-      nodeB: 123
-      length: 45.13786
-      isBlocked: 0
-      streetType: 1
-    - id: 141
-      nodeA: 114
-      nodeB: 105
-      length: 43.151665
-      isBlocked: 0
-      streetType: 1
-    - id: 142
-      nodeA: 115
-      nodeB: 124
-      length: 73.01085
-      isBlocked: 0
-      streetType: 1
-    - id: 143
-      nodeA: 115
-      nodeB: 125
-      length: 71.39858
-      isBlocked: 0
-      streetType: 1
-    - id: 144
-      nodeA: 116
-      nodeB: 126
       length: 120
       isBlocked: 0
       streetType: 0
+    - id: 137
+      nodeA: 105
+      nodeB: 120
+      length: 30.190695
+      isBlocked: 0
+      streetType: 1
+    - id: 138
+      nodeA: 106
+      nodeB: 105
+      length: 60.864143
+      isBlocked: 0
+      streetType: 1
+    - id: 139
+      nodeA: 107
+      nodeB: 119
+      length: 52.766422
+      isBlocked: 0
+      streetType: 1
+    - id: 140
+      nodeA: 107
+      nodeB: 69
+      length: 79.36459
+      isBlocked: 0
+      streetType: 1
+    - id: 141
+      nodeA: 108
+      nodeB: 85
+      length: 63.31197
+      isBlocked: 0
+      streetType: 1
+    - id: 142
+      nodeA: 110
+      nodeB: 122
+      length: 58.6711
+      isBlocked: 0
+      streetType: 1
+    - id: 143
+      nodeA: 110
+      nodeB: 123
+      length: 119.99996
+      isBlocked: 0
+      streetType: 0
+    - id: 144
+      nodeA: 111
+      nodeB: 124
+      length: 49.027206
+      isBlocked: 0
+      streetType: 1
     - id: 145
-      nodeA: 116
-      nodeB: 127
-      length: 31.861288
+      nodeA: 112
+      nodeB: 125
+      length: 59.747772
       isBlocked: 0
       streetType: 1
     - id: 146
-      nodeA: 117
-      nodeB: 128
-      length: 48.95989
+      nodeA: 112
+      nodeB: 126
+      length: 62.041325
       isBlocked: 0
       streetType: 1
     - id: 147
-      nodeA: 118
-      nodeB: 129
-      length: 73.90772
+      nodeA: 113
+      nodeB: 126
+      length: 77.45332
       isBlocked: 0
       streetType: 1
     - id: 148
-      nodeA: 119
-      nodeB: 130
-      length: 58.184177
+      nodeA: 113
+      nodeB: 127
+      length: 51.062916
       isBlocked: 0
       streetType: 1
     - id: 149
-      nodeA: 120
-      nodeB: 128
-      length: 69.913864
+      nodeA: 114
+      nodeB: 125
+      length: 143.45377
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 150
-      nodeA: 120
-      nodeB: 132
-      length: 34.94472
+      nodeA: 114
+      nodeB: 128
+      length: 36.518627
       isBlocked: 0
       streetType: 1
     - id: 151
-      nodeA: 121
-      nodeB: 133
-      length: 76.66462
+      nodeA: 115
+      nodeB: 128
+      length: 51.218964
       isBlocked: 0
       streetType: 1
     - id: 152
-      nodeA: 121
-      nodeB: 134
-      length: 119.99998
+      nodeA: 116
+      nodeB: 129
+      length: 39.616776
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 153
-      nodeA: 122
-      nodeB: 134
-      length: 33.20054
+      nodeA: 116
+      nodeB: 130
+      length: 74.63683
       isBlocked: 0
       streetType: 1
     - id: 154
-      nodeA: 123
-      nodeB: 135
-      length: 56.006073
+      nodeA: 117
+      nodeB: 131
+      length: 53.93253
       isBlocked: 0
       streetType: 1
     - id: 155
-      nodeA: 124
-      nodeB: 136
-      length: 119.99998
+      nodeA: 118
+      nodeB: 105
+      length: 123.4325
       isBlocked: 0
       streetType: 0
     - id: 156
-      nodeA: 125
-      nodeB: 138
-      length: 119.99998
+      nodeA: 118
+      nodeB: 132
+      length: 55.52274
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 157
-      nodeA: 125
-      nodeB: 139
-      length: 60.946953
+      nodeA: 119
+      nodeB: 133
+      length: 37.933315
       isBlocked: 0
       streetType: 1
     - id: 158
-      nodeA: 126
-      nodeB: 140
-      length: 31.81563
+      nodeA: 119
+      nodeB: 132
+      length: 47.700905
       isBlocked: 0
       streetType: 1
     - id: 159
-      nodeA: 126
-      nodeB: 139
-      length: 65.24431
+      nodeA: 120
+      nodeB: 134
+      length: 66.41176
       isBlocked: 0
       streetType: 1
     - id: 160
-      nodeA: 127
-      nodeB: 125
-      length: 56.641644
+      nodeA: 122
+      nodeB: 136
+      length: 35.218224
       isBlocked: 0
       streetType: 1
     - id: 161
-      nodeA: 127
-      nodeB: 141
-      length: 34.203518
+      nodeA: 123
+      nodeB: 137
+      length: 59.881245
       isBlocked: 0
       streetType: 1
     - id: 162
-      nodeA: 128
-      nodeB: 132
-      length: 49.69466
+      nodeA: 124
+      nodeB: 138
+      length: 58.873703
       isBlocked: 0
       streetType: 1
     - id: 163
-      nodeA: 128
-      nodeB: 142
-      length: 47.138702
+      nodeA: 124
+      nodeB: 139
+      length: 62.716717
       isBlocked: 0
       streetType: 1
     - id: 164
-      nodeA: 129
-      nodeB: 143
-      length: 49.851482
+      nodeA: 125
+      nodeB: 140
+      length: 69.26168
       isBlocked: 0
       streetType: 1
     - id: 165
-      nodeA: 129
-      nodeB: 142
-      length: 49.77703
+      nodeA: 126
+      nodeB: 141
+      length: 42.333412
       isBlocked: 0
       streetType: 1
     - id: 166
-      nodeA: 130
-      nodeB: 144
-      length: 32.89464
+      nodeA: 127
+      nodeB: 138
+      length: 112.15672
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 167
-      nodeA: 132
-      nodeB: 144
-      length: 68.23957
+      nodeA: 129
+      nodeB: 143
+      length: 42.38944
       isBlocked: 0
       streetType: 1
     - id: 168
-      nodeA: 133
-      nodeB: 146
-      length: 43.13517
+      nodeA: 129
+      nodeB: 124
+      length: 75.50658
       isBlocked: 0
       streetType: 1
     - id: 169
-      nodeA: 134
-      nodeB: 147
-      length: 56.59156
+      nodeA: 130
+      nodeB: 139
+      length: 69.994156
       isBlocked: 0
       streetType: 1
     - id: 170
-      nodeA: 135
-      nodeB: 133
-      length: 78.59779
+      nodeA: 130
+      nodeB: 144
+      length: 120
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 171
-      nodeA: 136
-      nodeB: 148
-      length: 34.099316
+      nodeA: 132
+      nodeB: 146
+      length: 119.99996
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 172
-      nodeA: 138
-      nodeB: 148
-      length: 71.21798
+      nodeA: 133
+      nodeB: 147
+      length: 51.52048
       isBlocked: 0
       streetType: 1
     - id: 173
-      nodeA: 138
-      nodeB: 149
-      length: 39.65956
+      nodeA: 133
+      nodeB: 117
+      length: 100.82157
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 174
-      nodeA: 139
-      nodeB: 150
-      length: 42.7007
+      nodeA: 133
+      nodeB: 148
+      length: 48.20619
       isBlocked: 0
       streetType: 1
     - id: 175
-      nodeA: 139
-      nodeB: 151
-      length: 42.699738
+      nodeA: 134
+      nodeB: 150
+      length: 55.565804
       isBlocked: 0
       streetType: 1
     - id: 176
-      nodeA: 140
-      nodeB: 151
-      length: 72.234535
+      nodeA: 136
+      nodeB: 123
+      length: 144.37396
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 177
-      nodeA: 141
-      nodeB: 125
-      length: 63.423286
-      isBlocked: 0
-      streetType: 1
-    - id: 178
-      nodeA: 142
+      nodeA: 137
       nodeB: 152
-      length: 32.022114
+      length: 120.00001
+      isBlocked: 0
+      streetType: 0
+    - id: 178
+      nodeA: 139
+      nodeB: 144
+      length: 63.544025
       isBlocked: 0
       streetType: 1
     - id: 179
-      nodeA: 143
-      nodeB: 153
-      length: 36.313015
+      nodeA: 140
+      nodeB: 154
+      length: 32.673355
       isBlocked: 0
       streetType: 1
     - id: 180
-      nodeA: 143
-      nodeB: 154
-      length: 48.54522
+      nodeA: 141
+      nodeB: 156
+      length: 35.819138
       isBlocked: 0
       streetType: 1
     - id: 181
-      nodeA: 146
-      nodeB: 158
-      length: 39.358788
+      nodeA: 141
+      nodeB: 140
+      length: 115.69221
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 182
-      nodeA: 147
-      nodeB: 159
-      length: 44.137768
+      nodeA: 143
+      nodeB: 130
+      length: 72.31405
       isBlocked: 0
       streetType: 1
     - id: 183
-      nodeA: 147
-      nodeB: 160
-      length: 34.591873
+      nodeA: 144
+      nodeB: 158
+      length: 79.62151
       isBlocked: 0
       streetType: 1
     - id: 184
-      nodeA: 148
-      nodeB: 161
-      length: 44.911316
+      nodeA: 144
+      nodeB: 159
+      length: 48.1295
       isBlocked: 0
       streetType: 1
     - id: 185
-      nodeA: 148
-      nodeB: 162
-      length: 66.501495
+      nodeA: 146
+      nodeB: 160
+      length: 75.37441
       isBlocked: 0
       streetType: 1
     - id: 186
-      nodeA: 149
+      nodeA: 146
       nodeB: 161
-      length: 62.183735
+      length: 51.61492
       isBlocked: 0
       streetType: 1
     - id: 187
-      nodeA: 149
-      nodeB: 163
-      length: 119.99995
+      nodeA: 147
+      nodeB: 162
+      length: 119.99998
       isBlocked: 0
       streetType: 0
     - id: 188
-      nodeA: 150
-      nodeB: 151
-      length: 51.489983
+      nodeA: 147
+      nodeB: 131
+      length: 101.99374
       isBlocked: 0
       streetType: 1
     - id: 189
-      nodeA: 150
-      nodeB: 164
-      length: 47.550446
+      nodeA: 148
+      nodeB: 117
+      length: 63.25379
       isBlocked: 0
       streetType: 1
     - id: 190
-      nodeA: 151
-      nodeB: 164
-      length: 41.04349
+      nodeA: 150
+      nodeB: 152
+      length: 67.41432
       isBlocked: 0
       streetType: 1
     - id: 191
-      nodeA: 152
-      nodeB: 165
-      length: 120.000015
+      nodeA: 154
+      nodeB: 169
+      length: 66.25765
       isBlocked: 0
-      streetType: 0
+      streetType: 1
     - id: 192
-      nodeA: 153
+      nodeA: 156
       nodeB: 154
-      length: 67.12088
+      length: 63.666588
       isBlocked: 0
       streetType: 1
     - id: 193
-      nodeA: 153
-      nodeB: 165
-      length: 109.07688
+      nodeA: 156
+      nodeB: 169
+      length: 41.050205
       isBlocked: 0
       streetType: 1
     - id: 194
       nodeA: 158
-      nodeB: 160
-      length: 92.939835
+      nodeB: 174
+      length: 69.57696
       isBlocked: 0
       streetType: 1
     - id: 195
-      nodeA: 160
-      nodeB: 159
-      length: 51.218357
+      nodeA: 159
+      nodeB: 174
+      length: 41.91093
       isBlocked: 0
       streetType: 1
     - id: 196
-      nodeA: 161
-      nodeB: 163
-      length: 62.787632
+      nodeA: 160
+      nodeB: 178
+      length: 30.281424
       isBlocked: 0
       streetType: 1
     - id: 197
+      nodeA: 161
+      nodeB: 160
+      length: 41.82101
+      isBlocked: 0
+      streetType: 1
+    - id: 198
       nodeA: 162
-      nodeB: 163
-      length: 69.84045
+      nodeB: 178
+      length: 72.01426
       isBlocked: 0
       streetType: 1
   blocks:
-  - worldCenter: {x: 66.7352, y: 0, z: 118.28662}
-    size: {x: 107.77803, y: 0, z: 10.37085}
-    zoneType: 0
+  - worldCenter: {x: -5.031077, y: 0, z: 272.53177}
+    size: {x: 68.53612, y: 0, z: 27.799057}
+    zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 14.624615, y: 0, z: 119.68422}
-    - {x: 122.40264, y: 0, z: 112.402405}
-    - {x: 63.178345, y: 0, z: 122.773254}
-    area: 343.24484
+    - {x: -15.833896, y: 0, z: 255.38933}
+    - {x: 34.638393, y: 0, z: 283.1884}
+    - {x: -33.897728, y: 0, z: 279.01767}
+    area: 847.36664
     hasPizzaria: 1
-  - worldCenter: {x: 27.172659, y: 0, z: 133.43109}
-    size: {x: 40.312424, y: 0, z: 24.938385}
-    zoneType: 2
-    deliveryPointIndices: 
-    polygon:
-    - {x: 13.364233, y: 0, z: 123.368805}
-    - {x: 53.67666, y: 0, z: 128.6173}
-    - {x: 14.4770775, y: 0, z: 148.30719}
-    area: 499.74298
-    hasPizzaria: 0
-  - worldCenter: {x: 72.917656, y: 0, z: 173.49376}
-    size: {x: 118.51999, y: 0, z: 133.48792}
-    zoneType: 2
-    deliveryPointIndices: 
-    polygon:
-    - {x: 61.277103, y: 0, z: 133.33589}
-    - {x: 124.3325, y: 0, z: 116.097466}
-    - {x: 113.23233, y: 0, z: 181.45976}
-    - {x: 116.397896, y: 0, z: 249.58539}
-    - {x: 5.8125095, y: 0, z: 205.64465}
-    - {x: 16.45364, y: 0, z: 154.83931}
-    area: 9899.57
-    hasPizzaria: 0
-  - worldCenter: {x: 162.31302, y: 0, z: 235.12984}
-    size: {x: 71.63202, y: 0, z: 112.88083}
+  - worldCenter: {x: -31.19362, y: 0, z: 358.76315}
+    size: {x: 114.451126, y: 0, z: 154.01791}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 122.92119, y: 0, z: 187.32187}
-    - {x: 194.5532, y: 0, z: 190.56131}
-    - {x: 192.82489, y: 0, z: 300.2027}
-    - {x: 176.4269, y: 0, z: 245.20473}
-    - {x: 124.83895, y: 0, z: 252.35858}
-    area: 4617.3604
+    - {x: 36.241962, y: 0, z: 289.10687}
+    - {x: 6.1005, y: 0, z: 331.5383}
+    - {x: 4.446442, y: 0, z: 387.27277}
+    - {x: -28.32972, y: 0, z: 440.49783}
+    - {x: -78.20916, y: 0, z: 425.09418}
+    - {x: -76.1044, y: 0, z: 378.1837}
+    - {x: -74.628174, y: 0, z: 331.9317}
+    - {x: -39.066418, y: 0, z: 286.47992}
+    area: 11062.595
     hasPizzaria: 0
-  - worldCenter: {x: 99.20757, y: 0, z: 344.3392}
-    size: {x: 229.86662, y: 0, z: 226.91934}
+  - worldCenter: {x: 52.971336, y: 0, z: 360.6676}
+    size: {x: 101.854706, y: 0, z: 76.2493}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 3.9334922, y: 0, z: 213.13065}
-    - {x: 118.04778, y: 0, z: 260.65826}
-    - {x: 106.90642, y: 0, z: 368.62637}
-    - {x: 222.42293, y: 0, z: 363.61414}
-    - {x: 233.80011, y: 0, z: 422.71387}
-    - {x: 176.5227, y: 0, z: 440.05}
-    - {x: 137.39153, y: 0, z: 436.83405}
-    - {x: 23.690626, y: 0, z: 433.0077}
-    - {x: 25.205622, y: 0, z: 358.76047}
-    - {x: 38.395245, y: 0, z: 246.04475}
-    - {x: 4.966883, y: 0, z: 244.29126}
-    area: 24866.13
+    - {x: 15.684364, y: 0, z: 331.69266}
+    - {x: 78.38143, y: 0, z: 338.86035}
+    - {x: 115.91411, y: 0, z: 337.2601}
+    - {x: 40.817383, y: 0, z: 407.94196}
+    - {x: 14.0594, y: 0, z: 387.58286}
+    area: 4330.8784
     hasPizzaria: 0
-  - worldCenter: {x: 252.43501, y: 0, z: 264.7696}
-    size: {x: 111.59396, y: 0, z: 128.91103}
+  - worldCenter: {x: 14.506155, y: 0, z: 429.2169}
+    size: {x: 58.84987, y: 0, z: 61.865814}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 201.40099, y: 0, z: 190.63176}
-    - {x: 311.8774, y: 0, z: 210.28848}
-    - {x: 291.94223, y: 0, z: 319.5428}
-    - {x: 256.671, y: 0, z: 301.17615}
-    - {x: 200.28345, y: 0, z: 302.20874}
-    area: 10818.095
+    - {x: 10.0631895, y: 0, z: 396.94208}
+    - {x: 34.239048, y: 0, z: 416.9067}
+    - {x: 36.28612, y: 0, z: 458.8079}
+    - {x: -22.563745, y: 0, z: 444.21097}
+    area: 2115.0745
     hasPizzaria: 0
-  - worldCenter: {x: 180.65169, y: 0, z: 309.68698}
-    size: {x: 138.14246, y: 0, z: 115.67946}
+  - worldCenter: {x: -96.06382, y: 0, z: 417.37656}
+    size: {x: 34.65049, y: 0, z: 53.652496}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 123.882965, y: 0, z: 258.74548}
-    - {x: 181.37444, y: 0, z: 254.65938}
-    - {x: 189.55502, y: 0, z: 307.15164}
-    - {x: 251.3753, y: 0, z: 307.29727}
-    - {x: 224.4896, y: 0, z: 359.92923}
-    - {x: 113.23284, y: 0, z: 370.33884}
-    area: 10194.269
+    - {x: -83.665146, y: 0, z: 386.2058}
+    - {x: -86.21068, y: 0, z: 426.06552}
+    - {x: -118.315636, y: 0, z: 439.8583}
+    area: 622.29144
     hasPizzaria: 0
-  - worldCenter: {x: 12.979637, y: 0, z: 253.43518}
-    size: {x: 25.837318, y: 0, z: 28.48938}
+  - worldCenter: {x: 67.91391, y: 0, z: 444.5891}
+    size: {x: 69.748924, y: 0, z: 60.04947}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 4.8949714, y: 0, z: 244.35757}
-    - {x: 29.94063, y: 0, z: 243.72928}
-    - {x: 4.1033106, y: 0, z: 272.21866}
-    area: 348.65088
+    - {x: 43.32876, y: 0, z: 418.2475}
+    - {x: 113.07768, y: 0, z: 421.47284}
+    - {x: 70.53371, y: 0, z: 478.29697}
+    - {x: 44.715485, y: 0, z: 460.33917}
+    area: 2581.2358
     hasPizzaria: 0
-  - worldCenter: {x: 14.095711, y: 0, z: 318.97577}
-    size: {x: 32.902428, y: 0, z: 145.06851}
+  - worldCenter: {x: 3.4210968, y: 0, z: 575.1774}
+    size: {x: 131.50412, y: 0, z: 244.5592}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 33.67451, y: 0, z: 246.72443}
-    - {x: 18.533705, y: 0, z: 353.92188}
-    - {x: 0.77208424, y: 0, z: 391.79294}
-    - {x: 3.402546, y: 0, z: 283.46387}
-    area: 2256.6472
+    - {x: -26.708788, y: 0, z: 452.3274}
+    - {x: 37.869495, y: 0, z: 469.40482}
+    - {x: 67.543106, y: 0, z: 489.06842}
+    - {x: 65.837585, y: 0, z: 601.93304}
+    - {x: 41.409206, y: 0, z: 630.6401}
+    - {x: 42.390797, y: 0, z: 669.11237}
+    - {x: -17.0572, y: 0, z: 696.8866}
+    - {x: -21.818895, y: 0, z: 654.8464}
+    - {x: -22.108643, y: 0, z: 594.0357}
+    - {x: 1.0894341, y: 0, z: 573.4292}
+    - {x: -63.43192, y: 0, z: 569.6123}
+    - {x: -63.961014, y: 0, z: 500.83298}
+    area: 21230.195
     hasPizzaria: 0
-  - worldCenter: {x: 305.60248, y: 0, z: 426.73663}
-    size: {x: 132.99971, y: 0, z: 232.17334}
+  - worldCenter: {x: -74.98053, y: 0, z: 454.73395}
+    size: {x: 82.78208, y: 0, z: 54.66739}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 296.094, y: 0, z: 330.34967}
-    - {x: 330.52924, y: 0, z: 334.3061}
-    - {x: 326.10843, y: 0, z: 378.62158}
-    - {x: 364.0046, y: 0, z: 375.46814}
-    - {x: 370.0941, y: 0, z: 487.2529}
-    - {x: 351.74097, y: 0, z: 544.86646}
-    - {x: 275.73306, y: 0, z: 537.5814}
-    - {x: 237.09438, y: 0, z: 540.47125}
-    - {x: 244.9932, y: 0, z: 425.75525}
-    - {x: 259.63284, y: 0, z: 312.6931}
-    area: 23708.238
+    - {x: -34.033257, y: 0, z: 447.4656}
+    - {x: -68.96943, y: 0, z: 490.45078}
+    - {x: -116.81534, y: 0, z: 445.23605}
+    - {x: -80.10411, y: 0, z: 435.7834}
+    area: 2250.3281
     hasPizzaria: 0
-  - worldCenter: {x: 243.13025, y: 0, z: 365.9155}
-    size: {x: 21.485825, y: 0, z: 106.79611}
+  - worldCenter: {x: -190.82198, y: 0, z: 849.1096}
+    size: {x: 318.05615, y: 0, z: 764.8093}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 255.81258, y: 0, z: 312.92844}
-    - {x: 239.2514, y: 0, z: 419.72455}
-    - {x: 234.32675, y: 0, z: 365.0935}
-    area: 715.34247
+    - {x: -123.67595, y: 0, z: 449.89133}
+    - {x: -69.94066, y: 0, z: 502.03275}
+    - {x: -71.796265, y: 0, z: 574.5982}
+    - {x: -74.43631, y: 0, z: 610.84985}
+    - {x: -110.75479, y: 0, z: 656.528}
+    - {x: -145.48506, y: 0, z: 700.73834}
+    - {x: -107.373314, y: 0, z: 735.0022}
+    - {x: -106.0578, y: 0, z: 850.02783}
+    - {x: -104.29519, y: 0, z: 890.7927}
+    - {x: -133.65138, y: 0, z: 936.9341}
+    - {x: -134.05644, y: 0, z: 995.54645}
+    - {x: -131.25722, y: 0, z: 1056.1962}
+    - {x: -101.7859, y: 0, z: 1055.893}
+    - {x: -144.18968, y: 0, z: 1105.5074}
+    - {x: -179.81818, y: 0, z: 1147.3284}
+    - {x: -177.4371, y: 0, z: 1214.7007}
+    - {x: -278.45242, y: 0, z: 1153.1863}
+    - {x: -337.39313, y: 0, z: 1154.3065}
+    - {x: -249.03807, y: 0, z: 1040.4578}
+    - {x: -283.3754, y: 0, z: 1039.9675}
+    - {x: -340.63644, y: 0, z: 1035.1229}
+    - {x: -387.9968, y: 0, z: 999.5989}
+    - {x: -358.6239, y: 0, z: 956.5144}
+    - {x: -284.77448, y: 0, z: 863.5691}
+    - {x: -212.05951, y: 0, z: 839.0189}
+    - {x: -161.75012, y: 0, z: 810.9799}
+    - {x: -221.06703, y: 0, z: 770.8452}
+    - {x: -217.94623, y: 0, z: 703.1254}
+    - {x: -268.5516, y: 0, z: 664.5792}
+    - {x: -250.2384, y: 0, z: 639.71906}
+    - {x: -189.55444, y: 0, z: 537.41547}
+    - {x: -148.83429, y: 0, z: 480.5338}
+    area: 103748.03
     hasPizzaria: 0
-  - worldCenter: {x: 14.258412, y: 0, z: 398.48373}
-    size: {x: 13.062978, y: 0, z: 65.86444}
+  - worldCenter: {x: 219.85526, y: 0, z: 475.2924}
+    size: {x: 280.66376, y: 0, z: 92.954834}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 18.3291, y: 0, z: 365.7909}
-    - {x: 18.754559, y: 0, z: 431.65533}
-    - {x: 5.691581, y: 0, z: 398.00488}
-    area: 423.03424
+    - {x: 123.65631, y: 0, z: 421.6413}
+    - {x: 168.29973, y: 0, z: 447.65314}
+    - {x: 212.58098, y: 0, z: 452.17795}
+    - {x: 264.6027, y: 0, z: 444.2235}
+    - {x: 267.0706, y: 0, z: 476.4587}
+    - {x: 357.79263, y: 0, z: 513.7498}
+    - {x: 299.8699, y: 0, z: 514.5961}
+    - {x: 231.08185, y: 0, z: 512.25757}
+    - {x: 196.46901, y: 0, z: 486.268}
+    - {x: 77.12888, y: 0, z: 483.89792}
+    area: 10508.418
     hasPizzaria: 0
-  - worldCenter: {x: 359.36588, y: 0, z: 351.8923}
-    size: {x: 68.121826, y: 0, z: 37.2619}
+  - worldCenter: {x: 231.82149, y: 0, z: 607.85065}
+    size: {x: 282.76248, y: 0, z: 276.24075}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 336.56912, y: 0, z: 332.5085}
-    - {x: 401.5808, y: 0, z: 339.12848}
-    - {x: 365.85464, y: 0, z: 366.1619}
-    - {x: 333.45898, y: 0, z: 369.77042}
-    area: 1594.9454
+    - {x: 75.89828, y: 0, z: 487.92148}
+    - {x: 193.00412, y: 0, z: 494.52304}
+    - {x: 232.7606, y: 0, z: 524.0009}
+    - {x: 255.95393, y: 0, z: 543.151}
+    - {x: 358.66077, y: 0, z: 518.8171}
+    - {x: 326.6099, y: 0, z: 565.719}
+    - {x: 327.09354, y: 0, z: 611.97095}
+    - {x: 280.78555, y: 0, z: 663.7046}
+    - {x: 336.08185, y: 0, z: 701.62646}
+    - {x: 285.6184, y: 0, z: 761.162}
+    - {x: 239.50072, y: 0, z: 764.16223}
+    - {x: 191.4924, y: 0, z: 722.2594}
+    - {x: 234.92773, y: 0, z: 659.8034}
+    - {x: 183.82126, y: 0, z: 661.2397}
+    - {x: 187.27893, y: 0, z: 550.4882}
+    - {x: 150.34795, y: 0, z: 551.95166}
+    - {x: 81.12958, y: 0, z: 550.9611}
+    area: 34854.348
     hasPizzaria: 0
-  - worldCenter: {x: 135.29724, y: 0, z: 483.1061}
-    size: {x: 208.35661, y: 0, z: 116.88336}
+  - worldCenter: {x: 135.24506, y: 0, z: 709.7485}
+    size: {x: 234.96735, y: 0, z: 378.9284}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 233.73297, y: 0, z: 428.60498}
-    - {x: 228.94443, y: 0, z: 542.3933}
-    - {x: 168.41566, y: 0, z: 545.48834}
-    - {x: 56.57444, y: 0, z: 537.29565}
-    - {x: 92.442184, y: 0, z: 512.4342}
-    - {x: 97.45474, y: 0, z: 445.0797}
-    - {x: 25.37636, y: 0, z: 439.75113}
-    - {x: 139.02087, y: 0, z: 448.3378}
-    - {x: 175.71349, y: 0, z: 448.57004}
-    area: 14097.134
+    - {x: 72.77796, y: 0, z: 490.0384}
+    - {x: 77.599, y: 0, z: 554.4714}
+    - {x: 145.01648, y: 0, z: 554.55066}
+    - {x: 181.89175, y: 0, z: 551.5108}
+    - {x: 175.53918, y: 0, z: 669.9167}
+    - {x: 229.77715, y: 0, z: 668.21173}
+    - {x: 183.79709, y: 0, z: 726.02563}
+    - {x: 183.09775, y: 0, z: 777.0971}
+    - {x: 284.43982, y: 0, z: 840.63916}
+    - {x: 207.66019, y: 0, z: 866.8985}
+    - {x: 166.74889, y: 0, z: 868.9668}
+    - {x: 134.02551, y: 0, z: 848.62823}
+    - {x: 76.74375, y: 0, z: 854.1509}
+    - {x: 107.855095, y: 0, z: 804.79724}
+    - {x: 75.970406, y: 0, z: 777.6033}
+    - {x: 92.46539, y: 0, z: 706.1175}
+    - {x: 50.310863, y: 0, z: 676.82007}
+    - {x: 49.47248, y: 0, z: 639.37524}
+    - {x: 74.46749, y: 0, z: 609.40186}
+    area: 38041.758
     hasPizzaria: 0
-  - worldCenter: {x: 56.770485, y: 0, z: 468.74902}
-    size: {x: 64.1555, y: 0, z: 69.37903}
+  - worldCenter: {x: -46.863804, y: 0, z: 581.2751}
+    size: {x: 58.813503, y: 0, z: 30.567505}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 24.339474, y: 0, z: 441.4757}
-    - {x: 88.49497, y: 0, z: 444.5565}
-    - {x: 84.21465, y: 0, z: 510.85474}
-    - {x: 58.683826, y: 0, z: 472.3748}
-    - {x: 28.11948, y: 0, z: 474.48334}
-    area: 2375.3604
+    - {x: -64.19057, y: 0, z: 572.0537}
+    - {x: -8.793674, y: 0, z: 570.60205}
+    - {x: -67.60718, y: 0, z: 601.16956}
+    area: 803.9827
     hasPizzaria: 0
-  - worldCenter: {x: 417.98468, y: 0, z: 357.59872}
-    size: {x: 90.9285, y: 0, z: 27.273102}
+  - worldCenter: {x: -42.478363, y: 0, z: 609.7907}
+    size: {x: 58.636806, y: 0, z: 85.16412}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 410.04907, y: 0, z: 342.64575}
-    - {x: 465.24017, y: 0, z: 348.07385}
-    - {x: 422.3378, y: 0, z: 369.75644}
-    - {x: 374.31168, y: 0, z: 369.91885}
-    area: 1366.793
+    - {x: -65.84591, y: 0, z: 606.1773}
+    - {x: -7.209101, y: 0, z: 573.31604}
+    - {x: -31.74323, y: 0, z: 601.1893}
+    - {x: -65.11521, y: 0, z: 658.48016}
+    area: 1307.7434
     hasPizzaria: 0
-  - worldCenter: {x: 289.31223, y: 0, z: 546.85596}
-    size: {x: 107.913574, y: 0, z: 5.3519287}
+  - worldCenter: {x: -39.01529, y: 0, z: 760.0283}
+    size: {x: 208.61893, y: 0, z: 271.3449}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 240.00513, y: 0, z: 545.71295}
-    - {x: 280.01282, y: 0, z: 544.7515}
-    - {x: 347.9187, y: 0, z: 550.10345}
-    area: 139.69872
+    - {x: -70.55575, y: 0, z: 611.32776}
+    - {x: -65.90959, y: 0, z: 669.67975}
+    - {x: -20.093653, y: 0, z: 708.4411}
+    - {x: 66.13823, y: 0, z: 780.947}
+    - {x: 69.98569, y: 0, z: 855.751}
+    - {x: -1.2656927, y: 0, z: 882.67267}
+    - {x: -48.965214, y: 0, z: 882.57434}
+    - {x: -46.45744, y: 0, z: 848.5878}
+    - {x: -8.821779, y: 0, z: 793.4832}
+    - {x: -98.378944, y: 0, z: 732.6655}
+    - {x: -138.63324, y: 0, z: 698.1625}
+    - {x: -105.226074, y: 0, z: 656.04706}
+    area: 21598.568
     hasPizzaria: 0
-  - worldCenter: {x: 350.86508, y: 0, z: 612.85803}
-    size: {x: 230.65364, y: 0, z: 120.62744}
+  - worldCenter: {x: 289.8392, y: 0, z: 522.0688}
+    size: {x: 118.79263, y: 0, z: 18.994324}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 239.20544, y: 0, z: 548.60944}
-    - {x: 353.61786, y: 0, z: 556.4544}
-    - {x: 468.25635, y: 0, z: 542.54016}
-    - {x: 463.33618, y: 0, z: 657.17365}
-    - {x: 402.48782, y: 0, z: 660.1828}
-    - {x: 291.5493, y: 0, z: 661.8783}
-    - {x: 237.6027, y: 0, z: 663.1676}
-    area: 24924.365
+    - {x: 238.80212, y: 0, z: 518.4241}
+    - {x: 299.5231, y: 0, z: 519.03876}
+    - {x: 357.59476, y: 0, z: 515.909}
+    - {x: 263.43686, y: 0, z: 534.9033}
+    area: 896.9169
     hasPizzaria: 0
-  - worldCenter: {x: 33.863327, y: 0, z: 498.61047}
-    size: {x: 37.276165, y: 0, z: 53.19467}
+  - worldCenter: {x: 462.99506, y: 0, z: 603.8726}
+    size: {x: 317.61978, y: 0, z: 352.03177}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 25.009016, y: 0, z: 480.82193}
-    - {x: 56.928566, y: 0, z: 480.9929}
-    - {x: 19.652401, y: 0, z: 534.0166}
-    area: 849.4335
+    - {x: 274.12735, y: 0, z: 444.6813}
+    - {x: 344.38885, y: 0, z: 443.14352}
+    - {x: 388.07196, y: 0, z: 439.56082}
+    - {x: 414.9776, y: 0, z: 458.06924}
+    - {x: 501.44064, y: 0, z: 535.51227}
+    - {x: 551.7815, y: 0, z: 573.33527}
+    - {x: 580.6791, y: 0, z: 589.54865}
+    - {x: 512.89355, y: 0, z: 680.90125}
+    - {x: 561.7347, y: 0, z: 673.7929}
+    - {x: 584.6683, y: 0, z: 647.4441}
+    - {x: 591.74713, y: 0, z: 787.91797}
+    - {x: 533.491, y: 0, z: 791.5926}
+    - {x: 417.12366, y: 0, z: 787.4128}
+    - {x: 419.506, y: 0, z: 696.99664}
+    - {x: 457.3911, y: 0, z: 642.7956}
+    - {x: 414.30267, y: 0, z: 605.8639}
+    - {x: 417.53348, y: 0, z: 551.7804}
+    - {x: 368.0515, y: 0, z: 519.35785}
+    area: 47073.008
     hasPizzaria: 0
-  - worldCenter: {x: 473.74298, y: 0, z: 443.1945}
-    size: {x: 196.78781, y: 0, z: 134.97784}
+  - worldCenter: {x: 303.6785, y: 0, z: 478.12292}
+    size: {x: 84.94348, y: 0, z: 66.91919}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 373.50064, y: 0, z: 374.8952}
-    - {x: 427.9871, y: 0, z: 380.21634}
-    - {x: 428.07516, y: 0, z: 409.5216}
-    - {x: 495.7969, y: 0, z: 412.48294}
-    - {x: 557.9104, y: 0, z: 412.00885}
-    - {x: 551.4332, y: 0, z: 449.15775}
-    - {x: 570.28845, y: 0, z: 509.87305}
-    - {x: 531.288, y: 0, z: 506.65186}
-    - {x: 421.31485, y: 0, z: 488.38608}
-    - {x: 379.83478, y: 0, z: 488.7512}
-    area: 17238.59
+    - {x: 273.5136, y: 0, z: 445.30957}
+    - {x: 358.4571, y: 0, z: 512.22876}
+    - {x: 279.0648, y: 0, z: 476.83047}
+    area: 1153
     hasPizzaria: 0
-  - worldCenter: {x: 404.9525, y: 0, z: 519.5247}
-    size: {x: 108.684814, y: 0, z: 51.869263}
+  - worldCenter: {x: -34.63474, y: 0, z: 655.3941}
+    size: {x: 41.796013, y: 0, z: 93.55261}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 358.9801, y: 0, z: 547.2561}
-    - {x: 378.91492, y: 0, z: 495.38684}
-    - {x: 414.25012, y: 0, z: 497.7576}
-    - {x: 467.66492, y: 0, z: 537.6984}
-    area: 3365.779
+    - {x: -61.776432, y: 0, z: 662.5899}
+    - {x: -27.641096, y: 0, z: 603.58075}
+    - {x: -29.141005, y: 0, z: 658.2724}
+    - {x: -19.980417, y: 0, z: 697.13336}
+    area: 1543.1005
     hasPizzaria: 0
-  - worldCenter: {x: 292.09784, y: 0, z: 747.4452}
-    size: {x: 109.70381, y: 0, z: 183.44824}
+  - worldCenter: {x: -278.7406, y: 0, z: 757.7352}
+    size: {x: 95.5854, y: 0, z: 193.49316}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 235.65524, y: 0, z: 670.44696}
-    - {x: 287.27026, y: 0, z: 671.6868}
-    - {x: 344.50458, y: 0, z: 682.0333}
-    - {x: 342.44574, y: 0, z: 752.2005}
-    - {x: 339.44394, y: 0, z: 806.7248}
-    - {x: 342.57037, y: 0, z: 853.8952}
-    - {x: 259.54736, y: 0, z: 825.96405}
-    - {x: 265.4262, y: 0, z: 767.1986}
-    - {x: 269.3139, y: 0, z: 721.5799}
-    - {x: 234.80077, y: 0, z: 722.7214}
-    area: 14328.568
+    - {x: -271.36942, y: 0, z: 665.031}
+    - {x: -223.26628, y: 0, z: 701.49066}
+    - {x: -229.1807, y: 0, z: 764.44293}
+    - {x: -290.04483, y: 0, z: 858.5242}
+    - {x: -286.37857, y: 0, z: 812.35895}
+    - {x: -318.85168, y: 0, z: 815.99146}
+    - {x: -317.70688, y: 0, z: 744.13763}
+    - {x: -293.1265, y: 0, z: 699.9055}
+    area: 10745.077
     hasPizzaria: 0
-  - worldCenter: {x: 54.358055, y: 0, z: 517.786}
-    size: {x: 58.84661, y: 0, z: 53.227753}
+  - worldCenter: {x: 45.829945, y: 0, z: 717.0857}
+    size: {x: 92.84761, y: 0, z: 95.89526}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 60.767265, y: 0, z: 483.40787}
-    - {x: 81.53662, y: 0, z: 516.3284}
-    - {x: 52.438313, y: 0, z: 534.77203}
-    - {x: 22.69001, y: 0, z: 536.6356}
-    area: 1426.7343
+    - {x: 44.94773, y: 0, z: 680.6374}
+    - {x: 80.69051, y: 0, z: 707.1345}
+    - {x: 69.838615, y: 0, z: 776.53265}
+    - {x: -12.157093, y: 0, z: 704.03815}
+    area: 4413.2876
     hasPizzaria: 0
-  - worldCenter: {x: 28.024744, y: 0, z: 553.23425}
-    size: {x: 29.629353, y: 0, z: 28.645203}
+  - worldCenter: {x: 385.28598, y: 0, z: 621.1102}
+    size: {x: 114.76868, y: 0, z: 229.086}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 21.181015, y: 0, z: 544.3304}
-    - {x: 46.261284, y: 0, z: 543.3636}
-    - {x: 16.631931, y: 0, z: 572.0088}
-    area: 344.892
+    - {x: 364.77438, y: 0, z: 521.2459}
+    - {x: 411.42844, y: 0, z: 552.8582}
+    - {x: 403.25327, y: 0, z: 609.32764}
+    - {x: 450.9268, y: 0, z: 646.5498}
+    - {x: 414.7805, y: 0, z: 696.8386}
+    - {x: 372.41916, y: 0, z: 750.3319}
+    - {x: 374.8264, y: 0, z: 631.9322}
+    - {x: 339.00668, y: 0, z: 613.21606}
+    - {x: 336.1581, y: 0, z: 567.69226}
+    area: 11428.109
     hasPizzaria: 0
-  - worldCenter: {x: 653.6623, y: 0, z: 351.98413}
-    size: {x: 107.568054, y: 0, z: 11.430328}
+  - worldCenter: {x: 83.43182, y: 0, z: 818.00684}
+    size: {x: 26.490715, y: 0, z: 66.07373}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 597.09686, y: 0, z: 349.16904}
-    - {x: 659.2251, y: 0, z: 347.67654}
-    - {x: 704.6649, y: 0, z: 359.10687}
-    area: 388.97992
+    - {x: 73.98203, y: 0, z: 787.7921}
+    - {x: 100.47275, y: 0, z: 812.36255}
+    - {x: 75.84069, y: 0, z: 853.86584}
+    area: 852.33765
     hasPizzaria: 0
-  - worldCenter: {x: 491.94403, y: 0, z: 520.2471}
-    size: {x: 115.840485, y: 0, z: 44.380615}
+  - worldCenter: {x: -77.59986, y: 0, z: 861.4026}
+    size: {x: 117.762856, y: 0, z: 200.92041}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 477.69476, y: 0, z: 535.2625}
-    - {x: 422.39322, y: 0, z: 494.4463}
-    - {x: 529.4545, y: 0, z: 512.45276}
-    - {x: 538.2337, y: 0, z: 538.8269}
-    area: 2469.714
+    - {x: -102.65619, y: 0, z: 736.04364}
+    - {x: -9.305559, y: 0, z: 801.9158}
+    - {x: -52.785725, y: 0, z: 856.01166}
+    - {x: -53.819603, y: 0, z: 884.44}
+    - {x: -84.89596, y: 0, z: 934.4687}
+    - {x: -127.06841, y: 0, z: 936.96405}
+    - {x: -95.50301, y: 0, z: 888.45264}
+    - {x: -94.764404, y: 0, z: 852.92444}
+    area: 9699.229
     hasPizzaria: 0
-  - worldCenter: {x: 542.3458, y: 0, z: 617.93726}
-    size: {x: 133.4408, y: 0, z: 115.05463}
+  - worldCenter: {x: -199.60199, y: 0, z: 802.39545}
+    size: {x: 55.943268, y: 0, z: 60.842957}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 477.37036, y: 0, z: 543.95496}
-    - {x: 543.7193, y: 0, z: 547.00104}
-    - {x: 541.53156, y: 0, z: 614.61127}
-    - {x: 607.5829, y: 0, z: 614.8863}
-    - {x: 607.44006, y: 0, z: 654.86127}
-    - {x: 574.0933, y: 0, z: 652.75586}
-    - {x: 512.8871, y: 0, z: 659.0096}
-    - {x: 474.1421, y: 0, z: 656.41724}
-    area: 10056.512
+    - {x: -220.03073, y: 0, z: 770.32324}
+    - {x: -164.08746, y: 0, z: 805.6969}
+    - {x: -214.68776, y: 0, z: 831.1662}
+    area: 1607.3813
     hasPizzaria: 0
-  - worldCenter: {x: 551.9702, y: 0, z: 521.72284}
-    size: {x: 29.261108, y: 0, z: 21.001465}
+  - worldCenter: {x: -244.76245, y: 0, z: 821.6486}
+    size: {x: 63.498962, y: 0, z: 89.57068}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 546.0396, y: 0, z: 535.42535}
-    - {x: 540.305, y: 0, z: 514.4239}
-    - {x: 569.5661, y: 0, z: 515.3192}
-    area: 304.69513
+    - {x: -225.27817, y: 0, z: 770.8922}
+    - {x: -222.7551, y: 0, z: 833.5907}
+    - {x: -286.25406, y: 0, z: 860.4629}
+    area: 2024.5486
     hasPizzaria: 0
-  - worldCenter: {x: 534.87836, y: 0, z: 719.781}
-    size: {x: 76.09799, y: 0, z: 115.83618}
+  - worldCenter: {x: 308.0965, y: 0, z: 736.5366}
+    size: {x: 181.95456, y: 0, z: 220.5697}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 511.87515, y: 0, z: 669.3459}
-    - {x: 574.7084, y: 0, z: 662.1435}
-    - {x: 554.31946, y: 0, z: 769.65485}
-    - {x: 498.61038, y: 0, z: 777.9797}
-    area: 6274.955
+    - {x: 331.90982, y: 0, z: 618.1158}
+    - {x: 367.54764, y: 0, z: 641.39996}
+    - {x: 366.09692, y: 0, z: 754.534}
+    - {x: 374.15854, y: 0, z: 819.6656}
+    - {x: 290.00516, y: 0, z: 838.6855}
+    - {x: 192.20398, y: 0, z: 779.8864}
+    - {x: 245.17772, y: 0, z: 767.5162}
+    - {x: 290.9806, y: 0, z: 761.8686}
+    - {x: 336.20752, y: 0, z: 709.7944}
+    - {x: 286.67676, y: 0, z: 673.89984}
+    area: 16907.559
     hasPizzaria: 0
-  - worldCenter: {x: 573.042, y: 0, z: 424.77316}
-    size: {x: 31.3219, y: 0, z: 29.627838}
+  - worldCenter: {x: 108.16513, y: 0, z: 892.9244}
+    size: {x: 197.7988, y: 0, z: 71.39862}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 566.8327, y: 0, z: 414.96292}
-    - {x: 591.80756, y: 0, z: 414.86435}
-    - {x: 560.48566, y: 0, z: 444.4922}
-    area: 368.4351
+    - {x: 78.78183, y: 0, z: 863.90735}
+    - {x: 130.60742, y: 0, z: 859.5927}
+    - {x: 162.16737, y: 0, z: 876.5649}
+    - {x: 204.29099, y: 0, z: 873.5171}
+    - {x: 167.45001, y: 0, z: 930.99133}
+    - {x: 76.183235, y: 0, z: 923.62683}
+    - {x: 39.347946, y: 0, z: 926.5507}
+    - {x: 6.492187, y: 0, z: 888.64417}
+    area: 9505.368
     hasPizzaria: 0
-  - worldCenter: {x: 635.3651, y: 0, z: 798.3692}
-    size: {x: 167.87372, y: 0, z: 261.62683}
+  - worldCenter: {x: -328.40546, y: 0, z: 901.1135}
+    size: {x: 65.57999, y: 0, z: 85.931274}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 580.35016, y: 0, z: 662.7753}
-    - {x: 613.5875, y: 0, z: 663.7618}
-    - {x: 728.86206, y: 0, z: 670.4197}
-    - {x: 721.4103, y: 0, z: 786.3361}
-    - {x: 717.73083, y: 0, z: 900.6732}
-    - {x: 643.25934, y: 0, z: 924.40216}
-    - {x: 606.22754, y: 0, z: 919.1983}
-    - {x: 618.9888, y: 0, z: 837.5971}
-    - {x: 560.98834, y: 0, z: 841.547}
-    - {x: 562.2459, y: 0, z: 776.98083}
-    area: 35116.945
+    - {x: -294.9909, y: 0, z: 868.6855}
+    - {x: -360.5709, y: 0, z: 954.61676}
+    - {x: -328.30615, y: 0, z: 900.8999}
+    - {x: -329.7539, y: 0, z: 880.25183}
+    area: 742.369
     hasPizzaria: 0
-  - worldCenter: {x: 544.1645, y: 0, z: 846.45123}
-    size: {x: 120.039215, y: 0, z: 139.10529}
+  - worldCenter: {x: -303.3525, y: 0, z: 851.50214}
+    size: {x: 35.78665, y: 0, z: 46.758606}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 499.12424, y: 0, z: 787.80286}
-    - {x: 555.50446, y: 0, z: 781.1598}
-    - {x: 549.8433, y: 0, z: 845.3515}
-    - {x: 610.7019, y: 0, z: 843.3858}
-    - {x: 601.19226, y: 0, z: 920.2651}
-    - {x: 490.6627, y: 0, z: 901.04285}
-    - {x: 502.12274, y: 0, z: 846.1507}
-    area: 10465.918
+    - {x: -294.9187, y: 0, z: 860.2178}
+    - {x: -325.46274, y: 0, z: 870.52356}
+    - {x: -289.6761, y: 0, z: 823.76495}
+    area: 529.69666
     hasPizzaria: 0
-  - worldCenter: {x: 925.3743, y: 0, z: 634.20935}
-    size: {x: 199.24066, y: 0, z: 120.572266}
+  - worldCenter: {x: 205.54842, y: 0, z: 759.72577}
+    size: {x: 43.560593, y: 0, z: 44.114502}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 848.14606, y: 0, z: 564.3108}
-    - {x: 883.498, y: 0, z: 570.98883}
-    - {x: 995.47156, y: 0, z: 575.5122}
-    - {x: 991.7698, y: 0, z: 635.12244}
-    - {x: 1037.1987, y: 0, z: 636.4367}
-    - {x: 991.66144, y: 0, z: 684.88306}
-    - {x: 945.17993, y: 0, z: 680.03754}
-    - {x: 880.08044, y: 0, z: 683.34906}
-    - {x: 837.95807, y: 0, z: 680.71497}
-    - {x: 842.7781, y: 0, z: 630.7376}
-    area: 17646.566
+    - {x: 192.14058, y: 0, z: 733.2995}
+    - {x: 234.03265, y: 0, z: 768.4638}
+    - {x: 190.47206, y: 0, z: 777.414}
+    area: 953.36176
     hasPizzaria: 0
-  - worldCenter: {x: 1060.3683, y: 0, z: 620.65424}
-    size: {x: 108.210205, y: 0, z: 90.33728}
+  - worldCenter: {x: 402.2062, y: 0, z: 750.2876}
+    size: {x: 37.40143, y: 0, z: 79.397766}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 1004.69165, y: 0, z: 575.45886}
-    - {x: 1057.0022, y: 0, z: 579.24115}
-    - {x: 1111.8314, y: 0, z: 580.8303}
-    - {x: 1106.2888, y: 0, z: 633.5884}
-    - {x: 1106.8556, y: 0, z: 663.9867}
-    - {x: 1045.0355, y: 0, z: 665.79614}
-    - {x: 1047.6199, y: 0, z: 632.48315}
-    - {x: 1003.6212, y: 0, z: 633.84924}
-    area: 7630.604
+    - {x: 377.7243, y: 0, z: 755.18036}
+    - {x: 415.12573, y: 0, z: 708.1423}
+    - {x: 413.76865, y: 0, z: 787.54004}
+    area: 1452.884
     hasPizzaria: 0
-  - worldCenter: {x: 709.2969, y: 0, z: 962.9361}
-    size: {x: 119.48358, y: 0, z: 122.28992}
+  - worldCenter: {x: 438.73828, y: 0, z: 813.7571}
+    size: {x: 153.33078, y: 0, z: 97.255005}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 720.20306, y: 0, z: 911.18054}
-    - {x: 766.367, y: 0, z: 910.57166}
-    - {x: 765.55176, y: 0, z: 961.3878}
-    - {x: 761.5331, y: 0, z: 1032.8616}
-    - {x: 688.3516, y: 0, z: 1029.0098}
-    - {x: 690.49, y: 0, z: 975.31195}
-    - {x: 646.8834, y: 0, z: 971.19244}
-    - {x: 649.0314, y: 0, z: 933.0543}
-    - {x: 695.2614, y: 0, z: 941.8543}
-    area: 9970.57
+    - {x: 376.35318, y: 0, z: 760.2454}
+    - {x: 420.05972, y: 0, z: 797.317}
+    - {x: 529.68396, y: 0, z: 798.2189}
+    - {x: 495.93192, y: 0, z: 845.9315}
+    - {x: 426.59808, y: 0, z: 857.5004}
+    - {x: 383.80267, y: 0, z: 823.329}
+    area: 7171.229
     hasPizzaria: 0
-  - worldCenter: {x: 685.0468, y: 0, z: 923.0246}
-    size: {x: 66.618286, y: 0, z: 23.316528}
+  - worldCenter: {x: -98.295944, y: 0, z: 980.2475}
+    size: {x: 75.500565, y: 0, z: 110.2088}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 716.2098, y: 0, z: 908.12244}
-    - {x: 689.33905, y: 0, z: 931.43896}
-    - {x: 649.5915, y: 0, z: 929.51245}
-    area: 489.2657
+    - {x: -126.41727, y: 0, z: 946.4684}
+    - {x: -87.345764, y: 0, z: 946.14886}
+    - {x: -51.96009, y: 0, z: 972.0152}
+    - {x: -127.460655, y: 0, z: 1056.3577}
+    area: 4615.3228
     hasPizzaria: 0
-  - worldCenter: {x: 411.60162, y: 0, z: 1013.2069}
-    size: {x: 64.62259, y: 0, z: 53.583496}
+  - worldCenter: {x: -25.231447, y: 0, z: 912.6184}
+    size: {x: 108.30521, y: 0, z: 45.416138}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 380.20465, y: 0, z: 992.0382}
-    - {x: 411.3801, y: 0, z: 998.2723}
-    - {x: 438.00195, y: 0, z: 996.5931}
-    - {x: 444.82724, y: 0, z: 1045.6217}
-    - {x: 383.59418, y: 0, z: 1033.5093}
-    area: 2541.3423
+    - {x: -45.101162, y: 0, z: 892.6855}
+    - {x: -3.9470787, y: 0, z: 892.4393}
+    - {x: 28.21383, y: 0, z: 927.49347}
+    - {x: -80.09138, y: 0, z: 937.8554}
+    area: 2990.0554
     hasPizzaria: 0
-  - worldCenter: {x: 939.88837, y: 0, z: 714.5117}
-    size: {x: 111.418335, y: 0, z: 50.780945}
+  - worldCenter: {x: 367.1863, y: 0, z: 895.62897}
+    size: {x: 128.86124, y: 0, z: 159.96619}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 881.5386, y: 0, z: 690.0426}
-    - {x: 946.1253, y: 0, z: 691.3655}
-    - {x: 990.99304, y: 0, z: 691.0346}
-    - {x: 992.2502, y: 0, z: 733.5562}
-    - {x: 947.5909, y: 0, z: 740.24774}
-    - {x: 880.83185, y: 0, z: 740.82355}
-    area: 5322.9834
+    - {x: 293.97668, y: 0, z: 847.87354}
+    - {x: 376.97623, y: 0, z: 830.29193}
+    - {x: 419.84598, y: 0, z: 866.21387}
+    - {x: 422.83792, y: 0, z: 912.5083}
+    - {x: 352.8741, y: 0, z: 990.2581}
+    - {x: 351.56833, y: 0, z: 931.856}
+    - {x: 352.2252, y: 0, z: 890.4008}
+    area: 9176.007
     hasPizzaria: 0
-  - worldCenter: {x: 830.51953, y: 0, z: 939.4369}
-    size: {x: 109.82941, y: 0, z: 50.076965}
+  - worldCenter: {x: 285.78262, y: 0, z: 893.4733}
+    size: {x: 128.33614, y: 0, z: 83.42297}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 776.0809, y: 0, z: 909.4448}
-    - {x: 882.9069, y: 0, z: 929.5972}
-    - {x: 885.9103, y: 0, z: 959.5218}
-    - {x: 777.1802, y: 0, z: 959.1839}
-    area: 4271.987
+    - {x: 288.51834, y: 0, z: 850.5767}
+    - {x: 340.58057, y: 0, z: 888.95087}
+    - {x: 344.28235, y: 0, z: 933.9997}
+    - {x: 277.85526, y: 0, z: 914.248}
+    - {x: 247.51317, y: 0, z: 899.0758}
+    - {x: 215.94621, y: 0, z: 873.9887}
+    area: 5648.395
     hasPizzaria: 0
-  - worldCenter: {x: 408.14017, y: 0, z: 1138.7194}
-    size: {x: 66.082275, y: 0, z: 186.71143}
+  - worldCenter: {x: 564.0544, y: 0, z: 649.4568}
+    size: {x: 63.63739, y: 0, z: 87.92755}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 380.47873, y: 0, z: 1042.9023}
-    - {x: 446.561, y: 0, z: 1055.3135}
-    - {x: 438.2304, y: 0, z: 1165.6929}
-    - {x: 415.23337, y: 0, z: 1229.6138}
-    - {x: 383.69162, y: 0, z: 1224.3497}
-    - {x: 384.64594, y: 0, z: 1114.4445}
-    area: 9546.45
+    - {x: 584.6394, y: 0, z: 594.4756}
+    - {x: 584.322, y: 0, z: 649.6776}
+    - {x: 566.25415, y: 0, z: 671.27094}
+    - {x: 521.002, y: 0, z: 682.40314}
+    area: 2130.5088
     hasPizzaria: 0
-  - worldCenter: {x: 470.60934, y: 0, z: 1011.2829}
-    size: {x: 108.56656, y: 0, z: 55.464844}
+  - worldCenter: {x: -22.052448, y: 0, z: 951.956}
+    size: {x: 108.050766, y: 0, z: 35.952393}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 417.05197, y: 0, z: 994.0628}
-    - {x: 525.6185, y: 0, z: 989.1278}
-    - {x: 505.66937, y: 0, z: 1044.5001}
-    - {x: 451.9373, y: 0, z: 1044.5927}
-    - {x: 475.14603, y: 0, z: 998.67566}
-    - {x: 448.23294, y: 0, z: 996.7376}
-    area: 2934.2136
+    - {x: -79.61675, y: 0, z: 941.5778}
+    - {x: 28.43401, y: 0, z: 931.5263}
+    - {x: 4.2368684, y: 0, z: 967.2412}
+    - {x: -41.263924, y: 0, z: 967.4787}
+    area: 2401.7092
     hasPizzaria: 0
-  - worldCenter: {x: 1026.3798, y: 0, z: 665.3671}
-    size: {x: 39.08722, y: 0, z: 43.129272}
+  - worldCenter: {x: -305.80127, y: 0, z: 1074.2263}
+    size: {x: 83.63403, y: 0, z: 110.47876}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 1040.3518, y: 0, z: 641.8206}
-    - {x: 1037.5226, y: 0, z: 669.33075}
-    - {x: 1001.2646, y: 0, z: 684.9499}
-    area: 476.63467
+    - {x: -339.81223, y: 0, z: 1043.6638}
+    - {x: -289.4481, y: 0, z: 1050.2719}
+    - {x: -256.1782, y: 0, z: 1048.827}
+    - {x: -337.76663, y: 0, z: 1154.1426}
+    area: 4468.3164
     hasPizzaria: 0
-  - worldCenter: {x: 833.9445, y: 0, z: 1020.2749}
-    size: {x: 120.62579, y: 0, z: 106.29108}
+  - worldCenter: {x: 539.5285, y: 0, z: 836.9495}
+    size: {x: 110.213196, y: 0, z: 82.35687}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 775.8785, y: 0, z: 965.4141}
-    - {x: 887.35785, y: 0, z: 965.86237}
-    - {x: 888.68054, y: 0, z: 1018.34937}
-    - {x: 891.5952, y: 0, z: 1049.9038}
-    - {x: 809.86255, y: 0, z: 1071.7052}
-    - {x: 813.26764, y: 0, z: 1034.4626}
-    - {x: 770.9694, y: 0, z: 1036.2269}
-    area: 10021.569
+    - {x: 536.16156, y: 0, z: 803.1838}
+    - {x: 590.4633, y: 0, z: 796.5357}
+    - {x: 583.86914, y: 0, z: 859.13354}
+    - {x: 480.25012, y: 0, z: 878.8926}
+    - {x: 506.89844, y: 0, z: 847.0018}
+    area: 4930.48
     hasPizzaria: 0
-  - worldCenter: {x: 456.6105, y: 0, z: 1013.17816}
-    size: {x: 26.276886, y: 0, z: 46.82672}
+  - worldCenter: {x: 266.52026, y: 0, z: 936.0859}
+    size: {x: 57.85112, y: 0, z: 64.70441}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 450.23557, y: 0, z: 1043.9777}
-    - {x: 446.65952, y: 0, z: 998.4059}
-    - {x: 472.9364, y: 0, z: 997.15094}
-    area: 600.99774
+    - {x: 245.0801, y: 0, z: 904.7775}
+    - {x: 272.81302, y: 0, z: 925.0913}
+    - {x: 302.9312, y: 0, z: 944.9927}
+    - {x: 245.25677, y: 0, z: 969.48193}
+    area: 1838.1229
     hasPizzaria: 0
-  - worldCenter: {x: 539.09564, y: 0, z: 1019.48895}
-    size: {x: 45.304382, y: 0, z: 60.811035}
+  - worldCenter: {x: 119.80813, y: 0, z: 957.0873}
+    size: {x: 93.85002, y: 0, z: 53.964844}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 532.6194, y: 0, z: 992.7751}
-    - {x: 559.52875, y: 0, z: 989.9944}
-    - {x: 550.0101, y: 0, z: 1050.8054}
-    - {x: 514.22437, y: 0, z: 1044.3809}
-    area: 1787.4109
+    - {x: 166.94902, y: 0, z: 936.5565}
+    - {x: 164.11551, y: 0, z: 984.9116}
+    - {x: 73.099, y: 0, z: 976.7265}
+    - {x: 76.981895, y: 0, z: 930.9468}
+    - {x: 117.89521, y: 0, z: 956.2954}
+    area: 3256.8574
     hasPizzaria: 0
-  - worldCenter: {x: 983.63934, y: 0, z: 785.1713}
-    size: {x: 97.684814, y: 0, z: 111.66461}
+  - worldCenter: {x: 119.65473, y: 0, z: 937.43896}
+    size: {x: 88.78921, y: 0, z: 19.27295}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 953.1591, y: 0, z: 750.53687}
-    - {x: 996.2159, y: 0, z: 741.3954}
-    - {x: 1025.5792, y: 0, z: 742.5691}
-    - {x: 1037.3706, y: 0, z: 853.06}
-    - {x: 939.6858, y: 0, z: 826.92957}
-    - {x: 986.00305, y: 0, z: 787.81384}
-    - {x: 947.46185, y: 0, z: 793.89417}
-    area: 7427.1436
+    - {x: 166.50824, y: 0, z: 934.7426}
+    - {x: 114.73692, y: 0, z: 948.42365}
+    - {x: 77.71903, y: 0, z: 929.1507}
+    area: 752.1188
     hasPizzaria: 0
-  - worldCenter: {x: 450.05762, y: 0, z: 1203.4756}
-    size: {x: 57.42758, y: 0, z: 55.957764}
+  - worldCenter: {x: 84.06802, y: 0, z: 1020.3708}
+    size: {x: 138.59743, y: 0, z: 185.05945}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 444.00876, y: 0, z: 1175.5502}
-    - {x: 477.5205, y: 0, z: 1179.0715}
-    - {x: 458.60825, y: 0, z: 1227.773}
-    - {x: 420.09293, y: 0, z: 1231.5079}
-    area: 1882.283
+    - {x: 36.861324, y: 0, z: 934.4568}
+    - {x: 72.66288, y: 0, z: 933.7484}
+    - {x: 69.84707, y: 0, z: 984.71075}
+    - {x: 153.0668, y: 0, z: 1054.8835}
+    - {x: 128.7946, y: 0, z: 1118.8079}
+    - {x: 100.037766, y: 0, z: 1118.8033}
+    - {x: 96.804405, y: 0, z: 1044.0673}
+    - {x: 14.469373, y: 0, z: 973.4884}
+    area: 8137.9995
     hasPizzaria: 0
-  - worldCenter: {x: 525.5678, y: 0, z: 1065.7137}
-    size: {x: 32.24597, y: 0, z: 32.59778}
+  - worldCenter: {x: 296.47504, y: 0, z: 953.4828}
+    size: {x: 95.86168, y: 0, z: 56.544067}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 514.0483, y: 0, z: 1053.0807}
-    - {x: 546.29425, y: 0, z: 1058.382}
-    - {x: 516.36096, y: 0, z: 1085.6785}
-    area: 519.45764
+    - {x: 343.49344, y: 0, z: 939.1214}
+    - {x: 308.6831, y: 0, z: 981.4569}
+    - {x: 247.63176, y: 0, z: 972.37463}
+    - {x: 303.51318, y: 0, z: 949.5478}
+    - {x: 279.05374, y: 0, z: 924.91284}
+    area: 2235.3474
     hasPizzaria: 0
-  - worldCenter: {x: 956.6753, y: 0, z: 806.62506}
-    size: {x: 45.380554, y: 0, z: 31.942505}
+  - worldCenter: {x: 296.8037, y: 0, z: 1002.5977}
+    size: {x: 88.643845, y: 0, z: 61.966858}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 946.3709, y: 0, z: 798.9769}
-    - {x: 984.5177, y: 0, z: 794.47797}
-    - {x: 939.13715, y: 0, z: 826.4205}
-    area: 507.1343
+    - {x: 247.43465, y: 0, z: 977.16864}
+    - {x: 306.89798, y: 0, z: 991.4891}
+    - {x: 336.0785, y: 0, z: 1039.1355}
+    area: 1207.672
     hasPizzaria: 0
-  - worldCenter: {x: 910.7163, y: 0, z: 1031.2821}
-    size: {x: 33.561707, y: 0, z: 25.514832}
+  - worldCenter: {x: 534.35693, y: 0, z: 882.5809}
+    size: {x: 102.256714, y: 0, z: 34.14209}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 899.2502, y: 0, z: 1021.9559}
-    - {x: 932.8119, y: 0, z: 1024.4197}
-    - {x: 900.0869, y: 0, z: 1047.4707}
-    area: 427.13922
+    - {x: 583.62744, y: 0, z: 864.00146}
+    - {x: 561.6353, y: 0, z: 885.733}
+    - {x: 510.79416, y: 0, z: 898.14355}
+    - {x: 481.37073, y: 0, z: 882.44556}
+    area: 1489.9038
     hasPizzaria: 0
-  - worldCenter: {x: 438.57837, y: 0, z: 1266.6749}
-    size: {x: 60.684998, y: 0, z: 58.407837}
+  - worldCenter: {x: 342.28967, y: 0, z: 1084.5879}
+    size: {x: 73.26694, y: 0, z: 59.021606}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 419.29504, y: 0, z: 1240.3998}
-    - {x: 457.22504, y: 0, z: 1238.4338}
-    - {x: 469.23914, y: 0, z: 1291.0247}
-    - {x: 408.55414, y: 0, z: 1296.8417}
-    area: 2690.544
+    - {x: 340.76093, y: 0, z: 1049.3197}
+    - {x: 371.4675, y: 0, z: 1076.0176}
+    - {x: 358.7297, y: 0, z: 1108.3413}
+    - {x: 298.20056, y: 0, z: 1104.673}
+    area: 2419.6045
     hasPizzaria: 0
-  - worldCenter: {x: 473.76004, y: 0, z: 1234.5847}
-    size: {x: 14.474335, y: 0, z: 107.81018}
+  - worldCenter: {x: 92.22144, y: 0, z: 1088.7954}
+    size: {x: 20.519562, y: 0, z: 63.706055}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 481.013, y: 0, z: 1180.9926}
-    - {x: 473.72845, y: 0, z: 1288.8027}
-    - {x: 466.53867, y: 0, z: 1233.9587}
-    area: 587.30817
+    - {x: 98.384155, y: 0, z: 1055.2361}
+    - {x: 99.39987, y: 0, z: 1118.9421}
+    - {x: 78.88031, y: 0, z: 1092.208}
+    area: 640.0345
     hasPizzaria: 0
-  - worldCenter: {x: 541.9799, y: 0, z: 1081.3319}
-    size: {x: 36.901245, y: 0, z: 30.645264}
+  - worldCenter: {x: 533.66473, y: 0, z: 908.0112}
+    size: {x: 50.989807, y: 0, z: 42.050476}
     zoneType: 3
     deliveryPointIndices: 
     polygon:
-    - {x: 519.60876, y: 0, z: 1089.2119}
-    - {x: 549.82104, y: 0, z: 1062.0693}
-    - {x: 556.51, y: 0, z: 1092.7146}
-    area: 553.7396
+    - {x: 562.5404, y: 0, z: 889.5547}
+    - {x: 526.9031, y: 0, z: 931.60516}
+    - {x: 511.5506, y: 0, z: 902.87384}
+    area: 834.742
     hasPizzaria: 0
-  pizzariaPosition: {x: 90.453026, y: 4.8222547, z: 110.702866}
-  bancadaPosition: {x: 97.87266, y: 5.8222547, z: 110.702866}
+  pizzariaPosition: {x: 3.522121, y: 7.815212, z: 270.79022}
+  bancadaPosition: {x: 9.83487, y: 8.815212, z: 270.79022}
   pizzariaBlockIndex: 0
   enemySpawnPoints:
-  - position: {x: 17.782932, y: 0, z: 135.03654}
+  - position: {x: -17.149017, y: 0, z: 280.5402}
+    blockIndex: 0
+    zone: 3
+  - position: {x: -30.67982, y: 0, z: 371.07184}
     blockIndex: 1
-    zone: 2
-  - position: {x: 86.73402, y: 0, z: 193.53242}
+    zone: 3
+  - position: {x: -8.330072, y: 0, z: 374.6015}
+    blockIndex: 1
+    zone: 3
+  - position: {x: -41.193554, y: 0, z: 381.06122}
+    blockIndex: 1
+    zone: 3
+  - position: {x: 21.294752, y: 0, z: 369.9575}
     blockIndex: 2
-    zone: 2
-  - position: {x: 134.96696, y: 0, z: 262.58344}
-    blockIndex: 3
     zone: 3
-  - position: {x: 150.22108, y: 0, z: 232.24426}
-    blockIndex: 3
+  - position: {x: 66.03139, y: 0, z: 369.31226}
+    blockIndex: 2
     zone: 3
-  - position: {x: 287.52277, y: 0, z: 272.05026}
+  - position: {x: 27.242393, y: 0, z: 335.2684}
+    blockIndex: 2
+    zone: 3
+  - position: {x: -99.65834, y: 0, z: 437.43073}
+    blockIndex: 4
+    zone: 3
+  - position: {x: 69.23416, y: 0, z: 436.70325}
     blockIndex: 5
     zone: 3
-  - position: {x: 255.01947, y: 0, z: 314.0828}
-    blockIndex: 5
-    zone: 3
-  - position: {x: 225.05449, y: 0, z: 261.64914}
-    blockIndex: 5
-    zone: 3
-  - position: {x: 182.79018, y: 0, z: 283.3333}
-    blockIndex: 6
-    zone: 3
-  - position: {x: 146.79936, y: 0, z: 328.57062}
-    blockIndex: 6
-    zone: 3
-  - position: {x: 26.658978, y: 0, z: 329.76727}
+  - position: {x: -163.65369, y: 0, z: 861.8827}
     blockIndex: 8
     zone: 3
-  - position: {x: 8.394531, y: 0, z: 332.58514}
+  - position: {x: -160.99945, y: 0, z: 616.6821}
     blockIndex: 8
     zone: 3
-  - position: {x: 15.4128, y: 0, z: 324.18735}
+  - position: {x: -272.88864, y: 0, z: 762.21265}
     blockIndex: 8
     zone: 3
-  - position: {x: 354.77997, y: 0, z: 444.02734}
+  - position: {x: 250.37212, y: 0, z: 440.8118}
     blockIndex: 9
     zone: 3
-  - position: {x: 270.9101, y: 0, z: 359.8016}
-    blockIndex: 9
-    zone: 3
-  - position: {x: 277.07162, y: 0, z: 513.22974}
-    blockIndex: 9
-    zone: 3
-  - position: {x: 9.717993, y: 0, z: 405.04224}
+  - position: {x: 139.86247, y: 0, z: 840.6852}
     blockIndex: 11
     zone: 3
-  - position: {x: 10.91143, y: 0, z: 394.01758}
+  - position: {x: 227.39316, y: 0, z: 759.91064}
     blockIndex: 11
     zone: 3
-  - position: {x: 359.02814, y: 0, z: 362.55606}
-    blockIndex: 12
+  - position: {x: 56.625572, y: 0, z: 633.9822}
+    blockIndex: 11
     zone: 3
-  - position: {x: 360.82437, y: 0, z: 363.05197}
-    blockIndex: 12
-    zone: 3
-  - position: {x: 201.61797, y: 0, z: 522.42255}
-    blockIndex: 13
-    zone: 3
-  - position: {x: 72.86122, y: 0, z: 472.04993}
-    blockIndex: 13
-    zone: 3
-  - position: {x: 131.01321, y: 0, z: 437.77054}
-    blockIndex: 13
-    zone: 3
-  - position: {x: 74.59224, y: 0, z: 487.969}
+  - position: {x: -11.276459, y: 0, z: 757.3804}
     blockIndex: 14
     zone: 3
-  - position: {x: 67.566696, y: 0, z: 442.79315}
-    blockIndex: 14
-    zone: 3
-  - position: {x: 69.05742, y: 0, z: 451.3623}
-    blockIndex: 14
-    zone: 3
-  - position: {x: 448.76508, y: 0, z: 353.12802}
+  - position: {x: 327.0505, y: 0, z: 517.0747}
     blockIndex: 15
     zone: 3
-  - position: {x: 445.19888, y: 0, z: 353.23367}
+  - position: {x: 275.78802, y: 0, z: 528.79285}
     blockIndex: 15
     zone: 3
-  - position: {x: 279.75723, y: 0, z: 547.9106}
-    blockIndex: 16
+  - position: {x: 321.02908, y: 0, z: 479.4215}
+    blockIndex: 17
     zone: 3
-  - position: {x: 466.47357, y: 0, z: 452.99496}
+  - position: {x: 323.9514, y: 0, z: 468.4195}
+    blockIndex: 17
+    zone: 3
+  - position: {x: 315.37524, y: 0, z: 459.00726}
+    blockIndex: 17
+    zone: 3
+  - position: {x: -274.08768, y: 0, z: 798.02264}
     blockIndex: 19
     zone: 3
-  - position: {x: 397.22504, y: 0, z: 420.38986}
+  - position: {x: -259.37296, y: 0, z: 718.5974}
     blockIndex: 19
     zone: 3
-  - position: {x: 474.65295, y: 0, z: 422.2059}
+  - position: {x: -315.1117, y: 0, z: 774.04913}
     blockIndex: 19
     zone: 3
-  - position: {x: 62.18216, y: 0, z: 524.2652}
+  - position: {x: 391.08826, y: 0, z: 617.43024}
+    blockIndex: 21
+    zone: 3
+  - position: {x: 79.23039, y: 0, z: 809.00433}
     blockIndex: 22
     zone: 3
-  - position: {x: 35.2089, y: 0, z: 555.0775}
+  - position: {x: -115.55038, y: 0, z: 798.5736}
     blockIndex: 23
     zone: 3
-  - position: {x: 18.98881, y: 0, z: 545.4148}
-    blockIndex: 23
-    zone: 3
-  - position: {x: 643.7329, y: 0, z: 348.5037}
+  - position: {x: -210.27301, y: 0, z: 783.8492}
     blockIndex: 24
     zone: 3
-  - position: {x: 506.56354, y: 0, z: 514.07385}
+  - position: {x: -178.31671, y: 0, z: 813.3788}
+    blockIndex: 24
+    zone: 3
+  - position: {x: -179.51709, y: 0, z: 818.2303}
+    blockIndex: 24
+    zone: 3
+  - position: {x: -259.6533, y: 0, z: 840.54816}
     blockIndex: 25
     zone: 3
-  - position: {x: 486.17294, y: 0, z: 518.1442}
-    blockIndex: 25
-    zone: 3
-  - position: {x: 523.6545, y: 0, z: 628.9537}
+  - position: {x: 323.31436, y: 0, z: 649.8072}
     blockIndex: 26
     zone: 3
-  - position: {x: 543.31146, y: 0, z: 521.47156}
-    blockIndex: 27
-    zone: 3
-  - position: {x: 545.0588, y: 0, z: 524.58325}
-    blockIndex: 27
-    zone: 3
-  - position: {x: 523.01544, y: 0, z: 759.4374}
+  - position: {x: -310.18558, y: 0, z: 905.08746}
     blockIndex: 28
     zone: 3
-  - position: {x: 558.2276, y: 0, z: 673.5583}
-    blockIndex: 28
-    zone: 3
-  - position: {x: 569.0693, y: 0, z: 425.73682}
+  - position: {x: -297.9354, y: 0, z: 850.6945}
     blockIndex: 29
     zone: 3
-  - position: {x: 575.31696, y: 0, z: 435.8215}
-    blockIndex: 29
+  - position: {x: 485.64658, y: 0, z: 812.96606}
+    blockIndex: 32
     zone: 3
-  - position: {x: 638.1245, y: 0, z: 711.88513}
-    blockIndex: 30
+  - position: {x: 452.81558, y: 0, z: 822.17145}
+    blockIndex: 32
     zone: 3
-  - position: {x: 543.39734, y: 0, z: 823.49115}
-    blockIndex: 31
+  - position: {x: -94.5273, y: 0, z: 1015.2069}
+    blockIndex: 33
     zone: 3
-  - position: {x: 664.1684, y: 0, z: 927.2337}
+  - position: {x: -95.73049, y: 0, z: 978.63654}
+    blockIndex: 33
+    zone: 3
+  - position: {x: -102.700096, y: 0, z: 996.9297}
+    blockIndex: 33
+    zone: 3
+  - position: {x: -32.98092, y: 0, z: 895.3225}
+    blockIndex: 34
+    zone: 3
+  - position: {x: -57.11068, y: 0, z: 896.19336}
+    blockIndex: 34
+    zone: 3
+  - position: {x: 412.02402, y: 0, z: 874.8726}
     blockIndex: 35
     zone: 3
-  - position: {x: 423.82608, y: 0, z: 1091.0513}
+  - position: {x: 319.79572, y: 0, z: 864.99384}
+    blockIndex: 35
+    zone: 3
+  - position: {x: 280.74152, y: 0, z: 878.01025}
+    blockIndex: 36
+    zone: 3
+  - position: {x: 549.8055, y: 0, z: 651.766}
+    blockIndex: 37
+    zone: 3
+  - position: {x: -63.41318, y: 0, z: 954.38293}
+    blockIndex: 38
+    zone: 3
+  - position: {x: -11.786611, y: 0, z: 962.301}
+    blockIndex: 38
+    zone: 3
+  - position: {x: -297.7908, y: 0, z: 1050.9429}
     blockIndex: 39
     zone: 3
-  - position: {x: 417.97015, y: 0, z: 1147.9459}
+  - position: {x: -306.7536, y: 0, z: 1039.8353}
     blockIndex: 39
     zone: 3
-  - position: {x: 507.43475, y: 0, z: 1009.57214}
+  - position: {x: 579.4783, y: 0, z: 860.2121}
     blockIndex: 40
     zone: 3
-  - position: {x: 512.4647, y: 0, z: 1031.0946}
-    blockIndex: 40
+  - position: {x: 253.62074, y: 0, z: 951.5773}
+    blockIndex: 41
     zone: 3
-  - position: {x: 470.43103, y: 0, z: 1018.04956}
-    blockIndex: 40
-    zone: 3
-  - position: {x: 447.007, y: 0, z: 1016.12744}
+  - position: {x: 129.81343, y: 0, z: 942.8237}
     blockIndex: 43
     zone: 3
-  - position: {x: 465.56735, y: 0, z: 1020.3567}
-    blockIndex: 43
-    zone: 3
-  - position: {x: 554.2157, y: 0, z: 1012.385}
+  - position: {x: 75.83421, y: 0, z: 984.8759}
     blockIndex: 44
     zone: 3
-  - position: {x: 527.98334, y: 0, z: 1035.6841}
+  - position: {x: 37.182888, y: 0, z: 1026.8063}
     blockIndex: 44
     zone: 3
-  - position: {x: 532.7895, y: 0, z: 1013.488}
+  - position: {x: 129.70895, y: 0, z: 967.5859}
     blockIndex: 44
     zone: 3
-  - position: {x: 972.6151, y: 0, z: 815.81635}
+  - position: {x: 300.92462, y: 0, z: 932.62634}
     blockIndex: 45
     zone: 3
-  - position: {x: 988.4848, y: 0, z: 825.5758}
-    blockIndex: 45
-    zone: 3
-  - position: {x: 955.7096, y: 0, z: 811.9923}
-    blockIndex: 45
-    zone: 3
-  - position: {x: 446.75076, y: 0, z: 1216.4979}
+  - position: {x: 279.12952, y: 0, z: 1010.13837}
     blockIndex: 46
     zone: 3
-  - position: {x: 434.4643, y: 0, z: 1219.3547}
-    blockIndex: 46
-    zone: 3
-  - position: {x: 898.8785, y: 0, z: 1023.2171}
+  - position: {x: 98.74416, y: 0, z: 1104.509}
     blockIndex: 49
     zone: 3
-  - position: {x: 462.5642, y: 0, z: 1273.2719}
+  - position: {x: 97.630936, y: 0, z: 1113.7991}
+    blockIndex: 49
+    zone: 3
+  - position: {x: 545.38824, y: 0, z: 912.93286}
     blockIndex: 50
     zone: 3
-  - position: {x: 468.90012, y: 0, z: 1230.3165}
-    blockIndex: 51
+  - position: {x: 551.4925, y: 0, z: 900.3224}
+    blockIndex: 50
     zone: 3
-  - position: {x: 471.6589, y: 0, z: 1237.1305}
-    blockIndex: 51
-    zone: 3
-  - position: {x: 477.22888, y: 0, z: 1232.0757}
-    blockIndex: 51
+  - position: {x: 553.32007, y: 0, z: 907.49756}
+    blockIndex: 50
     zone: 3
   _gridWidth: 15
   _gridHeight: 12
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 12
-  _deliveryPointCount: 78
+  _deliveryPointCount: 80

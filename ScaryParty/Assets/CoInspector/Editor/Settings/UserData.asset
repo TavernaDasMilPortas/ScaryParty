@@ -163,32 +163,60 @@ MonoBehaviour:
       mostClicked:
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 12
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
+        count: 3
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_23[0]"}'
+        count: 2
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_66[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_64[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_62_10[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
       recentlyClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_23[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
-      - paths: []
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
         count: 1
-        gameObjects: []
-      - paths: []
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_62_10[0]"}'
         count: 1
-        gameObjects: []
-      - paths: []
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_64[0]"}'
         count: 1
-        gameObjects: []
-      - paths: []
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_66[0]"}'
         count: 1
-        gameObjects: []
+        gameObjects:
+        - {fileID: 0}
       - paths: []
         count: 1
         gameObjects: []
@@ -208,7 +236,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 10:15 PM (August 27, 2026)
+    lastSaveTimePrint: 11:26 PM (August 30, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -222,16 +250,16 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 123
+    lastValidTabWidth: 105
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
+    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_23[0]"}'
       paths: []
-      tabWidth: 120
-      name: BorderWall_7
+      tabWidth: 102
+      name: BorderWall_23
       icon: {fileID: 2244882685325231567, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: "SolidCore_Maci\xE7o"
+      shortName: BorderWall_23
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -240,10 +268,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: "SolidCore_Maci\xE7o"
+        m_Text: BorderWall_23
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "SolidCore_Maci\xE7o\u200B"
+        m_TextWithWhitespace: "BorderWall_23\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -311,17 +339,39 @@ MonoBehaviour:
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
+        componentName: boxcollider
+        niceComponentName: box collider
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
         componentName: meshrenderer
         niceComponentName: mesh renderer
       historyPaths:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_7[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_23[0]"}'
         prefab: 0
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
         prefab: 0
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_58_87,83582[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_62_10[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_64[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_66[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_54_100,7137[0]"}'
         prefab: 0
       owner: {fileID: 0}
     closedTabs: []

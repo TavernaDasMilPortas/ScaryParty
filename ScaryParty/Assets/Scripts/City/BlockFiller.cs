@@ -45,6 +45,7 @@ public class BlockFiller : MonoBehaviour
 
         MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
         int buildingCount = 0;
+        List<OBB2D> placedBuildings = new List<OBB2D>();
 
         for (int i = 0; i < n; i++)
         {
@@ -103,11 +104,80 @@ public class BlockFiller : MonoBehaviour
                 float bHeight = GetRandomHeight(block.zoneType, rng);
 
                 float distAlongEdge = currentDistance + (bWidth * 0.5f);
-                Vector3 centerPos = p1 + edgeDir * distAlongEdge + inwardNormal * (bDepth * 0.5f);
+                
+                // Camada 2: Clamp pela distância ao centroide projetada na normal
+                Vector3 edgePoint = p1 + edgeDir * distAlongEdge;
+                float maxSafeDepth = Vector3.Dot(centroid - edgePoint, inwardNormal);
+                maxSafeDepth = Mathf.Max(maxSafeDepth, 0f);
+                maxSafeDepth = Mathf.Max(maxSafeDepth - config.buildingInnerSafetyMargin, config.minBuildingDepth * 0.5f);
+                bDepth = Mathf.Min(bDepth, maxSafeDepth);
+
+                if (bDepth < 2f) 
+                {
+                    currentDistance += 1f; 
+                    continue; 
+                }
 
                 Vector3 forwardDir = -inwardNormal;
                 if (forwardDir == Vector3.zero) forwardDir = Vector3.forward;
                 Quaternion rotation = Quaternion.LookRotation(forwardDir, Vector3.up);
+
+                // Camada 3: OBB 2D Collision (SAT)
+                // Garante eixos normalizados no plano XZ para que as projeções SAT sejam corretas.
+                Vector2 axisW = new Vector2(edgeDir.x, edgeDir.z).normalized;
+                Vector2 axisD = new Vector2(inwardNormal.x, inwardNormal.z).normalized;
+
+                Vector3 centerPos = edgePoint + inwardNormal * (bDepth * 0.5f);
+                OBB2D candidateOBB = new OBB2D(
+                    new Vector2(centerPos.x, centerPos.z),
+                    new Vector2(bWidth * 0.5f, bDepth * 0.5f),
+                    axisW,
+                    axisD
+                );
+                
+                bool discarded = false;
+                foreach (var otherOBB in placedBuildings)
+                {
+                    if (OBBOverlap(candidateOBB, otherOBB, out float penetration, out Vector2 shrinkAxis))
+                    {
+                        // Projeta a penetração no eixo de profundidade (axisD) do candidato.
+                        // Só faz sentido encolher bDepth se o overlap estiver alinhado com esse eixo.
+                        float depthAlignment = Mathf.Abs(Vector2.Dot(shrinkAxis.normalized, axisD));
+                        float depthPenetration = penetration / Mathf.Max(depthAlignment, 0.01f);
+
+                        if (depthPenetration >= bDepth * 0.4f || depthAlignment < 0.3f)
+                        {
+                            // Penetração severa, ou no eixo errado: descarta o prédio
+                            discarded = true;
+                            Debug.LogWarning($"Building discarded due to overlap in Block_{blockIndex}");
+                            break;
+                        }
+                        else
+                        {
+                            bDepth -= depthPenetration;
+                            if (bDepth < 2f)
+                            {
+                                discarded = true;
+                                break;
+                            }
+                            centerPos = edgePoint + inwardNormal * (bDepth * 0.5f);
+                            candidateOBB = new OBB2D(
+                                new Vector2(centerPos.x, centerPos.z),
+                                new Vector2(bWidth * 0.5f, bDepth * 0.5f),
+                                axisW,
+                                axisD
+                            );
+                        }
+                    }
+                }
+
+                if (discarded)
+                {
+                    currentDistance += 1f;
+                    continue;
+                }
+
+                placedBuildings.Add(candidateOBB);
 
                 GameObject buildingObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 buildingObj.name = $"Building_{buildingCount++}";
@@ -370,5 +440,62 @@ public class BlockFiller : MonoBehaviour
             case ZoneType.MonsterZone: return new Color(0.6f, 0.2f, 0.7f);
             default: return Color.gray;
         }
+    }
+
+    private struct OBB2D
+    {
+        public Vector2 center;
+        public Vector2 halfExtents;
+        public Vector2 axisX;
+        public Vector2 axisZ;
+
+        public OBB2D(Vector2 center, Vector2 halfExtents, Vector2 axisX, Vector2 axisZ)
+        {
+            this.center = center;
+            this.halfExtents = halfExtents;
+            this.axisX = axisX;
+            this.axisZ = axisZ;
+        }
+    }
+
+    private static bool OBBOverlap(OBB2D a, OBB2D b, out float penetration, out Vector2 shrinkAxis)
+    {
+        penetration = float.MaxValue;
+        shrinkAxis = Vector2.zero;
+
+        // Todos os eixos devem ser normalizados para que as projeções SAT sejam métricas corretas.
+        Vector2[] axes = new Vector2[]
+        {
+            a.axisX.normalized,
+            a.axisZ.normalized,
+            b.axisX.normalized,
+            b.axisZ.normalized
+        };
+
+        foreach (Vector2 axis in axes)
+        {
+            if (axis.sqrMagnitude < 1e-6f) continue; // Ignora eixos degenerados
+
+            float rA = a.halfExtents.x * Mathf.Abs(Vector2.Dot(a.axisX.normalized, axis))
+                     + a.halfExtents.y * Mathf.Abs(Vector2.Dot(a.axisZ.normalized, axis));
+            float rB = b.halfExtents.x * Mathf.Abs(Vector2.Dot(b.axisX.normalized, axis))
+                     + b.halfExtents.y * Mathf.Abs(Vector2.Dot(b.axisZ.normalized, axis));
+
+            float distance = Mathf.Abs(Vector2.Dot(b.center - a.center, axis));
+
+            if (distance >= rA + rB)
+            {
+                return false; // Eixo separador encontrado: sem overlap
+            }
+
+            float overlap = (rA + rB) - distance;
+            if (overlap < penetration)
+            {
+                penetration = overlap;
+                shrinkAxis = axis; // Eixo com menor penetração (MPV — Minimum Penetration Vector)
+            }
+        }
+
+        return true; // Overlap em todos os eixos testados
     }
 }
