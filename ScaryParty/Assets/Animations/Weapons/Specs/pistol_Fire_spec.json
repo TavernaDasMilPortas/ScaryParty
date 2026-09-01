@@ -1,0 +1,413 @@
+﻿{
+    "keyPoses":  [
+                     {
+                         "time":  0,
+                         "description":  "Descreva a pose inicial aqui.",
+                         "poseName":  "Initial_Pose",
+                         "boneTargets":  [
+                                             {
+                                                 "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm",
+                                                 "note":  "PREENCHER COM VALORES EXATOS",
+                                                 "targetLocalRotation":  {
+                                                                             "y":  0,
+                                                                             "z":  0,
+                                                                             "x":  0
+                                                                         }
+                                             }
+                                         ]
+                     }
+                 ],
+    "meta":  {
+                 "description":  "Flash de recuo: bracos sobem/voltam ~15 graus, depois retornam ao Idle",
+                 "bonePathPrefix":  "Skeleton/",
+                 "isLooping":  false,
+                 "targetPrefab":  "PlayerArmature",
+                 "outputPath":  "Assets/Animations/Weapons/Pistol_Fire.anim",
+                 "tPoseReference":  "PlayerArmature_armature_map.json",
+                 "animationName":  "Pistol_Fire",
+                 "wrapMode":  "Default",
+                 "clipName":  "Pistol_Fire",
+                 "frameRate":  30,
+                 "duration":  0.3
+             },
+    "animatedBones":  [
+                          {
+                              "bonePath":  "Skeleton/Hips",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Hips",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.981,
+                                                         "z":  -0.0159,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Spine",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.058,
+                                                         "z":  0.001,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Chest",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.103,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "UpperChest",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.103,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Neck",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Neck",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.1,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Head",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Head",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.1,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Left_Shoulder",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  346.95,
+                                                         "z":  4.99,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.191,
+                                                         "z":  -0.009,
+                                                         "x":  -0.001
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Left_UpperArm",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  20.24,
+                                                         "z":  134.35,
+                                                         "x":  5.07
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  -0.167
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Left_LowerArm",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  43.94
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.285,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Left_Hand",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  332,
+                                                         "z":  2.8,
+                                                         "x":  355.1
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.24,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Right_Shoulder",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  193.05,
+                                                         "z":  184.99,
+                                                         "x":  0
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0.191,
+                                                         "z":  -0.009,
+                                                         "x":  0.001
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Right_UpperArm",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  20.24,
+                                                         "z":  134.35,
+                                                         "x":  5.07
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  0.167
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Right_LowerArm",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  0,
+                                                         "z":  0,
+                                                         "x":  43.94
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  -0.285,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          },
+                          {
+                              "bonePath":  "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand",
+                              "animatePosition":  false,
+                              "keyframes":  [
+                                                {
+                                                    "time":  0,
+                                                    "localRotation":  {
+                                                                          "y":  0,
+                                                                          "z":  0,
+                                                                          "x":  0
+                                                                      }
+                                                }
+                                            ],
+                              "boneName":  "Right_Hand",
+                              "animateRotation":  true,
+                              "tPoseLocalRotation":  {
+                                                         "y":  332,
+                                                         "z":  2.8,
+                                                         "x":  355.1
+                                                     },
+                              "tPoseLocalPosition":  {
+                                                         "y":  -0.24,
+                                                         "z":  0,
+                                                         "x":  0
+                                                     },
+                              "role":  "PREENCHER - Qual o papel deste osso na animaÃ§Ã£o?"
+                          }
+                      ]
+}

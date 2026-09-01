@@ -1044,6 +1044,8 @@ GameObject:
   - component: {fileID: 3653618326592965880}
   - component: {fileID: 789712693648477549}
   - component: {fileID: 9019280639209332962}
+  - component: {fileID: 8261990279543270710}
+  - component: {fileID: 7761476708585225109}
   m_Layer: 8
   m_Name: PlayerArmature
   m_TagString: Player
@@ -1130,15 +1132,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 471146044
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3666505991
+  InScenePlacedSourceGlobalObjectIdHash: 471146044
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 0
+  m_InScenePlaced: 1
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
@@ -1225,6 +1227,9 @@ MonoBehaviour:
   look: {x: 0, y: 0}
   jump: 0
   sprint: 0
+  scrollWeapon: 0
+  aim: 0
+  fire: 0
   analogMovement: 0
   cursorLocked: 1
   cursorInputForLook: 1
@@ -1411,6 +1416,26 @@ MonoBehaviour:
       NameHash: 1939466105
       Synchronize: 1
       ParameterType: 1
+    - name: WeaponMode
+      NameHash: -1753021816
+      Synchronize: 1
+      ParameterType: 3
+    - name: IsAiming
+      NameHash: 2025090383
+      Synchronize: 1
+      ParameterType: 4
+    - name: Fire
+      NameHash: -118708495
+      Synchronize: 1
+      ParameterType: 9
+    - name: IsMoving
+      NameHash: 120489994
+      Synchronize: 1
+      ParameterType: 4
+    - name: IsSprinting
+      NameHash: -980523212
+      Synchronize: 1
+      ParameterType: 4
   AnimatorParametersExpanded: 0
 --- !u!114 &4179397643801327919
 MonoBehaviour:
@@ -1532,6 +1557,35 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
     m_InternalValue: 0
+--- !u!114 &8261990279543270710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081852918481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 056ea93e07632e64db993898dfe5d607, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponController
+  pistolPrefab: {fileID: 3311485812756139665, guid: 2187096be82611f469ed612c9f9e7d31, type: 3}
+  shotgunPrefab: {fileID: 94254705452596145, guid: 1d4179f13d2014444873b391da997482, type: 3}
+  rightHandAttachment: {fileID: 0}
+  animator: {fileID: 0}
+  tpc: {fileID: 0}
+--- !u!114 &7761476708585225109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4416926081852918481}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbfa6f5d5dcd47749bbef1615d525d85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponInputHandler
 --- !u!1 &4523139366846529165
 GameObject:
   m_ObjectHideFlags: 0
