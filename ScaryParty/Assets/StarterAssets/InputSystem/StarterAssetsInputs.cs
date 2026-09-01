@@ -12,6 +12,11 @@ namespace StarterAssets
 		public Vector2 look;
 		public bool jump;
 		public bool sprint;
+        
+        [Header("Weapon Input Values")]
+        public float scrollWeapon;
+        public bool aim;
+        public bool fire;
 
 		[Header("Movement Settings")]
 		public bool analogMovement;
@@ -43,6 +48,21 @@ namespace StarterAssets
 		{
 			SprintInput(value.isPressed);
 		}
+
+        public void OnScrollWeapon(InputValue value)
+        {
+            scrollWeapon = value.Get<float>();
+        }
+
+        public void OnAim(InputValue value)
+        {
+            aim = value.isPressed;
+        }
+
+        public void OnFire(InputValue value)
+        {
+            fire = value.isPressed;
+        }
 #endif
 
 

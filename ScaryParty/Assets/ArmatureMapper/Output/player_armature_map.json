@@ -1,0 +1,1282 @@
+{
+    "prefabInfo": {
+        "name": "player",
+        "assetPath": "Assets/StarterAssets/ThirdPersonController/Character/Models/player.fbx",
+        "totalBoneCount": 72,
+        "totalComponentCount": 74,
+        "exportTimestamp": "2026-08-31T23:05:48"
+    },
+    "hierarchy": [
+        {
+            "name": "player",
+            "path": "",
+            "localPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "localRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "localScale": {
+                "x": 1.0,
+                "y": 1.0,
+                "z": 1.0
+            },
+            "worldPosition": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "worldRotation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "depth": 0,
+            "components": [
+                "Transform",
+                "Animator"
+            ],
+            "children": [
+                {
+                    "name": "Geometry",
+                    "path": "Geometry",
+                    "localPosition": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "localRotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "worldPosition": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "worldRotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "depth": 1,
+                    "components": [
+                        "Transform"
+                    ],
+                    "children": [
+                        {
+                            "name": "Armature_Mesh",
+                            "path": "Geometry/Armature_Mesh",
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localRotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "worldPosition": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "worldRotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "depth": 2,
+                            "components": [
+                                "Transform",
+                                "SkinnedMeshRenderer"
+                            ],
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Skeleton",
+                    "path": "Skeleton",
+                    "localPosition": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "localRotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "localScale": {
+                        "x": 1.0,
+                        "y": 1.0,
+                        "z": 1.0
+                    },
+                    "worldPosition": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "worldRotation": {
+                        "x": 0.0,
+                        "y": 0.0,
+                        "z": 0.0
+                    },
+                    "depth": 1,
+                    "components": [
+                        "Transform"
+                    ],
+                    "children": [
+                        {
+                            "name": "Hips",
+                            "path": "Skeleton/Hips",
+                            "localPosition": {
+                                "x": 0.0,
+                                "y": 0.9810985922813416,
+                                "z": -0.01590454950928688
+                            },
+                            "localRotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "localScale": {
+                                "x": 1.0,
+                                "y": 1.0,
+                                "z": 1.0
+                            },
+                            "worldPosition": {
+                                "x": 0.0,
+                                "y": 0.9810985922813416,
+                                "z": -0.01590454950928688
+                            },
+                            "worldRotation": {
+                                "x": 0.0,
+                                "y": 0.0,
+                                "z": 0.0
+                            },
+                            "depth": 2,
+                            "components": [
+                                "Transform"
+                            ],
+                            "children": [
+                                {
+                                    "name": "Left_UpperLeg",
+                                    "path": "Skeleton/Hips/Left_UpperLeg",
+                                    "localPosition": {
+                                        "x": -0.0861031711101532,
+                                        "y": -0.05345803499221802,
+                                        "z": -0.011470641009509564
+                                    },
+                                    "localRotation": {
+                                        "x": 359.70135498046877,
+                                        "y": 179.98939514160157,
+                                        "z": 182.03457641601563
+                                    },
+                                    "localScale": {
+                                        "x": 1.0,
+                                        "y": 1.0,
+                                        "z": 1.0
+                                    },
+                                    "worldPosition": {
+                                        "x": -0.0861031711101532,
+                                        "y": 0.9276405572891235,
+                                        "z": -0.02737519145011902
+                                    },
+                                    "worldRotation": {
+                                        "x": 359.70135498046877,
+                                        "y": 179.98939514160157,
+                                        "z": 182.03457641601563
+                                    },
+                                    "depth": 3,
+                                    "components": [
+                                        "Transform"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Left_LowerLeg",
+                                            "path": "Skeleton/Hips/Left_UpperLeg/Left_LowerLeg",
+                                            "localPosition": {
+                                                "x": -2.986451295374675e-16,
+                                                "y": 0.4133444130420685,
+                                                "z": -5.495603363089594e-17
+                                            },
+                                            "localRotation": {
+                                                "x": 3.902146100997925,
+                                                "y": 2.6073280501236943e-17,
+                                                "z": 1.7743561806660605e-18
+                                            },
+                                            "localScale": {
+                                                "x": 1.0,
+                                                "y": 1.0,
+                                                "z": 1.0
+                                            },
+                                            "worldPosition": {
+                                                "x": -0.1007775291800499,
+                                                "y": 0.5145623683929443,
+                                                "z": -0.029531117528676988
+                                            },
+                                            "worldRotation": {
+                                                "x": 355.8016662597656,
+                                                "y": 179.8505859375,
+                                                "z": 182.04002380371095
+                                            },
+                                            "depth": 4,
+                                            "components": [
+                                                "Transform"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Left_Foot",
+                                                    "path": "Skeleton/Hips/Left_UpperLeg/Left_LowerLeg/Left_Foot",
+                                                    "localPosition": {
+                                                        "x": 1.7320426204392448e-9,
+                                                        "y": 0.4140394628047943,
+                                                        "z": 7.141508949450785e-16
+                                                    },
+                                                    "localRotation": {
+                                                        "x": 356.0263671875,
+                                                        "y": 5.816840648651123,
+                                                        "z": 357.5505065917969
+                                                    },
+                                                    "localScale": {
+                                                        "x": 1.0,
+                                                        "y": 1.0,
+                                                        "z": 1.0
+                                                    },
+                                                    "worldPosition": {
+                                                        "x": -0.11543726176023483,
+                                                        "y": 0.10189557075500488,
+                                                        "z": -0.059861764311790469
+                                                    },
+                                                    "worldRotation": {
+                                                        "x": -1.9733408862521174e-7,
+                                                        "y": 174.19351196289063,
+                                                        "z": 180.0
+                                                    },
+                                                    "depth": 5,
+                                                    "components": [
+                                                        "Transform"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Left_Toes",
+                                                            "path": "Skeleton/Hips/Left_UpperLeg/Left_LowerLeg/Left_Foot/Left_Toes",
+                                                            "localPosition": {
+                                                                "x": 7.105427198782324e-17,
+                                                                "y": 0.07224802672863007,
+                                                                "z": -0.11806550621986389
+                                                            },
+                                                            "localRotation": {
+                                                                "x": 270.0,
+                                                                "y": 0.0,
+                                                                "z": 0.0
+                                                            },
+                                                            "localScale": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            },
+                                                            "worldPosition": {
+                                                                "x": -0.1273818165063858,
+                                                                "y": 0.0296475887298584,
+                                                                "z": 0.05759798362851143
+                                                            },
+                                                            "worldRotation": {
+                                                                "x": 90.0,
+                                                                "y": 354.1935119628906,
+                                                                "z": 0.0
+                                                            },
+                                                            "depth": 6,
+                                                            "components": [
+                                                                "Transform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Left_ToesEnd",
+                                                                    "path": "Skeleton/Hips/Left_UpperLeg/Left_LowerLeg/Left_Foot/Left_Toes/Left_ToesEnd",
+                                                                    "localPosition": {
+                                                                        "x": -0.0010026174131780863,
+                                                                        "y": 0.06423476338386536,
+                                                                        "z": 0.016843978315591813
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 88.76298522949219,
+                                                                        "y": 270.0,
+                                                                        "z": 270.0
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": -0.13487786054611207,
+                                                                        "y": 0.01280355453491211,
+                                                                        "z": 0.12140174210071564
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": 1.3811633436944249e-7,
+                                                                        "y": 175.43038940429688,
+                                                                        "z": 180.0
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Right_UpperLeg",
+                                    "path": "Skeleton/Hips/Right_UpperLeg",
+                                    "localPosition": {
+                                        "x": 0.08610318601131439,
+                                        "y": -0.05345814675092697,
+                                        "z": -0.011470647528767586
+                                    },
+                                    "localRotation": {
+                                        "x": 0.29865702986717226,
+                                        "y": 0.010609707795083523,
+                                        "z": 2.0345704555511476
+                                    },
+                                    "localScale": {
+                                        "x": 1.0,
+                                        "y": 1.0,
+                                        "z": 1.0
+                                    },
+                                    "worldPosition": {
+                                        "x": 0.08610318601131439,
+                                        "y": 0.927640438079834,
+                                        "z": -0.027375197038054467
+                                    },
+                                    "worldRotation": {
+                                        "x": 0.29865702986717226,
+                                        "y": 0.010609707795083523,
+                                        "z": 2.0345704555511476
+                                    },
+                                    "depth": 3,
+                                    "components": [
+                                        "Transform"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Right_LowerLeg",
+                                            "path": "Skeleton/Hips/Right_UpperLeg/Right_LowerLeg",
+                                            "localPosition": {
+                                                "x": 4.5146089178160766e-7,
+                                                "y": -0.413344144821167,
+                                                "z": 2.5994435048914967e-8
+                                            },
+                                            "localRotation": {
+                                                "x": 3.902146100997925,
+                                                "y": 2.6073280501236943e-17,
+                                                "z": 1.7743561806660605e-18
+                                            },
+                                            "localScale": {
+                                                "x": 1.0,
+                                                "y": 1.0,
+                                                "z": 1.0
+                                            },
+                                            "worldPosition": {
+                                                "x": 0.10077798366546631,
+                                                "y": 0.5145624876022339,
+                                                "z": -0.029531097039580346
+                                            },
+                                            "worldRotation": {
+                                                "x": 4.198337554931641,
+                                                "y": 0.14941109716892243,
+                                                "z": 2.0400190353393556
+                                            },
+                                            "depth": 4,
+                                            "components": [
+                                                "Transform"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "Right_Foot",
+                                                    "path": "Skeleton/Hips/Right_UpperLeg/Right_LowerLeg/Right_Foot",
+                                                    "localPosition": {
+                                                        "x": -7.472542051800701e-7,
+                                                        "y": -0.414039671421051,
+                                                        "z": -3.284750249576973e-8
+                                                    },
+                                                    "localRotation": {
+                                                        "x": 356.0263671875,
+                                                        "y": 5.816840648651123,
+                                                        "z": 357.5505065917969
+                                                    },
+                                                    "localScale": {
+                                                        "x": 1.0,
+                                                        "y": 1.0,
+                                                        "z": 1.0
+                                                    },
+                                                    "worldPosition": {
+                                                        "x": 0.11543698608875275,
+                                                        "y": 0.10189551115036011,
+                                                        "z": -0.059861790388822559
+                                                    },
+                                                    "worldRotation": {
+                                                        "x": 2.0113471066451894e-7,
+                                                        "y": 5.806481838226318,
+                                                        "z": -2.786524078146613e-7
+                                                    },
+                                                    "depth": 5,
+                                                    "components": [
+                                                        "Transform"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Right_Toes",
+                                                            "path": "Skeleton/Hips/Right_UpperLeg/Right_LowerLeg/Right_Foot/Right_Toes",
+                                                            "localPosition": {
+                                                                "x": -1.5643121287212126e-7,
+                                                                "y": -0.07224798947572708,
+                                                                "z": 0.11806999891996384
+                                                            },
+                                                            "localRotation": {
+                                                                "x": 270.0,
+                                                                "y": 0.0,
+                                                                "z": 0.0
+                                                            },
+                                                            "localScale": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            },
+                                                            "worldPosition": {
+                                                                "x": 0.127381831407547,
+                                                                "y": 0.0296475887298584,
+                                                                "z": 0.05760243907570839
+                                                            },
+                                                            "worldRotation": {
+                                                                "x": 270.0,
+                                                                "y": 5.806481838226318,
+                                                                "z": 0.0
+                                                            },
+                                                            "depth": 6,
+                                                            "components": [
+                                                                "Transform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Right_ToesEnd",
+                                                                    "path": "Skeleton/Hips/Right_UpperLeg/Right_LowerLeg/Right_Foot/Right_Toes/Right_ToesEnd",
+                                                                    "localPosition": {
+                                                                        "x": 0.001003158395178616,
+                                                                        "y": -0.06423059105873108,
+                                                                        "z": -0.016843898221850396
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 88.76298522949219,
+                                                                        "y": 270.0,
+                                                                        "z": 270.0
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": 0.1348779797554016,
+                                                                        "y": 0.01280367374420166,
+                                                                        "z": 0.12140202522277832
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": -1.2069830290784012e-7,
+                                                                        "y": 4.569609642028809,
+                                                                        "z": -3.21063339470129e-7
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "Spine",
+                                    "path": "Skeleton/Hips/Spine",
+                                    "localPosition": {
+                                        "x": 0.0,
+                                        "y": 0.05822938308119774,
+                                        "z": 0.001222954597324133
+                                    },
+                                    "localRotation": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0
+                                    },
+                                    "localScale": {
+                                        "x": 1.0,
+                                        "y": 1.0,
+                                        "z": 1.0
+                                    },
+                                    "worldPosition": {
+                                        "x": 0.0,
+                                        "y": 1.0393279790878297,
+                                        "z": -0.01468159444630146
+                                    },
+                                    "worldRotation": {
+                                        "x": 0.0,
+                                        "y": 0.0,
+                                        "z": 0.0
+                                    },
+                                    "depth": 3,
+                                    "components": [
+                                        "Transform"
+                                    ],
+                                    "children": [
+                                        {
+                                            "name": "Chest",
+                                            "path": "Skeleton/Hips/Spine/Chest",
+                                            "localPosition": {
+                                                "x": 0.0,
+                                                "y": 0.10340429842472077,
+                                                "z": 0.0
+                                            },
+                                            "localRotation": {
+                                                "x": 0.0,
+                                                "y": 0.0,
+                                                "z": 0.0
+                                            },
+                                            "localScale": {
+                                                "x": 1.0,
+                                                "y": 1.0,
+                                                "z": 1.0
+                                            },
+                                            "worldPosition": {
+                                                "x": 0.0,
+                                                "y": 1.1427322626113892,
+                                                "z": -0.01468159444630146
+                                            },
+                                            "worldRotation": {
+                                                "x": 0.0,
+                                                "y": 0.0,
+                                                "z": 0.0
+                                            },
+                                            "depth": 4,
+                                            "components": [
+                                                "Transform"
+                                            ],
+                                            "children": [
+                                                {
+                                                    "name": "UpperChest",
+                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest",
+                                                    "localPosition": {
+                                                        "x": 0.0,
+                                                        "y": 0.10340429842472077,
+                                                        "z": 0.0
+                                                    },
+                                                    "localRotation": {
+                                                        "x": 0.0,
+                                                        "y": 0.0,
+                                                        "z": 0.0
+                                                    },
+                                                    "localScale": {
+                                                        "x": 1.0,
+                                                        "y": 1.0,
+                                                        "z": 1.0
+                                                    },
+                                                    "worldPosition": {
+                                                        "x": 0.0,
+                                                        "y": 1.2461365461349488,
+                                                        "z": -0.01468159444630146
+                                                    },
+                                                    "worldRotation": {
+                                                        "x": 0.0,
+                                                        "y": 0.0,
+                                                        "z": 0.0
+                                                    },
+                                                    "depth": 5,
+                                                    "components": [
+                                                        "Transform"
+                                                    ],
+                                                    "children": [
+                                                        {
+                                                            "name": "Left_Shoulder",
+                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder",
+                                                            "localPosition": {
+                                                                "x": -0.0009571358095854521,
+                                                                "y": 0.1914922446012497,
+                                                                "z": -0.008727794513106346
+                                                            },
+                                                            "localRotation": {
+                                                                "x": -5.336085351359543e-8,
+                                                                "y": 346.9508056640625,
+                                                                "z": 4.99290132522583
+                                                            },
+                                                            "localScale": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            },
+                                                            "worldPosition": {
+                                                                "x": -0.0009571358095854521,
+                                                                "y": 1.4376287460327149,
+                                                                "z": -0.023409388959407808
+                                                            },
+                                                            "worldRotation": {
+                                                                "x": -5.336085351359543e-8,
+                                                                "y": 346.9508056640625,
+                                                                "z": 4.99290132522583
+                                                            },
+                                                            "depth": 6,
+                                                            "components": [
+                                                                "Transform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Left_UpperArm",
+                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm",
+                                                                    "localPosition": {
+                                                                        "x": -0.16743502020835877,
+                                                                        "y": -5.684341229630267e-16,
+                                                                        "z": -2.664535034107249e-17
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 5.070913314819336,
+                                                                        "y": 20.243026733398439,
+                                                                        "z": 134.34942626953126
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": -0.1634494811296463,
+                                                                        "y": 1.4230566024780274,
+                                                                        "z": -0.061070676892995837
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": 3.328331470489502,
+                                                                        "y": 7.537649154663086,
+                                                                        "z": 139.04115295410157
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": [
+                                                                        {
+                                                                            "name": "Left_LowerArm",
+                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm",
+                                                                            "localPosition": {
+                                                                                "x": -2.8421706148151339e-16,
+                                                                                "y": 0.2850806713104248,
+                                                                                "z": 0.0
+                                                                            },
+                                                                            "localRotation": {
+                                                                                "x": 43.94489288330078,
+                                                                                "y": -1.3804343275023931e-14,
+                                                                                "z": -9.579747815868269e-15
+                                                                            },
+                                                                            "localScale": {
+                                                                                "x": 1.0,
+                                                                                "y": 1.0,
+                                                                                "z": 1.0
+                                                                            },
+                                                                            "worldPosition": {
+                                                                                "x": -0.35034942626953127,
+                                                                                "y": 1.208132266998291,
+                                                                                "z": -0.04894791170954704
+                                                                            },
+                                                                            "worldRotation": {
+                                                                                "x": 331.22418212890627,
+                                                                                "y": 38.80268478393555,
+                                                                                "z": 131.70242309570313
+                                                                            },
+                                                                            "depth": 8,
+                                                                            "components": [
+                                                                                "Transform"
+                                                                            ],
+                                                                            "children": [
+                                                                                {
+                                                                                    "name": "Left_Hand",
+                                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand",
+                                                                                    "localPosition": {
+                                                                                        "x": -2.4123816833032665e-10,
+                                                                                        "y": 0.24036221206188203,
+                                                                                        "z": -1.4210853074075669e-16
+                                                                                    },
+                                                                                    "localRotation": {
+                                                                                        "x": 355.0986633300781,
+                                                                                        "y": 332.06793212890627,
+                                                                                        "z": 2.8110203742980959
+                                                                                    },
+                                                                                    "localScale": {
+                                                                                        "x": 1.0,
+                                                                                        "y": 1.0,
+                                                                                        "z": 1.0
+                                                                                    },
+                                                                                    "worldPosition": {
+                                                                                        "x": -0.4419659972190857,
+                                                                                        "y": 1.0679750442504883,
+                                                                                        "z": 0.12349435687065125
+                                                                                    },
+                                                                                    "worldRotation": {
+                                                                                        "x": 356.07177734375,
+                                                                                        "y": 53.11904525756836,
+                                                                                        "z": 129.14674377441407
+                                                                                    },
+                                                                                    "depth": 9,
+                                                                                    "components": [
+                                                                                        "Transform"
+                                                                                    ],
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "name": "Left_IndexProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand/Left_IndexProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Left_MiddleProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand/Left_MiddleProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Left_PinkyProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand/Left_PinkyProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Left_RingProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand/Left_RingProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Left_ThumbProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Left_Shoulder/Left_UpperArm/Left_LowerArm/Left_Hand/Left_ThumbProximal",
+                                                                                            "depth": 10
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "name": "Neck",
+                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck",
+                                                            "localPosition": {
+                                                                "x": 0.0,
+                                                                "y": 0.2510465681552887,
+                                                                "z": -0.015329580754041672
+                                                            },
+                                                            "localRotation": {
+                                                                "x": 6.958658695220947,
+                                                                "y": 0.0,
+                                                                "z": 0.0
+                                                            },
+                                                            "localScale": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            },
+                                                            "worldPosition": {
+                                                                "x": 0.0,
+                                                                "y": 1.497183084487915,
+                                                                "z": -0.030011175200343133
+                                                            },
+                                                            "worldRotation": {
+                                                                "x": 6.958658695220947,
+                                                                "y": 0.0,
+                                                                "z": 0.0
+                                                            },
+                                                            "depth": 6,
+                                                            "components": [
+                                                                "Transform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Head",
+                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Head",
+                                                                    "localPosition": {
+                                                                        "x": 0.0,
+                                                                        "y": 0.12747400999069215,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 353.0413513183594,
+                                                                        "y": 0.0,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": 0.0,
+                                                                        "y": 1.6237181425094605,
+                                                                        "z": -0.01456729881465435
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": 0.0,
+                                                                        "y": 0.0,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": [
+                                                                        {
+                                                                            "name": "Jaw",
+                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Head/Jaw",
+                                                                            "localPosition": {
+                                                                                "x": 0.0,
+                                                                                "y": -0.007635389920324087,
+                                                                                "z": 0.012895277701318264
+                                                                            },
+                                                                            "localRotation": {
+                                                                                "x": 0.0,
+                                                                                "y": 90.0,
+                                                                                "z": 26.07113265991211
+                                                                            },
+                                                                            "localScale": {
+                                                                                "x": 1.0,
+                                                                                "y": 1.0,
+                                                                                "z": 1.0
+                                                                            },
+                                                                            "worldPosition": {
+                                                                                "x": 0.0,
+                                                                                "y": 1.6160826683044434,
+                                                                                "z": -0.0016720201820135117
+                                                                            },
+                                                                            "worldRotation": {
+                                                                                "x": 0.0,
+                                                                                "y": 90.0,
+                                                                                "z": 26.071130752563478
+                                                                            },
+                                                                            "depth": 8,
+                                                                            "components": [
+                                                                                "Transform"
+                                                                            ],
+                                                                            "children": []
+                                                                        },
+                                                                        {
+                                                                            "name": "Left_Eye",
+                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Head/Left_Eye",
+                                                                            "localPosition": {
+                                                                                "x": -0.033303260803222659,
+                                                                                "y": 0.03459811583161354,
+                                                                                "z": 0.08674030005931854
+                                                                            },
+                                                                            "localRotation": {
+                                                                                "x": 0.0,
+                                                                                "y": 90.0,
+                                                                                "z": 0.0
+                                                                            },
+                                                                            "localScale": {
+                                                                                "x": 1.0,
+                                                                                "y": 1.0,
+                                                                                "z": 1.0
+                                                                            },
+                                                                            "worldPosition": {
+                                                                                "x": -0.033303260803222659,
+                                                                                "y": 1.6583162546157838,
+                                                                                "z": 0.07217299938201904
+                                                                            },
+                                                                            "worldRotation": {
+                                                                                "x": 0.0,
+                                                                                "y": 90.0,
+                                                                                "z": 0.0
+                                                                            },
+                                                                            "depth": 8,
+                                                                            "components": [
+                                                                                "Transform"
+                                                                            ],
+                                                                            "children": []
+                                                                        },
+                                                                        {
+                                                                            "name": "Right_Eye",
+                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Head/Right_Eye",
+                                                                            "localPosition": {
+                                                                                "x": 0.03330329433083534,
+                                                                                "y": 0.0345962792634964,
+                                                                                "z": 0.08674030005931854
+                                                                            },
+                                                                            "localRotation": {
+                                                                                "x": -1.3423890634061547e-13,
+                                                                                "y": 90.0,
+                                                                                "z": 180.0
+                                                                            },
+                                                                            "localScale": {
+                                                                                "x": 1.0,
+                                                                                "y": 1.0,
+                                                                                "z": 1.0
+                                                                            },
+                                                                            "worldPosition": {
+                                                                                "x": 0.03330329433083534,
+                                                                                "y": 1.6583144664764405,
+                                                                                "z": 0.07217299938201904
+                                                                            },
+                                                                            "worldRotation": {
+                                                                                "x": 0.0,
+                                                                                "y": 90.0,
+                                                                                "z": 180.0
+                                                                            },
+                                                                            "depth": 8,
+                                                                            "components": [
+                                                                                "Transform"
+                                                                            ],
+                                                                            "children": []
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "name": "Neck_Twist_A",
+                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Neck/Neck_Twist_A",
+                                                                    "localPosition": {
+                                                                        "x": 0.0,
+                                                                        "y": 0.06373700499534607,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 0.0,
+                                                                        "y": 0.0,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": 0.0,
+                                                                        "y": 1.560450553894043,
+                                                                        "z": -0.02228923700749874
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": 6.958658695220947,
+                                                                        "y": 0.0,
+                                                                        "z": 0.0
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "name": "Right_Shoulder",
+                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder",
+                                                            "localPosition": {
+                                                                "x": 0.0009571358095854521,
+                                                                "y": 0.19149380922317506,
+                                                                "z": -0.008727802895009518
+                                                            },
+                                                            "localRotation": {
+                                                                "x": 5.336085351359543e-8,
+                                                                "y": 193.0491943359375,
+                                                                "z": 184.99290466308595
+                                                            },
+                                                            "localScale": {
+                                                                "x": 1.0,
+                                                                "y": 1.0,
+                                                                "z": 1.0
+                                                            },
+                                                            "worldPosition": {
+                                                                "x": 0.0009571358095854521,
+                                                                "y": 1.4376304149627686,
+                                                                "z": -0.023409398272633554
+                                                            },
+                                                            "worldRotation": {
+                                                                "x": 5.336085351359543e-8,
+                                                                "y": 193.0491943359375,
+                                                                "z": 184.99290466308595
+                                                            },
+                                                            "depth": 6,
+                                                            "components": [
+                                                                "Transform"
+                                                            ],
+                                                            "children": [
+                                                                {
+                                                                    "name": "Right_UpperArm",
+                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm",
+                                                                    "localPosition": {
+                                                                        "x": 0.16743431985378266,
+                                                                        "y": -0.0000022099181933299407,
+                                                                        "z": 1.2213746458655806e-7
+                                                                    },
+                                                                    "localRotation": {
+                                                                        "x": 5.070913314819336,
+                                                                        "y": 20.243026733398439,
+                                                                        "z": 134.34942626953126
+                                                                    },
+                                                                    "localScale": {
+                                                                        "x": 1.0,
+                                                                        "y": 1.0,
+                                                                        "z": 1.0
+                                                                    },
+                                                                    "worldPosition": {
+                                                                        "x": 0.16344895958900453,
+                                                                        "y": 1.423060417175293,
+                                                                        "z": -0.06107068806886673
+                                                                    },
+                                                                    "worldRotation": {
+                                                                        "x": 356.6716613769531,
+                                                                        "y": 172.46234130859376,
+                                                                        "z": 319.0411376953125
+                                                                    },
+                                                                    "depth": 7,
+                                                                    "components": [
+                                                                        "Transform"
+                                                                    ],
+                                                                    "children": [
+                                                                        {
+                                                                            "name": "Right_LowerArm",
+                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm",
+                                                                            "localPosition": {
+                                                                                "x": 0.0000037273982798069484,
+                                                                                "y": -0.285084992647171,
+                                                                                "z": -3.5927226349485866e-7
+                                                                            },
+                                                                            "localRotation": {
+                                                                                "x": 43.94489288330078,
+                                                                                "y": -1.3804343275023931e-14,
+                                                                                "z": -9.579747815868269e-15
+                                                                            },
+                                                                            "localScale": {
+                                                                                "x": 1.0,
+                                                                                "y": 1.0,
+                                                                                "z": 1.0
+                                                                            },
+                                                                            "worldPosition": {
+                                                                                "x": 0.35034891963005068,
+                                                                                "y": 1.2081304788589478,
+                                                                                "z": -0.04894788935780525
+                                                                            },
+                                                                            "worldRotation": {
+                                                                                "x": 28.77582359313965,
+                                                                                "y": 141.19732666015626,
+                                                                                "z": 311.7024230957031
+                                                                            },
+                                                                            "depth": 8,
+                                                                            "components": [
+                                                                                "Transform"
+                                                                            ],
+                                                                            "children": [
+                                                                                {
+                                                                                    "name": "Right_Hand",
+                                                                                    "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand",
+                                                                                    "localPosition": {
+                                                                                        "x": 0.0000014923929256838165,
+                                                                                        "y": -0.24036367237567902,
+                                                                                        "z": 0.0000017856367549029529
+                                                                                    },
+                                                                                    "localRotation": {
+                                                                                        "x": 355.0986633300781,
+                                                                                        "y": 332.06793212890627,
+                                                                                        "z": 2.8110203742980959
+                                                                                    },
+                                                                                    "localScale": {
+                                                                                        "x": 1.0,
+                                                                                        "y": 1.0,
+                                                                                        "z": 1.0
+                                                                                    },
+                                                                                    "worldPosition": {
+                                                                                        "x": 0.44196590781211855,
+                                                                                        "y": 1.0679705142974854,
+                                                                                        "z": 0.12349399924278259
+                                                                                    },
+                                                                                    "worldRotation": {
+                                                                                        "x": 3.928222417831421,
+                                                                                        "y": 126.8809585571289,
+                                                                                        "z": 309.146728515625
+                                                                                    },
+                                                                                    "depth": 9,
+                                                                                    "components": [
+                                                                                        "Transform"
+                                                                                    ],
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "name": "Right_IndexProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand/Right_IndexProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Right_MiddleProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand/Right_MiddleProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Right_PinkyProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand/Right_PinkyProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Right_RingProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand/Right_RingProximal",
+                                                                                            "depth": 10
+                                                                                        },
+                                                                                        {
+                                                                                            "name": "Right_ThumbProximal",
+                                                                                            "path": "Skeleton/Hips/Spine/Chest/UpperChest/Right_Shoulder/Right_UpperArm/Right_LowerArm/Right_Hand/Right_ThumbProximal",
+                                                                                            "depth": 10
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "skinnedMeshes": [
+        {
+            "meshName": "Armature_Mesh",
+            "materialNames": [
+                "Lit",
+                "Lit",
+                "Lit"
+            ],
+            "boneNames": [
+                "Hips",
+                "Spine",
+                "Chest",
+                "UpperChest",
+                "Neck",
+                "Head",
+                "Right_Eye",
+                "Left_Eye",
+                "Jaw",
+                "Neck_Twist_A",
+                "Left_Shoulder",
+                "Left_UpperArm",
+                "Left_LowerArm",
+                "Left_Hand",
+                "Left_PinkyProximal",
+                "Left_PinkyIntermediate",
+                "Left_PinkyDistal",
+                "Left_PinkyDistalEnd",
+                "Left_RingProximal",
+                "Left_RingIntermediate",
+                "Left_RingDistal",
+                "Left_RingDistalEnd",
+                "Left_MiddleProximal",
+                "Left_MiddleIntermediate",
+                "Left_MiddleDistal",
+                "Left_MiddleDistalEnd",
+                "Left_IndexProximal",
+                "Left_IndexIntermediate",
+                "Left_IndexDistal",
+                "Left_IndexDistalEnd",
+                "Left_ThumbProximal",
+                "Left_ThumbIntermediate",
+                "Left_ThumbDistal",
+                "Left_ThumbDistalEnd",
+                "Right_Shoulder",
+                "Right_UpperArm",
+                "Right_LowerArm",
+                "Right_Hand",
+                "Right_PinkyProximal",
+                "Right_PinkyIntermediate",
+                "Right_PinkyDistal",
+                "Right_PinkyDistalEnd",
+                "Right_RingProximal",
+                "Right_RingIntermediate",
+                "Right_RingDistal",
+                "Right_RingDistalEnd",
+                "Right_MiddleProximal",
+                "Right_MiddleIntermediate",
+                "Right_MiddleDistal",
+                "Right_MiddleDistalEnd",
+                "Right_IndexProximal",
+                "Right_IndexIntermediate",
+                "Right_IndexDistal",
+                "Right_IndexDistalEnd",
+                "Right_ThumbProximal",
+                "Right_ThumbIntermediate",
+                "Right_ThumbDistal",
+                "Right_ThumbDistalEnd",
+                "Left_UpperLeg",
+                "Left_LowerLeg",
+                "Left_Foot",
+                "Left_Toes",
+                "Left_ToesEnd",
+                "Right_UpperLeg",
+                "Right_LowerLeg",
+                "Right_Foot",
+                "Right_Toes",
+                "Right_ToesEnd"
+            ],
+            "rootBoneName": "Hips",
+            "blendShapeNames": [],
+            "boundingBox": {
+                "m_Center": {
+                    "x": -5.960464477539063e-8,
+                    "y": -0.09214255213737488,
+                    "z": 0.026248633861541749
+                },
+                "m_Extent": {
+                    "x": 0.5281845331192017,
+                    "y": 0.8809299468994141,
+                    "z": 0.22050176560878755
+                }
+            }
+        }
+    ],
+    "animatorInfo": {
+        "controllerName": "",
+        "controllerPath": "",
+        "parameters": [],
+        "layers": [],
+        "avatar": {
+            "name": "",
+            "isHuman": false,
+            "humanBoneMapping": []
+        }
+    },
+    "animationClips": []
+}
