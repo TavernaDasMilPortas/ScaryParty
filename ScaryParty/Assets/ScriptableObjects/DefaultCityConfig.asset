@@ -15,20 +15,21 @@ MonoBehaviour:
   gerarEmTempoReal: 1
   generateBorderWalls: 1
   generateSolidCore: 0
-  seed: 358271599
-  gridWidth: 15
+  seed: 906118532
+  gridWidth: 10
   gridHeight: 12
   minStreetBranchLength: 30
   maxStreetBranchLength: 80
   streetWidth: 12
   sidewalkWidth: 2
+  sidewalkHeight: 0.15
   minBuildingWidth: 5
   maxBuildingWidth: 15
-  minBuildingDepth: 8
+  minBuildingDepth: 4
   maxBuildingDepth: 20
-  blockCornerMargin: 10
-  buildingGap: 1.5
-  buildingInnerSafetyMargin: 1.5
+  blockCornerMargin: 1
+  buildingGap: 1
+  buildingInnerSafetyMargin: 1
   minBuildingHeight: 5
   maxBuildingHeight: 30
   pizzariaInsideBlock: 1

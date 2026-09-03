@@ -55,6 +55,10 @@ public class CityConfig : ScriptableObject
     [LabelText("Largura da Calçada")]
     public float sidewalkWidth = 2f;
 
+    [TabGroup("Geometria e Chunks")]
+    [LabelText("Altura da Calçada (Desnível)")]
+    public float sidewalkHeight = 0.15f;
+
 
     // --- CONSTRUÇÕES ---
     [TabGroup("Construções (Perímetro)")]

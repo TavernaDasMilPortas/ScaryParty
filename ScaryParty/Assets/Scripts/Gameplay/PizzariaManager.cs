@@ -190,6 +190,7 @@ public class PizzariaManager : NetworkBehaviour
 
     /// <summary>
     /// Called when a player successfully delivers a pizza.
+    /// O servidor é a autoridade: incrementa Money diretamente via NetworkVariable.
     /// </summary>
     public void CompleteOrder(string pizzaType, int deliveryPointId, ulong clientId)
     {
@@ -201,9 +202,19 @@ public class PizzariaManager : NetworkBehaviour
         {
             _activeOrders.Remove(targetOrder);
             
-            // Pay player
+            // Paga o jogador via NetworkVariable (autoridade do servidor)
             int reward = Random.Range(10, 30);
-            PayPlayerClientRpc(reward, new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } } });
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                var playerState = client.PlayerObject?.GetComponent<PlayerState>();
+                if (playerState != null)
+                {
+                    playerState.Money.Value += reward;
+                }
+            }
+
+            // Notifica o jogador que fez a entrega para efeitos visuais locais
+            NotifyDeliveryClientRpc(reward, new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } } });
 
             UpdateClientsOrdersClientRpc(targetOrder, false, deliveryPointId);
         }
@@ -256,12 +267,15 @@ public class PizzariaManager : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Notifica o cliente que fez a entrega para feedback visual (ex: "+R$20").
+    /// O dinheiro real já foi adicionado via NetworkVariable no servidor.
+    /// </summary>
     [ClientRpc]
-    private void PayPlayerClientRpc(int amount, ClientRpcParams rpcParams = default)
+    private void NotifyDeliveryClientRpc(int amount, ClientRpcParams rpcParams = default)
     {
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.AddMoney(amount);
             UIManager.Instance.AddCompletedDelivery();
         }
     }

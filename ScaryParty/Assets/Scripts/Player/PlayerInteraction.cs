@@ -197,7 +197,8 @@ public class PlayerInteraction : NetworkBehaviour
             
             if (UIManager.Instance != null)
                 UIManager.Instance.UpdateHand(true, itemName);
-                
+            
+            SyncHeldPizzaCount();
             return true;
         }
         else if (!leftHand.isFull)
@@ -208,7 +209,8 @@ public class PlayerInteraction : NetworkBehaviour
             
             if (UIManager.Instance != null)
                 UIManager.Instance.UpdateHand(false, itemName);
-                
+            
+            SyncHeldPizzaCount();
             return true;
         }
 
@@ -247,6 +249,26 @@ public class PlayerInteraction : NetworkBehaviour
             
             if (UIManager.Instance != null)
                 UIManager.Instance.UpdateHand(false, "Empty");
+        }
+
+        SyncHeldPizzaCount();
+    }
+
+    /// <summary>
+    /// Conta quantas pizzas o jogador está segurando e informa ao servidor via ServerRpc.
+    /// O servidor atualiza PlayerState.HeldPizzas (NetworkVariable), tornando o dado
+    /// visível para todos os clientes no scoreboard.
+    /// </summary>
+    private void SyncHeldPizzaCount()
+    {
+        int count = 0;
+        if (rightHand.isFull) count++;
+        if (leftHand.isFull) count++;
+
+        var ps = GetComponent<PlayerState>();
+        if (ps != null)
+        {
+            ps.UpdateHeldPizzasServerRpc(count);
         }
     }
 }

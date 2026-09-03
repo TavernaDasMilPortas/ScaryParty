@@ -53,10 +53,20 @@
                 
                 <ui:Label text="ENTRAR POR CÓDIGO" class="panel-title" />
                 
-                <ui:Label text="Join Code:" class="field-label" />
+                <ui:Label text="Join Code (Relay):" class="field-label" />
                 <ui:TextField name="ManualIpInput" text="" class="input-field" />
                 
-                <ui:Button name="BtnJoinManual" text="ENTRAR NA SALA" class="action-btn join-manual-btn" />
+                <ui:Button name="BtnJoinManual" text="ENTRAR (RELAY)" class="action-btn join-manual-btn" />
+
+                <ui:VisualElement class="divider" />
+                
+                <ui:Label text="CONEXÃO LOCAL (LAN)" class="panel-title" />
+                
+                <ui:Button name="BtnCreateLAN" text="CRIAR SALA (LAN)" class="action-btn create-btn" />
+                
+                <ui:Label text="IP do Host (LAN):" class="field-label" />
+                <ui:TextField name="LanIpInput" text="127.0.0.1" class="input-field" />
+                <ui:Button name="BtnJoinLAN" text="ENTRAR (LAN)" class="action-btn join-manual-btn" />
             </ui:VisualElement>
             
         </ui:VisualElement>

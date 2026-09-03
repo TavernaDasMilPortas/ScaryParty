@@ -137,9 +137,9 @@ public class TrafficManager : NetworkBehaviour
         vehicleObj.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
         vehicleObj.transform.SetParent(_vehicleRoot.transform);
         
-        // Remove collider to avoid physics overhead on server if not needed
+        // Keep collider as trigger so TrafficVehicle.CheckVehicleAhead() raycasts still detect other vehicles
         Collider col = vehicleObj.GetComponent<Collider>();
-        if (col != null) Destroy(col);
+        if (col != null) col.isTrigger = true;
         
         TrafficVehicle vehicle = vehicleObj.AddComponent<TrafficVehicle>();
         vehicle.speed = _baseSpeed * (0.8f + (float)_rng.NextDouble() * 0.4f);

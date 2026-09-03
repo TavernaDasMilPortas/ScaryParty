@@ -54,90 +54,73 @@ public class WeaponAnimationGenerator
     /// </summary>
     private static MusclePose PistolIdlePose(bool tight = false) => new MusclePose
     {
-        SpineFrontBack      =  0.05f,   // leve lean pra frente
+        SpineFrontBack      =  0.05f,
         ChestFrontBack      =  0.04f,
 
-        // Braço direito: desce da T-Pose (-0.25), vai para frente (+0.45)
-        RightArmDownUp      = -0.25f,
-        RightArmFrontBack   =  tight ? 0.35f : 0.45f,
-        RightArmTwistInOut  =  0.10f,
-        RightForearmStretch = -0.45f,   // cotovelo ~90° dobrado
-        RightHandDownUp     = -0.08f,   // pulso levemente abaixado (grip)
-        RightHandInOut      = -0.05f,
+        RightArmDownUp      = -0.30f,   // A bit lower to avoid floating feeling
+        RightArmFrontBack   =  tight ? 0.25f : 0.35f, // Closer to body
+        RightArmTwistInOut  =  0.05f,
+        RightForearmStretch = -0.35f,   // Less deeply bent
+        RightHandDownUp     = -0.05f,
+        RightHandInOut      =  0.00f,
 
-        // Braço esquerdo: levemente à frente e relaxado
-        LeftArmDownUp       = -0.55f,   // braço abaixado naturalmente
-        LeftArmFrontBack    =  0.08f,
-        LeftForearmStretch  =  0.05f,   // quase estendido, relaxado
+        LeftArmDownUp       = -0.65f,   // Relaxed naturally
+        LeftArmFrontBack    =  0.05f,
+        LeftForearmStretch  =  0.05f,
     };
 
-    /// <summary>
-    /// ADS pistola — ambos braços estendidos à altura dos olhos.
-    /// </summary>
     private static MusclePose PistolAimPose() => new MusclePose
     {
-        SpineFrontBack      =  0.10f,   // lean agressivo para frente
-        ChestFrontBack      =  0.08f,
-        HeadNodDownUp       =  0.10f,   // cabeça levemente para frente (mira)
+        SpineFrontBack      =  0.05f,
+        ChestFrontBack      =  0.05f,
+        HeadNodDownUp       =  0.05f,
 
-        // Braço direito: quase horizontal, apontando para frente
-        RightArmDownUp      = -0.05f,   // quase horizontal (levemente abaixo da T-Pose)
-        RightArmFrontBack   =  0.80f,   // bem para frente
-        RightArmTwistInOut  = -0.05f,
-        RightForearmStretch =  0.25f,   // braço maioritariamente estendido
+        RightArmDownUp      = -0.10f,
+        RightArmFrontBack   =  0.75f,
+        RightArmTwistInOut  =  0.00f,
+        RightForearmStretch =  0.15f,
         RightHandDownUp     =  0.05f,
         RightHandInOut      =  0.00f,
 
-        // Braço esquerdo: espelhado para suportar a pistola
-        LeftArmDownUp       = -0.05f,
-        LeftArmFrontBack    =  0.78f,
-        LeftArmTwistInOut   =  0.30f,   // rotação para segurar por baixo
-        LeftForearmStretch  =  0.20f,
+        LeftArmDownUp       = -0.10f,
+        LeftArmFrontBack    =  0.70f,
+        LeftArmTwistInOut   =  0.05f, // Prevent weird twisting
+        LeftForearmStretch  =  0.10f,
     };
 
-    /// <summary>
-    /// Port Arms — escopeta na frente do peito, cano ~45° para cima.
-    /// Braços cruzados na frente segurando a arma.
-    /// </summary>
     private static MusclePose ShotgunIdlePose(bool tight = false) => new MusclePose
     {
-        SpineFrontBack      = -0.03f,   // leve lean para trás (peso da arma)
+        SpineFrontBack      = -0.03f,
 
-        // Braço direito: segurado na altura do peito
-        RightArmDownUp      = -0.22f,
-        RightArmFrontBack   =  0.38f,
-        RightArmTwistInOut  = -0.15f,
-        RightForearmStretch = -0.62f,   // cotovelo muito dobrado (coronha)
+        RightArmDownUp      = -0.30f, // Lower to avoid clipping neck/chest
+        RightArmFrontBack   =  0.30f, // Closer to body but lower
+        RightArmTwistInOut  =  0.05f, // Flare elbow OUT to avoid rib clipping
+        RightForearmStretch = -0.50f, // Less bent
         RightHandDownUp     = -0.05f,
 
-        // Braço esquerdo: esticado para segurar o cano/guardamão
-        LeftArmDownUp       = -0.18f,
-        LeftArmFrontBack    =  tight ? 0.48f : 0.55f,
-        LeftArmTwistInOut   =  0.12f,
-        LeftForearmStretch  = -0.32f,   // moderadamente dobrado
+        LeftArmDownUp       = -0.25f,
+        LeftArmFrontBack    =  tight ? 0.40f : 0.45f,
+        LeftArmTwistInOut   = -0.05f, // Twist naturally
+        LeftForearmStretch  = -0.20f,
     };
 
-    /// <summary>
-    /// ADS escopeta — coronha no ombro direito, cheek weld.
-    /// </summary>
     private static MusclePose ShotgunAimPose() => new MusclePose
     {
-        SpineFrontBack      =  0.12f,
-        SpineLeftRight      = -0.08f,   // leve rotação do torso para o ombro dominante
-        ChestLeftRight      = -0.12f,
-        HeadNodDownUp       =  0.12f,
-        HeadTiltLeftRight   =  0.12f,   // cheek weld — cabeça inclina no coronha
+        SpineFrontBack      =  0.10f,
+        SpineLeftRight      = -0.05f,
+        ChestLeftRight      = -0.10f,
+        HeadNodDownUp       =  0.10f,
+        HeadTiltLeftRight   =  0.10f,
 
-        // Braço direito: elbow up (cotovelo levantado), empunhando
-        RightArmDownUp      = -0.10f,   // cotovelo na altura do ombro
-        RightArmFrontBack   =  0.42f,
-        RightForearmStretch = -0.58f,
+        RightArmDownUp      = -0.15f,
+        RightArmFrontBack   =  0.40f,
+        RightArmTwistInOut  =  0.05f, // Flare elbow out
+        RightForearmStretch = -0.50f,
 
-        // Braço esquerdo: esticado segurando o cano
-        LeftArmDownUp       = -0.08f,
-        LeftArmFrontBack    =  0.72f,
-        LeftArmTwistInOut   =  0.22f,
-        LeftForearmStretch  =  0.10f,   // quase estendido alcançando o cano
+        LeftArmDownUp       = -0.15f,
+        LeftArmFrontBack    =  0.65f,
+        LeftArmTwistInOut   =  0.00f, // No weird twisting
+        LeftForearmStretch  =  0.05f,
     };
 
     // ─── POSE DE HOLSTER (usada para Equip/Unequip) ─────────────────────────

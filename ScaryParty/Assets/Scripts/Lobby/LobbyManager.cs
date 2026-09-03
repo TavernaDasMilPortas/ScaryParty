@@ -238,6 +238,73 @@ public class LobbyManager : MonoBehaviour
         }
     }
 
+    public async void StartLANHost(string roomName)
+    {
+        if (NetworkManager.Singleton == null) return;
+        Debug.Log("[LobbyManager] Tentando iniciar Host (LAN)...");
+
+        if (NetworkManager.Singleton.IsListening)
+        {
+            Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
+            NetworkManager.Singleton.Shutdown();
+            await Task.Delay(500);
+        }
+
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        // Remove relay data
+        transport.SetRelayServerData(default);
+        // Configure connection for LAN (listen on all interfaces)
+        transport.UseWebSockets = false;
+        transport.SetConnectionData("0.0.0.0", 7777, "0.0.0.0");
+
+        if (NetworkManager.Singleton.StartHost())
+        {
+            Debug.Log("[LobbyManager] ✅ Host LAN iniciado com sucesso. Carregando ReadyScene...");
+            
+            // Try starting Room Discovery broadcast
+            var discovery = GetComponent<RoomDiscoveryService>();
+            if (discovery != null)
+            {
+                discovery.StartHosting(roomName, 7777, 4);
+            }
+
+            NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+        }
+        else
+        {
+            Debug.LogError("[LobbyManager] ❌ Falha ao iniciar Host LAN.");
+        }
+    }
+
+    public async void JoinLANClient(string ipAddress)
+    {
+        if (NetworkManager.Singleton == null) return;
+        Debug.Log($"[LobbyManager] Tentando entrar em Host LAN no IP: {ipAddress}...");
+
+        if (NetworkManager.Singleton.IsListening)
+        {
+            Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
+            NetworkManager.Singleton.Shutdown();
+            await Task.Delay(500);
+        }
+
+        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        // Remove relay data
+        transport.SetRelayServerData(default);
+        // Configure connection for LAN (connect to target IP)
+        transport.UseWebSockets = false;
+        transport.SetConnectionData(ipAddress, 7777);
+
+        if (NetworkManager.Singleton.StartClient())
+        {
+            Debug.Log("[LobbyManager] ✅ StartClient LAN executado! Aguardando o Host...");
+        }
+        else
+        {
+            Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente LAN.");
+        }
+    }
+
     private IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float intervalSeconds)
     {
         while (true)

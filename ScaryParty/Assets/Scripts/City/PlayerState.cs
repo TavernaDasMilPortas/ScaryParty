@@ -11,6 +11,18 @@ public class PlayerState : NetworkBehaviour
     public NetworkVariable<bool> IsReady = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> IsGameStarted = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    /// <summary>
+    /// Dinheiro acumulado pelo jogador. Somente o servidor pode alterar (autoridade do servidor).
+    /// Sincronizado automaticamente para todos os clientes via NetworkVariable.
+    /// </summary>
+    public NetworkVariable<int> Money = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+    /// <summary>
+    /// Quantidade de pizzas que o jogador está carregando (0, 1 ou 2).
+    /// Visível para todos os clientes no scoreboard.
+    /// </summary>
+    public NetworkVariable<int> HeldPizzas = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private ThirdPersonController _tpc;
     private PlayerInput _playerInput;
     private StarterAssetsInputs _inputs;
@@ -29,10 +41,15 @@ public class PlayerState : NetworkBehaviour
         // Listeners for state changes
         IsGameStarted.OnValueChanged += OnGameStartedChanged;
         PlayerColor.OnValueChanged += OnColorChanged;
+        Money.OnValueChanged += OnMoneyChanged;
 
         // Apply initial states
         UpdateMovementLock(IsGameStarted.Value);
         ApplyColorToMesh(PlayerColor.Value);
+        
+        // Atualiza o HUD com o dinheiro atual (pode ser 0 no início, mas garante consistência)
+        if (IsOwner && UIManager.Instance != null)
+            UIManager.Instance.UpdateMoneyDisplay(Money.Value);
 
         if (IsOwner)
         {
@@ -72,6 +89,7 @@ public class PlayerState : NetworkBehaviour
     {
         IsGameStarted.OnValueChanged -= OnGameStartedChanged;
         PlayerColor.OnValueChanged -= OnColorChanged;
+        Money.OnValueChanged -= OnMoneyChanged;
     }
 
     [ServerRpc]
@@ -184,5 +202,27 @@ public class PlayerState : NetworkBehaviour
             }
             smr.materials = originalMats;
         }
+    }
+
+    /// <summary>
+    /// Callback disparado quando o dinheiro do jogador muda (via NetworkVariable).
+    /// Apenas o dono local atualiza seu HUD.
+    /// </summary>
+    private void OnMoneyChanged(int previous, int current)
+    {
+        if (IsOwner && UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateMoneyDisplay(current);
+        }
+    }
+
+    /// <summary>
+    /// O cliente informa ao servidor quantas pizzas está carregando.
+    /// O servidor atualiza a NetworkVariable que é visível para todos (scoreboard).
+    /// </summary>
+    [ServerRpc]
+    public void UpdateHeldPizzasServerRpc(int count)
+    {
+        HeldPizzas.Value = Mathf.Clamp(count, 0, 2);
     }
 }

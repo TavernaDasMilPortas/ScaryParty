@@ -1,10 +1,14 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 /// <summary>
 /// Singleton manager for the Main Game UI using UI Toolkit.
 /// Updates the HUD dynamically during gameplay.
+/// Includes a Tab-activated scoreboard showing all players, their pizza slots, and money.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -22,8 +26,11 @@ public class UIManager : MonoBehaviour
     private Label _leftHandContent;
     private Label _rightHandContent;
 
+    // Scoreboard Elements
+    private VisualElement _scoreboardOverlay;
+    private ScrollView _scoreboardList;
+
     // State
-    private int _currentMoney = 0;
     private int _completedDeliveries = 0;
 
     private void Awake()
@@ -56,11 +63,16 @@ public class UIManager : MonoBehaviour
         _rightHandContent = root.Q<Label>("RightHandContent");
         _minimapImage = root.Q<VisualElement>("MinimapImage");
 
-        UpdateMoney(0);
+        // Scoreboard
+        _scoreboardOverlay = root.Q<VisualElement>("ScoreboardOverlay");
+        _scoreboardList = root.Q<ScrollView>("ScoreboardList");
+
+        UpdateMoneyDisplay(0);
         UpdateScore(0);
         HideInteractionPrompt();
         UpdateHand(true, "Empty");
         UpdateHand(false, "Empty");
+        HideScoreboard();
 
         // Minimap drag and drop setup
         if (_minimapImage != null)
@@ -126,22 +138,132 @@ public class UIManager : MonoBehaviour
                 _minimapImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(worldImage.RenderTexture));
             }
         }
+
+        // Scoreboard: mostra enquanto Tab está pressionado
+        HandleScoreboardInput();
+    }
+
+    // ========================================
+    // SCOREBOARD (Tab)
+    // ========================================
+
+    private void HandleScoreboardInput()
+    {
+        bool tabHeld = false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null)
+            tabHeld = Keyboard.current.tabKey.isPressed;
+#else
+        tabHeld = Input.GetKey(KeyCode.Tab);
+#endif
+
+        if (tabHeld)
+        {
+            ShowScoreboard();
+        }
+        else
+        {
+            HideScoreboard();
+        }
+    }
+
+    private void ShowScoreboard()
+    {
+        if (_scoreboardOverlay == null) return;
+
+        _scoreboardOverlay.RemoveFromClassList("hidden");
+        _scoreboardOverlay.style.display = DisplayStyle.Flex;
+
+        RefreshScoreboardData();
+    }
+
+    private void HideScoreboard()
+    {
+        if (_scoreboardOverlay == null) return;
+
+        _scoreboardOverlay.AddToClassList("hidden");
+        _scoreboardOverlay.style.display = DisplayStyle.None;
     }
 
     /// <summary>
-    /// Adds money and updates the UI.
+    /// Lê todos os PlayerState na cena e monta as linhas do scoreboard.
+    /// Cada linha: Nome ············ ■/□ slots ············ R$xxx
+    /// ■ = slot com pizza, □ = slot vazio
     /// </summary>
-    public void AddMoney(int amount)
+    private void RefreshScoreboardData()
     {
-        _currentMoney += amount;
-        UpdateMoney(_currentMoney);
+        if (_scoreboardList == null) return;
+
+        _scoreboardList.Clear();
+
+        // Busca todos os jogadores ativos
+        var allPlayers = Object.FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+
+        foreach (var player in allPlayers)
+        {
+            if (player == null) continue;
+
+            string playerName = player.PlayerName.Value.ToString();
+            if (string.IsNullOrEmpty(playerName)) playerName = "???";
+
+            int heldPizzas = player.HeldPizzas.Value;
+            int money = player.Money.Value;
+            Color playerColor = player.PlayerColor.Value;
+
+            // Monta a string de slots: ■ para pizza, □ para vazio (2 slots = 2 mãos)
+            const int maxSlots = 2;
+            string slotsDisplay = "";
+            for (int i = 0; i < maxSlots; i++)
+            {
+                if (i < heldPizzas)
+                    slotsDisplay += "●  "; // Círculo cheio = slot com pizza
+                else
+                    slotsDisplay += "■  "; // Quadrado = slot vazio
+            }
+            slotsDisplay = slotsDisplay.TrimEnd();
+
+            // Cria a row do scoreboard
+            var row = new VisualElement();
+            row.AddToClassList("scoreboard-row");
+
+            // Nome do jogador (com cor)
+            var nameLabel = new Label(playerName);
+            nameLabel.AddToClassList("scoreboard-cell");
+            nameLabel.AddToClassList("scoreboard-name");
+            nameLabel.style.color = new StyleColor(playerColor);
+
+            // Indicador de slots (pizzas)
+            var slotsLabel = new Label(slotsDisplay);
+            slotsLabel.AddToClassList("scoreboard-cell");
+            slotsLabel.AddToClassList("scoreboard-slots");
+
+            // Dinheiro
+            var moneyLabel = new Label($"R${money}");
+            moneyLabel.AddToClassList("scoreboard-cell");
+            moneyLabel.AddToClassList("scoreboard-money");
+
+            row.Add(nameLabel);
+            row.Add(slotsLabel);
+            row.Add(moneyLabel);
+
+            _scoreboardList.Add(row);
+        }
     }
 
-    private void UpdateMoney(int total)
+    // ========================================
+    // MONEY (agora via NetworkVariable)
+    // ========================================
+
+    /// <summary>
+    /// Atualiza o display de dinheiro no HUD.
+    /// Chamado pelo callback OnMoneyChanged do PlayerState (NetworkVariable).
+    /// </summary>
+    public void UpdateMoneyDisplay(int total)
     {
         if (_moneyLabel != null)
         {
-            _moneyLabel.text = $"${total}";
+            _moneyLabel.text = $"R${total}";
         }
     }
 
@@ -158,9 +280,13 @@ public class UIManager : MonoBehaviour
     {
         if (_scoreLabel != null)
         {
-            _scoreLabel.text = $"Deliveries: {total}";
+            _scoreLabel.text = $"Entregas: {total}";
         }
     }
+
+    // ========================================
+    // HANDS / INTERACTION
+    // ========================================
 
     /// <summary>
     /// Updates the text shown in a hand slot.
@@ -217,6 +343,10 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // ========================================
+    // MINIMAP
+    // ========================================
+
     /// <summary>
     /// Toggles the minimap VisualElement to cover most of the screen.
     /// </summary>
@@ -247,6 +377,10 @@ public class UIManager : MonoBehaviour
             container.style.left = StyleKeyword.Null;
         }
     }
+
+    // ========================================
+    // ORDERS LIST
+    // ========================================
 
     /// <summary>
     /// Updates the orders list on the right side of the screen.

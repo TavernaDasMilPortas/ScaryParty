@@ -5,8 +5,8 @@
         <ui:VisualElement class="top-section">
             <!-- Top Left: Stats -->
             <ui:VisualElement class="stats-container">
-                <ui:Label name="MoneyLabel" text="$0" class="money-label" />
-                <ui:Label name="ScoreLabel" text="Deliveries: 0" class="score-label" />
+                <ui:Label name="MoneyLabel" text="R$0" class="money-label" />
+                <ui:Label name="ScoreLabel" text="Entregas: 0" class="score-label" />
             </ui:VisualElement>
 
             
@@ -45,6 +45,21 @@
         <ui:VisualElement class="minimap-container">
             <ui:VisualElement name="MinimapImage" class="minimap-image" />
             <ui:Label text="CITY MAP" class="minimap-title" />
+        </ui:VisualElement>
+
+        <!-- Scoreboard Overlay (Tab) - Inicialmente oculto -->
+        <ui:VisualElement name="ScoreboardOverlay" class="scoreboard-overlay hidden">
+            <ui:VisualElement class="scoreboard-panel">
+                <ui:Label text="SCOREBOARD" class="scoreboard-title" />
+                <ui:VisualElement class="scoreboard-row scoreboard-header">
+                    <ui:Label text="Jogador" class="scoreboard-cell scoreboard-name" />
+                    <ui:Label text="Pizzas" class="scoreboard-cell scoreboard-slots" />
+                    <ui:Label text="Dinheiro" class="scoreboard-cell scoreboard-money" />
+                </ui:VisualElement>
+                <ui:ScrollView name="ScoreboardList" class="scoreboard-list">
+                    <!-- Player rows will be injected here dynamically -->
+                </ui:ScrollView>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

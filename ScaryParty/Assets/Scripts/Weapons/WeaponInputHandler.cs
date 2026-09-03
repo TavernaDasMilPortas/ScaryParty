@@ -46,7 +46,9 @@ public class WeaponInputHandler : MonoBehaviour
         if (starterAssetsInputs.fire)
         {
             weaponController.TriggerFire();
-            starterAssetsInputs.fire = false; // Como não é "Hold" e sim trigger
+            // We do not set starterAssetsInputs.fire = false here. 
+            // The new Input System will set it to false when the user releases the button.
+            // TriggerFire() already handles the fireRate cooldown.
         }
     }
 }

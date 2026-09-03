@@ -22,6 +22,11 @@ public class LobbyUIController : MonoBehaviour
     private TextField _manualIpInput;
     private Button _btnJoinManual;
 
+    // LAN
+    private TextField _lanIpInput;
+    private Button _btnCreateLAN;
+    private Button _btnJoinLAN;
+
     private void OnEnable()
     {
         _document = GetComponent<UIDocument>();
@@ -60,6 +65,11 @@ public class LobbyUIController : MonoBehaviour
         _manualIpInput = root.Q<TextField>("ManualIpInput");
         _btnJoinManual = root.Q<Button>("BtnJoinManual");
 
+        // LAN
+        _lanIpInput = root.Q<TextField>("LanIpInput");
+        _btnCreateLAN = root.Q<Button>("BtnCreateLAN");
+        _btnJoinLAN = root.Q<Button>("BtnJoinLAN");
+
         Debug.Log("[LobbyUI] Elements queried, registering callbacks...");
         RegisterCallbacks();
         LoadProfileData();
@@ -92,6 +102,9 @@ public class LobbyUIController : MonoBehaviour
 
         _btnCreateRoom.clicked += OnCreateRoomClicked;
         _btnJoinManual.clicked += OnJoinManualClicked;
+
+        _btnCreateLAN.clicked += OnCreateLANClicked;
+        _btnJoinLAN.clicked += OnJoinLANClicked;
     }
 
     private void LoadProfileData()
@@ -197,6 +210,30 @@ public class LobbyUIController : MonoBehaviour
 
         SaveProfileData();
         LobbyManager.JoinRelayRoom(joinCode);
+    }
+
+    private void OnCreateLANClicked()
+    {
+        Debug.Log("[LobbyUI] Create LAN clicked.");
+        string roomName = _roomNameInput.value;
+        if (string.IsNullOrEmpty(roomName)) roomName = $"{_playerNameInput.value}'s LAN Party";
+        
+        SaveProfileData();
+        LobbyManager.StartLANHost(roomName);
+    }
+
+    private void OnJoinLANClicked()
+    {
+        Debug.Log("[LobbyUI] Join LAN clicked.");
+        string ip = _lanIpInput.value;
+        if (string.IsNullOrEmpty(ip))
+        {
+            Debug.LogError("[LobbyUI] IP está vazio!");
+            return;
+        }
+
+        SaveProfileData();
+        LobbyManager.JoinLANClient(ip);
     }
 }
 

@@ -210,7 +210,7 @@ public class CityGenerator : NetworkBehaviour
 
         StreetGraph graph = _streetGridGen.Generate(
             config, rng, _streetsRoot.transform,
-            streetMaterial, sidewalkMaterial, out List<Vector3[]> blockPolygons
+            streetMaterial, sidewalkMaterial, buildingMaterials, out List<Vector3[]> blockPolygons
         );
         CityData.streetGraph = graph;
 
@@ -489,14 +489,73 @@ public class CityGenerator : NetworkBehaviour
         _eventManager = _cityRoot.AddComponent<CityEventManager>();
     }
 
+    private Vector3[] CleanPolygon(Vector3[] poly)
+    {
+        if (poly == null || poly.Length < 3) return poly;
+        
+        List<Vector3> distanceCleaned = new List<Vector3>();
+        distanceCleaned.Add(poly[0]);
+        for (int i = 1; i < poly.Length; i++)
+        {
+            // Apenas remove arestas microscópicas (< 1 metro) que quebram o cálculo da normal.
+            // Não remove segmentos curtos válidos (zig-zags).
+            if (Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], poly[i]) > 1f)
+            {
+                distanceCleaned.Add(poly[i]);
+            }
+        }
+        
+        if (distanceCleaned.Count > 2 && Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], distanceCleaned[0]) <= 1f)
+        {
+            distanceCleaned.RemoveAt(distanceCleaned.Count - 1);
+        }
+
+        if (distanceCleaned.Count < 3) return distanceCleaned.ToArray();
+        
+        List<Vector3> finalCleaned = new List<Vector3>();
+        int n = distanceCleaned.Count;
+        for (int i = 0; i < n; i++)
+        {
+            Vector3 prev = distanceCleaned[(i - 1 + n) % n];
+            Vector3 curr = distanceCleaned[i];
+            Vector3 next = distanceCleaned[(i + 1) % n];
+
+            Vector3 dir1 = (curr - prev).normalized;
+            Vector3 dir2 = (next - curr).normalized;
+
+            float angle = Vector3.Angle(dir1, dir2);
+            // Tolerância de 5 graus:
+            // - É o suficiente para fundir T-intersections ligeiramente tortos (que criavam buracos no meio da rua).
+            // - Preserva curvas reais (que normalmente têm ângulos de 10 a 15 graus por segmento).
+            if (angle > 5f) 
+            {
+                finalCleaned.Add(curr);
+            }
+        }
+        
+        return finalCleaned.ToArray();
+    }
+
     private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons)
     {
+        CityGenLogger.StartLog();
         CityData.blocks = new List<BlockInfo>();
         int blockIndex = 0;
 
-        foreach (Vector3[] poly in blockPolygons)
+        foreach (Vector3[] rawPoly in blockPolygons)
         {
-            Vector3[] insetPoly = InsetPolygon(poly, config.streetWidth * 0.5f);
+            // BUG FIX: Remove degenerate collinear edges that cause severe miter math corruption
+            Vector3[] poly = CleanPolygon(rawPoly);
+            if (poly.Length < 3) continue;
+
+            // Fix: Inset polygon by streetWidth * 0.5f PLUS sidewalkWidth
+            float totalInset = (config.streetWidth * 0.5f) + config.sidewalkWidth;
+            Vector3[] insetPoly = InsetPolygon(poly, totalInset);
+            
+            // BUG FIX: Quarteirões muito pequenos se auto-interceptam durante o Inset, criando geometrias inválidas.
+            // Pulamos quarteirões cuja área útil ficou pequena demais!
+            float insetArea = CalculatePolygonArea(insetPoly);
+            if (Mathf.Abs(insetArea) < 100f) continue;
             
             float area = CalculatePolygonArea(insetPoly);
             float minViableArea = (config.minBuildingWidth + config.blockCornerMargin * 2f) 
@@ -509,6 +568,16 @@ public class CityGenerator : NetworkBehaviour
             
             float minDimension = Mathf.Min(size.x, size.z);
             if (minDimension < config.minBuildingDepth * 2f) continue;
+
+            // Thinness filter: Area / Perimeter^2 check to reject long, narrow wedge blocks
+            float perimeter = 0f;
+            for (int i = 0; i < insetPoly.Length; i++) {
+                perimeter += Vector3.Distance(insetPoly[i], insetPoly[(i + 1) % insetPoly.Length]);
+            }
+            if (perimeter > 0f) {
+                float thinness = (4f * Mathf.PI * area) / (perimeter * perimeter);
+                if (thinness < 0.1f) continue; // Reject extremely thin polygons (e.g. 1x20 aspect ratio)
+            }
 
             // Zonas baseadas em "Chunks" quadrados (Chebyshev distance para não formar círculos)
             float maxAbsDist = Mathf.Max(Mathf.Abs(centerPos.x), Mathf.Abs(centerPos.z));
@@ -537,23 +606,74 @@ public class CityGenerator : NetworkBehaviour
             };
 
             CityData.blocks.Add(block);
+            CityGenLogger.StartBlock(blockIndex, area, insetPoly.Length);
             _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, blockIndex);
             
             blockIndex++;
         }
+        CityGenLogger.SaveLog();
     }
 
     private Vector3[] InsetPolygon(Vector3[] poly, float inset)
     {
-        Vector3 center = CalculatePolygonCentroid(poly);
-        Vector3[] insetPoly = new Vector3[poly.Length];
-        for (int i = 0; i < poly.Length; i++)
+        int n = poly.Length;
+        if (n < 3) return poly;
+
+        // 1. Determine winding order (CW vs CCW) using signed area
+        float signedArea = 0f;
+        for (int i = 0; i < n; i++)
         {
-            Vector3 dir = (center - poly[i]);
-            dir.y = 0;
-            if (dir.sqrMagnitude < 0.01f) insetPoly[i] = poly[i];
-            else insetPoly[i] = poly[i] + dir.normalized * inset;
+            int j = (i + 1) % n;
+            signedArea += poly[i].x * poly[j].z - poly[j].x * poly[i].z;
         }
+        // sign > 0 means CCW in XZ plane; we want inward normals
+        float windingSign = Mathf.Sign(signedArea);
+
+        // 2. Compute inward normal for each edge
+        Vector3[] edgeNormals = new Vector3[n];
+        for (int i = 0; i < n; i++)
+        {
+            int j = (i + 1) % n;
+            Vector3 edgeDir = (poly[j] - poly[i]);
+            edgeDir.y = 0;
+            edgeDir.Normalize();
+            // Inward normal depends on winding direction
+            // For CCW (signedArea > 0): inward = (-edgeDir.z, 0, edgeDir.x)
+            // For CW  (signedArea < 0): inward = (edgeDir.z, 0, -edgeDir.x)
+            edgeNormals[i] = new Vector3(-edgeDir.z * windingSign, 0, edgeDir.x * windingSign);
+        }
+
+        // 3. Compute miter vector for each vertex
+        Vector3[] insetPoly = new Vector3[n];
+        for (int i = 0; i < n; i++)
+        {
+            int prevEdge = (i - 1 + n) % n;
+            int currEdge = i;
+
+            Vector3 n1 = edgeNormals[prevEdge];
+            Vector3 n2 = edgeNormals[currEdge];
+            Vector3 miter = (n1 + n2);
+            miter.y = 0;
+
+            float miterSqr = miter.sqrMagnitude;
+            if (miterSqr < 0.001f)
+            {
+                // Edges are nearly parallel, just offset by normal
+                insetPoly[i] = poly[i] + n1 * inset;
+            }
+            else
+            {
+                // Miter length = inset / dot(miter_normalized, normal)
+                miter.Normalize();
+                float dot = Vector3.Dot(miter, n1);
+                if (Mathf.Abs(dot) < 0.1f) dot = 0.1f * Mathf.Sign(dot); // Clamp for very acute angles
+                float miterLength = inset / dot;
+                // Cap miter length to avoid spikes on very acute angles
+                miterLength = Mathf.Min(miterLength, inset * 3f);
+                insetPoly[i] = poly[i] + miter * miterLength;
+            }
+        }
+
         return insetPoly;
     }
 

@@ -1,0 +1,15 @@
+Lista de Portas - Photon Engine
+Estas portas frequentemente aparecem em tutoriais de Unity, mas são específicas do Photon Engine (PUN2, Photon Fusion) e NÃO do Unity Netcode for GameObjects (NGO) ou Relay.
+
+Porta | Protocolo | Serviço Photon | Descrição
+---- | ---- | ---- | ----
+5058 | UDP | Photon Name Server | Autenticação e descoberta de regiões.
+5055 | UDP | Photon Master Server | Matchmaking, criação e listagem de salas.
+5056 | UDP | Photon Game Server | Tráfego de jogo em tempo real (simulação).
+4533 | TCP | Photon Name Server | Fallback TCP caso UDP falhe.
+4530 | TCP | Photon Master Server | Fallback TCP caso UDP falhe.
+4531 | TCP | Photon Game Server | Fallback TCP caso UDP falhe.
+9090 | TCP (WS) | Photon Master Server | Conexão WebSocket para WebGL (insegura).
+9091 | TCP (WS) | Photon Game Server | Conexão WebSocket para WebGL (insegura).
+9093 | TCP (WS) | Photon Name Server | Conexão WebSocket para WebGL (insegura).
+19090 | TCP (WSS)| Photon Master Server | Conexão WebSocket segura (TLS/HTTPS).

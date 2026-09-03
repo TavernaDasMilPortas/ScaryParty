@@ -47,74 +47,134 @@ public class BlockFiller : MonoBehaviour
         int buildingCount = 0;
         List<OBB2D> placedBuildings = new List<OBB2D>();
 
+        // Calculate winding sign once for the polygon
+        float signedArea = 0f;
         for (int i = 0; i < n; i++)
         {
-            Vector3 p0 = poly[(i - 1 + n) % n];
-            Vector3 p1 = poly[i];
-            Vector3 p2 = poly[(i + 1) % n];
-            Vector3 p3 = poly[(i + 2) % n];
+            int j = (i + 1) % n;
+            signedArea += poly[i].x * poly[j].z - poly[j].x * poly[i].z;
+        }
+        float windingSign = Mathf.Sign(signedArea);
 
-            Vector3 edgeVec = p2 - p1;
-            float edgeLength = edgeVec.magnitude;
-            
-            if (edgeLength < 5f) continue; // Skip edges that are too small
-
-            Vector3 edgeDir = edgeVec.normalized;
-            Vector3 prevEdgeDir = (p1 - p0).normalized;
-            Vector3 nextEdgeDir = (p3 - p2).normalized;
-
-            // Calculate normals perpendicular to the edge
-            Vector3 normal1 = new Vector3(-edgeDir.z, 0, edgeDir.x);
-            Vector3 normal2 = new Vector3(edgeDir.z, 0, -edgeDir.x);
-
-            // Test which normal points toward the centroid
-            Vector3 testP1 = p1 + edgeDir * (edgeLength * 0.5f) + normal1 * 1f;
-            Vector3 testP2 = p1 + edgeDir * (edgeLength * 0.5f) + normal2 * 1f;
-
-            Vector3 inwardNormal = (Vector3.Distance(testP1, centroid) < Vector3.Distance(testP2, centroid)) ? normal1 : normal2;
-
-            // Envelopamento contínuo, MAS com respeito trigonométrico às esquinas para NUNCA cruzar casas.
-            float angle1 = Vector3.Angle(-prevEdgeDir, edgeDir);
-            float angle2 = Vector3.Angle(-edgeDir, nextEdgeDir);
-            
-            float maxD = config.maxBuildingDepth;
-            float margin1 = config.blockCornerMargin;
-            if (angle1 > 5f && angle1 < 175f) margin1 = Mathf.Max(margin1, maxD / Mathf.Tan(angle1 * 0.5f * Mathf.Deg2Rad));
-            
-            float margin2 = config.blockCornerMargin;
-            if (angle2 > 5f && angle2 < 175f) margin2 = Mathf.Max(margin2, maxD / Mathf.Tan(angle2 * 0.5f * Mathf.Deg2Rad));
-
-            // Limitar para que a margem não consuma a rua inteira em triângulos muito agudos
-            margin1 = Mathf.Min(margin1, edgeLength * 0.4f);
-            margin2 = Mathf.Min(margin2, edgeLength * 0.4f);
-
-            float currentDistance = margin1;
-            float maxDistance = edgeLength - margin2;
-
-            while (currentDistance < maxDistance)
+        // Varredura: Pass 1 coloca prédios normais. Pass 2 varre novamente colocando casas pequenas (filler).
+        for (int pass = 1; pass <= 2; pass++)
+        {
+            for (int i = 0; i < n; i++)
             {
-                float bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
-                if (currentDistance + bWidth > maxDistance)
+                Vector3 p0 = poly[(i - 1 + n) % n];
+                Vector3 p1 = poly[i];
+                Vector3 p2 = poly[(i + 1) % n];
+                Vector3 p3 = poly[(i + 2) % n];
+
+                Vector3 edgeVec = p2 - p1;
+                float edgeLength = edgeVec.magnitude;
+                
+                if (edgeLength < 5f) continue; 
+
+                Vector3 edgeDir = edgeVec.normalized;
+                Vector3 prevEdgeDir = (p1 - p0).normalized;
+                Vector3 nextEdgeDir = (p3 - p2).normalized;
+
+                // Robust inward normal using the polygon's winding sign
+                Vector3 inwardNormal = new Vector3(-edgeDir.z * windingSign, 0, edgeDir.x * windingSign);
+
+                float angle1 = Vector3.Angle(-prevEdgeDir, edgeDir);
+                float angle2 = Vector3.Angle(-edgeDir, nextEdgeDir);
+                
+                float margin1 = angle1 > 160f ? 0f : config.blockCornerMargin;
+                if (angle1 < 85f) margin1 = Mathf.Max(margin1, config.maxBuildingDepth / Mathf.Tan(angle1 * 0.5f * Mathf.Deg2Rad));
+                
+                float margin2 = angle2 > 160f ? 0f : config.blockCornerMargin;
+                if (angle2 < 85f) margin2 = Mathf.Max(margin2, config.maxBuildingDepth / Mathf.Tan(angle2 * 0.5f * Mathf.Deg2Rad));
+
+                // Cap the margins so acute corners don't consume the entire edge
+                float maxMargin = config.maxBuildingDepth * 1.5f;
+                margin1 = Mathf.Min(margin1, maxMargin);
+                margin2 = Mathf.Min(margin2, maxMargin);
+
+                margin1 = Mathf.Min(margin1, edgeLength * 0.4f);
+                margin2 = Mathf.Min(margin2, edgeLength * 0.4f);
+
+                CityGenLogger.StartEdge(i, edgeLength, margin1, margin2);
+
+                float currentDistance = margin1;
+                float maxDistance = edgeLength - margin2;
+
+                while (currentDistance < maxDistance)
                 {
-                    bWidth = maxDistance - currentDistance; // Force it to fill the exact remaining space perfectly!
-                    if (bWidth < 2f) break; 
+                    float bWidth;
+                    if (pass == 1) bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
+                    else bWidth = 2f + (float)rng.NextDouble() * 3f;
+
+                    float requestedWidth = bWidth;
+
+                    if (currentDistance + bWidth > maxDistance)
+                    {
+                        bWidth = maxDistance - currentDistance;
+                        if (bWidth < 2f) break; 
+                    }
+
+                    float bDepth;
+                    if (pass == 1) bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
+                    else bDepth = 2f + (float)rng.NextDouble() * 5f;
+
+                    float requestedDepth = bDepth;
+
+                    float bHeight = GetRandomHeight(block.zoneType, rng);
+                    float distAlongEdge = currentDistance + (bWidth * 0.5f);
+                
+                // Camada 2: Raycast depth calculation
+                Vector3 edgePoint = p1 + edgeDir * distAlongEdge;
+                float originalBDepth = bDepth;
+                bool isInside = false;
+
+                // Dynamic width and depth shrinking loop
+                float minAllowedDepth = 2f;
+                float minAllowedWidth = 2f;
+
+                while (bWidth >= minAllowedWidth)
+                {
+                    float availableDepth = GetBlockDepthAtPoint(p1, edgeDir, inwardNormal, currentDistance, bWidth, poly);
+                    
+                    // To fill the large empty spaces inside the blocks, we stretch the building depth inwards
+                    float targetDepth = availableDepth * 0.5f; // Meet buildings from the opposite side in the middle
+                    
+                    // Cap it so it doesn't get ridiculously long on massive blocks, but allow it to be much larger than maxBuildingDepth
+                    float absoluteMaxDepth = Mathf.Max(config.maxBuildingDepth * 2f, 35f); 
+                    
+                    bDepth = targetDepth - (float)rng.NextDouble() * 2f;
+                    bDepth = Mathf.Clamp(bDepth, config.minBuildingDepth, absoluteMaxDepth);
+
+                    if (bDepth >= minAllowedDepth)
+                    {
+                        // Check if back corners are strictly inside the polygon
+                        float extX = (bWidth * 0.5f) - 0.1f;
+                        float extZ = (bDepth * 0.5f) - 0.1f;
+                        Vector3 cCenter = edgePoint + inwardNormal * (bDepth * 0.5f);
+                        Vector3 backRight = cCenter + edgeDir * extX + inwardNormal * extZ;
+                        Vector3 backLeft = cCenter - edgeDir * extX + inwardNormal * extZ;
+
+                        if (IsPointInPolygon(new Vector2(backRight.x, backRight.z), poly) && 
+                            IsPointInPolygon(new Vector2(backLeft.x, backLeft.z), poly))
+                        {
+                            isInside = true;
+                            break;
+                        }
+                    }
+
+                    // Shrink depth, then width if needed
+                    bDepth -= 0.2f; 
+                    if (bDepth < minAllowedDepth)
+                    {
+                        bWidth -= 1f;
+                        bDepth = originalBDepth; 
+                    }
                 }
 
-                float bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
-                float bHeight = GetRandomHeight(block.zoneType, rng);
-
-                float distAlongEdge = currentDistance + (bWidth * 0.5f);
-                
-                // Camada 2: Clamp pela distância ao centroide projetada na normal
-                Vector3 edgePoint = p1 + edgeDir * distAlongEdge;
-                float maxSafeDepth = Vector3.Dot(centroid - edgePoint, inwardNormal);
-                maxSafeDepth = Mathf.Max(maxSafeDepth, 0f);
-                maxSafeDepth = Mathf.Max(maxSafeDepth - config.buildingInnerSafetyMargin, config.minBuildingDepth * 0.5f);
-                bDepth = Mathf.Min(bDepth, maxSafeDepth);
-
-                if (bDepth < 2f) 
+                if (!isInside || bWidth < minAllowedWidth || bDepth < minAllowedDepth) 
                 {
-                    currentDistance += 1f; 
+                    CityGenLogger.LogAttempt(pass, currentDistance, requestedWidth, requestedDepth, false, bWidth, bDepth, "FailedPolygonOrDepth");
+                    currentDistance += 1f;
                     continue; 
                 }
 
@@ -128,9 +188,13 @@ public class BlockFiller : MonoBehaviour
                 Vector2 axisD = new Vector2(inwardNormal.x, inwardNormal.z).normalized;
 
                 Vector3 centerPos = edgePoint + inwardNormal * (bDepth * 0.5f);
+                
+                // Aplicar a margem de segurança no tamanho do OBB para permitir costas-com-costas em blocos finos
+                float obbDepthExtents = Mathf.Max(0.1f, (bDepth * 0.5f) - (config.buildingInnerSafetyMargin * 0.5f));
+                
                 OBB2D candidateOBB = new OBB2D(
                     new Vector2(centerPos.x, centerPos.z),
-                    new Vector2(bWidth * 0.5f, bDepth * 0.5f),
+                    new Vector2(bWidth * 0.5f - 0.1f, obbDepthExtents),
                     axisW,
                     axisD
                 );
@@ -155,15 +219,16 @@ public class BlockFiller : MonoBehaviour
                         else
                         {
                             bDepth -= depthPenetration;
-                            if (bDepth < 2f)
+                            if (bDepth < minAllowedDepth)
                             {
                                 discarded = true;
                                 break;
                             }
                             centerPos = edgePoint + inwardNormal * (bDepth * 0.5f);
+                            float newObbDepthExtents = Mathf.Max(0.1f, (bDepth * 0.5f) - (config.buildingInnerSafetyMargin * 0.5f));
                             candidateOBB = new OBB2D(
                                 new Vector2(centerPos.x, centerPos.z),
-                                new Vector2(bWidth * 0.5f, bDepth * 0.5f),
+                                new Vector2(bWidth * 0.5f - 0.1f, newObbDepthExtents),
                                 axisW,
                                 axisD
                             );
@@ -173,10 +238,12 @@ public class BlockFiller : MonoBehaviour
 
                 if (discarded)
                 {
+                    CityGenLogger.LogAttempt(pass, currentDistance, requestedWidth, requestedDepth, false, bWidth, bDepth, "FailedSAT");
                     currentDistance += 1f;
                     continue;
                 }
 
+                CityGenLogger.LogAttempt(pass, currentDistance, requestedWidth, requestedDepth, true, bWidth, bDepth, "");
                 placedBuildings.Add(candidateOBB);
 
                 GameObject buildingObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -203,7 +270,7 @@ public class BlockFiller : MonoBehaviour
 
                 renderer.sharedMaterial = baseMat;
 
-                Color buildingColor = GenerateOrganicColor(block.zoneType, rng);
+                Color buildingColor = GenerateOrganicColor(rng);
                 propBlock.SetColor("_Color", buildingColor); 
                 propBlock.SetColor("_BaseColor", buildingColor); 
                 propBlock.SetColor("_MainColor", buildingColor); 
@@ -219,11 +286,12 @@ public class BlockFiller : MonoBehaviour
                 // Gap ZERO para garantir envelopamento contínuo (parede de prédios)
             }
         }
+        } // Closing the pass loop
 
         // Gera o miolo maciço para impedir visão interna (apenas se configurado)
         if (config.generateSolidCore)
         {
-            GenerateSolidCore(poly, centroid, blockParent.transform, GetRandomHeight(block.zoneType, rng) * 0.8f, GetZoneColor(block.zoneType) * 0.5f);
+            GenerateSolidCore(poly, centroid, blockParent.transform, GetRandomHeight(block.zoneType, rng) * 0.8f, Color.gray);
         }
     }
 
@@ -353,7 +421,6 @@ public class BlockFiller : MonoBehaviour
         float cellDepth = availableDepth / rows;
         float spacing = 1f;
 
-        Color zoneColor = GetZoneColor(block.zoneType);
         MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 
         for (int x = 0; x < cols; x++)
@@ -402,7 +469,7 @@ public class BlockFiller : MonoBehaviour
 
                 renderer.sharedMaterial = baseMat;
 
-                Color buildingColor = zoneColor * (float)(0.7 + rng.NextDouble() * 0.6);
+                Color buildingColor = GenerateOrganicColor(rng);
                 buildingColor.a = 1f;
                 propBlock.SetColor("_Color", buildingColor); 
                 propBlock.SetColor("_BaseColor", buildingColor); 
@@ -430,16 +497,76 @@ public class BlockFiller : MonoBehaviour
         }
     }
 
-    private Color GetZoneColor(ZoneType zone)
+    private Color GenerateOrganicColor(System.Random rng)
     {
-        switch (zone)
+        float h = (float)rng.NextDouble();
+        float s = 0.5f + (float)rng.NextDouble() * 0.5f;
+        float v = 0.4f + (float)rng.NextDouble() * 0.6f;
+        return Color.HSVToRGB(h, s, v);
+    }
+
+    private float GetBlockDepthAtPoint(Vector3 p1, Vector3 edgeDir, Vector3 inNormal, float currentDistance, float bWidth, Vector3[] poly)
+    {
+        Vector3 rayStart = p1 + edgeDir * (currentDistance + bWidth * 0.5f);
+        float minDepth = 9999f;
+
+        for (int i = 0; i < poly.Length; i++)
         {
-            case ZoneType.Residential: return new Color(0.3f, 0.5f, 0.9f);
-            case ZoneType.Commercial: return new Color(0.9f, 0.8f, 0.3f);
-            case ZoneType.Industrial: return new Color(0.8f, 0.4f, 0.2f);
-            case ZoneType.MonsterZone: return new Color(0.6f, 0.2f, 0.7f);
-            default: return Color.gray;
+            Vector3 pA = poly[i];
+            Vector3 pB = poly[(i + 1) % poly.Length];
+            if (LineLineIntersection(out Vector3 intersect, rayStart, inNormal, pA, (pB - pA).normalized))
+            {
+                float t = Vector3.Dot(intersect - pA, (pB - pA).normalized);
+                if (t >= 0 && t <= Vector3.Distance(pA, pB))
+                {
+                    // BUG FIX: Ensure the intersection is actually IN FRONT of the ray, not behind it!
+                    if (Vector3.Dot((intersect - rayStart).normalized, inNormal) > 0.9f)
+                    {
+                        float dist = Vector3.Distance(rayStart, intersect);
+                        if (dist > 0.1f && dist < minDepth)
+                        {
+                            minDepth = dist;
+                        }
+                    }
+                }
+            }
         }
+        return minDepth;
+    }
+
+    private bool LineLineIntersection(out Vector3 intersection, Vector3 linePoint1, Vector3 lineVec1, Vector3 linePoint2, Vector3 lineVec2)
+    {
+        float det = lineVec1.x * lineVec2.z - lineVec1.z * lineVec2.x;
+        if (Mathf.Abs(det) < 0.0001f)
+        {
+            intersection = Vector3.zero;
+            return false;
+        }
+
+        float dx = linePoint2.x - linePoint1.x;
+        float dz = linePoint2.z - linePoint1.z;
+
+        float u = (dx * lineVec2.z - dz * lineVec2.x) / det;
+        intersection = linePoint1 + lineVec1 * u;
+        return true;
+    }
+
+    private bool IsPointInPolygon(Vector2 p, Vector3[] poly)
+    {
+        bool inside = false;
+        int j = poly.Length - 1;
+        for (int i = 0; i < poly.Length; i++)
+        {
+            Vector2 pi = new Vector2(poly[i].x, poly[i].z);
+            Vector2 pj = new Vector2(poly[j].x, poly[j].z);
+            if (((pi.y > p.y) != (pj.y > p.y)) &&
+                (p.x < (pj.x - pi.x) * (p.y - pi.y) / (pj.y - pi.y) + pi.x))
+            {
+                inside = !inside;
+            }
+            j = i;
+        }
+        return inside;
     }
 
     private struct OBB2D

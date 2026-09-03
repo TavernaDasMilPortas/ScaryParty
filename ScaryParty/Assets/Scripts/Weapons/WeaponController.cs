@@ -31,15 +31,22 @@ public class WeaponController : MonoBehaviour
         if (animator == null) animator = GetComponent<Animator>();
         if (tpc == null) tpc = GetComponent<ThirdPersonController>();
         
-        if (rightHandAttachment == null)
+        if (rightHandAttachment == null && animator != null)
         {
-            Transform[] allTransforms = GetComponentsInChildren<Transform>();
-            foreach (Transform t in allTransforms)
+            rightHandAttachment = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            
+            // Fallback if not a humanoid
+            if (rightHandAttachment == null)
             {
-                if (t.name == "Right_Hand" || t.name.EndsWith("Right_Hand"))
+                Transform[] allTransforms = GetComponentsInChildren<Transform>();
+                foreach (Transform t in allTransforms)
                 {
-                    rightHandAttachment = t;
-                    break;
+                    string lowerName = t.name.ToLower();
+                    if (lowerName.Contains("righthand") || lowerName.EndsWith("right_hand"))
+                    {
+                        rightHandAttachment = t;
+                        break;
+                    }
                 }
             }
         }
@@ -95,6 +102,7 @@ public class WeaponController : MonoBehaviour
 
         currentMode = mode;
         animator.SetInteger(AnimWeaponMode, (int)currentMode);
+        animator.ResetTrigger(AnimFire); // Reset any pending fire triggers when switching weapons
 
         switch (currentMode)
         {
@@ -155,6 +163,26 @@ public class WeaponController : MonoBehaviour
 
             animator.SetBool(AnimIsMoving, isMoving);
             animator.SetBool(AnimIsSprinting, isSprinting);
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (currentMode != WeaponMode.Unarmed)
+        {
+            float size = 10f;
+            float thickness = 2f;
+            float x = Screen.width / 2f;
+            float y = Screen.height / 2f;
+
+            GUI.color = new Color(1, 1, 1, 0.8f);
+            
+            // Draw horizontal line
+            GUI.DrawTexture(new Rect(x - size, y - thickness / 2f, size * 2f, thickness), Texture2D.whiteTexture);
+            // Draw vertical line
+            GUI.DrawTexture(new Rect(x - thickness / 2f, y - size, thickness, size * 2f), Texture2D.whiteTexture);
+
+            GUI.color = Color.white; // Reset color
         }
     }
 }

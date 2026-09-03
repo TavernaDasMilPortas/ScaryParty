@@ -167,3 +167,85 @@
     font-size: 20px;
     color: rgb(255, 255, 255);
 }
+
+/* ========================================
+   SCOREBOARD (Tab Overlay)
+   ======================================== */
+
+.scoreboard-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+.scoreboard-panel {
+    background-color: rgba(15, 15, 15, 0.95);
+    border-radius: 15px;
+    padding: 20px 25px;
+    width: 620px;
+    max-height: 500px;
+    border-width: 2px;
+    border-color: rgb(255, 140, 0);
+}
+
+.scoreboard-title {
+    font-size: 28px;
+    color: rgb(255, 200, 50);
+    -unity-text-align: middle-center;
+    margin-bottom: 15px;
+    letter-spacing: 4px;
+}
+
+.scoreboard-header {
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+    padding-bottom: 8px;
+    margin-bottom: 5px;
+}
+
+.scoreboard-row {
+    flex-direction: row;
+    padding: 6px 10px;
+    align-items: center;
+}
+
+.scoreboard-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+.scoreboard-list {
+    flex-grow: 1;
+    max-height: 350px;
+}
+
+.scoreboard-cell {
+    font-size: 18px;
+}
+
+.scoreboard-name {
+    width: 40%;
+    -unity-text-align: middle-left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.scoreboard-slots {
+    width: 30%;
+    -unity-text-align: middle-center;
+    font-size: 22px;
+    color: rgb(255, 200, 100);
+    letter-spacing: 3px;
+}
+
+.scoreboard-money {
+    width: 30%;
+    -unity-text-align: middle-right;
+    color: rgb(133, 224, 100);
+    font-size: 20px;
+}
