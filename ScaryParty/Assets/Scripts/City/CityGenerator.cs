@@ -331,7 +331,7 @@ public class CityGenerator : NetworkBehaviour
                 pizzariaRot = largestBuilding.transform.rotation;
                 pizzariaScale = largestBuilding.transform.localScale;
                 
-                entranceDir = (largestBuilding.entrancePosition - largestBuilding.transform.position).normalized;
+                entranceDir = largestBuilding.transform.forward;
                 entranceDir.y = 0;
                 if (entranceDir.sqrMagnitude < 0.01f) entranceDir = Vector3.forward;
 
@@ -351,17 +351,25 @@ public class CityGenerator : NetworkBehaviour
 
         Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
         mat.color = new Color(0.8f, 0.1f, 0.1f);
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", mat.color);
         pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
 
-        Vector3 bancadaPos = pizzariaPos + entranceDir * 8.5f + Vector3.up * 0.5f;
+        // Bancada outside the pizzaria, on the sidewalk!
+        // Pizzaria scale Z is depth. So pizzariaScale.z * 0.5f is the edge of the building.
+        // Add 1.5f so the counter sits exactly on the sidewalk just outside the building.
+        float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
+        Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk + Vector3.up * 0.5f;
+        
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
         bancada.transform.position = bancadaPos;
-        bancada.transform.localScale = new Vector3(3f, 1f, 1.5f);
+        bancada.transform.rotation = pizzariaRot; // Align rotation with building
+        bancada.transform.localScale = new Vector3(4f, 1f, 1.5f);
         bancada.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
 
         Material bancadaMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
         bancadaMat.color = new Color(0.4f, 0.2f, 0.1f);
+        if (bancadaMat.HasProperty("_BaseColor")) bancadaMat.SetColor("_BaseColor", bancadaMat.color);
         bancada.GetComponent<Renderer>().sharedMaterial = bancadaMat;
 
         CityData.bancadaPosition = bancadaPos + new Vector3(0, 0.5f, 0);
@@ -369,17 +377,18 @@ public class CityGenerator : NetworkBehaviour
         GameObject sign = GameObject.CreatePrimitive(PrimitiveType.Cube);
         sign.name = "Pizzaria_Sign";
         sign.transform.SetParent(pizzariaBuilding.transform);
-        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f);
+        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f); // Front of the building
         sign.transform.localScale = new Vector3(0.8f, 0.2f, 0.1f);
         Material signMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
         signMat.color = Color.yellow;
+        if (signMat.HasProperty("_BaseColor")) signMat.SetColor("_BaseColor", signMat.color);
         sign.GetComponent<Renderer>().sharedMaterial = signMat;
         sign.GetComponent<Collider>().enabled = false;
 
         GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
         spawnPoint.transform.SetParent(pizzariaBuilding.transform);
-        // Posicionar na frente da entrada
-        spawnPoint.transform.position = pizzariaPos + entranceDir * ((pizzariaScale.z / 2f) + 2f) + Vector3.up * 0.1f;
+        // Posicionar o player spawn atrás da bancada, ou na frente
+        spawnPoint.transform.position = bancadaPos + entranceDir * 2f + Vector3.up * 0.1f;
         spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
     }
 

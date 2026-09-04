@@ -15,14 +15,14 @@ MonoBehaviour:
   gerarEmTempoReal: 1
   generateBorderWalls: 1
   generateSolidCore: 0
-  seed: 906118532
+  seed: 223865498
   gridWidth: 10
   gridHeight: 12
   minStreetBranchLength: 30
   maxStreetBranchLength: 80
-  streetWidth: 12
-  sidewalkWidth: 2
-  sidewalkHeight: 0.15
+  streetWidth: 15
+  sidewalkWidth: 5
+  sidewalkHeight: 1
   minBuildingWidth: 5
   maxBuildingWidth: 15
   minBuildingDepth: 4

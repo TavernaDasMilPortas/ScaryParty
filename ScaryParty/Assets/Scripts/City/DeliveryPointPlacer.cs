@@ -54,15 +54,24 @@ public class DeliveryPointPlacer : MonoBehaviour
                 GameObject markerObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 markerObj.name = $"DeliveryPoint_{pointIndex}";
                 markerObj.transform.SetParent(parent);
-                markerObj.transform.position = building.entrancePosition + Vector3.up * 0.1f;
-                markerObj.transform.localScale = new Vector3(4f, 0.1f, 4f);
+                
+                // Position it on top of the sidewalk
+                float yPos = config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f;
+                markerObj.transform.position = building.entrancePosition + Vector3.up * (yPos + 0.05f);
+                
+                // Visual scale: flat disc on the ground
+                markerObj.transform.localScale = new Vector3(4f, 0.05f, 4f);
 
-                // Set collider as trigger so it doesn't block player movement, but can still be Raycasted!
-                var col = markerObj.GetComponent<Collider>();
-                if (col != null)
-                {
-                    col.isTrigger = true;
-                }
+                // The PrimitiveType.Cylinder comes with a squashed CapsuleCollider. Destroy it.
+                var oldCol = markerObj.GetComponent<Collider>();
+                if (oldCol != null) Object.DestroyImmediate(oldCol);
+
+                // Add a large, tall BoxCollider for easy collision detection
+                BoxCollider boxCol = markerObj.AddComponent<BoxCollider>();
+                boxCol.isTrigger = true;
+                // Since the local scale Y is 0.05f, a size of Y=100 makes the collider 5 units tall in world space
+                boxCol.size = new Vector3(1f, 100f, 1f); 
+                boxCol.center = new Vector3(0, 50f, 0);
 
                 // Glowing emissive material
                 Renderer renderer = markerObj.GetComponent<Renderer>();

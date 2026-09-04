@@ -162,13 +162,13 @@ MonoBehaviour:
   - tracker:
       mostClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
-        count: 7
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
+        count: 15
         gameObjects:
         - {fileID: 0}
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
-        count: 5
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 13
         gameObjects:
         - {fileID: 0}
       - paths:
@@ -176,31 +176,12 @@ MonoBehaviour:
         count: 2
         gameObjects:
         - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_28[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
       recentlyClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_28[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
         count: 1
         gameObjects:
         - {fileID: 0}
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]/Minimap_WorldImage_Rig[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
       - paths: []
         count: 1
         gameObjects: []
@@ -209,6 +190,18 @@ MonoBehaviour:
         count: 1
         gameObjects:
         - {fileID: 0}
+      - paths: []
+        count: 1
+        gameObjects: []
+      - paths: []
+        count: 1
+        gameObjects: []
+      - paths: []
+        count: 1
+        gameObjects: []
+      - paths: []
+        count: 1
+        gameObjects: []
       - paths: []
         count: 1
         gameObjects: []
@@ -222,7 +215,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 07:10 PM (September 3, 2026)
+    lastSaveTimePrint: 10:51 PM (September 3, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -236,16 +229,16 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 105
+    lastValidTabWidth: 97
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_28[0]"}'
+    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
       paths: []
-      tabWidth: 102
-      name: BorderWall_28
+      tabWidth: 94
+      name: GroundPlane
       icon: {fileID: 2244882685325231567, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: BorderWall_28
+      shortName: GroundPlane
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -254,10 +247,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: BorderWall_28
+        m_Text: GroundPlane
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "BorderWall_28\u200B"
+        m_TextWithWhitespace: "GroundPlane\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -325,8 +318,8 @@ MonoBehaviour:
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: boxcollider
-        niceComponentName: box collider
+        componentName: meshcollider
+        niceComponentName: mesh collider
       - index: 0
         component: {fileID: 0}
         missingComponentID:
@@ -337,41 +330,37 @@ MonoBehaviour:
         hidden: 0
         componentName: meshrenderer
         niceComponentName: mesh renderer
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: 
+        niceComponentName: 
       historyPaths:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderWall_28[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityRoadNetwork[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]/Minimap_WorldImage_Rig[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Intersections[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Traffic[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
         prefab: 0
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_3[0]/Building_3[0]"}'
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_3[0]/Building_2[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_3[0]/Building_2[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
         prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - 7125a3c8cb32ba54a92762e1b3f686a4
+    - assetGUIDs:
+      - fd443a703d51ae0408ddfe7d9a12507f
+    - assetGUIDs:
       - ca14d084d9058bf4bb740f0939df13ff
+    - assetGUIDs:
+      - aefe2171e12196c4c988d9e2428d90ab
+    - assetGUIDs:
+      - 7cd3ab0928587bc4292b6ce48a449d80
     - assetGUIDs:
       - c21f32d3c53ae7144a12f79fcbdbf054
     - assetGUIDs:
@@ -380,9 +369,9 @@ MonoBehaviour:
       - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
       - 8105016687592461f977c054a80ce2f2
-    targetObject: {fileID: 11400000, guid: ca14d084d9058bf4bb740f0939df13ff, type: 2}
+    targetObject: {fileID: 2100000, guid: 7125a3c8cb32ba54a92762e1b3f686a4, type: 2}
     targetObjects: []
-    lastSelectedAsset: Assets/ScriptableObjects/DefaultCityConfig.asset
+    lastSelectedAsset: Assets/data/materials/grama.mat
     lastClickedTab: -1
     previousTab: 3
   - tracker:

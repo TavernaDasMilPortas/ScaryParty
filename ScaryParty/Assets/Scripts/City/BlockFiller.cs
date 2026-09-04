@@ -125,6 +125,14 @@ public class BlockFiller : MonoBehaviour
                 
                 // Camada 2: Raycast depth calculation
                 Vector3 edgePoint = p1 + edgeDir * distAlongEdge;
+                
+                // To fill the large empty spaces inside the blocks, we stretch the building depth inwards
+                float availableDepthInitial = GetBlockDepthAtPoint(p1, edgeDir, inwardNormal, currentDistance, bWidth, poly);
+                float targetDepth = availableDepthInitial * 0.5f; 
+                float absoluteMaxDepth = Mathf.Max(config.maxBuildingDepth * 2f, 35f); 
+                bDepth = targetDepth - (float)rng.NextDouble() * 2f;
+                bDepth = Mathf.Clamp(bDepth, config.minBuildingDepth, absoluteMaxDepth);
+                
                 float originalBDepth = bDepth;
                 bool isInside = false;
 
@@ -135,15 +143,7 @@ public class BlockFiller : MonoBehaviour
                 while (bWidth >= minAllowedWidth)
                 {
                     float availableDepth = GetBlockDepthAtPoint(p1, edgeDir, inwardNormal, currentDistance, bWidth, poly);
-                    
-                    // To fill the large empty spaces inside the blocks, we stretch the building depth inwards
-                    float targetDepth = availableDepth * 0.5f; // Meet buildings from the opposite side in the middle
-                    
-                    // Cap it so it doesn't get ridiculously long on massive blocks, but allow it to be much larger than maxBuildingDepth
-                    float absoluteMaxDepth = Mathf.Max(config.maxBuildingDepth * 2f, 35f); 
-                    
-                    bDepth = targetDepth - (float)rng.NextDouble() * 2f;
-                    bDepth = Mathf.Clamp(bDepth, config.minBuildingDepth, absoluteMaxDepth);
+                    bDepth = Mathf.Min(bDepth, availableDepth - 0.5f);
 
                     if (bDepth >= minAllowedDepth)
                     {
@@ -569,7 +569,7 @@ public class BlockFiller : MonoBehaviour
         return inside;
     }
 
-    private struct OBB2D
+    public struct OBB2D
     {
         public Vector2 center;
         public Vector2 halfExtents;
@@ -585,7 +585,7 @@ public class BlockFiller : MonoBehaviour
         }
     }
 
-    private static bool OBBOverlap(OBB2D a, OBB2D b, out float penetration, out Vector2 shrinkAxis)
+    public static bool OBBOverlap(OBB2D a, OBB2D b, out float penetration, out Vector2 shrinkAxis)
     {
         penetration = float.MaxValue;
         shrinkAxis = Vector2.zero;

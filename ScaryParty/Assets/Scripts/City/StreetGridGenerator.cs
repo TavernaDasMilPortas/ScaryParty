@@ -299,202 +299,199 @@ public class StreetGridGenerator : MonoBehaviour
         graph.edges = edges;
 
         // 4. Extract organic block faces using the planar graph
-        blockPolygons = ExtractFaces(graph, out Vector3[] outerPerimeter);
+        blockPolygons = ExtractFaces(graph, out List<Vector3[]> voidFaces);
 
         // 5. Generate Geometry using Unified Mesh
         UnifiedRoadMesher.BuildUnifiedMesh(graph, config, rng, parent, streetMat, sidewalkMat);
 
-        if (config.generateBorderWalls && outerPerimeter != null && outerPerimeter.Length >= 3)
+        if (config.generateBorderWalls && voidFaces.Count > 0)
         {
             GameObject borderParent = new GameObject("CityBorders");
             borderParent.transform.SetParent(parent);
             Material wallMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
             wallMat.color = new Color(0.15f, 0.15f, 0.15f);
 
-            float wallThickness = 10f;
-            float wallHeight = config.maxBuildingHeight * 1.5f;
-            float buildingSpace = config.maxBuildingDepth + 5f; 
-            float offsetOutward = (config.streetWidth / 2f) + config.sidewalkWidth + buildingSpace + (wallThickness / 2f);
-
-            // BUG FIX: Clean outer perimeter to remove microscopic edges and collinear vertices
-            List<Vector3> distanceCleaned = new List<Vector3>();
-            if (outerPerimeter.Length > 0) distanceCleaned.Add(outerPerimeter[0]);
-            for (int i = 1; i < outerPerimeter.Length; i++)
+            List<Vector3[]> cleanedVoidFaces = new List<Vector3[]>();
+            foreach (var voidFace in voidFaces)
             {
-                if (Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], outerPerimeter[i]) > 1f)
-                    distanceCleaned.Add(outerPerimeter[i]);
-            }
-            if (distanceCleaned.Count > 2 && Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], distanceCleaned[0]) <= 1f)
-                distanceCleaned.RemoveAt(distanceCleaned.Count - 1);
-            
-            List<Vector3> finalCleaned = new List<Vector3>();
-            int dc = distanceCleaned.Count;
-            for (int i = 0; i < dc; i++)
-            {
-                Vector3 prev = distanceCleaned[(i - 1 + dc) % dc];
-                Vector3 curr = distanceCleaned[i];
-                Vector3 next = distanceCleaned[(i + 1) % dc];
-                float angle = Vector3.Angle((curr - prev).normalized, (next - curr).normalized);
-                if (angle > 2f) finalCleaned.Add(curr);
-            }
-            outerPerimeter = finalCleaned.ToArray();
-
-            // BUG 2 FIX: Calculate perfect mitered offset polygon for the border wall
-            int n = outerPerimeter.Length;
-            if (n < 3) return graph; // Prevent collapse if perimeter becomes too small
-            Vector3[] miteredPerimeter = new Vector3[n];
-            Vector3[] edgeDirs = new Vector3[n];
-            Vector3[] edgeNormals = new Vector3[n];
-
-            for (int i = 0; i < n; i++)
-            {
-                Vector3 p1 = outerPerimeter[i];
-                Vector3 p2 = outerPerimeter[(i + 1) % n];
-                Vector3 dir = (p2 - p1).normalized;
-                edgeDirs[i] = dir;
-                // Outer face is extracted clockwise, left is outward
-                edgeNormals[i] = new Vector3(-dir.z, 0, dir.x);
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                int prev = (i - 1 + n) % n;
-                Vector3 n1 = edgeNormals[prev];
-                Vector3 n2 = edgeNormals[i];
-                Vector3 miter = (n1 + n2).normalized;
-                float dot = Vector3.Dot(miter, n1);
-                if (Mathf.Abs(dot) < 0.1f) dot = 0.1f * Mathf.Sign(dot);
-                float miterLength = offsetOutward / dot;
-                miterLength = Mathf.Min(miterLength, offsetOutward * 3f);
-                miteredPerimeter[i] = outerPerimeter[i] + miter * miterLength;
-            }
-
-            for (int i = 0; i < n; i++)
-            {
-                // -- WALL GENERATION --
-                // Remove this chaotic wall generation loop inside the border buildings loop.
-                // We will generate the convex hull wall AFTER placing the border buildings.
-
-                // --- BORDER BUILDING GENERATION ---
-                Vector3 p1 = outerPerimeter[i];
-                Vector3 p2 = outerPerimeter[(i + 1) % n];
-                Vector3 dir = edgeDirs[i];
-                Vector3 normal = edgeNormals[i];
-                float length = Vector3.Distance(p1, p2);
-
-                if (length < 10f) continue;
-
-                // BUG 3 FIX: Trigonometric margins for border buildings to prevent corner overlaps
-                Vector3 prevDir = edgeDirs[(i - 1 + n) % n];
-                Vector3 nextDir = edgeDirs[(i + 1) % n];
-
-                float angle1 = Vector3.Angle(-prevDir, dir);
-                float angle2 = Vector3.Angle(-dir, nextDir);
-
-                float margin1 = config.blockCornerMargin;
-                if (angle1 > 5f && angle1 < 175f) margin1 = Mathf.Max(margin1, config.maxBuildingDepth / Mathf.Tan(angle1 * 0.5f * Mathf.Deg2Rad));
-
-                float margin2 = config.blockCornerMargin;
-                if (angle2 > 5f && angle2 < 175f) margin2 = Mathf.Max(margin2, config.maxBuildingDepth / Mathf.Tan(angle2 * 0.5f * Mathf.Deg2Rad));
-
-                if (margin1 + margin2 >= length) continue;
-
-                float currentDist = margin1;
-                float maxDist = length - margin2;
-                float buildingOffset = (config.streetWidth / 2f) + config.sidewalkWidth;
-                MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
-
-                while (currentDist < maxDist)
+                List<Vector3> distanceCleaned = new List<Vector3>();
+                if (voidFace.Length > 0) distanceCleaned.Add(voidFace[0]);
+                for (int i = 1; i < voidFace.Length; i++)
                 {
-                    float bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
-                    if (currentDist + bWidth > maxDist)
-                    {
-                        bWidth = maxDist - currentDist;
-                        if (bWidth < 2f) break;
-                    }
+                    if (Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], voidFace[i]) > 1f)
+                        distanceCleaned.Add(voidFace[i]);
+                }
+                if (distanceCleaned.Count > 2 && Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], distanceCleaned[0]) <= 1f)
+                    distanceCleaned.RemoveAt(distanceCleaned.Count - 1);
+                
+                List<Vector3> finalCleaned = new List<Vector3>();
+                int dc = distanceCleaned.Count;
+                if (dc < 3) continue;
 
-                    float bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
-                    float bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
-
-                    // Casas apontam para a rua (-normal)
-                    Vector3 bCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
-                    
-                    GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    bObj.name = $"BorderBuilding_{i}_{currentDist}";
-                    bObj.transform.SetParent(borderParent.transform);
-                    bObj.transform.position = bCenter + new Vector3(0, bHeight * 0.5f, 0);
-                    bObj.transform.rotation = Quaternion.LookRotation(-normal, Vector3.up);
-                    bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
-
-                    Material baseMat = null;
-                    if (buildingMaterials != null && buildingMaterials.Length > 0)
-                    {
-                        baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
-                    }
-                    if (baseMat == null) baseMat = wallMat;
-                    
-                    Renderer r = bObj.GetComponent<Renderer>();
-                    r.sharedMaterial = baseMat;
-                    
-                    // Zone-like colors for border (sombrias mas coloridas)
-                    float hue = (float)rng.NextDouble();
-                    float sat = 0.5f + (float)rng.NextDouble() * 0.5f; // Mais saturação para ficar colorido
-                    float val = 0.3f + (float)rng.NextDouble() * 0.4f;
-                    Color buildingColor = Color.HSVToRGB(hue, sat, val);
-                    
-                    propBlock.SetColor("_Color", buildingColor);
-                    propBlock.SetColor("_BaseColor", buildingColor);
-                    propBlock.SetColor("_MainColor", buildingColor);
-                    r.SetPropertyBlock(propBlock);
-
-                    currentDist += bWidth;
+                for (int i = 0; i < dc; i++)
+                {
+                    Vector3 prev = distanceCleaned[(i - 1 + dc) % dc];
+                    Vector3 curr = distanceCleaned[i];
+                    Vector3 next = distanceCleaned[(i + 1) % dc];
+                    float angle = Vector3.Angle((curr - prev).normalized, (next - curr).normalized);
+                    if (angle > 2f) finalCleaned.Add(curr);
+                }
+                if (finalCleaned.Count >= 3)
+                {
+                    cleanedVoidFaces.Add(finalCleaned.ToArray());
                 }
             }
-            // Generate clean enveloping walls using a Convex Hull
-            List<Vector3> hullPoints = ComputeConvexHull(outerPerimeter);
-            // The houses are pushed out by (streetWidth/2 + sidewalkWidth + maxBuildingDepth/2)
-            // So we expand the hull by maxBuildingDepth + 10f to safely envelop all houses
-            float hullExpansion = config.maxBuildingDepth + 10f; 
-            
-            // Expand the hull normals
-            Vector3[] expandedHull = new Vector3[hullPoints.Count];
-            for (int i = 0; i < hullPoints.Count; i++)
+
+            List<BlockFiller.OBB2D> placedBorderBuildings = new List<BlockFiller.OBB2D>();
+
+            // Compute street OBBs to prevent houses from spawning inside streets
+            List<BlockFiller.OBB2D> streetOBBs = new List<BlockFiller.OBB2D>();
+            float streetHalfWidth = (config.streetWidth / 2f) + config.sidewalkWidth;
+            foreach (var edge in graph.edges)
             {
-                Vector3 pPrev = hullPoints[(i - 1 + hullPoints.Count) % hullPoints.Count];
-                Vector3 pCurr = hullPoints[i];
-                Vector3 pNext = hullPoints[(i + 1) % hullPoints.Count];
-                
-                Vector3 dir1 = (pCurr - pPrev).normalized;
-                Vector3 dir2 = (pNext - pCurr).normalized;
-                
-                Vector3 n1 = new Vector3(-dir1.z, 0, dir1.x);
-                Vector3 n2 = new Vector3(-dir2.z, 0, dir2.x);
-                
-                Vector3 miter = (n1 + n2).normalized;
-                float dot = Vector3.Dot(miter, n1);
-                float length = hullExpansion / Mathf.Max(dot, 0.1f);
-                
-                expandedHull[i] = pCurr + miter * length;
+                Vector3 A = graph.nodes[edge.nodeA].worldPosition;
+                Vector3 B = graph.nodes[edge.nodeB].worldPosition;
+                float len = Vector3.Distance(A, B);
+                if (len < 0.1f) continue;
+                Vector3 eDir = (B - A).normalized;
+                Vector2 center = new Vector2((A.x + B.x) / 2f, (A.z + B.z) / 2f);
+                // Extend the OBB by streetHalfWidth to cover the intersection node perfectly
+                Vector2 extents = new Vector2(len * 0.5f + streetHalfWidth - 0.1f, streetHalfWidth - 0.1f);
+                Vector2 axisX = new Vector2(eDir.x, eDir.z);
+                Vector2 axisZ = new Vector2(-eDir.z, eDir.x);
+                streetOBBs.Add(new BlockFiller.OBB2D(center, extents, axisX, axisZ));
             }
-            
-            for (int i = 0; i < expandedHull.Length; i++)
+
+            foreach (var outerPerimeter in cleanedVoidFaces)
             {
-                Vector3 wp1 = expandedHull[i];
-                Vector3 wp2 = expandedHull[(i + 1) % expandedHull.Length];
-                Vector3 wallDir = wp2 - wp1;
-                float wallLen = wallDir.magnitude;
-                
-                if (wallLen > 0.1f)
+                int n = outerPerimeter.Length;
+
+                Vector3[] edgeDirs = new Vector3[n];
+                Vector3[] edgeNormals = new Vector3[n];
+
+                for (int i = 0; i < n; i++)
                 {
-                    wallDir /= wallLen;
-                    Vector3 center = (wp1 + wp2) / 2f;
-                    GameObject wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    wall.name = $"BorderWall_{i}";
-                    wall.transform.SetParent(borderParent.transform);
-                    wall.transform.position = center + new Vector3(0, wallHeight / 2f, 0);
-                    wall.transform.rotation = Quaternion.LookRotation(wallDir);
-                    wall.transform.localScale = new Vector3(wallThickness, wallHeight, wallLen); 
-                    wall.GetComponent<Renderer>().sharedMaterial = wallMat;
+                    Vector3 p1 = outerPerimeter[i];
+                    Vector3 p2 = outerPerimeter[(i + 1) % n];
+                    Vector3 dir = (p2 - p1).normalized;
+                    edgeDirs[i] = dir;
+                    // Void face is traversed clockwise, so void is on the left
+                    edgeNormals[i] = new Vector3(-dir.z, 0, dir.x);
+                }
+
+                for (int i = 0; i < n; i++)
+                {
+                    Vector3 p1 = outerPerimeter[i];
+                    Vector3 p2 = outerPerimeter[(i + 1) % n];
+                    Vector3 dir = edgeDirs[i];
+                    Vector3 normal = edgeNormals[i];
+                    float length = Vector3.Distance(p1, p2);
+
+                    if (length < 10f) continue;
+
+                    // Expand the search space backwards and forwards to allow filling convex corner wedges.
+                    // The SAT check against streetOBBs will naturally prevent overlapping concave corners.
+                    float currentDist = -config.maxBuildingWidth;
+                    float maxDist = length + config.maxBuildingWidth;
+                    
+                    float buildingOffset = streetHalfWidth;
+                    MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+
+                    while (currentDist < maxDist)
+                    {
+                        float bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
+                        if (currentDist + bWidth > maxDist)
+                        {
+                            bWidth = maxDist - currentDist;
+                            if (bWidth < 2f) break;
+                        }
+
+                        float bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
+                        float bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
+
+                        // Casas apontam para a rua (-normal)
+                        Vector3 bCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
+                        
+                        // Create candidate OBB
+                        Vector2 cCenter = new Vector2(bCenter.x, bCenter.z);
+                        Vector2 cExtents = new Vector2(bWidth * 0.5f - 0.1f, bDepth * 0.5f - 0.1f);
+                        Vector3 fwd = -normal;
+                        Vector3 rightDir = Vector3.Cross(Vector3.up, fwd);
+                        Vector2 axisX = new Vector2(rightDir.x, rightDir.z);
+                        Vector2 axisZ = new Vector2(fwd.x, fwd.z);
+                        BlockFiller.OBB2D candidateOBB = new BlockFiller.OBB2D(cCenter, cExtents, axisX, axisZ);
+
+                        bool overlap = false;
+                        float candidateRadius = bWidth + bDepth; // Safe upper bound
+                        
+                        // Fast rejection for buildings
+                        float buildingDistThresh = (candidateRadius + config.maxBuildingWidth + config.maxBuildingDepth);
+                        float buildingDistThreshSqr = buildingDistThresh * buildingDistThresh;
+                        
+                        foreach (var otherOBB in placedBorderBuildings)
+                        {
+                            if ((cCenter - otherOBB.center).sqrMagnitude > buildingDistThreshSqr) continue;
+                            if (BlockFiller.OBBOverlap(candidateOBB, otherOBB, out _, out _))
+                            {
+                                overlap = true;
+                                break;
+                            }
+                        }
+
+                        if (!overlap)
+                        {
+                            foreach (var stOBB in streetOBBs)
+                            {
+                                float stRadius = stOBB.halfExtents.x + stOBB.halfExtents.y;
+                                float stThresh = candidateRadius + stRadius;
+                                if ((cCenter - stOBB.center).sqrMagnitude > stThresh * stThresh) continue;
+
+                                if (BlockFiller.OBBOverlap(candidateOBB, stOBB, out _, out _))
+                                {
+                                    overlap = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (overlap)
+                        {
+                            currentDist += 1f; // Step and try again
+                            continue;
+                        }
+                        
+                        placedBorderBuildings.Add(candidateOBB);
+
+                        GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                        bObj.name = $"BorderBuilding_{i}_{currentDist}";
+                        bObj.transform.SetParent(borderParent.transform);
+                        bObj.transform.position = bCenter + new Vector3(0, bHeight * 0.5f, 0);
+                        bObj.transform.rotation = Quaternion.LookRotation(-normal, Vector3.up);
+                        bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
+
+                        Material baseMat = null;
+                        if (buildingMaterials != null && buildingMaterials.Length > 0)
+                        {
+                            baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
+                        }
+                        if (baseMat == null) baseMat = wallMat;
+                        
+                        Renderer r = bObj.GetComponent<Renderer>();
+                        r.sharedMaterial = baseMat;
+                        
+                        // Zone-like colors for border (sombrias mas coloridas)
+                        float hue = (float)rng.NextDouble();
+                        float sat = 0.5f + (float)rng.NextDouble() * 0.5f; 
+                        float val = 0.3f + (float)rng.NextDouble() * 0.4f;
+                        Color buildingColor = Color.HSVToRGB(hue, sat, val);
+                        
+                        propBlock.SetColor("_Color", buildingColor);
+                        propBlock.SetColor("_BaseColor", buildingColor);
+                        propBlock.SetColor("_MainColor", buildingColor);
+                        r.SetPropertyBlock(propBlock);
+
+                        currentDist += bWidth;
+                    }
                 }
             }
         }
@@ -502,43 +499,8 @@ public class StreetGridGenerator : MonoBehaviour
         return graph;
     }
 
-    private List<Vector3> ComputeConvexHull(Vector3[] points)
-    {
-        if (points == null || points.Length <= 3) return new List<Vector3>(points);
-        
-        List<Vector3> pts = new List<Vector3>(points);
-        pts.Sort((a, b) => a.x == b.x ? a.z.CompareTo(b.z) : a.x.CompareTo(b.x));
-        
-        List<Vector3> hull = new List<Vector3>();
-        
-        // Lower hull
-        foreach (var pt in pts)
-        {
-            while (hull.Count >= 2 && CrossProduct(hull[hull.Count - 2], hull[hull.Count - 1], pt) <= 0)
-                hull.RemoveAt(hull.Count - 1);
-            hull.Add(pt);
-        }
-        
-        // Upper hull
-        int lowerCount = hull.Count;
-        for (int i = pts.Count - 2; i >= 0; i--)
-        {
-            var pt = pts[i];
-            while (hull.Count > lowerCount && CrossProduct(hull[hull.Count - 2], hull[hull.Count - 1], pt) <= 0)
-                hull.RemoveAt(hull.Count - 1);
-            hull.Add(pt);
-        }
-        
-        hull.RemoveAt(hull.Count - 1);
-        return hull;
-    }
-    
-    private float CrossProduct(Vector3 o, Vector3 a, Vector3 b)
-    {
-        return (a.x - o.x) * (b.z - o.z) - (a.z - o.z) * (b.x - o.x);
-    }
 
-    private List<Vector3[]> ExtractFaces(StreetGraph graph, out Vector3[] outerPerimeter)
+    private List<Vector3[]> ExtractFaces(StreetGraph graph, out List<Vector3[]> voidFaces)
     {
         Dictionary<int, HashSet<int>> tempAdj = new Dictionary<int, HashSet<int>>();
         foreach (var node in graph.nodes)
@@ -611,33 +573,32 @@ public class StreetGridGenerator : MonoBehaviour
             }
         }
         
-        outerPerimeter = null;
-        if (faces.Count > 0)
-        {
-            int maxAreaIdx = 0;
-            float maxArea = -1;
-            for (int i = 0; i < faces.Count; i++)
-            {
-                float area = 0f;
-                var poly = faces[i];
-                for (int j = 0; j < poly.Length; j++)
-                {
-                    int k = (j + 1) % poly.Length;
-                    area += poly[j].x * poly[k].z - poly[k].x * poly[j].z;
-                }
-                area = Mathf.Abs(area) * 0.5f;
+        List<Vector3[]> innerFaces = new List<Vector3[]>();
+        voidFaces = new List<Vector3[]>();
 
-                if (area > maxArea)
-                {
-                    maxArea = area;
-                    maxAreaIdx = i;
-                }
+        foreach (var face in faces)
+        {
+            float signedArea = 0f;
+            for (int i = 0; i < face.Length; i++)
+            {
+                int j = (i + 1) % face.Length;
+                signedArea += face[i].x * face[j].z - face[j].x * face[i].z;
             }
-            outerPerimeter = faces[maxAreaIdx];
-            faces.RemoveAt(maxAreaIdx);
+            signedArea *= 0.5f;
+
+            // Counter-clockwise faces have positive signed area in this top-down coordinate system.
+            // Inner blocks are counter-clockwise. Outer boundaries and zero-area bridges are <= 0.
+            if (signedArea > 1.0f)
+            {
+                innerFaces.Add(face);
+            }
+            else
+            {
+                voidFaces.Add(face);
+            }
         }
 
-        return faces;
+        return innerFaces;
     }
 
     private bool SegmentsIntersect(Vector2 A, Vector2 B, Vector2 C, Vector2 D)
