@@ -83,17 +83,37 @@ public class MinimapRouteManager : MonoBehaviour
 
     private void Update()
     {
-        // Follow player with minimap camera if not dragging
+        // Atualiza posição da câmera do minimap manualmente para seguir o jogador.
+        // O WorldImage usa CameraOrigin como âncora, mas só move a câmera quando
+        // UpdateTransform é chamado explicitamente. Fazemos isso todo frame aqui.
         if (_playerTransform != null && worldImage != null)
         {
             if (!_isFullscreen)
             {
-                _panOffset = Vector3.zero; // Recenter correctly when returning to HUD
+                _panOffset = Vector3.zero;
             }
 
-            // O WorldImage já usa o transform do player como centro se ele for adicionado como WorldObject.
-            // Portanto, a posição de LookAt deve ser apenas o OFFSET local (panOffset).
-            worldImage.CameraLookAtPosition = _panOffset;
+            // Garante que o CameraOrigin continua apontando pro jogador
+            // (pode ter sido perdido se o player foi recriado)
+            if (worldImage.CameraOrigin != _playerTransform)
+            {
+                worldImage.CameraOrigin = _playerTransform;
+            }
+
+            // Movemos a câmera do minimap diretamente para cima do jogador + offset de pan.
+            // Isso funciona mesmo sem WorldObjects registrados na lista do WorldImage.
+            if (worldImage.ObjectCamera != null && worldImage.ObjectCamera.Camera != null)
+            {
+                Vector3 playerXZ = _playerTransform.position;
+                playerXZ.y = 0f;
+                Vector3 camPos = playerXZ + new Vector3(_panOffset.x, 100f, _panOffset.z);
+                worldImage.ObjectCamera.Camera.transform.position = camPos;
+                worldImage.ObjectCamera.Camera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+
+                // Garante que os planos de clipping cobrem toda a cidade vertical
+                worldImage.ObjectCamera.Camera.nearClipPlane = 0.3f;
+                worldImage.ObjectCamera.Camera.farClipPlane = 500f;
+            }
         }
 
         // Update player icon position and rotation
@@ -126,11 +146,21 @@ public class MinimapRouteManager : MonoBehaviour
 
         if (worldImage != null)
         {
-            worldImage.CameraOrigin = _playerTransform; // Define a âncora da câmera diretamente no jogador
+            worldImage.CameraOrigin = _playerTransform;
             worldImage.CameraFollowBoundsCenter = false;
-            worldImage.CameraUseBoundsToClip = false; // MANTÉM A VISÃO LONGA PARA VER A CIDADE, senão ele corta tudo que não for o player
+            worldImage.CameraUseBoundsToClip = false;
             worldImage.CameraOrthographic = true;
-            worldImage.CameraOffset = new Vector3(0f, 100f, 0f); // Strict top-down
+            worldImage.CameraOrthographicSize = hudOrthoSize;
+            // Zeramos offset e LookAt — posicionamos a câmera diretamente no Update()
+            worldImage.CameraOffset = Vector3.zero;
+            worldImage.CameraLookAtPosition = Vector3.zero;
+
+            // Garante que o culling mask inclua os layers necessários
+            int defaultLayer = LayerMask.NameToLayer("Default");
+            int minimapLayer = LayerMask.NameToLayer("MinimapOnly");
+            int mask = (defaultLayer >= 0 ? (1 << defaultLayer) : 0)
+                     | (minimapLayer >= 0 ? (1 << minimapLayer) : 0);
+            if (mask != 0) worldImage.CameraCullingMask = mask;
         }
 
         // Show the minimap now that we have a player

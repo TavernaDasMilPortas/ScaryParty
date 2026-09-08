@@ -30,6 +30,13 @@ public class CityGenerator : NetworkBehaviour
 
     public int CurrentSeed { get; private set; }
 
+    /// <summary>
+    /// Seed persistida via rede. Qualquer cliente que entrar na sessão (inclusive late-joiners)
+    /// lerá este valor no OnNetworkSpawn e gerará a cidade localmente com a mesma seed.
+    /// </summary>
+    private NetworkVariable<int> _networkSeed = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     public event Action OnCityGenerated;
     public event Action OnCityCleared;
 
@@ -55,15 +62,69 @@ public class CityGenerator : NetworkBehaviour
         if (IsServer)
         {
             if (config == null) return;
+
+            // Gera uma seed e persiste na NetworkVariable ANTES de gerar localmente.
+            // Isso garante que qualquer cliente que entrar depois (late-join) consiga ler
+            // a seed e gerar a cidade localmente sem precisar do ClientRpc.
             int useSeed = config.seed == 0 ? UnityEngine.Random.Range(1, int.MaxValue) : config.seed;
+            _networkSeed.Value = useSeed;
+
             DestroyStaticCity();
             GenerateLocally(useSeed);
+            // ClientRpc é um fast-path para clientes já conectados no momento do spawn.
             ClientGenerateCityClientRpc(useSeed);
         }
         else
         {
+            // Registra listener ANTES de verificar o valor atual.
+            // Ordem importa: se o server ainda não setou a seed, o OnValueChanged vai disparar quando setar.
+            _networkSeed.OnValueChanged += OnNetworkSeedChanged;
+
             DestroyStaticCity();
+
+            // Late-join guard: se a seed já foi setada pelo servidor antes de entrarmos,
+            // o OnValueChanged NÃO vai disparar (o valor não vai mudar para nós).
+            // Por isso verificamos o valor atual agora e geramos se necessário.
+            if (_networkSeed.Value != 0)
+            {
+                Debug.Log($"[CityGenerator] Late-join detectado — gerando cidade com seed {_networkSeed.Value}");
+                GenerateLocally(_networkSeed.Value);
+            }
+            else
+            {
+                Debug.Log("[CityGenerator] Cliente conectou antes do servidor gerar — aguardando OnValueChanged.");
+            }
         }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (!IsServer)
+        {
+            _networkSeed.OnValueChanged -= OnNetworkSeedChanged;
+        }
+    }
+
+    /// <summary>
+    /// Chamado no cliente quando o servidor seta a seed pela primeira vez.
+    /// Só é relevante para clientes que estavam conectados antes do servidor gerar.
+    /// Clientes que entraram depois (late-join) já leram o valor diretamente no OnNetworkSpawn.
+    /// </summary>
+    private void OnNetworkSeedChanged(int previousValue, int newValue)
+    {
+        if (IsServer) return;
+        if (newValue == 0) return;
+
+        // Evita gerar duas vezes (o ClientRpc também pode ser recebido logo depois)
+        if (CityData != null)
+        {
+            Debug.Log("[CityGenerator] OnNetworkSeedChanged: cidade já gerada via late-join, ignorando.");
+            return;
+        }
+
+        Debug.Log($"[CityGenerator] Seed recebida via NetworkVariable ({newValue}) — gerando cidade.");
+        DestroyStaticCity();
+        GenerateLocally(newValue);
     }
 
     private void OnEnable()
@@ -176,7 +237,16 @@ public class CityGenerator : NetworkBehaviour
     [ClientRpc]
     private void ClientGenerateCityClientRpc(int seed)
     {
-        if (IsServer) return; 
+        if (IsServer) return;
+
+        // Evita gerar duas vezes se o cliente já gerou via NetworkVariable (late-join)
+        if (CityData != null)
+        {
+            Debug.Log("[CityGenerator] ClientRpc recebido mas cidade já existe (late-join). Ignorando.");
+            return;
+        }
+
+        Debug.Log($"[CityGenerator] ClientRpc recebido — gerando cidade com seed {seed}.");
         GenerateLocally(seed);
     }
 
@@ -266,19 +336,16 @@ public class CityGenerator : NetworkBehaviour
         
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
         {
-            foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+            if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
             {
-                if (client.PlayerObject == null) continue;
-                if (client.PlayerObject.IsOwner)
-                {
-                    var cc = client.PlayerObject.GetComponent<CharacterController>();
-                    if (cc != null) cc.enabled = false;
-                    
-                    client.PlayerObject.transform.position = spawnPoint.transform.position;
-                    client.PlayerObject.transform.rotation = spawnPoint.transform.rotation;
-                    
-                    if (cc != null) cc.enabled = true;
-                }
+                var po = NetworkManager.Singleton.LocalClient.PlayerObject;
+                var cc = po.GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+                
+                po.transform.position = spawnPoint.transform.position;
+                po.transform.rotation = spawnPoint.transform.rotation;
+                
+                if (cc != null) cc.enabled = true;
             }
         }
     }
@@ -358,7 +425,8 @@ public class CityGenerator : NetworkBehaviour
         // Pizzaria scale Z is depth. So pizzariaScale.z * 0.5f is the edge of the building.
         // Add 1.5f so the counter sits exactly on the sidewalk just outside the building.
         float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
-        Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk + Vector3.up * 0.5f;
+        Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk;
+        bancadaPos.y = config.sidewalkHeight + 0.5f;
         
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
@@ -387,8 +455,11 @@ public class CityGenerator : NetworkBehaviour
 
         GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
         spawnPoint.transform.SetParent(pizzariaBuilding.transform);
-        // Posicionar o player spawn atrás da bancada, ou na frente
-        spawnPoint.transform.position = bancadaPos + entranceDir * 2f + Vector3.up * 0.1f;
+        // Posicionar o spawn na rua à frente da pizzaria.
+        // A bancada já fica na calçada; adicionar streetWidth (mínimo 8u) garante que o
+        // jogador nasça na rua de verdade, e não em cima ou dentro da bancada.
+        float spawnStreetOffset = Mathf.Max(config.streetWidth, 8f);
+        spawnPoint.transform.position = bancadaPos + entranceDir * spawnStreetOffset + Vector3.up * 0.1f;
         spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
     }
 
@@ -439,7 +510,7 @@ public class CityGenerator : NetworkBehaviour
         mat.color = new Color(0.8f, 0.1f, 0.1f);
         pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
 
-        Vector3 bancadaPos = pos + new Vector3(0, 0.5f, -8.5f);
+        Vector3 bancadaPos = pos + new Vector3(0, config.sidewalkHeight + 0.5f, -8.5f);
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
         bancada.transform.position = bancadaPos;
@@ -464,7 +535,9 @@ public class CityGenerator : NetworkBehaviour
 
         GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
         spawnPoint.transform.SetParent(pizzariaBuilding.transform);
-        spawnPoint.transform.position = pos + new Vector3(0, 0.1f, -12f);
+        // Spawn na rua à frente da pizzaria legada (lado Z negativo)
+        float legacyStreetOffset = Mathf.Max(config.streetWidth, 8f);
+        spawnPoint.transform.position = pos + new Vector3(0, 0.1f, -(8.5f + legacyStreetOffset));
         spawnPoint.transform.rotation = Quaternion.Euler(0, 180, 0);
     }
 
