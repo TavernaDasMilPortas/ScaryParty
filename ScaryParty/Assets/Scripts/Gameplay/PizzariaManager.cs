@@ -13,7 +13,7 @@ public class PizzariaManager : NetworkBehaviour
 
     [Header("Settings")]
     public float orderGenerationInterval = 20f;
-    public int maxActiveOrders = 2;
+    public int maxActiveOrders = 3;
     
     [Header("Prefabs")]
     public GameObject pizzaBoxPrefab;

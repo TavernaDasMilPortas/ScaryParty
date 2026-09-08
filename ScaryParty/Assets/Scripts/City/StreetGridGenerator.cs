@@ -81,6 +81,13 @@ public class StreetGridGenerator : MonoBehaviour
                 Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * length;
                 Vector3 newPos = u.worldPosition + offset;
 
+                float maxBoundsX = (config.gridWidth / 2f) * config.maxStreetBranchLength;
+                float maxBoundsZ = (config.gridHeight / 2f) * config.maxStreetBranchLength;
+                if (Mathf.Abs(newPos.x) > maxBoundsX || Mathf.Abs(newPos.z) > maxBoundsZ)
+                {
+                    continue;
+                }
+
                 // Agressive Snapping: If a local street comes close to an avenue, force connection!
                 int snapNodeIdx = -1;
                 float snapDist = isAvenue ? 30f : 40f; 

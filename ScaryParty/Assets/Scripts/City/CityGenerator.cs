@@ -331,9 +331,6 @@ public class CityGenerator : NetworkBehaviour
 
     private void TeleportPlayersToSpawn()
     {
-        GameObject spawnPoint = GameObject.Find("NetworkSpawnPoint");
-        if (spawnPoint == null) return;
-        
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
         {
             if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
@@ -342,8 +339,27 @@ public class CityGenerator : NetworkBehaviour
                 var cc = po.GetComponent<CharacterController>();
                 if (cc != null) cc.enabled = false;
                 
-                po.transform.position = spawnPoint.transform.position;
-                po.transform.rotation = spawnPoint.transform.rotation;
+                int playerIndex = 0;
+                var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+                System.Array.Sort(allPlayers, (a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
+                
+                for (int i = 0; i < allPlayers.Length; i++)
+                {
+                    if (allPlayers[i].OwnerClientId == NetworkManager.Singleton.LocalClientId)
+                    {
+                        playerIndex = i;
+                        break;
+                    }
+                }
+                
+                GameObject spawnPoint = GameObject.Find($"NetworkSpawnPoint_{playerIndex % 4}");
+                if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint_0");
+                
+                if (spawnPoint != null)
+                {
+                    po.transform.position = spawnPoint.transform.position;
+                    po.transform.rotation = spawnPoint.transform.rotation;
+                }
                 
                 if (cc != null) cc.enabled = true;
             }
@@ -453,14 +469,21 @@ public class CityGenerator : NetworkBehaviour
         sign.GetComponent<Renderer>().sharedMaterial = signMat;
         sign.GetComponent<Collider>().enabled = false;
 
-        GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
-        spawnPoint.transform.SetParent(pizzariaBuilding.transform);
-        // Posicionar o spawn na rua à frente da pizzaria.
-        // A bancada já fica na calçada; adicionar streetWidth (mínimo 8u) garante que o
-        // jogador nasça na rua de verdade, e não em cima ou dentro da bancada.
+        Vector3 rightDir = Vector3.Cross(Vector3.up, -entranceDir).normalized;
+        float spacing = 2.0f;
         float spawnStreetOffset = Mathf.Max(config.streetWidth, 8f);
-        spawnPoint.transform.position = bancadaPos + entranceDir * spawnStreetOffset + Vector3.up * 0.1f;
-        spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
+
+        for (int i = 0; i < 4; i++)
+        {
+            GameObject spawnPoint = new GameObject($"NetworkSpawnPoint_{i}");
+            spawnPoint.transform.SetParent(pizzariaBuilding.transform);
+            
+            float offsetAmount = (i - 1.5f) * spacing;
+            Vector3 spawnPos = bancadaPos + entranceDir * spawnStreetOffset + rightDir * offsetAmount + Vector3.up * 0.1f;
+            
+            spawnPoint.transform.position = spawnPos;
+            spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
+        }
     }
 
     private int FindBestPizzariaBlock()
@@ -533,12 +556,17 @@ public class CityGenerator : NetworkBehaviour
         sign.GetComponent<Renderer>().sharedMaterial = signMat;
         sign.GetComponent<Collider>().enabled = false;
 
-        GameObject spawnPoint = new GameObject("NetworkSpawnPoint");
-        spawnPoint.transform.SetParent(pizzariaBuilding.transform);
-        // Spawn na rua à frente da pizzaria legada (lado Z negativo)
         float legacyStreetOffset = Mathf.Max(config.streetWidth, 8f);
-        spawnPoint.transform.position = pos + new Vector3(0, 0.1f, -(8.5f + legacyStreetOffset));
-        spawnPoint.transform.rotation = Quaternion.Euler(0, 180, 0);
+        float spacing = 2.0f;
+
+        for (int i = 0; i < 4; i++)
+        {
+            GameObject spawnPoint = new GameObject($"NetworkSpawnPoint_{i}");
+            spawnPoint.transform.SetParent(pizzariaBuilding.transform);
+            float offsetAmount = (i - 1.5f) * spacing;
+            spawnPoint.transform.position = pos + new Vector3(offsetAmount, 0.1f, -(8.5f + legacyStreetOffset));
+            spawnPoint.transform.rotation = Quaternion.Euler(0, 180, 0);
+        }
     }
 
     private void CreateHierarchy()

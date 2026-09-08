@@ -221,6 +221,20 @@ public static class UnifiedRoadMesher
                 sidewalkTriangles.Add(swBase); sidewalkTriangles.Add(swBase + 2); sidewalkTriangles.Add(swBase + 1);
                 sidewalkTriangles.Add(swBase + 1); sidewalkTriangles.Add(swBase + 2); sidewalkTriangles.Add(swBase + 3);
 
+                // Left Sidewalk Vertical Face (curb)
+                int vertBaseL = vertices.Count;
+                vertices.Add(pALeft); // street level
+                vertices.Add(pALeft + Vector3.up * yOff); // sidewalk level
+                vertices.Add(pBLeft); // street level
+                vertices.Add(pBLeft + Vector3.up * yOff); // sidewalk level
+                
+                uvs.Add(new Vector2(0, 0)); uvs.Add(new Vector2(0, yOff / sw));
+                uvs.Add(new Vector2(edgeLen / sw, 0)); uvs.Add(new Vector2(edgeLen / sw, yOff / sw));
+
+                sidewalkTriangles.Add(vertBaseL); sidewalkTriangles.Add(vertBaseL + 1); sidewalkTriangles.Add(vertBaseL + 2);
+                sidewalkTriangles.Add(vertBaseL + 2); sidewalkTriangles.Add(vertBaseL + 1); sidewalkTriangles.Add(vertBaseL + 3);
+
+
                 // Right Sidewalk
                 int swBaseR = vertices.Count;
                 vertices.Add(pARight + Vector3.up * yOff);
@@ -233,6 +247,19 @@ public static class UnifiedRoadMesher
 
                 sidewalkTriangles.Add(swBaseR); sidewalkTriangles.Add(swBaseR + 2); sidewalkTriangles.Add(swBaseR + 1);
                 sidewalkTriangles.Add(swBaseR + 1); sidewalkTriangles.Add(swBaseR + 2); sidewalkTriangles.Add(swBaseR + 3);
+
+                // Right Sidewalk Vertical Face (curb)
+                int vertBaseR = vertices.Count;
+                vertices.Add(pARight); // street level
+                vertices.Add(pARight + Vector3.up * yOff); // sidewalk level
+                vertices.Add(pBRight); // street level
+                vertices.Add(pBRight + Vector3.up * yOff); // sidewalk level
+                
+                uvs.Add(new Vector2(0, 0)); uvs.Add(new Vector2(0, yOff / sw));
+                uvs.Add(new Vector2(edgeLen / sw, 0)); uvs.Add(new Vector2(edgeLen / sw, yOff / sw));
+
+                sidewalkTriangles.Add(vertBaseR); sidewalkTriangles.Add(vertBaseR + 2); sidewalkTriangles.Add(vertBaseR + 1);
+                sidewalkTriangles.Add(vertBaseR + 1); sidewalkTriangles.Add(vertBaseR + 2); sidewalkTriangles.Add(vertBaseR + 3);
             }
         }
 
