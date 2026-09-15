@@ -55,6 +55,17 @@ public class DeliveryPoint : MonoBehaviour, IInteractable
     {
         if (!isActive) return;
 
+        // Novo Módulo Pizzaria: Entrega autoritativa em lote via DeliveryPointAdapter
+        if (ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance != null)
+        {
+            bool submitted = ScaryParty.Pizzeria.Integration.DeliveryPointAdapter.TrySubmitDelivery(pointIndex);
+            if (!submitted && UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowInteractionPrompt("Nenhuma pizza para entregar aqui!");
+            }
+            return;
+        }
+
         PlayerInteraction interaction = player.GetComponent<PlayerInteraction>();
         if (interaction != null)
         {

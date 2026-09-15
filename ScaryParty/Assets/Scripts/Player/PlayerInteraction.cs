@@ -45,6 +45,16 @@ public class PlayerInteraction : NetworkBehaviour
         if (mainCamera == null)
             mainCamera = Camera.main;
 
+        // Anexar adaptadores da Pizzaria se ausentes
+        if (GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>() == null)
+            gameObject.AddComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+
+        if (GetComponent<ScaryParty.Pizzeria.Player.BackpackController>() == null)
+            gameObject.AddComponent<ScaryParty.Pizzeria.Player.BackpackController>();
+
+        if (GetComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>() == null)
+            gameObject.AddComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>();
+
         // SERVER AUTHORITY: Teleport the player to the pizzaria spawn point
         // If this client is also the server (Host), do it directly.
         // If not, request it via RPC.
@@ -60,6 +70,16 @@ public class PlayerInteraction : NetworkBehaviour
 
     private void TeleportToSpawn()
     {
+        if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+        {
+            var cc = GetComponent<CharacterController>();
+            if (cc != null) cc.enabled = false;
+            transform.position = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition((int)OwnerClientId);
+            transform.rotation = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation((int)OwnerClientId);
+            if (cc != null) cc.enabled = true;
+            return;
+        }
+
         CityGenerator cityGen = FindObjectOfType<CityGenerator>();
         if (cityGen != null && cityGen.CityData != null)
         {
@@ -74,6 +94,14 @@ public class PlayerInteraction : NetworkBehaviour
     [ServerRpc]
     private void RequestSpawnPositionServerRpc()
     {
+        if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+        {
+            Vector3 spawnPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition((int)OwnerClientId);
+            Quaternion spawnRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation((int)OwnerClientId);
+            TeleportClientRpc(spawnPos, spawnRot);
+            return;
+        }
+
         CityGenerator cityGen = FindObjectOfType<CityGenerator>();
         if (cityGen != null && cityGen.CityData != null)
         {
@@ -146,6 +174,10 @@ public class PlayerInteraction : NetworkBehaviour
                 _currentInteractable = interactable;
                 _currentInteractable.OnFocus();
             }
+
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowInteractionPrompt(_currentInteractable.InteractPrompt);
+
             return;
         }
 
@@ -181,6 +213,43 @@ public class PlayerInteraction : NetworkBehaviour
         {
             _currentInteractable.OnInteract(this.gameObject);
         }
+
+        // Suporte a segurar [F] para trabalhar em bancadas da Pizzaria (Preparo / Embalagem)
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null)
+        {
+            if (Keyboard.current.fKey.wasPressedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
+            {
+                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+                if (cmd != null) cmd.StartWorkServerRpc(prep.stationId, 0, prep.defaultProcessId);
+            }
+            else if (Keyboard.current.fKey.wasReleasedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prepRel)
+            {
+                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+                if (cmd != null) cmd.CancelWorkServerRpc(prepRel.stationId, 0);
+            }
+            else if (Keyboard.current.fKey.wasPressedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
+            {
+                var state = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+                if (state != null && cmd != null)
+                {
+                    for (int i = 0; i < state.Items.Count; i++)
+                    {
+                        var item = state.Items[i];
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.SlotId == pkg.stationId)
+                        {
+                            if (item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
+                            {
+                                cmd.StartPackagingServerRpc(item.ItemId);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+#endif
     }
 
     /// <summary>

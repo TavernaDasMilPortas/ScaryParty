@@ -1,0 +1,45 @@
+﻿using UnityEngine;
+using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Types;
+
+namespace ScaryParty.Pizzeria.Stations
+{
+    public class StorageStation : StationView
+    {
+        [Header("Configuração de Armazenamento")]
+        public int[] acceptedIngredientIds;
+
+        public override string InteractPrompt => "[E] Abrir " + stationName;
+
+        public override void OnInteract(GameObject interactor)
+        {
+            var state = PizzeriaNetworkState.Instance;
+            if (state == null) return;
+            
+            bool hasItemOnStation = false;
+            for (int i = 0; i < state.Items.Count; i++) {
+                if (state.Items[i].LocationType == (byte)LocationType.StationSlot && state.Items[i].SlotId == stationId) {
+                    hasItemOnStation = true; break;
+                }
+            }
+
+            if (hasItemOnStation)
+            {
+                TryPickOrPlace(interactor);
+            }
+            else
+            {
+                if (acceptedIngredientIds != null && acceptedIngredientIds.Length > 0)
+                {
+                    int ingId = acceptedIngredientIds[0];
+                    var cmd = PizzeriaCommandHandler.Instance;
+                    if (cmd != null)
+                    {
+                        cmd.DispenseIngredientServerRpc(stationId, ingId, 0);
+                    }
+                }
+            }
+        }
+    }
+}

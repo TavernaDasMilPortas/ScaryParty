@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01079388787f3b542acd219046dd7143, type: 3}
+  m_Name: Recipe_2_Calabresa
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.RecipeDef
+  id: 2
+  recipeName: Calabresa
+  baseIngredientId: 2
+  ingredients:
+  - ingredientId: 3
+    requiredStage: 0
+    quantity: 1
+  - ingredientId: 5
+    requiredStage: 1
+    quantity: 1
+  - ingredientId: 7
+    requiredStage: 1
+    quantity: 1
+  basePrice: 20
+  baseBakeDuration: 15

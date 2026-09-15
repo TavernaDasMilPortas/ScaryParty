@@ -180,10 +180,20 @@ public class CitySceneBuilder : EditorWindow
             Debug.Log("[SceneBuilder] 🛠️ Created 'MinimapOnly' Layer.");
         }
 
-        // 6. Regenerate city to fix all delivery point index issues
+        // 6. Wire pizzeriaPrefab if missing
         CityGenerator gen = FindObjectOfType<CityGenerator>();
         if (gen != null)
         {
+            if (gen.pizzeriaPrefab == null)
+            {
+                var pizzPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab");
+                if (pizzPrefab != null)
+                {
+                    gen.pizzeriaPrefab = pizzPrefab;
+                    EditorUtility.SetDirty(gen);
+                }
+            }
+
             gen.ClearCity();
             gen.GenerateCity();
             Debug.Log("[SceneBuilder] 🛠️ City regenerated — DeliveryPoint indices are now correct!");
@@ -200,6 +210,7 @@ public class CitySceneBuilder : EditorWindow
             "✅ NetworkObject adicionado ao CITY\n" +
             "✅ MinimapRouteManager configurado\n" +
             "✅ Layer 'MinimapOnly' verificada\n" +
+            "✅ PizzeriaPrefab atribuído ao CityGenerator\n" +
             "✅ Cidade regenerada (DeliveryPoints corretos)\n\n" +
             "Salve a cena (Ctrl+S) e dê Play!", "OK");
     }
@@ -401,6 +412,8 @@ public class CitySceneBuilder : EditorWindow
             // CRITICAL: NetworkObject is required for OnNetworkSpawn to fire
             bool hasNetObj = gen.GetComponent<NetworkObject>() != null;
             DrawStatusLine(" ↳ NetworkObject (OnNetworkSpawn)", hasNetObj);
+
+            DrawStatusLine(" ↳ PizzeriaPrefab Assigned", gen.pizzeriaPrefab != null);
         }
 
         DrawStatusLine("MinimapRouteManager", FindObjectOfType<MinimapRouteManager>() != null);
@@ -684,6 +697,18 @@ public class CitySceneBuilder : EditorWindow
 
         // Assign Distant Lands Materials
         AssignCartoonMaterials(generator);
+
+        // Auto-wire Pizzeria prefab if it exists
+        if (generator.pizzeriaPrefab == null)
+        {
+            var pizzeriaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab");
+            if (pizzeriaPrefab != null)
+            {
+                generator.pizzeriaPrefab = pizzeriaPrefab;
+                EditorUtility.SetDirty(generator);
+                Debug.Log("[SceneBuilder] ✅ pizzeriaPrefab atribuído ao CityGenerator.");
+            }
+        }
 
         // CityGizmos component
         if (cityRoot.GetComponent<CityGizmos>() == null)

@@ -1,0 +1,14 @@
+{
+    "name": "ScaryParty.Pizzeria.Domain",
+    "rootNamespace": "ScaryParty.Pizzeria.Domain",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}

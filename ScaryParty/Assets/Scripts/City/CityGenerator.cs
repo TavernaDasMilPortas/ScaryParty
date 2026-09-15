@@ -10,6 +10,7 @@ public class CityGenerator : NetworkBehaviour
 {
     [Header("Configuration")]
     public CityConfig config;
+    public GameObject pizzeriaPrefab;
 
     [Header("Materials — Streets")]
     public Material streetMaterial;
@@ -389,38 +390,129 @@ public class CityGenerator : NetworkBehaviour
         Quaternion pizzariaRot = Quaternion.identity;
         Vector3 pizzariaScale = new Vector3(12f, 6f, 12f);
 
+        // ── Pick the building closest to the block edge (= closest to the street) ──
         if (blockTransform != null)
         {
-            CityBuilding largestBuilding = null;
-            float largestVolume = 0f;
+            Vector3 blockCenter = pBlock.worldCenter;
+            CityBuilding bestBuilding = null;
+            float bestEdgeDist = float.MaxValue;
 
             foreach (Transform child in blockTransform)
             {
                 CityBuilding building = child.GetComponent<CityBuilding>();
                 if (building == null) continue;
 
+                // Score: distance from block center → farther = closer to street edge.
+                // We also need the building to be big enough to be replaced by the
+                // pizzeria (12 m wide). Accept buildings ≥ 6 m wide.
                 Vector3 scale = child.localScale;
-                float volume = scale.x * scale.y * scale.z;
-                if (volume > largestVolume)
+                float footprint = Mathf.Max(scale.x, scale.z);
+                if (footprint < 6f) continue;
+
+                // Direction from center to building (outward toward street)
+                Vector3 toBuilding = child.position - blockCenter;
+                toBuilding.y = 0;
+                float distFromCenter = toBuilding.magnitude;
+
+                // Higher distFromCenter = closer to street. Pick the farthest out.
+                if (distFromCenter > 0 && (bestBuilding == null || distFromCenter > -bestEdgeDist))
                 {
-                    largestVolume = volume;
-                    largestBuilding = building;
+                    bestEdgeDist = -distFromCenter; // negate so "best" = most negative
+                    bestBuilding = building;
                 }
             }
 
-            if (largestBuilding != null)
+            // Fallback: if nothing was found with footprint ≥ 6, just pick the largest
+            if (bestBuilding == null)
             {
-                pizzariaPos = largestBuilding.transform.position;
-                pizzariaRot = largestBuilding.transform.rotation;
-                pizzariaScale = largestBuilding.transform.localScale;
-                
-                entranceDir = largestBuilding.transform.forward;
+                float largestVolume = 0f;
+                foreach (Transform child in blockTransform)
+                {
+                    CityBuilding building = child.GetComponent<CityBuilding>();
+                    if (building == null) continue;
+                    Vector3 s = child.localScale;
+                    float vol = s.x * s.y * s.z;
+                    if (vol > largestVolume)
+                    {
+                        largestVolume = vol;
+                        bestBuilding = building;
+                    }
+                }
+            }
+
+            if (bestBuilding != null)
+            {
+                // ── Calculate street-snapped position ──
+                Vector3 buildingPos = bestBuilding.transform.position;
+
+                // Direction from block center outward (toward the street)
+                entranceDir = (buildingPos - blockCenter);
                 entranceDir.y = 0;
                 if (entranceDir.sqrMagnitude < 0.01f) entranceDir = Vector3.forward;
+                entranceDir.Normalize();
 
-                if (Application.isPlaying) Destroy(largestBuilding.gameObject);
-                else DestroyImmediate(largestBuilding.gameObject);
+                // Snap to the nearest cardinal axis so the 12 × 12 box aligns cleanly
+                if (Mathf.Abs(entranceDir.x) > Mathf.Abs(entranceDir.z))
+                    entranceDir = new Vector3(Mathf.Sign(entranceDir.x), 0, 0);
+                else
+                    entranceDir = new Vector3(0, 0, Mathf.Sign(entranceDir.z));
+
+                // Rotation: the prefab door is at local Z = −6 (the −Z face).
+                // LookRotation(-entranceDir) makes +Z point inward and −Z face the street.
+                pizzariaRot = Quaternion.LookRotation(-entranceDir, Vector3.up);
+
+                // Use world-space bounds so rotation of the old building doesn't matter.
+                Renderer rend = bestBuilding.GetComponent<Renderer>();
+                Bounds bnd = rend != null ? rend.bounds : new Bounds(buildingPos, bestBuilding.transform.localScale);
+
+                // Farthest extent of the old building in entranceDir = street edge
+                float dotCenter = Vector3.Dot(bnd.center, entranceDir);
+                float dotExtent = Mathf.Abs(bnd.extents.x * entranceDir.x)
+                                + Mathf.Abs(bnd.extents.z * entranceDir.z);
+                float streetEdgeDot = dotCenter + dotExtent;
+                Vector3 streetEdge = entranceDir * streetEdgeDot;
+                streetEdge.y = buildingPos.y;
+                // Keep the lateral coordinate from the building
+                if (Mathf.Abs(entranceDir.x) > 0.5f)
+                    streetEdge.z = buildingPos.z;
+                else
+                    streetEdge.x = buildingPos.x;
+
+                // Pizzeria center is 6 m inward from the street edge so the door
+                // wall (local Z = −6) sits flush with the sidewalk.
+                const float pizzeriaHalfDepth = 6f;
+                pizzariaPos = streetEdge - entranceDir * pizzeriaHalfDepth;
+
+                if (Application.isPlaying) Destroy(bestBuilding.gameObject);
+                else DestroyImmediate(bestBuilding.gameObject);
+
+                // ── Carve out space for the 12x12 Pizzeria ──
+                Bounds pizzeriaBounds = new Bounds(pizzariaPos, new Vector3(12f, 10f, 12f));
+                pizzeriaBounds.Expand(0.5f); // Leave a small gap to neighbors
+
+                CityBuilding[] remainingBuildings = blockTransform.GetComponentsInChildren<CityBuilding>();
+                foreach (var b in remainingBuildings)
+                {
+                    if (b == null) continue;
+                    Renderer bRend = b.GetComponent<Renderer>();
+                    Bounds bBounds = bRend != null ? bRend.bounds : new Bounds(b.transform.position, b.transform.localScale);
+                    
+                    if (pizzeriaBounds.Intersects(bBounds))
+                    {
+                        if (Application.isPlaying) Destroy(b.gameObject);
+                        else DestroyImmediate(b.gameObject);
+                    }
+                }
             }
+        }
+
+        Transform parentTransform = blockTransform != null ? blockTransform : _blocksRoot.transform;
+
+        if (pizzeriaPrefab != null)
+        {
+            ScaryParty.Pizzeria.Integration.CityPizzeriaPlacementAdapter.SpawnPizzeria(
+                pizzeriaPrefab, pizzariaPos, pizzariaRot, parentTransform, CityData, config.sidewalkHeight);
+            return;
         }
 
         CityData.pizzariaPosition = pizzariaPos;
@@ -430,7 +522,7 @@ public class CityGenerator : NetworkBehaviour
         pizzariaBuilding.transform.position = pizzariaPos;
         pizzariaBuilding.transform.rotation = pizzariaRot;
         pizzariaBuilding.transform.localScale = pizzariaScale;
-        pizzariaBuilding.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
+        pizzariaBuilding.transform.SetParent(parentTransform);
 
         Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
         mat.color = new Color(0.8f, 0.1f, 0.1f);
@@ -438,8 +530,6 @@ public class CityGenerator : NetworkBehaviour
         pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
 
         // Bancada outside the pizzaria, on the sidewalk!
-        // Pizzaria scale Z is depth. So pizzariaScale.z * 0.5f is the edge of the building.
-        // Add 1.5f so the counter sits exactly on the sidewalk just outside the building.
         float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
         Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk;
         bancadaPos.y = config.sidewalkHeight + 0.5f;
@@ -447,7 +537,7 @@ public class CityGenerator : NetworkBehaviour
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
         bancada.transform.position = bancadaPos;
-        bancada.transform.rotation = pizzariaRot; // Align rotation with building
+        bancada.transform.rotation = pizzariaRot;
         bancada.transform.localScale = new Vector3(4f, 1f, 1.5f);
         bancada.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
 
@@ -461,7 +551,7 @@ public class CityGenerator : NetworkBehaviour
         GameObject sign = GameObject.CreatePrimitive(PrimitiveType.Cube);
         sign.name = "Pizzaria_Sign";
         sign.transform.SetParent(pizzariaBuilding.transform);
-        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f); // Front of the building
+        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f);
         sign.transform.localScale = new Vector3(0.8f, 0.2f, 0.1f);
         Material signMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
         signMat.color = Color.yellow;
@@ -522,6 +612,13 @@ public class CityGenerator : NetworkBehaviour
     {
         Vector3 pos = CityData.pizzariaPosition;
         Transform blocksRoot = _blocksRoot.transform;
+
+        if (pizzeriaPrefab != null)
+        {
+            ScaryParty.Pizzeria.Integration.CityPizzeriaPlacementAdapter.SpawnPizzeria(
+                pizzeriaPrefab, pos, Quaternion.identity, blocksRoot, CityData, config.sidewalkHeight);
+            return;
+        }
 
         GameObject pizzariaBuilding = GameObject.CreatePrimitive(PrimitiveType.Cube);
         pizzariaBuilding.name = "The_Pizzaria_Building";
@@ -650,20 +747,16 @@ public class CityGenerator : NetworkBehaviour
     {
         CityGenLogger.StartLog();
         CityData.blocks = new List<BlockInfo>();
-        int blockIndex = 0;
 
+        // PASS 1: Generate all BlockInfo geometry
         foreach (Vector3[] rawPoly in blockPolygons)
         {
-            // BUG FIX: Remove degenerate collinear edges that cause severe miter math corruption
             Vector3[] poly = CleanPolygon(rawPoly);
             if (poly.Length < 3) continue;
 
-            // Fix: Inset polygon by streetWidth * 0.5f PLUS sidewalkWidth
             float totalInset = (config.streetWidth * 0.5f) + config.sidewalkWidth;
             Vector3[] insetPoly = InsetPolygon(poly, totalInset);
             
-            // BUG FIX: Quarteirões muito pequenos se auto-interceptam durante o Inset, criando geometrias inválidas.
-            // Pulamos quarteirões cuja área útil ficou pequena demais!
             float insetArea = CalculatePolygonArea(insetPoly);
             if (Mathf.Abs(insetArea) < 100f) continue;
             
@@ -679,29 +772,27 @@ public class CityGenerator : NetworkBehaviour
             float minDimension = Mathf.Min(size.x, size.z);
             if (minDimension < config.minBuildingDepth * 2f) continue;
 
-            // Thinness filter: Area / Perimeter^2 check to reject long, narrow wedge blocks
             float perimeter = 0f;
             for (int i = 0; i < insetPoly.Length; i++) {
                 perimeter += Vector3.Distance(insetPoly[i], insetPoly[(i + 1) % insetPoly.Length]);
             }
             if (perimeter > 0f) {
                 float thinness = (4f * Mathf.PI * area) / (perimeter * perimeter);
-                if (thinness < 0.1f) continue; // Reject extremely thin polygons (e.g. 1x20 aspect ratio)
+                if (thinness < 0.1f) continue;
             }
 
-            // Zonas baseadas em "Chunks" quadrados (Chebyshev distance para não formar círculos)
             float maxAbsDist = Mathf.Max(Mathf.Abs(centerPos.x), Mathf.Abs(centerPos.z));
             float chunkSize = config.maxStreetBranchLength;
             
             ZoneType zone;
             if (maxAbsDist <= chunkSize * 0.5f) {
-                zone = ZoneType.Commercial; // Chunk 1x1 (Centro Seguro)
+                zone = ZoneType.Commercial;
             } else if (maxAbsDist <= chunkSize * 1.5f) {
-                zone = ZoneType.Residential; // Chunks 3x3 (Bairros)
+                zone = ZoneType.Residential;
             } else if (maxAbsDist <= chunkSize * 2.5f) {
-                zone = ZoneType.Industrial; // Chunks 5x5 (Zona Afastada)
+                zone = ZoneType.Industrial;
             } else {
-                zone = ZoneType.MonsterZone; // Bordas (Perigo Máximo)
+                zone = ZoneType.MonsterZone;
             }
 
             BlockInfo block = new BlockInfo
@@ -716,11 +807,29 @@ public class CityGenerator : NetworkBehaviour
             };
 
             CityData.blocks.Add(block);
-            CityGenLogger.StartBlock(blockIndex, area, insetPoly.Length);
-            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, blockIndex);
-            
-            blockIndex++;
         }
+
+        // Identify Pizzeria block before filling
+        if (config.pizzariaInsideBlock && CityData.blocks.Count > 0)
+        {
+            int bestBlock = FindBestPizzariaBlock();
+            if (bestBlock >= 0)
+            {
+                BlockInfo pBlock = CityData.blocks[bestBlock];
+                pBlock.hasPizzaria = true;
+                CityData.blocks[bestBlock] = pBlock;
+                CityData.pizzariaBlockIndex = bestBlock;
+            }
+        }
+
+        // PASS 2: Fill Blocks
+        for (int i = 0; i < CityData.blocks.Count; i++)
+        {
+            BlockInfo block = CityData.blocks[i];
+            CityGenLogger.StartBlock(i, block.area, block.polygon.Length);
+            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i);
+        }
+        
         CityGenLogger.SaveLog();
     }
 

@@ -1,0 +1,22 @@
+{
+    "name": "ScaryParty.Pizzeria.Tests",
+    "rootNamespace": "ScaryParty.Pizzeria.Tests",
+    "references": [
+        "ScaryParty.Pizzeria.Domain"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
