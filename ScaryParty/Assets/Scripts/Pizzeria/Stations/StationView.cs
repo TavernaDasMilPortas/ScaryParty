@@ -41,6 +41,40 @@ namespace ScaryParty.Pizzeria.Stations
             return transform.rotation;
         }
 
+        protected ScaryParty.Pizzeria.Presentation.StationProgressBar _progressBar;
+
+        protected virtual void Start()
+        {
+            _progressBar = ScaryParty.Pizzeria.Presentation.StationProgressBar.Create(transform);
+            // Default offset for the bar above the station
+            var pos = GetSlotPosition(0);
+            _progressBar.transform.position = pos + Vector3.up * 0.4f;
+        }
+
+        protected virtual void Update()
+        {
+            if (_progressBar == null) return;
+            var state = PizzeriaNetworkState.Instance;
+            if (state == null) return;
+
+            bool foundActive = false;
+            for (int i = 0; i < state.StationSlots.Count; i++)
+            {
+                var slot = state.StationSlots[i];
+                if (slot.StationId == stationId && slot.Progress > 0 && slot.Progress < 1f)
+                {
+                    _progressBar.SetProgress(slot.Progress, Color.green);
+                    foundActive = true;
+                    break;
+                }
+            }
+
+            if (!foundActive)
+            {
+                _progressBar.Hide();
+            }
+        }
+
         protected void TryPickOrPlace(GameObject interactor)
         {
             var netObj = interactor.GetComponent<NetworkObject>();
@@ -91,7 +125,10 @@ namespace ScaryParty.Pizzeria.Stations
                                     itemInHand.Category == (byte)ItemCategory.Sauce || 
                                     itemInHand.Category == (byte)ItemCategory.Cheese || 
                                     itemInHand.Category == (byte)ItemCategory.Topping;
-                if (itemOnStation.Category == (byte)ItemCategory.PizzaBase && isIngredient)
+                
+                bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.PizzaBase || itemOnStation.Category == (byte)ItemCategory.Pizza;
+                
+                if (isPizzaOrBase && isIngredient)
                 {
                     cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
                 }

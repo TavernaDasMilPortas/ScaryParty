@@ -33,6 +33,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
 
+            var catalog = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.Catalog;
+
             var sb = new StringBuilder();
             sb.AppendLine("<b>=== COMANDAS DE DELIVERY ===</b>\n");
 
@@ -44,12 +46,22 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     activeCount++;
                     sb.AppendLine($"<color=yellow>PEDIDO #{order.OrderId}</color> -> <color=cyan>ENDEREÇO #{order.DestinationId}</color>");
+                    
                     if (order.LineCount > 0 && order.Qty_0 > 0)
-                        sb.AppendLine($" • {order.Qty_0}x Pizza #{order.RecipeId_0}");
+                    {
+                        string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_0, out var r1) ? r1.Name : $"Pizza #{order.RecipeId_0}";
+                        sb.AppendLine($" • {order.Qty_0}x {rName}");
+                    }
                     if (order.LineCount > 1 && order.Qty_1 > 0)
-                        sb.AppendLine($" • {order.Qty_1}x Pizza #{order.RecipeId_1}");
+                    {
+                        string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_1, out var r2) ? r2.Name : $"Pizza #{order.RecipeId_1}";
+                        sb.AppendLine($" • {order.Qty_1}x {rName}");
+                    }
                     if (order.LineCount > 2 && order.Qty_2 > 0)
-                        sb.AppendLine($" • {order.Qty_2}x Pizza #{order.RecipeId_2}");
+                    {
+                        string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_2, out var r3) ? r3.Name : $"Pizza #{order.RecipeId_2}";
+                        sb.AppendLine($" • {order.Qty_2}x {rName}");
+                    }
                     sb.AppendLine("----------------------------");
                 }
             }

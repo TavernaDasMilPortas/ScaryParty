@@ -53,8 +53,21 @@ namespace ScaryParty.Pizzeria.Editor
             var dict = new Dictionary<string, Material>();
             dict["Wall"] = GetOrCreateMaterial("Mat_PizzeriaWall", new Color(0.85f, 0.82f, 0.78f));
             dict["Floor"] = GetOrCreateMaterial("Mat_PizzeriaFloor", new Color(0.35f, 0.35f, 0.38f));
-            dict["Counter"] = GetOrCreateMaterial("Mat_PizzeriaCounter", new Color(0.45f, 0.25f, 0.15f));
-            dict["Oven"] = GetOrCreateMaterial("Mat_PizzeriaOven", new Color(0.2f, 0.2f, 0.22f));
+            
+            // Station Colors
+            dict["Counter"] = GetOrCreateMaterial("Mat_Station_Counter", ParseColor("#8B7355", Color.gray));
+            dict["Fridge"] = GetOrCreateMaterial("Mat_Station_Fridge", ParseColor("#B3D9E6", Color.cyan));
+            dict["ToolRack"] = GetOrCreateMaterial("Mat_Station_ToolRack", ParseColor("#8090A0", Color.gray));
+            dict["Prep"] = GetOrCreateMaterial("Mat_Station_Prep", ParseColor("#7DB83A", Color.green));
+            dict["Assembly"] = GetOrCreateMaterial("Mat_Station_Assembly", ParseColor("#E08030", Color.yellow));
+            dict["Oven"] = GetOrCreateMaterial("Mat_Station_Oven", ParseColor("#8B2020", Color.red));
+            dict["Packaging"] = GetOrCreateMaterial("Mat_Station_Packaging", ParseColor("#9060B0", Color.magenta));
+            dict["Staging"] = GetOrCreateMaterial("Mat_Station_Staging", ParseColor("#D4A017", Color.yellow));
+            dict["Phone"] = GetOrCreateMaterial("Mat_Station_Phone", ParseColor("#40B0B0", Color.cyan));
+            dict["Supplier"] = GetOrCreateMaterial("Mat_Station_Supplier", ParseColor("#6B4226", Color.gray));
+            dict["Trash"] = GetOrCreateMaterial("Mat_Station_Trash", ParseColor("#404040", Color.gray));
+
+            // Item Colors
             dict["PizzaBox"] = GetOrCreateMaterial("Mat_PizzaBox", new Color(0.75f, 0.2f, 0.15f));
             dict["Dough"] = GetOrCreateMaterial("Mat_Dough", new Color(0.92f, 0.85f, 0.70f));
             dict["Sauce"] = GetOrCreateMaterial("Mat_Sauce", new Color(0.80f, 0.15f, 0.10f));
@@ -62,6 +75,11 @@ namespace ScaryParty.Pizzeria.Editor
             dict["Calabresa"] = GetOrCreateMaterial("Mat_Calabresa", new Color(0.65f, 0.15f, 0.15f));
             dict["Tool"] = GetOrCreateMaterial("Mat_Tool", new Color(0.7f, 0.75f, 0.8f));
             return dict;
+        }
+
+        private static Color ParseColor(string hex, Color fallback)
+        {
+            return ColorUtility.TryParseHtmlString(hex, out var c) ? c : fallback;
         }
 
         private static Material GetOrCreateMaterial(string name, Color color)
@@ -272,6 +290,7 @@ namespace ScaryParty.Pizzeria.Editor
             root.AddComponent<PizzeriaCommandHandler>();
             root.AddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder>();
             root.AddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer>();
+            root.AddComponent<Night1Bootstrapper>();
 
             // Assign config field via SerializedObject
             var so = new SerializedObject(rootComp);
@@ -304,51 +323,51 @@ namespace ScaryParty.Pizzeria.Editor
             stationsRoot.transform.SetParent(root.transform);
 
             // 1. Storage Fridge (Left side)
-            var fridge = CreateStation<StorageStation>("Storage_Fridge", 1, stationsRoot.transform, new Vector3(-5f, 1f, 4f), new Vector3(1.5f, 2f, 1f), materials["Counter"]);
+            var fridge = CreateStation<StorageStation>("Storage_Fridge", 1, stationsRoot.transform, new Vector3(-5f, 1f, 4f), new Vector3(1.5f, 2f, 1f), materials["Fridge"]);
             fridge.acceptedIngredientIds = new[] { 3, 4, 6, 8 };
 
             // 2. Storage Cupboard (Left side)
-            var cupboard = CreateStation<StorageStation>("Storage_Cupboard", 2, stationsRoot.transform, new Vector3(-5f, 1f, 1.5f), new Vector3(1.5f, 2f, 1f), materials["Counter"]);
+            var cupboard = CreateStation<StorageStation>("Storage_Cupboard", 2, stationsRoot.transform, new Vector3(-5f, 1f, 1.5f), new Vector3(1.5f, 2f, 1f), materials["Fridge"]);
             cupboard.acceptedIngredientIds = new[] { 1 };
 
             // 3. Tool Rack (Shared tools)
-            var toolRack = CreateStation<ToolRackStation>("Station_ToolRack", 3, stationsRoot.transform, new Vector3(-5f, 0.5f, -1f), new Vector3(1.2f, 1f, 1f), materials["Counter"]);
+            var toolRack = CreateStation<ToolRackStation>("Station_ToolRack", 3, stationsRoot.transform, new Vector3(-5f, 0.5f, -1f), new Vector3(1.2f, 1f, 1f), materials["ToolRack"]);
 
             // 4. Neutral Waiting Counter (Bancada de Espera)
             CreateStation<CounterStation>("Station_NeutralCounter", 4, stationsRoot.transform, new Vector3(-2.5f, 0.5f, 3f), new Vector3(2f, 1f, 1f), materials["Counter"]);
 
             // 5. Prep Counter A (Slot 0, 1)
-            var prepA = CreateStation<PrepStation>("Station_Prep_A", 5, stationsRoot.transform, new Vector3(0f, 0.5f, 3f), new Vector3(2f, 1f, 1f), materials["Counter"]);
+            var prepA = CreateStation<PrepStation>("Station_Prep_A", 5, stationsRoot.transform, new Vector3(0f, 0.5f, 3f), new Vector3(2f, 1f, 1f), materials["Prep"]);
             prepA.defaultProcessId = 1;
 
             // 6. Prep Counter B (Slot 0, 1)
-            var prepB = CreateStation<PrepStation>("Station_Prep_B", 6, stationsRoot.transform, new Vector3(2.5f, 0.5f, 3f), new Vector3(2f, 1f, 1f), materials["Counter"]);
+            var prepB = CreateStation<PrepStation>("Station_Prep_B", 6, stationsRoot.transform, new Vector3(2.5f, 0.5f, 3f), new Vector3(2f, 1f, 1f), materials["Prep"]);
             prepB.defaultProcessId = 2;
 
             // 7. Assembly Counter
-            CreateStation<AssemblyStation>("Station_Assembly", 7, stationsRoot.transform, new Vector3(5f, 0.5f, 3f), new Vector3(1.5f, 1f, 1.5f), materials["Counter"]);
+            CreateStation<AssemblyStation>("Station_Assembly", 7, stationsRoot.transform, new Vector3(5f, 0.5f, 3f), new Vector3(1.5f, 1f, 1.5f), materials["Assembly"]);
 
             // 8. Oven (Back wall)
             CreateStation<OvenStation>("Station_Oven", 8, stationsRoot.transform, new Vector3(0f, 0.75f, 5.2f), new Vector3(3f, 1.5f, 1.2f), materials["Oven"]);
 
             // 9. Packaging Station (Right wall)
-            CreateStation<PackagingStation>("Station_Packaging", 9, stationsRoot.transform, new Vector3(5f, 0.5f, 0f), new Vector3(1.5f, 1f, 2f), materials["Counter"]);
+            CreateStation<PackagingStation>("Station_Packaging", 9, stationsRoot.transform, new Vector3(5f, 0.5f, 0f), new Vector3(1.5f, 1f, 2f), materials["Packaging"]);
 
             // 10. Staging Counter (Retirada de Caixas - near doorway)
-            CreateStation<StagingStation>("Station_Staging", 10, stationsRoot.transform, new Vector3(3.5f, 0.5f, -4.5f), new Vector3(3f, 1f, 1f), materials["Counter"]);
+            CreateStation<StagingStation>("Station_Staging", 10, stationsRoot.transform, new Vector3(3.5f, 0.5f, -4.5f), new Vector3(3f, 1f, 1f), materials["Staging"]);
 
             // 11. Supplier Terminal
-            CreateStation<SupplierTerminal>("Terminal_Supplier", 11, stationsRoot.transform, new Vector3(-5f, 0.75f, -3.5f), new Vector3(1f, 1.5f, 0.8f), materials["Counter"]);
+            CreateStation<SupplierTerminal>("Terminal_Supplier", 11, stationsRoot.transform, new Vector3(-5f, 0.75f, -3.5f), new Vector3(1f, 1.5f, 0.8f), materials["Supplier"]);
 
             // 12. Order Phone
-            var phone = CreateStation<PhoneStation>("Station_Phone", 12, stationsRoot.transform, new Vector3(-3f, 0.6f, -4.5f), new Vector3(0.8f, 1.2f, 0.8f), materials["Counter"]);
+            var phone = CreateStation<PhoneStation>("Station_Phone", 12, stationsRoot.transform, new Vector3(-3f, 0.6f, -4.5f), new Vector3(0.8f, 1.2f, 0.8f), materials["Phone"]);
             phone.isRinging = true;
 
             // 13. Receiving Area
             CreateStation<ReceivingStation>("Area_Receiving", 13, stationsRoot.transform, new Vector3(-3.5f, 0.05f, -7f), new Vector3(2f, 0.1f, 2f), materials["Floor"]);
 
             // 14. Trash Bin
-            CreateStation<TrashStation>("Station_Trash", 14, stationsRoot.transform, new Vector3(5f, 0.5f, -3.5f), new Vector3(0.8f, 1f, 0.8f), materials["Oven"]);
+            CreateStation<TrashStation>("Station_Trash", 14, stationsRoot.transform, new Vector3(5f, 0.5f, -3.5f), new Vector3(0.8f, 1f, 0.8f), materials["Trash"]);
 
             // Anchors Group
             var anchors = new GameObject("Anchors");

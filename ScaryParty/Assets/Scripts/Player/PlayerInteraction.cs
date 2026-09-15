@@ -218,28 +218,45 @@ public class PlayerInteraction : NetworkBehaviour
 #if ENABLE_INPUT_SYSTEM
         if (Keyboard.current != null)
         {
+            var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+
             if (Keyboard.current.fKey.wasPressedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
             {
-                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
-                if (cmd != null) cmd.StartWorkServerRpc(prep.stationId, 0, prep.defaultProcessId);
+                if (cmd != null) cmd.StartWorkServerRpc(prep.stationId, 0, 0); // 0 = auto-detect processId
+            }
+            else if (Keyboard.current.fKey.isPressed && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prepActive)
+            {
+                if (netState != null && cmd != null)
+                {
+                    // Check if progress reached 1.0 to auto-complete
+                    for (int i = 0; i < netState.StationSlots.Count; i++)
+                    {
+                        var slot = netState.StationSlots[i];
+                        if (slot.StationId == prepActive.stationId && slot.Progress >= 1f)
+                        {
+                            cmd.CompleteWorkServerRpc(prepActive.stationId, 0);
+                            break;
+                        }
+                    }
+                }
             }
             else if (Keyboard.current.fKey.wasReleasedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prepRel)
             {
-                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
                 if (cmd != null) cmd.CancelWorkServerRpc(prepRel.stationId, 0);
             }
             else if (Keyboard.current.fKey.wasPressedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
             {
-                var state = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
-                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
-                if (state != null && cmd != null)
+                if (netState != null && cmd != null)
                 {
-                    for (int i = 0; i < state.Items.Count; i++)
+                    for (int i = 0; i < netState.Items.Count; i++)
                     {
-                        var item = state.Items[i];
+                        var item = netState.Items[i];
                         if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.SlotId == pkg.stationId)
                         {
-                            if (item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
+                            bool canPackage = item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase || 
+                                              item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza;
+                            if (canPackage && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
                             {
                                 cmd.StartPackagingServerRpc(item.ItemId);
                             }

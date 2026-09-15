@@ -148,7 +148,7 @@ namespace ScaryParty.Pizzeria.Composition
 
                 if (dirty)
                 {
-                    ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance.GetType().GetMethod("CommitAndReplicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.Invoke(ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance, null);
+                    ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 }
             }
         }

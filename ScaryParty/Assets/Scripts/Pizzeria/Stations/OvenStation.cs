@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Composition;
@@ -48,6 +48,44 @@ namespace ScaryParty.Pizzeria.Stations
             else if (!hasItemOnStation && hasItemInHand)
             {
                 cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, 0);
+            }
+        }
+
+        protected override void Update()
+        {
+            if (_progressBar == null) return;
+            var state = PizzeriaNetworkState.Instance;
+            if (state == null) return;
+
+            bool foundActive = false;
+            for (int i = 0; i < state.Items.Count; i++)
+            {
+                var item = state.Items[i];
+                if (item.LocationType == (byte)LocationType.StationSlot && item.SlotId == stationId && item.CookingStage != (byte)CookingStage.Uncooked)
+                {
+                    foundActive = true;
+                    if (item.BurnProgress > 0)
+                    {
+                        // Burning
+                        _progressBar.SetProgress(item.BurnProgress, Color.red);
+                    }
+                    else if (item.CookProgress < 1f)
+                    {
+                        // Cooking
+                        _progressBar.SetProgress(item.CookProgress, item.CookProgress > 0.8f ? Color.yellow : Color.green);
+                    }
+                    else
+                    {
+                        // Baked, waiting to burn or be removed
+                        _progressBar.SetProgress(1f, Color.yellow);
+                    }
+                    break;
+                }
+            }
+
+            if (!foundActive)
+            {
+                _progressBar.Hide();
             }
         }
     }

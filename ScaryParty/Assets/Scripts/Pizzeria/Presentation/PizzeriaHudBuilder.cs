@@ -54,21 +54,57 @@ namespace ScaryParty.Pizzeria.Presentation
             // Display Active Orders on the Top Right
             GUI.Box(new Rect(Screen.width - 260, 10, 250, 400), "PEDIDOS ATIVOS");
             int yOffset = 40;
+            
+            var catalog = PizzeriaRoot.Instance?.Catalog;
+            
             foreach (var order in netState.Orders)
             {
                 if (order.Lifecycle != (byte)ScaryParty.Pizzeria.Domain.Types.OrderLifecycle.Accepted) continue;
                 
                 string content = $"Destino: Casa #{order.DestinationId}\n";
-                if (order.LineCount > 0) content += $"- {order.Qty_0}x Receita {order.RecipeId_0}\n";
-                if (order.LineCount > 1) content += $"- {order.Qty_1}x Receita {order.RecipeId_1}\n";
-                if (order.LineCount > 2) content += $"- {order.Qty_2}x Receita {order.RecipeId_2}\n";
+                if (order.LineCount > 0)
+                {
+                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_0, out var r1) ? r1.Name : $"Receita {order.RecipeId_0}";
+                    content += $"- {order.Qty_0}x {rName}\n";
+                }
+                if (order.LineCount > 1)
+                {
+                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_1, out var r2) ? r2.Name : $"Receita {order.RecipeId_1}";
+                    content += $"- {order.Qty_1}x {rName}\n";
+                }
+                if (order.LineCount > 2)
+                {
+                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_2, out var r3) ? r3.Name : $"Receita {order.RecipeId_2}";
+                    content += $"- {order.Qty_2}x {rName}\n";
+                }
                 
                 double timeRemaining = order.DeadlineTime - PizzeriaRoot.Instance.Clock.Now;
                 content += $"Tempo: {Mathf.Max(0, (float)timeRemaining):F0}s";
 
-                GUI.Label(new Rect(Screen.width - 250, yOffset, 230, 80), content);
+                GUIStyle style = new GUIStyle(GUI.skin.label);
+                if (timeRemaining < 30) style.normal.textColor = Color.red;
+                else if (timeRemaining < 60) style.normal.textColor = Color.yellow;
+                else style.normal.textColor = Color.green;
+
+                GUI.Label(new Rect(Screen.width - 250, yOffset, 230, 80), content, style);
                 yOffset += 90;
             }
+
+            // Display Inventory Stock
+            GUI.Box(new Rect(10, 120, 220, 120), "ESTOQUE");
+            int itemsInFridge = 0;
+            int itemsInCupboard = 0;
+            for (int i = 0; i < netState.Items.Count; i++)
+            {
+                var item = netState.Items[i];
+                if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot)
+                {
+                    if (item.SlotId == 1) itemsInFridge++; // Fridge
+                    if (item.SlotId == 2) itemsInCupboard++; // Cupboard
+                }
+            }
+            GUI.Label(new Rect(20, 150, 200, 25), $"Geladeira: {itemsInFridge} itens");
+            GUI.Label(new Rect(20, 180, 200, 25), $"Armário: {itemsInCupboard} itens");
 
             // Staging Address Picker Window
             if (_showStagingAddressPicker)

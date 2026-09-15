@@ -33,7 +33,7 @@ namespace ScaryParty.Pizzeria.Network
             base.OnDestroy();
         }
 
-        private void CommitAndReplicate()
+        public void CommitAndReplicate()
         {
             var root = PizzeriaRoot.Instance;
             if (root != null && root.DomainState != null && _projector != null)
@@ -92,6 +92,28 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
 
             var slot = new StationSlotId(stationId, slotIndex);
+
+            if (processId == 0)
+            {
+                // Auto-detect process based on the item currently in the station
+                // Note: codebase convention stores stationId in LocationRef.SlotId (holderId=0)
+                foreach (var item in root.DomainState.Items.Values)
+                {
+                    if (item.Location.Type == LocationType.StationSlot && item.Location.SlotId == stationId)
+                    {
+                        foreach (var proc in root.Catalog.Processes.Values)
+                        {
+                            if (proc.InputIngredientId == item.DefinitionId && proc.InputStage == item.PrepStage)
+                            {
+                                processId = proc.Id;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
             var res = root.ProcessingService.StartWork(slot, processId, senderClientId, root.DomainState, root.Catalog, root.Clock);
             if (res.Success)
             {
