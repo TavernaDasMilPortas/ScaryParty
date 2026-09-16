@@ -42,6 +42,18 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        [ClientRpc]
+        private void NotifyErrorClientRpc(string message, ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show(message, ScaryParty.Pizzeria.Presentation.NotificationType.Error);
+        }
+
+        [ClientRpc]
+        private void NotifySuccessClientRpc(string message, ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show(message, ScaryParty.Pizzeria.Presentation.NotificationType.Success);
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void DispenseIngredientServerRpc(int storageId, int ingredientDefId, byte hand, ServerRpcParams rpcParams = default)
         {
@@ -53,6 +65,11 @@ namespace ScaryParty.Pizzeria.Network
             if (res.Success)
             {
                 CommitAndReplicate();
+            }
+            else
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc("Mão cheia ou estoque esgotado!", targetParams);
             }
         }
 
@@ -99,7 +116,7 @@ namespace ScaryParty.Pizzeria.Network
                 // Note: codebase convention stores stationId in LocationRef.SlotId (holderId=0)
                 foreach (var item in root.DomainState.Items.Values)
                 {
-                    if (item.Location.Type == LocationType.StationSlot && item.Location.SlotId == stationId)
+                    if (item.Location.Type == LocationType.StationSlot && item.Location.HolderId == (ulong)stationId)
                     {
                         foreach (var proc in root.Catalog.Processes.Values)
                         {
@@ -118,6 +135,11 @@ namespace ScaryParty.Pizzeria.Network
             if (res.Success)
             {
                 CommitAndReplicate();
+            }
+            else
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc(res.Error ?? "Não foi possível iniciar o trabalho.", targetParams);
             }
         }
 
@@ -164,6 +186,7 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void AddIngredientToPizzaServerRpc(ulong pizzaIdVal, ulong ingredientIdVal, ServerRpcParams rpcParams = default)
         {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
 
@@ -178,11 +201,17 @@ namespace ScaryParty.Pizzeria.Network
                 root.TransferService.DestroyItem(ingItem.Id);
                 CommitAndReplicate();
             }
+            else
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc("Não foi possível adicionar ingrediente", targetParams);
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void InsertOvenServerRpc(ulong pizzaIdVal, int stationId, int slotIndex, ServerRpcParams rpcParams = default)
         {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
 
@@ -191,6 +220,11 @@ namespace ScaryParty.Pizzeria.Network
             if (res.Success)
             {
                 CommitAndReplicate();
+            }
+            else
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc("Slot do forno ocupado!", targetParams);
             }
         }
 
@@ -336,6 +370,10 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             CommitAndReplicate();
+            
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            NotifySuccessClientRpc($"Entrega concluída! +R${eval.PersonalEarned}", targetParams);
+            
             Debug.Log($"[PizzeriaCommandHandler] Entrega concluída no destino #{destinationId}. Pessoal: +R${eval.PersonalEarned}, Restaurante: +R${eval.RestaurantEarned}.");
         }
 

@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Stations
 {
@@ -19,7 +20,7 @@ namespace ScaryParty.Pizzeria.Stations
             
             bool hasItemOnStation = false;
             for (int i = 0; i < state.Items.Count; i++) {
-                if (state.Items[i].LocationType == (byte)LocationType.StationSlot && state.Items[i].SlotId == stationId) {
+                if (state.Items[i].LocationType == (byte)LocationType.StationSlot && state.Items[i].HolderId == (ulong)stationId) {
                     hasItemOnStation = true; break;
                 }
             }
@@ -30,14 +31,9 @@ namespace ScaryParty.Pizzeria.Stations
             }
             else
             {
-                if (acceptedIngredientIds != null && acceptedIngredientIds.Length > 0)
+                if (PizzeriaHudBuilder.Instance != null)
                 {
-                    int ingId = acceptedIngredientIds[0];
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null)
-                    {
-                        cmd.DispenseIngredientServerRpc(stationId, ingId, 0);
-                    }
+                    PizzeriaHudBuilder.Instance.OpenStoragePicker(stationId);
                 }
             }
         }

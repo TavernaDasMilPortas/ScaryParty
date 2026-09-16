@@ -100,7 +100,7 @@ namespace ScaryParty.Pizzeria.Composition
                 for (int i = 0; i < toolData.InitialCount; i++)
                 {
                     var toolId = DomainState.GenerateToolId();
-                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(99 /* ToolRack */, i));
+                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(2 /* Cupboard */, i));
                     DomainState.Tools[toolId] = toolState;
                 }
             }

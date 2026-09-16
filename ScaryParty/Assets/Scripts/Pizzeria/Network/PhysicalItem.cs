@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Player;
 
 namespace ScaryParty.Pizzeria.Network
 {
@@ -20,23 +21,21 @@ namespace ScaryParty.Pizzeria.Network
         public virtual void OnInteract(GameObject interactor)
         {
             if (ItemInstanceId.Value == 0) return;
-
-            // Request pickup via command handler
             var cmd = PizzeriaCommandHandler.Instance;
             if (cmd != null && NetworkManager.Singleton != null)
             {
                 ulong myClientId = NetworkManager.Singleton.LocalClientId;
-                cmd.TransferItemServerRpc(ItemInstanceId.Value, (byte)LocationType.Hand, myClientId, 0 /* Active/Left Hand */);
+                byte handSlot = 0;
+                var invAdapter = interactor.GetComponent<PlayerInventoryAdapter>();
+                if (invAdapter != null)
+                {
+                    handSlot = (byte)invAdapter.ActiveHand;
+                }
+                cmd.TransferItemServerRpc(ItemInstanceId.Value, (byte)LocationType.Hand, myClientId, handSlot);
             }
         }
 
-        public virtual void OnFocus()
-        {
-            // Highlight effect if desired
-        }
-
-        public virtual void OnLoseFocus()
-        {
-        }
+        public virtual void OnFocus() { }
+        public virtual void OnLoseFocus() { }
     }
 }

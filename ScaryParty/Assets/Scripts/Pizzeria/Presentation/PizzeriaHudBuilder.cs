@@ -17,6 +17,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private bool _showDevPanel = false;
 
+        private bool _showStoragePicker = false;
+        private int _storageStationId = 0;
+        private Vector2 _storageScrollPos = Vector2.zero;
+
         private void Awake()
         {
             Instance = this;
@@ -33,6 +37,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.f9Key.wasPressedThisFrame)
             {
                 _showDevPanel = !_showDevPanel;
+                UpdateUIMode();
             }
         }
 
@@ -41,12 +46,47 @@ namespace ScaryParty.Pizzeria.Presentation
             _stagingBoxId = boxId;
             _stagingSlotIndex = slotIndex;
             _showStagingAddressPicker = true;
+            SetUIMode(true);
+        }
+
+        public void OpenStoragePicker(int stationId)
+        {
+            _storageStationId = stationId;
+            _showStoragePicker = true;
+            SetUIMode(true);
+        }
+
+        public void CloseStoragePicker()
+        {
+            _showStoragePicker = false;
+            UpdateUIMode();
+        }
+
+        private void UpdateUIMode()
+        {
+            bool anyUIOpen = _showStagingAddressPicker || _showStoragePicker || _showDevPanel;
+            SetUIMode(anyUIOpen);
+        }
+
+        private void SetUIMode(bool uiActive)
+        {
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+            {
+                var inputs = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<StarterAssets.StarterAssetsInputs>();
+                if (inputs != null)
+                {
+                    inputs.cursorLocked = !uiActive;
+                    inputs.cursorInputForLook = !uiActive;
+                }
+            }
+            Cursor.lockState = uiActive ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = uiActive;
         }
 
         private void OnGUI()
         {
             var netState = PizzeriaNetworkState.Instance;
-            if (netState == null) return;
+            if (netState == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsClient) return;
 
             // Display Restaurant Budget at Top Left below player money
             GUI.Box(new Rect(10, 80, 220, 30), $"Caixa da Pizzaria: R$ {netState.RestaurantBudget.Value}");
@@ -90,21 +130,49 @@ namespace ScaryParty.Pizzeria.Presentation
                 yOffset += 90;
             }
 
-            // Display Inventory Stock
-            GUI.Box(new Rect(10, 120, 220, 120), "ESTOQUE");
-            int itemsInFridge = 0;
-            int itemsInCupboard = 0;
-            for (int i = 0; i < netState.Items.Count; i++)
+            // Display Inventory Stock Summary
+            GUI.Box(new Rect(10, 120, 220, 120), "ESTOQUE (Resumo)");
+            int stockFridge = 0;
+            int stockCupboard = 0;
+            for (int i = 0; i < netState.StorageSlots.Count; i++)
             {
-                var item = netState.Items[i];
-                if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot)
+                if (netState.StorageSlots[i].StorageId == 1) stockFridge += netState.StorageSlots[i].Quantity;
+                if (netState.StorageSlots[i].StorageId == 2) stockCupboard += netState.StorageSlots[i].Quantity;
+            }
+            for (int i = 0; i < netState.Tools.Count; i++)
+            {
+                var tool = netState.Tools[i];
+                if (tool.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot)
                 {
-                    if (item.SlotId == 1) itemsInFridge++; // Fridge
-                    if (item.SlotId == 2) itemsInCupboard++; // Cupboard
+                    if (tool.HolderId == 1) stockFridge++;
+                    if (tool.HolderId == 2) stockCupboard++;
                 }
             }
-            GUI.Label(new Rect(20, 150, 200, 25), $"Geladeira: {itemsInFridge} itens");
-            GUI.Label(new Rect(20, 180, 200, 25), $"Armário: {itemsInCupboard} itens");
+            GUI.Label(new Rect(20, 150, 200, 25), $"Geladeira: {stockFridge} itens/utensílios");
+            GUI.Label(new Rect(20, 180, 200, 25), $"Armário: {stockCupboard} itens/utensílios");
+
+            // Backpack contents
+            if (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.LocalClient != null)
+            {
+                ulong myId = Unity.Netcode.NetworkManager.Singleton.LocalClientId;
+                int backpackCount = 0;
+                string backpackContent = "";
+                for (int i = 0; i < netState.Items.Count; i++)
+                {
+                    var item = netState.Items[i];
+                    if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Backpack && item.HolderId == myId)
+                    {
+                        backpackCount++;
+                        string label = item.LabelDestinationId > 0 ? $"Caixa → #{item.LabelDestinationId}" : "Caixa";
+                        backpackContent += $"  Slot {item.SlotId}: {label}\n";
+                    }
+                }
+                if (backpackCount > 0)
+                {
+                    GUI.Box(new Rect(10, 250, 220, 30 + backpackCount * 25), $"MOCHILA ({backpackCount}/2)");
+                    GUI.Label(new Rect(15, 275, 210, backpackCount * 25), backpackContent);
+                }
+            }
 
             // Staging Address Picker Window
             if (_showStagingAddressPicker)
@@ -130,12 +198,89 @@ namespace ScaryParty.Pizzeria.Presentation
                         cmd.ConfirmStageBoxServerRpc(_stagingBoxId, _stagingSlotIndex, _selectedDestinationIndex);
                     }
                     _showStagingAddressPicker = false;
+                    UpdateUIMode();
                 }
 
                 if (GUI.Button(new Rect(Screen.width / 2 + 10, Screen.height / 2 + 30, 130, 35), "Cancelar"))
                 {
                     _showStagingAddressPicker = false;
+                    UpdateUIMode();
                 }
+            }
+
+            // Storage Picker Window
+            if (_showStoragePicker)
+            {
+                GUI.Box(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300), $"ESTOQUE (Armazém #{_storageStationId})");
+                
+                if (GUI.Button(new Rect(Screen.width / 2 + 160, Screen.height / 2 - 150, 40, 20), "X"))
+                {
+                    CloseStoragePicker();
+                }
+
+                _storageScrollPos = GUI.BeginScrollView(new Rect(Screen.width / 2 - 190, Screen.height / 2 - 120, 380, 260), _storageScrollPos, new Rect(0, 0, 360, 1000));
+                
+                int storageY = 0;
+                
+                // Show items in this storage (e.g. from StorageSlots, which actually holds the logical quantity of ingredients)
+                // Wait, netState.StorageSlots holds the logical count of ingredients available to dispense.
+                for (int i = 0; i < netState.StorageSlots.Count; i++)
+                {
+                    var slot = netState.StorageSlots[i];
+                    if (slot.StorageId == _storageStationId && slot.Quantity > 0)
+                    {
+                        string ingName = catalog != null && catalog.Ingredients.TryGetValue(slot.IngredientDefId, out var def) ? def.Name : $"Ingrediente {slot.IngredientDefId}";
+                        GUI.Label(new Rect(10, storageY, 200, 30), $"{ingName} (Qtd: {slot.Quantity})");
+                        
+                        if (GUI.Button(new Rect(220, storageY, 100, 30), "Pegar"))
+                        {
+                            var cmd = PizzeriaCommandHandler.Instance;
+                            var adapter = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+                            if (cmd != null && adapter != null)
+                            {
+                                cmd.DispenseIngredientServerRpc(_storageStationId, slot.IngredientDefId, (byte)adapter.ActiveHand);
+                                
+                                // After clicking pegou, assume they might have full hands and maybe close
+                                var pInteract = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerInteraction>();
+                                if (pInteract != null)
+                                {
+                                    if (pInteract.CountItemsInHands() >= 2)
+                                    {
+                                        // Fechar interface se as mãos ficarem cheias após pegar ou já estiverem
+                                        // Let's close anyway after picking up for convenience, or they can click again if they toggled hand.
+                                        CloseStoragePicker();
+                                    }
+                                }
+                            }
+                        }
+                        storageY += 40;
+                    }
+                }
+
+                // Show tools in this storage
+                for (int i = 0; i < netState.Tools.Count; i++)
+                {
+                    var tool = netState.Tools[i];
+                    if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)_storageStationId)
+                    {
+                        string toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
+                        GUI.Label(new Rect(10, storageY, 200, 30), $"{toolName}");
+                        
+                        if (GUI.Button(new Rect(220, storageY, 100, 30), "Pegar"))
+                        {
+                            var cmd = PizzeriaCommandHandler.Instance;
+                            var adapter = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+                            if (cmd != null && adapter != null)
+                            {
+                                cmd.TransferToolServerRpc(tool.ToolId, (byte)LocationType.Hand, NetworkManager.Singleton.LocalClientId, (int)adapter.ActiveHand);
+                                CloseStoragePicker();
+                            }
+                        }
+                        storageY += 40;
+                    }
+                }
+
+                GUI.EndScrollView();
             }
 
             // Dev Panel (F9)
@@ -199,6 +344,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (GUI.Button(new Rect(Screen.width - 300, y, 270, 25), "Fechar Painel (F9)"))
                 {
                     _showDevPanel = false;
+                    UpdateUIMode();
                 }
             }
         }

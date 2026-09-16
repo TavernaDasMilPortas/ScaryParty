@@ -13,6 +13,13 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private Dictionary<ulong, GameObject> _visuals = new Dictionary<ulong, GameObject>();
         private Dictionary<ulong, GameObject> _toolVisuals = new Dictionary<ulong, GameObject>();
+        private Dictionary<ulong, GameObject[]> _pizzaIngredientLayers = new Dictionary<ulong, GameObject[]>();
+
+        private Dictionary<int, StationView> _stationCache = new Dictionary<int, StationView>();
+        private Dictionary<ulong, (Transform left, Transform right)> _playerHandCache = new Dictionary<ulong, (Transform left, Transform right)>();
+        
+        private float _cacheUpdateTimer = 0f;
+        private const float CacheUpdateInterval = 2f;
 
         public GameObject pizzaBoxPrefab; // Optional: If null, we use a brown cube
         public GameObject pizzaBasePrefab; // Optional: If null, we use a cylinder
@@ -30,6 +37,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 PizzeriaNetworkState.Instance.Items.OnListChanged += OnItemsChanged;
                 PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsChanged;
                 
+                UpdateCaches();
+
                 foreach (var item in PizzeriaNetworkState.Instance.Items)
                     UpdateOrSpawnVisual(item);
                 
@@ -47,6 +56,38 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        private void UpdateCaches()
+        {
+            _stationCache.Clear();
+            var stations = FindObjectsByType<StationView>(FindObjectsSortMode.None);
+            foreach (var st in stations)
+            {
+                _stationCache[st.stationId] = st;
+            }
+
+            _playerHandCache.Clear();
+            var players = FindObjectsByType<PlayerInteraction>(FindObjectsSortMode.None);
+            foreach (var p in players)
+            {
+                var netObj = p.GetComponent<NetworkObject>();
+                if (netObj != null)
+                {
+                    var anim = p.GetComponentInChildren<Animator>();
+                    Transform leftHand = null;
+                    Transform rightHand = null;
+                    if (anim != null)
+                    {
+                        leftHand = anim.GetBoneTransform(HumanBodyBones.LeftHand);
+                        rightHand = anim.GetBoneTransform(HumanBodyBones.RightHand);
+                    }
+                    if (leftHand == null) leftHand = p.transform;
+                    if (rightHand == null) rightHand = p.transform;
+                    
+                    _playerHandCache[netObj.OwnerClientId] = (leftHand, rightHand);
+                }
+            }
+        }
+
         private void OnItemsChanged(NetworkListEvent<NetItemDto> changeEvent)
         {
             if (changeEvent.Type == NetworkListEvent<NetItemDto>.EventType.Remove ||
@@ -56,6 +97,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     Destroy(go);
                     _visuals.Remove(changeEvent.Value.ItemId);
+                }
+                if (_pizzaIngredientLayers.TryGetValue(changeEvent.Value.ItemId, out var layers))
+                {
+                    foreach (var l in layers) if (l != null) Destroy(l);
+                    _pizzaIngredientLayers.Remove(changeEvent.Value.ItemId);
                 }
             }
             else
@@ -94,48 +140,55 @@ namespace ScaryParty.Pizzeria.Presentation
                 _toolVisuals[tool.ToolId] = go;
             }
 
+            if (tool.LocationType == (byte)LocationType.Destroyed || 
+                tool.LocationType == (byte)LocationType.Backpack || 
+                tool.LocationType == (byte)LocationType.StorageSlot)
+            {
+                if (go.activeSelf) go.SetActive(false);
+                return;
+            }
+
+            if (!go.activeSelf) go.SetActive(true);
+
             Transform parent = null;
-            Vector3 targetPos = Vector3.zero;
-            Quaternion targetRot = Quaternion.identity;
+            Vector3 targetPos = go.transform.position;
+            Quaternion targetRot = go.transform.rotation;
 
             if (tool.LocationType == (byte)LocationType.StationSlot)
             {
-                var stations = FindObjectsByType<StationView>(FindObjectsSortMode.None);
-                foreach (var st in stations)
+                if (_stationCache.TryGetValue((int)tool.HolderId, out var st))
                 {
-                    if (st.stationId == tool.SlotId)
-                    {
-                        parent = st.transform;
-                        // Tools sit next to the item slot
-                        targetPos = st.GetSlotPosition(0) + st.transform.right * 0.4f;
-                        targetRot = st.GetSlotRotation(0);
-                        break;
-                    }
+                    parent = st.transform;
+                    // Tools sit next to the item slot
+                    targetPos = st.GetSlotPosition((int)tool.SlotId) + st.transform.right * 0.4f;
+                    targetRot = st.GetSlotRotation((int)tool.SlotId);
                 }
             }
             else if (tool.LocationType == (byte)LocationType.Hand)
             {
-                var players = FindObjectsByType<PlayerInteraction>(FindObjectsSortMode.None);
-                foreach (var p in players)
+                if (_playerHandCache.TryGetValue(tool.HolderId, out var hands))
                 {
-                    var netObj = p.GetComponent<NetworkObject>();
-                    if (netObj != null && netObj.NetworkObjectId == tool.HolderId)
+                    var handTransform = tool.SlotId == 0 ? hands.left : hands.right;
+                    parent = handTransform;
+                    if (parent != null)
                     {
-                        parent = p.transform;
-                        if (parent != null)
-                        {
-                            targetPos = parent.position + parent.up * 1.2f + parent.forward * 0.6f + parent.right * (tool.SlotId == 0 ? -0.3f : 0.3f);
-                            targetRot = parent.rotation;
-                        }
-                        break;
+                        targetPos = parent.position + parent.forward * 0.1f;
+                        targetRot = parent.rotation;
                     }
                 }
             }
-
-            if (parent != null)
+            else if (tool.LocationType == (byte)LocationType.StagingSlot)
             {
-                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, 0.5f);
-                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, 0.5f);
+                parent = null;
+                targetPos = new Vector3(tool.SlotId * 0.5f, 1f, 0f);
+                targetRot = Quaternion.identity;
+            }
+
+            if (parent != null || tool.LocationType == (byte)LocationType.StagingSlot)
+            {
+                float lerpSpeed = 10f * Time.deltaTime;
+                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, lerpSpeed);
+                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, lerpSpeed);
             }
         }
 
@@ -150,48 +203,55 @@ namespace ScaryParty.Pizzeria.Presentation
             // Update appearance based on state
             UpdateAppearance(go, item);
 
+            if (item.LocationType == (byte)LocationType.Destroyed || 
+                item.LocationType == (byte)LocationType.Backpack || 
+                item.LocationType == (byte)LocationType.StorageSlot)
+            {
+                if (go.activeSelf) go.SetActive(false);
+                return;
+            }
+
+            if (!go.activeSelf) go.SetActive(true);
+
             // Update Position
             Transform parent = null;
-            Vector3 targetPos = Vector3.zero;
-            Quaternion targetRot = Quaternion.identity;
+            Vector3 targetPos = go.transform.position;
+            Quaternion targetRot = go.transform.rotation;
 
             if (item.LocationType == (byte)LocationType.StationSlot)
             {
-                var stations = FindObjectsByType<StationView>(FindObjectsSortMode.None);
-                foreach (var st in stations)
+                if (_stationCache.TryGetValue((int)item.HolderId, out var st))
                 {
-                    if (st.stationId == item.SlotId)
-                    {
-                        parent = st.transform;
-                        targetPos = st.GetSlotPosition(0);
-                        targetRot = st.GetSlotRotation(0);
-                        break;
-                    }
+                    parent = st.transform;
+                    targetPos = st.GetSlotPosition((int)item.SlotId);
+                    targetRot = st.GetSlotRotation((int)item.SlotId);
                 }
             }
             else if (item.LocationType == (byte)LocationType.Hand)
             {
-                var players = FindObjectsByType<PlayerInteraction>(FindObjectsSortMode.None);
-                foreach (var p in players)
+                if (_playerHandCache.TryGetValue(item.HolderId, out var hands))
                 {
-                    var netObj = p.GetComponent<NetworkObject>();
-                    if (netObj != null && netObj.NetworkObjectId == item.HolderId)
+                    var handTransform = item.SlotId == 0 ? hands.left : hands.right;
+                    parent = handTransform;
+                    if (parent != null)
                     {
-                        parent = p.transform;
-                        if (parent != null)
-                        {
-                            targetPos = parent.position + parent.up * 1.2f + parent.forward * 0.6f + parent.right * (item.SlotId == 0 ? -0.3f : 0.3f);
-                            targetRot = parent.rotation;
-                        }
-                        break;
+                        targetPos = parent.position + parent.forward * 0.1f;
+                        targetRot = parent.rotation;
                     }
                 }
             }
-
-            if (parent != null)
+            else if (item.LocationType == (byte)LocationType.StagingSlot)
             {
-                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, 0.5f); // Smooth quick snap
-                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, 0.5f);
+                parent = null;
+                targetPos = new Vector3(item.SlotId * 0.5f, 1f, 0f);
+                targetRot = Quaternion.identity;
+            }
+
+            if (parent != null || item.LocationType == (byte)LocationType.StagingSlot)
+            {
+                float lerpSpeed = 10f * Time.deltaTime;
+                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, lerpSpeed); // Smooth quick snap
+                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, lerpSpeed);
             }
         }
 
@@ -245,6 +305,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (item.CookingStage == (byte)CookingStage.Uncooked) rend.material.color = new Color(1f, 0.9f, 0.7f); // Pale dough
                 else if (item.CookingStage == (byte)CookingStage.Baked) rend.material.color = new Color(0.8f, 0.5f, 0.2f); // Baked crust
                 else if (item.CookingStage == (byte)CookingStage.Burned) rend.material.color = Color.black;
+
+                UpdatePizzaIngredientLayers(go, item);
             }
             else
             {
@@ -259,8 +321,82 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        private void UpdatePizzaIngredientLayers(GameObject pizzaGo, NetItemDto item)
+        {
+            if (!_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers))
+            {
+                layers = new GameObject[3];
+                _pizzaIngredientLayers[item.ItemId] = layers;
+            }
+
+            // Sauce: Bit 0
+            bool hasSauce = (item.IngredientMask & 1) != 0;
+            if (hasSauce && layers[0] == null)
+            {
+                var sauce = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                sauce.transform.SetParent(pizzaGo.transform);
+                sauce.transform.localPosition = new Vector3(0, 1.25f, 0); 
+                sauce.transform.localScale = new Vector3(0.875f, 0.25f, 0.875f); // Global roughly 0.35 x 0.005 x 0.35
+                sauce.transform.localRotation = Quaternion.identity;
+                sauce.GetComponent<Renderer>().material.color = new Color(0.80f, 0.15f, 0.10f); // Red
+                Destroy(sauce.GetComponent<Collider>());
+                layers[0] = sauce;
+            }
+            if (layers[0] != null) layers[0].SetActive(hasSauce);
+
+            // Cheese: Bit 1
+            bool hasCheese = (item.IngredientMask & 2) != 0;
+            if (hasCheese && layers[1] == null)
+            {
+                var cheese = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                cheese.transform.SetParent(pizzaGo.transform);
+                cheese.transform.localPosition = new Vector3(0, 1.75f, 0);
+                cheese.transform.localScale = new Vector3(0.825f, 0.25f, 0.825f); // Global roughly 0.33 x 0.005 x 0.33
+                cheese.transform.localRotation = Quaternion.identity;
+                cheese.GetComponent<Renderer>().material.color = new Color(0.98f, 0.88f, 0.35f); // Yellow
+                Destroy(cheese.GetComponent<Collider>());
+                layers[1] = cheese;
+            }
+            if (layers[1] != null) layers[1].SetActive(hasCheese);
+
+            // Topping: Bit 2
+            bool hasTopping = (item.IngredientMask & 4) != 0;
+            if (hasTopping && layers[2] == null)
+            {
+                var toppingRoot = new GameObject("Toppings");
+                toppingRoot.transform.SetParent(pizzaGo.transform);
+                toppingRoot.transform.localPosition = new Vector3(0, 2.25f, 0);
+                toppingRoot.transform.localRotation = Quaternion.identity;
+                toppingRoot.transform.localScale = Vector3.one;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    sphere.transform.SetParent(toppingRoot.transform);
+                    
+                    float angle = i * Mathf.PI / 2f + Random.Range(-0.2f, 0.2f);
+                    float radius = Random.Range(0.1f, 0.3f) / 0.4f;
+                    sphere.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
+                    sphere.transform.localScale = new Vector3(0.25f, 5f, 0.25f); // Global roughly 0.1 x 0.1 x 0.1
+                    sphere.GetComponent<Renderer>().material.color = new Color(0.4f, 0.1f, 0.1f);
+                    Destroy(sphere.GetComponent<Collider>());
+                }
+                layers[2] = toppingRoot;
+            }
+            if (layers[2] != null) layers[2].SetActive(hasTopping);
+        }
+
         private void Update()
         {
+            if (PizzeriaNetworkState.Instance == null) return;
+
+            _cacheUpdateTimer -= Time.deltaTime;
+            if (_cacheUpdateTimer <= 0f)
+            {
+                UpdateCaches();
+                _cacheUpdateTimer = CacheUpdateInterval;
+            }
+
             // Continuously lerp items to their target anchors just to keep them locked
             foreach (var item in PizzeriaNetworkState.Instance.Items)
             {

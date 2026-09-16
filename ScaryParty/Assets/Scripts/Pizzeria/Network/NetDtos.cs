@@ -19,6 +19,8 @@ namespace ScaryParty.Pizzeria.Network
         public float BurnProgress;
         public int LabelDestinationId;
         public uint Revision;
+        public byte IngredientMask;
+        public byte IngredientCount;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -36,13 +38,15 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref BurnProgress);
             serializer.SerializeValue(ref LabelDestinationId);
             serializer.SerializeValue(ref Revision);
+            serializer.SerializeValue(ref IngredientMask);
+            serializer.SerializeValue(ref IngredientCount);
         }
 
         public bool Equals(NetItemDto other)
-            => ItemId == other.ItemId && Revision == other.Revision && LocationType == other.LocationType && HolderId == other.HolderId && SlotId == other.SlotId;
+            => ItemId == other.ItemId && Revision == other.Revision && LocationType == other.LocationType && HolderId == other.HolderId && SlotId == other.SlotId && IngredientMask == other.IngredientMask && IngredientCount == other.IngredientCount;
 
         public override bool Equals(object obj) => obj is NetItemDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(ItemId, Revision);
+        public override int GetHashCode() => HashCode.Combine(ItemId, Revision, IngredientMask);
     }
 
     public struct NetToolDto : INetworkSerializable, IEquatable<NetToolDto>

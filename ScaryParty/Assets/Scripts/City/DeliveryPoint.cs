@@ -64,48 +64,6 @@ public class DeliveryPoint : MonoBehaviour, IInteractable
                 UIManager.Instance.ShowInteractionPrompt("Nenhuma pizza para entregar aqui!");
             }
             return;
-        }
-
-        PlayerInteraction interaction = player.GetComponent<PlayerInteraction>();
-        if (interaction != null)
-        {
-            // Simple check: Is the player holding any pizza?
-            // In a real scenario, we check if they hold the *correct* pizza type.
-            string heldPizza = "";
-            if (interaction.rightHand.isFull && interaction.rightHand.itemName.Contains("Pizza"))
-                heldPizza = interaction.rightHand.itemName;
-            else if (interaction.leftHand.isFull && interaction.leftHand.itemName.Contains("Pizza"))
-                heldPizza = interaction.leftHand.itemName;
-
-            if (!string.IsNullOrEmpty(heldPizza))
-            {
-                if (PizzariaManager.Instance != null && PizzariaManager.Instance.HasOrder(heldPizza, pointIndex))
-                {
-                    // Deliver!
-                    interaction.RemoveItem(heldPizza);
-                    
-                    // Notify the Pizzaria Manager
-                    if (player.GetComponent<Unity.Netcode.NetworkObject>() != null)
-                    {
-                        ulong clientId = player.GetComponent<Unity.Netcode.NetworkObject>().OwnerClientId;
-                        PizzariaManager.Instance.CompleteOrder(heldPizza, pointIndex, clientId);
-                    }
-
-                    // Deactivate this point until it's requested again
-                    isActive = false;
-                }
-                else
-                {
-                    if (UIManager.Instance != null)
-                        UIManager.Instance.ShowInteractionPrompt("Wrong pizza for this address!");
-                }
-            }
-            else
-            {
-                if (UIManager.Instance != null)
-                    UIManager.Instance.ShowInteractionPrompt("You don't have a pizza to deliver here!");
-            }
-        }
     }
 
     private InteractableHighlight _highlight;

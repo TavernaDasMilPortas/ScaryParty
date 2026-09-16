@@ -12,7 +12,39 @@ namespace ScaryParty.Pizzeria.Stations
         public string stationName = "EstaÃ§Ã£o";
         public Transform[] slotAnchors;
 
-        public virtual string InteractPrompt => "[E] Interagir com " + stationName;
+        public virtual string InteractPrompt 
+        {
+            get
+            {
+                var netState = PizzeriaNetworkState.Instance;
+                var networkManager = NetworkManager.Singleton;
+                if (netState == null || networkManager == null) return "[E] Interagir com " + stationName;
+
+                ulong localClientId = networkManager.LocalClientId;
+                bool stationHasItem = false;
+                bool playerHasItem = false;
+                string itemName = "Item"; // Without ItemLibrary, use generic name
+
+                for (int i = 0; i < netState.Items.Count; i++)
+                {
+                    var item = netState.Items[i];
+                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                    {
+                        stationHasItem = true;
+                    }
+                    if (item.LocationType == (byte)LocationType.Hand && item.HolderId == localClientId)
+                    {
+                        playerHasItem = true;
+                    }
+                }
+
+                if (stationHasItem && !playerHasItem) return $"[E] Pegar {itemName}";
+                if (!stationHasItem && playerHasItem) return "[E] Colocar";
+                if (stationHasItem && playerHasItem) return "[E] Adicionar ingrediente";
+
+                return "[E] Interagir com " + stationName;
+            }
+        }
 
         public virtual void OnInteract(GameObject interactor)
         {
@@ -79,7 +111,7 @@ namespace ScaryParty.Pizzeria.Stations
         {
             var netObj = interactor.GetComponent<NetworkObject>();
             if (netObj == null) return;
-            ulong playerId = netObj.NetworkObjectId;
+            ulong playerId = netObj.OwnerClientId;
 
             var state = PizzeriaNetworkState.Instance;
             var cmd = PizzeriaCommandHandler.Instance;
@@ -96,7 +128,7 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < state.Items.Count; i++)
             {
                 var item = state.Items[i];
-                if (item.LocationType == (byte)LocationType.StationSlot && item.SlotId == stationId)
+                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
                 {
                     itemOnStation = item;
                     hasItemOnStation = true;
@@ -112,11 +144,13 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 // Pick up
                 cmd.TransferItemServerRpc(itemOnStation.ItemId, (byte)LocationType.Hand, playerId, 0);
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
             }
             else if (!hasItemOnStation && hasItemInHand)
             {
                 // Place
-                cmd.TransferItemServerRpc(itemInHand.ItemId, (byte)LocationType.StationSlot, 0, stationId);
+                cmd.TransferItemServerRpc(itemInHand.ItemId, (byte)LocationType.StationSlot, (ulong)stationId, 0);
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item colocado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
             }
             else if (hasItemOnStation && hasItemInHand)
             {

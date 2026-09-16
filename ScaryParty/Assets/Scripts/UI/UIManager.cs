@@ -58,6 +58,8 @@ public class UIManager : MonoBehaviour
         _moneyLabel = root.Q<Label>("MoneyLabel");
         _scoreLabel = root.Q<Label>("ScoreLabel");
         _ordersList = root.Q<ScrollView>("OrdersList");
+        if (_ordersList != null)
+            _ordersList.style.display = DisplayStyle.None;
         _interactionPrompt = root.Q<Label>("InteractionPrompt");
         _leftHandContent = root.Q<Label>("LeftHandContent");
         _rightHandContent = root.Q<Label>("RightHandContent");

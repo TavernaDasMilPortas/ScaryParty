@@ -17,18 +17,26 @@ public class PizzaItem : NetworkBehaviour, IInteractable
         PlayerInteraction interaction = player.GetComponent<PlayerInteraction>();
         if (interaction != null)
         {
-            // Attempt to pick up
-            bool pickedUp = interaction.TryPickUpItem(pizzaType, (int)NetworkObjectId);
-            
-            if (pickedUp)
+            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+            if (cmd != null && NetworkManager.Singleton != null)
             {
-                // Tell server to despawn this pizza box
+                ulong myClientId = NetworkManager.Singleton.LocalClientId;
+                byte handSlot = 0;
+                var invAdapter = player.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+                if (invAdapter != null)
+                {
+                    handSlot = (byte)invAdapter.ActiveHand;
+                }
+                
+                cmd.TransferItemServerRpc(NetworkObjectId, (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand, myClientId, handSlot);
+                
+                // Keep the old despawn behavior but skip the legacy hand tracking
                 PickUpServerRpc();
             }
             else
             {
                 if (UIManager.Instance != null)
-                    UIManager.Instance.ShowInteractionPrompt("Hands are full!");
+                    UIManager.Instance.ShowInteractionPrompt("Cannot pick up (Network error)");
             }
         }
     }

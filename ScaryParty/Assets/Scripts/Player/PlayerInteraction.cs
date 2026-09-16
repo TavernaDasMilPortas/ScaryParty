@@ -19,19 +19,8 @@ public class PlayerInteraction : NetworkBehaviour
     [Tooltip("Layers that contain interactable objects")]
     public LayerMask interactableLayer;
 
-    // Hand Slots (Inventory)
-    [System.Serializable]
-    public class HandSlot
-    {
-        public bool isFull;
-        public string itemName;
-        public int networkObjectId; // Reference to the object if needed
-    }
-
-    public HandSlot rightHand = new HandSlot();
-    public HandSlot leftHand = new HandSlot();
-
     private IInteractable _currentInteractable;
+    private float _lastSyncTime = 0f;
 
     public override void OnNetworkSpawn()
     {
@@ -126,6 +115,12 @@ public class PlayerInteraction : NetworkBehaviour
         
         HandleRaycast();
         HandleInput();
+
+        if (Time.time - _lastSyncTime > 0.5f)
+        {
+            _lastSyncTime = Time.time;
+            SyncHeldPizzaCount();
+        }
     }
 
     private void HandleRaycast()
@@ -223,12 +218,46 @@ public class PlayerInteraction : NetworkBehaviour
 
             if (Keyboard.current.fKey.wasPressedThisFrame && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
             {
-                if (cmd != null) cmd.StartWorkServerRpc(prep.stationId, 0, 0); // 0 = auto-detect processId
+                if (netState != null && cmd != null && Unity.Netcode.NetworkManager.Singleton != null)
+                {
+                    bool stationEmpty = true;
+                    ulong itemInHandId = 0;
+                    ulong localClientId = Unity.Netcode.NetworkManager.Singleton.LocalClientId;
+
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var item = netState.Items[i];
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)prep.stationId)
+                        {
+                            stationEmpty = false;
+                        }
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && item.HolderId == localClientId)
+                        {
+                            itemInHandId = item.ItemId;
+                        }
+                    }
+
+                    if (stationEmpty && itemInHandId != 0)
+                    {
+                        cmd.TransferItemServerRpc(itemInHandId, (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot, (ulong)prep.stationId, 0);
+                    }
+                    else
+                    {
+                        cmd.StartWorkServerRpc(prep.stationId, 0, 0); // 0 = auto-detect processId
+                    }
+                }
+                else if (cmd != null)
+                {
+                    cmd.StartWorkServerRpc(prep.stationId, 0, 0); // 0 = auto-detect processId
+                }
             }
             else if (Keyboard.current.fKey.isPressed && _currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prepActive)
             {
                 if (netState != null && cmd != null)
                 {
+                    // Send heartbeat so progress continues
+                    cmd.HeartbeatWorkServerRpc(prepActive.stationId, 0);
+
                     // Check if progress reached 1.0 to auto-complete
                     for (int i = 0; i < netState.StationSlots.Count; i++)
                     {
@@ -252,7 +281,7 @@ public class PlayerInteraction : NetworkBehaviour
                     for (int i = 0; i < netState.Items.Count; i++)
                     {
                         var item = netState.Items[i];
-                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.SlotId == pkg.stationId)
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)pkg.stationId)
                         {
                             bool canPackage = item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase || 
                                               item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza;
@@ -269,75 +298,44 @@ public class PlayerInteraction : NetworkBehaviour
 #endif
     }
 
-    /// <summary>
-    /// Attempts to place an item in an empty hand.
-    /// Returns true if successful.
-    /// </summary>
-    public bool TryPickUpItem(string itemName, int objectId)
+    public bool IsHandFull(ScaryParty.Pizzeria.Domain.Types.HandSlotIndex hand)
     {
-        if (!rightHand.isFull)
+        var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+        if (netState == null) return false;
+        ulong myId = NetworkManager.Singleton.LocalClientId;
+        for (int i = 0; i < netState.Items.Count; i++)
         {
-            rightHand.isFull = true;
-            rightHand.itemName = itemName;
-            rightHand.networkObjectId = objectId;
-            
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateHand(true, itemName);
-            
-            SyncHeldPizzaCount();
-            return true;
+            var it = netState.Items[i];
+            if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && it.HolderId == myId && it.SlotId == (int)hand)
+                return true;
         }
-        else if (!leftHand.isFull)
+        // Also check tools
+        for (int i = 0; i < netState.Tools.Count; i++)
         {
-            leftHand.isFull = true;
-            leftHand.itemName = itemName;
-            leftHand.networkObjectId = objectId;
-            
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateHand(false, itemName);
-            
-            SyncHeldPizzaCount();
-            return true;
+            var tool = netState.Tools[i];
+            if (tool.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && tool.HolderId == myId && tool.SlotId == (int)hand)
+                return true;
         }
-
-        // Both hands full
         return false;
     }
 
-    /// <summary>
-    /// Checks if the player is holding a specific item.
-    /// </summary>
-    public bool IsHoldingItem(string itemName)
+    public int CountItemsInHands()
     {
-        return (rightHand.isFull && rightHand.itemName == itemName) || 
-               (leftHand.isFull && leftHand.itemName == itemName);
-    }
-    
-    /// <summary>
-    /// Removes a specific item from the hands (e.g. after delivery).
-    /// </summary>
-    public void RemoveItem(string itemName)
-    {
-        if (rightHand.isFull && rightHand.itemName == itemName)
+        int count = 0;
+        var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+        if (netState == null) return 0;
+        ulong myId = NetworkManager.Singleton.LocalClientId;
+        for (int i = 0; i < netState.Items.Count; i++)
         {
-            rightHand.isFull = false;
-            rightHand.itemName = "";
-            rightHand.networkObjectId = -1;
-            
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateHand(true, "Empty");
+            if (netState.Items[i].LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && netState.Items[i].HolderId == myId)
+                count++;
         }
-        else if (leftHand.isFull && leftHand.itemName == itemName)
+        for (int i = 0; i < netState.Tools.Count; i++)
         {
-            leftHand.isFull = false;
-            leftHand.itemName = "";
-            leftHand.networkObjectId = -1;
-            
-            if (UIManager.Instance != null)
-                UIManager.Instance.UpdateHand(false, "Empty");
+            if (netState.Tools[i].LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && netState.Tools[i].HolderId == myId)
+                count++;
         }
-
-        SyncHeldPizzaCount();
+        return count;
     }
 
     /// <summary>
@@ -347,9 +345,7 @@ public class PlayerInteraction : NetworkBehaviour
     /// </summary>
     private void SyncHeldPizzaCount()
     {
-        int count = 0;
-        if (rightHand.isFull) count++;
-        if (leftHand.isFull) count++;
+        int count = CountItemsInHands();
 
         var ps = GetComponent<PlayerState>();
         if (ps != null)

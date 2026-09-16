@@ -86,7 +86,27 @@ namespace ScaryParty.Pizzeria.Player
                 };
                 return $"Pizza ({stage})";
             }
-            return $"Item #{it.DefinitionId}";
+            
+            string baseName = $"Item #{it.DefinitionId}";
+            var catalog = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.Catalog;
+            if (catalog != null && catalog.Ingredients.TryGetValue(it.DefinitionId, out var def))
+            {
+                baseName = def.Name;
+            }
+            else
+            {
+                // Fallbacks
+                switch ((ItemCategory)it.Category)
+                {
+                    case ItemCategory.PizzaBase: baseName = "Massa Aberta"; break;
+                    case ItemCategory.Dough: baseName = "Massa"; break;
+                    case ItemCategory.Sauce: baseName = "Molho"; break;
+                    case ItemCategory.Cheese: baseName = "Queijo"; break;
+                    case ItemCategory.Topping: baseName = "Cobertura"; break;
+                }
+            }
+            
+            return baseName;
         }
     }
 }
