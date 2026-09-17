@@ -139,7 +139,7 @@ namespace ScaryParty.Pizzeria.Network
             else
             {
                 var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
-                NotifyErrorClientRpc(res.Error ?? "Não foi possível iniciar o trabalho.", targetParams);
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível iniciar o trabalho." : res.Message, targetParams);
             }
         }
 

@@ -283,7 +283,7 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
-        private NetItemDto CreateItemDto(Item item)
+        private NetItemDto CreateItemDto(ItemState item)
         {
             byte mask = 0;
             byte count = 0;
@@ -322,7 +322,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetToolDto CreateToolDto(Tool tool)
+        private NetToolDto CreateToolDto(ToolItemState tool)
         {
             return new NetToolDto
             {
@@ -338,7 +338,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetStorageDto CreateStorageDto(IngredientStorageSlot slot)
+        private NetStorageDto CreateStorageDto(StorageSlotState slot)
         {
             return new NetStorageDto
             {
@@ -350,7 +350,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetStationSlotDto CreateStationSlotDto(StationOperation op)
+        private NetStationSlotDto CreateStationSlotDto(OperationState op)
         {
             return new NetStationSlotDto
             {
@@ -365,7 +365,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetOrderDto CreateOrderDto(Order order)
+        private NetOrderDto CreateOrderDto(OrderState order)
         {
             var dto = new NetOrderDto
             {
@@ -398,7 +398,7 @@ namespace ScaryParty.Pizzeria.Network
             return dto;
         }
 
-        private NetSupplyDto CreateSupplyDto(SupplyOrder sup)
+        private NetSupplyDto CreateSupplyDto(SupplyOrderState sup)
         {
             return new NetSupplyDto
             {

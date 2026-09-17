@@ -31,7 +31,7 @@ namespace ScaryParty.Pizzeria.Stations
 
             if (!foundBox)
             {
-                TryPickOrPlace(interactor, 0);
+                TryPickOrPlace(interactor);
             }
         }
     }
