@@ -23,7 +23,11 @@ namespace ScaryParty.Pizzeria.Stations
                 ulong localClientId = networkManager.LocalClientId;
                 bool stationHasItem = false;
                 bool playerHasItem = false;
-                string itemName = "Item"; // Without ItemLibrary, use generic name
+                string itemName = "Item";
+
+                bool stationHasTool = false;
+                bool playerHasTool = false;
+                string toolName = "Utensílio";
 
                 for (int i = 0; i < netState.Items.Count; i++)
                 {
@@ -38,8 +42,24 @@ namespace ScaryParty.Pizzeria.Stations
                     }
                 }
 
-                if (stationHasItem && !playerHasItem) return $"[E] Pegar {itemName}";
-                if (!stationHasItem && playerHasItem) return "[E] Colocar";
+                for (int i = 0; i < netState.Tools.Count; i++)
+                {
+                    var tool = netState.Tools[i];
+                    if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId)
+                    {
+                        stationHasTool = true;
+                        toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
+                    }
+                    if (tool.LocationType == (byte)LocationType.Hand && tool.HolderId == localClientId)
+                    {
+                        playerHasTool = true;
+                        toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
+                    }
+                }
+
+                if (stationHasTool && !playerHasItem && !playerHasTool) return $"[E] Pegar {toolName}";
+                if (stationHasItem && !playerHasItem && !playerHasTool) return $"[E] Pegar {itemName}";
+                if (!stationHasItem && !stationHasTool && (playerHasItem || playerHasTool)) return "[E] Colocar";
                 if (stationHasItem && playerHasItem) return "[E] Adicionar ingrediente";
 
                 return "[E] Interagir com " + stationName;
@@ -93,11 +113,24 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < state.StationSlots.Count; i++)
             {
                 var slot = state.StationSlots[i];
-                if (slot.StationId == stationId && slot.Progress > 0 && slot.Progress < 1f)
+                if (slot.StationId == stationId && slot.HeldItemId != 0)
                 {
-                    _progressBar.SetProgress(slot.Progress, Color.green);
-                    foundActive = true;
-                    break;
+                    float currentP = slot.Progress;
+                    if (slot.CapturedDuration > 0 && NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                    {
+                        double now = NetworkManager.Singleton.ServerTime.Time;
+                        if (now > slot.OperationStartTime)
+                        {
+                            currentP += (float)((now - slot.OperationStartTime) / slot.CapturedDuration);
+                        }
+                    }
+
+                    if (currentP > 0 && currentP < 1f)
+                    {
+                        _progressBar.SetProgress(currentP, Color.green);
+                        foundActive = true;
+                        break;
+                    }
                 }
             }
 
@@ -113,58 +146,161 @@ namespace ScaryParty.Pizzeria.Stations
             if (netObj == null) return;
             ulong playerId = netObj.OwnerClientId;
 
+            var invAdapter = interactor.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+            int activeHand = invAdapter != null ? (int)invAdapter.ActiveHand : 0;
+
             var state = PizzeriaNetworkState.Instance;
             var cmd = PizzeriaCommandHandler.Instance;
             if (state == null || cmd == null) return;
 
-            // 1. Check if there is an item on this station
+            // Use slotIndex 0 for generic StationView for now, unless implemented per subclass
+            int slotIndex = 0; 
+
             NetItemDto itemOnStation = default;
             bool hasItemOnStation = false;
 
-            // 2. Check if player has an item in hand
             NetItemDto itemInHand = default;
             bool hasItemInHand = false;
+
+            NetToolDto toolOnStation = default;
+            bool hasToolOnStation = false;
+
+            NetToolDto toolInHand = default;
+            bool hasToolInHand = false;
 
             for (int i = 0; i < state.Items.Count; i++)
             {
                 var item = state.Items[i];
-                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.SlotId == slotIndex)
                 {
                     itemOnStation = item;
                     hasItemOnStation = true;
                 }
-                if (item.LocationType == (byte)LocationType.Hand && item.HolderId == playerId)
+                if (item.LocationType == (byte)LocationType.Hand && item.HolderId == playerId && item.SlotId == activeHand)
                 {
                     itemInHand = item;
                     hasItemInHand = true;
                 }
             }
 
-            if (hasItemOnStation && !hasItemInHand)
+            for (int i = 0; i < state.Tools.Count; i++)
             {
-                // Pick up
-                cmd.TransferItemServerRpc(itemOnStation.ItemId, (byte)LocationType.Hand, playerId, 0);
-                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                var tool = state.Tools[i];
+                if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId && tool.SlotId == slotIndex)
+                {
+                    toolOnStation = tool;
+                    hasToolOnStation = true;
+                }
+                if (tool.LocationType == (byte)LocationType.Hand && tool.HolderId == playerId && tool.SlotId == activeHand)
+                {
+                    toolInHand = tool;
+                    hasToolInHand = true;
+                }
             }
-            else if (!hasItemOnStation && hasItemInHand)
+
+            bool handEmpty = !hasItemInHand && !hasToolInHand;
+            bool stationEmpty = !hasItemOnStation && !hasToolOnStation;
+
+            // Checar se a OUTRA mão está livre
+            int otherHand = activeHand == 0 ? 1 : 0;
+            bool otherHandEmpty = true;
+            for (int i = 0; i < state.Items.Count; i++)
             {
-                // Place
-                cmd.TransferItemServerRpc(itemInHand.ItemId, (byte)LocationType.StationSlot, (ulong)stationId, 0);
+                var it = state.Items[i];
+                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == playerId && it.SlotId == otherHand)
+                {
+                    otherHandEmpty = false;
+                    break;
+                }
+            }
+            if (otherHandEmpty)
+            {
+                for (int i = 0; i < state.Tools.Count; i++)
+                {
+                    var t = state.Tools[i];
+                    if (t.LocationType == (byte)LocationType.Hand && t.HolderId == playerId && t.SlotId == otherHand)
+                    {
+                        otherHandEmpty = false;
+                        break;
+                    }
+                }
+            }
+
+            int pickHand = handEmpty ? activeHand : (otherHandEmpty ? otherHand : -1);
+
+            if (hasToolOnStation && pickHand != -1)
+            {
+                // Pegar ferramenta da bancada (na mão ativa ou na mão livre)
+                cmd.TransferToolServerRpc(toolOnStation.ToolId, (byte)LocationType.Hand, playerId, pickHand);
+                string tName = toolOnStation.DefinitionId == 1 ? "Ralador" : "Faca";
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+            }
+            else if (hasItemOnStation)
+            {
+                // Tenta combinar se a mão ativa tiver ingrediente compatível
+                if (hasItemInHand)
+                {
+                    bool isIngredient = itemInHand.Category == (byte)ItemCategory.Sauce || 
+                                        itemInHand.Category == (byte)ItemCategory.Cheese || 
+                                        itemInHand.Category == (byte)ItemCategory.Topping;
+                    
+                    bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.Dough || itemOnStation.Category == (byte)ItemCategory.Pizza;
+                    
+                    if (isPizzaOrBase && isIngredient)
+                    {
+                        cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
+                        if (invAdapter != null && !otherHandEmpty)
+                        {
+                            invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                        }
+                        return;
+                    }
+                }
+
+                // Se não combinou, e temos mão livre (ativa ou oposta), pega o item!
+                if (pickHand != -1)
+                {
+                    cmd.TransferItemServerRpc(itemOnStation.ItemId, (byte)LocationType.Hand, playerId, pickHand);
+                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                }
+            }
+            else if (stationEmpty && hasToolInHand)
+            {
+                // Colocar ferramenta na bancada
+                cmd.TransferToolServerRpc(toolInHand.ToolId, (byte)LocationType.StationSlot, (ulong)stationId, slotIndex);
+                string tName = toolInHand.DefinitionId == 1 ? "Ralador" : "Faca";
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} colocado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                if (invAdapter != null && !otherHandEmpty)
+                {
+                    invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                }
+            }
+            else if (stationEmpty && hasItemInHand)
+            {
+                // Colocar item na bancada
+                cmd.TransferItemServerRpc(itemInHand.ItemId, (byte)LocationType.StationSlot, (ulong)stationId, slotIndex);
                 ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item colocado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                if (invAdapter != null && !otherHandEmpty)
+                {
+                    invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                }
             }
             else if (hasItemOnStation && hasItemInHand)
             {
                 // Combine (Add ingredient to pizza)
-                bool isIngredient = itemInHand.Category == (byte)ItemCategory.Dough || 
-                                    itemInHand.Category == (byte)ItemCategory.Sauce || 
+                bool isIngredient = itemInHand.Category == (byte)ItemCategory.Sauce || 
                                     itemInHand.Category == (byte)ItemCategory.Cheese || 
                                     itemInHand.Category == (byte)ItemCategory.Topping;
                 
-                bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.PizzaBase || itemOnStation.Category == (byte)ItemCategory.Pizza;
+                bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.Dough || itemOnStation.Category == (byte)ItemCategory.Pizza;
                 
                 if (isPizzaOrBase && isIngredient)
                 {
                     cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
+                    if (invAdapter != null && !otherHandEmpty)
+                    {
+                        invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                    }
                 }
             }
         }

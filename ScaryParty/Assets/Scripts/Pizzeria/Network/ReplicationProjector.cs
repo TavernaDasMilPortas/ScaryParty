@@ -99,12 +99,13 @@ namespace ScaryParty.Pizzeria.Network
         private void ProjectStorageSlotsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.StorageSlots;
-            var domainKeys = new HashSet<int>();
-            foreach (var kvp in domainState.StorageSlots) domainKeys.Add(kvp.Value.StorageId);
+            var domainKeys = new HashSet<(int, int)>();
+            foreach (var kvp in domainState.StorageSlots) domainKeys.Add((kvp.Value.StorageId, kvp.Value.IngredientDefId));
 
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].StorageId)) networkList.RemoveAt(i);
+                var key = (networkList[i].StorageId, networkList[i].IngredientDefId);
+                if (!domainKeys.Contains(key)) networkList.RemoveAt(i);
             }
 
             foreach (var kvp in domainState.StorageSlots)
@@ -113,7 +114,7 @@ namespace ScaryParty.Pizzeria.Network
                 int existingIdx = -1;
                 for (int i = 0; i < networkList.Count; i++)
                 {
-                    if (networkList[i].StorageId == dto.StorageId) { existingIdx = i; break; }
+                    if (networkList[i].StorageId == dto.StorageId && networkList[i].IngredientDefId == dto.IngredientDefId) { existingIdx = i; break; }
                 }
 
                 if (existingIdx >= 0)
@@ -283,7 +284,7 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
-        private NetItemDto CreateItemDto(Item item)
+        private NetItemDto CreateItemDto(ItemState item)
         {
             byte mask = 0;
             byte count = 0;
@@ -322,7 +323,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetToolDto CreateToolDto(Tool tool)
+        private NetToolDto CreateToolDto(ToolItemState tool)
         {
             return new NetToolDto
             {
@@ -338,7 +339,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetStorageDto CreateStorageDto(IngredientStorageSlot slot)
+        private NetStorageDto CreateStorageDto(StorageSlotState slot)
         {
             return new NetStorageDto
             {
@@ -350,7 +351,7 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private NetStationSlotDto CreateStationSlotDto(StationOperation op)
+        private NetStationSlotDto CreateStationSlotDto(OperationState op)
         {
             return new NetStationSlotDto
             {
@@ -361,11 +362,13 @@ namespace ScaryParty.Pizzeria.Network
                 WorkerId = op.WorkerId,
                 Progress = op.AccumulatedProgress,
                 ProcessId = op.ProcessId,
+                OperationStartTime = op.OperationStartTime,
+                CapturedDuration = op.CapturedDuration,
                 Revision = op.Revision
             };
         }
 
-        private NetOrderDto CreateOrderDto(Order order)
+        private NetOrderDto CreateOrderDto(OrderState order)
         {
             var dto = new NetOrderDto
             {
@@ -398,7 +401,7 @@ namespace ScaryParty.Pizzeria.Network
             return dto;
         }
 
-        private NetSupplyDto CreateSupplyDto(SupplyOrder sup)
+        private NetSupplyDto CreateSupplyDto(SupplyOrderState sup)
         {
             return new NetSupplyDto
             {

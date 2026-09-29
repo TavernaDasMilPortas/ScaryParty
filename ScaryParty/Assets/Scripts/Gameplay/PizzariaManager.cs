@@ -59,6 +59,11 @@ public class PizzariaManager : NetworkBehaviour
         // Subscribe to future city generation events
         _cityGen.OnCityGenerated += OnCityReady;
 
+        if (IsServer && NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+        }
+
         // Race-condition guard: if CityGenerator.OnNetworkSpawn() already fired before us,
         // the city is already generated — check for it and start immediately.
         if (IsServer && _cityGen.CityData != null && _cityGen.CityData.DeliveryPointCount > 0)
@@ -72,6 +77,19 @@ public class PizzariaManager : NetworkBehaviour
     {
         if (_cityGen != null)
             _cityGen.OnCityGenerated -= OnCityReady;
+
+        if (NetworkManager.Singleton != null)
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+    }
+
+    private void OnClientConnected(ulong clientId)
+    {
+        if (!IsServer || !_cityReady) return;
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client) && client.PlayerObject != null)
+        {
+            var pState = client.PlayerObject.GetComponent<PlayerState>();
+            if (pState != null) pState.IsGameStarted.Value = true;
+        }
     }
 
     private void OnCityReady()
@@ -94,6 +112,17 @@ public class PizzariaManager : NetworkBehaviour
     {
         if (!IsServer) return;
         if (!_cityReady) return;
+
+        // Se algum jogador ainda estiver com IsGameStarted = false após a cidade estar pronta, garante a ativação
+        // (Resolve a condição de corrida do spawn do jogador local no Host ou late-join)
+        var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+        foreach (var pState in allPlayers)
+        {
+            if (pState != null && !pState.IsGameStarted.Value)
+            {
+                pState.IsGameStarted.Value = true;
+            }
+        }
 
         // Não gera pedidos até que o jogo tenha começado
         if (!IsGameActuallyStarted()) return;

@@ -4,19 +4,22 @@ namespace ScaryParty.Pizzeria.Domain.Models
 {
     public class OperationState
     {
+        public const ulong NoWorker = ulong.MaxValue;
+        public const ulong ServerWorker = ulong.MaxValue - 1;
+
         public OperationId Id { get; }
         public StationSlotId SlotId { get; }
         public ItemId InputItemId { get; set; }
         public ToolItemId ToolItemId { get; set; }
         public int ProcessId { get; }
-        public ulong WorkerId { get; set; }
+        public ulong WorkerId { get; set; } = NoWorker;
         public float AccumulatedProgress { get; set; }
         public double OperationStartTime { get; set; }
         public float CapturedDuration { get; set; }
         public double LeaseExpirationTime { get; set; }
         public uint Revision { get; set; } = 1;
 
-        public bool IsActive(double now) => WorkerId != 0 && LeaseExpirationTime > now;
+        public bool IsActive(double now) => WorkerId != NoWorker && LeaseExpirationTime > now;
 
         public OperationState(OperationId id, StationSlotId slotId, ItemId inputItemId, ToolItemId toolItemId, int processId, ulong workerId, float duration, double startTime, double leaseDuration)
         {
@@ -35,7 +38,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public float ComputeCurrentProgress(double now)
         {
             if (CapturedDuration <= 0.001f) return 1f;
-            if (WorkerId == 0) return AccumulatedProgress;
+            if (WorkerId == NoWorker) return AccumulatedProgress;
 
             double elapsed = now - OperationStartTime;
             if (elapsed < 0) elapsed = 0;
@@ -46,7 +49,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public void Pause(double now)
         {
             AccumulatedProgress = ComputeCurrentProgress(now);
-            WorkerId = 0;
+            WorkerId = NoWorker;
             LeaseExpirationTime = 0;
             Revision++;
         }

@@ -17,8 +17,6 @@ public class MinimapRouteManager : MonoBehaviour
     [Header("Minimap Settings")]
     [Tooltip("The WorldImage component used for the minimap camera")]
     public Kamgam.UGUIWorldImage.WorldImage worldImage;
-    [Tooltip("Canvas Group wrapping the minimap HUD (small corner map)")]
-    public CanvasGroup hudCanvasGroup;
     [Tooltip("Orthographic size when minimap is small (HUD mode)")]
     public float hudOrthoSize = 60f;
     [Tooltip("Orthographic size when minimap is fullscreen (M mode)")]
@@ -58,15 +56,15 @@ public class MinimapRouteManager : MonoBehaviour
         }
         Instance = this;
 
-        // Try to auto-find the WorldImage if not assigned
         if (worldImage == null)
             worldImage = FindObjectOfType<Kamgam.UGUIWorldImage.WorldImage>();
 
-        if (hudCanvasGroup == null && worldImage != null)
-            hudCanvasGroup = worldImage.GetComponentInParent<CanvasGroup>();
-
-        // Start with minimap hidden until a player is tracked
-        SetMinimapVisible(false);
+        if (worldImage != null)
+        {
+            // Disable UGUI rendering so it only renders to RenderTexture for UI Toolkit
+            var img = worldImage.GetComponent<UnityEngine.UI.Image>();
+            if (img != null) img.enabled = false;
+        }
     }
 
     public void PanMap(Vector2 screenDelta)
@@ -163,9 +161,6 @@ public class MinimapRouteManager : MonoBehaviour
             if (mask != 0) worldImage.CameraCullingMask = mask;
         }
 
-        // Show the minimap now that we have a player
-        SetMinimapVisible(true);
-
         // Create player icon
         if (_playerIconInstance != null)
             Destroy(_playerIconInstance);
@@ -222,16 +217,6 @@ public class MinimapRouteManager : MonoBehaviour
         }
 
         Debug.Log($"[MINIMAP] Toggled to {(_isFullscreen ? "FULLSCREEN" : "HUD")} mode.");
-    }
-
-    private void SetMinimapVisible(bool visible)
-    {
-        if (hudCanvasGroup != null)
-        {
-            hudCanvasGroup.alpha = visible ? 1f : 0f;
-            hudCanvasGroup.interactable = false;
-            hudCanvasGroup.blocksRaycasts = false;
-        }
     }
 
     private void SetLayerRecursively(GameObject go, int layer)

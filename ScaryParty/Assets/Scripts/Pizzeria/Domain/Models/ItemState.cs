@@ -119,11 +119,11 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int DefinitionId { get; }
         public ToolCapability Capabilities { get; }
         public LocationRef Location { get; set; }
-        public ulong ReservedByWorkerId { get; set; } = 0;
+        public ulong ReservedByWorkerId { get; set; } = OperationState.NoWorker;
         public double LeaseExpiration { get; set; } = 0;
         public uint Revision { get; set; } = 1;
 
-        public bool IsReserved(double now) => ReservedByWorkerId != 0 && LeaseExpiration > now;
+        public bool IsReserved(double now) => ReservedByWorkerId != OperationState.NoWorker && LeaseExpiration > now;
 
         public ToolItemState(ToolItemId id, int definitionId, ToolCapability capabilities, LocationRef location)
         {
@@ -147,7 +147,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         {
             if (ReservedByWorkerId == workerId)
             {
-                ReservedByWorkerId = 0;
+                ReservedByWorkerId = OperationState.NoWorker;
                 LeaseExpiration = 0;
                 Revision++;
             }

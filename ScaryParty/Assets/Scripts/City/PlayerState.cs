@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine;
 using StarterAssets;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerState : NetworkBehaviour
 {
@@ -36,12 +37,57 @@ public class PlayerState : NetworkBehaviour
         _meshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
     }
 
+    private void Start()
+    {
+        // Se estiver rodando offline/sem Netcode ativo (ex: teste rápido direto na cena sem Host)
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+        {
+            UpdateMovementLock(true);
+        }
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (IsServer)
+        {
+            // Libera os controles automaticamente quando entrar na GameScene ou cena de gameplay
+            if (scene.name == "GameScene" || (scene.name != "ReadyScene" && scene.name != "LobbyScene"))
+            {
+                IsGameStarted.Value = true;
+            }
+            else
+            {
+                IsGameStarted.Value = false;
+            }
+        }
+    }
+
     public override void OnNetworkSpawn()
     {
         // Listeners for state changes
         IsGameStarted.OnValueChanged += OnGameStartedChanged;
         PlayerColor.OnValueChanged += OnColorChanged;
         Money.OnValueChanged += OnMoneyChanged;
+
+        // Se formos o servidor e a cena atual for o GameScene (ou cena de teste), inicia o jogo imediatamente
+        if (IsServer)
+        {
+            string currentScene = SceneManager.GetActiveScene().name;
+            if (currentScene == "GameScene" || (currentScene != "ReadyScene" && currentScene != "LobbyScene"))
+            {
+                IsGameStarted.Value = true;
+            }
+        }
 
         // Apply initial states
         UpdateMovementLock(IsGameStarted.Value);
@@ -148,6 +194,9 @@ public class PlayerState : NetworkBehaviour
     private void UpdateMovementLock(bool started)
     {
         if (!IsOwner) return;
+
+        if (_tpc == null) _tpc = GetComponent<ThirdPersonController>();
+        if (_inputs == null) _inputs = GetComponent<StarterAssetsInputs>();
 
         // Bloqueia ou libera inputs dependendo se o jogo começou
         if (_tpc != null) _tpc.enabled = started;

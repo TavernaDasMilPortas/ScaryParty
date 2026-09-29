@@ -43,10 +43,21 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         public bool Equals(NetItemDto other)
-            => ItemId == other.ItemId && Revision == other.Revision && LocationType == other.LocationType && HolderId == other.HolderId && SlotId == other.SlotId && IngredientMask == other.IngredientMask && IngredientCount == other.IngredientCount;
+            => ItemId == other.ItemId && 
+               Revision == other.Revision && 
+               LocationType == other.LocationType && 
+               HolderId == other.HolderId && 
+               SlotId == other.SlotId && 
+               CookingStage == other.CookingStage &&
+               PackagingState == other.PackagingState &&
+               LabelDestinationId == other.LabelDestinationId &&
+               IngredientMask == other.IngredientMask && 
+               IngredientCount == other.IngredientCount &&
+               Math.Abs(CookProgress - other.CookProgress) < 0.005f &&
+               Math.Abs(BurnProgress - other.BurnProgress) < 0.005f;
 
         public override bool Equals(object obj) => obj is NetItemDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(ItemId, Revision, IngredientMask);
+        public override int GetHashCode() => HashCode.Combine(ItemId, Revision, LocationType, HolderId, SlotId, CookingStage);
     }
 
     public struct NetToolDto : INetworkSerializable, IEquatable<NetToolDto>
@@ -114,6 +125,8 @@ namespace ScaryParty.Pizzeria.Network
         public ulong WorkerId;
         public float Progress;
         public int ProcessId;
+        public double OperationStartTime;
+        public float CapturedDuration;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -125,11 +138,13 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref WorkerId);
             serializer.SerializeValue(ref Progress);
             serializer.SerializeValue(ref ProcessId);
+            serializer.SerializeValue(ref OperationStartTime);
+            serializer.SerializeValue(ref CapturedDuration);
             serializer.SerializeValue(ref Revision);
         }
 
         public bool Equals(NetStationSlotDto other)
-            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && WorkerId == other.WorkerId && Revision == other.Revision;
+            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && WorkerId == other.WorkerId && Revision == other.Revision && Math.Abs(Progress - other.Progress) < 0.005f;
 
         public override bool Equals(object obj) => obj is NetStationSlotDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(StationId, SlotIndex, Revision);

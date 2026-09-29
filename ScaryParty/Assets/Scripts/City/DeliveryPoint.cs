@@ -64,6 +64,7 @@ public class DeliveryPoint : MonoBehaviour, IInteractable
                 UIManager.Instance.ShowInteractionPrompt("Nenhuma pizza para entregar aqui!");
             }
             return;
+        }
     }
 
     private InteractableHighlight _highlight;

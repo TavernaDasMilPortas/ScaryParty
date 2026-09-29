@@ -60,6 +60,9 @@ namespace ScaryParty.Pizzeria.Stations
             if (netObj == null) return;
             ulong playerId = netObj.OwnerClientId;
 
+            var invAdapter = interactor.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+            int activeHand = invAdapter != null ? (int)invAdapter.ActiveHand : 0;
+
             var state = PizzeriaNetworkState.Instance;
             var cmd = PizzeriaCommandHandler.Instance;
             if (state == null || cmd == null) return;
@@ -77,22 +80,71 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     itemOnStation = item;
                     hasItemOnStation = true;
-                    bool isPizza = item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza;
                 }
-                if (item.LocationType == (byte)LocationType.Hand && item.HolderId == playerId)
+                if (item.LocationType == (byte)LocationType.Hand && item.HolderId == playerId && item.SlotId == activeHand)
                 {
                     itemInHand = item;
                     hasItemInHand = true;
                 }
             }
 
-            if (hasItemOnStation && !hasItemInHand)
+            int otherHand = activeHand == 0 ? 1 : 0;
+            bool otherHandFree = true;
+            for (int i = 0; i < state.Items.Count; i++)
             {
-                cmd.RemoveOvenServerRpc(stationId, 0, 0); // 0 = right hand
+                var it = state.Items[i];
+                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == playerId && it.SlotId == otherHand)
+                {
+                    otherHandFree = false;
+                    break;
+                }
+            }
+            if (otherHandFree)
+            {
+                for (int i = 0; i < state.Tools.Count; i++)
+                {
+                    var t = state.Tools[i];
+                    if (t.LocationType == (byte)LocationType.Hand && t.HolderId == playerId && t.SlotId == otherHand)
+                    {
+                        otherHandFree = false;
+                        break;
+                    }
+                }
+            }
+
+            if (hasItemOnStation)
+            {
+                if (!hasItemInHand)
+                {
+                    cmd.RemoveOvenServerRpc(stationId, 0, (byte)activeHand);
+                }
+                else if (otherHandFree)
+                {
+                    cmd.RemoveOvenServerRpc(stationId, 0, (byte)otherHand);
+                }
+                else
+                {
+                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Ambas as mãos ocupadas!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+                }
             }
             else if (!hasItemOnStation && hasItemInHand)
             {
                 cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, 0);
+                if (invAdapter != null && !otherHandFree)
+                {
+                    // A outra mão tem item/utensílio: muda a seleção para ela imediatamente!
+                    invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                }
+            }
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+            if (_progressBar != null)
+            {
+                // Posicionar a barra bem acima do forno (que tem 1m de altura)
+                _progressBar.transform.position = transform.position + Vector3.up * 1.1f;
             }
         }
 
@@ -106,25 +158,29 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < state.Items.Count; i++)
             {
                 var item = state.Items[i];
-                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.CookingStage != (byte)CookingStage.Uncooked)
+                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
                 {
-                    foundActive = true;
-                    if (item.BurnProgress > 0)
+                    bool isPizza = item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza;
+                    if (isPizza)
                     {
-                        // Burning
-                        _progressBar.SetProgress(item.BurnProgress, Color.red);
+                        foundActive = true;
+                        if (item.BurnProgress > 0)
+                        {
+                            // Burning (barra vermelha)
+                            _progressBar.SetProgress(item.BurnProgress, Color.red);
+                        }
+                        else if (item.CookProgress < 1f)
+                        {
+                            // Cooking (barra verde -> amarela)
+                            _progressBar.SetProgress(item.CookProgress, item.CookProgress > 0.8f ? Color.yellow : Color.green);
+                        }
+                        else
+                        {
+                            // Baked, pronta para retirar (amarelo ouro)
+                            _progressBar.SetProgress(1f, Color.yellow);
+                        }
+                        break;
                     }
-                    else if (item.CookProgress < 1f)
-                    {
-                        // Cooking
-                        _progressBar.SetProgress(item.CookProgress, item.CookProgress > 0.8f ? Color.yellow : Color.green);
-                    }
-                    else
-                    {
-                        // Baked, waiting to burn or be removed
-                        _progressBar.SetProgress(1f, Color.yellow);
-                    }
-                    break;
                 }
             }
 

@@ -295,10 +295,56 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void UpdateHand(bool isRightHand, string itemName)
     {
-        if (isRightHand && _rightHandContent != null)
-            _rightHandContent.text = string.IsNullOrEmpty(itemName) ? "Empty" : itemName;
-        else if (!isRightHand && _leftHandContent != null)
-            _leftHandContent.text = string.IsNullOrEmpty(itemName) ? "Empty" : itemName;
+        SetHandState(isRightHand, false, itemName);
+    }
+
+    /// <summary>
+    /// Updates the text shown in a hand slot and visually highlights the active/selected hand.
+    /// </summary>
+    public void SetHandState(bool isRightHand, bool isSelected, string itemName)
+    {
+        var contentLabel = isRightHand ? _rightHandContent : _leftHandContent;
+        if (contentLabel == null) return;
+
+        contentLabel.text = string.IsNullOrEmpty(itemName) ? "Vazio" : itemName;
+
+        var slotContainer = contentLabel.parent;
+        if (slotContainer != null)
+        {
+            var titleLabel = slotContainer.Q<Label>(null, "hand-title");
+            if (titleLabel != null)
+            {
+                string handName = isRightHand ? "Mão Direita [2]" : "Mão Esquerda [1]";
+                titleLabel.text = isSelected ? $"★ {handName}" : handName;
+                titleLabel.style.color = isSelected ? new StyleColor(new Color(1f, 0.9f, 0.2f)) : new StyleColor(new Color(0.7f, 0.7f, 0.7f));
+                titleLabel.style.unityFontStyleAndWeight = isSelected ? FontStyle.Bold : FontStyle.Normal;
+            }
+
+            if (isSelected)
+            {
+                slotContainer.style.borderTopColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
+                slotContainer.style.borderBottomColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
+                slotContainer.style.borderLeftColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
+                slotContainer.style.borderRightColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
+                slotContainer.style.borderTopWidth = 2.5f;
+                slotContainer.style.borderBottomWidth = 2.5f;
+                slotContainer.style.borderLeftWidth = 2.5f;
+                slotContainer.style.borderRightWidth = 2.5f;
+                slotContainer.style.backgroundColor = new StyleColor(new Color(0.18f, 0.16f, 0.05f, 0.85f));
+            }
+            else
+            {
+                slotContainer.style.borderTopColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
+                slotContainer.style.borderBottomColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
+                slotContainer.style.borderLeftColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
+                slotContainer.style.borderRightColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
+                slotContainer.style.borderTopWidth = 1f;
+                slotContainer.style.borderBottomWidth = 1f;
+                slotContainer.style.borderLeftWidth = 1f;
+                slotContainer.style.borderRightWidth = 1f;
+                slotContainer.style.backgroundColor = new StyleColor(new Color(0.08f, 0.08f, 0.08f, 0.6f));
+            }
+        }
     }
 
     /// <summary>

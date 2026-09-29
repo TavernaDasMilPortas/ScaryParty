@@ -194,7 +194,33 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void UpdateOrSpawnVisual(NetItemDto item)
         {
-            if (!_visuals.TryGetValue(item.ItemId, out var go))
+            if (_visuals.TryGetValue(item.ItemId, out var go))
+            {
+                bool wantsBox = item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box;
+                bool wantsPizza = item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza;
+
+                var mf = go != null ? go.GetComponent<MeshFilter>() : null;
+                string meshName = mf != null && mf.sharedMesh != null ? mf.sharedMesh.name : "";
+
+                bool needsRecreate = false;
+                if (wantsBox && !meshName.Contains("Cube")) needsRecreate = true;
+                else if (wantsPizza && !meshName.Contains("Cylinder")) needsRecreate = true;
+                else if (!wantsBox && !wantsPizza && !meshName.Contains("Sphere")) needsRecreate = true;
+
+                if (needsRecreate)
+                {
+                    if (go != null) Destroy(go);
+                    _visuals.Remove(item.ItemId);
+                    if (_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers))
+                    {
+                        foreach (var l in layers) if (l != null) Destroy(l);
+                        _pizzaIngredientLayers.Remove(item.ItemId);
+                    }
+                    go = null;
+                }
+            }
+
+            if (go == null)
             {
                 go = CreateVisualPrimitive(item);
                 _visuals[item.ItemId] = go;
@@ -242,9 +268,18 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (item.LocationType == (byte)LocationType.StagingSlot)
             {
-                parent = null;
-                targetPos = new Vector3(item.SlotId * 0.5f, 1f, 0f);
-                targetRot = Quaternion.identity;
+                if (_stationCache.TryGetValue(10, out var stg))
+                {
+                    parent = stg.transform;
+                    targetPos = stg.GetSlotPosition(item.SlotId);
+                    targetRot = stg.GetSlotRotation(item.SlotId);
+                }
+                else
+                {
+                    parent = null;
+                    targetPos = new Vector3(item.SlotId * 0.5f, 1f, 0f);
+                    targetRot = Quaternion.identity;
+                }
             }
 
             if (parent != null || item.LocationType == (byte)LocationType.StagingSlot)

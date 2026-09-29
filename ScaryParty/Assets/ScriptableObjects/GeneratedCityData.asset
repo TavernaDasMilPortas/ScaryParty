@@ -18,20 +18,17 @@ MonoBehaviour:
       worldPosition: {x: 0, y: 0, z: 0}
       connectedEdges: 0000000002000000
     - id: 1
-      worldPosition: {x: 6.5978327, y: 0, z: 119.81848}
+      worldPosition: {x: -30.5892, y: 0, z: 116.035774}
       connectedEdges: 0000000001000000
     - id: 2
-      worldPosition: {x: 69.94049, y: 0, z: 114.21398}
-      connectedEdges: 0100000005000000
+      worldPosition: {x: 8.782345, y: 0, z: 113.70432}
+      connectedEdges: 0100000004000000
     - id: 3
-      worldPosition: {x: 119.67702, y: 0, z: -8.7984}
+      worldPosition: {x: 119.54703, y: 0, z: 10.416676}
       connectedEdges: 0200000003000000
     - id: 4
-      worldPosition: {x: 119.823364, y: 0, z: 37.60475}
+      worldPosition: {x: 93.79797, y: 0, z: 85.03265}
       connectedEdges: 0300000004000000
-    - id: 5
-      worldPosition: {x: 75.9404, y: 0, z: 73.27928}
-      connectedEdges: 0400000005000000
     edges:
     - id: 0
       nodeA: 0
@@ -42,49 +39,42 @@ MonoBehaviour:
     - id: 1
       nodeA: 1
       nodeB: 2
-      length: 63.590115
+      length: 39.440514
       isBlocked: 0
       streetType: 1
     - id: 2
       nodeA: 0
       nodeB: 3
-      length: 120
+      length: 119.99999
       isBlocked: 0
       streetType: 0
     - id: 3
       nodeA: 3
       nodeB: 4
-      length: 46.40338
+      length: 78.93388
       isBlocked: 0
       streetType: 1
     - id: 4
-      nodeA: 4
-      nodeB: 5
-      length: 56.55428
-      isBlocked: 0
-      streetType: 1
-    - id: 5
-      nodeA: 5
-      nodeB: 2
-      length: 41.372074
+      nodeA: 2
+      nodeB: 4
+      length: 89.72024
       isBlocked: 0
       streetType: 1
   blocks:
-  - worldCenter: {x: 61.555187, y: 0, z: 53.900257}
-    size: {x: 94.14874, y: 0, z: 101.577}
+  - worldCenter: {x: 37.63274, y: 0, z: 62.771812}
+    size: {x: 116.60993, y: 0, z: 89.170944}
     zoneType: 0
     deliveryPointIndices: 
     polygon:
-    - {x: 13.155852, y: 0, z: 11.5665455}
-    - {x: 107.219376, y: 0, z: 4.6511946}
-    - {x: 107.304596, y: 0, z: 31.672445}
-    - {x: 64.27845, y: 0, z: 66.65042}
-    - {x: 59.004425, y: 0, z: 102.63276}
-    - {x: 18.368418, y: 0, z: 106.228195}
-    area: 6347.976
+    - {x: 9.403331, y: 0, z: 13.366719}
+    - {x: 102.506134, y: 0, z: 21.479187}
+    - {x: 83.984856, y: 0, z: 75.15042}
+    - {x: 6.3731866, y: 0, z: 101.32509}
+    - {x: -14.103798, y: 0, z: 102.53767}
+    area: 6845.963
     hasPizzaria: 1
-  pizzariaPosition: {x: 101.10472, y: 1, z: 10.82254}
-  bancadaPosition: {x: 108.60472, y: 1.5, z: 10.822541}
+  pizzariaPosition: {x: -0.8923812, y: 1, z: 93.567215}
+  bancadaPosition: {x: -8.392382, y: 1.5, z: 93.567215}
   pizzariaBlockIndex: 0
   enemySpawnPoints: []
   _gridWidth: 3
@@ -92,4 +82,4 @@ MonoBehaviour:
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 15
-  _deliveryPointCount: 1
+  _deliveryPointCount: 3

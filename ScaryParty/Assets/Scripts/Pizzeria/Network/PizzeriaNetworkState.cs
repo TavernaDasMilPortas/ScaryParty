@@ -33,6 +33,33 @@ namespace ScaryParty.Pizzeria.Network
             Upgrades = new NetworkList<NetUpgradeDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         }
 
+        public bool IsHandOccupied(ulong playerId, int slotId)
+        {
+            if (Items != null)
+            {
+                for (int i = 0; i < Items.Count; i++)
+                {
+                    var it = Items[i];
+                    if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand &&
+                        it.HolderId == playerId && it.SlotId == slotId)
+                        return true;
+                }
+            }
+
+            if (Tools != null)
+            {
+                for (int i = 0; i < Tools.Count; i++)
+                {
+                    var t = Tools[i];
+                    if (t.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand &&
+                        t.HolderId == playerId && t.SlotId == slotId)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         public override void OnDestroy()
         {
             if (Instance == this) Instance = null;

@@ -30,6 +30,15 @@ namespace ScaryParty.Pizzeria.Network
                 if (invAdapter != null)
                 {
                     handSlot = (byte)invAdapter.ActiveHand;
+                    if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupied(myClientId, handSlot))
+                    {
+                        byte otherHand = handSlot == 0 ? (byte)1 : (byte)0;
+                        if (!PizzeriaNetworkState.Instance.IsHandOccupied(myClientId, otherHand))
+                        {
+                            handSlot = otherHand;
+                            invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                        }
+                    }
                 }
                 cmd.TransferItemServerRpc(ItemInstanceId.Value, (byte)LocationType.Hand, myClientId, handSlot);
             }

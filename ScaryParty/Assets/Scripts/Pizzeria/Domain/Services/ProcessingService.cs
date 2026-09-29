@@ -122,7 +122,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.ActiveOperations.TryGetValue(slotId, out var op))
                 return CommandResult.Ok(); // Already cancelled or completed
 
-            if (op.WorkerId != workerId && op.WorkerId != 0)
+            if (op.WorkerId != workerId && op.WorkerId != OperationState.NoWorker)
                 return CommandResult.Fail(CommandError.NotOwner, "Worker mismatch.");
 
             if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
@@ -184,7 +184,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             // Create autonomous oven operation
             var opId = state.GenerateOperationId();
-            var op = new OperationState(opId, ovenSlot, pizzaId, ToolItemId.None, 0, 1 /* server worker */, bakeDuration, clock.Now, 999999);
+            var op = new OperationState(opId, ovenSlot, pizzaId, ToolItemId.None, 0, OperationState.ServerWorker, bakeDuration, clock.Now, 999999);
             op.AccumulatedProgress = pizza.CookProgress;
             state.ActiveOperations[ovenSlot] = op;
 
@@ -230,7 +230,11 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.Items.TryGetValue(op.InputItemId, out var pizza)) return;
 
             float p = op.ComputeCurrentProgress(clock.Now);
-            pizza.CookProgress = p;
+            if (Math.Abs(pizza.CookProgress - p) > 0.005f)
+            {
+                pizza.CookProgress = p;
+                pizza.Revision++;
+            }
 
             if (p >= 1.0f)
             {
@@ -245,7 +249,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (timePastBaked > 0 && burnGraceDuration > 0.001f)
                 {
                     float burnP = (float)(timePastBaked / burnGraceDuration);
-                    pizza.BurnProgress = burnP > 1f ? 1f : burnP;
+                    float clampedBurn = burnP > 1f ? 1f : burnP;
+                    if (Math.Abs(pizza.BurnProgress - clampedBurn) > 0.005f)
+                    {
+                        pizza.BurnProgress = clampedBurn;
+                        pizza.Revision++;
+                    }
 
                     if (burnP >= 1.0f && pizza.CookingStage != CookingStage.Burned)
                     {

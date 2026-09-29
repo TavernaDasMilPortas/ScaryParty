@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -10,20 +11,73 @@ namespace ScaryParty.Pizzeria.Presentation
     {
         public static PizzeriaHudBuilder Instance { get; private set; }
 
-        private bool _showStagingAddressPicker = false;
-        private ulong _stagingBoxId = 0;
-        private int _stagingSlotIndex = 0;
+        private UIDocument _doc;
+        private VisualElement _root;
+        
+        private VisualElement _storagePanel;
+        private VisualElement _stagingPanel;
+        private VisualElement _devPanel;
+
+        private int _storageStationId;
+        private ulong _stagingBoxId;
+        private int _stagingSlotIndex;
         private int _selectedDestinationIndex = 4;
-
-        private bool _showDevPanel = false;
-
-        private bool _showStoragePicker = false;
-        private int _storageStationId = 0;
-        private Vector2 _storageScrollPos = Vector2.zero;
 
         private void Awake()
         {
             Instance = this;
+        }
+
+        private void Start()
+        {
+            EnsureUIInitialized();
+        }
+
+        private void EnsureUIInitialized()
+        {
+            if (_storagePanel != null) return;
+
+            // 1. Prioridade: Conectar diretamente ao rootVisualElement do UIManager existente
+            if (UIManager.Instance != null && UIManager.Instance.uiDocument != null && UIManager.Instance.uiDocument.rootVisualElement != null)
+            {
+                _root = UIManager.Instance.uiDocument.rootVisualElement;
+            }
+            else
+            {
+                // 2. Fallback: UIDocument próprio com PanelSettings carregado dinamicamente
+                if (_doc == null)
+                    _doc = GetComponent<UIDocument>() ?? gameObject.AddComponent<UIDocument>();
+
+                if (_doc.panelSettings == null)
+                {
+                    if (UIManager.Instance != null && UIManager.Instance.uiDocument != null && UIManager.Instance.uiDocument.panelSettings != null)
+                    {
+                        _doc.panelSettings = UIManager.Instance.uiDocument.panelSettings;
+                    }
+                    else
+                    {
+                        var panelSettingsList = Resources.FindObjectsOfTypeAll<PanelSettings>();
+                        if (panelSettingsList != null && panelSettingsList.Length > 0)
+                        {
+                            _doc.panelSettings = panelSettingsList[0];
+                        }
+                    }
+                }
+
+                if (_doc.rootVisualElement != null)
+                {
+                    _root = _doc.rootVisualElement;
+                }
+            }
+
+            if (_root == null)
+            {
+                return; // Tentará novamente quando UIManager estiver pronto
+            }
+
+            CreateStoragePanel();
+            CreateStagingPanel();
+            CreateDevPanel();
         }
 
         private void OnDestroy()
@@ -33,319 +87,343 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void Update()
         {
-            // F9 toggles dev panel
+            if (_devPanel == null)
+            {
+                EnsureUIInitialized();
+            }
+
             if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.f9Key.wasPressedThisFrame)
             {
-                _showDevPanel = !_showDevPanel;
-                UpdateUIMode();
+                if (_devPanel != null)
+                {
+                    _devPanel.style.display = _devPanel.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
+                    UpdateUIMode();
+                }
             }
         }
 
-        public void OpenStagingAddressPicker(ulong boxId, int slotIndex)
+        private void CreateStoragePanel()
         {
-            _stagingBoxId = boxId;
-            _stagingSlotIndex = slotIndex;
-            _showStagingAddressPicker = true;
-            SetUIMode(true);
+            _storagePanel = new VisualElement();
+            _storagePanel.style.position = Position.Absolute;
+            _storagePanel.style.width = 400;
+            _storagePanel.style.height = 300;
+            _storagePanel.style.left = new Length(50, LengthUnit.Percent);
+            _storagePanel.style.top = new Length(50, LengthUnit.Percent);
+            _storagePanel.style.translate = new Translate(new Length(-50, LengthUnit.Percent), new Length(-50, LengthUnit.Percent));
+            _storagePanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            _storagePanel.style.display = DisplayStyle.None;
+            _storagePanel.style.paddingLeft = 10;
+            _storagePanel.style.paddingRight = 10;
+            _storagePanel.style.paddingTop = 10;
+            _storagePanel.style.paddingBottom = 10;
+
+            var title = new Label("ESTOQUE");
+            title.style.color = Color.white;
+            title.style.fontSize = 20;
+            _storagePanel.Add(title);
+
+            var closeBtn = new Button(() => { CloseStoragePicker(); });
+            closeBtn.text = "X";
+            closeBtn.style.position = Position.Absolute;
+            closeBtn.style.right = 10;
+            closeBtn.style.top = 10;
+            _storagePanel.Add(closeBtn);
+
+            _root.Add(_storagePanel);
         }
 
         public void OpenStoragePicker(int stationId)
         {
+            EnsureUIInitialized();
             _storageStationId = stationId;
-            _showStoragePicker = true;
+            if (_storagePanel == null)
+            {
+                Debug.LogWarning("[PizzeriaHudBuilder] Impossível abrir estoque: _storagePanel não pôde ser inicializado.");
+                return;
+            }
+            RefreshStoragePanel();
+            _storagePanel.style.display = DisplayStyle.Flex;
             SetUIMode(true);
         }
 
         public void CloseStoragePicker()
         {
-            _showStoragePicker = false;
+            if (_storagePanel != null)
+                _storagePanel.style.display = DisplayStyle.None;
             UpdateUIMode();
+        }
+
+        private void RefreshStoragePanel()
+        {
+            _storagePanel.Clear();
+            var title = new Label($"ESTOQUE (Armazém #{_storageStationId})");
+            title.style.color = Color.white;
+            title.style.fontSize = 20;
+            _storagePanel.Add(title);
+
+            var closeBtn = new Button(() => { CloseStoragePicker(); });
+            closeBtn.text = "X";
+            closeBtn.style.position = Position.Absolute;
+            closeBtn.style.right = 10;
+            closeBtn.style.top = 10;
+            _storagePanel.Add(closeBtn);
+
+            var scroll = new ScrollView();
+            scroll.style.flexGrow = 1;
+            scroll.style.marginTop = 20;
+            _storagePanel.Add(scroll);
+
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null) return;
+            var catalog = PizzeriaRoot.Instance?.Catalog;
+
+            for (int i = 0; i < netState.StorageSlots.Count; i++)
+            {
+                var slot = netState.StorageSlots[i];
+                if (slot.StorageId == _storageStationId && slot.Quantity > 0)
+                {
+                    string ingName = catalog != null && catalog.Ingredients.TryGetValue(slot.IngredientDefId, out var def) ? def.Name : $"Ingrediente {slot.IngredientDefId}";
+                    
+                    var row = new VisualElement();
+                    row.style.flexDirection = FlexDirection.Row;
+                    row.style.justifyContent = Justify.SpaceBetween;
+                    row.style.marginBottom = 5;
+
+                    var lbl = new Label($"{ingName} (Qtd: {slot.Quantity})");
+                    lbl.style.color = Color.white;
+                    row.Add(lbl);
+
+                    int capturedIngId = slot.IngredientDefId;
+                    int capturedStorageId = _storageStationId;
+                    var btn = new Button(() => {
+                        var cmd = PizzeriaCommandHandler.Instance;
+                        var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+                        var adapter = localPlayer != null ? localPlayer.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>() : null;
+                        if (cmd != null && adapter != null)
+                        {
+                            cmd.DispenseIngredientServerRpc(capturedStorageId, capturedIngId, (byte)adapter.ActiveHand);
+                            CloseStoragePicker();
+                        }
+                    });
+                    btn.text = "Pegar";
+                    row.Add(btn);
+
+                    scroll.Add(row);
+                }
+            }
+
+            for (int i = 0; i < netState.Tools.Count; i++)
+            {
+                var tool = netState.Tools[i];
+                if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)_storageStationId)
+                {
+                    string toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
+                    var row = new VisualElement();
+                    row.style.flexDirection = FlexDirection.Row;
+                    row.style.justifyContent = Justify.SpaceBetween;
+                    row.style.marginBottom = 5;
+
+                    var lbl = new Label($"{toolName}");
+                    lbl.style.color = Color.white;
+                    row.Add(lbl);
+
+                    ulong capturedToolId = tool.ToolId;
+                    var btn = new Button(() => {
+                        var cmd = PizzeriaCommandHandler.Instance;
+                        var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+                        var adapter = localPlayer != null ? localPlayer.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>() : null;
+                        if (cmd != null && adapter != null && NetworkManager.Singleton != null)
+                        {
+                            cmd.TransferToolServerRpc(capturedToolId, (byte)LocationType.Hand, NetworkManager.Singleton.LocalClientId, (int)adapter.ActiveHand);
+                            CloseStoragePicker();
+                        }
+                    });
+                    btn.text = "Pegar";
+                    row.Add(btn);
+
+                    scroll.Add(row);
+                }
+            }
+
+            if (scroll.childCount == 0)
+            {
+                var emptyLbl = new Label("Estoque vazio neste compartimento.");
+                emptyLbl.style.color = new Color(0.8f, 0.8f, 0.8f);
+                emptyLbl.style.marginTop = 20;
+                emptyLbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+                scroll.Add(emptyLbl);
+            }
+        }
+
+        private void CreateStagingPanel()
+        {
+            _stagingPanel = new VisualElement();
+            _stagingPanel.style.position = Position.Absolute;
+            _stagingPanel.style.width = 350;
+            _stagingPanel.style.height = 240;
+            _stagingPanel.style.left = new Length(50, LengthUnit.Percent);
+            _stagingPanel.style.top = new Length(50, LengthUnit.Percent);
+            _stagingPanel.style.translate = new Translate(new Length(-50, LengthUnit.Percent), new Length(-50, LengthUnit.Percent));
+            _stagingPanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            _stagingPanel.style.display = DisplayStyle.None;
+            _stagingPanel.style.paddingLeft = 10;
+            _stagingPanel.style.paddingRight = 10;
+            _stagingPanel.style.paddingTop = 10;
+            _stagingPanel.style.paddingBottom = 10;
+            _stagingPanel.style.alignItems = Align.Center;
+
+            var title = new Label("ETIQUETAR CAIXA");
+            title.style.color = Color.white;
+            title.style.fontSize = 18;
+            _stagingPanel.Add(title);
+
+            var desc = new Label("Escolha o endereço de entrega para esta caixa.");
+            desc.style.color = Color.white;
+            desc.style.marginTop = 20;
+            _stagingPanel.Add(desc);
+
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.marginTop = 20;
+            row.style.alignItems = Align.Center;
+
+            var lblDest = new Label($"Endereço: #{_selectedDestinationIndex}");
+            lblDest.style.color = Color.white;
+            row.Add(lblDest);
+
+            var btnMinus = new Button(() => {
+                if (_selectedDestinationIndex > 1) _selectedDestinationIndex--;
+                lblDest.text = $"Endereço: #{_selectedDestinationIndex}";
+            });
+            btnMinus.text = "-";
+            row.Add(btnMinus);
+
+            var btnPlus = new Button(() => {
+                _selectedDestinationIndex++;
+                lblDest.text = $"Endereço: #{_selectedDestinationIndex}";
+            });
+            btnPlus.text = "+";
+            row.Add(btnPlus);
+
+            _stagingPanel.Add(row);
+
+            var btnConfirm = new Button(() => {
+                var cmd = PizzeriaCommandHandler.Instance;
+                if (cmd != null)
+                {
+                    cmd.ConfirmStageBoxServerRpc(_stagingBoxId, _stagingSlotIndex, _selectedDestinationIndex);
+                }
+                _stagingPanel.style.display = DisplayStyle.None;
+                UpdateUIMode();
+            });
+            btnConfirm.text = "Confirmar Etiqueta";
+            btnConfirm.style.marginTop = 20;
+            _stagingPanel.Add(btnConfirm);
+
+            var btnCancel = new Button(() => {
+                _stagingPanel.style.display = DisplayStyle.None;
+                UpdateUIMode();
+            });
+            btnCancel.text = "Cancelar";
+            btnCancel.style.marginTop = 10;
+            _stagingPanel.Add(btnCancel);
+
+            _root.Add(_stagingPanel);
+        }
+
+        public void OpenStagingAddressPicker(ulong boxId, int slotIndex)
+        {
+            EnsureUIInitialized();
+            _stagingBoxId = boxId;
+            _stagingSlotIndex = slotIndex;
+            if (_stagingPanel != null)
+            {
+                _stagingPanel.style.display = DisplayStyle.Flex;
+                SetUIMode(true);
+            }
+        }
+
+        private void CreateDevPanel()
+        {
+            _devPanel = new VisualElement();
+            _devPanel.style.position = Position.Absolute;
+            _devPanel.style.width = 310;
+            _devPanel.style.height = 420;
+            _devPanel.style.right = 10;
+            _devPanel.style.top = 10;
+            _devPanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            _devPanel.style.display = DisplayStyle.None;
+            _devPanel.style.paddingLeft = 10;
+            _devPanel.style.paddingRight = 10;
+            _devPanel.style.paddingTop = 10;
+            _devPanel.style.paddingBottom = 10;
+
+            var title = new Label("PAINEL DEV - PIZZERIA (F9)");
+            title.style.color = Color.white;
+            title.style.fontSize = 16;
+            _devPanel.Add(title);
+
+            AddDevButton("Atender Pedido Teste (#4: Calabresa+Muss)", () => {
+                PizzeriaCommandHandler.Instance?.AnswerPhoneServerRpc(12);
+            });
+            AddDevButton("Comprar Suprimento Queijo (5x)", () => {
+                PizzeriaCommandHandler.Instance?.PurchaseSupplyServerRpc(3, 1);
+            });
+            AddDevButton("Comprar Suprimento Calabresa (5x)", () => {
+                PizzeriaCommandHandler.Instance?.PurchaseSupplyServerRpc(4, 1);
+            });
+
+            var upgradesTitle = new Label("Upgrades Demonstráveis:");
+            upgradesTitle.style.color = Color.white;
+            upgradesTitle.style.marginTop = 10;
+            _devPanel.Add(upgradesTitle);
+
+            AddDevButton("Forno Rápido (-20% tempo)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(1, 1); });
+            AddDevButton("Slot Forno Extra (+1 slot)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(2, 1); });
+            AddDevButton("Mochila Maior (+1 slot)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(3, 1); });
+            AddDevButton("Desbloquear Cogumelo", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(5, 1); });
+
+            AddDevButton("Fechar Painel (F9)", () => {
+                _devPanel.style.display = DisplayStyle.None;
+                UpdateUIMode();
+            });
+
+            _root.Add(_devPanel);
+        }
+
+        private void AddDevButton(string text, System.Action action)
+        {
+            var btn = new Button(action);
+            btn.text = text;
+            btn.style.marginTop = 5;
+            _devPanel.Add(btn);
+        }
+
+        private void SetUIMode(bool interacting)
+        {
+            if (interacting)
+            {
+                UnityEngine.Cursor.lockState = CursorLockMode.None;
+                UnityEngine.Cursor.visible = true;
+            }
         }
 
         private void UpdateUIMode()
         {
-            bool anyUIOpen = _showStagingAddressPicker || _showStoragePicker || _showDevPanel;
-            SetUIMode(anyUIOpen);
-        }
+            bool anyOpen = (_storagePanel != null && _storagePanel.style.display == DisplayStyle.Flex) ||
+                           (_stagingPanel != null && _stagingPanel.style.display == DisplayStyle.Flex) ||
+                           (_devPanel != null && _devPanel.style.display == DisplayStyle.Flex);
 
-        private void SetUIMode(bool uiActive)
-        {
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+            if (!anyOpen)
             {
-                var inputs = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<StarterAssets.StarterAssetsInputs>();
-                if (inputs != null)
-                {
-                    inputs.cursorLocked = !uiActive;
-                    inputs.cursorInputForLook = !uiActive;
-                }
+                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                UnityEngine.Cursor.visible = false;
             }
-            Cursor.lockState = uiActive ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = uiActive;
-        }
-
-        private void OnGUI()
-        {
-            var netState = PizzeriaNetworkState.Instance;
-            if (netState == null || NetworkManager.Singleton == null || !NetworkManager.Singleton.IsClient) return;
-
-            // Display Restaurant Budget at Top Left below player money
-            GUI.Box(new Rect(10, 80, 220, 30), $"Caixa da Pizzaria: R$ {netState.RestaurantBudget.Value}");
-
-            // Display Active Orders on the Top Right
-            GUI.Box(new Rect(Screen.width - 260, 10, 250, 400), "PEDIDOS ATIVOS");
-            int yOffset = 40;
-            
-            var catalog = PizzeriaRoot.Instance?.Catalog;
-            
-            foreach (var order in netState.Orders)
+            else
             {
-                if (order.Lifecycle != (byte)ScaryParty.Pizzeria.Domain.Types.OrderLifecycle.Accepted) continue;
-                
-                string content = $"Destino: Casa #{order.DestinationId}\n";
-                if (order.LineCount > 0)
-                {
-                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_0, out var r1) ? r1.Name : $"Receita {order.RecipeId_0}";
-                    content += $"- {order.Qty_0}x {rName}\n";
-                }
-                if (order.LineCount > 1)
-                {
-                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_1, out var r2) ? r2.Name : $"Receita {order.RecipeId_1}";
-                    content += $"- {order.Qty_1}x {rName}\n";
-                }
-                if (order.LineCount > 2)
-                {
-                    string rName = catalog != null && catalog.Recipes.TryGetValue(order.RecipeId_2, out var r3) ? r3.Name : $"Receita {order.RecipeId_2}";
-                    content += $"- {order.Qty_2}x {rName}\n";
-                }
-                
-                double timeRemaining = order.DeadlineTime - PizzeriaRoot.Instance.Clock.Now;
-                content += $"Tempo: {Mathf.Max(0, (float)timeRemaining):F0}s";
-
-                GUIStyle style = new GUIStyle(GUI.skin.label);
-                if (timeRemaining < 30) style.normal.textColor = Color.red;
-                else if (timeRemaining < 60) style.normal.textColor = Color.yellow;
-                else style.normal.textColor = Color.green;
-
-                GUI.Label(new Rect(Screen.width - 250, yOffset, 230, 80), content, style);
-                yOffset += 90;
-            }
-
-            // Display Inventory Stock Summary
-            GUI.Box(new Rect(10, 120, 220, 120), "ESTOQUE (Resumo)");
-            int stockFridge = 0;
-            int stockCupboard = 0;
-            for (int i = 0; i < netState.StorageSlots.Count; i++)
-            {
-                if (netState.StorageSlots[i].StorageId == 1) stockFridge += netState.StorageSlots[i].Quantity;
-                if (netState.StorageSlots[i].StorageId == 2) stockCupboard += netState.StorageSlots[i].Quantity;
-            }
-            for (int i = 0; i < netState.Tools.Count; i++)
-            {
-                var tool = netState.Tools[i];
-                if (tool.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot)
-                {
-                    if (tool.HolderId == 1) stockFridge++;
-                    if (tool.HolderId == 2) stockCupboard++;
-                }
-            }
-            GUI.Label(new Rect(20, 150, 200, 25), $"Geladeira: {stockFridge} itens/utensílios");
-            GUI.Label(new Rect(20, 180, 200, 25), $"Armário: {stockCupboard} itens/utensílios");
-
-            // Backpack contents
-            if (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.LocalClient != null)
-            {
-                ulong myId = Unity.Netcode.NetworkManager.Singleton.LocalClientId;
-                int backpackCount = 0;
-                string backpackContent = "";
-                for (int i = 0; i < netState.Items.Count; i++)
-                {
-                    var item = netState.Items[i];
-                    if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Backpack && item.HolderId == myId)
-                    {
-                        backpackCount++;
-                        string label = item.LabelDestinationId > 0 ? $"Caixa → #{item.LabelDestinationId}" : "Caixa";
-                        backpackContent += $"  Slot {item.SlotId}: {label}\n";
-                    }
-                }
-                if (backpackCount > 0)
-                {
-                    GUI.Box(new Rect(10, 250, 220, 30 + backpackCount * 25), $"MOCHILA ({backpackCount}/2)");
-                    GUI.Label(new Rect(15, 275, 210, backpackCount * 25), backpackContent);
-                }
-            }
-
-            // Staging Address Picker Window
-            if (_showStagingAddressPicker)
-            {
-                GUI.Box(new Rect(Screen.width / 2 - 175, Screen.height / 2 - 120, 350, 240), "ETIQUETAR CAIXA (Bancada de Retirada)");
-                GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 80, 300, 40), "Escolha o endereço de entrega para esta caixa.\n(A etiqueta NÃO revela se a receita está correta!)");
-
-                GUI.Label(new Rect(Screen.width / 2 - 150, Screen.height / 2 - 30, 150, 25), $"Endereço: #{_selectedDestinationIndex}");
-                if (GUI.Button(new Rect(Screen.width / 2 + 10, Screen.height / 2 - 30, 40, 25), "-"))
-                {
-                    if (_selectedDestinationIndex > 1) _selectedDestinationIndex--;
-                }
-                if (GUI.Button(new Rect(Screen.width / 2 + 60, Screen.height / 2 - 30, 40, 25), "+"))
-                {
-                    _selectedDestinationIndex++;
-                }
-
-                if (GUI.Button(new Rect(Screen.width / 2 - 140, Screen.height / 2 + 30, 130, 35), "Confirmar Etiqueta"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null)
-                    {
-                        cmd.ConfirmStageBoxServerRpc(_stagingBoxId, _stagingSlotIndex, _selectedDestinationIndex);
-                    }
-                    _showStagingAddressPicker = false;
-                    UpdateUIMode();
-                }
-
-                if (GUI.Button(new Rect(Screen.width / 2 + 10, Screen.height / 2 + 30, 130, 35), "Cancelar"))
-                {
-                    _showStagingAddressPicker = false;
-                    UpdateUIMode();
-                }
-            }
-
-            // Storage Picker Window
-            if (_showStoragePicker)
-            {
-                GUI.Box(new Rect(Screen.width / 2 - 200, Screen.height / 2 - 150, 400, 300), $"ESTOQUE (Armazém #{_storageStationId})");
-                
-                if (GUI.Button(new Rect(Screen.width / 2 + 160, Screen.height / 2 - 150, 40, 20), "X"))
-                {
-                    CloseStoragePicker();
-                }
-
-                _storageScrollPos = GUI.BeginScrollView(new Rect(Screen.width / 2 - 190, Screen.height / 2 - 120, 380, 260), _storageScrollPos, new Rect(0, 0, 360, 1000));
-                
-                int storageY = 0;
-                
-                // Show items in this storage (e.g. from StorageSlots, which actually holds the logical quantity of ingredients)
-                // Wait, netState.StorageSlots holds the logical count of ingredients available to dispense.
-                for (int i = 0; i < netState.StorageSlots.Count; i++)
-                {
-                    var slot = netState.StorageSlots[i];
-                    if (slot.StorageId == _storageStationId && slot.Quantity > 0)
-                    {
-                        string ingName = catalog != null && catalog.Ingredients.TryGetValue(slot.IngredientDefId, out var def) ? def.Name : $"Ingrediente {slot.IngredientDefId}";
-                        GUI.Label(new Rect(10, storageY, 200, 30), $"{ingName} (Qtd: {slot.Quantity})");
-                        
-                        if (GUI.Button(new Rect(220, storageY, 100, 30), "Pegar"))
-                        {
-                            var cmd = PizzeriaCommandHandler.Instance;
-                            var adapter = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
-                            if (cmd != null && adapter != null)
-                            {
-                                cmd.DispenseIngredientServerRpc(_storageStationId, slot.IngredientDefId, (byte)adapter.ActiveHand);
-                                
-                                // After clicking pegou, assume they might have full hands and maybe close
-                                var pInteract = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<PlayerInteraction>();
-                                if (pInteract != null)
-                                {
-                                    if (pInteract.CountItemsInHands() >= 2)
-                                    {
-                                        // Fechar interface se as mãos ficarem cheias após pegar ou já estiverem
-                                        // Let's close anyway after picking up for convenience, or they can click again if they toggled hand.
-                                        CloseStoragePicker();
-                                    }
-                                }
-                            }
-                        }
-                        storageY += 40;
-                    }
-                }
-
-                // Show tools in this storage
-                for (int i = 0; i < netState.Tools.Count; i++)
-                {
-                    var tool = netState.Tools[i];
-                    if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)_storageStationId)
-                    {
-                        string toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
-                        GUI.Label(new Rect(10, storageY, 200, 30), $"{toolName}");
-                        
-                        if (GUI.Button(new Rect(220, storageY, 100, 30), "Pegar"))
-                        {
-                            var cmd = PizzeriaCommandHandler.Instance;
-                            var adapter = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
-                            if (cmd != null && adapter != null)
-                            {
-                                cmd.TransferToolServerRpc(tool.ToolId, (byte)LocationType.Hand, NetworkManager.Singleton.LocalClientId, (int)adapter.ActiveHand);
-                                CloseStoragePicker();
-                            }
-                        }
-                        storageY += 40;
-                    }
-                }
-
-                GUI.EndScrollView();
-            }
-
-            // Dev Panel (F9)
-            if (_showDevPanel)
-            {
-                GUI.Box(new Rect(Screen.width - 320, 10, 310, 420), "PAINEL DEV - PIZZERIA (F9)");
-                int y = 40;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 30), "Atender Pedido Teste (#4: Calabresa+Muss)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.AnswerPhoneServerRpc(12);
-                }
-                y += 40;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 30), "Comprar Suprimento Queijo (5x)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.PurchaseSupplyServerRpc(3, 1);
-                }
-                y += 40;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 30), "Comprar Suprimento Calabresa (5x)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.PurchaseSupplyServerRpc(4, 1);
-                }
-                y += 40;
-
-                GUI.Label(new Rect(Screen.width - 300, y, 270, 20), "<b>Upgrades Demonstráveis:</b>");
-                y += 25;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 28), "Forno Rápido (-20% tempo)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.SetUpgradeLevelServerRpc(1, 1);
-                }
-                y += 32;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 28), "Slot Forno Extra (+1 slot)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.SetUpgradeLevelServerRpc(2, 1);
-                }
-                y += 32;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 28), "Mochila Maior (+1 slot)"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.SetUpgradeLevelServerRpc(3, 1);
-                }
-                y += 32;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 28), "Desbloquear Cogumelo"))
-                {
-                    var cmd = PizzeriaCommandHandler.Instance;
-                    if (cmd != null) cmd.SetUpgradeLevelServerRpc(5, 1);
-                }
-                y += 35;
-
-                if (GUI.Button(new Rect(Screen.width - 300, y, 270, 25), "Fechar Painel (F9)"))
-                {
-                    _showDevPanel = false;
-                    UpdateUIMode();
-                }
+                UnityEngine.Cursor.lockState = CursorLockMode.None;
+                UnityEngine.Cursor.visible = true;
             }
         }
     }

@@ -65,9 +65,40 @@ namespace ScaryParty.Pizzeria.Composition
             if (IsServer)
             {
                 InitializeServerDomain();
+                ReplicateInitialState();
             }
 
             OnPizzeriaInitialized?.Invoke();
+        }
+
+        private void ReplicateInitialState()
+        {
+            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+            if (cmd != null)
+            {
+                cmd.CommitAndReplicate();
+                Debug.Log("[PizzeriaRoot] Estado inicial replicado para clientes.");
+            }
+            else
+            {
+                // CommandHandler pode não estar pronto ainda — agendar para o próximo frame
+                StartCoroutine(ReplicateInitialStateDeferred());
+            }
+        }
+
+        private System.Collections.IEnumerator ReplicateInitialStateDeferred()
+        {
+            yield return null; // Esperar um frame
+            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+            if (cmd != null)
+            {
+                cmd.CommitAndReplicate();
+                Debug.Log("[PizzeriaRoot] Estado inicial replicado (deferred) para clientes.");
+            }
+            else
+            {
+                Debug.LogError("[PizzeriaRoot] PizzeriaCommandHandler.Instance não encontrado após defer!");
+            }
         }
 
         private void InitializeServerDomain()
@@ -93,14 +124,14 @@ namespace ScaryParty.Pizzeria.Composition
             // Armário (ID 2)
             InitStorageSlot(2, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
 
-            // Inicializar Utensílios Compartilhados no ToolRack
+            // Inicializar Utensílios Compartilhados no ToolRack (ID 3)
             foreach (var kvp in Catalog.Tools)
             {
                 var toolData = kvp.Value;
                 for (int i = 0; i < toolData.InitialCount; i++)
                 {
                     var toolId = DomainState.GenerateToolId();
-                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(2 /* Cupboard */, i));
+                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(3 /* ToolRack */, i));
                     DomainState.Tools[toolId] = toolState;
                 }
             }
@@ -120,20 +151,31 @@ namespace ScaryParty.Pizzeria.Composition
             {
                 bool dirty = false;
 
-                // Tick Active Operations (like Oven)
+                // Tick Active Operations (like Oven and Manual work)
                 var keys = new System.Collections.Generic.List<ScaryParty.Pizzeria.Domain.Types.StationSlotId>(DomainState.ActiveOperations.Keys);
                 foreach (var slot in keys)
                 {
                     if (DomainState.ActiveOperations.TryGetValue(slot, out var op))
                     {
+                        float oldProgress = op.AccumulatedProgress;
+                        
                         // Se for um forno (processo autônomo sem workerId)
-                        if (op.WorkerId == 1) // Usando 1 para servidor/autônomo
+                        if (op.WorkerId == OperationState.ServerWorker)
                         {
-                            float oldProgress = op.AccumulatedProgress;
-                            ProcessingService.TickOven(slot, DomainState, _config.ovenBurnGraceDuration, Clock);
-                            if (DomainState.ActiveOperations.TryGetValue(slot, out var updatedOp))
+                            float oldCookProgress = 0f;
+                            float oldBurnProgress = 0f;
+                            if (DomainState.Items.TryGetValue(op.InputItemId, out var pizzaItem))
                             {
-                                if (Mathf.Abs(updatedOp.AccumulatedProgress - oldProgress) > 0.01f)
+                                oldCookProgress = pizzaItem.CookProgress;
+                                oldBurnProgress = pizzaItem.BurnProgress;
+                            }
+
+                            ProcessingService.TickOven(slot, DomainState, _config.ovenBurnGraceDuration, Clock);
+                            
+                            if (DomainState.Items.TryGetValue(op.InputItemId, out var updatedPizza))
+                            {
+                                if (Mathf.Abs(updatedPizza.CookProgress - oldCookProgress) > 0.005f ||
+                                    Mathf.Abs(updatedPizza.BurnProgress - oldBurnProgress) > 0.005f)
                                 {
                                     dirty = true;
                                 }
@@ -141,6 +183,15 @@ namespace ScaryParty.Pizzeria.Composition
                             else
                             {
                                 dirty = true; // Operation completed or removed
+                            }
+                        }
+                        else
+                        {
+                            // Para trabalho manual: auto-completar se atingir 1.0
+                            if (op.ComputeCurrentProgress(Clock.Now) >= 1f)
+                            {
+                                ProcessingService.CompleteWork(slot, DomainState, Catalog);
+                                dirty = true;
                             }
                         }
                     }

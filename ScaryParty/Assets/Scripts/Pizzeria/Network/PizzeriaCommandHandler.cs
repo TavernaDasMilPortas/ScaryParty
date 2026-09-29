@@ -22,8 +22,13 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (IsServer)
             {
-                var netState = GetComponent<PizzeriaNetworkState>();
-                _projector = new ReplicationProjector(netState);
+                if (_projector == null)
+                {
+                    var netState = GetComponent<PizzeriaNetworkState>();
+                    if (netState != null)
+                        _projector = new ReplicationProjector(netState);
+                }
+                CommitAndReplicate();
             }
         }
 
@@ -36,9 +41,19 @@ namespace ScaryParty.Pizzeria.Network
         public void CommitAndReplicate()
         {
             var root = PizzeriaRoot.Instance;
-            if (root != null && root.DomainState != null && _projector != null)
+            if (root != null && root.DomainState != null)
             {
-                _projector.ProjectFullState(root.DomainState);
+                if (_projector == null)
+                {
+                    var netState = GetComponent<PizzeriaNetworkState>();
+                    if (netState != null)
+                        _projector = new ReplicationProjector(netState);
+                }
+
+                if (_projector != null)
+                {
+                    _projector.ProjectFullState(root.DomainState);
+                }
             }
         }
 
@@ -61,7 +76,19 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
 
-            var res = root.TransferService.DispenseFromStorage(storageId, ingredientDefId, senderClientId, (HandSlotIndex)hand);
+            var targetHand = (HandSlotIndex)hand;
+            var targetLoc = LocationRef.InHand(senderClientId, targetHand);
+            if (root.TransferService.IsLocationOccupied(targetLoc))
+            {
+                var otherHand = targetHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var otherLoc = LocationRef.InHand(senderClientId, otherHand);
+                if (!root.TransferService.IsLocationOccupied(otherLoc))
+                {
+                    targetHand = otherHand;
+                }
+            }
+
+            var res = root.TransferService.DispenseFromStorage(storageId, ingredientDefId, senderClientId, targetHand);
             if (res.Success)
             {
                 CommitAndReplicate();
@@ -69,7 +96,7 @@ namespace ScaryParty.Pizzeria.Network
             else
             {
                 var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
-                NotifyErrorClientRpc("Mão cheia ou estoque esgotado!", targetParams);
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Ambas as mãos cheias ou estoque esgotado!" : res.Message, targetParams);
             }
         }
 
@@ -80,6 +107,16 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
 
             var loc = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId);
+            if (loc.Type == LocationType.Hand && root.TransferService.IsLocationOccupied(loc))
+            {
+                var otherHand = loc.SlotId == 0 ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var altLoc = new LocationRef(LocationType.Hand, targetHolderId, (int)otherHand);
+                if (!root.TransferService.IsLocationOccupied(altLoc))
+                {
+                    loc = altLoc;
+                }
+            }
+
             var res = root.TransferService.TransferItem(new ItemId(itemIdVal), loc);
             if (res.Success)
             {
@@ -94,29 +131,80 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
 
             var loc = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId);
+            if (loc.Type == LocationType.Hand && root.TransferService.IsLocationOccupied(loc))
+            {
+                var otherHand = loc.SlotId == 0 ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var altLoc = new LocationRef(LocationType.Hand, targetHolderId, (int)otherHand);
+                if (!root.TransferService.IsLocationOccupied(altLoc))
+                {
+                    loc = altLoc;
+                }
+            }
+
             var res = root.TransferService.TransferTool(new ToolItemId(toolIdVal), loc, root.Clock.Now);
             if (res.Success)
             {
                 CommitAndReplicate();
             }
+            else
+            {
+                ulong senderClientId = rpcParams.Receive.SenderClientId;
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível mover o utensílio." : res.Message, targetParams);
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void StartWorkServerRpc(int stationId, int slotIndex, int processId, ServerRpcParams rpcParams = default)
+        public void StartWorkAtomicServerRpc(int stationId, int slotIndex, int processId, byte activeHand, ServerRpcParams rpcParams = default)
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
 
             var slot = new StationSlotId(stationId, slotIndex);
+            bool domainMutated = false;
+            
+            // Check if there is already an item in the slot
+            bool slotHasItem = false;
+            foreach (var kvp in root.DomainState.Items)
+            {
+                if (kvp.Value.Location == LocationRef.InStation(stationId, slotIndex))
+                {
+                    slotHasItem = true;
+                    break;
+                }
+            }
+
+            if (!slotHasItem)
+            {
+                // Try to transfer item from player's ACTIVE hand only
+                ItemId itemToTransfer = new ItemId(0);
+                foreach (var kvp in root.DomainState.Items)
+                {
+                    if (kvp.Value.Location.Type == LocationType.Hand && kvp.Value.Location.HolderId == senderClientId && kvp.Value.Location.SlotId == activeHand)
+                    {
+                        itemToTransfer = kvp.Key;
+                        break;
+                    }
+                }
+
+                if (itemToTransfer.Value != 0)
+                {
+                    var loc = LocationRef.InStation(stationId, slotIndex);
+                    root.TransferService.TransferItem(itemToTransfer, loc);
+                    domainMutated = true;
+                }
+                else
+                {
+                    return; // No item in slot and no item in active hand
+                }
+            }
 
             if (processId == 0)
             {
-                // Auto-detect process based on the item currently in the station
-                // Note: codebase convention stores stationId in LocationRef.SlotId (holderId=0)
                 foreach (var item in root.DomainState.Items.Values)
                 {
-                    if (item.Location.Type == LocationType.StationSlot && item.Location.HolderId == (ulong)stationId)
+                    if (item.Location.Type == LocationType.StationSlot && item.Location.HolderId == (ulong)stationId && item.Location.SlotId == slotIndex)
                     {
                         foreach (var proc in root.Catalog.Processes.Values)
                         {
@@ -138,8 +226,13 @@ namespace ScaryParty.Pizzeria.Network
             }
             else
             {
+                // Se o domínio foi mutado (item transferido), replicar mesmo com falha no StartWork
+                if (domainMutated)
+                {
+                    CommitAndReplicate();
+                }
                 var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
-                NotifyErrorClientRpc(res.Error ?? "Não foi possível iniciar o trabalho.", targetParams);
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível iniciar o trabalho." : res.Message, targetParams);
             }
         }
 
@@ -236,7 +329,26 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
 
             var slot = new StationSlotId(stationId, slotIndex);
-            var targetLoc = LocationRef.InHand(senderClientId, (HandSlotIndex)targetHand);
+            var targetHandIndex = (HandSlotIndex)targetHand;
+            var targetLoc = LocationRef.InHand(senderClientId, targetHandIndex);
+
+            // Verificar se a mão destino está ocupada; se estiver, tenta a outra mão livre
+            if (root.TransferService.IsLocationOccupied(targetLoc))
+            {
+                var otherHand = targetHandIndex == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var otherLoc = LocationRef.InHand(senderClientId, otherHand);
+                if (!root.TransferService.IsLocationOccupied(otherLoc))
+                {
+                    targetLoc = otherLoc;
+                }
+                else
+                {
+                    var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                    NotifyErrorClientRpc("Ambas as mãos ocupadas! Libere uma mão antes de retirar do forno.", targetParams);
+                    return;
+                }
+            }
+
             var res = root.ProcessingService.RemoveOven(slot, targetLoc, root.DomainState, root.Clock);
             if (res.Success)
             {
@@ -272,7 +384,7 @@ namespace ScaryParty.Pizzeria.Network
             if (root.DomainState.Items.TryGetValue(boxId, out var box))
             {
                 box.LabelDestinationId = chosenDestinationId;
-                box.Location = LocationRef.InStaging(stagingSlotIndex);
+                // Mantém a caixa repousando na bancada de expedição (StationSlot) para ser vista e recolhida
                 box.Revision++;
                 root.DomainState.IncrementRevision();
                 CommitAndReplicate();
