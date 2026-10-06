@@ -51,24 +51,34 @@ public class WeaponController : MonoBehaviour
             }
         }
 
-        if (pistolPrefab != null && rightHandAttachment != null)
+        Transform targetAttachment = rightHandAttachment;
+        bool isLocal = tpc != null && tpc.IsOwner;
+
+        if (isLocal && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
         {
-            pistolInstance = Instantiate(pistolPrefab, rightHandAttachment) as PistolWeapon;
+            targetAttachment = ScaryParty.Player.FirstPersonCameraController.LocalInstance.RightHandAnchor;
+        }
+
+        if (pistolPrefab != null && targetAttachment != null)
+        {
+            pistolInstance = Instantiate(pistolPrefab, targetAttachment) as PistolWeapon;
             if (pistolInstance != null)
             {
                 pistolInstance.transform.localPosition = Vector3.zero;
                 pistolInstance.transform.localRotation = Quaternion.identity;
+                if (isLocal) SetLayerRecursively(pistolInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
                 pistolInstance.OnUnequip();
             }
         }
 
-        if (shotgunPrefab != null && rightHandAttachment != null)
+        if (shotgunPrefab != null && targetAttachment != null)
         {
-            shotgunInstance = Instantiate(shotgunPrefab, rightHandAttachment) as ShotgunWeapon;
+            shotgunInstance = Instantiate(shotgunPrefab, targetAttachment) as ShotgunWeapon;
             if (shotgunInstance != null)
             {
                 shotgunInstance.transform.localPosition = Vector3.zero;
                 shotgunInstance.transform.localRotation = Quaternion.identity;
+                if (isLocal) SetLayerRecursively(shotgunInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
                 shotgunInstance.OnUnequip();
             }
         }
@@ -163,6 +173,16 @@ public class WeaponController : MonoBehaviour
 
             animator.SetBool(AnimIsMoving, isMoving);
             animator.SetBool(AnimIsSprinting, isSprinting);
+        }
+    }
+
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (obj == null) return;
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
         }
     }
 

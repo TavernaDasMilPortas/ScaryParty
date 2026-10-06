@@ -156,6 +156,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (tool.LocationType == (byte)LocationType.StationSlot)
             {
+                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue((int)tool.HolderId, out var st))
                 {
                     parent = st.transform;
@@ -166,7 +167,18 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (tool.LocationType == (byte)LocationType.Hand)
             {
-                if (_playerHandCache.TryGetValue(tool.HolderId, out var hands))
+                if (NetworkManager.Singleton != null && tool.HolderId == NetworkManager.Singleton.LocalClientId && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
+                {
+                    var fpCam = ScaryParty.Player.FirstPersonCameraController.LocalInstance;
+                    parent = tool.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
+                    if (parent != null)
+                    {
+                        targetPos = parent.position;
+                        targetRot = parent.rotation;
+                        SetLayerRecursively(go, LayerMask.NameToLayer("FirstPersonOnly"));
+                    }
+                }
+                else if (_playerHandCache.TryGetValue(tool.HolderId, out var hands))
                 {
                     var handTransform = tool.SlotId == 0 ? hands.left : hands.right;
                     parent = handTransform;
@@ -174,11 +186,13 @@ namespace ScaryParty.Pizzeria.Presentation
                     {
                         targetPos = parent.position + parent.forward * 0.1f;
                         targetRot = parent.rotation;
+                        SetLayerRecursively(go, 0);
                     }
                 }
             }
             else if (tool.LocationType == (byte)LocationType.StagingSlot)
             {
+                SetLayerRecursively(go, 0);
                 parent = null;
                 targetPos = new Vector3(tool.SlotId * 0.5f, 1f, 0f);
                 targetRot = Quaternion.identity;
@@ -246,6 +260,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (item.LocationType == (byte)LocationType.StationSlot)
             {
+                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue((int)item.HolderId, out var st))
                 {
                     parent = st.transform;
@@ -255,7 +270,18 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (item.LocationType == (byte)LocationType.Hand)
             {
-                if (_playerHandCache.TryGetValue(item.HolderId, out var hands))
+                if (NetworkManager.Singleton != null && item.HolderId == NetworkManager.Singleton.LocalClientId && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
+                {
+                    var fpCam = ScaryParty.Player.FirstPersonCameraController.LocalInstance;
+                    parent = item.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
+                    if (parent != null)
+                    {
+                        targetPos = parent.position;
+                        targetRot = parent.rotation;
+                        SetLayerRecursively(go, LayerMask.NameToLayer("FirstPersonOnly"));
+                    }
+                }
+                else if (_playerHandCache.TryGetValue(item.HolderId, out var hands))
                 {
                     var handTransform = item.SlotId == 0 ? hands.left : hands.right;
                     parent = handTransform;
@@ -263,11 +289,13 @@ namespace ScaryParty.Pizzeria.Presentation
                     {
                         targetPos = parent.position + parent.forward * 0.1f;
                         targetRot = parent.rotation;
+                        SetLayerRecursively(go, 0);
                     }
                 }
             }
             else if (item.LocationType == (byte)LocationType.StagingSlot)
             {
+                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue(10, out var stg))
                 {
                     parent = stg.transform;
@@ -440,6 +468,16 @@ namespace ScaryParty.Pizzeria.Presentation
             foreach (var tool in PizzeriaNetworkState.Instance.Tools)
             {
                 UpdateOrSpawnToolVisual(tool);
+            }
+        }
+
+        private void SetLayerRecursively(GameObject obj, int newLayer)
+        {
+            if (obj == null) return;
+            obj.layer = newLayer;
+            foreach (Transform child in obj.transform)
+            {
+                SetLayerRecursively(child.gameObject, newLayer);
             }
         }
     }
