@@ -472,25 +472,9 @@ namespace ScaryParty.Pizzeria.Presentation
             title.style.fontSize = 16;
             _devPanel.Add(title);
 
-            AddDevButton("Atender Pedido Teste (#4: Calabresa+Muss)", () => {
+            AddDevButton("Atender Pedido Teste", () => {
                 PizzeriaCommandHandler.Instance?.AnswerPhoneServerRpc(12);
             });
-            AddDevButton("Comprar Suprimento Queijo (5x)", () => {
-                PizzeriaCommandHandler.Instance?.PurchaseSupplyServerRpc(3, 1);
-            });
-            AddDevButton("Comprar Suprimento Calabresa (5x)", () => {
-                PizzeriaCommandHandler.Instance?.PurchaseSupplyServerRpc(4, 1);
-            });
-
-            var upgradesTitle = new Label("Upgrades Demonstráveis:");
-            upgradesTitle.style.color = Color.white;
-            upgradesTitle.style.marginTop = 10;
-            _devPanel.Add(upgradesTitle);
-
-            AddDevButton("Forno Rápido (-20% tempo)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(1, 1); });
-            AddDevButton("Slot Forno Extra (+1 slot)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(2, 1); });
-            AddDevButton("Mochila Maior (+1 slot)", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(3, 1); });
-            AddDevButton("Desbloquear Cogumelo", () => { PizzeriaCommandHandler.Instance?.SetUpgradeLevelServerRpc(5, 1); });
 
             AddDevButton("Fechar Painel (F9)", () => {
                 _devPanel.style.display = DisplayStyle.None;

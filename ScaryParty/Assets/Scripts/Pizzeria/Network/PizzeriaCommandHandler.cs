@@ -378,10 +378,49 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
 
-            // Answering the phone immediately publishes a multi-pizza order!
-            // Pick a destination (e.g. 4 for testing, or from catalog)
+            // Se houver chamada pendente no CallService, atende a primeira
+            if (root.DomainState.Calls.Count > 0)
+            {
+                var firstCallId = System.Linq.Enumerable.First(root.DomainState.Calls.Keys);
+                var answerRes = root.CallService.AnswerCall(
+                    root.DomainState,
+                    firstCallId,
+                    root.OrderService,
+                    root.Catalog,
+                    root.Clock,
+                    root.Config.maxActiveOrders,
+                    root.Config.deliveryTimeLimit);
+
+                if (answerRes.Success)
+                {
+                    CommitAndReplicate();
+                    Debug.Log($"[PizzeriaCommandHandler] Chamada #{firstCallId.Value} atendida! Pedido #{answerRes.Value.Value} criado.");
+                    return;
+                }
+            }
+
+            // Fallback: cria pedido de teste com receitas do catálogo
+            var recipes = new System.Collections.Generic.List<(int recipeId, int qty)>();
+            if (root.Catalog != null && root.Catalog.Recipes.Count > 0)
+            {
+                int firstRecipeId = System.Linq.Enumerable.First(root.Catalog.Recipes.Keys);
+                recipes.Add((firstRecipeId, 1));
+            }
+            else
+            {
+                recipes.Add((1, 1));
+            }
+
             int destId = 4;
-            var res = root.OrderService.CreatePhoneOrder(new AddressId(destId), recipes, root.DomainState, root.Catalog, root.Clock, root.Config.maxActiveOrders, root.Config.deliveryTimeLimit);
+            var res = root.OrderService.CreatePhoneOrder(
+                new AddressId(destId),
+                recipes,
+                root.DomainState,
+                root.Catalog,
+                root.Clock,
+                root.Config.maxActiveOrders,
+                root.Config.deliveryTimeLimit);
+
             if (res.Success)
             {
                 CommitAndReplicate();

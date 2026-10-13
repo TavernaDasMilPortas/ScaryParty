@@ -140,6 +140,8 @@ namespace ScaryParty.Pizzeria.Network
         public uint Revision;
 
         public float Progress => Duration > 0 ? Math.Clamp(Accumulated / Duration, 0f, 1f) : 0f;
+        public float CapturedDuration => Duration;
+        public double OperationStartTime => ServerTime;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {

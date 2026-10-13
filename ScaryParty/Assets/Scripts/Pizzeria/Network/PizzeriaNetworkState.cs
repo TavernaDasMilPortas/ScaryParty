@@ -14,6 +14,7 @@ namespace ScaryParty.Pizzeria.Network
         public NetworkList<NetOrderDto> Orders;
         public NetworkList<NetOrderLineDto> OrderLines;
         public NetworkList<NetCallDto> Calls;
+        public NetworkList<NetCallDto> ActiveCalls => Calls;
         public NetworkList<NetStackDto> Stacks;
         public NetworkList<NetBackpackDto> Backpacks;
         public NetworkList<NetSupplyDto> SupplyOrders;

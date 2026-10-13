@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Models
@@ -16,6 +16,11 @@ namespace ScaryParty.Pizzeria.Domain.Models
             RecipeId = recipeId;
             RequestedQuantity = requestedQuantity;
             DeliveredQuantity = 0;
+        }
+
+        public OrderLineState(int recipeId, int requestedQuantity)
+            : this(OrderLineId.None, recipeId, requestedQuantity)
+        {
         }
     }
 

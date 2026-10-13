@@ -4,6 +4,7 @@ using UnityEngine.UIElements;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Composition;
 
 namespace ScaryParty.Pizzeria.Presentation
@@ -275,7 +276,7 @@ namespace ScaryParty.Pizzeria.Presentation
             UpdateTimerDisplay();
         }
 
-        private void AddLineItem(int recipeId, int qty, Definitions.DefinitionCatalog catalog)
+        private void AddLineItem(int recipeId, int qty, DefinitionCatalog catalog)
         {
             string recipeName = catalog != null && catalog.Recipes.TryGetValue(recipeId, out var r) ? r.Name : $"Pizza #{recipeId}";
             var row = new VisualElement();

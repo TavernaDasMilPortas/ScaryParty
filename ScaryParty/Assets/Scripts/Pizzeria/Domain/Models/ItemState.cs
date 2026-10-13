@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -39,6 +39,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public float BurnProgress { get; set; } = 0f;
         public float CapturedCookDuration { get; set; } = 0f;
         public int LabelAddressId { get; set; } = -1; // AddressId.None
+        public int LabelDestinationId { get => LabelAddressId; set => LabelAddressId = value; }
         public ulong ReservedByHold { get; set; } = 0;
         public uint Revision { get; set; } = 1;
 

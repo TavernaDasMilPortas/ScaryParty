@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -8,14 +8,14 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class PizzeriaContentMigration
     {
-        [MenuItem(""Tools/Scary Party/Pizzeria/Migrar Referências de Conteúdo"")]
+        [MenuItem("Tools/Scary Party/Pizzeria/Migrar Referências de Conteúdo")]
         public static void MigrateContentReferences()
         {
             var ingredientsById = new Dictionary<int, IngredientDef>();
             var processesById = new Dictionary<int, ProcessDef>();
             var stationsById = new Dictionary<int, StationDef>();
 
-            string[] ingredientGuids = AssetDatabase.FindAssets(""t:IngredientDef"");
+            string[] ingredientGuids = AssetDatabase.FindAssets("t:IngredientDef");
             var allIngredients = new List<IngredientDef>();
             foreach (var guid in ingredientGuids)
             {
@@ -28,7 +28,7 @@ namespace ScaryParty.Pizzeria.Editor
                 }
             }
 
-            string[] processGuids = AssetDatabase.FindAssets(""t:ProcessDef"");
+            string[] processGuids = AssetDatabase.FindAssets("t:ProcessDef");
             var allProcesses = new List<ProcessDef>();
             foreach (var guid in processGuids)
             {
@@ -41,7 +41,7 @@ namespace ScaryParty.Pizzeria.Editor
                 }
             }
 
-            string[] recipeGuids = AssetDatabase.FindAssets(""t:RecipeDef"");
+            string[] recipeGuids = AssetDatabase.FindAssets("t:RecipeDef");
             var allRecipes = new List<RecipeDef>();
             foreach (var guid in recipeGuids)
             {
@@ -50,7 +50,7 @@ namespace ScaryParty.Pizzeria.Editor
                 if (rec != null) allRecipes.Add(rec);
             }
 
-            string[] stationGuids = AssetDatabase.FindAssets(""t:StationDef"");
+            string[] stationGuids = AssetDatabase.FindAssets("t:StationDef");
             var allStations = new List<StationDef>();
             foreach (var guid in stationGuids)
             {
@@ -78,7 +78,7 @@ namespace ScaryParty.Pizzeria.Editor
                     }
                     else
                     {
-                        Debug.LogWarning($""[Migração] Ingredient {ing.name} (id {ing.id}) referencia preparedIngredientId {ing.preparedIngredientId} inexistente."");
+                        Debug.LogWarning($"[Migração] Ingredient {ing.name} (id {ing.id}) referencia preparedIngredientId {ing.preparedIngredientId} inexistente.");
                     }
                 }
                 if (modified)
@@ -188,7 +188,7 @@ namespace ScaryParty.Pizzeria.Editor
             }
 
             // 5. Migrar PizzeriaConfig (garantir initialStorageSlots e listas)
-            string[] configGuids = AssetDatabase.FindAssets(""t:PizzeriaConfig"");
+            string[] configGuids = AssetDatabase.FindAssets("t:PizzeriaConfig");
             foreach (var guid in configGuids)
             {
                 var path = AssetDatabase.GUIDToAssetPath(guid);
@@ -226,7 +226,7 @@ namespace ScaryParty.Pizzeria.Editor
             }
 
             AssetDatabase.SaveAssets();
-            Debug.Log($""[PizzeriaContentMigration] Concluída! {migratedCount} assets atualizados com referências diretas."");
+            Debug.Log($"[PizzeriaContentMigration] Concluída! {migratedCount} assets atualizados com referências diretas.");
         }
     }
 }

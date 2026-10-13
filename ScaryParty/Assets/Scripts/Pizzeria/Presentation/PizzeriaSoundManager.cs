@@ -41,5 +41,6 @@ namespace ScaryParty.Pizzeria.Presentation
         public static void PlayPackage() => Play(Instance?.packageSound);
         public static void PlayDelivery() => Play(Instance?.deliverySound);
         public static void PlayError() => Play(Instance?.errorSound);
+        public void PlayDing() => Play(deliverySound != null ? deliverySound : ovenReadySound);
     }
 }

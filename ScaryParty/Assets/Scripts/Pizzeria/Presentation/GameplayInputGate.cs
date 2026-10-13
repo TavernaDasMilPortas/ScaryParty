@@ -21,6 +21,9 @@ namespace ScaryParty.Pizzeria.Presentation
             ApplyState();
         }
 
+        public static void PushModal() => PushLock();
+        public static void PopModal() => PopLock();
+
         public static void SetLock(bool locked)
         {
             if (locked) PushLock();

@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Ports;
@@ -31,38 +31,38 @@ namespace ScaryParty.Pizzeria.Tests
             _clock = new SimulatedClock { CurrentTime = 100.0 };
 
             // Setup Catalog definitions
-            _catalog.RegisterIngredient(new IngredientData(1, ""Massa"", ItemCategory.Dough, true, 2));
-            _catalog.RegisterIngredient(new IngredientData(2, ""Massa Aberta"", ItemCategory.Dough));
-            _catalog.RegisterIngredient(new IngredientData(3, ""Molho"", ItemCategory.Sauce));
-            _catalog.RegisterIngredient(new IngredientData(4, ""Queijo Inteiro"", ItemCategory.Cheese, true, 5));
-            _catalog.RegisterIngredient(new IngredientData(5, ""Queijo Ralado"", ItemCategory.Cheese));
-            _catalog.RegisterIngredient(new IngredientData(6, ""Calabresa Inteira"", ItemCategory.Topping, true, 7));
-            _catalog.RegisterIngredient(new IngredientData(7, ""Calabresa Fatiada"", ItemCategory.Topping));
-            _catalog.RegisterIngredient(new IngredientData(8, ""Cogumelo Inteiro"", ItemCategory.Topping, true, 9));
-            _catalog.RegisterIngredient(new IngredientData(9, ""Cogumelo Fatiado"", ItemCategory.Topping));
+            _catalog.RegisterIngredient(new IngredientData(1, "Massa", ItemCategory.Dough, true, 2));
+            _catalog.RegisterIngredient(new IngredientData(2, "Massa Aberta", ItemCategory.Dough));
+            _catalog.RegisterIngredient(new IngredientData(3, "Molho", ItemCategory.Sauce));
+            _catalog.RegisterIngredient(new IngredientData(4, "Queijo Inteiro", ItemCategory.Cheese, true, 5));
+            _catalog.RegisterIngredient(new IngredientData(5, "Queijo Ralado", ItemCategory.Cheese));
+            _catalog.RegisterIngredient(new IngredientData(6, "Calabresa Inteira", ItemCategory.Topping, true, 7));
+            _catalog.RegisterIngredient(new IngredientData(7, "Calabresa Fatiada", ItemCategory.Topping));
+            _catalog.RegisterIngredient(new IngredientData(8, "Cogumelo Inteiro", ItemCategory.Topping, true, 9));
+            _catalog.RegisterIngredient(new IngredientData(9, "Cogumelo Fatiado", ItemCategory.Topping));
 
             // Tools
-            _catalog.RegisterTool(new ToolData(1, ""Ralador"", ToolCapability.Grate, 1));
-            _catalog.RegisterTool(new ToolData(2, ""Faca"", ToolCapability.Slice, 1));
+            _catalog.RegisterTool(new ToolData(1, "Ralador", ToolCapability.Grate, 1));
+            _catalog.RegisterTool(new ToolData(2, "Faca", ToolCapability.Slice, 1));
 
             // Processes
-            _catalog.RegisterProcess(new ProcessData(1, ""Abrir Massa"", 1, ProcessingStage.Raw, 2, ProcessingStage.Prepared, ToolCapability.None, 3.0f));
-            _catalog.RegisterProcess(new ProcessData(2, ""Ralar Queijo"", 4, ProcessingStage.Raw, 5, ProcessingStage.Prepared, ToolCapability.Grate, 3.0f));
-            _catalog.RegisterProcess(new ProcessData(3, ""Fatiar Calabresa"", 6, ProcessingStage.Raw, 7, ProcessingStage.Prepared, ToolCapability.Slice, 2.0f));
+            _catalog.RegisterProcess(new ProcessData(1, "Abrir Massa", 1, ProcessingStage.Raw, 2, ProcessingStage.Prepared, ToolCapability.None, 3.0f));
+            _catalog.RegisterProcess(new ProcessData(2, "Ralar Queijo", 4, ProcessingStage.Raw, 5, ProcessingStage.Prepared, ToolCapability.Grate, 3.0f));
+            _catalog.RegisterProcess(new ProcessData(3, "Fatiar Calabresa", 6, ProcessingStage.Raw, 7, ProcessingStage.Prepared, ToolCapability.Slice, 2.0f));
 
             // Stations
-            _catalog.RegisterStation(new StationData(1, ""Preparo A"", 2, new[] { 1, 2, 3 }));
-            _catalog.RegisterStation(new StationData(2, ""Preparo B"", 2, new[] { 2 }, new System.Collections.Generic.Dictionary<int, float> { { 2, 2.0f } }));
-            _catalog.RegisterStation(new StationData(3, ""Forno"", 2, new int[0]));
+            _catalog.RegisterStation(new StationData(1, "Preparo A", 2, new[] { 1, 2, 3 }));
+            _catalog.RegisterStation(new StationData(2, "Preparo B", 2, new[] { 2 }, new System.Collections.Generic.Dictionary<int, float> { { 2, 2.0f } }));
+            _catalog.RegisterStation(new StationData(3, "Forno", 2, new int[0]));
 
             // Recipes
-            _catalog.RegisterRecipe(new RecipeData(1, ""Mussarela"", 2, new[]
+            _catalog.RegisterRecipe(new RecipeData(1, "Mussarela", 2, new[]
             {
                 new IngredientEntry(3, ProcessingStage.Raw, 1),
                 new IngredientEntry(5, ProcessingStage.Prepared, 1)
             }, 15, 15f));
 
-            _catalog.RegisterRecipe(new RecipeData(2, ""Calabresa"", 2, new[]
+            _catalog.RegisterRecipe(new RecipeData(2, "Calabresa", 2, new[]
             {
                 new IngredientEntry(3, ProcessingStage.Raw, 1),
                 new IngredientEntry(5, ProcessingStage.Prepared, 1),
@@ -100,7 +100,7 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.AreEqual(101, tool.ReservedByWorkerId);
 
             var toolLeaseRes = tool.TryAcquireLease(202, _clock.Now, 0.75);
-            Assert.IsFalse(toolLeaseRes, ""Worker 202 should not acquire lease while 101 is working"");
+            Assert.IsFalse(toolLeaseRes, "Worker 202 should not acquire lease while 101 is working");
 
             _clock.Advance(3.0);
             var compRes = _processingService.CompleteWork(slot, _state, _catalog);
@@ -176,7 +176,7 @@ namespace ScaryParty.Pizzeria.Tests
 
             var recipe = _catalog.Recipes[1];
             bool matches = _recipeEvaluator.MatchesRecipeExact(pizza, recipe);
-            Assert.IsFalse(matches, ""Raw cheese pizza must not match Mussarela exact"");
+            Assert.IsFalse(matches, "Raw cheese pizza must not match Mussarela exact");
         }
 
         [Test]
@@ -411,7 +411,7 @@ namespace ScaryParty.Pizzeria.Tests
             var res = _transferService.TransferItem(item2.Id, handRight);
             Assert.IsFalse(res.Success);
             Assert.AreEqual(CommandError.SlotFull, res.Error);
-            Assert.AreEqual(LocationRef.InWorld(0, 0, 0), item2.Location, ""item2 must not change location on failure"");
+            Assert.AreEqual(LocationRef.InWorld(0, 0, 0), item2.Location, "item2 must not change location on failure");
         }
     }
 }

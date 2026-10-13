@@ -1,6 +1,6 @@
 using System;
 
-namespace ScaryParty.Pizzeria.Domain
+namespace ScaryParty.Pizzeria.Domain.Types
 {
     public readonly struct ItemId : IEquatable<ItemId>, IComparable<ItemId>
     {
@@ -347,7 +347,9 @@ namespace ScaryParty.Pizzeria.Domain
     public enum OrderLifecycle : byte
     {
         Accepted = 1,
+        Active = 1,
         Completed = 2,
+        Delivered = 2,
         Cancelled = 3,
         Expired = 4
     }

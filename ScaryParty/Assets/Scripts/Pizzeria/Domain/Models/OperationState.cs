@@ -1,4 +1,4 @@
-﻿using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Models
 {
@@ -66,5 +66,19 @@ namespace ScaryParty.Pizzeria.Domain.Models
             WorkerId = NoWorker;
             Revision++;
         }
+
+        public float ComputeCurrentProgress(double now)
+        {
+            if (Phase != OperationPhase.Running)
+                return Progress.Normalized;
+            float currentNow = (float)now;
+            float effectiveNow = System.Math.Min(currentNow, Progress.LeaseExpiry);
+            float delta = effectiveNow - Progress.LastTick;
+            float total = Progress.Accumulated + (delta > 0 ? delta : 0f);
+            return Progress.Duration > 0 ? System.Math.Clamp(total / Progress.Duration, 0f, 1f) : 1f;
+        }
+
+        public float ComputeCurrentProgress(float now) => ComputeCurrentProgress((double)now);
+        public float AccumulatedProgress => Progress.Accumulated;
     }
 }

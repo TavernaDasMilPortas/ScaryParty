@@ -135,7 +135,7 @@ namespace ScaryParty.Pizzeria.Composition
                 lines.Add(new OrderLineState(rId, 1));
             }
 
-            float now = (float)(root.Clock != null ? root.Clock.CurrentTime : Time.time);
+            float now = (float)(root.Clock != null ? root.Clock.Now : Time.time);
             var res = root.CallService.EnqueueCall(root.DomainState, destId, lines, now, 45f);
             if (res.Success)
             {
