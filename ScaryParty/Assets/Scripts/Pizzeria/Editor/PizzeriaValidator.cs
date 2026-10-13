@@ -26,7 +26,7 @@ namespace ScaryParty.Pizzeria.Editor
             }
             else
             {
-                Debug.Log($"[PizzeriaValidator] ✅ PizzeriaConfig carregado: {config.ingredients.Count} ingredientes, {config.recipes.Count} receitas, {config.tools.Count} utensílios, {config.processes.Count} processos, {config.upgrades.Count} upgrades.");
+                Debug.Log($"[PizzeriaValidator] ✅ PizzeriaConfig carregado: {config.ingredients.Count} ingredientes, {config.recipes.Count} receitas, {config.tools.Count} utensílios, {config.processes.Count} processos.");
 
                 // Validate unique IDs
                 var ingIds = new HashSet<int>();
@@ -82,6 +82,25 @@ namespace ScaryParty.Pizzeria.Editor
                         warningCount++;
                     }
                 }
+
+                // Check Stations in PizzeriaPrefab
+                var stationsParent = prefab.transform.Find("Stations");
+                if (stationsParent != null)
+                {
+                    var phone = stationsParent.Find("Station_Phone");
+                    if (phone == null)
+                    {
+                        Debug.LogWarning("[PizzeriaValidator] ⚠️ Station_Phone não encontrada em Stations no PizzeriaPrefab.");
+                        warningCount++;
+                    }
+
+                    var ticketBoard = stationsParent.Find("Station_TicketBoard");
+                    if (ticketBoard == null)
+                    {
+                        Debug.LogWarning("[PizzeriaValidator] ⚠️ Station_TicketBoard não encontrada em Stations no PizzeriaPrefab.");
+                        warningCount++;
+                    }
+                }
             }
 
             // 3. Check NetworkPrefabsList
@@ -107,6 +126,21 @@ namespace ScaryParty.Pizzeria.Editor
                 {
                     Debug.LogWarning("[PizzeriaValidator] ⚠️ PizzeriaPrefab não está registrado em DefaultNetworkPrefabs.asset.");
                     warningCount++;
+                }
+            }
+
+            // 4. Check DeliveryPoints in Scene
+            var dps = Object.FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);
+            if (dps.Length > 0)
+            {
+                var seenAddrs = new HashSet<int>();
+                foreach (var dp in dps)
+                {
+                    if (!seenAddrs.Add(dp.AddressId))
+                    {
+                        Debug.LogWarning($"[PizzeriaValidator] ⚠️ Endereço duplicado em DeliveryPoint: {dp.AddressId} ({dp.name})");
+                        warningCount++;
+                    }
                 }
             }
 

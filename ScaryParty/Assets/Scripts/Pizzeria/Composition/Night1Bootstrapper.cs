@@ -87,25 +87,59 @@ namespace ScaryParty.Pizzeria.Composition
         private void GenerateAutoOrder()
         {
             var root = PizzeriaRoot.Instance;
-            if (root == null || root.Catalog == null || root.Catalog.Recipes.Count == 0) return;
+            if (root == null || root.Catalog == null || root.Catalog.Recipes.Count == 0 || root.DomainState == null) return;
 
-            // Generate 1-2 random recipes
-            var recipes = new List<(int recipeId, int qty)>();
+            // Seleciona endereço do AddressRegistry não ocupado por pedidos ou chamadas
+            var availableAddresses = new List<AddressId>();
+            if (root.AddressRegistry != null && root.AddressRegistry.GetAllIds().Count > 0)
+            {
+                foreach (var addr in root.AddressRegistry.GetAllIds())
+                {
+                    bool isOccupied = false;
+                    foreach (var o in root.DomainState.Orders.Values)
+                    {
+                        if (o.DestinationId == addr && o.Lifecycle == OrderLifecycle.Active)
+                        {
+                            isOccupied = true;
+                            break;
+                        }
+                    }
+                    if (!isOccupied)
+                    {
+                        foreach (var c in root.DomainState.Calls.Values)
+                        {
+                            if (c.AddressId == addr)
+                            {
+                                isOccupied = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!isOccupied) availableAddresses.Add(addr);
+                }
+            }
+
+            AddressId destId = availableAddresses.Count > 0
+                ? availableAddresses[Random.Range(0, availableAddresses.Count)]
+                : new AddressId(Random.Range(0, 8));
+
+            // Gera 1-2 receitas aleatórias
+            var lines = new List<OrderLineState>();
             int numRecipes = Random.Range(1, 3);
-            
             var recipeKeys = new List<int>(root.Catalog.Recipes.Keys);
+
             for (int i = 0; i < numRecipes; i++)
             {
                 int rId = recipeKeys[Random.Range(0, recipeKeys.Count)];
-                recipes.Add((rId, 1));
+                lines.Add(new OrderLineState(rId, 1));
             }
 
-            int destId = Random.Range(1, 9);
-
-            var res = root.OrderService.CreatePhoneOrder(destId, recipes, root.DomainState, root.Catalog, root.Clock, root.Config.deliveryTimeLimit);
+            float now = (float)(root.Clock != null ? root.Clock.CurrentTime : Time.time);
+            var res = root.CallService.EnqueueCall(root.DomainState, destId, lines, now, 45f);
             if (res.Success)
             {
-                Debug.Log($"[Night1Bootstrapper] Pedido automático #{res.Value.Value} gerado para o destino #{destId}.");
+                Debug.Log($"[Night1Bootstrapper] 📞 Chamada telefônica agendada #{res.Value.Value} para o endereço {AddressFormat.Display(destId.Value)}!");
                 var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
                 if (cmd != null) cmd.CommitAndReplicate();
             }
