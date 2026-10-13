@@ -309,8 +309,38 @@ namespace ScaryParty.Pizzeria.Presentation
                     targetRot = Quaternion.identity;
                 }
             }
+            else if (item.LocationType == (byte)LocationType.Stack)
+            {
+                SetLayerRecursively(go, 0);
+                var netState = PizzeriaNetworkState.Instance;
+                int stackStationId = 10; // Default staging
+                if (netState != null)
+                {
+                    for (int s = 0; s < netState.Stacks.Count; s++)
+                    {
+                        if (netState.Stacks[s].StackId == item.HolderId)
+                        {
+                            stackStationId = netState.Stacks[s].StationId;
+                            break;
+                        }
+                    }
+                }
 
-            if (parent != null || item.LocationType == (byte)LocationType.StagingSlot)
+                if (_stationCache.TryGetValue(stackStationId, out var stackStation))
+                {
+                    parent = stackStation.transform;
+                    targetPos = stackStation.GetSlotPosition(0) + Vector3.up * (item.SlotId * 0.12f);
+                    targetRot = stackStation.GetSlotRotation(0);
+                }
+                else
+                {
+                    parent = null;
+                    targetPos = new Vector3(0f, 0.5f + (item.SlotId * 0.12f), 0f);
+                    targetRot = Quaternion.identity;
+                }
+            }
+
+            if (parent != null || item.LocationType == (byte)LocationType.StagingSlot || item.LocationType == (byte)LocationType.Stack)
             {
                 float lerpSpeed = 10f * Time.deltaTime;
                 go.transform.position = Vector3.Lerp(go.transform.position, targetPos, lerpSpeed); // Smooth quick snap
@@ -361,15 +391,35 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 rend.material.color = new Color(0.6f, 0.4f, 0.2f); // Brown cardboard
                 go.transform.localScale = new Vector3(0.4f, 0.1f, 0.4f);
+                UpdateBoxLabel(go, item);
             }
             else if (item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza)
             {
                 go.transform.localScale = new Vector3(0.4f, 0.02f, 0.4f);
-                if (item.CookingStage == (byte)CookingStage.Uncooked) rend.material.color = new Color(1f, 0.9f, 0.7f); // Pale dough
-                else if (item.CookingStage == (byte)CookingStage.Baked) rend.material.color = new Color(0.8f, 0.5f, 0.2f); // Baked crust
-                else if (item.CookingStage == (byte)CookingStage.Burned) rend.material.color = Color.black;
+
+                Color doughColor = new Color(0.95f, 0.88f, 0.72f);
+                Color bakedColor = new Color(0.80f, 0.48f, 0.15f);
+                Color burnedColor = new Color(0.12f, 0.10f, 0.10f);
+
+                if (item.CookingStage == (byte)CookingStage.Burned)
+                {
+                    rend.material.color = burnedColor;
+                }
+                else if (item.BurnProgress > 0f)
+                {
+                    rend.material.color = Color.Lerp(bakedColor, burnedColor, item.BurnProgress);
+                }
+                else if (item.CookingStage == (byte)CookingStage.Baked)
+                {
+                    rend.material.color = bakedColor;
+                }
+                else
+                {
+                    rend.material.color = Color.Lerp(doughColor, bakedColor, Mathf.Clamp01(item.CookProgress));
+                }
 
                 UpdatePizzaIngredientLayers(go, item);
+                UpdatePizzaSmoke(go, item);
             }
             else
             {
@@ -381,6 +431,78 @@ namespace ScaryParty.Pizzeria.Presentation
                 else if (item.Category == (byte)ItemCategory.Sauce) rend.material.color = new Color(0.80f, 0.15f, 0.10f);
                 else if (item.Category == (byte)ItemCategory.Cheese) rend.material.color = new Color(0.98f, 0.88f, 0.35f);
                 else if (item.Category == (byte)ItemCategory.Topping) rend.material.color = new Color(0.65f, 0.15f, 0.15f);
+            }
+        }
+
+        private void UpdateBoxLabel(GameObject boxGo, NetItemDto item)
+        {
+            var labelTrans = boxGo.transform.Find("BoxLabel");
+            TMPro.TextMeshPro tmp;
+            if (labelTrans == null)
+            {
+                var labelGo = new GameObject("BoxLabel");
+                labelGo.transform.SetParent(boxGo.transform, false);
+                labelGo.transform.localPosition = new Vector3(0f, 0.52f, 0f);
+                labelGo.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                labelGo.transform.localScale = Vector3.one * 0.1f;
+                tmp = labelGo.AddComponent<TMPro.TextMeshPro>();
+                tmp.alignment = TMPro.TextAlignmentOptions.Center;
+                tmp.fontSize = 2.5f;
+                tmp.color = Color.black;
+                var rect = labelGo.GetComponent<RectTransform>();
+                rect.sizeDelta = new Vector2(3.5f, 3.5f);
+            }
+            else
+            {
+                tmp = labelTrans.GetComponent<TMPro.TextMeshPro>();
+            }
+
+            if (tmp != null)
+            {
+                if (item.LabelDestinationId >= 0)
+                {
+                    tmp.text = $"<b>{AddressFormat.Display(item.LabelDestinationId)}</b>\n<size=70%>PEDIDO PIZZA</size>";
+                }
+                else
+                {
+                    tmp.text = "<size=70%>(Sem Etiqueta)</size>";
+                }
+            }
+        }
+
+        private void UpdatePizzaSmoke(GameObject pizzaGo, NetItemDto item)
+        {
+            var smokeTrans = pizzaGo.transform.Find("PizzaSmoke");
+            ParticleSystem ps;
+            if (smokeTrans == null)
+            {
+                var smokeGo = new GameObject("PizzaSmoke");
+                smokeGo.transform.SetParent(pizzaGo.transform, false);
+                smokeGo.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+                ps = smokeGo.AddComponent<ParticleSystem>();
+                var main = ps.main;
+                main.startLifetime = 0.8f;
+                main.startSpeed = 0.4f;
+                main.startSize = 0.15f;
+                main.startColor = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+                main.playOnAwake = false;
+                var em = ps.emission;
+                em.rateOverTime = 6f;
+                var rend = smokeGo.GetComponent<ParticleSystemRenderer>();
+                var shader = Shader.Find("Universal Render Pipeline/Particles/Unlit") ?? Shader.Find("Particles/Standard Unlit");
+                if (shader != null) rend.material = new Material(shader);
+                ps.Stop();
+            }
+            else
+            {
+                ps = smokeTrans.GetComponent<ParticleSystem>();
+            }
+
+            if (ps != null)
+            {
+                bool isBurning = item.BurnProgress > 0f || item.CookingStage == (byte)CookingStage.Burned;
+                if (isBurning && !ps.isPlaying) ps.Play();
+                else if (!isBurning && ps.isPlaying) ps.Stop();
             }
         }
 

@@ -4,7 +4,15 @@ using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Stations
-{    public class AssemblyStation : StationView
+{
+    public class AssemblyStation : StationView
     {
-        public override string InteractPrompt => "[E] Montar Pizza em " + stationName;
-    }}
+        public override string InteractPrompt => "[E] Montar Pizza";
+
+        protected override void Start()
+        {
+            base.Start();
+            stationName = "Bancada de Montagem";
+        }
+    }
+}

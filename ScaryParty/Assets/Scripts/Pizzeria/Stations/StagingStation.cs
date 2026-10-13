@@ -19,8 +19,8 @@ namespace ScaryParty.Pizzeria.Stations
                         var item = netState.Items[i];
                         if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.PackagingState == (byte)PackagingState.Boxed)
                         {
-                            if (item.LabelDestinationId > 0)
-                                return $"[E] Pegar Caixa (Destino #{item.LabelDestinationId})";
+                            if (item.LabelDestinationId >= 0)
+                                return $"[E] Pegar Caixa ({AddressFormat.Display(item.LabelDestinationId)})";
                             else
                                 return $"[E] Etiquetar Caixa em {stationName}";
                         }
@@ -41,7 +41,7 @@ namespace ScaryParty.Pizzeria.Stations
                 if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.PackagingState == (byte)PackagingState.Boxed)
                 {
                     // Se a caixa ainda não foi etiquetada, abre o seletor de endereço
-                    if (item.LabelDestinationId == 0)
+                    if (item.LabelDestinationId < 0)
                     {
                         if (ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
                         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -16,15 +16,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
             float defaultBakeDuration)
         {
             if (!state.Items.TryGetValue(itemId, out var item))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Item não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
             if (!item.IsPizzaLike || item.IsBoxed)
-                return CommandResult.Fail(CommandError.Incompatible, ""Apenas pizzas desembaladas podem ser inseridas no forno."");
+                return CommandResult.Fail(CommandError.Incompatible, "Apenas pizzas desembaladas podem ser inseridas no forno.");
 
             if (catalog.Stations.TryGetValue(slotId.StationId, out var stationData))
             {
                 if (slotId.SlotIndex >= stationData.SlotCount)
-                    return CommandResult.Fail(CommandError.SlotFull, ""Índice de slot inválido para este forno."");
+                    return CommandResult.Fail(CommandError.SlotFull, "Índice de slot inválido para este forno.");
             }
 
             var destLocation = new LocationRef(LocationType.StationSlot, (ulong)slotId.StationId, slotId.SlotIndex);
@@ -78,7 +78,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
 
             if (targetItem == ItemId.None)
-                return CommandResult.Fail(CommandError.SlotEmpty, ""Slot do forno está vazio."");
+                return CommandResult.Fail(CommandError.SlotEmpty, "Slot do forno está vazio.");
 
             return TransferService.TransferItem(state, targetItem, handLocation, requesterId, bypassReservation: false);
         }
