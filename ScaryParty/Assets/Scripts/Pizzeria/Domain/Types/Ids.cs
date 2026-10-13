@@ -151,6 +151,8 @@ namespace ScaryParty.Pizzeria.Domain
         public override string ToString() => $"Stack({Value})";
         public static bool operator ==(StackId a, StackId b) => a.Value == b.Value;
         public static bool operator !=(StackId a, StackId b) => a.Value != b.Value;
+        public static explicit operator ulong(StackId id) => id.Value;
+        public static explicit operator StackId(ulong val) => new StackId(val);
     }
 
     public readonly struct BackpackId : IEquatable<BackpackId>, IComparable<BackpackId>
@@ -167,6 +169,8 @@ namespace ScaryParty.Pizzeria.Domain
         public override string ToString() => $"Backpack({Value})";
         public static bool operator ==(BackpackId a, BackpackId b) => a.Value == b.Value;
         public static bool operator !=(BackpackId a, BackpackId b) => a.Value != b.Value;
+        public static explicit operator ulong(BackpackId id) => id.Value;
+        public static explicit operator BackpackId(ulong val) => new BackpackId(val);
     }
 
     public readonly struct DomainVector3 : IEquatable<DomainVector3>

@@ -393,6 +393,11 @@ namespace ScaryParty.Pizzeria.Editor
             // 15. Ticket Board (Quadro de Comandas)
             CreateStation<TicketBoardStation>("Station_TicketBoard", 15, stationsRoot.transform, new Vector3(3.5f, 1.6f, 5.8f), new Vector3(2.2f, 0.9f, 0.08f), materials["Counter"]);
 
+            // 16. Staging Stack (Pilha de Caixas)
+            var stack = CreateStation<StackStation>("Station_Stack_Staging", 16, stationsRoot.transform, new Vector3(2.0f, 0.05f, -4.5f), new Vector3(0.6f, 0.1f, 0.6f), materials["Counter"]);
+            stack.stackId = 1;
+            stack.capacity = 6;
+
             // Anchors Group
             var anchors = new GameObject("Anchors");
             anchors.transform.SetParent(root.transform);

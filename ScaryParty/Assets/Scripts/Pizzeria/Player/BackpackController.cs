@@ -3,13 +3,44 @@ using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Player
 {
     public class BackpackController : NetworkBehaviour
     {
         [Header("Configuração de Capacidade")]
-        public int capacity = 2;
+        public int capacity = 3;
+        public ulong backpackId = 0;
+
+        public override void OnNetworkSpawn()
+        {
+            if (backpackId == 0)
+            {
+                backpackId = OwnerClientId + 1; // ID default correspondente ao jogador
+            }
+
+            // Assegurar visualizador da mochila
+            if (GetComponent<BackpackVisualizer>() == null)
+            {
+                gameObject.AddComponent<BackpackVisualizer>();
+            }
+        }
+
+        private void Update()
+        {
+            if (!IsOwner) return;
+
+            // Tecla [B] para inspecionar / alternar status da mochila
+            if (UnityEngine.InputSystem.Keyboard.current != null &&
+                UnityEngine.InputSystem.Keyboard.current.bKey.wasPressedThisFrame)
+            {
+                if (!GameplayInputGate.IsLocked)
+                {
+                    ToggleBackpackQuickInspection();
+                }
+            }
+        }
 
         public IReadOnlyList<NetItemDto> GetBoxesInBackpack()
         {
@@ -17,7 +48,7 @@ namespace ScaryParty.Pizzeria.Player
             var netState = PizzeriaNetworkState.Instance;
             if (netState == null || !IsSpawned) return list;
 
-            ulong myId = NetworkManager.Singleton.LocalClientId;
+            ulong myId = OwnerClientId;
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var it = netState.Items[i];
@@ -29,53 +60,70 @@ namespace ScaryParty.Pizzeria.Player
             return list;
         }
 
-        public bool TryLoadFromHand(ulong boxItemId)
+        public bool TryStoreFromHand(HandSlotIndex hand)
         {
+            var netState = PizzeriaNetworkState.Instance;
+            var logistics = LogisticsCommands.Instance;
+            if (netState == null || logistics == null) return false;
+
             var boxes = GetBoxesInBackpack();
             if (boxes.Count >= capacity)
             {
-                Debug.LogWarning("[BackpackController] Mochila cheia!");
+                NotificationManager.Show($"Mochila cheia! ({boxes.Count}/{capacity})", NotificationType.Warning);
                 return false;
             }
 
-            int nextFreeSlot = 0;
-            var occupiedSlots = new HashSet<int>();
-            for (int i = 0; i < boxes.Count; i++) occupiedSlots.Add(boxes[i].SlotId);
-            while (occupiedSlots.Contains(nextFreeSlot)) nextFreeSlot++;
+            NetItemDto boxToStore = default;
+            bool found = false;
 
-            var cmd = PizzeriaCommandHandler.Instance;
-            if (cmd != null)
+            for (int i = 0; i < netState.Items.Count; i++)
             {
-                ulong myId = NetworkManager.Singleton.LocalClientId;
-                cmd.TransferItemServerRpc(boxItemId, (byte)LocationType.Backpack, myId, nextFreeSlot);
-                return true;
-            }
-            return false;
-        }
-
-        public bool TryUnloadToHand(int slotIndex, HandSlotIndex targetHand)
-        {
-            var boxes = GetBoxesInBackpack();
-            ulong targetItemId = 0;
-            for (int i = 0; i < boxes.Count; i++)
-            {
-                if (boxes[i].SlotId == slotIndex)
+                var it = netState.Items[i];
+                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == OwnerClientId && it.SlotId == (int)hand)
                 {
-                    targetItemId = boxes[i].ItemId;
-                    break;
+                    if (it.PackagingState == (byte)PackagingState.Boxed || it.Category == (byte)ItemCategory.Box)
+                    {
+                        boxToStore = it;
+                        found = true;
+                        break;
+                    }
                 }
             }
 
-            if (targetItemId == 0) return false;
-
-            var cmd = PizzeriaCommandHandler.Instance;
-            if (cmd != null)
+            if (!found)
             {
-                ulong myId = NetworkManager.Singleton.LocalClientId;
-                cmd.TransferItemServerRpc(targetItemId, (byte)LocationType.Hand, myId, (int)targetHand);
-                return true;
+                NotificationManager.Show("Você precisa segurar uma caixa de pizza para guardar na mochila.", NotificationType.Warning);
+                return false;
             }
-            return false;
+
+            logistics.StoreBackpackItemServerRpc(backpackId, boxToStore.ItemId, hand);
+            return true;
+        }
+
+        public bool TryRetrieveToHand(ulong boxItemId, HandSlotIndex hand)
+        {
+            var logistics = LogisticsCommands.Instance;
+            if (logistics == null) return false;
+
+            logistics.RetrieveBackpackItemServerRpc(backpackId, boxItemId, hand);
+            return true;
+        }
+
+        private void ToggleBackpackQuickInspection()
+        {
+            var boxes = GetBoxesInBackpack();
+            if (boxes.Count == 0)
+            {
+                NotificationManager.Show($"🎒 Mochila Vazia (0/{capacity} caixas)", NotificationType.Info);
+                return;
+            }
+
+            string info = $"🎒 Mochila ({boxes.Count}/{capacity} caixas):\n";
+            for (int i = 0; i < boxes.Count; i++)
+            {
+                info += $"• Caixa #{boxes[i].ItemId} -> {AddressFormat.Display(boxes[i].LabelDestinationId)}\n";
+            }
+            NotificationManager.Show(info.TrimEnd(), NotificationType.Success);
         }
     }
 }

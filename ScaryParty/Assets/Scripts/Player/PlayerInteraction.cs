@@ -41,6 +41,9 @@ public class PlayerInteraction : NetworkBehaviour
         if (GetComponent<ScaryParty.Pizzeria.Player.BackpackController>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Player.BackpackController>();
 
+        if (GetComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>() == null)
+            gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>();
+
         if (GetComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>();
 
