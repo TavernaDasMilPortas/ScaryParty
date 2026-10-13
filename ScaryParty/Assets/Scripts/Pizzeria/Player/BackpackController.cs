@@ -31,13 +31,20 @@ namespace ScaryParty.Pizzeria.Player
         {
             if (!IsOwner) return;
 
-            // Tecla [B] para inspecionar / alternar status da mochila
+            // Tecla [B] para inspecionar / abrir painel interativo da mochila
             if (UnityEngine.InputSystem.Keyboard.current != null &&
                 UnityEngine.InputSystem.Keyboard.current.bKey.wasPressedThisFrame)
             {
                 if (!GameplayInputGate.IsLocked)
                 {
-                    ToggleBackpackQuickInspection();
+                    if (BackpackPanelPresenter.Instance != null)
+                    {
+                        BackpackPanelPresenter.Instance.Toggle();
+                    }
+                    else
+                    {
+                        ToggleBackpackQuickInspection();
+                    }
                 }
             }
         }

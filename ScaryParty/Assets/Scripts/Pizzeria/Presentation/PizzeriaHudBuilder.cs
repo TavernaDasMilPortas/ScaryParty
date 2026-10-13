@@ -78,12 +78,22 @@ namespace ScaryParty.Pizzeria.Presentation
             CreateStoragePanel();
             CreateStagingPanel();
             CreateDevPanel();
+            CreateHudHintsBar();
+            CreateActiveOrdersWidget();
+
+            if (GetComponent<RecipeBookPresenter>() == null) gameObject.AddComponent<RecipeBookPresenter>();
+            if (GetComponent<BackpackPanelPresenter>() == null) gameObject.AddComponent<BackpackPanelPresenter>();
+            if (GetComponent<DeliveryResultPresenter>() == null) gameObject.AddComponent<DeliveryResultPresenter>();
+            if (GetComponent<DeliverySelectionPresenter>() == null) gameObject.AddComponent<DeliverySelectionPresenter>();
         }
 
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
         }
+
+        private float _ordersRefreshTimer = 0f;
+        private Label _activeOrdersLabel;
 
         private void Update()
         {
@@ -99,6 +109,104 @@ namespace ScaryParty.Pizzeria.Presentation
                     _devPanel.style.display = _devPanel.style.display == DisplayStyle.None ? DisplayStyle.Flex : DisplayStyle.None;
                     UpdateUIMode();
                 }
+            }
+
+            _ordersRefreshTimer += Time.deltaTime;
+            if (_ordersRefreshTimer >= 1.0f)
+            {
+                _ordersRefreshTimer = 0f;
+                RefreshActiveOrdersDisplay();
+            }
+        }
+
+        private void CreateHudHintsBar()
+        {
+            var hints = new VisualElement();
+            hints.style.position = Position.Absolute;
+            hints.style.left = 16;
+            hints.style.bottom = 16;
+            hints.style.flexDirection = FlexDirection.Row;
+            hints.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
+            hints.style.paddingLeft = 10;
+            hints.style.paddingRight = 10;
+            hints.style.paddingTop = 6;
+            hints.style.paddingBottom = 6;
+            hints.style.borderTopLeftRadius = 5;
+            hints.style.borderTopRightRadius = 5;
+            hints.style.borderBottomLeftRadius = 5;
+            hints.style.borderBottomRightRadius = 5;
+
+            var label = new Label("📖 [H] Receitas  •  🎒 [B] Mochila  •  🛠️ [F9] Dev");
+            label.style.fontSize = 12;
+            label.style.color = new Color(0.9f, 0.9f, 0.9f);
+            hints.Add(label);
+
+            _root.Add(hints);
+        }
+
+        private void CreateActiveOrdersWidget()
+        {
+            var container = new VisualElement();
+            container.style.position = Position.Absolute;
+            container.style.top = 16;
+            container.style.left = new Length(50, LengthUnit.Percent);
+            container.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
+            container.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f, 0.8f);
+            container.style.paddingLeft = 14;
+            container.style.paddingRight = 14;
+            container.style.paddingTop = 5;
+            container.style.paddingBottom = 5;
+            container.style.borderTopLeftRadius = 6;
+            container.style.borderTopRightRadius = 6;
+            container.style.borderBottomLeftRadius = 6;
+            container.style.borderBottomRightRadius = 6;
+            container.style.borderBottomWidth = 2;
+            container.style.borderBottomColor = new Color(0.95f, 0.65f, 0.2f);
+
+            _activeOrdersLabel = new Label("📋 COMANDAS ATIVAS: Nenhuma");
+            _activeOrdersLabel.style.fontSize = 12;
+            _activeOrdersLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _activeOrdersLabel.style.color = new Color(0.95f, 0.85f, 0.6f);
+            container.Add(_activeOrdersLabel);
+
+            _root.Add(container);
+        }
+
+        private void RefreshActiveOrdersDisplay()
+        {
+            if (_activeOrdersLabel == null) return;
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null || netState.Orders == null)
+            {
+                _activeOrdersLabel.text = "📋 COMANDAS ATIVAS: 0";
+                return;
+            }
+
+            var dests = new System.Collections.Generic.List<int>();
+            for (int i = 0; i < netState.Orders.Count; i++)
+            {
+                var o = netState.Orders[i];
+                if (o.Lifecycle == (byte)OrderLifecycle.Active)
+                {
+                    dests.Add(o.DestinationId);
+                }
+            }
+
+            if (dests.Count == 0)
+            {
+                _activeOrdersLabel.text = "📋 NENHUMA COMANDA ATIVA";
+                _activeOrdersLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
+            }
+            else
+            {
+                string s = $"📋 COMANDAS ATIVAS ({dests.Count}): ";
+                for (int i = 0; i < dests.Count; i++)
+                {
+                    if (i > 0) s += ", ";
+                    s += AddressFormat.Display(dests[i]);
+                }
+                _activeOrdersLabel.text = s;
+                _activeOrdersLabel.style.color = new Color(1f, 0.85f, 0.35f);
             }
         }
 
