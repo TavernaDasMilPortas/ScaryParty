@@ -66,8 +66,9 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void TransferItemServerRpc(ulong itemIdVal, LocationRef destination, ServerRpcParams rpcParams = default)
+        public void TransferItemServerRpc(ulong itemIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, float x = 0f, float y = 0f, float z = 0f, ServerRpcParams rpcParams = default)
         {
+            var destination = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId, x, y, z);
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
@@ -102,9 +103,15 @@ namespace ScaryParty.Pizzeria.Network
             CommitAndReplicate();
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        public void TransferToolServerRpc(ulong toolIdVal, LocationRef destination, ServerRpcParams rpcParams = default)
+        public void TransferItem(ulong itemIdVal, LocationRef destination)
         {
+            TransferItemServerRpc(itemIdVal, (byte)destination.Type, destination.HolderId, destination.SlotId, destination.WorldX, destination.WorldY, destination.WorldZ);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void TransferToolServerRpc(ulong toolIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, float x = 0f, float y = 0f, float z = 0f, ServerRpcParams rpcParams = default)
+        {
+            var destination = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId, x, y, z);
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
@@ -118,6 +125,11 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             CommitAndReplicate();
+        }
+
+        public void TransferTool(ulong toolIdVal, LocationRef destination)
+        {
+            TransferToolServerRpc(toolIdVal, (byte)destination.Type, destination.HolderId, destination.SlotId, destination.WorldX, destination.WorldY, destination.WorldZ);
         }
 
         [ServerRpc(RequireOwnership = false)]

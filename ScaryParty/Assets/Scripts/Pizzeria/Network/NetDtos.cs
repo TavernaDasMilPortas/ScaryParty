@@ -1,5 +1,6 @@
 using System;
 using Unity.Netcode;
+using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Network
 {
@@ -362,5 +363,29 @@ namespace ScaryParty.Pizzeria.Network
 
         public override bool Equals(object obj) => obj is NetUpgradeDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(UpgradeId, Level);
+    }
+
+    public static class LocationRefSerializationExtensions
+    {
+        public static void WriteValueSafe(this FastBufferWriter writer, in LocationRef location)
+        {
+            writer.WriteValueSafe((byte)location.Type);
+            writer.WriteValueSafe(location.HolderId);
+            writer.WriteValueSafe(location.SlotId);
+            writer.WriteValueSafe(location.WorldX);
+            writer.WriteValueSafe(location.WorldY);
+            writer.WriteValueSafe(location.WorldZ);
+        }
+
+        public static void ReadValueSafe(this FastBufferReader reader, out LocationRef location)
+        {
+            reader.ReadValueSafe(out byte type);
+            reader.ReadValueSafe(out ulong holderId);
+            reader.ReadValueSafe(out int slotId);
+            reader.ReadValueSafe(out float x);
+            reader.ReadValueSafe(out float y);
+            reader.ReadValueSafe(out float z);
+            location = new LocationRef((LocationType)type, holderId, slotId, x, y, z);
+        }
     }
 }
