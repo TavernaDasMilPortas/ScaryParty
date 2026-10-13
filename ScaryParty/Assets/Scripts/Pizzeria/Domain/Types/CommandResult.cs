@@ -22,7 +22,8 @@ namespace ScaryParty.Pizzeria.Domain.Types
         LimitReached = 17,
         NoActiveOrder = 18,
         InvalidOperation = 19,
-        ItemNotFound = 20
+        ItemNotFound = 20,
+        TechnicalInvalid = 21
     }
 
     public readonly struct CommandResult

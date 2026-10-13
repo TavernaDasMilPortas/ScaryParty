@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Authoring
@@ -9,13 +9,20 @@ namespace ScaryParty.Pizzeria.Authoring
         [Tooltip("ID numérico único e estável")]
         public int id;
         public string processName;
-        public int inputIngredientId;
+        public IngredientDef inputIngredient;
         public ProcessingStage inputStage;
-        public int outputIngredientId;
+        public IngredientDef outputIngredient;
         public ProcessingStage outputStage;
         [Tooltip("Ferramenta exigida para o processo (None se manual)")]
         public ToolCapability requiredToolCapability = ToolCapability.None;
         [Tooltip("Duração base em segundos")]
         public float baseDuration = 3.0f;
+
+        // Fallbacks para migração
+        public int inputIngredientId;
+        public int outputIngredientId;
+
+        public int EffectiveInputIngredientId => inputIngredient != null ? inputIngredient.id : inputIngredientId;
+        public int EffectiveOutputIngredientId => outputIngredient != null ? outputIngredient.id : outputIngredientId;
     }
 }

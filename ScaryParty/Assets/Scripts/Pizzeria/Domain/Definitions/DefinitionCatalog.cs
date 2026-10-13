@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -106,8 +106,18 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
             DurationOverrides = overrides != null ? new Dictionary<int, float>(overrides) : new Dictionary<int, float>();
         }
 
+        public bool AcceptsProcess(int processId)
+        {
+            for (int i = 0; i < AcceptedProcessIds.Count; i++)
+            {
+                if (AcceptedProcessIds[i] == processId) return true;
+            }
+            return false;
+        }
+
         public float GetProcessDuration(ProcessData process)
         {
+            if (process == null) return 3.0f;
             if (DurationOverrides.TryGetValue(process.Id, out float customDuration))
                 return customDuration;
             return process.BaseDuration;
@@ -171,5 +181,37 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
         public void RegisterStation(StationData data) => Stations[data.Id] = data;
         public void RegisterSupplyItem(SupplyItemData data) => SupplyItems[data.Id] = data;
         public void RegisterUpgrade(UpgradeData data) => Upgrades[data.Id] = data;
+
+        public int ComputeHash()
+        {
+            int hash = 17;
+            foreach (var ing in Ingredients.Values)
+            {
+                hash = hash * 31 + ing.Id;
+                hash = hash * 31 + (ing.Name != null ? ing.Name.GetHashCode() : 0);
+            }
+            foreach (var rec in Recipes.Values)
+            {
+                hash = hash * 31 + rec.Id;
+                hash = hash * 31 + (int)(rec.BaseBakeDuration * 100);
+                hash = hash * 31 + rec.BasePrice;
+            }
+            foreach (var pr in Processes.Values)
+            {
+                hash = hash * 31 + pr.Id;
+                hash = hash * 31 + (int)(pr.BaseDuration * 100);
+            }
+            foreach (var st in Stations.Values)
+            {
+                hash = hash * 31 + st.Id;
+                hash = hash * 31 + st.SlotCount;
+                foreach (var ov in st.DurationOverrides)
+                {
+                    hash = hash * 31 + ov.Key;
+                    hash = hash * 31 + (int)(ov.Value * 100);
+                }
+            }
+            return hash;
+        }
     }
 }

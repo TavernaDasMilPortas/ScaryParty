@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -37,8 +37,13 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public float Quality { get; set; } = 1.0f;
         public float CookProgress { get; set; } = 0f;
         public float BurnProgress { get; set; } = 0f;
-        public int LabelDestinationId { get; set; } = 0;
+        public float CapturedCookDuration { get; set; } = 0f;
+        public int LabelAddressId { get; set; } = -1; // AddressId.None
+        public ulong ReservedByHold { get; set; } = 0;
         public uint Revision { get; set; } = 1;
+
+        public bool IsPizzaLike => Category == ItemCategory.Pizza || Category == ItemCategory.Dough;
+        public bool IsBoxed => PackagingState == PackagingState.Boxed;
 
         private readonly List<IngredientEntry> _ingredients = new List<IngredientEntry>(8);
         public IReadOnlyList<IngredientEntry> Ingredients => _ingredients;
@@ -56,10 +61,12 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
         public bool CanAddIngredient(int ingredientDefId)
         {
-            if (Category != ItemCategory.Pizza && Category != ItemCategory.Dough)
+            if (!IsPizzaLike)
                 return false;
             if (CookingStage != CookingStage.Uncooked)
                 return false; // Frozen after cooking starts
+            if (CookProgress > 0f)
+                return false; // Cannot add ingredient to partially cooked pizza
 
             // If already present, we can increment quantity
             for (int i = 0; i < _ingredients.Count; i++)

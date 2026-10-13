@@ -1,6 +1,6 @@
 using System;
 
-namespace ScaryParty.Pizzeria.Domain.Types
+namespace ScaryParty.Pizzeria.Domain
 {
     public readonly struct ItemId : IEquatable<ItemId>, IComparable<ItemId>
     {
@@ -86,6 +86,135 @@ namespace ScaryParty.Pizzeria.Domain.Types
         public override string ToString() => $"Op({Value})";
         public static bool operator ==(OperationId a, OperationId b) => a.Value == b.Value;
         public static bool operator !=(OperationId a, OperationId b) => a.Value != b.Value;
+    }
+
+    public readonly struct AddressId : IEquatable<AddressId>, IComparable<AddressId>
+    {
+        public readonly int Value;
+        public static AddressId None => new AddressId(-1);
+        public bool IsValid => Value >= 0;
+
+        public AddressId(int value) => Value = value;
+        public bool Equals(AddressId other) => Value == other.Value;
+        public override bool Equals(object obj) => obj is AddressId other && Equals(other);
+        public override int GetHashCode() => Value.GetHashCode();
+        public int CompareTo(AddressId other) => Value.CompareTo(other.Value);
+        public override string ToString() => $"Address({Value})";
+        public static bool operator ==(AddressId a, AddressId b) => a.Value == b.Value;
+        public static bool operator !=(AddressId a, AddressId b) => a.Value != b.Value;
+        public static explicit operator int(AddressId id) => id.Value;
+        public static explicit operator AddressId(int val) => new AddressId(val);
+    }
+
+    public static class AddressFormat
+    {
+        public static string Format(AddressId id)
+        {
+            if (!id.IsValid) return "Sem destino";
+            return $"Endereço {id.Value + 1}";
+        }
+        
+        public static string Display(int idValue)
+        {
+            if (idValue < 0) return "Sem destino";
+            return $"Endereço {idValue + 1}";
+        }
+    }
+
+    public readonly struct CallId : IEquatable<CallId>, IComparable<CallId>
+    {
+        public readonly ulong Value;
+        public static CallId None => new CallId(0);
+        public bool IsValid => Value != 0;
+
+        public CallId(ulong value) => Value = value;
+        public bool Equals(CallId other) => Value == other.Value;
+        public override bool Equals(object obj) => obj is CallId other && Equals(other);
+        public override int GetHashCode() => Value.GetHashCode();
+        public int CompareTo(CallId other) => Value.CompareTo(other.Value);
+        public override string ToString() => $"Call({Value})";
+        public static bool operator ==(CallId a, CallId b) => a.Value == b.Value;
+        public static bool operator !=(CallId a, CallId b) => a.Value != b.Value;
+    }
+
+    public readonly struct StackId : IEquatable<StackId>, IComparable<StackId>
+    {
+        public readonly ulong Value;
+        public static StackId None => new StackId(0);
+        public bool IsValid => Value != 0;
+
+        public StackId(ulong value) => Value = value;
+        public bool Equals(StackId other) => Value == other.Value;
+        public override bool Equals(object obj) => obj is StackId other && Equals(other);
+        public override int GetHashCode() => Value.GetHashCode();
+        public int CompareTo(StackId other) => Value.CompareTo(other.Value);
+        public override string ToString() => $"Stack({Value})";
+        public static bool operator ==(StackId a, StackId b) => a.Value == b.Value;
+        public static bool operator !=(StackId a, StackId b) => a.Value != b.Value;
+    }
+
+    public readonly struct BackpackId : IEquatable<BackpackId>, IComparable<BackpackId>
+    {
+        public readonly ulong Value;
+        public static BackpackId None => new BackpackId(0);
+        public bool IsValid => Value != 0;
+
+        public BackpackId(ulong value) => Value = value;
+        public bool Equals(BackpackId other) => Value == other.Value;
+        public override bool Equals(object obj) => obj is BackpackId other && Equals(other);
+        public override int GetHashCode() => Value.GetHashCode();
+        public int CompareTo(BackpackId other) => Value.CompareTo(other.Value);
+        public override string ToString() => $"Backpack({Value})";
+        public static bool operator ==(BackpackId a, BackpackId b) => a.Value == b.Value;
+        public static bool operator !=(BackpackId a, BackpackId b) => a.Value != b.Value;
+    }
+
+    public readonly struct DomainVector3 : IEquatable<DomainVector3>
+    {
+        public readonly float X;
+        public readonly float Y;
+        public readonly float Z;
+
+        public static DomainVector3 Zero => new DomainVector3(0f, 0f, 0f);
+
+        public DomainVector3(float x, float y, float z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+
+        public bool Equals(DomainVector3 other) => X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z);
+        public override bool Equals(object obj) => obj is DomainVector3 other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z);
+        public static bool operator ==(DomainVector3 a, DomainVector3 b) => a.Equals(b);
+        public static bool operator !=(DomainVector3 a, DomainVector3 b) => !a.Equals(b);
+        public override string ToString() => $"({X}, {Y}, {Z})";
+    }
+
+    public readonly struct DomainQuaternion : IEquatable<DomainQuaternion>
+    {
+        public readonly float X;
+        public readonly float Y;
+        public readonly float Z;
+        public readonly float W;
+
+        public static DomainQuaternion Identity => new DomainQuaternion(0f, 0f, 0f, 1f);
+
+        public DomainQuaternion(float x, float y, float z, float w)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            W = w;
+        }
+
+        public bool Equals(DomainQuaternion other) => X.Equals(other.X) && Y.Equals(other.Y) && Z.Equals(other.Z) && W.Equals(other.W);
+        public override bool Equals(object obj) => obj is DomainQuaternion other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(X, Y, Z, W);
+        public static bool operator ==(DomainQuaternion a, DomainQuaternion b) => a.Equals(b);
+        public static bool operator !=(DomainQuaternion a, DomainQuaternion b) => !a.Equals(b);
+        public override string ToString() => $"({X}, {Y}, {Z}, {W})";
     }
 
     public readonly struct SupplyOrderId : IEquatable<SupplyOrderId>, IComparable<SupplyOrderId>
@@ -175,7 +304,8 @@ namespace ScaryParty.Pizzeria.Domain.Types
         Backpack = 4,
         World = 5,
         StagingSlot = 6,
-        ReceivingSlot = 7
+        ReceivingSlot = 7,
+        Stack = 8
     }
 
     public enum HandSlotIndex : byte
@@ -244,5 +374,31 @@ namespace ScaryParty.Pizzeria.Domain.Types
         Multiply = 3,
         BoolSet = 4,
         Override = 5
+    }
+
+    public enum OperationKind : byte
+    {
+        Process = 1,
+        Package = 2
+    }
+
+    public enum OperationPhase : byte
+    {
+        Running = 1,
+        Paused = 2,
+        Completed = 3,
+        Cancelled = 4
+    }
+
+    public enum ResumePolicy : byte
+    {
+        Resumable = 1,
+        ResetOnCancel = 2
+    }
+
+    public enum PlayerHoldKind : byte
+    {
+        Discard = 1,
+        ArchiveTicket = 2
     }
 }

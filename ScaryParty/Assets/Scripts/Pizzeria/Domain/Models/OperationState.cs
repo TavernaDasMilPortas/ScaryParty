@@ -1,4 +1,4 @@
-using ScaryParty.Pizzeria.Domain.Types;
+﻿using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Models
 {
@@ -9,56 +9,61 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
         public OperationId Id { get; }
         public StationSlotId SlotId { get; }
+        public OperationKind Kind { get; }
+        public OperationPhase Phase { get; set; }
+        public TimedProgress Progress;
         public ItemId InputItemId { get; set; }
         public ToolItemId ToolItemId { get; set; }
         public int ProcessId { get; }
         public ulong WorkerId { get; set; } = NoWorker;
-        public float AccumulatedProgress { get; set; }
-        public double OperationStartTime { get; set; }
-        public float CapturedDuration { get; set; }
-        public double LeaseExpirationTime { get; set; }
+        public ResumePolicy ResumePolicy { get; }
         public uint Revision { get; set; } = 1;
 
-        public bool IsActive(double now) => WorkerId != NoWorker && LeaseExpirationTime > now;
-
-        public OperationState(OperationId id, StationSlotId slotId, ItemId inputItemId, ToolItemId toolItemId, int processId, ulong workerId, float duration, double startTime, double leaseDuration)
+        public OperationState(OperationId id, StationSlotId slotId, OperationKind kind, ResumePolicy resumePolicy, ItemId inputItemId, ToolItemId toolItemId, int processId, ulong workerId, float duration, float now, float leaseDuration)
         {
             Id = id;
             SlotId = slotId;
+            Kind = kind;
+            ResumePolicy = resumePolicy;
             InputItemId = inputItemId;
             ToolItemId = toolItemId;
             ProcessId = processId;
             WorkerId = workerId;
-            CapturedDuration = duration;
-            OperationStartTime = startTime;
-            LeaseExpirationTime = startTime + leaseDuration;
-            AccumulatedProgress = 0f;
+            Phase = OperationPhase.Running;
+            Progress = new TimedProgress(duration, now, leaseDuration);
         }
 
-        public float ComputeCurrentProgress(double now)
+        public void Pause(float now)
         {
-            if (CapturedDuration <= 0.001f) return 1f;
-            if (WorkerId == NoWorker) return AccumulatedProgress;
-
-            double elapsed = now - OperationStartTime;
-            if (elapsed < 0) elapsed = 0;
-            float current = AccumulatedProgress + (float)(elapsed / CapturedDuration);
-            return current > 1f ? 1f : current;
-        }
-
-        public void Pause(double now)
-        {
-            AccumulatedProgress = ComputeCurrentProgress(now);
+            if (Phase != OperationPhase.Running) return;
+            Progress.Materialize(now);
+            Phase = OperationPhase.Paused;
             WorkerId = NoWorker;
-            LeaseExpirationTime = 0;
             Revision++;
         }
 
-        public void Resume(ulong workerId, double now, double leaseDuration)
+        public void Resume(ulong workerId, float now, float leaseDuration)
         {
+            if (Phase != OperationPhase.Paused) return;
             WorkerId = workerId;
-            OperationStartTime = now;
-            LeaseExpirationTime = now + leaseDuration;
+            Phase = OperationPhase.Running;
+            Progress.LastTick = now;
+            Progress.LeaseExpiry = now + leaseDuration;
+            Revision++;
+        }
+
+        public void Cancel()
+        {
+            Phase = OperationPhase.Cancelled;
+            WorkerId = NoWorker;
+            Revision++;
+        }
+
+        public void Complete(float now)
+        {
+            Progress.Materialize(now);
+            Phase = OperationPhase.Completed;
+            WorkerId = NoWorker;
             Revision++;
         }
     }

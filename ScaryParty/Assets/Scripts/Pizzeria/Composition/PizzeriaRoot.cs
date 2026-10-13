@@ -37,6 +37,9 @@ namespace ScaryParty.Pizzeria.Composition
         public DeliveryEvaluator DeliveryEvaluator { get; private set; }
         public OrderService OrderService { get; private set; }
         public UpgradeService UpgradeService { get; private set; }
+        public OvenService OvenService { get; private set; }
+        public CallService CallService { get; private set; }
+        public PlayerHoldService PlayerHoldService { get; private set; }
 
         public event Action OnPizzeriaInitialized;
 
@@ -113,25 +116,40 @@ namespace ScaryParty.Pizzeria.Composition
             DeliveryEvaluator = new DeliveryEvaluator();
             OrderService = new OrderService();
             UpgradeService = new UpgradeService();
+            OvenService = new OvenService();
+            CallService = new CallService();
+            PlayerHoldService = new PlayerHoldService();
 
             // Inicializar Estoque nos StorageSlots
-            // Geladeira (ID 1)
-            InitStorageSlot(1, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);     // Molho
-            InitStorageSlot(1, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);    // Queijo Inteiro
-            InitStorageSlot(1, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient); // Calabresa Inteira
-            InitStorageSlot(1, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);  // Cogumelo Inteiro
+            if (_config.initialStorageSlots != null && _config.initialStorageSlots.Count > 0)
+            {
+                foreach (var slotCfg in _config.initialStorageSlots)
+                {
+                    if (slotCfg == null) continue;
+                    InitStorageSlot(slotCfg.storageId, slotCfg.EffectiveIngredientId, slotCfg.initialStock, slotCfg.capacity);
+                }
+            }
+            else
+            {
+                // Geladeira (ID 1)
+                InitStorageSlot(1, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);     // Molho
+                InitStorageSlot(1, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);    // Queijo Inteiro
+                InitStorageSlot(1, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient); // Calabresa Inteira
+                InitStorageSlot(1, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);  // Cogumelo Inteiro
 
-            // Armário (ID 2)
-            InitStorageSlot(2, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
+                // Armário (ID 2)
+                InitStorageSlot(2, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
+            }
 
-            // Inicializar Utensílios Compartilhados no ToolRack (ID 3)
+            // Inicializar Utensílios Compartilhados no ToolRack (ID 3) com índice contínuo (A12)
+            int globalToolSlotIndex = 0;
             foreach (var kvp in Catalog.Tools)
             {
                 var toolData = kvp.Value;
                 for (int i = 0; i < toolData.InitialCount; i++)
                 {
                     var toolId = DomainState.GenerateToolId();
-                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(3 /* ToolRack */, i));
+                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(3 /* ToolRack */, globalToolSlotIndex++));
                     DomainState.Tools[toolId] = toolState;
                 }
             }
@@ -201,6 +219,11 @@ namespace ScaryParty.Pizzeria.Composition
                 {
                     ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 }
+
+                // Tick de Pedidos (A15), Chamadas e Holds do Jogador
+                OrderService?.TickOrders(DomainState, Clock);
+                CallService?.TickCalls(DomainState, (float)Clock.Now);
+                PlayerHoldService?.TickHolds(DomainState, (float)Clock.Now, OrderService);
             }
         }
 
