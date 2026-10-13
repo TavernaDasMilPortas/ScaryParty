@@ -5,6 +5,7 @@ using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Network
 {
@@ -193,11 +194,73 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             var eval = res.Value;
+
+            // Credita dinheiro pessoal no PlayerState do jogador
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(sender, out var client))
+            {
+                if (client.PlayerObject != null)
+                {
+                    var playerState = client.PlayerObject.GetComponent<PlayerState>();
+                    if (playerState != null)
+                    {
+                        playerState.Money.Value += eval.PersonalEarned;
+                    }
+                }
+            }
+
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
 
             string feedbackMsg = $"Entrega realizada no {AddressFormat.Display(addressIdVal)}! Ganho pessoal: R${eval.PersonalEarned}. Bônus da pizzaria: R${eval.RestaurantEarned}.";
             PizzeriaSession.Notifier?.NotifyClient(sender, feedbackMsg);
             PizzeriaSession.Notifier?.BroadcastFeedback($"Entrega concluída no {AddressFormat.Display(addressIdVal)}.");
+
+            // Exibe painel detalhado de resultado para o cliente solicitante
+            var clientParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { sender } } };
+            DeliveryResultClientRpc(
+                addressIdVal,
+                eval.DeliveredCount,
+                eval.CorrectBakedCount,
+                eval.BurnedCount,
+                eval.WrongOrIncompleteCount,
+                eval.PersonalEarned,
+                eval.RestaurantEarned,
+                eval.OrderId != Domain.Types.OrderId.None,
+                clientParams);
+
+            // Dispara feedback visual e sonoro no endereço
+            DeliveryFeedbackClientRpc(addressIdVal);
+        }
+
+        [ClientRpc]
+        private void DeliveryResultClientRpc(
+            int addressIdVal,
+            int deliveredCount,
+            int correctCount,
+            int burnedCount,
+            int wrongCount,
+            int personalEarned,
+            int restaurantEarned,
+            bool orderCompleted,
+            ClientRpcParams rpcParams = default)
+        {
+            if (DeliveryResultPresenter.Instance != null)
+            {
+                DeliveryResultPresenter.Instance.Show(
+                    addressIdVal,
+                    deliveredCount,
+                    correctCount,
+                    burnedCount,
+                    wrongCount,
+                    personalEarned,
+                    restaurantEarned,
+                    orderCompleted);
+            }
+        }
+
+        [ClientRpc]
+        private void DeliveryFeedbackClientRpc(int addressIdVal)
+        {
+            DeliveryPointView.PlayDeliveryFeedbackForAddress(addressIdVal);
         }
 
         public override void OnDestroy()

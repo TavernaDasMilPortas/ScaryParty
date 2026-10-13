@@ -3,42 +3,65 @@ using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Integration
 {
+    /// <summary>
+    /// Adaptador de entrega entre pontos do mundo e o subsistema de logística autoritativo.
+    /// </summary>
     public static class DeliveryPointAdapter
     {
-        public static bool TrySubmitDelivery(int pointIndex)
+        public static bool TrySubmitDelivery(int addressId)
         {
             var netState = PizzeriaNetworkState.Instance;
-            var cmd = PizzeriaCommandHandler.Instance;
-            if (netState == null || cmd == null || NetworkManager.Singleton == null) return false;
+            var logistics = LogisticsCommands.Instance;
+            if (netState == null || logistics == null || NetworkManager.Singleton == null) return false;
 
             ulong myId = NetworkManager.Singleton.LocalClientId;
             var carriedBoxes = new List<ulong>();
 
-            // Collect all boxes carried by the local player (hands or backpack)
+            // Coleta todas as caixas transportadas pelo jogador local (mãos ou mochila)
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var item = netState.Items[i];
                 bool isCarriedByMe = item.HolderId == myId &&
                     (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
 
-                if (isCarriedByMe && item.PackagingState == (byte)PackagingState.Boxed)
+                if (isCarriedByMe && (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box))
                 {
-                    // By default submit boxes labeled for this point, or any carried box if none specifically labeled
-                    carriedBoxes.Add(item.ItemId);
+                    // Prioriza caixas com etiqueta do destino ou aceita todas se não houver etiqueta
+                    if (item.LabelDestinationId == addressId || item.LabelDestinationId <= 0)
+                    {
+                        carriedBoxes.Add(item.ItemId);
+                    }
+                }
+            }
+
+            // Se não achou nenhuma com etiqueta específica, inclui todas as caixas carregadas
+            if (carriedBoxes.Count == 0)
+            {
+                for (int i = 0; i < netState.Items.Count; i++)
+                {
+                    var item = netState.Items[i];
+                    bool isCarriedByMe = item.HolderId == myId &&
+                        (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
+
+                    if (isCarriedByMe && (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box))
+                    {
+                        carriedBoxes.Add(item.ItemId);
+                    }
                 }
             }
 
             if (carriedBoxes.Count == 0)
             {
-                Debug.LogWarning("[DeliveryPointAdapter] Nenhuma caixa na mão ou mochila para entregar.");
+                NotificationManager.Show("Você não possui nenhuma pizza para entregar aqui!", NotificationType.Warning);
                 return false;
             }
 
-            // Submit batch delivery to server
-            cmd.SubmitDeliveryServerRpc(pointIndex, carriedBoxes.ToArray());
+            ulong attemptId = ((ulong)System.DateTime.UtcNow.Ticks) ^ ((ulong)UnityEngine.Random.Range(1, 1000000));
+            logistics.SubmitDeliveryServerRpc(addressId, carriedBoxes.ToArray(), attemptId);
             return true;
         }
     }

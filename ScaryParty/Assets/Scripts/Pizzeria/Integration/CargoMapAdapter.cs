@@ -1,11 +1,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
 
 namespace ScaryParty.Pizzeria.Integration
 {
+    /// <summary>
+    /// Integra caixas carregadas nas mãos e mochila com o minimapa.
+    /// Gera rotas dinâmicas a partir do AddressRegistry para os destinos rotulados.
+    /// </summary>
     public class CargoMapAdapter : MonoBehaviour
     {
         private readonly HashSet<int> _displayedDestinations = new HashSet<int>();
@@ -29,12 +34,38 @@ namespace ScaryParty.Pizzeria.Integration
             ulong myId = NetworkManager.Singleton.LocalClientId;
             var currentDestinations = new HashSet<int>();
 
-            // Find all destinations labeled on boxes currently held by local player (hands or backpack)
+            // Encontra todos os destinos rotulados nas caixas transportadas pelo jogador
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var item = netState.Items[i];
-                bool isCarriedByMe = item.HolderId == myId &&
-                    (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
+                bool isCarriedByMe = false;
+
+                if (item.HolderId == myId && item.LocationType == (byte)LocationType.Hand)
+                {
+                    isCarriedByMe = true;
+                }
+                else if (item.LocationType == (byte)LocationType.Backpack)
+                {
+                    // Valida se a mochila correspondente está equipada pelo jogador local
+                    bool bpEquipped = false;
+                    if (netState.Backpacks != null)
+                    {
+                        for (int b = 0; b < netState.Backpacks.Count; b++)
+                        {
+                            var bp = netState.Backpacks[b];
+                            if (bp.BackpackId == item.HolderId && bp.EquippedBy == myId)
+                            {
+                                bpEquipped = true;
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        bpEquipped = item.HolderId == myId;
+                    }
+                    isCarriedByMe = bpEquipped;
+                }
 
                 if (isCarriedByMe && item.LabelDestinationId > 0)
                 {
@@ -42,7 +73,7 @@ namespace ScaryParty.Pizzeria.Integration
                 }
             }
 
-            // Remove destinations no longer carried
+            // Remove rotas de destinos não mais transportados
             var toRemove = new List<int>();
             foreach (int destId in _displayedDestinations)
             {
@@ -54,7 +85,7 @@ namespace ScaryParty.Pizzeria.Integration
             }
             for (int i = 0; i < toRemove.Count; i++) _displayedDestinations.Remove(toRemove[i]);
 
-            // Add newly carried destinations
+            // Adiciona rotas para novos destinos transportados
             foreach (int destId in currentDestinations)
             {
                 if (!_displayedDestinations.Contains(destId))
@@ -71,11 +102,21 @@ namespace ScaryParty.Pizzeria.Integration
 
         private Vector3 FindDeliveryPointPosition(int destId)
         {
-            // Find in scene delivery points
+            // Consulta primeiramente o AddressRegistry autoritativo
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.AddressRegistry != null)
+            {
+                if (root.AddressRegistry.TryGetPosition(new AddressId(destId), out var dPos))
+                {
+                    return new Vector3(dPos.X, dPos.Y, dPos.Z);
+                }
+            }
+
+            // Fallback para varredura de DeliveryPoint na cena
             var points = Object.FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);
             for (int i = 0; i < points.Length; i++)
             {
-                if (points[i].pointIndex == destId)
+                if (points[i].AddressId == destId)
                     return points[i].transform.position;
             }
             return Vector3.zero;

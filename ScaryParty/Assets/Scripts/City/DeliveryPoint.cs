@@ -1,100 +1,109 @@
 using UnityEngine;
+using UnityEngine.Serialization;
+using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Presentation;
+using ScaryParty.Pizzeria.Integration;
+using ScaryParty.Pizzeria.Composition;
 
 /// <summary>
-/// Component for delivery point markers.
-/// Allows players to deliver pizzas by interacting with them.
+/// Componente de ponto de entrega no mundo.
+/// Representa o destino de entrega de residências na cidade.
 /// </summary>
 public class DeliveryPoint : MonoBehaviour, IInteractable
 {
-    [Header("Delivery Point Info")]
+    [Header("Informações do Ponto de Entrega")]
     public CityBuilding associatedBuilding;
-    public int pointIndex;
-    public bool isActive;
 
-    [Header("Animation Settings")]
+    [FormerlySerializedAs("pointIndex")]
+    [SerializeField] private int _addressId;
+    public int AddressId { get => _addressId; set => _addressId = value; }
+    public int pointIndex { get => _addressId; set => _addressId = value; }
+
+    [Tooltip("Status de destaque visual. A interação de entrega permanece sempre disponível.")]
+    public bool isActive = true;
+
+    [Header("Animação")]
     [SerializeField] private float _floatSpeed = 2f;
-    [SerializeField] private float _floatAmplitude = 0.5f;
+    [SerializeField] private float _floatAmplitude = 0.2f;
 
     private float _startY;
     private Renderer[] _renderers;
+    private DeliveryPointView _view;
 
-    public string InteractPrompt => $"Press [E] to Deliver to Point #{pointIndex}";
+    public string InteractPrompt => $"Pressione [E] para Entregar no {AddressFormat.Display(_addressId)}";
 
     private void Start()
     {
         _startY = transform.position.y;
         _renderers = GetComponentsInChildren<Renderer>();
 
-        _highlight = GetComponent<InteractableHighlight>();
-        if (_highlight == null)
+        // Assegurar visualizador do ponto de entrega
+        _view = GetComponent<DeliveryPointView>();
+        if (_view == null)
         {
-            _highlight = gameObject.AddComponent<InteractableHighlight>();
+            _view = gameObject.AddComponent<DeliveryPointView>();
+        }
+
+        // Registrar posição no AddressRegistry se o PizzeriaRoot já estiver ativo
+        if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.AddressRegistry != null)
+        {
+            PizzeriaRoot.Instance.AddressRegistry.Register(
+                new AddressId(_addressId),
+                new DomainVector3(transform.position.x, transform.position.y, transform.position.z));
         }
     }
 
     private void Update()
     {
-        // Bobbing animation when active
+        // Animação de flutuação suave do marcador
         if (isActive)
         {
             float newY = _startY + Mathf.Sin(Time.time * _floatSpeed) * _floatAmplitude;
             transform.position = new Vector3(transform.position.x, newY, transform.position.z);
         }
-
-        // Toggle visibility
-        if (_renderers != null)
-        {
-            foreach (var r in _renderers)
-            {
-                r.enabled = isActive;
-            }
-        }
     }
 
     public void OnInteract(GameObject player)
     {
-        if (!isActive) return;
-
-        // Novo Módulo Pizzaria: Entrega autoritativa em lote via DeliveryPointAdapter
-        if (ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance != null)
+        // Abrir modal de seleção de caixas se disponível
+        if (DeliverySelectionPresenter.Instance != null)
         {
-            bool submitted = ScaryParty.Pizzeria.Integration.DeliveryPointAdapter.TrySubmitDelivery(pointIndex);
-            if (!submitted && UIManager.Instance != null)
-            {
-                UIManager.Instance.ShowInteractionPrompt("Nenhuma pizza para entregar aqui!");
-            }
+            DeliverySelectionPresenter.Instance.Open(_addressId);
             return;
+        }
+
+        // Fallback para entrega em lote direta via adapter
+        bool submitted = DeliveryPointAdapter.TrySubmitDelivery(_addressId);
+        if (!submitted && UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowInteractionPrompt("Nenhuma pizza para entregar aqui!");
         }
     }
 
-    private InteractableHighlight _highlight;
-
-    public void OnFocus() 
-    { 
-        if (!isActive) return;
-
-        if (_highlight != null) _highlight.EnableHighlight();
-
+    public void OnFocus()
+    {
         if (UIManager.Instance != null)
+        {
             UIManager.Instance.ShowInteractionPrompt(InteractPrompt);
+        }
     }
 
-    public void OnLoseFocus() 
-    { 
-        if (_highlight != null) _highlight.DisableHighlight();
-
+    public void OnLoseFocus()
+    {
         if (UIManager.Instance != null)
+        {
             UIManager.Instance.HideInteractionPrompt();
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
-        Gizmos.color = isActive ? Color.green : Color.red;
-        Gizmos.DrawWireSphere(transform.position, 1f);
+        Gizmos.color = isActive ? Color.green : Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, 1.2f);
 
         if (associatedBuilding != null)
         {
-            Gizmos.color = Color.yellow;
+            Gizmos.color = Color.cyan;
             Gizmos.DrawLine(transform.position, associatedBuilding.transform.position);
         }
     }

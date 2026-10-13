@@ -40,6 +40,7 @@ namespace ScaryParty.Pizzeria.Composition
         public OvenService OvenService { get; private set; }
         public CallService CallService { get; private set; }
         public PlayerHoldService PlayerHoldService { get; private set; }
+        public AddressRegistry AddressRegistry { get; } = new AddressRegistry();
 
         public event Action OnPizzeriaInitialized;
 
@@ -65,6 +66,8 @@ namespace ScaryParty.Pizzeria.Composition
 
             Catalog = _config.BuildCatalog();
 
+            RebuildAddressRegistry();
+
             if (IsServer)
             {
                 InitializeServerDomain();
@@ -72,6 +75,30 @@ namespace ScaryParty.Pizzeria.Composition
             }
 
             OnPizzeriaInitialized?.Invoke();
+        }
+
+        public void RebuildAddressRegistry()
+        {
+            AddressRegistry.Clear();
+            var deliveryPoints = FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);
+            for (int i = 0; i < deliveryPoints.Length; i++)
+            {
+                var dp = deliveryPoints[i];
+                var pos = dp.transform.position;
+                AddressRegistry.Register(new AddressId(dp.AddressId), new DomainVector3(pos.x, pos.y, pos.z));
+            }
+
+            int hash = AddressRegistry.ComputeHash();
+            if (IsServer)
+            {
+                var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+                if (netState != null)
+                {
+                    netState.AddressRegistryHash.Value = hash;
+                }
+            }
+
+            Debug.Log($"[PizzeriaRoot] AddressRegistry populado com {deliveryPoints.Length} endereços. Hash: {hash}");
         }
 
         private void ReplicateInitialState()
