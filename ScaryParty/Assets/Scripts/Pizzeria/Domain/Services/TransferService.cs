@@ -1,4 +1,4 @@
-﻿using ScaryParty.Pizzeria.Domain.Definitions;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -72,14 +72,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             var key = (storageId, ingredientDefId);
             if (!state.StorageSlots.TryGetValue(key, out var slot) || slot.Quantity <= 0)
-                return CommandResult<ItemId>.Fail(CommandError.StockEmpty, ""Estoque esgotado."");
+                return CommandResult<ItemId>.Fail(CommandError.StockEmpty, "Estoque esgotado.");
 
             LocationRef targetHand = LocationRef.InHand(playerId, hand);
             if (IsLocationOccupied(state, targetHand))
-                return CommandResult<ItemId>.Fail(CommandError.SlotFull, ""Mão selecionada já está ocupada."");
+                return CommandResult<ItemId>.Fail(CommandError.SlotFull, "Mão selecionada já está ocupada.");
 
             if (!catalog.Ingredients.TryGetValue(ingredientDefId, out var ingData))
-                return CommandResult<ItemId>.Fail(CommandError.Incompatible, ""Ingrediente desconhecido."");
+                return CommandResult<ItemId>.Fail(CommandError.Incompatible, "Ingrediente desconhecido.");
 
             slot.Quantity--;
             slot.Revision++;
@@ -100,10 +100,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
             bool bypassReservation = false)
         {
             if (!state.Items.TryGetValue(itemId, out var itemState))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Item não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
             if (!bypassReservation && itemState.ReservedByHold != 0 && itemState.ReservedByHold != requesterId)
-                return CommandResult.Fail(CommandError.Blocked, ""Item reservado por outro processo."");
+                return CommandResult.Fail(CommandError.Blocked, "Item reservado por outro processo.");
 
             // Se o item está em um StationSlot com operação ativa
             if (itemState.Location.Type == LocationType.StationSlot)
@@ -112,7 +112,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (state.ActiveOperations.TryGetValue(currentSlotId, out var op))
                 {
                     if (op.Phase == OperationPhase.Running)
-                        return CommandResult.Fail(CommandError.Busy, ""Não é possível mover o item enquanto a operação está em andamento."");
+                        return CommandResult.Fail(CommandError.Busy, "Não é possível mover o item enquanto a operação está em andamento.");
 
                     if (op.Phase == OperationPhase.Paused)
                     {
@@ -123,7 +123,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
 
             if (!ValidateCapacity(state, newLocation))
-                return CommandResult.Fail(CommandError.SlotFull, ""Destino sem capacidade."");
+                return CommandResult.Fail(CommandError.SlotFull, "Destino sem capacidade.");
 
             // Remover do local anterior
             if (itemState.Location.Type == LocationType.Stack)
@@ -169,13 +169,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
             double now)
         {
             if (!state.Tools.TryGetValue(toolId, out var toolState))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Utensílio não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Utensílio não encontrado.");
 
             if (toolState.IsReserved(now) && toolState.ReservedByWorkerId != requesterId)
-                return CommandResult.Fail(CommandError.ToolBusy, ""Utensílio em uso."");
+                return CommandResult.Fail(CommandError.ToolBusy, "Utensílio em uso.");
 
             if (!ValidateCapacity(state, newLocation))
-                return CommandResult.Fail(CommandError.SlotFull, ""Destino sem capacidade."");
+                return CommandResult.Fail(CommandError.SlotFull, "Destino sem capacidade.");
 
             toolState.Location = newLocation;
             toolState.Revision++;
@@ -187,7 +187,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public static CommandResult DestroyItem(PizzeriaState state, ItemId itemId)
         {
             if (!state.Items.TryGetValue(itemId, out var item))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Item não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
             if (item.Location.Type == LocationType.Stack)
             {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -28,6 +29,10 @@ namespace ScaryParty.Pizzeria.Network
             ProjectStorageSlotsDelta(domainState);
             ProjectStationSlotsDelta(domainState);
             ProjectOrdersDelta(domainState);
+            ProjectOrderLinesDelta(domainState);
+            ProjectCallsDelta(domainState);
+            ProjectStacksDelta(domainState);
+            ProjectBackpacksDelta(domainState);
             ProjectSupplyOrdersDelta(domainState);
             ProjectUpgradesDelta(domainState);
 
@@ -198,6 +203,182 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        private void ProjectOrderLinesDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.OrderLines;
+            var domainKeys = new HashSet<ulong>();
+            foreach (var order in domainState.Orders.Values)
+            {
+                foreach (var line in order.Lines)
+                {
+                    domainKeys.Add(line.Id.Value);
+                }
+            }
+
+            for (int i = networkList.Count - 1; i >= 0; i--)
+            {
+                if (!domainKeys.Contains(networkList[i].OrderLineId)) networkList.RemoveAt(i);
+            }
+
+            foreach (var order in domainState.Orders.Values)
+            {
+                foreach (var line in order.Lines)
+                {
+                    var dto = new NetOrderLineDto
+                    {
+                        OrderLineId = line.Id.Value,
+                        OrderId = order.Id.Value,
+                        RecipeId = line.RecipeId,
+                        RequestedQuantity = line.RequestedQuantity,
+                        DeliveredQuantity = line.DeliveredQuantity,
+                        Revision = order.Revision
+                    };
+
+                    int existingIdx = -1;
+                    for (int i = 0; i < networkList.Count; i++)
+                    {
+                        if (networkList[i].OrderLineId == dto.OrderLineId) { existingIdx = i; break; }
+                    }
+
+                    if (existingIdx >= 0)
+                    {
+                        if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    }
+                    else
+                    {
+                        networkList.Add(dto);
+                    }
+                }
+            }
+        }
+
+        private void ProjectCallsDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.Calls;
+            var domainKeys = new HashSet<ulong>();
+            foreach (var kvp in domainState.Calls) domainKeys.Add(kvp.Key.Value);
+
+            for (int i = networkList.Count - 1; i >= 0; i--)
+            {
+                if (!domainKeys.Contains(networkList[i].CallId)) networkList.RemoveAt(i);
+            }
+
+            foreach (var kvp in domainState.Calls)
+            {
+                var call = kvp.Value;
+                var dto = new NetCallDto
+                {
+                    CallId = call.Id.Value,
+                    AddressId = call.AddressId.Value,
+                    ExpiresAt = call.ExpiresAt,
+                    Revision = domainState.Revision
+                };
+
+                int existingIdx = -1;
+                for (int i = 0; i < networkList.Count; i++)
+                {
+                    if (networkList[i].CallId == dto.CallId) { existingIdx = i; break; }
+                }
+
+                if (existingIdx >= 0)
+                {
+                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                }
+                else
+                {
+                    networkList.Add(dto);
+                }
+            }
+        }
+
+        private void ProjectStacksDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.Stacks;
+            var domainKeys = new HashSet<ulong>();
+            foreach (var kvp in domainState.Stacks) domainKeys.Add(kvp.Key.Value);
+
+            for (int i = networkList.Count - 1; i >= 0; i--)
+            {
+                if (!domainKeys.Contains(networkList[i].StackId)) networkList.RemoveAt(i);
+            }
+
+            foreach (var kvp in domainState.Stacks)
+            {
+                var stack = kvp.Value;
+                var dto = new NetStackDto
+                {
+                    StackId = stack.Id.Value,
+                    StationId = stack.StationId,
+                    Capacity = stack.Capacity,
+                    ItemCount = stack.Items.Count,
+                    TopItemId = stack.TopItem.Value,
+                    Revision = stack.Revision
+                };
+
+                int existingIdx = -1;
+                for (int i = 0; i < networkList.Count; i++)
+                {
+                    if (networkList[i].StackId == dto.StackId) { existingIdx = i; break; }
+                }
+
+                if (existingIdx >= 0)
+                {
+                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                }
+                else
+                {
+                    networkList.Add(dto);
+                }
+            }
+        }
+
+        private void ProjectBackpacksDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.Backpacks;
+            var domainKeys = new HashSet<ulong>();
+            foreach (var kvp in domainState.Backpacks) domainKeys.Add(kvp.Key.Value);
+
+            for (int i = networkList.Count - 1; i >= 0; i--)
+            {
+                if (!domainKeys.Contains(networkList[i].BackpackId)) networkList.RemoveAt(i);
+            }
+
+            foreach (var kvp in domainState.Backpacks)
+            {
+                var bp = kvp.Value;
+                var dto = new NetBackpackDto
+                {
+                    BackpackId = bp.Id.Value,
+                    EquippedBy = bp.EquippedBy,
+                    PosX = bp.WorldPos.X,
+                    PosY = bp.WorldPos.Y,
+                    PosZ = bp.WorldPos.Z,
+                    RotX = bp.WorldRot.X,
+                    RotY = bp.WorldRot.Y,
+                    RotZ = bp.WorldRot.Z,
+                    RotW = bp.WorldRot.W,
+                    Capacity = bp.Capacity,
+                    ItemCount = bp.Items.Count,
+                    Revision = bp.Revision
+                };
+
+                int existingIdx = -1;
+                for (int i = 0; i < networkList.Count; i++)
+                {
+                    if (networkList[i].BackpackId == dto.BackpackId) { existingIdx = i; break; }
+                }
+
+                if (existingIdx >= 0)
+                {
+                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                }
+                else
+                {
+                    networkList.Add(dto);
+                }
+            }
+        }
+
         private void ProjectSupplyOrdersDelta(PizzeriaState domainState)
         {
             var networkList = _netState.SupplyOrders;
@@ -232,9 +413,6 @@ namespace ScaryParty.Pizzeria.Network
         private void ProjectUpgradesDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Upgrades;
-            // Since domainState.UpgradeLevels is an IDictionary, we can safely just use kvp.Key
-            
-            // Collect current keys
             var domainKeysList = new List<object>();
             foreach (var kvp in domainState.UpgradeLevels)
             {
@@ -294,11 +472,14 @@ namespace ScaryParty.Pizzeria.Network
                 foreach (var entry in item.Ingredients)
                 {
                     count++;
-                    var cat = catalog.Ingredients[entry.IngredientDefId].Category;
-                    if (cat == ItemCategory.Sauce) mask |= 1;
-                    else if (cat == ItemCategory.Cheese) mask |= 2;
-                    else if (cat == ItemCategory.Topping) mask |= 4;
-                    else if (cat == ItemCategory.Dough) mask |= 8;
+                    if (catalog.Ingredients.TryGetValue(entry.IngredientDefId, out var ingData))
+                    {
+                        var cat = ingData.Category;
+                        if (cat == ItemCategory.Sauce) mask |= 1;
+                        else if (cat == ItemCategory.Cheese) mask |= 2;
+                        else if (cat == ItemCategory.Topping) mask |= 4;
+                        else if (cat == ItemCategory.Dough) mask |= 8;
+                    }
                 }
             }
 
@@ -312,11 +493,12 @@ namespace ScaryParty.Pizzeria.Network
                 PackagingState = (byte)item.PackagingState,
                 LocationType = (byte)item.Location.Type,
                 HolderId = item.Location.HolderId,
-                SlotId = item.Location.SlotId,
+                SlotId = item.Location.SlotIndex,
                 Quality = item.Quality,
                 CookProgress = item.CookProgress,
                 BurnProgress = item.BurnProgress,
-                LabelDestinationId = item.LabelDestinationId,
+                LabelAddressId = item.LabelAddressId,
+                ReservedByHold = item.ReservedByHold,
                 Revision = item.Revision,
                 IngredientMask = mask,
                 IngredientCount = count
@@ -332,7 +514,7 @@ namespace ScaryParty.Pizzeria.Network
                 Capabilities = (byte)tool.Capabilities,
                 LocationType = (byte)tool.Location.Type,
                 HolderId = tool.Location.HolderId,
-                SlotId = tool.Location.SlotId,
+                SlotId = tool.Location.SlotIndex,
                 WorkerId = tool.ReservedByWorkerId,
                 LeaseExpiration = tool.LeaseExpiration,
                 Revision = tool.Revision
@@ -360,10 +542,11 @@ namespace ScaryParty.Pizzeria.Network
                 HeldItemId = op.InputItemId.Value,
                 ToolItemId = op.ToolItemId.Value,
                 WorkerId = op.WorkerId,
-                Progress = op.AccumulatedProgress,
+                Phase = (byte)op.Phase,
+                Accumulated = op.Progress.Accumulated,
+                Duration = op.Progress.Duration,
+                ServerTime = op.Progress.LastTick,
                 ProcessId = op.ProcessId,
-                OperationStartTime = op.OperationStartTime,
-                CapturedDuration = op.CapturedDuration,
                 Revision = op.Revision
             };
         }
@@ -373,11 +556,12 @@ namespace ScaryParty.Pizzeria.Network
             var dto = new NetOrderDto
             {
                 OrderId = order.Id.Value,
-                DestinationId = order.DestinationId,
+                DestinationId = order.DestinationId.Value,
                 Lifecycle = (byte)order.Lifecycle,
                 DeadlineTime = order.DeadlineTime,
                 QuotedReward = order.QuotedPotentialReward,
                 FinalEarnedReward = order.FinalEarnedReward,
+                TicketArchived = order.TicketArchived,
                 LineCount = order.Lines.Count,
                 Revision = order.Revision
             };

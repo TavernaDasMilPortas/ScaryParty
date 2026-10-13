@@ -12,6 +12,10 @@ namespace ScaryParty.Pizzeria.Network
         public NetworkList<NetStorageDto> StorageSlots;
         public NetworkList<NetStationSlotDto> StationSlots;
         public NetworkList<NetOrderDto> Orders;
+        public NetworkList<NetOrderLineDto> OrderLines;
+        public NetworkList<NetCallDto> Calls;
+        public NetworkList<NetStackDto> Stacks;
+        public NetworkList<NetBackpackDto> Backpacks;
         public NetworkList<NetSupplyDto> SupplyOrders;
         public NetworkList<NetUpgradeDto> Upgrades;
 
@@ -19,6 +23,12 @@ namespace ScaryParty.Pizzeria.Network
             500, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         public NetworkVariable<uint> PublishedRevision = new NetworkVariable<uint>(
+            0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        public NetworkVariable<int> CatalogHash = new NetworkVariable<int>(
+            0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        public NetworkVariable<int> AddressRegistryHash = new NetworkVariable<int>(
             0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         private void Awake()
@@ -29,6 +39,10 @@ namespace ScaryParty.Pizzeria.Network
             StorageSlots = new NetworkList<NetStorageDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             StationSlots = new NetworkList<NetStationSlotDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Orders = new NetworkList<NetOrderDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            OrderLines = new NetworkList<NetOrderLineDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            Calls = new NetworkList<NetCallDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            Stacks = new NetworkList<NetStackDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            Backpacks = new NetworkList<NetBackpackDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             SupplyOrders = new NetworkList<NetSupplyDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Upgrades = new NetworkList<NetUpgradeDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         }

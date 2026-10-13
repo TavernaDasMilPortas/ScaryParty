@@ -18,9 +18,19 @@ namespace ScaryParty.Pizzeria.Editor
         private const string ConfigFolder = "Assets/ScriptableObjects/Pizzeria";
         private const string NetworkPrefabsAssetPath = "Assets/DefaultNetworkPrefabs.asset";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Build or Update", false, 10)]
+        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Reconstruir Pizzeria Prefab", false, 10)]
+        [MenuItem("Tools/Scary Party/Pizzeria/Build or Update", false, 20)]
         public static void BuildOrUpdate()
         {
+            if (!EditorUtility.DisplayDialog(
+                "Reconstruir Pizzeria Prefab",
+                "Deseja reconstruir/atualizar o prefab da Pizzaria e seus componentes de rede de forma idempotente?",
+                "Sim",
+                "Cancelar"))
+            {
+                return;
+            }
+
             EnsureDirectories();
             var materials = EnsureMaterials();
             var itemPrefabs = EnsureItemPrefabs(materials);
@@ -284,13 +294,20 @@ namespace ScaryParty.Pizzeria.Editor
             root.transform.position = Vector3.zero;
 
             // Network Components
-            root.AddComponent<NetworkObject>();
-            var rootComp = root.AddComponent<PizzeriaRoot>();
-            root.AddComponent<PizzeriaNetworkState>();
-            root.AddComponent<PizzeriaCommandHandler>();
-            root.AddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder>();
-            root.AddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer>();
-            root.AddComponent<Night1Bootstrapper>();
+            BuilderToolkit.GetOrAddComponent<NetworkObject>(root);
+            var rootComp = BuilderToolkit.GetOrAddComponent<PizzeriaRoot>(root);
+            BuilderToolkit.GetOrAddComponent<PizzeriaNetworkState>(root);
+            BuilderToolkit.GetOrAddComponent<PizzeriaCommandHandler>(root);
+            BuilderToolkit.GetOrAddComponent<KitchenCommands>(root);
+            BuilderToolkit.GetOrAddComponent<OrderCommands>(root);
+            BuilderToolkit.GetOrAddComponent<LogisticsCommands>(root);
+            BuilderToolkit.GetOrAddComponent<PizzeriaNotifier>(root);
+            BuilderToolkit.GetOrAddComponent<PizzeriaDebugCommands>(root);
+            BuilderToolkit.GetOrAddComponent<PlayerLifecycleBridge>(root);
+            BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder>(root);
+            BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer>(root);
+            BuilderToolkit.GetOrAddComponent<Night1Bootstrapper>(root);
+            BuilderToolkit.MarkGenerated(root, "PizzeriaBuilder", "Root");
 
             // Assign config field via SerializedObject
             var so = new SerializedObject(rootComp);
@@ -299,6 +316,7 @@ namespace ScaryParty.Pizzeria.Editor
             // Building Architecture (12x12m)
             var bld = new GameObject("Building");
             bld.transform.SetParent(root.transform);
+            BuilderToolkit.MarkGenerated(bld, "PizzeriaBuilder", "Building");
 
             // Floor (12x12m)
             var floor = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -321,6 +339,7 @@ namespace ScaryParty.Pizzeria.Editor
             // Stations Group
             var stationsRoot = new GameObject("Stations");
             stationsRoot.transform.SetParent(root.transform);
+            BuilderToolkit.MarkGenerated(stationsRoot, "PizzeriaBuilder", "Stations");
 
             // 1. Storage Fridge (Left side)
             var fridge = CreateStation<StorageStation>("Storage_Fridge", 1, stationsRoot.transform, new Vector3(-5f, 1f, 4f), new Vector3(1.5f, 2f, 1f), materials["Fridge"]);
@@ -372,6 +391,7 @@ namespace ScaryParty.Pizzeria.Editor
             // Anchors Group
             var anchors = new GameObject("Anchors");
             anchors.transform.SetParent(root.transform);
+            BuilderToolkit.MarkGenerated(anchors, "PizzeriaBuilder", "Anchors");
 
             var spawnList = new List<Transform>();
             for (int i = 0; i < 4; i++)

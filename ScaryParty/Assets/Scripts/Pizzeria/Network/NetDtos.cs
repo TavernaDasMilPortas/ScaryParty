@@ -17,10 +17,17 @@ namespace ScaryParty.Pizzeria.Network
         public float Quality;
         public float CookProgress;
         public float BurnProgress;
-        public int LabelDestinationId;
+        public int LabelAddressId;
+        public ulong ReservedByHold;
         public uint Revision;
         public byte IngredientMask;
         public byte IngredientCount;
+
+        public int LabelDestinationId
+        {
+            get => LabelAddressId;
+            set => LabelAddressId = value;
+        }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -36,7 +43,8 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref Quality);
             serializer.SerializeValue(ref CookProgress);
             serializer.SerializeValue(ref BurnProgress);
-            serializer.SerializeValue(ref LabelDestinationId);
+            serializer.SerializeValue(ref LabelAddressId);
+            serializer.SerializeValue(ref ReservedByHold);
             serializer.SerializeValue(ref Revision);
             serializer.SerializeValue(ref IngredientMask);
             serializer.SerializeValue(ref IngredientCount);
@@ -50,7 +58,8 @@ namespace ScaryParty.Pizzeria.Network
                SlotId == other.SlotId && 
                CookingStage == other.CookingStage &&
                PackagingState == other.PackagingState &&
-               LabelDestinationId == other.LabelDestinationId &&
+               LabelAddressId == other.LabelAddressId &&
+               ReservedByHold == other.ReservedByHold &&
                IngredientMask == other.IngredientMask && 
                IngredientCount == other.IngredientCount &&
                Math.Abs(CookProgress - other.CookProgress) < 0.005f &&
@@ -123,11 +132,14 @@ namespace ScaryParty.Pizzeria.Network
         public ulong HeldItemId;
         public ulong ToolItemId;
         public ulong WorkerId;
-        public float Progress;
+        public byte Phase;
+        public float Accumulated;
+        public float Duration;
+        public double ServerTime;
         public int ProcessId;
-        public double OperationStartTime;
-        public float CapturedDuration;
         public uint Revision;
+
+        public float Progress => Duration > 0 ? Math.Clamp(Accumulated / Duration, 0f, 1f) : 0f;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -136,15 +148,16 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref HeldItemId);
             serializer.SerializeValue(ref ToolItemId);
             serializer.SerializeValue(ref WorkerId);
-            serializer.SerializeValue(ref Progress);
+            serializer.SerializeValue(ref Phase);
+            serializer.SerializeValue(ref Accumulated);
+            serializer.SerializeValue(ref Duration);
+            serializer.SerializeValue(ref ServerTime);
             serializer.SerializeValue(ref ProcessId);
-            serializer.SerializeValue(ref OperationStartTime);
-            serializer.SerializeValue(ref CapturedDuration);
             serializer.SerializeValue(ref Revision);
         }
 
         public bool Equals(NetStationSlotDto other)
-            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && WorkerId == other.WorkerId && Revision == other.Revision && Math.Abs(Progress - other.Progress) < 0.005f;
+            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && WorkerId == other.WorkerId && Phase == other.Phase && Revision == other.Revision && Math.Abs(Accumulated - other.Accumulated) < 0.005f;
 
         public override bool Equals(object obj) => obj is NetStationSlotDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(StationId, SlotIndex, Revision);
@@ -158,16 +171,17 @@ namespace ScaryParty.Pizzeria.Network
         public double DeadlineTime;
         public int QuotedReward;
         public int FinalEarnedReward;
+        public bool TicketArchived;
         public int LineCount;
+        public uint Revision;
 
+        // Fallback legado para 3 linhas fixas
         public int RecipeId_0;
         public int Qty_0;
         public int RecipeId_1;
         public int Qty_1;
         public int RecipeId_2;
         public int Qty_2;
-
-        public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -177,6 +191,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref DeadlineTime);
             serializer.SerializeValue(ref QuotedReward);
             serializer.SerializeValue(ref FinalEarnedReward);
+            serializer.SerializeValue(ref TicketArchived);
             serializer.SerializeValue(ref LineCount);
 
             serializer.SerializeValue(ref RecipeId_0);
@@ -190,10 +205,117 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         public bool Equals(NetOrderDto other)
-            => OrderId == other.OrderId && Lifecycle == other.Lifecycle && Revision == other.Revision;
+            => OrderId == other.OrderId && Lifecycle == other.Lifecycle && TicketArchived == other.TicketArchived && Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetOrderDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(OrderId, Lifecycle, Revision);
+        public override int GetHashCode() => HashCode.Combine(OrderId, Lifecycle, TicketArchived, Revision);
+    }
+
+    public struct NetOrderLineDto : INetworkSerializable, IEquatable<NetOrderLineDto>
+    {
+        public ulong OrderLineId;
+        public ulong OrderId;
+        public int RecipeId;
+        public int RequestedQuantity;
+        public int DeliveredQuantity;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref OrderLineId);
+            serializer.SerializeValue(ref OrderId);
+            serializer.SerializeValue(ref RecipeId);
+            serializer.SerializeValue(ref RequestedQuantity);
+            serializer.SerializeValue(ref DeliveredQuantity);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetOrderLineDto other)
+            => OrderLineId == other.OrderLineId && RequestedQuantity == other.RequestedQuantity && DeliveredQuantity == other.DeliveredQuantity && Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetOrderLineDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(OrderLineId, Revision);
+    }
+
+    public struct NetCallDto : INetworkSerializable, IEquatable<NetCallDto>
+    {
+        public ulong CallId;
+        public int AddressId;
+        public float ExpiresAt;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref CallId);
+            serializer.SerializeValue(ref AddressId);
+            serializer.SerializeValue(ref ExpiresAt);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetCallDto other)
+            => CallId == other.CallId && Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetCallDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(CallId, Revision);
+    }
+
+    public struct NetStackDto : INetworkSerializable, IEquatable<NetStackDto>
+    {
+        public ulong StackId;
+        public int StationId;
+        public int Capacity;
+        public int ItemCount;
+        public ulong TopItemId;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref StackId);
+            serializer.SerializeValue(ref StationId);
+            serializer.SerializeValue(ref Capacity);
+            serializer.SerializeValue(ref ItemCount);
+            serializer.SerializeValue(ref TopItemId);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetStackDto other)
+            => StackId == other.StackId && ItemCount == other.ItemCount && TopItemId == other.TopItemId && Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetStackDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(StackId, Revision);
+    }
+
+    public struct NetBackpackDto : INetworkSerializable, IEquatable<NetBackpackDto>
+    {
+        public ulong BackpackId;
+        public ulong EquippedBy;
+        public float PosX, PosY, PosZ;
+        public float RotX, RotY, RotZ, RotW;
+        public int Capacity;
+        public int ItemCount;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref BackpackId);
+            serializer.SerializeValue(ref EquippedBy);
+            serializer.SerializeValue(ref PosX);
+            serializer.SerializeValue(ref PosY);
+            serializer.SerializeValue(ref PosZ);
+            serializer.SerializeValue(ref RotX);
+            serializer.SerializeValue(ref RotY);
+            serializer.SerializeValue(ref RotZ);
+            serializer.SerializeValue(ref RotW);
+            serializer.SerializeValue(ref Capacity);
+            serializer.SerializeValue(ref ItemCount);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetBackpackDto other)
+            => BackpackId == other.BackpackId && EquippedBy == other.EquippedBy && ItemCount == other.ItemCount && Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetBackpackDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(BackpackId, Revision);
     }
 
     public struct NetSupplyDto : INetworkSerializable, IEquatable<NetSupplyDto>

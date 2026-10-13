@@ -80,12 +80,9 @@ namespace ScaryParty.Pizzeria.Network
             var targetLoc = LocationRef.InHand(senderClientId, targetHand);
             if (root.TransferService.IsLocationOccupied(targetLoc))
             {
-                var otherHand = targetHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left;
-                var otherLoc = LocationRef.InHand(senderClientId, otherHand);
-                if (!root.TransferService.IsLocationOccupied(otherLoc))
-                {
-                    targetHand = otherHand;
-                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc("A mão selecionada está ocupada!", targetParams);
+                return;
             }
 
             var res = root.TransferService.DispenseFromStorage(storageId, ingredientDefId, senderClientId, targetHand);
@@ -109,12 +106,9 @@ namespace ScaryParty.Pizzeria.Network
             var loc = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId);
             if (loc.Type == LocationType.Hand && root.TransferService.IsLocationOccupied(loc))
             {
-                var otherHand = loc.SlotId == 0 ? HandSlotIndex.Right : HandSlotIndex.Left;
-                var altLoc = new LocationRef(LocationType.Hand, targetHolderId, (int)otherHand);
-                if (!root.TransferService.IsLocationOccupied(altLoc))
-                {
-                    loc = altLoc;
-                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { targetHolderId } } };
+                NotifyErrorClientRpc("A mão selecionada está ocupada!", targetParams);
+                return;
             }
 
             var res = root.TransferService.TransferItem(new ItemId(itemIdVal), loc);
@@ -262,19 +256,6 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
-        [ServerRpc(RequireOwnership = false)]
-        public void CompleteWorkServerRpc(int stationId, int slotIndex, ServerRpcParams rpcParams = default)
-        {
-            var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) return;
-
-            var slot = new StationSlotId(stationId, slotIndex);
-            var res = root.ProcessingService.CompleteWork(slot, root.DomainState, root.Catalog);
-            if (res.Success)
-            {
-                CommitAndReplicate();
-            }
-        }
 
         [ServerRpc(RequireOwnership = false)]
         public void AddIngredientToPizzaServerRpc(ulong pizzaIdVal, ulong ingredientIdVal, ServerRpcParams rpcParams = default)
@@ -400,39 +381,12 @@ namespace ScaryParty.Pizzeria.Network
             // Answering the phone immediately publishes a multi-pizza order!
             // Pick a destination (e.g. 4 for testing, or from catalog)
             int destId = 4;
-            var recipes = new List<(int recipeId, int qty)> { (1 /* Mussarela */, 1), (2 /* Calabresa */, 1) };
-            var res = root.OrderService.CreatePhoneOrder(destId, recipes, root.DomainState, root.Catalog, root.Clock);
+            var res = root.OrderService.CreatePhoneOrder(new AddressId(destId), recipes, root.DomainState, root.Catalog, root.Clock, root.Config.maxActiveOrders, root.Config.deliveryTimeLimit);
             if (res.Success)
             {
                 CommitAndReplicate();
                 Debug.Log($"[PizzeriaCommandHandler] Telefone atendido! Pedido #{res.Value.Value} publicado para o destino #{destId}.");
             }
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void PurchaseSupplyServerRpc(int supplyItemId, int packQuantity, ServerRpcParams rpcParams = default)
-        {
-            var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) return;
-
-            if (!root.Catalog.SupplyItems.TryGetValue(supplyItemId, out var supData)) return;
-
-            int totalCost = supData.PackPrice * packQuantity;
-            if (root.DomainState.RestaurantBudget < totalCost)
-            {
-                Debug.LogWarning("[PizzeriaCommandHandler] Saldo insuficiente para compra de suprimentos.");
-                return;
-            }
-
-            root.DomainState.RestaurantBudget -= totalCost;
-            var orderId = root.DomainState.GenerateSupplyOrderId();
-            double now = root.Clock.Now;
-            var supOrder = new SupplyOrderState(orderId, now, now + supData.BaseETA, totalCost);
-            supOrder.AddLine(supplyItemId, supData.IngredientId, supData.UnitsPerPack, packQuantity);
-
-            root.DomainState.SupplyOrders[orderId] = supOrder;
-            root.DomainState.IncrementRevision();
-            CommitAndReplicate();
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -443,7 +397,7 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
 
             var state = root.DomainState;
-            var order = root.OrderService.GetActiveOrderForDestination(destinationId, state);
+            var order = root.OrderService.GetActiveOrderForDestination(new AddressId(destinationId), state);
 
             var deliveredList = new List<ItemState>();
             if (selectedItemIds != null)
@@ -487,19 +441,6 @@ namespace ScaryParty.Pizzeria.Network
             NotifySuccessClientRpc($"Entrega concluída! +R${eval.PersonalEarned}", targetParams);
             
             Debug.Log($"[PizzeriaCommandHandler] Entrega concluída no destino #{destinationId}. Pessoal: +R${eval.PersonalEarned}, Restaurante: +R${eval.RestaurantEarned}.");
-        }
-
-        [ServerRpc(RequireOwnership = false)]
-        public void SetUpgradeLevelServerRpc(int upgradeId, int level, ServerRpcParams rpcParams = default)
-        {
-            var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) return;
-
-            var res = root.UpgradeService.SetUpgradeLevel(upgradeId, level, root.DomainState, root.Catalog);
-            if (res.Success)
-            {
-                CommitAndReplicate();
-            }
         }
     }
 }
