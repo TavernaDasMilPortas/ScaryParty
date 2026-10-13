@@ -31,7 +31,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _canvas.sortingOrder = 100; // Always on top
 
             var rt = _canvas.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(100, 15);
+            rt.sizeDelta = new Vector2(140, 20);
 
             // Background
             GameObject bgObj = new GameObject("Background");

@@ -313,6 +313,7 @@ namespace ScaryParty.Pizzeria.Editor
             // Assign config field via SerializedObject
             var so = new SerializedObject(rootComp);
             so.FindProperty("_config").objectReferenceValue = config;
+            so.ApplyModifiedProperties();
 
             // Building Architecture (12x12m)
             var bld = new GameObject("Building");
@@ -432,7 +433,7 @@ namespace ScaryParty.Pizzeria.Editor
             rootComp.entranceAnchor = entAnc.transform;
             rootComp.toolRackAnchor = toolRack.transform;
 
-            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(rootComp);
 
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);

@@ -364,14 +364,14 @@ public class UIManager : MonoBehaviour
             _interactionPrompt.text = message;
             _interactionPrompt.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.8f));
             _interactionPrompt.style.color = new StyleColor(Color.white);
-            _interactionPrompt.style.paddingLeft = 10;
-            _interactionPrompt.style.paddingRight = 10;
-            _interactionPrompt.style.paddingTop = 5;
-            _interactionPrompt.style.paddingBottom = 5;
-            _interactionPrompt.style.borderTopLeftRadius = 5;
-            _interactionPrompt.style.borderTopRightRadius = 5;
-            _interactionPrompt.style.borderBottomLeftRadius = 5;
-            _interactionPrompt.style.borderBottomRightRadius = 5;
+            _interactionPrompt.style.paddingLeft = 36;
+            _interactionPrompt.style.paddingRight = 36;
+            _interactionPrompt.style.paddingTop = 16;
+            _interactionPrompt.style.paddingBottom = 16;
+            _interactionPrompt.style.borderTopLeftRadius = 32;
+            _interactionPrompt.style.borderTopRightRadius = 32;
+            _interactionPrompt.style.borderBottomLeftRadius = 32;
+            _interactionPrompt.style.borderBottomRightRadius = 32;
             
             _interactionPrompt.RemoveFromClassList("hidden");
             // Also ensure display is block in case class list isn't working

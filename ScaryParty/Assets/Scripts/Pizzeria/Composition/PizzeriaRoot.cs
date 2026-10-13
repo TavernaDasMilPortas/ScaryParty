@@ -46,8 +46,46 @@ namespace ScaryParty.Pizzeria.Composition
 
         private void Awake()
         {
+            // Se este objeto faz parte de um __City__ estático pré-existente sendo descartado em Play Mode, ignorar.
+            if (Application.isPlaying && transform.root != null && transform.root.name == "__City__")
+            {
+                var gen = FindObjectOfType<CityGenerator>();
+                if (gen != null && gen.CityData == null)
+                {
+                    return;
+                }
+            }
+
             Instance = this;
             Clock = new NetworkServerClock();
+            EnsureAnchorsResolved();
+        }
+
+        public void EnsureAnchorsResolved()
+        {
+            if (playerSpawnAnchors == null || playerSpawnAnchors.Length == 0)
+            {
+                var list = new System.Collections.Generic.List<Transform>();
+                for (int i = 0; i < 4; i++)
+                {
+                    Transform t = transform.Find($"Anchors/PlayerSpawn_{i}") 
+                               ?? transform.Find($"PlayerSpawn_{i}");
+                    if (t != null) list.Add(t);
+                }
+                if (list.Count > 0) playerSpawnAnchors = list.ToArray();
+            }
+
+            if (entranceAnchor == null)
+                entranceAnchor = transform.Find("Anchors/EntranceAnchor") ?? transform.Find("EntranceAnchor");
+
+            if (receivingAnchor == null)
+                receivingAnchor = transform.Find("Anchors/ReceivingAnchor") ?? transform.Find("ReceivingAnchor");
+
+            if (recoveryAnchor == null)
+                recoveryAnchor = transform.Find("Anchors/RecoveryAnchor") ?? transform.Find("RecoveryAnchor");
+
+            if (toolRackAnchor == null)
+                toolRackAnchor = transform.Find("Stations/Station_ToolRack") ?? transform.Find("Station_ToolRack");
         }
 
         public override void OnDestroy()
@@ -64,6 +102,7 @@ namespace ScaryParty.Pizzeria.Composition
                 return;
             }
 
+            EnsureAnchorsResolved();
             Catalog = _config.BuildCatalog();
 
             RebuildAddressRegistry();
@@ -256,6 +295,7 @@ namespace ScaryParty.Pizzeria.Composition
 
         public Vector3 GetPlayerSpawnPosition(int index)
         {
+            EnsureAnchorsResolved();
             if (playerSpawnAnchors != null && playerSpawnAnchors.Length > 0)
             {
                 int safeIdx = Mathf.Clamp(index, 0, playerSpawnAnchors.Length - 1);
@@ -267,6 +307,7 @@ namespace ScaryParty.Pizzeria.Composition
 
         public Quaternion GetPlayerSpawnRotation(int index)
         {
+            EnsureAnchorsResolved();
             if (playerSpawnAnchors != null && playerSpawnAnchors.Length > 0)
             {
                 int safeIdx = Mathf.Clamp(index, 0, playerSpawnAnchors.Length - 1);

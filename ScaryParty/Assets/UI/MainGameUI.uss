@@ -4,7 +4,7 @@
     width: 100%;
     height: 100%;
     justify-content: space-between;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* Typography Base */
@@ -24,48 +24,48 @@
 /* Stats (Top Left) */
 .stats-container {
     background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 12px;
+    padding: 18px 24px;
     border-width: 2px;
     border-color: rgb(255, 140, 0);
 }
 
 .money-label {
-    font-size: 36px;
+    font-size: 46px;
     color: rgb(133, 224, 100);
 }
 
 .score-label {
-    font-size: 24px;
+    font-size: 30px;
     color: rgb(220, 220, 220);
 }
 
 /* Minimap (Bottom Right) */
 .minimap-container {
     background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 10px;
-    padding: 10px;
-    width: 250px;
-    height: 250px;
+    border-radius: 14px;
+    padding: 12px;
+    width: 340px;
+    height: 340px;
     border-width: 3px;
     border-color: rgb(100, 200, 255);
     align-items: center;
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    bottom: 24px;
+    right: 24px;
 }
 
 .minimap-image {
     flex-grow: 1;
     width: 100%;
     height: 100%;
-    border-radius: 5px;
-    margin-bottom: 5px;
+    border-radius: 8px;
+    margin-bottom: 6px;
     background-color: rgb(30, 30, 30);
 }
 
 .minimap-title {
-    font-size: 16px;
+    font-size: 20px;
     color: rgb(100, 200, 255);
     -unity-text-align: middle-center;
 }
@@ -73,18 +73,18 @@
 /* Orders (Top Right) */
 .orders-container {
     background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 10px;
-    padding: 15px;
-    width: 300px;
-    max-height: 400px;
+    border-radius: 12px;
+    padding: 18px 20px;
+    width: 380px;
+    max-height: 480px;
     border-width: 2px;
     border-color: rgb(255, 140, 0);
 }
 
 .orders-title {
-    font-size: 24px;
+    font-size: 28px;
     color: rgb(255, 200, 50);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     -unity-text-align: middle-center;
 }
 
@@ -94,15 +94,15 @@
 
 .order-item {
     background-color: rgba(50, 50, 50, 0.8);
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 5px;
-    border-left-width: 5px;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border-left-width: 6px;
     border-left-color: rgb(255, 100, 50);
 }
 
 .order-item-text {
-    font-size: 16px;
+    font-size: 20px;
     white-space: normal;
 }
 
@@ -114,11 +114,11 @@
 }
 
 .interaction-prompt {
-    font-size: 28px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 15px 30px;
-    border-radius: 30px;
-    border-width: 2px;
+    font-size: 34px;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 18px 36px;
+    border-radius: 36px;
+    border-width: 2.5px;
     border-color: rgb(255, 255, 255);
     transition-duration: 0.2s;
 }
@@ -137,15 +137,15 @@
 .hands-container {
     flex-direction: row;
     justify-content: space-between;
-    width: 400px;
+    width: 520px;
 }
 
 .hand-slot {
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 15px;
-    padding: 15px;
-    width: 180px;
-    height: 100px;
+    background-color: rgba(0, 0, 0, 0.65);
+    border-radius: 16px;
+    padding: 16px 20px;
+    width: 240px;
+    height: 120px;
     border-width: 3px;
     border-color: rgb(150, 150, 150);
     align-items: center;
@@ -154,17 +154,17 @@
 
 .hand-slot:hover {
     border-color: rgb(255, 255, 255);
-    background-color: rgba(40, 40, 40, 0.8);
+    background-color: rgba(40, 40, 40, 0.85);
 }
 
 .hand-title {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(180, 180, 180);
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .hand-content {
-    font-size: 20px;
+    font-size: 26px;
     color: rgb(255, 255, 255);
 }
 
@@ -178,54 +178,54 @@
     height: 100%;
     top: 0;
     left: 0;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.65);
     align-items: center;
     justify-content: center;
 }
 
 .scoreboard-panel {
     background-color: rgba(15, 15, 15, 0.95);
-    border-radius: 15px;
-    padding: 20px 25px;
-    width: 620px;
-    max-height: 500px;
-    border-width: 2px;
+    border-radius: 18px;
+    padding: 24px 30px;
+    width: 780px;
+    max-height: 580px;
+    border-width: 3px;
     border-color: rgb(255, 140, 0);
 }
 
 .scoreboard-title {
-    font-size: 28px;
+    font-size: 34px;
     color: rgb(255, 200, 50);
     -unity-text-align: middle-center;
-    margin-bottom: 15px;
+    margin-bottom: 18px;
     letter-spacing: 4px;
 }
 
 .scoreboard-header {
     border-bottom-width: 2px;
     border-bottom-color: rgba(255, 255, 255, 0.3);
-    padding-bottom: 8px;
-    margin-bottom: 5px;
+    padding-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .scoreboard-row {
     flex-direction: row;
-    padding: 6px 10px;
+    padding: 8px 14px;
     align-items: center;
 }
 
 .scoreboard-row:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
 }
 
 .scoreboard-list {
     flex-grow: 1;
-    max-height: 350px;
+    max-height: 400px;
 }
 
 .scoreboard-cell {
-    font-size: 18px;
+    font-size: 22px;
 }
 
 .scoreboard-name {
@@ -238,14 +238,14 @@
 .scoreboard-slots {
     width: 30%;
     -unity-text-align: middle-center;
-    font-size: 22px;
+    font-size: 26px;
     color: rgb(255, 200, 100);
-    letter-spacing: 3px;
+    letter-spacing: 4px;
 }
 
 .scoreboard-money {
     width: 30%;
     -unity-text-align: middle-right;
     color: rgb(133, 224, 100);
-    font-size: 20px;
+    font-size: 24px;
 }

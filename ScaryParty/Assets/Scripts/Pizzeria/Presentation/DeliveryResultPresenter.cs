@@ -91,12 +91,12 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _card = new VisualElement();
             _card.name = "DeliveryResultCard";
-            _card.style.width = 460;
+            _card.style.width = 600;
             _card.style.backgroundColor = new Color(0.12f, 0.12f, 0.15f, 0.98f);
-            _card.style.borderTopLeftRadius = 12;
-            _card.style.borderTopRightRadius = 12;
-            _card.style.borderBottomLeftRadius = 12;
-            _card.style.borderBottomRightRadius = 12;
+            _card.style.borderTopLeftRadius = 14;
+            _card.style.borderTopRightRadius = 14;
+            _card.style.borderBottomLeftRadius = 14;
+            _card.style.borderBottomRightRadius = 14;
             _card.style.borderTopWidth = 2;
             _card.style.borderBottomWidth = 2;
             _card.style.borderLeftWidth = 2;
@@ -105,57 +105,57 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.style.borderBottomColor = new Color(0.2f, 0.8f, 0.4f);
             _card.style.borderLeftColor = new Color(0.2f, 0.8f, 0.4f);
             _card.style.borderRightColor = new Color(0.2f, 0.8f, 0.4f);
-            _card.style.paddingTop = 20;
-            _card.style.paddingBottom = 20;
-            _card.style.paddingLeft = 24;
-            _card.style.paddingRight = 24;
+            _card.style.paddingTop = 24;
+            _card.style.paddingBottom = 24;
+            _card.style.paddingLeft = 28;
+            _card.style.paddingRight = 28;
 
             _titleLabel = new Label("ENTREGA CONCLUÍDA!");
-            _titleLabel.style.fontSize = 20;
+            _titleLabel.style.fontSize = 26;
             _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _titleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _titleLabel.style.marginBottom = 4;
+            _titleLabel.style.marginBottom = 6;
             _card.Add(_titleLabel);
 
             _addressLabel = new Label("Endereço: ...");
-            _addressLabel.style.fontSize = 14;
+            _addressLabel.style.fontSize = 19;
             _addressLabel.style.color = new Color(0.85f, 0.85f, 0.85f);
             _addressLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _addressLabel.style.marginBottom = 16;
+            _addressLabel.style.marginBottom = 18;
             _card.Add(_addressLabel);
 
             var statsBox = new VisualElement();
             statsBox.style.backgroundColor = new Color(0.08f, 0.08f, 0.1f, 0.9f);
-            statsBox.style.paddingTop = 10;
-            statsBox.style.paddingBottom = 10;
-            statsBox.style.paddingLeft = 14;
-            statsBox.style.paddingRight = 14;
-            statsBox.style.borderTopLeftRadius = 8;
-            statsBox.style.borderTopRightRadius = 8;
-            statsBox.style.borderBottomLeftRadius = 8;
-            statsBox.style.borderBottomRightRadius = 8;
-            statsBox.style.marginBottom = 14;
+            statsBox.style.paddingTop = 14;
+            statsBox.style.paddingBottom = 14;
+            statsBox.style.paddingLeft = 18;
+            statsBox.style.paddingRight = 18;
+            statsBox.style.borderTopLeftRadius = 10;
+            statsBox.style.borderTopRightRadius = 10;
+            statsBox.style.borderBottomLeftRadius = 10;
+            statsBox.style.borderBottomRightRadius = 10;
+            statsBox.style.marginBottom = 16;
 
             _summaryDelivered = new Label("• Total de caixas entregues: 0");
-            _summaryDelivered.style.fontSize = 13;
+            _summaryDelivered.style.fontSize = 17;
             _summaryDelivered.style.color = Color.white;
-            _summaryDelivered.style.marginBottom = 4;
+            _summaryDelivered.style.marginBottom = 6;
             statsBox.Add(_summaryDelivered);
 
             _summaryCorrect = new Label("• Pizzas corretas e no ponto: 0");
-            _summaryCorrect.style.fontSize = 13;
+            _summaryCorrect.style.fontSize = 17;
             _summaryCorrect.style.color = new Color(0.3f, 0.9f, 0.4f);
-            _summaryCorrect.style.marginBottom = 4;
+            _summaryCorrect.style.marginBottom = 6;
             statsBox.Add(_summaryCorrect);
 
             _summaryBurned = new Label("• Pizzas queimadas/cruas: 0");
-            _summaryBurned.style.fontSize = 13;
+            _summaryBurned.style.fontSize = 17;
             _summaryBurned.style.color = new Color(0.9f, 0.5f, 0.2f);
-            _summaryBurned.style.marginBottom = 4;
+            _summaryBurned.style.marginBottom = 6;
             statsBox.Add(_summaryBurned);
 
             _summaryWrong = new Label("• Pizzas incorretas: 0");
-            _summaryWrong.style.fontSize = 13;
+            _summaryWrong.style.fontSize = 17;
             _summaryWrong.style.color = new Color(0.9f, 0.3f, 0.3f);
             statsBox.Add(_summaryWrong);
 
@@ -164,30 +164,31 @@ namespace ScaryParty.Pizzeria.Presentation
             var moneyBox = new VisualElement();
             moneyBox.style.flexDirection = FlexDirection.Row;
             moneyBox.style.justifyContent = Justify.SpaceBetween;
-            moneyBox.style.marginBottom = 12;
+            moneyBox.style.marginBottom = 14;
 
             _personalMoneyLabel = new Label("💰 Ganho Pessoal: +R$ 0");
-            _personalMoneyLabel.style.fontSize = 15;
+            _personalMoneyLabel.style.fontSize = 20;
             _personalMoneyLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _personalMoneyLabel.style.color = new Color(0.3f, 0.95f, 0.3f);
             moneyBox.Add(_personalMoneyLabel);
 
             _restaurantMoneyLabel = new Label("🏪 Pizzaria: +R$ 0");
-            _restaurantMoneyLabel.style.fontSize = 14;
+            _restaurantMoneyLabel.style.fontSize = 19;
             _restaurantMoneyLabel.style.color = new Color(0.9f, 0.8f, 0.3f);
             moneyBox.Add(_restaurantMoneyLabel);
 
             _card.Add(moneyBox);
 
             _orderStatusLabel = new Label("Comanda Finalizada ✅");
-            _orderStatusLabel.style.fontSize = 13;
+            _orderStatusLabel.style.fontSize = 18;
             _orderStatusLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _orderStatusLabel.style.marginBottom = 16;
+            _orderStatusLabel.style.marginBottom = 18;
             _card.Add(_orderStatusLabel);
 
             _closeBtn = new Button(Close);
             _closeBtn.text = "Continuar [Espaço / Esc]";
-            _closeBtn.style.height = 36;
+            _closeBtn.style.fontSize = 18;
+            _closeBtn.style.height = 46;
             _closeBtn.style.backgroundColor = new Color(0.2f, 0.5f, 0.3f);
             _closeBtn.style.color = Color.white;
             _closeBtn.style.unityFontStyleAndWeight = FontStyle.Bold;

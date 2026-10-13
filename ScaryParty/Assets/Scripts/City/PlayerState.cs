@@ -100,13 +100,33 @@ public class PlayerState : NetworkBehaviour
         if (IsOwner)
         {
             // Tenta teleportar para a pizzaria caso a cidade já tenha sido gerada antes de nascer
-            var spawnPoint = GameObject.Find("NetworkSpawnPoint");
-            if (spawnPoint != null)
+            Vector3 targetPos = Vector3.zero;
+            Quaternion targetRot = Quaternion.identity;
+            bool foundSpawn = false;
+
+            if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+            {
+                targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(0);
+                targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(0);
+                foundSpawn = true;
+            }
+            else
+            {
+                var spawnPoint = GameObject.Find("NetworkSpawnPoint");
+                if (spawnPoint != null)
+                {
+                    targetPos = spawnPoint.transform.position;
+                    targetRot = spawnPoint.transform.rotation;
+                    foundSpawn = true;
+                }
+            }
+
+            if (foundSpawn)
             {
                 var cc = GetComponent<CharacterController>();
                 if (cc != null) cc.enabled = false;
-                transform.position = spawnPoint.transform.position;
-                transform.rotation = spawnPoint.transform.rotation;
+                transform.position = targetPos;
+                transform.rotation = targetRot;
                 if (cc != null) cc.enabled = true;
             }
 

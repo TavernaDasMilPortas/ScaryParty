@@ -123,22 +123,22 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             var hints = new VisualElement();
             hints.style.position = Position.Absolute;
-            hints.style.left = 16;
-            hints.style.bottom = 16;
+            hints.style.left = 24;
+            hints.style.bottom = 24;
             hints.style.flexDirection = FlexDirection.Row;
-            hints.style.backgroundColor = new Color(0f, 0f, 0f, 0.55f);
-            hints.style.paddingLeft = 10;
-            hints.style.paddingRight = 10;
-            hints.style.paddingTop = 6;
-            hints.style.paddingBottom = 6;
-            hints.style.borderTopLeftRadius = 5;
-            hints.style.borderTopRightRadius = 5;
-            hints.style.borderBottomLeftRadius = 5;
-            hints.style.borderBottomRightRadius = 5;
+            hints.style.backgroundColor = new Color(0f, 0f, 0f, 0.65f);
+            hints.style.paddingLeft = 14;
+            hints.style.paddingRight = 14;
+            hints.style.paddingTop = 8;
+            hints.style.paddingBottom = 8;
+            hints.style.borderTopLeftRadius = 8;
+            hints.style.borderTopRightRadius = 8;
+            hints.style.borderBottomLeftRadius = 8;
+            hints.style.borderBottomRightRadius = 8;
 
             var label = new Label("📖 [H] Receitas  •  🎒 [B] Mochila  •  🛠️ [F9] Dev");
-            label.style.fontSize = 12;
-            label.style.color = new Color(0.9f, 0.9f, 0.9f);
+            label.style.fontSize = 17;
+            label.style.color = new Color(0.95f, 0.95f, 0.95f);
             hints.Add(label);
 
             _root.Add(hints);
@@ -148,23 +148,23 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             var container = new VisualElement();
             container.style.position = Position.Absolute;
-            container.style.top = 16;
+            container.style.top = 20;
             container.style.left = new Length(50, LengthUnit.Percent);
             container.style.translate = new Translate(new Length(-50, LengthUnit.Percent), 0);
-            container.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f, 0.8f);
-            container.style.paddingLeft = 14;
-            container.style.paddingRight = 14;
-            container.style.paddingTop = 5;
-            container.style.paddingBottom = 5;
-            container.style.borderTopLeftRadius = 6;
-            container.style.borderTopRightRadius = 6;
-            container.style.borderBottomLeftRadius = 6;
-            container.style.borderBottomRightRadius = 6;
+            container.style.backgroundColor = new Color(0.1f, 0.1f, 0.12f, 0.85f);
+            container.style.paddingLeft = 18;
+            container.style.paddingRight = 18;
+            container.style.paddingTop = 8;
+            container.style.paddingBottom = 8;
+            container.style.borderTopLeftRadius = 8;
+            container.style.borderTopRightRadius = 8;
+            container.style.borderBottomLeftRadius = 8;
+            container.style.borderBottomRightRadius = 8;
             container.style.borderBottomWidth = 2;
             container.style.borderBottomColor = new Color(0.95f, 0.65f, 0.2f);
 
             _activeOrdersLabel = new Label("📋 COMANDAS ATIVAS: Nenhuma");
-            _activeOrdersLabel.style.fontSize = 12;
+            _activeOrdersLabel.style.fontSize = 17;
             _activeOrdersLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _activeOrdersLabel.style.color = new Color(0.95f, 0.85f, 0.6f);
             container.Add(_activeOrdersLabel);
@@ -214,28 +214,44 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             _storagePanel = new VisualElement();
             _storagePanel.style.position = Position.Absolute;
-            _storagePanel.style.width = 400;
-            _storagePanel.style.height = 300;
+            _storagePanel.style.width = 540;
+            _storagePanel.style.height = 420;
             _storagePanel.style.left = new Length(50, LengthUnit.Percent);
             _storagePanel.style.top = new Length(50, LengthUnit.Percent);
             _storagePanel.style.translate = new Translate(new Length(-50, LengthUnit.Percent), new Length(-50, LengthUnit.Percent));
-            _storagePanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            _storagePanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.95f);
             _storagePanel.style.display = DisplayStyle.None;
-            _storagePanel.style.paddingLeft = 10;
-            _storagePanel.style.paddingRight = 10;
-            _storagePanel.style.paddingTop = 10;
-            _storagePanel.style.paddingBottom = 10;
+            _storagePanel.style.paddingLeft = 16;
+            _storagePanel.style.paddingRight = 16;
+            _storagePanel.style.paddingTop = 16;
+            _storagePanel.style.paddingBottom = 16;
+            _storagePanel.style.borderTopLeftRadius = 12;
+            _storagePanel.style.borderTopRightRadius = 12;
+            _storagePanel.style.borderBottomLeftRadius = 12;
+            _storagePanel.style.borderBottomRightRadius = 12;
+            _storagePanel.style.borderTopWidth = 2;
+            _storagePanel.style.borderBottomWidth = 2;
+            _storagePanel.style.borderLeftWidth = 2;
+            _storagePanel.style.borderRightWidth = 2;
+            _storagePanel.style.borderTopColor = new Color(0.9f, 0.6f, 0.2f);
+            _storagePanel.style.borderBottomColor = new Color(0.9f, 0.6f, 0.2f);
+            _storagePanel.style.borderLeftColor = new Color(0.9f, 0.6f, 0.2f);
+            _storagePanel.style.borderRightColor = new Color(0.9f, 0.6f, 0.2f);
 
             var title = new Label("ESTOQUE");
             title.style.color = Color.white;
-            title.style.fontSize = 20;
+            title.style.fontSize = 26;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
             _storagePanel.Add(title);
 
             var closeBtn = new Button(() => { CloseStoragePicker(); });
-            closeBtn.text = "X";
+            closeBtn.text = "✕";
+            closeBtn.style.fontSize = 20;
+            closeBtn.style.width = 38;
+            closeBtn.style.height = 38;
             closeBtn.style.position = Position.Absolute;
-            closeBtn.style.right = 10;
-            closeBtn.style.top = 10;
+            closeBtn.style.right = 14;
+            closeBtn.style.top = 14;
             _storagePanel.Add(closeBtn);
 
             _root.Add(_storagePanel);
@@ -267,19 +283,23 @@ namespace ScaryParty.Pizzeria.Presentation
             _storagePanel.Clear();
             var title = new Label($"ESTOQUE (Armazém #{_storageStationId})");
             title.style.color = Color.white;
-            title.style.fontSize = 20;
+            title.style.fontSize = 24;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
             _storagePanel.Add(title);
 
             var closeBtn = new Button(() => { CloseStoragePicker(); });
-            closeBtn.text = "X";
+            closeBtn.text = "✕";
+            closeBtn.style.fontSize = 20;
+            closeBtn.style.width = 38;
+            closeBtn.style.height = 38;
             closeBtn.style.position = Position.Absolute;
-            closeBtn.style.right = 10;
-            closeBtn.style.top = 10;
+            closeBtn.style.right = 14;
+            closeBtn.style.top = 14;
             _storagePanel.Add(closeBtn);
 
             var scroll = new ScrollView();
             scroll.style.flexGrow = 1;
-            scroll.style.marginTop = 20;
+            scroll.style.marginTop = 24;
             _storagePanel.Add(scroll);
 
             var netState = PizzeriaNetworkState.Instance;
@@ -296,9 +316,20 @@ namespace ScaryParty.Pizzeria.Presentation
                     var row = new VisualElement();
                     row.style.flexDirection = FlexDirection.Row;
                     row.style.justifyContent = Justify.SpaceBetween;
-                    row.style.marginBottom = 5;
+                    row.style.alignItems = Align.Center;
+                    row.style.marginBottom = 8;
+                    row.style.paddingTop = 6;
+                    row.style.paddingBottom = 6;
+                    row.style.paddingLeft = 10;
+                    row.style.paddingRight = 10;
+                    row.style.backgroundColor = new Color(0.18f, 0.18f, 0.22f);
+                    row.style.borderTopLeftRadius = 6;
+                    row.style.borderTopRightRadius = 6;
+                    row.style.borderBottomLeftRadius = 6;
+                    row.style.borderBottomRightRadius = 6;
 
                     var lbl = new Label($"{ingName} (Qtd: {slot.Quantity})");
+                    lbl.style.fontSize = 18;
                     lbl.style.color = Color.white;
                     row.Add(lbl);
 
@@ -315,6 +346,10 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     });
                     btn.text = "Pegar";
+                    btn.style.fontSize = 17;
+                    btn.style.height = 36;
+                    btn.style.paddingLeft = 16;
+                    btn.style.paddingRight = 16;
                     row.Add(btn);
 
                     scroll.Add(row);
@@ -330,9 +365,20 @@ namespace ScaryParty.Pizzeria.Presentation
                     var row = new VisualElement();
                     row.style.flexDirection = FlexDirection.Row;
                     row.style.justifyContent = Justify.SpaceBetween;
-                    row.style.marginBottom = 5;
+                    row.style.alignItems = Align.Center;
+                    row.style.marginBottom = 8;
+                    row.style.paddingTop = 6;
+                    row.style.paddingBottom = 6;
+                    row.style.paddingLeft = 10;
+                    row.style.paddingRight = 10;
+                    row.style.backgroundColor = new Color(0.18f, 0.18f, 0.22f);
+                    row.style.borderTopLeftRadius = 6;
+                    row.style.borderTopRightRadius = 6;
+                    row.style.borderBottomLeftRadius = 6;
+                    row.style.borderBottomRightRadius = 6;
 
                     var lbl = new Label($"{toolName}");
+                    lbl.style.fontSize = 18;
                     lbl.style.color = Color.white;
                     row.Add(lbl);
 
@@ -348,6 +394,10 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     });
                     btn.text = "Pegar";
+                    btn.style.fontSize = 17;
+                    btn.style.height = 36;
+                    btn.style.paddingLeft = 16;
+                    btn.style.paddingRight = 16;
                     row.Add(btn);
 
                     scroll.Add(row);
@@ -357,6 +407,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (scroll.childCount == 0)
             {
                 var emptyLbl = new Label("Estoque vazio neste compartimento.");
+                emptyLbl.style.fontSize = 18;
                 emptyLbl.style.color = new Color(0.8f, 0.8f, 0.8f);
                 emptyLbl.style.marginTop = 20;
                 emptyLbl.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -368,36 +419,53 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             _stagingPanel = new VisualElement();
             _stagingPanel.style.position = Position.Absolute;
-            _stagingPanel.style.width = 350;
-            _stagingPanel.style.height = 240;
+            _stagingPanel.style.width = 480;
+            _stagingPanel.style.height = 320;
             _stagingPanel.style.left = new Length(50, LengthUnit.Percent);
             _stagingPanel.style.top = new Length(50, LengthUnit.Percent);
             _stagingPanel.style.translate = new Translate(new Length(-50, LengthUnit.Percent), new Length(-50, LengthUnit.Percent));
-            _stagingPanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+            _stagingPanel.style.backgroundColor = new Color(0.1f, 0.1f, 0.1f, 0.95f);
             _stagingPanel.style.display = DisplayStyle.None;
-            _stagingPanel.style.paddingLeft = 10;
-            _stagingPanel.style.paddingRight = 10;
-            _stagingPanel.style.paddingTop = 10;
-            _stagingPanel.style.paddingBottom = 10;
+            _stagingPanel.style.paddingLeft = 20;
+            _stagingPanel.style.paddingRight = 20;
+            _stagingPanel.style.paddingTop = 18;
+            _stagingPanel.style.paddingBottom = 18;
             _stagingPanel.style.alignItems = Align.Center;
+            _stagingPanel.style.borderTopLeftRadius = 12;
+            _stagingPanel.style.borderTopRightRadius = 12;
+            _stagingPanel.style.borderBottomLeftRadius = 12;
+            _stagingPanel.style.borderBottomRightRadius = 12;
+            _stagingPanel.style.borderTopWidth = 2;
+            _stagingPanel.style.borderBottomWidth = 2;
+            _stagingPanel.style.borderLeftWidth = 2;
+            _stagingPanel.style.borderRightWidth = 2;
+            _stagingPanel.style.borderTopColor = new Color(0.9f, 0.6f, 0.2f);
+            _stagingPanel.style.borderBottomColor = new Color(0.9f, 0.6f, 0.2f);
+            _stagingPanel.style.borderLeftColor = new Color(0.9f, 0.6f, 0.2f);
+            _stagingPanel.style.borderRightColor = new Color(0.9f, 0.6f, 0.2f);
 
             var title = new Label("ETIQUETAR CAIXA");
             title.style.color = Color.white;
-            title.style.fontSize = 18;
+            title.style.fontSize = 24;
+            title.style.unityFontStyleAndWeight = FontStyle.Bold;
             _stagingPanel.Add(title);
 
             var desc = new Label("Escolha o endereço de entrega para esta caixa.");
-            desc.style.color = Color.white;
-            desc.style.marginTop = 20;
+            desc.style.color = new Color(0.85f, 0.85f, 0.85f);
+            desc.style.fontSize = 17;
+            desc.style.marginTop = 16;
             _stagingPanel.Add(desc);
 
             var row = new VisualElement();
             row.style.flexDirection = FlexDirection.Row;
-            row.style.marginTop = 20;
+            row.style.marginTop = 18;
             row.style.alignItems = Align.Center;
 
             var lblDest = new Label($"Endereço: #{_selectedDestinationIndex}");
-            lblDest.style.color = Color.white;
+            lblDest.style.color = new Color(1f, 0.85f, 0.4f);
+            lblDest.style.fontSize = 22;
+            lblDest.style.unityFontStyleAndWeight = FontStyle.Bold;
+            lblDest.style.marginRight = 16;
             row.Add(lblDest);
 
             var btnMinus = new Button(() => {
@@ -405,6 +473,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 lblDest.text = $"Endereço: #{_selectedDestinationIndex}";
             });
             btnMinus.text = "-";
+            btnMinus.style.fontSize = 22;
+            btnMinus.style.width = 44;
+            btnMinus.style.height = 44;
             row.Add(btnMinus);
 
             var btnPlus = new Button(() => {
@@ -412,6 +483,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 lblDest.text = $"Endereço: #{_selectedDestinationIndex}";
             });
             btnPlus.text = "+";
+            btnPlus.style.fontSize = 22;
+            btnPlus.style.width = 44;
+            btnPlus.style.height = 44;
             row.Add(btnPlus);
 
             _stagingPanel.Add(row);
@@ -426,7 +500,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 UpdateUIMode();
             });
             btnConfirm.text = "Confirmar Etiqueta";
+            btnConfirm.style.fontSize = 20;
+            btnConfirm.style.height = 48;
             btnConfirm.style.marginTop = 20;
+            btnConfirm.style.paddingLeft = 24;
+            btnConfirm.style.paddingRight = 24;
             _stagingPanel.Add(btnConfirm);
 
             var btnCancel = new Button(() => {
@@ -434,7 +512,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 UpdateUIMode();
             });
             btnCancel.text = "Cancelar";
+            btnCancel.style.fontSize = 18;
+            btnCancel.style.height = 40;
             btnCancel.style.marginTop = 10;
+            btnCancel.style.paddingLeft = 20;
+            btnCancel.style.paddingRight = 20;
             _stagingPanel.Add(btnCancel);
 
             _root.Add(_stagingPanel);

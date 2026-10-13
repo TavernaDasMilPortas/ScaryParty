@@ -47,6 +47,11 @@ public class PlayerInteraction : NetworkBehaviour
         if (GetComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>();
 
+        // Sincroniza com a geração procedural da cidade
+        CityGenerator cityGen = FindObjectOfType<CityGenerator>();
+        if (cityGen != null)
+            cityGen.OnCityGenerated += OnCityGeneratedHandler;
+
         // SERVER AUTHORITY: Teleport the player to the pizzaria spawn point
         // If this client is also the server (Host), do it directly.
         // If not, request it via RPC.
@@ -60,8 +65,31 @@ public class PlayerInteraction : NetworkBehaviour
         }
     }
 
+    public override void OnNetworkDespawn()
+    {
+        CityGenerator cityGen = FindObjectOfType<CityGenerator>();
+        if (cityGen != null)
+            cityGen.OnCityGenerated -= OnCityGeneratedHandler;
+
+        base.OnNetworkDespawn();
+    }
+
+    private void OnCityGeneratedHandler()
+    {
+        if (!IsOwner) return;
+        if (IsServer) TeleportToSpawn();
+        else RequestSpawnPositionServerRpc();
+    }
+
     private void TeleportToSpawn()
     {
+        CityGenerator cityGen = FindObjectOfType<CityGenerator>();
+        if (cityGen != null && cityGen.CityData == null)
+        {
+            StartCoroutine(WaitForPizzeriaThenTeleport(false));
+            return;
+        }
+
         if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
         {
             var cc = GetComponent<CharacterController>();
@@ -72,21 +100,60 @@ public class PlayerInteraction : NetworkBehaviour
             return;
         }
 
+        // A pizzaria (prefab de rede) pode ainda não ter spawnado: espera ela existir
+        // para usar os anchors PlayerSpawn_X em vez de uma posição aproximada.
+        StartCoroutine(WaitForPizzeriaThenTeleport(false));
+    }
+
+    private System.Collections.IEnumerator WaitForPizzeriaThenTeleport(bool viaClientRpc)
+    {
         CityGenerator cityGen = FindObjectOfType<CityGenerator>();
+        float timeout = 15f;
+        while (((cityGen != null && cityGen.CityData == null) || ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance == null) && timeout > 0f)
+        {
+            timeout -= Time.deltaTime;
+            yield return null;
+        }
+
+        var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance;
+        if (root != null)
+        {
+            Vector3 pos = root.GetPlayerSpawnPosition((int)OwnerClientId);
+            Quaternion rot = root.GetPlayerSpawnRotation((int)OwnerClientId);
+            if (viaClientRpc) TeleportClientRpc(pos, rot);
+            else
+            {
+                var cc = GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+                transform.position = pos;
+                transform.rotation = rot;
+                if (cc != null) cc.enabled = true;
+            }
+            yield break;
+        }
+
+        // Fallback legado (sem pizzaria de prefab)
         if (cityGen != null && cityGen.CityData != null)
         {
-            var cc = GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-            transform.position = cityGen.CityData.pizzariaPosition + new Vector3(0, 0.1f, -12f);
-            transform.rotation = Quaternion.Euler(0, 180, 0);
-            if (cc != null) cc.enabled = true;
+            Vector3 pos = cityGen.CityData.pizzariaPosition + new Vector3(0, 0.1f, -12f);
+            Quaternion rot = Quaternion.Euler(0, 180, 0);
+            if (viaClientRpc) TeleportClientRpc(pos, rot);
+            else
+            {
+                var cc = GetComponent<CharacterController>();
+                if (cc != null) cc.enabled = false;
+                transform.position = pos;
+                transform.rotation = rot;
+                if (cc != null) cc.enabled = true;
+            }
         }
     }
 
     [ServerRpc]
     private void RequestSpawnPositionServerRpc()
     {
-        if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+        CityGenerator cityGen = FindObjectOfType<CityGenerator>();
+        if (cityGen != null && cityGen.CityData != null && ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
         {
             Vector3 spawnPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition((int)OwnerClientId);
             Quaternion spawnRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation((int)OwnerClientId);
@@ -94,12 +161,7 @@ public class PlayerInteraction : NetworkBehaviour
             return;
         }
 
-        CityGenerator cityGen = FindObjectOfType<CityGenerator>();
-        if (cityGen != null && cityGen.CityData != null)
-        {
-            Vector3 spawnPos = cityGen.CityData.pizzariaPosition + new Vector3(0, 0.1f, -12f);
-            TeleportClientRpc(spawnPos, Quaternion.Euler(0, 180, 0));
-        }
+        StartCoroutine(WaitForPizzeriaThenTeleport(true));
     }
 
     [ClientRpc]

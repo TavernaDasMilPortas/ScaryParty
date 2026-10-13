@@ -93,13 +93,13 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _card = new VisualElement();
             _card.name = "DeliverySelectionCard";
-            _card.style.width = 520;
-            _card.style.maxHeight = 600;
+            _card.style.width = 640;
+            _card.style.maxHeight = 680;
             _card.style.backgroundColor = new Color(0.12f, 0.12f, 0.14f, 0.98f);
-            _card.style.borderTopLeftRadius = 10;
-            _card.style.borderTopRightRadius = 10;
-            _card.style.borderBottomLeftRadius = 10;
-            _card.style.borderBottomRightRadius = 10;
+            _card.style.borderTopLeftRadius = 12;
+            _card.style.borderTopRightRadius = 12;
+            _card.style.borderBottomLeftRadius = 12;
+            _card.style.borderBottomRightRadius = 12;
             _card.style.borderTopWidth = 2;
             _card.style.borderBottomWidth = 2;
             _card.style.borderLeftWidth = 2;
@@ -108,44 +108,45 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.style.borderBottomColor = new Color(0.9f, 0.6f, 0.2f);
             _card.style.borderLeftColor = new Color(0.9f, 0.6f, 0.2f);
             _card.style.borderRightColor = new Color(0.9f, 0.6f, 0.2f);
-            _card.style.paddingTop = 18;
-            _card.style.paddingBottom = 18;
-            _card.style.paddingLeft = 20;
-            _card.style.paddingRight = 20;
+            _card.style.paddingTop = 22;
+            _card.style.paddingBottom = 22;
+            _card.style.paddingLeft = 24;
+            _card.style.paddingRight = 24;
 
             _titleLabel = new Label("ENTREGA DE PIZZAS");
-            _titleLabel.style.fontSize = 20;
+            _titleLabel.style.fontSize = 26;
             _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _titleLabel.style.color = new Color(0.95f, 0.7f, 0.2f);
             _titleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             _card.Add(_titleLabel);
 
             _subtitleLabel = new Label("Selecione as caixas que deseja entregar ao cliente:");
-            _subtitleLabel.style.fontSize = 13;
-            _subtitleLabel.style.color = new Color(0.8f, 0.8f, 0.8f);
+            _subtitleLabel.style.fontSize = 17;
+            _subtitleLabel.style.color = new Color(0.85f, 0.85f, 0.85f);
             _subtitleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _subtitleLabel.style.marginBottom = 12;
+            _subtitleLabel.style.marginBottom = 14;
             _card.Add(_subtitleLabel);
 
             _boxListContainer = new ScrollView();
-            _boxListContainer.style.height = 240;
-            _boxListContainer.style.marginBottom = 12;
+            _boxListContainer.style.height = 300;
+            _boxListContainer.style.marginBottom = 14;
             _boxListContainer.style.backgroundColor = new Color(0.08f, 0.08f, 0.1f, 0.8f);
-            _boxListContainer.style.borderTopLeftRadius = 6;
-            _boxListContainer.style.borderTopRightRadius = 6;
-            _boxListContainer.style.borderBottomLeftRadius = 6;
-            _boxListContainer.style.borderBottomRightRadius = 6;
-            _boxListContainer.style.paddingTop = 6;
-            _boxListContainer.style.paddingBottom = 6;
-            _boxListContainer.style.paddingLeft = 8;
-            _boxListContainer.style.paddingRight = 8;
+            _boxListContainer.style.borderTopLeftRadius = 8;
+            _boxListContainer.style.borderTopRightRadius = 8;
+            _boxListContainer.style.borderBottomLeftRadius = 8;
+            _boxListContainer.style.borderBottomRightRadius = 8;
+            _boxListContainer.style.paddingTop = 8;
+            _boxListContainer.style.paddingBottom = 8;
+            _boxListContainer.style.paddingLeft = 10;
+            _boxListContainer.style.paddingRight = 10;
             _card.Add(_boxListContainer);
 
             // Botão Selecionar Todas
             _selectAllBtn = new Button(ToggleSelectAll);
             _selectAllBtn.text = "Selecionar Todas as Caixas";
-            _selectAllBtn.style.height = 32;
-            _selectAllBtn.style.marginBottom = 10;
+            _selectAllBtn.style.fontSize = 17;
+            _selectAllBtn.style.height = 42;
+            _selectAllBtn.style.marginBottom = 12;
             _selectAllBtn.style.backgroundColor = new Color(0.2f, 0.35f, 0.5f);
             _selectAllBtn.style.color = Color.white;
             _selectAllBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -158,18 +159,20 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _cancelBtn = new Button(Close);
             _cancelBtn.text = "Cancelar [Esc]";
+            _cancelBtn.style.fontSize = 18;
             _cancelBtn.style.flexGrow = 1;
             _cancelBtn.style.marginRight = 8;
-            _cancelBtn.style.height = 36;
+            _cancelBtn.style.height = 44;
             _cancelBtn.style.backgroundColor = new Color(0.4f, 0.2f, 0.2f);
             _cancelBtn.style.color = Color.white;
             btnRow.Add(_cancelBtn);
 
             _confirmBtn = new Button(ConfirmDelivery);
             _confirmBtn.text = "Confirmar Entrega (0)";
+            _confirmBtn.style.fontSize = 18;
             _confirmBtn.style.flexGrow = 1;
             _confirmBtn.style.marginLeft = 8;
-            _confirmBtn.style.height = 36;
+            _confirmBtn.style.height = 44;
             _confirmBtn.style.backgroundColor = new Color(0.15f, 0.55f, 0.25f);
             _confirmBtn.style.color = Color.white;
             _confirmBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -231,16 +234,16 @@ namespace ScaryParty.Pizzeria.Presentation
                 row.style.flexDirection = FlexDirection.Row;
                 row.style.alignItems = Align.Center;
                 row.style.justifyContent = Justify.SpaceBetween;
-                row.style.paddingTop = 6;
-                row.style.paddingBottom = 6;
-                row.style.paddingLeft = 8;
-                row.style.paddingRight = 8;
-                row.style.marginBottom = 4;
+                row.style.paddingTop = 8;
+                row.style.paddingBottom = 8;
+                row.style.paddingLeft = 12;
+                row.style.paddingRight = 12;
+                row.style.marginBottom = 6;
                 row.style.backgroundColor = new Color(0.16f, 0.16f, 0.2f);
-                row.style.borderTopLeftRadius = 4;
-                row.style.borderTopRightRadius = 4;
-                row.style.borderBottomLeftRadius = 4;
-                row.style.borderBottomRightRadius = 4;
+                row.style.borderTopLeftRadius = 6;
+                row.style.borderTopRightRadius = 6;
+                row.style.borderBottomLeftRadius = 6;
+                row.style.borderBottomRightRadius = 6;
 
                 string locStr = item.LocationType == (byte)LocationType.Hand
                     ? $"Mão {(item.SlotId == 0 ? "Esquerda" : "Direita")}"
@@ -259,10 +262,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 var labelBox = new Label($"📦 {locStr} | {labelStr}");
                 labelBox.style.color = isMatch ? new Color(0.4f, 0.9f, 0.4f) : Color.white;
-                labelBox.style.fontSize = 13;
+                labelBox.style.fontSize = 17;
                 row.Add(labelBox);
 
                 var toggle = new Toggle();
+                toggle.style.scale = new Scale(new Vector2(1.2f, 1.2f));
                 toggle.value = _selectedItemIds.Contains(item.ItemId);
                 ulong itemId = item.ItemId;
                 toggle.RegisterValueChangedCallback(evt =>

@@ -66,10 +66,10 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (toasts.Count == 0) return;
 
-            int toastHeight = 30;
-            int spacing = 5;
-            int width = 300;
-            int startY = Screen.height - 50 - (toasts.Count * (toastHeight + spacing));
+            int toastHeight = 44;
+            int spacing = 8;
+            int width = 500;
+            int startY = Screen.height - 70 - (toasts.Count * (toastHeight + spacing));
 
             for (int i = 0; i < toasts.Count; i++)
             {
@@ -83,13 +83,14 @@ namespace ScaryParty.Pizzeria.Presentation
                     case NotificationType.Info: bgColor = Color.white; break;
                 }
 
-                bgColor.a = 0.8f;
+                bgColor.a = 0.85f;
                 GUI.backgroundColor = bgColor;
 
                 GUIStyle style = new GUIStyle(GUI.skin.box);
                 style.alignment = TextAnchor.MiddleCenter;
                 style.normal.textColor = Color.black;
                 style.fontStyle = FontStyle.Bold;
+                style.fontSize = 18;
 
                 float alpha = Mathf.Clamp01(toast.TimeRemaining / 0.5f);
                 Color originalColor = GUI.color;

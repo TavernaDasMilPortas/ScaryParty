@@ -10,7 +10,7 @@
 }
 
 .header-title {
-    font-size: 48px;
+    font-size: 56px;
     -unity-font-style: bold;
     color: rgb(255, 140, 0);
     margin-bottom: 30px;
@@ -19,69 +19,69 @@
 
 .main-content {
     flex-direction: row;
-    width: 90%;
-    height: 80%;
+    width: 92%;
+    height: 82%;
     justify-content: space-around;
 }
 
 /* Panels (Glassmorphism effect) */
 .panel {
     background-color: rgba(30, 30, 30, 0.6);
-    border-radius: 15px;
+    border-radius: 16px;
     border-width: 2px;
     border-color: rgba(255, 255, 255, 0.1);
-    padding: 20px;
+    padding: 24px;
     flex-grow: 1;
     margin: 0 10px;
 }
 
 .column-left {
-    flex-basis: 25%;
+    flex-basis: 26%;
 }
 
 .column-center {
-    flex-basis: 40%;
+    flex-basis: 42%;
 }
 
 .column-right {
-    flex-basis: 30%;
+    flex-basis: 32%;
 }
 
 .panel-title {
-    font-size: 24px;
+    font-size: 28px;
     -unity-font-style: bold;
     color: rgb(224, 224, 224);
     margin-bottom: 20px;
     -unity-text-align: middle-center;
     border-bottom-width: 1px;
     border-bottom-color: rgba(255, 255, 255, 0.2);
-    padding-bottom: 10px;
+    padding-bottom: 12px;
 }
 
 /* Typography & Inputs */
 .field-label {
-    font-size: 16px;
+    font-size: 20px;
     color: rgb(180, 180, 180);
     margin-top: 10px;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .input-field {
     background-color: rgba(0, 0, 0, 0.5);
     color: white;
-    font-size: 18px;
-    padding: 10px;
-    border-radius: 8px;
-    border-width: 1px;
+    font-size: 20px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border-width: 1.5px;
     border-color: rgba(255, 140, 0, 0.5);
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 /* Força texto branco e legível dentro de TextFields */
 .input-field .unity-text-field__input,
 .input-field .unity-base-text-field__input {
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     background-color: transparent;
     border-width: 0;
     -unity-text-align: middle-left;
@@ -92,15 +92,15 @@
 /* Placeholder text (quando vazio) — cinza claro */
 .input-field .unity-text-field__placeholder .unity-text-element {
     color: rgba(180, 180, 180, 0.6);
-    font-size: 16px;
+    font-size: 18px;
 }
 
 /* Color Picker */
 .color-preview {
     width: 100%;
-    height: 60px;
-    border-radius: 10px;
-    margin-bottom: 10px;
+    height: 65px;
+    border-radius: 12px;
+    margin-bottom: 12px;
     border-width: 2px;
     border-color: white;
 }
@@ -108,14 +108,14 @@
 .color-palette {
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
 }
 
 .color-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 20px;
-    border-width: 2px;
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    border-width: 2.5px;
     border-color: rgba(255, 255, 255, 0.3);
     cursor: pointer;
 }
@@ -131,12 +131,12 @@
 
 /* Buttons */
 .action-btn {
-    font-size: 18px;
+    font-size: 20px;
     -unity-font-style: bold;
     color: white;
     background-color: rgba(80, 80, 80, 0.8);
-    padding: 12px;
-    border-radius: 8px;
+    padding: 14px 20px;
+    border-radius: 10px;
     border-width: 2px;
     border-color: transparent;
     cursor: pointer;
@@ -166,26 +166,26 @@
 /* Room List */
 .room-list {
     flex-grow: 1;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
     background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 10px;
-    padding: 10px;
+    border-radius: 12px;
+    padding: 12px;
 }
 
 .no-rooms-label {
     color: rgb(150, 150, 150);
     -unity-text-align: middle-center;
-    margin-top: 20px;
-    font-size: 16px;
+    margin-top: 24px;
+    font-size: 18px;
 }
 
 .room-entry {
     flex-direction: row;
     background-color: rgba(50, 50, 50, 0.6);
-    border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 8px;
-    border-left-width: 4px;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    border-left-width: 5px;
     border-left-color: rgb(51, 204, 51);
     align-items: center;
     justify-content: space-between;
@@ -196,13 +196,13 @@
 }
 
 .room-name {
-    font-size: 18px;
+    font-size: 20px;
     -unity-font-style: bold;
     color: white;
 }
 
 .room-details {
-    font-size: 12px;
+    font-size: 15px;
     color: rgb(180, 180, 180);
 }
 
@@ -210,8 +210,9 @@
     background-color: rgb(51, 204, 51);
     color: white;
     -unity-font-style: bold;
-    border-radius: 5px;
-    padding: 5px 15px;
+    font-size: 16px;
+    border-radius: 6px;
+    padding: 8px 18px;
     cursor: pointer;
 }
 .join-btn:hover {

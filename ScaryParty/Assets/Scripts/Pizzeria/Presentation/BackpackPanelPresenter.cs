@@ -91,13 +91,13 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _card = new VisualElement();
             _card.name = "BackpackPanelCard";
-            _card.style.width = 480;
-            _card.style.maxHeight = 520;
+            _card.style.width = 600;
+            _card.style.maxHeight = 620;
             _card.style.backgroundColor = new Color(0.12f, 0.12f, 0.14f, 0.98f);
-            _card.style.borderTopLeftRadius = 10;
-            _card.style.borderTopRightRadius = 10;
-            _card.style.borderBottomLeftRadius = 10;
-            _card.style.borderBottomRightRadius = 10;
+            _card.style.borderTopLeftRadius = 12;
+            _card.style.borderTopRightRadius = 12;
+            _card.style.borderBottomLeftRadius = 12;
+            _card.style.borderBottomRightRadius = 12;
             _card.style.borderTopWidth = 2;
             _card.style.borderBottomWidth = 2;
             _card.style.borderLeftWidth = 2;
@@ -106,44 +106,45 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.style.borderBottomColor = new Color(0.9f, 0.35f, 0.2f);
             _card.style.borderLeftColor = new Color(0.9f, 0.35f, 0.2f);
             _card.style.borderRightColor = new Color(0.9f, 0.35f, 0.2f);
-            _card.style.paddingTop = 16;
-            _card.style.paddingBottom = 16;
-            _card.style.paddingLeft = 20;
-            _card.style.paddingRight = 20;
+            _card.style.paddingTop = 20;
+            _card.style.paddingBottom = 20;
+            _card.style.paddingLeft = 24;
+            _card.style.paddingRight = 24;
 
             _titleLabel = new Label("🎒 MOCHILA TÉRMICA DO ENTREGADOR");
-            _titleLabel.style.fontSize = 18;
+            _titleLabel.style.fontSize = 24;
             _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _titleLabel.style.color = new Color(0.95f, 0.5f, 0.3f);
             _titleLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
             _card.Add(_titleLabel);
 
             _capacityLabel = new Label("Capacidade: 0 / 3 caixas");
-            _capacityLabel.style.fontSize = 13;
-            _capacityLabel.style.color = new Color(0.8f, 0.8f, 0.8f);
+            _capacityLabel.style.fontSize = 17;
+            _capacityLabel.style.color = new Color(0.85f, 0.85f, 0.85f);
             _capacityLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _capacityLabel.style.marginBottom = 12;
+            _capacityLabel.style.marginBottom = 14;
             _card.Add(_capacityLabel);
 
             _slotsContainer = new ScrollView();
-            _slotsContainer.style.height = 200;
-            _slotsContainer.style.marginBottom = 12;
+            _slotsContainer.style.height = 260;
+            _slotsContainer.style.marginBottom = 14;
             _slotsContainer.style.backgroundColor = new Color(0.08f, 0.08f, 0.1f, 0.8f);
-            _slotsContainer.style.borderTopLeftRadius = 6;
-            _slotsContainer.style.borderTopRightRadius = 6;
-            _slotsContainer.style.borderBottomLeftRadius = 6;
-            _slotsContainer.style.borderBottomRightRadius = 6;
-            _slotsContainer.style.paddingTop = 6;
-            _slotsContainer.style.paddingBottom = 6;
-            _slotsContainer.style.paddingLeft = 8;
-            _slotsContainer.style.paddingRight = 8;
+            _slotsContainer.style.borderTopLeftRadius = 8;
+            _slotsContainer.style.borderTopRightRadius = 8;
+            _slotsContainer.style.borderBottomLeftRadius = 8;
+            _slotsContainer.style.borderBottomRightRadius = 8;
+            _slotsContainer.style.paddingTop = 8;
+            _slotsContainer.style.paddingBottom = 8;
+            _slotsContainer.style.paddingLeft = 10;
+            _slotsContainer.style.paddingRight = 10;
             _card.Add(_slotsContainer);
 
             // Botão Guardar da Mão Ativa
             _storeHandBtn = new Button(StoreFromActiveHand);
             _storeHandBtn.text = "Guardar Caixa da Mão Ativa";
-            _storeHandBtn.style.height = 34;
-            _storeHandBtn.style.marginBottom = 8;
+            _storeHandBtn.style.fontSize = 18;
+            _storeHandBtn.style.height = 46;
+            _storeHandBtn.style.marginBottom = 10;
             _storeHandBtn.style.backgroundColor = new Color(0.2f, 0.5f, 0.3f);
             _storeHandBtn.style.color = Color.white;
             _storeHandBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
@@ -156,18 +157,20 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _dropBackpackBtn = new Button(DropBackpack);
             _dropBackpackBtn.text = "Largar Mochila";
+            _dropBackpackBtn.style.fontSize = 17;
             _dropBackpackBtn.style.flexGrow = 1;
             _dropBackpackBtn.style.marginRight = 8;
-            _dropBackpackBtn.style.height = 34;
+            _dropBackpackBtn.style.height = 44;
             _dropBackpackBtn.style.backgroundColor = new Color(0.5f, 0.25f, 0.15f);
             _dropBackpackBtn.style.color = Color.white;
             bottomRow.Add(_dropBackpackBtn);
 
             _closeBtn = new Button(Toggle);
             _closeBtn.text = "Fechar [B / Esc]";
+            _closeBtn.style.fontSize = 17;
             _closeBtn.style.flexGrow = 1;
             _closeBtn.style.marginLeft = 8;
-            _closeBtn.style.height = 34;
+            _closeBtn.style.height = 44;
             _closeBtn.style.backgroundColor = new Color(0.3f, 0.3f, 0.35f);
             _closeBtn.style.color = Color.white;
             bottomRow.Add(_closeBtn);
@@ -228,16 +231,16 @@ namespace ScaryParty.Pizzeria.Presentation
                 row.style.flexDirection = FlexDirection.Row;
                 row.style.justifyContent = Justify.SpaceBetween;
                 row.style.alignItems = Align.Center;
-                row.style.paddingTop = 6;
-                row.style.paddingBottom = 6;
-                row.style.paddingLeft = 8;
-                row.style.paddingRight = 8;
-                row.style.marginBottom = 4;
+                row.style.paddingTop = 8;
+                row.style.paddingBottom = 8;
+                row.style.paddingLeft = 12;
+                row.style.paddingRight = 12;
+                row.style.marginBottom = 6;
                 row.style.backgroundColor = new Color(0.16f, 0.16f, 0.2f);
-                row.style.borderTopLeftRadius = 4;
-                row.style.borderTopRightRadius = 4;
-                row.style.borderBottomLeftRadius = 4;
-                row.style.borderBottomRightRadius = 4;
+                row.style.borderTopLeftRadius = 6;
+                row.style.borderTopRightRadius = 6;
+                row.style.borderBottomLeftRadius = 6;
+                row.style.borderBottomRightRadius = 6;
 
                 if (i < boxes.Count)
                 {
@@ -247,20 +250,25 @@ namespace ScaryParty.Pizzeria.Presentation
                         : "Sem etiqueta";
 
                     var desc = new Label($"Slot {i + 1}: 📦 Caixa #{item.ItemId} ({labelDest})");
+                    desc.style.fontSize = 17;
                     desc.style.color = new Color(0.95f, 0.8f, 0.4f);
                     row.Add(desc);
 
                     ulong itemId = item.ItemId;
                     var takeBtn = new Button(() => RetrieveToHand(itemId));
                     takeBtn.text = "Retirar para Mão";
+                    takeBtn.style.fontSize = 16;
                     takeBtn.style.backgroundColor = new Color(0.25f, 0.45f, 0.65f);
                     takeBtn.style.color = Color.white;
-                    takeBtn.style.height = 28;
+                    takeBtn.style.height = 36;
+                    takeBtn.style.paddingLeft = 14;
+                    takeBtn.style.paddingRight = 14;
                     row.Add(takeBtn);
                 }
                 else
                 {
                     var emptyDesc = new Label($"Slot {i + 1}: [Vazio]");
+                    emptyDesc.style.fontSize = 17;
                     emptyDesc.style.color = new Color(0.6f, 0.6f, 0.6f);
                     row.Add(emptyDesc);
                 }

@@ -7,45 +7,45 @@
 
 .panel {
     background-color: #2b2b2b;
-    border-radius: 15px;
-    padding: 30px;
-    width: 600px;
+    border-radius: 18px;
+    padding: 36px;
+    width: 720px;
     border-width: 3px;
     border-color: #ff6600;
 }
 
 .title {
-    font-size: 28px;
+    font-size: 36px;
     -unity-font-style: bold;
     color: #ff8800;
     -unity-text-align: middle-center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
 }
 
 .players-container {
-    min-height: 200px;
-    margin-bottom: 20px;
+    min-height: 220px;
+    margin-bottom: 24px;
 }
 
 .player-row {
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 20px;
-    margin-bottom: 8px;
-    border-radius: 8px;
+    padding: 14px 24px;
+    margin-bottom: 10px;
+    border-radius: 10px;
     border-width: 2px;
     border-color: #ffffff;
     align-items: center;
 }
 
 .player-name {
-    font-size: 18px;
+    font-size: 22px;
     -unity-font-style: bold;
     color: white;
 }
 
 .player-status {
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
 }
 
@@ -56,11 +56,11 @@
 .ready-btn {
     background-color: #2e8b57;
     color: white;
-    font-size: 20px;
+    font-size: 24px;
     -unity-font-style: bold;
-    border-radius: 10px;
-    height: 50px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    height: 60px;
+    margin-bottom: 12px;
 }
 
 .ready-btn:hover {
@@ -70,11 +70,11 @@
 .start-btn {
     background-color: #ff6600;
     color: white;
-    font-size: 20px;
+    font-size: 24px;
     -unity-font-style: bold;
-    border-radius: 10px;
-    height: 50px;
-    margin-bottom: 10px;
+    border-radius: 12px;
+    height: 60px;
+    margin-bottom: 12px;
 }
 
 .start-btn:hover {
@@ -84,9 +84,9 @@
 .cancel-btn {
     background-color: #b22222;
     color: white;
-    font-size: 16px;
-    border-radius: 8px;
-    height: 40px;
+    font-size: 19px;
+    border-radius: 10px;
+    height: 48px;
 }
 
 .cancel-btn:hover {

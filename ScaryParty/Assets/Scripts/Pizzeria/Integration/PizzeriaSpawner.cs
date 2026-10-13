@@ -64,6 +64,11 @@ namespace ScaryParty.Pizzeria.Integration
             _spawnedInstance = Object.Instantiate(prefab, position, rotation, null);
             _spawnedInstance.name = "The_Pizzeria_Building";
 
+            // Garante que a instância fica na cena do jogo (e não na cena ativa de um momento
+            // de transição, ex.: ReadyScene, que seria descarregada depois).
+            if (gameObject.scene.IsValid() && gameObject.scene.isLoaded && _spawnedInstance.scene != gameObject.scene)
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(_spawnedInstance, gameObject.scene);
+
             var netObj = _spawnedInstance.GetComponent<NetworkObject>();
             if (netObj != null && !netObj.IsSpawned)
             {

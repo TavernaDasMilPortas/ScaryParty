@@ -166,10 +166,22 @@ public class CityGenerator : NetworkBehaviour
         }
     }
 
+    private void Awake()
+    {
+        if (Application.isPlaying)
+        {
+            DestroyStaticCity();
+        }
+    }
+
     private void DestroyStaticCity()
     {
         GameObject staticCity = GameObject.Find("__City__");
-        if (staticCity != null) Destroy(staticCity);
+        if (staticCity != null)
+        {
+            staticCity.SetActive(false);
+            Destroy(staticCity);
+        }
     }
 
     [ContextMenu("Generate City")]
@@ -353,13 +365,33 @@ public class CityGenerator : NetworkBehaviour
                     }
                 }
                 
-                GameObject spawnPoint = GameObject.Find($"NetworkSpawnPoint_{playerIndex % 4}");
-                if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint_0");
-                
-                if (spawnPoint != null)
+                Vector3 targetPos = Vector3.zero;
+                Quaternion targetRot = Quaternion.identity;
+                bool foundPos = false;
+
+                if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
                 {
-                    po.transform.position = spawnPoint.transform.position;
-                    po.transform.rotation = spawnPoint.transform.rotation;
+                    targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(playerIndex);
+                    targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(playerIndex);
+                    foundPos = true;
+                }
+                else
+                {
+                    GameObject spawnPoint = GameObject.Find($"NetworkSpawnPoint_{playerIndex % 4}");
+                    if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint_0");
+                    if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint");
+                    if (spawnPoint != null)
+                    {
+                        targetPos = spawnPoint.transform.position;
+                        targetRot = spawnPoint.transform.rotation;
+                        foundPos = true;
+                    }
+                }
+
+                if (foundPos)
+                {
+                    po.transform.position = targetPos;
+                    po.transform.rotation = targetRot;
                 }
                 
                 if (cc != null) cc.enabled = true;
@@ -389,6 +421,11 @@ public class CityGenerator : NetworkBehaviour
         Vector3 entranceDir = Vector3.forward; 
         Quaternion pizzariaRot = Quaternion.identity;
         Vector3 pizzariaScale = new Vector3(12f, 6f, 12f);
+
+        // Footprint do prefab, baseado no objeto "Floor" dele (fallback 12x12).
+        GetPizzeriaFootprint(out Vector2 floorSize, out Vector2 floorCenter, out Vector2 frontLocal);
+        float frontHalfDepth = Mathf.Abs(frontLocal.x) * floorSize.x * 0.5f + Mathf.Abs(frontLocal.y) * floorSize.y * 0.5f;
+        float frontDistance = frontHalfDepth + Vector2.Dot(floorCenter, frontLocal) + 1.5f; // pivô -> bancada
 
         // ── Pick the building closest to the block edge (= closest to the street) ──
         if (blockTransform != null)
@@ -457,9 +494,11 @@ public class CityGenerator : NetworkBehaviour
                 else
                     entranceDir = new Vector3(0, 0, Mathf.Sign(entranceDir.z));
 
-                // Rotation: the prefab door is at local Z = −6 (the −Z face).
-                // LookRotation(-entranceDir) makes +Z point inward and −Z face the street.
-                pizzariaRot = Quaternion.LookRotation(-entranceDir, Vector3.up);
+                // Rotação: a frente do prefab (direção do EntranceAnchor, frontLocal) deve
+                // apontar para a rua (entranceDir).
+                Vector3 frontLocal3 = new Vector3(frontLocal.x, 0f, frontLocal.y);
+                pizzariaRot = Quaternion.LookRotation(entranceDir, Vector3.up)
+                              * Quaternion.Inverse(Quaternion.LookRotation(frontLocal3, Vector3.up));
 
                 // Use world-space bounds so rotation of the old building doesn't matter.
                 Renderer rend = bestBuilding.GetComponent<Renderer>();
@@ -478,16 +517,20 @@ public class CityGenerator : NetworkBehaviour
                 else
                     streetEdge.x = buildingPos.x;
 
-                // Pizzeria center is 6 m inward from the street edge so the door
-                // wall (local Z = −6) sits flush with the sidewalk.
-                const float pizzeriaHalfDepth = 6f;
-                pizzariaPos = streetEdge - entranceDir * pizzeriaHalfDepth;
+                // A borda da frente do Floor (centro + frontLocal*halfDepth) fica rente à calçada.
+                Vector3 frontEdgeLocal = new Vector3(
+                    floorCenter.x + frontLocal.x * frontHalfDepth, 0f,
+                    floorCenter.y + frontLocal.y * frontHalfDepth);
+                pizzariaPos = streetEdge - (pizzariaRot * frontEdgeLocal);
 
                 if (Application.isPlaying) Destroy(bestBuilding.gameObject);
                 else DestroyImmediate(bestBuilding.gameObject);
 
-                // ── Carve out space for the 12x12 Pizzeria ──
-                Bounds pizzeriaBounds = new Bounds(pizzariaPos, new Vector3(12f, 10f, 12f));
+                // ── Carve out space for the Pizzeria (tamanho real do Floor) ──
+                Vector3 floorWorldCenter = pizzariaPos + pizzariaRot * new Vector3(floorCenter.x, 0f, floorCenter.y);
+                Vector3 rotatedSize = pizzariaRot * new Vector3(floorSize.x, 10f, floorSize.y);
+                Bounds pizzeriaBounds = new Bounds(floorWorldCenter,
+                    new Vector3(Mathf.Abs(rotatedSize.x), 10f, Mathf.Abs(rotatedSize.z)));
                 pizzeriaBounds.Expand(0.5f); // Leave a small gap to neighbors
 
                 CityBuilding[] remainingBuildings = blockTransform.GetComponentsInChildren<CityBuilding>();
@@ -510,8 +553,41 @@ public class CityGenerator : NetworkBehaviour
 
         if (pizzeriaPrefab != null)
         {
-            ScaryParty.Pizzeria.Integration.CityPizzeriaPlacementAdapter.SpawnPizzeria(
-                pizzeriaPrefab, pizzariaPos, pizzariaRot, parentTransform, CityData, config.sidewalkHeight);
+            var pObj = ScaryParty.Pizzeria.Integration.CityPizzeriaPlacementAdapter.SpawnPizzeria(
+                pizzeriaPrefab, pizzariaPos, pizzariaRot, parentTransform, CityData, config.sidewalkHeight, frontDistance, entranceDir);
+
+            if (pObj != null)
+            {
+                var pRoot = pObj.GetComponent<ScaryParty.Pizzeria.Composition.PizzeriaRoot>();
+                for (int i = 0; i < 4; i++)
+                {
+                    GameObject sp = new GameObject($"NetworkSpawnPoint_{i}");
+                    sp.transform.SetParent(pObj.transform);
+                    if (pRoot != null)
+                    {
+                        sp.transform.position = pRoot.GetPlayerSpawnPosition(i);
+                        sp.transform.rotation = pRoot.GetPlayerSpawnRotation(i);
+                    }
+                    else
+                    {
+                        sp.transform.position = pizzariaPos + Vector3.up * 0.1f;
+                        sp.transform.rotation = pizzariaRot;
+                    }
+                }
+
+                GameObject spLegacy = new GameObject("NetworkSpawnPoint");
+                spLegacy.transform.SetParent(pObj.transform);
+                if (pRoot != null)
+                {
+                    spLegacy.transform.position = pRoot.GetPlayerSpawnPosition(0);
+                    spLegacy.transform.rotation = pRoot.GetPlayerSpawnRotation(0);
+                }
+                else
+                {
+                    spLegacy.transform.position = pizzariaPos + Vector3.up * 0.1f;
+                    spLegacy.transform.rotation = pizzariaRot;
+                }
+            }
             return;
         }
 
@@ -573,6 +649,59 @@ public class CityGenerator : NetworkBehaviour
             
             spawnPoint.transform.position = spawnPos;
             spawnPoint.transform.rotation = Quaternion.LookRotation(-entranceDir);
+        }
+    }
+
+    /// <summary>
+    /// Lê o objeto "Floor" do prefab da pizzaria e devolve tamanho (x,z) e centro (x,z)
+    /// no espaço local do prefab. Fallback: 12x12 centrado.
+    /// </summary>
+    private void GetPizzeriaFootprint(out Vector2 size, out Vector2 center, out Vector2 frontLocal)
+    {
+        size = new Vector2(12f, 12f);
+        center = Vector2.zero;
+        frontLocal = new Vector2(0f, -1f); // fallback: frente em -Z
+        if (pizzeriaPrefab == null) return;
+
+        Transform floor = null;
+        foreach (Transform t in pizzeriaPrefab.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.name == "Floor") { floor = t; break; }
+        }
+        if (floor == null) return;
+
+        MeshFilter mf = floor.GetComponent<MeshFilter>();
+        if (mf == null || mf.sharedMesh == null) return;
+
+        // Matriz do Floor relativa à raiz do prefab
+        Matrix4x4 m = pizzeriaPrefab.transform.worldToLocalMatrix * floor.localToWorldMatrix;
+        Bounds mb = mf.sharedMesh.bounds;
+        Vector3 min = new Vector3(float.MaxValue, 0, float.MaxValue);
+        Vector3 max = new Vector3(float.MinValue, 0, float.MinValue);
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3 corner = mb.center + Vector3.Scale(mb.extents,
+                new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1));
+            Vector3 p = m.MultiplyPoint3x4(corner);
+            min.x = Mathf.Min(min.x, p.x); max.x = Mathf.Max(max.x, p.x);
+            min.z = Mathf.Min(min.z, p.z); max.z = Mathf.Max(max.z, p.z);
+        }
+        size = new Vector2(max.x - min.x, max.z - min.z);
+        center = new Vector2((max.x + min.x) * 0.5f, (max.z + min.z) * 0.5f);
+
+        // Frente = direção do centro do Floor até o "EntranceAnchor" (snap cardinal).
+        foreach (Transform t in pizzeriaPrefab.GetComponentsInChildren<Transform>(true))
+        {
+            if (t.name != "EntranceAnchor") continue;
+            Vector3 a = pizzeriaPrefab.transform.worldToLocalMatrix.MultiplyPoint3x4(t.position);
+            Vector2 d = new Vector2(a.x, a.z) - center;
+            if (d.sqrMagnitude > 0.0001f)
+            {
+                frontLocal = Mathf.Abs(d.x) > Mathf.Abs(d.y)
+                    ? new Vector2(Mathf.Sign(d.x), 0f)
+                    : new Vector2(0f, Mathf.Sign(d.y));
+            }
+            break;
         }
     }
 
