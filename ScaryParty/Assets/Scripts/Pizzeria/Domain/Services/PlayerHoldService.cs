@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -9,16 +9,16 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public CommandResult BeginDiscard(PizzeriaState state, ulong playerId, ItemId itemId, float duration, float now, float leaseDuration)
         {
             if (state.PlayerHolds.TryGetValue(playerId, out var existing))
-                return CommandResult.Fail(CommandError.Busy, ""Jogador já está realizando uma ação."");
+                return CommandResult.Fail(CommandError.Busy, "Jogador já está realizando uma ação.");
 
             if (!state.Items.TryGetValue(itemId, out var item))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Item não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
             if (item.Location.Type != LocationType.Hand || (ulong)item.Location.HolderId != playerId)
-                return CommandResult.Fail(CommandError.NotOwner, ""Você precisa segurar o item para descartá-lo."");
+                return CommandResult.Fail(CommandError.NotOwner, "Você precisa segurar o item para descartá-lo.");
 
             if (item.ReservedByHold != 0)
-                return CommandResult.Fail(CommandError.Blocked, ""Item reservado."");
+                return CommandResult.Fail(CommandError.Blocked, "Item reservado.");
 
             item.ReservedByHold = playerId;
             item.Revision++;
@@ -33,10 +33,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public CommandResult BeginArchiveTicket(PizzeriaState state, ulong playerId, OrderId orderId, float duration, float now, float leaseDuration)
         {
             if (state.PlayerHolds.TryGetValue(playerId, out var existing))
-                return CommandResult.Fail(CommandError.Busy, ""Jogador já está realizando uma ação."");
+                return CommandResult.Fail(CommandError.Busy, "Jogador já está realizando uma ação.");
 
             if (!state.Orders.TryGetValue(orderId, out var order))
-                return CommandResult.Fail(CommandError.ItemNotFound, ""Pedido não encontrado."");
+                return CommandResult.Fail(CommandError.ItemNotFound, "Pedido não encontrado.");
 
             var hold = new PlayerHold(playerId, PlayerHoldKind.ArchiveTicket, ItemId.None, orderId, duration, now, leaseDuration);
             state.PlayerHolds[playerId] = hold;
@@ -48,10 +48,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public CommandResult Heartbeat(PizzeriaState state, ulong playerId, float now, float leaseDuration)
         {
             if (!state.PlayerHolds.TryGetValue(playerId, out var hold))
-                return CommandResult.Fail(CommandError.InvalidOperation, ""Nenhuma ação em andamento."");
+                return CommandResult.Fail(CommandError.InvalidOperation, "Nenhuma ação em andamento.");
 
             if (hold.Phase != OperationPhase.Running)
-                return CommandResult.Fail(CommandError.InvalidOperation, ""Ação não está rodando."");
+                return CommandResult.Fail(CommandError.InvalidOperation, "Ação não está rodando.");
 
             hold.Progress.ExtendLease(now, leaseDuration);
             hold.Revision++;

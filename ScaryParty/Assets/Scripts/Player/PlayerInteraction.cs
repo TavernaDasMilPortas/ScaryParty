@@ -112,6 +112,7 @@ public class PlayerInteraction : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
+        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
         
         HandleRaycast();
         HandleInput();

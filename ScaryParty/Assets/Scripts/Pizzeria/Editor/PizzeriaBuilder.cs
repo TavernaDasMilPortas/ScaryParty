@@ -306,6 +306,7 @@ namespace ScaryParty.Pizzeria.Editor
             BuilderToolkit.GetOrAddComponent<PlayerLifecycleBridge>(root);
             BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder>(root);
             BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer>(root);
+            BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.TicketModalPresenter>(root);
             BuilderToolkit.GetOrAddComponent<Night1Bootstrapper>(root);
             BuilderToolkit.MarkGenerated(root, "PizzeriaBuilder", "Root");
 
@@ -380,13 +381,17 @@ namespace ScaryParty.Pizzeria.Editor
 
             // 12. Order Phone
             var phone = CreateStation<PhoneStation>("Station_Phone", 12, stationsRoot.transform, new Vector3(-3f, 0.6f, -4.5f), new Vector3(0.8f, 1.2f, 0.8f), materials["Phone"]);
-            phone.isRinging = true;
+            var ringer = phone.gameObject.AddComponent<PhoneRinger>();
+            phone.ringer = ringer;
 
             // 13. Receiving Area
             CreateStation<ReceivingStation>("Area_Receiving", 13, stationsRoot.transform, new Vector3(-3.5f, 0.05f, -7f), new Vector3(2f, 0.1f, 2f), materials["Floor"]);
 
             // 14. Trash Bin
             CreateStation<TrashStation>("Station_Trash", 14, stationsRoot.transform, new Vector3(5f, 0.5f, -3.5f), new Vector3(0.8f, 1f, 0.8f), materials["Trash"]);
+
+            // 15. Ticket Board (Quadro de Comandas)
+            CreateStation<TicketBoardStation>("Station_TicketBoard", 15, stationsRoot.transform, new Vector3(3.5f, 1.6f, 5.8f), new Vector3(2.2f, 0.9f, 0.08f), materials["Counter"]);
 
             // Anchors Group
             var anchors = new GameObject("Anchors");
