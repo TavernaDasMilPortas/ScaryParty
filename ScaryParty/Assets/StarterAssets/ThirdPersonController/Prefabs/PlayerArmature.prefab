@@ -1470,6 +1470,7 @@ MonoBehaviour:
   interactableLayer:
     serializedVersion: 2
     m_Bits: 0
+  outlineMaterial: {fileID: 2100000, guid: ea288f3eaf0b1974ca52bef3c6c7aefe, type: 2}
 --- !u!114 &789712693648477549
 MonoBehaviour:
   m_ObjectHideFlags: 0

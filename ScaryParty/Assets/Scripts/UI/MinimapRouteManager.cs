@@ -67,6 +67,16 @@ public class MinimapRouteManager : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        if (_isFullscreen)
+        {
+            _isFullscreen = false;
+            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PopModal();
+        }
+        if (Instance == this) Instance = null;
+    }
+
     public void PanMap(Vector2 screenDelta)
     {
         if (!_isFullscreen) return;
@@ -214,6 +224,15 @@ public class MinimapRouteManager : MonoBehaviour
         if (UIManager.Instance != null)
         {
             UIManager.Instance.ToggleMinimapFullscreen(_isFullscreen);
+        }
+
+        if (_isFullscreen)
+        {
+            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PushModal();
+        }
+        else
+        {
+            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PopModal();
         }
 
         Debug.Log($"[MINIMAP] Toggled to {(_isFullscreen ? "FULLSCREEN" : "HUD")} mode.");

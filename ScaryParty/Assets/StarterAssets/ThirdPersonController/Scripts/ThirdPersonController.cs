@@ -209,6 +209,7 @@ namespace StarterAssets
         private void LateUpdate()
         {
             if (!IsOwner) return;
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
 
             CameraRotation();
         }
@@ -260,6 +261,19 @@ namespace StarterAssets
 
         private void Move()
         {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked)
+            {
+                _speed = 0f;
+                _animationBlend = 0f;
+                if (_hasAnimator)
+                {
+                    _animator.SetFloat(_animIDSpeed, 0f);
+                    _animator.SetFloat(_animIDMotionSpeed, 0f);
+                }
+                _controller.Move(new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
+                return;
+            }
+
             // set target speed based on move speed, sprint speed and if sprint is pressed
             float targetSpeed = _input.sprint ? SprintSpeed : MoveSpeed;
 

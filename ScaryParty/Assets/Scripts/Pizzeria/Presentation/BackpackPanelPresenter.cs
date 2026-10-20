@@ -30,6 +30,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private Button _closeBtn;
 
         private bool _isOpen = false;
+        private int _openedFrame = -1;
         public bool IsOpen => _isOpen;
 
         private void Awake()
@@ -40,7 +41,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
         }
@@ -188,6 +189,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _isOpen = !_isOpen;
             if (_isOpen)
             {
+                _openedFrame = Time.frameCount;
                 RefreshSlots();
                 _overlay.style.display = DisplayStyle.Flex;
                 GameplayInputGate.PushModal();
@@ -323,6 +325,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private void Update()
         {
             if (!_isOpen) return;
+            if (Time.frameCount == _openedFrame) return;
 
             if (UnityEngine.InputSystem.Keyboard.current != null)
             {

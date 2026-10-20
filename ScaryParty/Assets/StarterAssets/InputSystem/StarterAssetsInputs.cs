@@ -33,9 +33,13 @@ namespace StarterAssets
 
 		public void OnLook(InputValue value)
 		{
-			if(cursorInputForLook)
+			if(cursorInputForLook && !ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked)
 			{
 				LookInput(value.Get<Vector2>());
+			}
+			else
+			{
+				LookInput(Vector2.zero);
 			}
 		}
 
@@ -51,16 +55,31 @@ namespace StarterAssets
 
         public void OnScrollWeapon(InputValue value)
         {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            {
+                scrollWeapon = 0f;
+                return;
+            }
             scrollWeapon = value.Get<float>();
         }
 
         public void OnAim(InputValue value)
         {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            {
+                aim = false;
+                return;
+            }
             aim = value.isPressed;
         }
 
         public void OnFire(InputValue value)
         {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            {
+                fire = false;
+                return;
+            }
             fire = value.isPressed;
         }
 #endif
@@ -68,21 +87,41 @@ namespace StarterAssets
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
+			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			{
+				move = Vector2.zero;
+				return;
+			}
 			move = newMoveDirection;
 		} 
 
 		public void LookInput(Vector2 newLookDirection)
 		{
+			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			{
+				look = Vector2.zero;
+				return;
+			}
 			look = newLookDirection;
 		}
 
 		public void JumpInput(bool newJumpState)
 		{
+			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			{
+				jump = false;
+				return;
+			}
 			jump = newJumpState;
 		}
 
 		public void SprintInput(bool newSprintState)
 		{
+			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			{
+				sprint = false;
+				return;
+			}
 			sprint = newSprintState;
 		}
 

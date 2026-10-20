@@ -89,6 +89,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
+            if (_hudPanelsLocked)
+            {
+                _hudPanelsLocked = false;
+                GameplayInputGate.PopModal();
+            }
             if (Instance == this) Instance = null;
         }
 
@@ -583,21 +588,25 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        private bool _hudPanelsLocked = false;
+
         private void UpdateUIMode()
         {
             bool anyOpen = (_storagePanel != null && _storagePanel.style.display == DisplayStyle.Flex) ||
                            (_stagingPanel != null && _stagingPanel.style.display == DisplayStyle.Flex) ||
                            (_devPanel != null && _devPanel.style.display == DisplayStyle.Flex);
 
-            if (!anyOpen)
+            if (anyOpen != _hudPanelsLocked)
             {
-                UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-                UnityEngine.Cursor.visible = false;
-            }
-            else
-            {
-                UnityEngine.Cursor.lockState = CursorLockMode.None;
-                UnityEngine.Cursor.visible = true;
+                _hudPanelsLocked = anyOpen;
+                if (anyOpen)
+                {
+                    GameplayInputGate.PushModal();
+                }
+                else
+                {
+                    GameplayInputGate.PopModal();
+                }
             }
         }
     }

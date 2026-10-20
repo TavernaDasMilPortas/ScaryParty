@@ -60,9 +60,9 @@ namespace ScaryParty.Pizzeria.Integration
                             }
                         }
                     }
-                    else
+                    if (!bpEquipped)
                     {
-                        bpEquipped = item.HolderId == myId;
+                        bpEquipped = item.HolderId == myId || item.HolderId == (myId + 1);
                     }
                     isCarriedByMe = bpEquipped;
                 }

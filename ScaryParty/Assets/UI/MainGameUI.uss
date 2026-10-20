@@ -110,15 +110,17 @@
 .center-section {
     flex-grow: 1;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    padding-bottom: 40px;
 }
 
 .interaction-prompt {
-    font-size: 34px;
+    font-size: 28px;
     background-color: rgba(0, 0, 0, 0.8);
-    padding: 18px 36px;
-    border-radius: 36px;
-    border-width: 2.5px;
+    opacity: 0.8;
+    padding: 14px 32px;
+    border-radius: 32px;
+    border-width: 2px;
     border-color: rgb(255, 255, 255);
     transition-duration: 0.2s;
 }

@@ -27,6 +27,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private NetOrderDto _currentOrder;
         private bool _isOpen = false;
+        private int _openedFrame = -1;
         private float _archiveHoldTimer = 0f;
         private const float ArchiveHoldRequired = 1.0f;
 
@@ -40,7 +41,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
                 return;
             }
         }
@@ -231,6 +232,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _currentOrder = order;
             _isOpen = true;
+            _openedFrame = Time.frameCount;
             _archiveHoldTimer = 0f;
             _modalOverlay.style.display = DisplayStyle.Flex;
 
@@ -338,6 +340,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private void Update()
         {
             if (!_isOpen) return;
+            if (Time.frameCount == _openedFrame) return;
 
             // Fechar com Escape ou E
             if (UnityEngine.InputSystem.Keyboard.current != null)
@@ -349,9 +352,10 @@ namespace ScaryParty.Pizzeria.Presentation
                     return;
                 }
 
-                // Segurar F para arquivar
+                // Segurar F para arquivar (pedidos concluídos, cancelados ou expirados)
                 bool isDeliveredOrDone = _currentOrder.Lifecycle == (byte)OrderLifecycle.Delivered ||
-                                         _currentOrder.Lifecycle == (byte)OrderLifecycle.Cancelled;
+                                         _currentOrder.Lifecycle == (byte)OrderLifecycle.Cancelled ||
+                                         _currentOrder.Lifecycle == (byte)OrderLifecycle.Expired;
 
                 if (isDeliveredOrDone && kb.fKey.isPressed)
                 {
@@ -384,7 +388,7 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (OrderCommands.Instance != null)
             {
-                OrderCommands.Instance.BeginArchiveTicketHoldServerRpc(_currentOrder.OrderId);
+                OrderCommands.Instance.ArchiveTicketDirectServerRpc(_currentOrder.OrderId);
             }
 
             NotificationManager.Show($"Comanda #{_currentOrder.OrderId} arquivada!", NotificationType.Success);

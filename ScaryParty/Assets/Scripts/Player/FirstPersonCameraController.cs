@@ -4,7 +4,8 @@ using Unity.Netcode;
 
 namespace ScaryParty.Player
 {
-    public class FirstPersonCameraController : NetworkBehaviour
+    [DefaultExecutionOrder(100)]
+    public class FirstPersonCameraController : MonoBehaviour
     {
         public static FirstPersonCameraController LocalInstance { get; private set; }
 
@@ -14,15 +15,18 @@ namespace ScaryParty.Player
         private ThirdPersonController _tpc;
         private Transform _headBone;
         private CharacterController _cc;
+        private StarterAssetsInputs _starterInputs;
 
         private Vector3 _leftAnchorBasePos = new Vector3(-0.35f, -0.25f, 0.4f);
         private Vector3 _rightAnchorBasePos = new Vector3(0.35f, -0.25f, 0.4f);
         
         private float _bobTimer = 0f;
+        private float _currentRoll = 0f;
 
-        public override void OnNetworkSpawn()
+        private void Start()
         {
-            if (!IsOwner)
+            var netObj = GetComponent<NetworkObject>();
+            if (netObj != null && !netObj.IsOwner)
             {
                 enabled = false;
                 return;
@@ -33,10 +37,11 @@ namespace ScaryParty.Player
             _tpc = GetComponent<ThirdPersonController>();
             if (_tpc != null)
             {
-                _tpc.TopClamp = 89.0f;
-                _tpc.BottomClamp = -89.0f;
+                _tpc.TopClamp = 75.0f;
+                _tpc.BottomClamp = -70.0f;
             }
             _cc = GetComponent<CharacterController>();
+            _starterInputs = GetComponent<StarterAssetsInputs>();
             
             Animator anim = GetComponentInChildren<Animator>();
             if (anim != null)
@@ -44,7 +49,7 @@ namespace ScaryParty.Player
                 _headBone = anim.GetBoneTransform(HumanBodyBones.Head);
             }
 
-            // Create Anchors parented to the main camera
+            // Criar anchors na câmera
             var camSetup = GetComponent<PlayerCameraSetup>();
             if (camSetup != null && camSetup.mainCamera != null)
             {
@@ -62,18 +67,30 @@ namespace ScaryParty.Player
 
         private void LateUpdate()
         {
-            if (_tpc != null && _tpc.CinemachineCameraTarget != null && _headBone != null)
-            {
-                // Place the camera target slightly in front of the head to avoid clipping
-                _tpc.CinemachineCameraTarget.transform.position = _headBone.position + _headBone.forward * 0.15f;
+            var netObj = GetComponent<NetworkObject>();
+            if (netObj != null && !netObj.IsOwner) return;
 
-                // Sync main camera perfectly with the Target (bypassing Cinemachine)
-                var camSetup = GetComponent<PlayerCameraSetup>();
-                if (camSetup != null && camSetup.mainCamera != null)
+            var camSetup = GetComponent<PlayerCameraSetup>();
+            if (camSetup == null || camSetup.mainCamera == null) return;
+
+            if (_tpc != null && _tpc.CinemachineCameraTarget != null)
+            {
+                Vector3 headBase = _headBone != null ? _headBone.position : (transform.position + Vector3.up * 1.6f);
+                _tpc.CinemachineCameraTarget.transform.position = headBase + transform.forward * 0.12f;
+
+                // Suave roll/tilt multi-direcional baseado em strafe e curva de olhar
+                float targetRoll = 0f;
+                if (_starterInputs != null)
                 {
-                    camSetup.mainCamera.transform.position = _tpc.CinemachineCameraTarget.transform.position;
-                    camSetup.mainCamera.transform.rotation = _tpc.CinemachineCameraTarget.transform.rotation;
+                    targetRoll = Mathf.Clamp(-_starterInputs.move.x * 1.5f - _starterInputs.look.x * 0.35f, -3.5f, 3.5f);
                 }
+                _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, Time.deltaTime * 8f);
+
+                Quaternion baseRot = _tpc.CinemachineCameraTarget.transform.rotation;
+                Quaternion finalCamRot = baseRot * Quaternion.Euler(0f, 0f, _currentRoll);
+
+                camSetup.mainCamera.transform.position = _tpc.CinemachineCameraTarget.transform.position;
+                camSetup.mainCamera.transform.rotation = finalCamRot;
             }
 
             UpdateSwayAndBob();

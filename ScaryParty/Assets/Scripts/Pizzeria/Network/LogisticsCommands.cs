@@ -87,6 +87,15 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             var bpId = new BackpackId(backpackIdVal);
+            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
+            {
+                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
+                bp = new BackpackState(bpId, cap);
+                bp.EquippedBy = sender;
+                root.DomainState.Backpacks[bpId] = bp;
+                root.DomainState.IncrementRevision();
+            }
+
             var res = BackpackService.Equip(root.DomainState, bpId, sender);
             if (!res.Success)
             {
@@ -130,6 +139,16 @@ namespace ScaryParty.Pizzeria.Network
             var boxId = new ItemId(boxItemIdVal);
             var handLoc = LocationRef.InHand(sender, hand);
 
+            // Assegura existência da mochila no domínio caso não tenha sido pré-alocada
+            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
+            {
+                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
+                bp = new BackpackState(bpId, cap);
+                bp.EquippedBy = sender;
+                root.DomainState.Backpacks[bpId] = bp;
+                root.DomainState.IncrementRevision();
+            }
+
             var res = BackpackService.StoreItem(root.DomainState, bpId, boxId, handLoc);
             if (!res.Success)
             {
@@ -156,6 +175,16 @@ namespace ScaryParty.Pizzeria.Network
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, "A sua mão está ocupada.", true);
                 return;
+            }
+
+            // Assegura existência da mochila no domínio
+            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
+            {
+                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
+                bp = new BackpackState(bpId, cap);
+                bp.EquippedBy = sender;
+                root.DomainState.Backpacks[bpId] = bp;
+                root.DomainState.IncrementRevision();
             }
 
             var res = BackpackService.RetrieveItem(root.DomainState, bpId, boxId, handLoc);

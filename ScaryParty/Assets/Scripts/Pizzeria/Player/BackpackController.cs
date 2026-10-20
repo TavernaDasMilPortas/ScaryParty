@@ -7,29 +7,60 @@ using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Player
 {
-    public class BackpackController : NetworkBehaviour
+    public class BackpackController : MonoBehaviour
     {
         [Header("Configuração de Capacidade")]
         public int capacity = 3;
         public ulong backpackId = 0;
 
-        public override void OnNetworkSpawn()
+        private NetworkObject _netObj;
+
+        private void Awake()
+        {
+            _netObj = GetComponent<NetworkObject>();
+            EnsureVisualizer();
+        }
+
+        private void Start()
+        {
+            EnsureBackpackId();
+            EnsureVisualizer();
+        }
+
+        private void EnsureBackpackId()
         {
             if (backpackId == 0)
             {
-                backpackId = OwnerClientId + 1; // ID default correspondente ao jogador
+                ulong myId = GetOwnerClientId();
+                backpackId = myId + 1; // ID default correspondente ao jogador
             }
+        }
 
-            // Assegurar visualizador da mochila
+        private void EnsureVisualizer()
+        {
             if (GetComponent<BackpackVisualizer>() == null)
             {
                 gameObject.AddComponent<BackpackVisualizer>();
             }
         }
 
+        public ulong GetOwnerClientId()
+        {
+            if (_netObj != null) return _netObj.OwnerClientId;
+            if (NetworkManager.Singleton != null) return NetworkManager.Singleton.LocalClientId;
+            return 0;
+        }
+
+        public bool IsOwnerPlayer()
+        {
+            if (_netObj != null) return _netObj.IsOwner;
+            return true;
+        }
+
         private void Update()
         {
-            if (!IsOwner) return;
+            if (!IsOwnerPlayer()) return;
+            EnsureBackpackId();
 
             // Tecla [B] para inspecionar / abrir painel interativo da mochila
             if (UnityEngine.InputSystem.Keyboard.current != null &&
@@ -53,13 +84,15 @@ namespace ScaryParty.Pizzeria.Player
         {
             var list = new List<NetItemDto>();
             var netState = PizzeriaNetworkState.Instance;
-            if (netState == null || !IsSpawned) return list;
+            if (netState == null) return list;
 
-            ulong myId = OwnerClientId;
+            EnsureBackpackId();
+            ulong myId = GetOwnerClientId();
+
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var it = netState.Items[i];
-                if (it.LocationType == (byte)LocationType.Backpack && it.HolderId == myId)
+                if (it.LocationType == (byte)LocationType.Backpack && (it.HolderId == backpackId || it.HolderId == myId))
                 {
                     list.Add(it);
                 }
@@ -72,6 +105,9 @@ namespace ScaryParty.Pizzeria.Player
             var netState = PizzeriaNetworkState.Instance;
             var logistics = LogisticsCommands.Instance;
             if (netState == null || logistics == null) return false;
+
+            EnsureBackpackId();
+            ulong myId = GetOwnerClientId();
 
             var boxes = GetBoxesInBackpack();
             if (boxes.Count >= capacity)
@@ -86,7 +122,7 @@ namespace ScaryParty.Pizzeria.Player
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var it = netState.Items[i];
-                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == OwnerClientId && it.SlotId == (int)hand)
+                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == myId && it.SlotId == (int)hand)
                 {
                     if (it.PackagingState == (byte)PackagingState.Boxed || it.Category == (byte)ItemCategory.Box)
                     {
@@ -112,6 +148,7 @@ namespace ScaryParty.Pizzeria.Player
             var logistics = LogisticsCommands.Instance;
             if (logistics == null) return false;
 
+            EnsureBackpackId();
             logistics.RetrieveBackpackItemServerRpc(backpackId, boxItemId, hand);
             return true;
         }

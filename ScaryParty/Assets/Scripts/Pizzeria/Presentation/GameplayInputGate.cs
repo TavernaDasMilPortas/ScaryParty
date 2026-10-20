@@ -40,15 +40,24 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             bool locked = IsLocked;
 
-            var starterInputs = Object.FindFirstObjectByType<StarterAssetsInputs>();
-            if (starterInputs != null)
+            var allInputs = Object.FindObjectsByType<StarterAssetsInputs>(FindObjectsSortMode.None);
+            if (allInputs != null)
             {
-                starterInputs.cursorInputForLook = !locked;
-                starterInputs.cursorLocked = !locked;
-                if (locked)
+                foreach (var starterInputs in allInputs)
                 {
-                    starterInputs.move = Vector2.zero;
-                    starterInputs.look = Vector2.zero;
+                    if (starterInputs == null) continue;
+                    starterInputs.cursorInputForLook = !locked;
+                    starterInputs.cursorLocked = !locked;
+                    if (locked)
+                    {
+                        starterInputs.move = Vector2.zero;
+                        starterInputs.look = Vector2.zero;
+                        starterInputs.jump = false;
+                        starterInputs.sprint = false;
+                        starterInputs.scrollWeapon = 0f;
+                        starterInputs.aim = false;
+                        starterInputs.fire = false;
+                    }
                 }
             }
 

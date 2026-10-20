@@ -27,6 +27,11 @@ namespace ScaryParty.Pizzeria.Stations
 
         private void Awake()
         {
+            if (paperRenderer == null)
+            {
+                paperRenderer = GetComponent<Renderer>();
+            }
+
             if (paperRenderer != null)
             {
                 _paperMaterial = paperRenderer.material;
@@ -34,10 +39,12 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             var col = GetComponent<Collider>();
-            if (col == null)
+            if (col == null || col is MeshCollider)
             {
+                if (col != null) Destroy(col);
                 var box = gameObject.AddComponent<BoxCollider>();
-                box.size = new Vector3(0.35f, 0.5f, 0.05f);
+                box.size = new Vector3(1f, 1f, 0.08f);
+                box.center = new Vector3(0f, 0f, -0.02f);
             }
         }
 

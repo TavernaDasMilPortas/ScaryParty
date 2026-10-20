@@ -16,12 +16,16 @@ namespace ScaryParty.Pizzeria.Stations
 
         private readonly List<TicketSheetView> _sheets = new List<TicketSheetView>();
 
-        public override string InteractPrompt => "[E] Examinar Quadro de Comandas";
+        public override string InteractPrompt => string.Empty;
 
         protected override void Start()
         {
             base.Start();
             stationName = "Quadro de Comandas";
+
+            // Desativar o colisor da madeira do quadro para que o foco e clique ocorram exclusivamente em cada comanda individual
+            var boardCol = GetComponent<Collider>();
+            if (boardCol != null) boardCol.enabled = false;
 
             // Assegurar inicialização dos slots visuais se não atribuídos
             if (ticketSlots == null || ticketSlots.Length == 0)
@@ -34,15 +38,32 @@ namespace ScaryParty.Pizzeria.Stations
                     slotsParent = go.transform;
                 }
 
+                // Detecta a direção que aponta para o interior da sala (em relação ao prédio/sala)
+                Vector3 roomDir = transform.parent != null ? -transform.parent.forward : Vector3.back;
+                Vector3 localRoomDir = transform.InverseTransformDirection(roomDir);
+                float signZ = localRoomDir.z >= 0 ? 1f : -1f;
+
+                // Neutraliza a escala não-uniforme do pai para que os tickets tenham medidas reais em metros
+                Vector3 s = transform.localScale;
+                slotsParent.localPosition = new Vector3(0f, 0f, signZ * 0.55f);
+                slotsParent.localRotation = localRoomDir.z >= 0 ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
+                slotsParent.localScale = new Vector3(
+                    s.x > 0.001f ? 1f / s.x : 1f,
+                    s.y > 0.001f ? 1f / s.y : 1f,
+                    s.z > 0.001f ? 1f / s.z : 1f
+                );
+
                 ticketSlots = new Transform[maxVisibleTickets];
-                float spacing = 0.45f;
+                float spacing = 0.48f;
                 float startX = -((maxVisibleTickets - 1) * spacing) * 0.5f;
 
                 for (int i = 0; i < maxVisibleTickets; i++)
                 {
                     var slotGo = new GameObject($"Slot_{i}");
                     slotGo.transform.SetParent(slotsParent, false);
-                    slotGo.transform.localPosition = new Vector3(startX + (i * spacing), 0.2f, -0.05f);
+                    slotGo.transform.localPosition = new Vector3(startX + (i * spacing), 0f, 0f);
+                    slotGo.transform.localRotation = Quaternion.identity;
+                    slotGo.transform.localScale = Vector3.one;
                     ticketSlots[i] = slotGo.transform;
                 }
             }
@@ -67,7 +88,17 @@ namespace ScaryParty.Pizzeria.Stations
             var sheetObj = GameObject.CreatePrimitive(PrimitiveType.Quad);
             sheetObj.name = $"TicketSheet_{index}";
             sheetObj.transform.SetParent(parentSlot, false);
+            sheetObj.transform.localPosition = Vector3.zero;
+            sheetObj.transform.localRotation = Quaternion.identity;
             sheetObj.transform.localScale = new Vector3(0.38f, 0.55f, 1f);
+
+            // Remover MeshCollider padrão do Quad e adicionar BoxCollider frontal para raycast preciso
+            var meshCol = sheetObj.GetComponent<Collider>();
+            if (meshCol != null) Destroy(meshCol);
+
+            var boxCol = sheetObj.AddComponent<BoxCollider>();
+            boxCol.size = new Vector3(1f, 1f, 0.08f);
+            boxCol.center = new Vector3(0f, 0f, -0.02f);
 
             var meshRenderer = sheetObj.GetComponent<MeshRenderer>();
             var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
@@ -78,15 +109,16 @@ namespace ScaryParty.Pizzeria.Stations
             // Criar TextMeshPro 3D na frente do quad
             var textObj = new GameObject("SheetText");
             textObj.transform.SetParent(sheetObj.transform, false);
-            textObj.transform.localPosition = new Vector3(0f, 0f, -0.02f);
-            textObj.transform.localScale = Vector3.one * 0.15f;
+            textObj.transform.localPosition = new Vector3(0f, 0f, -0.015f);
+            textObj.transform.localRotation = Quaternion.identity;
+            textObj.transform.localScale = Vector3.one * 0.14f;
 
             var tmp = textObj.AddComponent<TextMeshPro>();
             tmp.alignment = TextAlignmentOptions.Center;
-            tmp.fontSize = 2.5f;
+            tmp.fontSize = 2.4f;
             tmp.color = Color.black;
             var rectTransform = textObj.GetComponent<RectTransform>();
-            rectTransform.sizeDelta = new Vector2(2.4f, 3.5f);
+            rectTransform.sizeDelta = new Vector2(2.4f, 3.6f);
 
             var sheetView = sheetObj.AddComponent<TicketSheetView>();
             sheetView.textMesh = tmp;

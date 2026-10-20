@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 #if ENABLE_INPUT_SYSTEM
@@ -18,6 +19,13 @@ public class PlayerInteraction : NetworkBehaviour
     
     [Tooltip("Layers that contain interactable objects")]
     public LayerMask interactableLayer;
+
+    [Header("Hover Outline Settings")]
+    [Tooltip("Material used to render outline on hover (Outline Example.mat)")]
+    public Material outlineMaterial;
+
+    private Material _outlineMatInstance;
+    private readonly Dictionary<Renderer, Material[]> _originalMaterialsCache = new Dictionary<Renderer, Material[]>();
 
     private IInteractable _currentInteractable;
     private float _lastSyncTime = 0f;
@@ -197,33 +205,44 @@ public class PlayerInteraction : NetworkBehaviour
             if (mainCamera == null) return;
         }
 
-        // Shoot a thick beam (SphereCast) from the player's chest, pointing where the camera looks
-        Vector3 rayOrigin = transform.position + Vector3.up * 1.0f; // Approx chest height
-        Vector3 rayDirection = mainCamera.transform.forward; // Aim down at the floor if camera looks down
-        
-        Ray ray = new Ray(rayOrigin, rayDirection);
-
-        // If interactableLayer is 0 (not configured), fall back to Physics.DefaultRaycastLayers
+        // Raycast diretamente a partir do centro da tela
+        Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         LayerMask mask = interactableLayer.value == 0 ? Physics.DefaultRaycastLayers : interactableLayer;
 
-        // 0.5f radius makes it a 1-meter thick beam, impossible to miss the pizza box
-        RaycastHit[] hits = Physics.SphereCastAll(ray, 0.5f, interactionDistance, mask);
-        
-        // Sort by distance
+        RaycastHit[] hits = Physics.RaycastAll(ray, interactionDistance, mask, QueryTriggerInteraction.Collide);
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         IInteractable interactable = null;
 
         foreach (var hit in hits)
         {
-            // Ignore self
-            if (hit.collider.transform.IsChildOf(this.transform))
+            if (hit.collider == null || hit.collider.transform.IsChildOf(this.transform))
                 continue;
 
-            interactable = hit.collider.GetComponentInParent<IInteractable>();
-            if (interactable != null)
+            var candidate = hit.collider.GetComponent<IInteractable>() ?? hit.collider.GetComponentInParent<IInteractable>();
+            if (candidate != null && !string.IsNullOrEmpty(candidate.InteractPrompt))
             {
-                break; // Found the closest valid interactable
+                interactable = candidate;
+                break;
+            }
+        }
+
+        // Fallback SphereCast com raio estreito (0.08m) para itens finos/pequenos
+        if (interactable == null)
+        {
+            RaycastHit[] sphereHits = Physics.SphereCastAll(ray, 0.08f, interactionDistance, mask, QueryTriggerInteraction.Collide);
+            System.Array.Sort(sphereHits, (a, b) => a.distance.CompareTo(b.distance));
+            foreach (var hit in sphereHits)
+            {
+                if (hit.collider == null || hit.collider.transform.IsChildOf(this.transform))
+                    continue;
+
+                var candidate = hit.collider.GetComponent<IInteractable>() ?? hit.collider.GetComponentInParent<IInteractable>();
+                if (candidate != null && !string.IsNullOrEmpty(candidate.InteractPrompt))
+                {
+                    interactable = candidate;
+                    break;
+                }
             }
         }
 
@@ -231,9 +250,14 @@ public class PlayerInteraction : NetworkBehaviour
         {
             if (_currentInteractable != interactable)
             {
-                if (_currentInteractable != null) _currentInteractable.OnLoseFocus();
+                if (_currentInteractable != null)
+                {
+                    _currentInteractable.OnLoseFocus();
+                    RemoveHoverOutline();
+                }
                 _currentInteractable = interactable;
                 _currentInteractable.OnFocus();
+                ApplyHoverOutline(_currentInteractable);
             }
 
             if (UIManager.Instance != null)
@@ -246,11 +270,107 @@ public class PlayerInteraction : NetworkBehaviour
         if (_currentInteractable != null)
         {
             _currentInteractable.OnLoseFocus();
+            RemoveHoverOutline();
             _currentInteractable = null;
 
             if (UIManager.Instance != null)
                 UIManager.Instance.HideInteractionPrompt();
         }
+    }
+
+    private void EnsureOutlineMaterialInstance()
+    {
+        if (_outlineMatInstance != null) return;
+
+        if (outlineMaterial == null)
+        {
+#if UNITY_EDITOR
+            outlineMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Materials/Outline Example.mat");
+#endif
+            if (outlineMaterial == null)
+            {
+                var allMats = Resources.FindObjectsOfTypeAll<Material>();
+                for (int i = 0; i < allMats.Length; i++)
+                {
+                    if (allMats[i] != null && allMats[i].name == "Outline Example")
+                    {
+                        outlineMaterial = allMats[i];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (outlineMaterial != null)
+        {
+            _outlineMatInstance = new Material(outlineMaterial);
+            _outlineMatInstance.name = "Outline_Example_HoverInstance";
+            // Desativa os passes de superfície para renderizar apenas o contorno (ExtraPrePass com Cull Front)
+            _outlineMatInstance.SetShaderPassEnabled("UniversalForwardOnly", false);
+            _outlineMatInstance.SetShaderPassEnabled("Forward", false);
+            _outlineMatInstance.SetShaderPassEnabled("DepthOnly", false);
+            _outlineMatInstance.SetShaderPassEnabled("DepthNormalsOnly", false);
+        }
+    }
+
+    private void ApplyHoverOutline(IInteractable interactable)
+    {
+        RemoveHoverOutline();
+        if (interactable == null || !(interactable is Component comp)) return;
+
+        EnsureOutlineMaterialInstance();
+        if (_outlineMatInstance == null) return;
+
+        var renderers = comp.GetComponentsInChildren<Renderer>(false);
+        foreach (var rend in renderers)
+        {
+            if (rend == null) continue;
+            if (rend is CanvasRenderer || rend.GetComponent<TMPro.TMP_Text>() != null) continue;
+            if (rend.gameObject.name.Contains("Progress") || rend.gameObject.name.Contains("Text")) continue;
+
+            var childInteractable = rend.GetComponent<IInteractable>();
+            if (childInteractable != null && childInteractable != interactable) continue;
+
+            var orig = rend.sharedMaterials;
+            if (orig == null || orig.Length == 0) continue;
+
+            _originalMaterialsCache[rend] = orig;
+
+            var newMats = new Material[orig.Length + 1];
+            System.Array.Copy(orig, newMats, orig.Length);
+            newMats[orig.Length] = _outlineMatInstance;
+            rend.sharedMaterials = newMats;
+        }
+    }
+
+    private void RemoveHoverOutline()
+    {
+        if (_originalMaterialsCache.Count == 0) return;
+
+        foreach (var kvp in _originalMaterialsCache)
+        {
+            if (kvp.Key != null && kvp.Value != null)
+            {
+                kvp.Key.sharedMaterials = kvp.Value;
+            }
+        }
+        _originalMaterialsCache.Clear();
+    }
+
+    private void OnDisable()
+    {
+        RemoveHoverOutline();
+    }
+
+    public override void OnDestroy()
+    {
+        RemoveHoverOutline();
+        if (_outlineMatInstance != null)
+        {
+            Destroy(_outlineMatInstance);
+            _outlineMatInstance = null;
+        }
+        base.OnDestroy();
     }
 
         private float _lastHeartbeatTime = 0f;

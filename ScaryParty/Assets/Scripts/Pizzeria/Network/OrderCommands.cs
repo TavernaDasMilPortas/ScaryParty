@@ -48,6 +48,17 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         [ServerRpc(RequireOwnership = false)]
+        public void ArchiveTicketDirectServerRpc(ulong orderIdVal, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            var orderId = new OrderId(orderIdVal);
+            root.OrderService.ArchiveTicket(orderId, root.DomainState);
+            PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
         public void BeginArchiveTicketHoldServerRpc(ulong orderIdVal, ServerRpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;

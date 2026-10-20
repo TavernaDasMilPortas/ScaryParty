@@ -220,7 +220,17 @@ namespace ScaryParty.Pizzeria.Composition
                 }
             }
 
-            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, {DomainState.Tools.Count} utensílios.");
+            // Inicializar Mochilas Térmicas dos Entregadores no Domínio (ID = PlayerId + 1)
+            int bpCap = _config != null && _config.backpackInitialSlots > 0 ? _config.backpackInitialSlots : 3;
+            for (ulong p = 0; p < 4; p++)
+            {
+                var bpId = new BackpackId(p + 1);
+                var bp = new BackpackState(bpId, bpCap);
+                bp.EquippedBy = p;
+                DomainState.Backpacks[bpId] = bp;
+            }
+
+            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas.");
         }
 
         private void InitStorageSlot(int storageId, int ingredientId, int initialStock, int maxCap)

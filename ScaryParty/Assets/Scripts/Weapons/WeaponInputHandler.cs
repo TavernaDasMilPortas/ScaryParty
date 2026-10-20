@@ -19,6 +19,7 @@ public class WeaponInputHandler : MonoBehaviour
     private void Update()
     {
         if (starterAssetsInputs == null) return;
+        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
 
         // Scroll (Troca de arma)
         if (starterAssetsInputs.scrollWeapon > 0)

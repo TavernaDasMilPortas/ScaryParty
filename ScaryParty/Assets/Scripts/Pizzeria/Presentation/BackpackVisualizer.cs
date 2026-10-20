@@ -4,21 +4,41 @@ using Unity.Netcode;
 using TMPro;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Player;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
-    public class BackpackVisualizer : NetworkBehaviour
+    public class BackpackVisualizer : MonoBehaviour
     {
         private Transform _backpackAnchor;
         private GameObject _bagVisual;
         private readonly List<GameObject> _boxVisuals = new List<GameObject>();
+        private NetworkObject _netObj;
 
         private float _refreshTimer = 0f;
         private const float RefreshInterval = 0.25f;
 
-        public override void OnNetworkSpawn()
+        private void Awake()
+        {
+            _netObj = GetComponent<NetworkObject>();
+        }
+
+        private void Start()
         {
             SetupBackpackMount();
+        }
+
+        private bool IsOwnerPlayer()
+        {
+            if (_netObj != null) return _netObj.IsOwner;
+            return true;
+        }
+
+        private ulong GetOwnerClientId()
+        {
+            if (_netObj != null) return _netObj.OwnerClientId;
+            if (NetworkManager.Singleton != null) return NetworkManager.Singleton.LocalClientId;
+            return 0;
         }
 
         private void SetupBackpackMount()
@@ -61,7 +81,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             // Se for o jogador local em 1ª pessoa, esconder para não atrapalhar o campo de visão
-            if (IsOwner)
+            if (IsOwnerPlayer())
             {
                 SetLayerRecursively(_bagVisual, LayerMask.NameToLayer("ThirdPersonOnly") != -1 ? LayerMask.NameToLayer("ThirdPersonOnly") : 0);
             }
@@ -85,12 +105,14 @@ namespace ScaryParty.Pizzeria.Presentation
             if (netState == null || netState.Items == null) return;
 
             var backpackItems = new List<NetItemDto>();
-            ulong myId = OwnerClientId;
+            ulong myId = GetOwnerClientId();
+            var ctrl = GetComponent<BackpackController>();
+            ulong bpId = ctrl != null && ctrl.backpackId != 0 ? ctrl.backpackId : (myId + 1);
 
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var it = netState.Items[i];
-                if (it.LocationType == (byte)LocationType.Backpack && it.HolderId == myId)
+                if (it.LocationType == (byte)LocationType.Backpack && (it.HolderId == bpId || it.HolderId == myId))
                 {
                     backpackItems.Add(it);
                 }
@@ -158,7 +180,7 @@ namespace ScaryParty.Pizzeria.Presentation
             var rect = labelGo.GetComponent<RectTransform>();
             rect.sizeDelta = new Vector2(3f, 1.5f);
 
-            if (IsOwner)
+            if (IsOwnerPlayer())
             {
                 SetLayerRecursively(boxGo, LayerMask.NameToLayer("ThirdPersonOnly") != -1 ? LayerMask.NameToLayer("ThirdPersonOnly") : 0);
             }
@@ -176,13 +198,12 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
-        public override void OnDestroy()
+        private void OnDestroy()
         {
             if (_backpackAnchor != null)
             {
                 Destroy(_backpackAnchor.gameObject);
             }
-            base.OnDestroy();
         }
     }
 }

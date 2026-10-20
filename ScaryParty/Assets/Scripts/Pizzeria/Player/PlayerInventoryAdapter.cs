@@ -36,6 +36,7 @@ namespace ScaryParty.Pizzeria.Player
         private void Update()
         {
             if (!IsOwnerPlayer()) return;
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
 
             // Teclado (New Input System)
             if (UnityEngine.InputSystem.Keyboard.current != null)

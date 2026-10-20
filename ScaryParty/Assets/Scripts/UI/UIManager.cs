@@ -362,6 +362,7 @@ public class UIManager : MonoBehaviour
             }
             
             _interactionPrompt.text = message;
+            _interactionPrompt.style.opacity = 0.8f;
             _interactionPrompt.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.8f));
             _interactionPrompt.style.color = new StyleColor(Color.white);
             _interactionPrompt.style.paddingLeft = 36;
