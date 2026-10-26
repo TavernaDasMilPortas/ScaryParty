@@ -209,7 +209,12 @@ namespace StarterAssets
         private void LateUpdate()
         {
             if (!IsOwner) return;
-            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible) return;
+
+            if (GetComponent<ScaryParty.Player.FirstPersonCameraController>() != null)
+            {
+                return;
+            }
 
             CameraRotation();
         }
@@ -261,7 +266,7 @@ namespace StarterAssets
 
         private void Move()
         {
-            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked)
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
             {
                 _speed = 0f;
                 _animationBlend = 0f;

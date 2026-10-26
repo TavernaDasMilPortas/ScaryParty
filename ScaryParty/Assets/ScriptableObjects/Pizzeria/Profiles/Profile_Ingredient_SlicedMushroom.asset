@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 215def019522bcf46a8e57c683f8027e, type: 3}
+  m_Name: Profile_Ingredient_SlicedMushroom
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.ItemPresentationProfile
+  presentationKey: Ingredient_SlicedMushroom
+  category: 4
+  definitionId: 9
+  isTool: 0
+  visualPrefab: {fileID: 0}
+  gripPointName: GripPoint
+  fpLeftHandPose:
+    position: {x: -0.02, y: -0.05, z: 0.2}
+    rotationEuler: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  fpRightHandPose:
+    position: {x: 0.02, y: -0.05, z: 0.2}
+    rotationEuler: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  remoteLeftHandPose:
+    position: {x: 0, y: 0, z: 0.1}
+    rotationEuler: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  remoteRightHandPose:
+    position: {x: 0, y: 0, z: 0.1}
+    rotationEuler: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  stationSlotPose:
+    position: {x: 0, y: 0, z: 0}
+    rotationEuler: {x: 0, y: 0, z: 0}
+    scale: {x: 1, y: 1, z: 1}
+  isPlaceholder: 1
+  notes: 

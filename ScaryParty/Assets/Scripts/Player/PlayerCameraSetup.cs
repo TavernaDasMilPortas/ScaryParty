@@ -53,10 +53,15 @@ public class PlayerCameraSetup : NetworkBehaviour
                 if (brain is Behaviour b) b.enabled = false;
             }
             
-            // Add First Person sync script
-            if (GetComponent<ScaryParty.Player.FirstPersonCameraController>() == null)
+            // Ensure First Person sync script
+            var fpCam = GetComponent<ScaryParty.Player.FirstPersonCameraController>();
+            if (fpCam == null)
             {
-                gameObject.AddComponent<ScaryParty.Player.FirstPersonCameraController>();
+                fpCam = gameObject.AddComponent<ScaryParty.Player.FirstPersonCameraController>();
+            }
+            if (fpCam != null)
+            {
+                fpCam.SetYawPitch(transform.eulerAngles.y, 0f);
             }
 
             // Hide the player's own body but cast shadows

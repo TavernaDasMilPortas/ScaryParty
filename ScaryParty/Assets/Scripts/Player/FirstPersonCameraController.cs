@@ -1,145 +1,317 @@
 using UnityEngine;
 using StarterAssets;
 using Unity.Netcode;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 namespace ScaryParty.Player
 {
-    [DefaultExecutionOrder(100)]
-    public class FirstPersonCameraController : MonoBehaviour
+    [DefaultExecutionOrder(50)]
+    public class FirstPersonCameraController : NetworkBehaviour
     {
         public static FirstPersonCameraController LocalInstance { get; private set; }
 
-        public Transform LeftHandAnchor { get; private set; }
-        public Transform RightHandAnchor { get; private set; }
+        [Header("Rig Serializado")]
+        [Tooltip("Pivot fixo da visão (altura dos olhos), independente do osso da cabeça")]
+        [SerializeField] private Transform _cameraPivot;
+        [Tooltip("Câmera de primeira pessoa")]
+        [SerializeField] private Camera _playerCamera;
+        [Tooltip("Âncora da mão esquerda (filho da câmera ou pivot)")]
+        [SerializeField] private Transform _leftHandAnchor;
+        [Tooltip("Âncora da mão direita (filho da câmera ou pivot)")]
+        [SerializeField] private Transform _rightHandAnchor;
+
+        [Header("Configurações de Visão")]
+        [Tooltip("Altura fixa dos olhos em relação à raiz do jogador")]
+        public float eyeHeight = 1.65f;
+        [Tooltip("Avanço da câmera para frente da raiz")]
+        public float forwardOffset = 0.05f;
+        public float mouseSensitivity = 1.0f;
+        public float gamepadSensitivity = 60.0f;
+        public float topClamp = 89.0f;
+        public float bottomClamp = -85.0f;
+        [Tooltip("Inverte o controle vertical da visão (olhar para cima/baixo)")]
+        public bool invertPitch = false;
+
+        [Header("Efeitos de Mão (Desativados por padrão)")]
+        public bool enableHandSwayBob = false;
+        public float handSwayAmount = 0.0f;
+        public float handBobAmount = 0.0f;
+
+        public Transform CameraPivot => _cameraPivot;
+        public Camera PlayerCamera => _playerCamera;
+        public Transform LeftHandAnchor => _leftHandAnchor;
+        public Transform RightHandAnchor => _rightHandAnchor;
 
         private ThirdPersonController _tpc;
-        private Transform _headBone;
-        private CharacterController _cc;
         private StarterAssetsInputs _starterInputs;
+        private CharacterController _cc;
+#if ENABLE_INPUT_SYSTEM
+        private PlayerInput _playerInput;
+#endif
 
-        private Vector3 _leftAnchorBasePos = new Vector3(-0.35f, -0.25f, 0.4f);
-        private Vector3 _rightAnchorBasePos = new Vector3(0.35f, -0.25f, 0.4f);
+        private Vector3 _leftAnchorBasePos = new Vector3(-0.32f, -0.25f, 0.45f);
+        private Vector3 _rightAnchorBasePos = new Vector3(0.32f, -0.25f, 0.45f);
         
-        private float _bobTimer = 0f;
-        private float _currentRoll = 0f;
+        private float _yaw;
+        private float _pitch;
 
-        private void Start()
+        private void Awake()
         {
-            var netObj = GetComponent<NetworkObject>();
-            if (netObj != null && !netObj.IsOwner)
+            _tpc = GetComponent<ThirdPersonController>();
+            _starterInputs = GetComponent<StarterAssetsInputs>();
+            _cc = GetComponent<CharacterController>();
+#if ENABLE_INPUT_SYSTEM
+            _playerInput = GetComponent<PlayerInput>();
+#endif
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            if (!IsOwner)
             {
+                if (_playerCamera != null)
+                {
+                    _playerCamera.gameObject.SetActive(false);
+                    var listener = _playerCamera.GetComponent<AudioListener>();
+                    if (listener != null) listener.enabled = false;
+                }
                 enabled = false;
                 return;
             }
 
             LocalInstance = this;
 
-            _tpc = GetComponent<ThirdPersonController>();
-            if (_tpc != null)
+            EnsureRig();
+
+            // Inicializa yaw e pitch alinhados ao jogador atual
+            _yaw = transform.eulerAngles.y;
+            _pitch = 0f;
+
+            if (_playerCamera != null)
             {
-                _tpc.TopClamp = 75.0f;
-                _tpc.BottomClamp = -70.0f;
+                _playerCamera.gameObject.SetActive(true);
+                var listener = _playerCamera.GetComponent<AudioListener>();
+                if (listener != null) listener.enabled = true;
+
+                ConfigureCameraCulling(_playerCamera);
             }
-            _cc = GetComponent<CharacterController>();
-            _starterInputs = GetComponent<StarterAssetsInputs>();
-            
-            Animator anim = GetComponentInChildren<Animator>();
-            if (anim != null)
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            if (LocalInstance == this)
             {
-                _headBone = anim.GetBoneTransform(HumanBodyBones.Head);
+                LocalInstance = null;
+            }
+            base.OnNetworkDespawn();
+        }
+
+        public override void OnDestroy()
+        {
+            if (LocalInstance == this)
+            {
+                LocalInstance = null;
+            }
+            base.OnDestroy();
+        }
+
+        public void SetYawPitch(float yaw, float pitch = 0f)
+        {
+            _yaw = yaw;
+            _pitch = Mathf.Clamp(pitch, bottomClamp, topClamp);
+
+            transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+            if (_cameraPivot != null)
+            {
+                _cameraPivot.localPosition = new Vector3(0f, eyeHeight, forwardOffset);
+                _cameraPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
+            }
+        }
+
+        /// <summary>
+        /// Retorna true se qualquer menu, modal ou interface estiver aberta, ou se o cursor estiver liberado/visível.
+        /// </summary>
+        public bool IsMenuOrInputBlocked()
+        {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return true;
+            if (_starterInputs != null && (!_starterInputs.cursorInputForLook || !_starterInputs.cursorLocked)) return true;
+            if (Cursor.lockState != CursorLockMode.Locked) return true;
+            if (Cursor.visible) return true;
+            return false;
+        }
+
+        private void Update()
+        {
+            if (!IsOwner) return;
+
+            // Quando estiver em qualquer menu, o mouse não pode rotacionar a câmera
+            if (IsMenuOrInputBlocked())
+            {
+                if (_starterInputs != null)
+                {
+                    _starterInputs.look = Vector2.zero;
+                }
+                return;
             }
 
-            // Criar anchors na câmera
-            var camSetup = GetComponent<PlayerCameraSetup>();
-            if (camSetup != null && camSetup.mainCamera != null)
+            if (_starterInputs != null)
             {
-                var camTransform = camSetup.mainCamera.transform;
-                
-                var leftGo = new GameObject("LeftHandAnchor");
-                leftGo.transform.SetParent(camTransform);
-                LeftHandAnchor = leftGo.transform;
+                bool isMouse = true;
+#if ENABLE_INPUT_SYSTEM
+                if (_playerInput != null)
+                {
+                    isMouse = _playerInput.currentControlScheme == "KeyboardMouse";
+                }
+#endif
+                float deltaMult = isMouse ? 1.0f : Time.deltaTime;
+                float sens = isMouse ? mouseSensitivity : gamepadSensitivity;
 
-                var rightGo = new GameObject("RightHandAnchor");
-                rightGo.transform.SetParent(camTransform);
-                RightHandAnchor = rightGo.transform;
+                _yaw += _starterInputs.look.x * sens * deltaMult;
+                float pitchFactor = invertPitch ? -1f : 1f;
+                _pitch = Mathf.Clamp(_pitch + (_starterInputs.look.y * sens * deltaMult * pitchFactor), bottomClamp, topClamp);
+
+                // O yaw gira a raiz do personagem no plano horizontal
+                transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+
+                // O pitch gira apenas o pivot da câmera. Roll é rigorosamente 0.
+                if (_cameraPivot != null)
+                {
+                    _cameraPivot.localPosition = new Vector3(0f, eyeHeight, forwardOffset);
+                    _cameraPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
+                }
             }
         }
 
         private void LateUpdate()
         {
-            var netObj = GetComponent<NetworkObject>();
-            if (netObj != null && !netObj.IsOwner) return;
+            if (!IsOwner) return;
 
-            var camSetup = GetComponent<PlayerCameraSetup>();
-            if (camSetup == null || camSetup.mainCamera == null) return;
-
-            if (_tpc != null && _tpc.CinemachineCameraTarget != null)
+            // Mantém posição fixa do pivot sem oscilação de animações de esqueleto
+            if (_cameraPivot != null)
             {
-                Vector3 headBase = _headBone != null ? _headBone.position : (transform.position + Vector3.up * 1.6f);
-                _tpc.CinemachineCameraTarget.transform.position = headBase + transform.forward * 0.12f;
+                _cameraPivot.localPosition = new Vector3(0f, eyeHeight, forwardOffset);
+                _cameraPivot.localRotation = Quaternion.Euler(_pitch, 0f, 0f);
 
-                // Suave roll/tilt multi-direcional baseado em strafe e curva de olhar
-                float targetRoll = 0f;
-                if (_starterInputs != null)
+                if (_playerCamera != null)
                 {
-                    targetRoll = Mathf.Clamp(-_starterInputs.move.x * 1.5f - _starterInputs.look.x * 0.35f, -3.5f, 3.5f);
+                    _playerCamera.transform.position = _cameraPivot.position;
+                    _playerCamera.transform.rotation = _cameraPivot.rotation;
                 }
-                _currentRoll = Mathf.Lerp(_currentRoll, targetRoll, Time.deltaTime * 8f);
 
-                Quaternion baseRot = _tpc.CinemachineCameraTarget.transform.rotation;
-                Quaternion finalCamRot = baseRot * Quaternion.Euler(0f, 0f, _currentRoll);
-
-                camSetup.mainCamera.transform.position = _tpc.CinemachineCameraTarget.transform.position;
-                camSetup.mainCamera.transform.rotation = finalCamRot;
+                // Sincroniza CinemachineCameraTarget para não quebrar dependências de terceiros
+                if (_tpc != null && _tpc.CinemachineCameraTarget != null)
+                {
+                    _tpc.CinemachineCameraTarget.transform.position = _cameraPivot.position;
+                    _tpc.CinemachineCameraTarget.transform.rotation = _cameraPivot.rotation;
+                }
             }
 
-            UpdateSwayAndBob();
+            UpdateHandAnchors();
         }
 
-        private void UpdateSwayAndBob()
+        private void UpdateHandAnchors()
         {
-            if (LeftHandAnchor == null || RightHandAnchor == null || _cc == null) return;
+            if (_leftHandAnchor == null || _rightHandAnchor == null) return;
 
-            float speed = new Vector3(_cc.velocity.x, 0, _cc.velocity.z).magnitude;
-            
-            // Sway based on look input
-            var starterAssetsInputs = GetComponent<StarterAssetsInputs>();
-            float lookX = starterAssetsInputs != null ? starterAssetsInputs.look.x : 0f;
-            float lookY = starterAssetsInputs != null ? starterAssetsInputs.look.y : 0f;
+            if (!enableHandSwayBob)
+            {
+                // Posição e rotação estáveis e travadas na câmera (sem atraso de frame nem oscilação)
+                _leftHandAnchor.localPosition = _leftAnchorBasePos;
+                _leftHandAnchor.localRotation = Quaternion.identity;
 
-            float swayAmount = 0.02f;
-            float maxSway = 0.05f;
-            
+                _rightHandAnchor.localPosition = _rightAnchorBasePos;
+                _rightHandAnchor.localRotation = Quaternion.identity;
+                return;
+            }
+
+            // Caso o usuário habilite sway/bob opcional nas mãos (nunca na câmera)
+            float speed = _cc != null ? new Vector3(_cc.velocity.x, 0, _cc.velocity.z).magnitude : 0f;
+            float lookX = _starterInputs != null ? _starterInputs.look.x : 0f;
+            float lookY = _starterInputs != null ? _starterInputs.look.y : 0f;
+
             Vector3 swayOffset = new Vector3(
-                Mathf.Clamp(-lookX * swayAmount, -maxSway, maxSway),
-                Mathf.Clamp(-lookY * swayAmount, -maxSway, maxSway),
-                0
+                Mathf.Clamp(-lookX * handSwayAmount, -0.05f, 0.05f),
+                Mathf.Clamp(-lookY * handSwayAmount, -0.05f, 0.05f),
+                0f
             );
 
-            // Bob based on movement
-            float bobSpeed = 10f;
-            float bobAmount = 0.02f;
+            _leftHandAnchor.localPosition = _leftAnchorBasePos + swayOffset;
+            _rightHandAnchor.localPosition = _rightAnchorBasePos + swayOffset;
+        }
 
-            if (speed > 0.1f)
+        public void EnsureRig()
+        {
+            if (_cameraPivot == null)
             {
-                _bobTimer += Time.deltaTime * bobSpeed;
-                float bobY = Mathf.Sin(_bobTimer) * bobAmount;
-                float bobX = Mathf.Cos(_bobTimer * 0.5f) * bobAmount;
-                swayOffset += new Vector3(bobX, bobY, 0);
+                var pivotT = transform.Find("CameraPivot");
+                if (pivotT == null)
+                {
+                    var pivotGo = new GameObject("CameraPivot");
+                    pivotGo.transform.SetParent(transform, false);
+                    pivotGo.transform.localPosition = new Vector3(0f, eyeHeight, forwardOffset);
+                    pivotT = pivotGo.transform;
+                }
+                _cameraPivot = pivotT;
             }
-            else
+
+            if (_playerCamera == null)
             {
-                _bobTimer = 0f;
+                var camSetup = GetComponent<PlayerCameraSetup>();
+                if (camSetup != null && camSetup.mainCamera != null)
+                {
+                    _playerCamera = camSetup.mainCamera.GetComponent<Camera>();
+                }
+                else
+                {
+                    _playerCamera = GetComponentInChildren<Camera>(true);
+                }
             }
 
-            // Smoothly move anchors
-            LeftHandAnchor.localPosition = Vector3.Lerp(LeftHandAnchor.localPosition, _leftAnchorBasePos + swayOffset, Time.deltaTime * 5f);
-            RightHandAnchor.localPosition = Vector3.Lerp(RightHandAnchor.localPosition, _rightAnchorBasePos + swayOffset, Time.deltaTime * 5f);
+            Transform parentForAnchors = _playerCamera != null ? _playerCamera.transform : _cameraPivot;
 
-            // Also slight rotation sway
-            Quaternion swayRotation = Quaternion.Euler(-lookY * 0.5f, lookX * 0.5f, lookX * 0.5f);
-            LeftHandAnchor.localRotation = Quaternion.Slerp(LeftHandAnchor.localRotation, swayRotation, Time.deltaTime * 5f);
-            RightHandAnchor.localRotation = Quaternion.Slerp(RightHandAnchor.localRotation, swayRotation, Time.deltaTime * 5f);
+            if (_leftHandAnchor == null && parentForAnchors != null)
+            {
+                var leftT = parentForAnchors.Find("LeftHandAnchor");
+                if (leftT == null)
+                {
+                    var leftGo = new GameObject("LeftHandAnchor");
+                    leftGo.transform.SetParent(parentForAnchors, false);
+                    leftGo.transform.localPosition = _leftAnchorBasePos;
+                    leftT = leftGo.transform;
+                }
+                _leftHandAnchor = leftT;
+            }
+
+            if (_rightHandAnchor == null && parentForAnchors != null)
+            {
+                var rightT = parentForAnchors.Find("RightHandAnchor");
+                if (rightT == null)
+                {
+                    var rightGo = new GameObject("RightHandAnchor");
+                    rightGo.transform.SetParent(parentForAnchors, false);
+                    rightGo.transform.localPosition = _rightAnchorBasePos;
+                    rightT = rightGo.transform;
+                }
+                _rightHandAnchor = rightT;
+            }
+        }
+
+        private void ConfigureCameraCulling(Camera cam)
+        {
+            if (cam == null) return;
+
+            int minimapLayer = LayerMask.NameToLayer("MinimapOnly");
+            if (minimapLayer >= 0) cam.cullingMask &= ~(1 << minimapLayer);
+
+            int localPlayerLayer = LayerMask.NameToLayer("LocalPlayerModel");
+            if (localPlayerLayer >= 0) cam.cullingMask &= ~(1 << localPlayerLayer);
+
+            int firstPersonLayer = LayerMask.NameToLayer("FirstPersonOnly");
+            if (firstPersonLayer >= 0) cam.cullingMask |= (1 << firstPersonLayer);
         }
     }
 }

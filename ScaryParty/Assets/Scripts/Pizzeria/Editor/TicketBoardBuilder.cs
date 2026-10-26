@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Integration;
+using ScaryParty.Interaction;
 
 namespace ScaryParty.Pizzeria.Editor
 {
@@ -59,6 +60,7 @@ namespace ScaryParty.Pizzeria.Editor
                 ticketBoard.stationId = 15;
                 ticketBoard.stationName = "Quadro de Comandas";
                 ticketBoard.maxVisibleTickets = 4;
+                BuilderToolkit.GetOrAddComponent<OutlineTarget>(boardObj);
 
                 // Marcar como gerado
                 BuilderToolkit.MarkGenerated(boardObj, "TicketBoardBuilder", "Station_TicketBoard");

@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 3616449695677294364}
   - component: {fileID: 3149996463661831962}
   - component: {fileID: 1720877260195553255}
+  - component: {fileID: 1153174000563841167}
   m_Layer: 0
   m_Name: SupplyCrate
   m_TagString: Untagged
@@ -161,3 +162,20 @@ MonoBehaviour:
   itemName: SupplyCrate
   category: 8
   definitionId: 0
+--- !u!114 &1153174000563841167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337704298186362566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3545654505f60e34b909a35a490fcb07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Interaction.OutlineTarget
+  _eligibleRenderers: []
+  _excludedRenderers: []
+  outlineColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  outlineWidth: 2.5
+  occludedByGeometry: 1

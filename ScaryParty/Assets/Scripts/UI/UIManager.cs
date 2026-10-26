@@ -170,12 +170,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private bool _isScoreboardOpen = false;
+
     private void ShowScoreboard()
     {
         if (_scoreboardOverlay == null) return;
 
-        _scoreboardOverlay.RemoveFromClassList("hidden");
-        _scoreboardOverlay.style.display = DisplayStyle.Flex;
+        if (!_isScoreboardOpen)
+        {
+            _isScoreboardOpen = true;
+            _scoreboardOverlay.RemoveFromClassList("hidden");
+            _scoreboardOverlay.style.display = DisplayStyle.Flex;
+            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PushModal();
+        }
 
         RefreshScoreboardData();
     }
@@ -184,8 +191,18 @@ public class UIManager : MonoBehaviour
     {
         if (_scoreboardOverlay == null) return;
 
-        _scoreboardOverlay.AddToClassList("hidden");
-        _scoreboardOverlay.style.display = DisplayStyle.None;
+        if (_isScoreboardOpen)
+        {
+            _isScoreboardOpen = false;
+            _scoreboardOverlay.AddToClassList("hidden");
+            _scoreboardOverlay.style.display = DisplayStyle.None;
+            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PopModal();
+        }
+    }
+
+    private void OnDisable()
+    {
+        HideScoreboard();
     }
 
     /// <summary>

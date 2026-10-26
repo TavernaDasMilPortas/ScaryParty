@@ -41,29 +41,14 @@ public class PizzaItem : NetworkBehaviour, IInteractable
         }
     }
 
-    private InteractableHighlight _highlight;
-
-    private void Awake()
-    {
-        _highlight = GetComponent<InteractableHighlight>();
-        if (_highlight == null)
-        {
-            _highlight = gameObject.AddComponent<InteractableHighlight>();
-        }
-    }
-
     public void OnFocus() 
     { 
-        if (_highlight != null) _highlight.EnableHighlight();
-
         if (UIManager.Instance != null)
             UIManager.Instance.ShowInteractionPrompt(InteractPrompt);
     }
     
     public void OnLoseFocus() 
     {
-        if (_highlight != null) _highlight.DisableHighlight();
-
         if (UIManager.Instance != null)
             UIManager.Instance.HideInteractionPrompt();
     }

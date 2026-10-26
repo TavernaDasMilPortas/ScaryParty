@@ -36,13 +36,15 @@ namespace ScaryParty.Pizzeria.Network
 
             // 1. Validar jogador e posição
             Vector3 playerPos = PlayerContextResolver.GetPlayerPosition(sender);
-            if (StationRegistry.TryGetStation(storageId, out var storageTrans))
+            if (!StationRegistry.TryGetStation(storageId, out var storageTrans))
             {
-                if (!InteractionValidator.ValidateDistanceAndSight(sender, storageTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
-                {
-                    PizzeriaSession.Notifier?.NotifyClient(sender, "Você está muito longe do armazenamento.", true);
-                    return;
-                }
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Armazenamento não registrado.", true);
+                return;
+            }
+            if (!InteractionValidator.ValidateDistanceAndSight(sender, storageTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Você está muito longe do armazenamento.", true);
+                return;
             }
 
             // 2. Validar mão explícita (sem fallback silencioso)
@@ -68,7 +70,6 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void TransferItemServerRpc(ulong itemIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, float x = 0f, float y = 0f, float z = 0f, ServerRpcParams rpcParams = default)
         {
-            var destination = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId, x, y, z);
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
@@ -80,16 +81,51 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
+            var destType = (LocationType)targetLocType;
+            ulong actualHolderId = targetHolderId;
+
+            // Se destino for mão, o solicitante só pode colocar em sua própria mão
+            if (destType == LocationType.Hand)
+            {
+                actualHolderId = sender;
+            }
+
+            // Não permitir retirar item da mão de outro jogador
+            if (item.Location.Type == LocationType.Hand && item.Location.HolderId != sender)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Você não pode pegar um item da mão de outro jogador.", true);
+                return;
+            }
+
+            // Validação de proximidade da bancada de origem
+            if (item.Location.Type == LocationType.StationSlot)
+            {
+                if (!StationRegistry.TryGetStation((int)item.Location.HolderId, out var srcStationTrans))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Bancada de origem não registrada.", true);
+                    return;
+                }
+                if (!InteractionValidator.ValidateDistanceAndSight(sender, srcStationTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada de origem.", true);
+                    return;
+                }
+            }
+
+            var destination = new LocationRef(destType, actualHolderId, targetSlotId, x, y, z);
+
             // Validação de proximidade se o destino for estação
             if (destination.Type == LocationType.StationSlot)
             {
-                if (StationRegistry.TryGetStation((int)destination.HolderId, out var stationTrans))
+                if (!StationRegistry.TryGetStation((int)destination.HolderId, out var stationTrans))
                 {
-                    if (!InteractionValidator.ValidateDistanceAndSight(sender, stationTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
-                    {
-                        PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada de destino.", true);
-                        return;
-                    }
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Bancada de destino não registrada.", true);
+                    return;
+                }
+                if (!InteractionValidator.ValidateDistanceAndSight(sender, stationTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada de destino.", true);
+                    return;
                 }
             }
 
@@ -111,12 +147,65 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void TransferToolServerRpc(ulong toolIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, float x = 0f, float y = 0f, float z = 0f, ServerRpcParams rpcParams = default)
         {
-            var destination = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId, x, y, z);
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             var toolId = new ToolItemId(toolIdVal);
+            if (!root.DomainState.Tools.TryGetValue(toolId, out var toolState))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Utensílio não encontrado.", true);
+                return;
+            }
+
+            var destType = (LocationType)targetLocType;
+            ulong actualHolderId = targetHolderId;
+
+            // Se destino for mão, o solicitante só pode colocar em sua própria mão
+            if (destType == LocationType.Hand)
+            {
+                actualHolderId = sender;
+            }
+
+            // Não permitir retirar utensílio da mão de outro jogador
+            if (toolState.Location.Type == LocationType.Hand && toolState.Location.HolderId != sender)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Você não pode pegar um utensílio da mão de outro jogador.", true);
+                return;
+            }
+
+            // Validação de proximidade da bancada de origem
+            if (toolState.Location.Type == LocationType.StationSlot)
+            {
+                if (!StationRegistry.TryGetStation((int)toolState.Location.HolderId, out var srcStationTrans))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Bancada de origem não registrada.", true);
+                    return;
+                }
+                if (!InteractionValidator.ValidateDistanceAndSight(sender, srcStationTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada de origem.", true);
+                    return;
+                }
+            }
+
+            var destination = new LocationRef(destType, actualHolderId, targetSlotId, x, y, z);
+
+            // Validação de proximidade se o destino for estação
+            if (destination.Type == LocationType.StationSlot)
+            {
+                if (!StationRegistry.TryGetStation((int)destination.HolderId, out var stationTrans))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Bancada de destino não registrada.", true);
+                    return;
+                }
+                if (!InteractionValidator.ValidateDistanceAndSight(sender, stationTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada de destino.", true);
+                    return;
+                }
+            }
+
             var res = TransferService.TransferTool(root.DomainState, toolId, destination, sender, root.Clock.Now);
             if (!res.Success)
             {

@@ -20,12 +20,8 @@ public class PlayerInteraction : NetworkBehaviour
     [Tooltip("Layers that contain interactable objects")]
     public LayerMask interactableLayer;
 
-    [Header("Hover Outline Settings")]
-    [Tooltip("Material used to render outline on hover (Outline Example.mat)")]
-    public Material outlineMaterial;
-
-    private Material _outlineMatInstance;
-    private readonly Dictionary<Renderer, Material[]> _originalMaterialsCache = new Dictionary<Renderer, Material[]>();
+    [Tooltip("Layers que contêm obstáculos sólidos (paredes, balcões) que ocluem interação")]
+    public LayerMask obstacleLayer;
 
     private IInteractable _currentInteractable;
     private float _lastSyncTime = 0f;
@@ -185,7 +181,14 @@ public class PlayerInteraction : NetworkBehaviour
     private void Update()
     {
         if (!IsOwner) return;
-        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
+        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
+        {
+            if (OutlineService.Instance != null)
+            {
+                OutlineService.Instance.SetTarget(null);
+            }
+            return;
+        }
         
         HandleRaycast();
         HandleInput();
@@ -205,11 +208,23 @@ public class PlayerInteraction : NetworkBehaviour
             if (mainCamera == null) return;
         }
 
-        // Raycast diretamente a partir do centro da tela
         Ray ray = mainCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-        LayerMask mask = interactableLayer.value == 0 ? Physics.DefaultRaycastLayers : interactableLayer;
+        
+        // 1. Raycast de obstáculos sólidos (paredes, portas, móveis) para limitar alcance
+        LayerMask obsMask = obstacleLayer.value != 0 ? obstacleLayer : (1 << 0);
+        float maxReach = interactionDistance;
 
-        RaycastHit[] hits = Physics.RaycastAll(ray, interactionDistance, mask, QueryTriggerInteraction.Collide);
+        if (Physics.Raycast(ray, out RaycastHit obsHit, interactionDistance, obsMask, QueryTriggerInteraction.Ignore))
+        {
+            if (obsHit.collider != null && !obsHit.collider.transform.IsChildOf(this.transform))
+            {
+                maxReach = obsHit.distance;
+            }
+        }
+
+        // 2. Raycast direto para interagíveis até o alcance limitado pelo obstáculo
+        LayerMask mask = interactableLayer.value == 0 ? Physics.DefaultRaycastLayers : interactableLayer;
+        RaycastHit[] hits = Physics.RaycastAll(ray, maxReach, mask, QueryTriggerInteraction.Collide);
         System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         IInteractable interactable = null;
@@ -227,10 +242,10 @@ public class PlayerInteraction : NetworkBehaviour
             }
         }
 
-        // Fallback SphereCast com raio estreito (0.08m) para itens finos/pequenos
+        // Fallback SphereCast com raio estreito (0.08m) limitado pelo mesmo alcance do obstáculo
         if (interactable == null)
         {
-            RaycastHit[] sphereHits = Physics.SphereCastAll(ray, 0.08f, interactionDistance, mask, QueryTriggerInteraction.Collide);
+            RaycastHit[] sphereHits = Physics.SphereCastAll(ray, 0.08f, maxReach, mask, QueryTriggerInteraction.Collide);
             System.Array.Sort(sphereHits, (a, b) => a.distance.CompareTo(b.distance));
             foreach (var hit in sphereHits)
             {
@@ -253,11 +268,22 @@ public class PlayerInteraction : NetworkBehaviour
                 if (_currentInteractable != null)
                 {
                     _currentInteractable.OnLoseFocus();
-                    RemoveHoverOutline();
+                    ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
                 }
+
                 _currentInteractable = interactable;
                 _currentInteractable.OnFocus();
-                ApplyHoverOutline(_currentInteractable);
+
+                if (interactable is Component comp)
+                {
+                    var target = comp.GetComponent<ScaryParty.Interaction.OutlineTarget>() 
+                                 ?? comp.GetComponentInParent<ScaryParty.Interaction.OutlineTarget>();
+                    if (target == null)
+                    {
+                        target = comp.gameObject.AddComponent<ScaryParty.Interaction.OutlineTarget>();
+                    }
+                    ScaryParty.Interaction.OutlineService.Instance?.SetTarget(target);
+                }
             }
 
             if (UIManager.Instance != null)
@@ -266,11 +292,11 @@ public class PlayerInteraction : NetworkBehaviour
             return;
         }
 
-        // Hit nothing or something without an interactable
+        // Sem alvo em foco
         if (_currentInteractable != null)
         {
             _currentInteractable.OnLoseFocus();
-            RemoveHoverOutline();
+            ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
             _currentInteractable = null;
 
             if (UIManager.Instance != null)
@@ -278,98 +304,19 @@ public class PlayerInteraction : NetworkBehaviour
         }
     }
 
-    private void EnsureOutlineMaterialInstance()
-    {
-        if (_outlineMatInstance != null) return;
-
-        if (outlineMaterial == null)
-        {
-#if UNITY_EDITOR
-            outlineMaterial = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>("Assets/Distant Lands/Illustrate - Stylized Toon Shader/Contents/Materials/Outline Example.mat");
-#endif
-            if (outlineMaterial == null)
-            {
-                var allMats = Resources.FindObjectsOfTypeAll<Material>();
-                for (int i = 0; i < allMats.Length; i++)
-                {
-                    if (allMats[i] != null && allMats[i].name == "Outline Example")
-                    {
-                        outlineMaterial = allMats[i];
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (outlineMaterial != null)
-        {
-            _outlineMatInstance = new Material(outlineMaterial);
-            _outlineMatInstance.name = "Outline_Example_HoverInstance";
-            // Desativa os passes de superfície para renderizar apenas o contorno (ExtraPrePass com Cull Front)
-            _outlineMatInstance.SetShaderPassEnabled("UniversalForwardOnly", false);
-            _outlineMatInstance.SetShaderPassEnabled("Forward", false);
-            _outlineMatInstance.SetShaderPassEnabled("DepthOnly", false);
-            _outlineMatInstance.SetShaderPassEnabled("DepthNormalsOnly", false);
-        }
-    }
-
-    private void ApplyHoverOutline(IInteractable interactable)
-    {
-        RemoveHoverOutline();
-        if (interactable == null || !(interactable is Component comp)) return;
-
-        EnsureOutlineMaterialInstance();
-        if (_outlineMatInstance == null) return;
-
-        var renderers = comp.GetComponentsInChildren<Renderer>(false);
-        foreach (var rend in renderers)
-        {
-            if (rend == null) continue;
-            if (rend is CanvasRenderer || rend.GetComponent<TMPro.TMP_Text>() != null) continue;
-            if (rend.gameObject.name.Contains("Progress") || rend.gameObject.name.Contains("Text")) continue;
-
-            var childInteractable = rend.GetComponent<IInteractable>();
-            if (childInteractable != null && childInteractable != interactable) continue;
-
-            var orig = rend.sharedMaterials;
-            if (orig == null || orig.Length == 0) continue;
-
-            _originalMaterialsCache[rend] = orig;
-
-            var newMats = new Material[orig.Length + 1];
-            System.Array.Copy(orig, newMats, orig.Length);
-            newMats[orig.Length] = _outlineMatInstance;
-            rend.sharedMaterials = newMats;
-        }
-    }
-
-    private void RemoveHoverOutline()
-    {
-        if (_originalMaterialsCache.Count == 0) return;
-
-        foreach (var kvp in _originalMaterialsCache)
-        {
-            if (kvp.Key != null && kvp.Value != null)
-            {
-                kvp.Key.sharedMaterials = kvp.Value;
-            }
-        }
-        _originalMaterialsCache.Clear();
-    }
-
     private void OnDisable()
     {
-        RemoveHoverOutline();
+        if (_currentInteractable != null)
+        {
+            _currentInteractable.OnLoseFocus();
+            _currentInteractable = null;
+        }
+        ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
     }
 
     public override void OnDestroy()
     {
-        RemoveHoverOutline();
-        if (_outlineMatInstance != null)
-        {
-            Destroy(_outlineMatInstance);
-            _outlineMatInstance = null;
-        }
+        ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
         base.OnDestroy();
     }
 

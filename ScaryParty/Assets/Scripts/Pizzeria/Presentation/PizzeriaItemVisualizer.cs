@@ -1,33 +1,55 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using System.Collections.Generic;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Player;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
+    [DefaultExecutionOrder(150)]
     public class PizzeriaItemVisualizer : NetworkBehaviour
     {
         public static PizzeriaItemVisualizer Instance { get; private set; }
 
-        private Dictionary<ulong, GameObject> _visuals = new Dictionary<ulong, GameObject>();
-        private Dictionary<ulong, GameObject> _toolVisuals = new Dictionary<ulong, GameObject>();
-        private Dictionary<ulong, GameObject[]> _pizzaIngredientLayers = new Dictionary<ulong, GameObject[]>();
+        [Header("Catálogo de Apresentação")]
+        public ItemPresentationCatalog catalog;
 
-        private Dictionary<int, StationView> _stationCache = new Dictionary<int, StationView>();
-        private Dictionary<ulong, (Transform left, Transform right)> _playerHandCache = new Dictionary<ulong, (Transform left, Transform right)>();
-        
+        [Header("Prefabs de Fallback")]
+        public GameObject pizzaBoxPrefab;
+        public GameObject pizzaBasePrefab;
+        public GameObject doughPrefab;
+
+        private readonly Dictionary<ulong, ItemVisualWrapper> _visualWrappers = new Dictionary<ulong, ItemVisualWrapper>();
+        private readonly Dictionary<ulong, ItemVisualWrapper> _toolVisualWrappers = new Dictionary<ulong, ItemVisualWrapper>();
+        private readonly Dictionary<ulong, GameObject[]> _pizzaIngredientLayers = new Dictionary<ulong, GameObject[]>();
+
+        private readonly Dictionary<int, StationView> _stationCache = new Dictionary<int, StationView>();
+        private readonly Dictionary<ulong, (Transform left, Transform right)> _playerHandCache = new Dictionary<ulong, (Transform left, Transform right)>();
+
         private float _cacheUpdateTimer = 0f;
         private const float CacheUpdateInterval = 2f;
-
-        public GameObject pizzaBoxPrefab; // Optional: If null, we use a brown cube
-        public GameObject pizzaBasePrefab; // Optional: If null, we use a cylinder
-        public GameObject doughPrefab; // Optional: If null, we use a sphere
 
         private void Awake()
         {
             Instance = this;
+            EnsureCatalog();
+        }
+
+        private void EnsureCatalog()
+        {
+            if (catalog == null)
+            {
+#if UNITY_EDITOR
+                catalog = UnityEditor.AssetDatabase.LoadAssetAtPath<ItemPresentationCatalog>("Assets/ScriptableObjects/Pizzeria/ItemPresentationCatalog.asset");
+#endif
+                if (catalog == null)
+                {
+                    catalog = Resources.Load<ItemPresentationCatalog>("ItemPresentationCatalog");
+                }
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -36,12 +58,12 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 PizzeriaNetworkState.Instance.Items.OnListChanged += OnItemsChanged;
                 PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsChanged;
-                
+
                 UpdateCaches();
 
                 foreach (var item in PizzeriaNetworkState.Instance.Items)
                     UpdateOrSpawnVisual(item);
-                
+
                 foreach (var tool in PizzeriaNetworkState.Instance.Tools)
                     UpdateOrSpawnToolVisual(tool);
             }
@@ -54,25 +76,51 @@ namespace ScaryParty.Pizzeria.Presentation
                 PizzeriaNetworkState.Instance.Items.OnListChanged -= OnItemsChanged;
                 PizzeriaNetworkState.Instance.Tools.OnListChanged -= OnToolsChanged;
             }
+
+            ClearAllVisuals();
+        }
+
+        private void ClearAllVisuals()
+        {
+            foreach (var kvp in _visualWrappers)
+            {
+                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+            }
+            _visualWrappers.Clear();
+
+            foreach (var kvp in _toolVisualWrappers)
+            {
+                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+            }
+            _toolVisualWrappers.Clear();
+
+            foreach (var kvp in _pizzaIngredientLayers)
+            {
+                if (kvp.Value != null)
+                {
+                    foreach (var l in kvp.Value) if (l != null) Destroy(l);
+                }
+            }
+            _pizzaIngredientLayers.Clear();
         }
 
         private void UpdateCaches()
         {
             _stationCache.Clear();
             var stations = FindObjectsByType<StationView>(FindObjectsSortMode.None);
-            foreach (var st in stations)
+            for (int i = 0; i < stations.Length; i++)
             {
-                _stationCache[st.stationId] = st;
+                _stationCache[stations[i].stationId] = stations[i];
             }
 
             _playerHandCache.Clear();
             var players = FindObjectsByType<PlayerInteraction>(FindObjectsSortMode.None);
-            foreach (var p in players)
+            for (int i = 0; i < players.Length; i++)
             {
-                var netObj = p.GetComponent<NetworkObject>();
+                var netObj = players[i].GetComponent<NetworkObject>();
                 if (netObj != null)
                 {
-                    var anim = p.GetComponentInChildren<Animator>();
+                    var anim = players[i].GetComponentInChildren<Animator>();
                     Transform leftHand = null;
                     Transform rightHand = null;
                     if (anim != null)
@@ -80,9 +128,9 @@ namespace ScaryParty.Pizzeria.Presentation
                         leftHand = anim.GetBoneTransform(HumanBodyBones.LeftHand);
                         rightHand = anim.GetBoneTransform(HumanBodyBones.RightHand);
                     }
-                    if (leftHand == null) leftHand = p.transform;
-                    if (rightHand == null) rightHand = p.transform;
-                    
+                    if (leftHand == null) leftHand = players[i].transform;
+                    if (rightHand == null) rightHand = players[i].transform;
+
                     _playerHandCache[netObj.OwnerClientId] = (leftHand, rightHand);
                 }
             }
@@ -93,14 +141,18 @@ namespace ScaryParty.Pizzeria.Presentation
             if (changeEvent.Type == NetworkListEvent<NetItemDto>.EventType.Remove ||
                 changeEvent.Type == NetworkListEvent<NetItemDto>.EventType.RemoveAt)
             {
-                if (_visuals.TryGetValue(changeEvent.Value.ItemId, out var go))
+                if (_visualWrappers.TryGetValue(changeEvent.Value.ItemId, out var wrapper))
                 {
-                    Destroy(go);
-                    _visuals.Remove(changeEvent.Value.ItemId);
+                    if (wrapper != null) Destroy(wrapper.gameObject);
+                    _visualWrappers.Remove(changeEvent.Value.ItemId);
                 }
                 if (_pizzaIngredientLayers.TryGetValue(changeEvent.Value.ItemId, out var layers))
                 {
-                    foreach (var l in layers) if (l != null) Destroy(l);
+                    if (layers != null)
+                    {
+                        for (int i = 0; i < layers.Length; i++)
+                            if (layers[i] != null) Destroy(layers[i]);
+                    }
                     _pizzaIngredientLayers.Remove(changeEvent.Value.ItemId);
                 }
             }
@@ -115,10 +167,10 @@ namespace ScaryParty.Pizzeria.Presentation
             if (changeEvent.Type == NetworkListEvent<NetToolDto>.EventType.Remove ||
                 changeEvent.Type == NetworkListEvent<NetToolDto>.EventType.RemoveAt)
             {
-                if (_toolVisuals.TryGetValue(changeEvent.Value.ToolId, out var go))
+                if (_toolVisualWrappers.TryGetValue(changeEvent.Value.ToolId, out var wrapper))
                 {
-                    Destroy(go);
-                    _toolVisuals.Remove(changeEvent.Value.ToolId);
+                    if (wrapper != null) Destroy(wrapper.gameObject);
+                    _toolVisualWrappers.Remove(changeEvent.Value.ToolId);
                 }
             }
             else
@@ -129,191 +181,279 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void UpdateOrSpawnToolVisual(NetToolDto tool)
         {
-            if (!_toolVisuals.TryGetValue(tool.ToolId, out var go))
+            ItemPresentationProfile profile = catalog != null
+                ? catalog.FindProfile(ItemCategory.Other, tool.DefinitionId, true, false)
+                : null;
+
+            if (!_toolVisualWrappers.TryGetValue(tool.ToolId, out var wrapper) || wrapper == null)
             {
-                go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                go.transform.localScale = new Vector3(0.1f, 0.3f, 0.1f);
-                var rend = go.GetComponent<Renderer>();
-                if (rend != null) rend.material.color = new Color(0.7f, 0.75f, 0.8f);
-                var col = go.GetComponent<Collider>();
-                if (col != null) Destroy(col);
-                _toolVisuals[tool.ToolId] = go;
+                var wrapperGo = new GameObject($"ToolVisual_{tool.ToolId}");
+                wrapper = wrapperGo.AddComponent<ItemVisualWrapper>();
+                wrapper.ItemId = tool.ToolId;
+                wrapper.IsTool = true;
+
+                GameObject model = null;
+                if (profile != null && profile.visualPrefab != null)
+                {
+                    model = Instantiate(profile.visualPrefab);
+                }
+                else
+                {
+                    model = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    model.transform.localScale = new Vector3(0.08f, 0.28f, 0.08f);
+                    var rend = model.GetComponent<Renderer>();
+                    if (rend != null) rend.material.color = new Color(0.7f, 0.75f, 0.8f);
+                    var col = model.GetComponent<Collider>();
+                    if (col != null) Destroy(col);
+                }
+
+                wrapper.BindVisual(profile, model);
+                _toolVisualWrappers[tool.ToolId] = wrapper;
             }
 
-            if (tool.LocationType == (byte)LocationType.Destroyed || 
-                tool.LocationType == (byte)LocationType.Backpack || 
+            if (tool.LocationType == (byte)LocationType.Destroyed ||
+                tool.LocationType == (byte)LocationType.Backpack ||
                 tool.LocationType == (byte)LocationType.StorageSlot)
             {
-                if (go.activeSelf) go.SetActive(false);
+                if (wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(false);
                 return;
             }
 
-            if (!go.activeSelf) go.SetActive(true);
+            if (!wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(true);
 
-            Transform parent = null;
-            Vector3 targetPos = go.transform.position;
-            Quaternion targetRot = go.transform.rotation;
+            AttachToolToLocation(wrapper, tool, profile);
+        }
+
+        private void AttachToolToLocation(ItemVisualWrapper wrapper, NetToolDto tool, ItemPresentationProfile profile)
+        {
+            int fpLayer = LayerMask.NameToLayer("FirstPersonOnly");
+            if (fpLayer < 0) fpLayer = 0;
 
             if (tool.LocationType == (byte)LocationType.StationSlot)
             {
-                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue((int)tool.HolderId, out var st))
                 {
-                    parent = st.transform;
-                    // Tools sit next to the item slot
-                    targetPos = st.GetSlotPosition((int)tool.SlotId) + st.transform.right * 0.4f;
-                    targetRot = st.GetSlotRotation((int)tool.SlotId);
+                    Transform slotT = st.slotAnchors != null && tool.SlotId < st.slotAnchors.Length
+                        ? st.slotAnchors[tool.SlotId]
+                        : st.transform;
+
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    wrapper.AttachTo(slotT, pose, 0);
                 }
             }
             else if (tool.LocationType == (byte)LocationType.Hand)
             {
-                if (NetworkManager.Singleton != null && tool.HolderId == NetworkManager.Singleton.LocalClientId && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
+                ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0;
+                bool isLocalPlayer = tool.HolderId == localClientId;
+
+                if (isLocalPlayer && FirstPersonCameraController.LocalInstance != null)
                 {
-                    var fpCam = ScaryParty.Player.FirstPersonCameraController.LocalInstance;
-                    parent = tool.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
-                    if (parent != null)
+                    var fpCam = FirstPersonCameraController.LocalInstance;
+                    Transform socket = tool.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
+                    if (socket != null)
                     {
-                        targetPos = parent.position;
-                        targetRot = parent.rotation;
-                        SetLayerRecursively(go, LayerMask.NameToLayer("FirstPersonOnly"));
+                        var pose = tool.SlotId == 0
+                            ? (profile != null ? profile.fpLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.fpRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, fpLayer);
                     }
                 }
                 else if (_playerHandCache.TryGetValue(tool.HolderId, out var hands))
                 {
-                    var handTransform = tool.SlotId == 0 ? hands.left : hands.right;
-                    parent = handTransform;
-                    if (parent != null)
+                    Transform socket = tool.SlotId == 0 ? hands.left : hands.right;
+                    if (socket != null)
                     {
-                        targetPos = parent.position + parent.forward * 0.1f;
-                        targetRot = parent.rotation;
-                        SetLayerRecursively(go, 0);
+                        var pose = tool.SlotId == 0
+                            ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, 0);
                     }
                 }
             }
             else if (tool.LocationType == (byte)LocationType.StagingSlot)
             {
-                SetLayerRecursively(go, 0);
-                parent = null;
-                targetPos = new Vector3(tool.SlotId * 0.5f, 1f, 0f);
-                targetRot = Quaternion.identity;
-            }
+                if (_stationCache.TryGetValue(10, out var stg))
+                {
+                    Transform slotT = stg.slotAnchors != null && tool.SlotId < stg.slotAnchors.Length
+                        ? stg.slotAnchors[tool.SlotId]
+                        : stg.transform;
 
-            if (parent != null || tool.LocationType == (byte)LocationType.StagingSlot)
-            {
-                float lerpSpeed = 10f * Time.deltaTime;
-                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, lerpSpeed);
-                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, lerpSpeed);
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    wrapper.AttachTo(slotT, pose, 0);
+                }
             }
         }
 
         private void UpdateOrSpawnVisual(NetItemDto item)
         {
-            if (_visuals.TryGetValue(item.ItemId, out var go))
+            bool isBoxed = item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box;
+            ItemPresentationProfile profile = catalog != null
+                ? catalog.FindProfile((ItemCategory)item.Category, item.DefinitionId, false, isBoxed)
+                : null;
+
+            if (!_visualWrappers.TryGetValue(item.ItemId, out var wrapper) || wrapper == null)
             {
-                bool wantsBox = item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box;
-                bool wantsPizza = item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza;
+                var wrapperGo = new GameObject($"ItemVisual_{item.ItemId}");
+                wrapper = wrapperGo.AddComponent<ItemVisualWrapper>();
+                wrapper.ItemId = item.ItemId;
+                wrapper.IsTool = false;
 
-                var mf = go != null ? go.GetComponent<MeshFilter>() : null;
-                string meshName = mf != null && mf.sharedMesh != null ? mf.sharedMesh.name : "";
-
-                bool needsRecreate = false;
-                if (wantsBox && !meshName.Contains("Cube")) needsRecreate = true;
-                else if (wantsPizza && !meshName.Contains("Cylinder")) needsRecreate = true;
-                else if (!wantsBox && !wantsPizza && !meshName.Contains("Sphere")) needsRecreate = true;
-
-                if (needsRecreate)
+                GameObject model = CreateItemModel(item, profile);
+                wrapper.BindVisual(profile, model);
+                _visualWrappers[item.ItemId] = wrapper;
+            }
+            else if (wrapper.CurrentProfile != profile)
+            {
+                // Re-bind quando perfil muda (ex: pizza empacotada em caixa)
+                if (wrapper.VisualInstance != null) Destroy(wrapper.VisualInstance);
+                if (_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers))
                 {
-                    if (go != null) Destroy(go);
-                    _visuals.Remove(item.ItemId);
-                    if (_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers))
+                    if (layers != null)
                     {
-                        foreach (var l in layers) if (l != null) Destroy(l);
-                        _pizzaIngredientLayers.Remove(item.ItemId);
+                        for (int i = 0; i < layers.Length; i++)
+                            if (layers[i] != null) Destroy(layers[i]);
                     }
-                    go = null;
+                    _pizzaIngredientLayers.Remove(item.ItemId);
                 }
+
+                GameObject model = CreateItemModel(item, profile);
+                wrapper.BindVisual(profile, model);
             }
 
-            if (go == null)
-            {
-                go = CreateVisualPrimitive(item);
-                _visuals[item.ItemId] = go;
-            }
+            // Atualiza aparência conforme o estado de cozimento / ingredientes
+            UpdateItemAppearance(wrapper, item);
 
-            // Update appearance based on state
-            UpdateAppearance(go, item);
-
-            if (item.LocationType == (byte)LocationType.Destroyed || 
-                item.LocationType == (byte)LocationType.Backpack || 
+            if (item.LocationType == (byte)LocationType.Destroyed ||
+                item.LocationType == (byte)LocationType.Backpack ||
                 item.LocationType == (byte)LocationType.StorageSlot)
             {
-                if (go.activeSelf) go.SetActive(false);
+                if (wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(false);
                 return;
             }
 
-            if (!go.activeSelf) go.SetActive(true);
+            if (!wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(true);
 
-            // Update Position
-            Transform parent = null;
-            Vector3 targetPos = go.transform.position;
-            Quaternion targetRot = go.transform.rotation;
+            AttachItemToLocation(wrapper, item, profile);
+        }
+
+        private GameObject CreateItemModel(NetItemDto item, ItemPresentationProfile profile)
+        {
+            if (profile != null && profile.visualPrefab != null)
+            {
+                return Instantiate(profile.visualPrefab);
+            }
+
+            bool isBoxed = item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box;
+            bool isIngredient = item.Category == (byte)ItemCategory.Dough ||
+                                item.Category == (byte)ItemCategory.Sauce ||
+                                item.Category == (byte)ItemCategory.Cheese ||
+                                item.Category == (byte)ItemCategory.Topping;
+
+            GameObject go;
+            if (isBoxed)
+            {
+                if (pizzaBoxPrefab != null) go = Instantiate(pizzaBoxPrefab);
+                else
+                {
+                    go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    go.transform.localScale = new Vector3(0.4f, 0.1f, 0.4f);
+                    go.GetComponent<Renderer>().material.color = new Color(0.6f, 0.4f, 0.2f);
+                }
+            }
+            else if (isIngredient)
+            {
+                if (item.Category == (byte)ItemCategory.Dough && doughPrefab != null)
+                    go = Instantiate(doughPrefab);
+                else
+                {
+                    go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    go.GetComponent<Renderer>().material.color = Color.white;
+                }
+            }
+            else
+            {
+                // Pizza Base
+                if (pizzaBasePrefab != null) go = Instantiate(pizzaBasePrefab);
+                else
+                {
+                    go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    go.transform.localScale = new Vector3(0.4f, 0.02f, 0.4f);
+                }
+            }
+
+            var col = go.GetComponent<Collider>();
+            if (col != null) Destroy(col);
+
+            return go;
+        }
+
+        private void AttachItemToLocation(ItemVisualWrapper wrapper, NetItemDto item, ItemPresentationProfile profile)
+        {
+            int fpLayer = LayerMask.NameToLayer("FirstPersonOnly");
+            if (fpLayer < 0) fpLayer = 0;
 
             if (item.LocationType == (byte)LocationType.StationSlot)
             {
-                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue((int)item.HolderId, out var st))
                 {
-                    parent = st.transform;
-                    targetPos = st.GetSlotPosition((int)item.SlotId);
-                    targetRot = st.GetSlotRotation((int)item.SlotId);
+                    Transform slotT = st.slotAnchors != null && item.SlotId < st.slotAnchors.Length
+                        ? st.slotAnchors[item.SlotId]
+                        : st.transform;
+
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    wrapper.AttachTo(slotT, pose, 0);
                 }
             }
             else if (item.LocationType == (byte)LocationType.Hand)
             {
-                if (NetworkManager.Singleton != null && item.HolderId == NetworkManager.Singleton.LocalClientId && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
+                ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0;
+                bool isLocalPlayer = item.HolderId == localClientId;
+
+                if (isLocalPlayer && FirstPersonCameraController.LocalInstance != null)
                 {
-                    var fpCam = ScaryParty.Player.FirstPersonCameraController.LocalInstance;
-                    parent = item.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
-                    if (parent != null)
+                    var fpCam = FirstPersonCameraController.LocalInstance;
+                    Transform socket = item.SlotId == 0 ? fpCam.LeftHandAnchor : fpCam.RightHandAnchor;
+                    if (socket != null)
                     {
-                        targetPos = parent.position;
-                        targetRot = parent.rotation;
-                        SetLayerRecursively(go, LayerMask.NameToLayer("FirstPersonOnly"));
+                        var pose = item.SlotId == 0
+                            ? (profile != null ? profile.fpLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.fpRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, fpLayer);
                     }
                 }
                 else if (_playerHandCache.TryGetValue(item.HolderId, out var hands))
                 {
-                    var handTransform = item.SlotId == 0 ? hands.left : hands.right;
-                    parent = handTransform;
-                    if (parent != null)
+                    Transform socket = item.SlotId == 0 ? hands.left : hands.right;
+                    if (socket != null)
                     {
-                        targetPos = parent.position + parent.forward * 0.1f;
-                        targetRot = parent.rotation;
-                        SetLayerRecursively(go, 0);
+                        var pose = item.SlotId == 0
+                            ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, 0);
                     }
                 }
             }
             else if (item.LocationType == (byte)LocationType.StagingSlot)
             {
-                SetLayerRecursively(go, 0);
                 if (_stationCache.TryGetValue(10, out var stg))
                 {
-                    parent = stg.transform;
-                    targetPos = stg.GetSlotPosition(item.SlotId);
-                    targetRot = stg.GetSlotRotation(item.SlotId);
-                }
-                else
-                {
-                    parent = null;
-                    targetPos = new Vector3(item.SlotId * 0.5f, 1f, 0f);
-                    targetRot = Quaternion.identity;
+                    Transform slotT = stg.slotAnchors != null && item.SlotId < stg.slotAnchors.Length
+                        ? stg.slotAnchors[item.SlotId]
+                        : stg.transform;
+
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    wrapper.AttachTo(slotT, pose, 0);
                 }
             }
             else if (item.LocationType == (byte)LocationType.Stack)
             {
-                SetLayerRecursively(go, 0);
+                int stackStationId = 10;
                 var netState = PizzeriaNetworkState.Instance;
-                int stackStationId = 10; // Default staging
                 if (netState != null)
                 {
                     for (int s = 0; s < netState.Stacks.Count; s++)
@@ -328,109 +468,66 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 if (_stationCache.TryGetValue(stackStationId, out var stackStation))
                 {
-                    parent = stackStation.transform;
-                    targetPos = stackStation.GetSlotPosition(0) + Vector3.up * (item.SlotId * 0.12f);
-                    targetRot = stackStation.GetSlotRotation(0);
-                }
-                else
-                {
-                    parent = null;
-                    targetPos = new Vector3(0f, 0.5f + (item.SlotId * 0.12f), 0f);
-                    targetRot = Quaternion.identity;
-                }
-            }
+                    Transform slotT = stackStation.slotAnchors != null && stackStation.slotAnchors.Length > 0
+                        ? stackStation.slotAnchors[0]
+                        : stackStation.transform;
 
-            if (parent != null || item.LocationType == (byte)LocationType.StagingSlot || item.LocationType == (byte)LocationType.Stack)
-            {
-                float lerpSpeed = 10f * Time.deltaTime;
-                go.transform.position = Vector3.Lerp(go.transform.position, targetPos, lerpSpeed); // Smooth quick snap
-                go.transform.rotation = Quaternion.Lerp(go.transform.rotation, targetRot, lerpSpeed);
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    pose.position += Vector3.up * (item.SlotId * 0.12f);
+                    wrapper.AttachTo(slotT, pose, 0);
+                }
             }
         }
 
-        private GameObject CreateVisualPrimitive(NetItemDto item)
+        private void UpdateItemAppearance(ItemVisualWrapper wrapper, NetItemDto item)
         {
-            GameObject go;
-            bool isIngredient = item.Category == (byte)ItemCategory.Dough || 
-                                item.Category == (byte)ItemCategory.Sauce || 
-                                item.Category == (byte)ItemCategory.Cheese || 
-                                item.Category == (byte)ItemCategory.Topping;
-                                
-            if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
-            {
-                go = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                go.transform.localScale = new Vector3(0.4f, 0.1f, 0.4f);
-                go.GetComponent<Renderer>().material.color = new Color(0.6f, 0.4f, 0.2f); // Brown
-            }
-            else if (isIngredient)
-            {
-                go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                go.GetComponent<Renderer>().material.color = Color.white;
-            }
-            else
-            {
-                // Pizza Base
-                go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                go.transform.localScale = new Vector3(0.4f, 0.02f, 0.4f);
-            }
-            
-            // Remove colliders so it doesn't interfere with physics
-            var col = go.GetComponent<Collider>();
-            if (col != null) Destroy(col);
-
-            return go;
-        }
-
-        private void UpdateAppearance(GameObject go, NetItemDto item)
-        {
-            var rend = go.GetComponent<Renderer>();
-            if (rend == null) return;
+            if (wrapper.VisualInstance == null) return;
+            var rend = wrapper.VisualInstance.GetComponent<Renderer>();
 
             if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
             {
-                rend.material.color = new Color(0.6f, 0.4f, 0.2f); // Brown cardboard
-                go.transform.localScale = new Vector3(0.4f, 0.1f, 0.4f);
-                UpdateBoxLabel(go, item);
+                if (rend != null) rend.material.color = new Color(0.6f, 0.4f, 0.2f);
+                UpdateBoxLabel(wrapper.VisualInstance, item);
             }
             else if (item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza)
             {
-                go.transform.localScale = new Vector3(0.4f, 0.02f, 0.4f);
+                if (rend != null)
+                {
+                    Color doughColor = new Color(0.95f, 0.88f, 0.72f);
+                    Color bakedColor = new Color(0.80f, 0.48f, 0.15f);
+                    Color burnedColor = new Color(0.12f, 0.10f, 0.10f);
 
-                Color doughColor = new Color(0.95f, 0.88f, 0.72f);
-                Color bakedColor = new Color(0.80f, 0.48f, 0.15f);
-                Color burnedColor = new Color(0.12f, 0.10f, 0.10f);
-
-                if (item.CookingStage == (byte)CookingStage.Burned)
-                {
-                    rend.material.color = burnedColor;
-                }
-                else if (item.BurnProgress > 0f)
-                {
-                    rend.material.color = Color.Lerp(bakedColor, burnedColor, item.BurnProgress);
-                }
-                else if (item.CookingStage == (byte)CookingStage.Baked)
-                {
-                    rend.material.color = bakedColor;
-                }
-                else
-                {
-                    rend.material.color = Color.Lerp(doughColor, bakedColor, Mathf.Clamp01(item.CookProgress));
+                    if (item.CookingStage == (byte)CookingStage.Burned)
+                    {
+                        rend.material.color = burnedColor;
+                    }
+                    else if (item.BurnProgress > 0f)
+                    {
+                        rend.material.color = Color.Lerp(bakedColor, burnedColor, item.BurnProgress);
+                    }
+                    else if (item.CookingStage == (byte)CookingStage.Baked)
+                    {
+                        rend.material.color = bakedColor;
+                    }
+                    else
+                    {
+                        rend.material.color = Color.Lerp(doughColor, bakedColor, Mathf.Clamp01(item.CookProgress));
+                    }
                 }
 
-                UpdatePizzaIngredientLayers(go, item);
-                UpdatePizzaSmoke(go, item);
+                UpdatePizzaIngredientLayers(wrapper.VisualInstance, item);
+                UpdatePizzaSmoke(wrapper.VisualInstance, item);
             }
             else
             {
-                // Ingredient
-                bool prepared = item.PrepStage == (byte)ProcessingStage.Prepared;
-                go.transform.localScale = prepared ? new Vector3(0.15f, 0.15f, 0.15f) : new Vector3(0.25f, 0.25f, 0.25f);
-                
-                if (item.Category == (byte)ItemCategory.Dough) rend.material.color = new Color(0.92f, 0.85f, 0.70f);
-                else if (item.Category == (byte)ItemCategory.Sauce) rend.material.color = new Color(0.80f, 0.15f, 0.10f);
-                else if (item.Category == (byte)ItemCategory.Cheese) rend.material.color = new Color(0.98f, 0.88f, 0.35f);
-                else if (item.Category == (byte)ItemCategory.Topping) rend.material.color = new Color(0.65f, 0.15f, 0.15f);
+                // Ingrediente
+                if (rend != null)
+                {
+                    if (item.Category == (byte)ItemCategory.Dough) rend.material.color = new Color(0.92f, 0.85f, 0.70f);
+                    else if (item.Category == (byte)ItemCategory.Sauce) rend.material.color = new Color(0.80f, 0.15f, 0.10f);
+                    else if (item.Category == (byte)ItemCategory.Cheese) rend.material.color = new Color(0.98f, 0.88f, 0.35f);
+                    else if (item.Category == (byte)ItemCategory.Topping) rend.material.color = new Color(0.65f, 0.15f, 0.15f);
+                }
             }
         }
 
@@ -520,10 +617,10 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 var sauce = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 sauce.transform.SetParent(pizzaGo.transform);
-                sauce.transform.localPosition = new Vector3(0, 1.25f, 0); 
-                sauce.transform.localScale = new Vector3(0.875f, 0.25f, 0.875f); // Global roughly 0.35 x 0.005 x 0.35
+                sauce.transform.localPosition = new Vector3(0, 1.25f, 0);
+                sauce.transform.localScale = new Vector3(0.875f, 0.25f, 0.875f);
                 sauce.transform.localRotation = Quaternion.identity;
-                sauce.GetComponent<Renderer>().material.color = new Color(0.80f, 0.15f, 0.10f); // Red
+                sauce.GetComponent<Renderer>().material.color = new Color(0.80f, 0.15f, 0.10f);
                 Destroy(sauce.GetComponent<Collider>());
                 layers[0] = sauce;
             }
@@ -536,9 +633,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 var cheese = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 cheese.transform.SetParent(pizzaGo.transform);
                 cheese.transform.localPosition = new Vector3(0, 1.75f, 0);
-                cheese.transform.localScale = new Vector3(0.825f, 0.25f, 0.825f); // Global roughly 0.33 x 0.005 x 0.33
+                cheese.transform.localScale = new Vector3(0.825f, 0.25f, 0.825f);
                 cheese.transform.localRotation = Quaternion.identity;
-                cheese.GetComponent<Renderer>().material.color = new Color(0.98f, 0.88f, 0.35f); // Yellow
+                cheese.GetComponent<Renderer>().material.color = new Color(0.98f, 0.88f, 0.35f);
                 Destroy(cheese.GetComponent<Collider>());
                 layers[1] = cheese;
             }
@@ -558,11 +655,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     sphere.transform.SetParent(toppingRoot.transform);
-                    
-                    float angle = i * Mathf.PI / 2f + Random.Range(-0.2f, 0.2f);
-                    float radius = Random.Range(0.1f, 0.3f) / 0.4f;
+
+                    float angle = i * Mathf.PI / 2f + UnityEngine.Random.Range(-0.2f, 0.2f);
+                    float radius = UnityEngine.Random.Range(0.1f, 0.3f) / 0.4f;
                     sphere.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
-                    sphere.transform.localScale = new Vector3(0.25f, 5f, 0.25f); // Global roughly 0.1 x 0.1 x 0.1
+                    sphere.transform.localScale = new Vector3(0.25f, 5f, 0.25f);
                     sphere.GetComponent<Renderer>().material.color = new Color(0.4f, 0.1f, 0.1f);
                     Destroy(sphere.GetComponent<Collider>());
                 }
@@ -580,26 +677,6 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 UpdateCaches();
                 _cacheUpdateTimer = CacheUpdateInterval;
-            }
-
-            // Continuously lerp items to their target anchors just to keep them locked
-            foreach (var item in PizzeriaNetworkState.Instance.Items)
-            {
-                UpdateOrSpawnVisual(item);
-            }
-            foreach (var tool in PizzeriaNetworkState.Instance.Tools)
-            {
-                UpdateOrSpawnToolVisual(tool);
-            }
-        }
-
-        private void SetLayerRecursively(GameObject obj, int newLayer)
-        {
-            if (obj == null) return;
-            obj.layer = newLayer;
-            foreach (Transform child in obj.transform)
-            {
-                SetLayerRecursively(child.gameObject, newLayer);
             }
         }
     }

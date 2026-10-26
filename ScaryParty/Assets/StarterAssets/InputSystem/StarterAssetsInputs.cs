@@ -25,6 +25,13 @@ namespace StarterAssets
 		public bool cursorLocked = true;
 		public bool cursorInputForLook = true;
 
+		public bool IsInputBlockedByMenu =>
+			ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked ||
+			!cursorInputForLook ||
+			!cursorLocked ||
+			Cursor.lockState != CursorLockMode.Locked ||
+			Cursor.visible;
+
 #if ENABLE_INPUT_SYSTEM
 		public void OnMove(InputValue value)
 		{
@@ -33,7 +40,7 @@ namespace StarterAssets
 
 		public void OnLook(InputValue value)
 		{
-			if(cursorInputForLook && !ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked)
+			if (!IsInputBlockedByMenu)
 			{
 				LookInput(value.Get<Vector2>());
 			}
@@ -55,7 +62,7 @@ namespace StarterAssets
 
         public void OnScrollWeapon(InputValue value)
         {
-            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            if (IsInputBlockedByMenu)
             {
                 scrollWeapon = 0f;
                 return;
@@ -65,7 +72,7 @@ namespace StarterAssets
 
         public void OnAim(InputValue value)
         {
-            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            if (IsInputBlockedByMenu)
             {
                 aim = false;
                 return;
@@ -75,7 +82,7 @@ namespace StarterAssets
 
         public void OnFire(InputValue value)
         {
-            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+            if (IsInputBlockedByMenu)
             {
                 fire = false;
                 return;
@@ -87,7 +94,7 @@ namespace StarterAssets
 
 		public void MoveInput(Vector2 newMoveDirection)
 		{
-			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			if (IsInputBlockedByMenu)
 			{
 				move = Vector2.zero;
 				return;
@@ -97,7 +104,7 @@ namespace StarterAssets
 
 		public void LookInput(Vector2 newLookDirection)
 		{
-			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			if (IsInputBlockedByMenu)
 			{
 				look = Vector2.zero;
 				return;
@@ -107,7 +114,7 @@ namespace StarterAssets
 
 		public void JumpInput(bool newJumpState)
 		{
-			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			if (IsInputBlockedByMenu)
 			{
 				jump = false;
 				return;
@@ -117,7 +124,7 @@ namespace StarterAssets
 
 		public void SprintInput(bool newSprintState)
 		{
-			if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || !cursorInputForLook)
+			if (IsInputBlockedByMenu)
 			{
 				sprint = false;
 				return;

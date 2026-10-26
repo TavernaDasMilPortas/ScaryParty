@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7390192655435960060}
   - component: {fileID: 3807453131614179644}
   - component: {fileID: 5744061534690502508}
+  - component: {fileID: 8536135057798903314}
   m_Layer: 0
   m_Name: PizzaBox
   m_TagString: Untagged
@@ -161,3 +162,20 @@ MonoBehaviour:
   itemName: PizzaBox
   category: 7
   definitionId: 0
+--- !u!114 &8536135057798903314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3030745894583852412}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3545654505f60e34b909a35a490fcb07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Interaction.OutlineTarget
+  _eligibleRenderers: []
+  _excludedRenderers: []
+  outlineColor: {r: 1, g: 0.85, b: 0.2, a: 1}
+  outlineWidth: 2.5
+  occludedByGeometry: 1

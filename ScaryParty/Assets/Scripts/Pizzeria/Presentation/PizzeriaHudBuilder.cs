@@ -122,6 +122,17 @@ namespace ScaryParty.Pizzeria.Presentation
                 _ordersRefreshTimer = 0f;
                 RefreshActiveOrdersDisplay();
             }
+
+            UpdateUIMode();
+        }
+
+        private void OnDisable()
+        {
+            if (_hudPanelsLocked)
+            {
+                _hudPanelsLocked = false;
+                GameplayInputGate.PopModal();
+            }
         }
 
         private void CreateHudHintsBar()
@@ -273,7 +284,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             RefreshStoragePanel();
             _storagePanel.style.display = DisplayStyle.Flex;
-            SetUIMode(true);
+            UpdateUIMode();
         }
 
         public void CloseStoragePicker()
@@ -535,7 +546,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_stagingPanel != null)
             {
                 _stagingPanel.style.display = DisplayStyle.Flex;
-                SetUIMode(true);
+                UpdateUIMode();
             }
         }
 

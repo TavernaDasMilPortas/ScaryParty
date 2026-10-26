@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Integration;
+using ScaryParty.Interaction;
 
 namespace ScaryParty.Pizzeria.Editor
 {
@@ -62,6 +63,7 @@ namespace ScaryParty.Pizzeria.Editor
                 var phoneStation = BuilderToolkit.GetOrAddComponent<PhoneStation>(phoneObj);
                 phoneStation.stationId = 12;
                 phoneStation.stationName = "Telefone de Pedidos";
+                BuilderToolkit.GetOrAddComponent<OutlineTarget>(phoneObj);
 
                 // Componente PhoneRinger
                 var ringer = BuilderToolkit.GetOrAddComponent<PhoneRinger>(phoneObj);

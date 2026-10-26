@@ -463,6 +463,7 @@ namespace ScaryParty.Pizzeria.Editor
             var station = go.AddComponent<T>();
             station.stationId = stationId;
             station.stationName = name;
+            go.AddComponent<ScaryParty.Interaction.OutlineTarget>();
             return station;
         }
 

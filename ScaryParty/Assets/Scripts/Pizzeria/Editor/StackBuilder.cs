@@ -3,6 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Integration;
+using ScaryParty.Interaction;
 
 namespace ScaryParty.Pizzeria.Editor
 {
@@ -60,6 +61,7 @@ namespace ScaryParty.Pizzeria.Editor
                 stackStation.stationName = "Pilha de Staging";
                 stackStation.stackId = 1;
                 stackStation.capacity = 6;
+                BuilderToolkit.GetOrAddComponent<OutlineTarget>(stackObj);
 
                 // Marcar como gerado
                 BuilderToolkit.MarkGenerated(stackObj, "StackBuilder", "Station_Stack_Staging");
