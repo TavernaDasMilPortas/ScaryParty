@@ -1,0 +1,360 @@
+================================================================================
+RELATÓRIO DE ANÁLISE FBX — PIZZARIA MODULAR
+Arquivo: Assets/Art/Pizzeria/Source/pizzariamodular (2)2 (1) (1) (2).fbx (GUID: f41c1a5c11441dc458d5fb3728a59962)
+Total de Nós na Raiz: 320
+Nós com Mesh: 319 | Nós Vazios: 1
+Vértices: 91497 | Triângulos: 74316
+Materiais Únicos (17): Lit, Material.026, Material.029, Material.022, Material.023, Material.003, Material.004, Material.006, Material.024, Material.014, Material.021, Material.025, Material.028, Material.013, Material.027, Material.012, Material.031
+Bounds Totais: Centro (15.21, 2.35, -7.00), Tamanho (36.88, 8.46, 42.87)
+Bounds Arquitetura: Centro (16.39, 1.13, -9.18), Tamanho (34.52, 6.01, 38.52)
+================================================================================
+
+--- Categoria: Decoration (46 nós) ---
+  • abertura.001                 | Pos: (15.26, -1.27, -9.99) | Tris: 10, Bounds: 1,90x0,05x0,96
+  • armario.001                  | Pos: (17.37, -0.71, -15.60) | Tris: 564, Bounds: 0,94x2,50x2,00
+  • batenteportamediainterior.001 | Pos: (24.59, -0.87, -13.17) | Tris: 44, Bounds: 2,00x2,10x0,10
+  • batenteportapequena.001      | Pos: (16.40, -0.87, -1.98) | Tris: 44, Bounds: 0,10x2,10x1,29
+  • batenteportapequena.003      | Pos: (16.40, -0.87, -24.38) | Tris: 44, Bounds: 0,10x2,10x1,29
+  • cadeira.001                  | Pos: (8.89, -1.30, 2.04) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.002                  | Pos: (8.89, -1.30, -1.08) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.003                  | Pos: (8.89, -1.30, -2.82) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.004                  | Pos: (8.89, -1.30, -7.86) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.005                  | Pos: (8.89, -1.30, -6.12) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.006                  | Pos: (5.91, -1.30, 6.24) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.007                  | Pos: (5.91, -1.30, -3.66) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.008                  | Pos: (5.91, -1.30, -5.39) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.009                  | Pos: (8.89, -1.30, 3.78) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.010                  | Pos: (5.91, -1.30, -0.35) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.011                  | Pos: (5.91, -1.30, 1.38) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.012                  | Pos: (5.91, -1.30, 4.51) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.013                  | Pos: (5.91, -1.30, -10.38) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.014                  | Pos: (5.91, -1.30, -8.64) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.015                  | Pos: (2.98, -1.30, 3.78) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.016                  | Pos: (2.98, -1.30, -6.12) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.017                  | Pos: (2.98, -1.30, -7.86) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cadeira.020                  | Pos: (2.98, -1.30, 2.04) | Tris: 380, Bounds: 0,61x1,18x0,63
+  • cardapio.001                 | Pos: (16.23, -0.15, -5.99) | Tris: 68, Bounds: 0,12x1,45x2,48
+  • coiso.001                    | Pos: (-1.54, 2.30, 12.73) | Tris: 100, Bounds: 3,37x8,46x3,39
+  • lata de lixo.001             | Pos: (26.61, -1.35, -9.51) | Tris: 1228, Bounds: 0,66x0,93x0,66
+  • lata de lixo.002             | Pos: (22.55, -1.35, -9.51) | Tris: 1228, Bounds: 0,66x0,93x0,66
+  • molhos.001                   | Pos: (9.01, -0.91, 2.82) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.002                   | Pos: (9.01, -0.91, -2.04) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.003                   | Pos: (9.01, -0.91, -7.08) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.004                   | Pos: (6.03, -0.91, -4.61) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.005                   | Pos: (6.03, -0.91, 0.43) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.006                   | Pos: (6.03, -0.91, 5.29) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.007                   | Pos: (6.03, -0.91, -9.60) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.008                   | Pos: (3.10, -0.91, -7.08) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • molhos.010                   | Pos: (3.10, -0.91, 2.82) | Tris: 720, Bounds: 0,33x0,40x0,28
+  • pilastra.001                 | Pos: (0.00, 1.13, -13.16) | Tris: 24, Bounds: 0,40x6,00x0,40
+  • pilastra.003                 | Pos: (0.00, 1.13, 9.22) | Tris: 24, Bounds: 0,40x6,00x0,40
+  • pilastra.006                 | Pos: (16.40, 1.13, -13.18) | Tris: 12, Bounds: 0,40x6,00x0,40
+  • pilastra.007                 | Pos: (16.40, 1.13, 9.22) | Tris: 24, Bounds: 0,40x6,00x0,40
+  • pilastra.008                 | Pos: (32.79, 1.13, 9.22) | Tris: 12, Bounds: 0,40x6,00x0,40
+  • pilastra.009                 | Pos: (32.79, 1.13, -13.18) | Tris: 12, Bounds: 0,40x6,00x0,40
+  • pilastra.010                 | Pos: (32.79, 1.13, -27.57) | Tris: 12, Bounds: 0,40x6,00x0,40
+  • pilastra.011                 | Pos: (16.40, 1.13, -27.58) | Tris: 12, Bounds: 0,40x6,00x0,40
+  • prancheta.001                | Pos: (11.74, -1.07, 1.96) | Tris: 244, Bounds: 0,86x0,07x0,72
+  • prateleira.001               | Pos: (16.99, -0.94, -19.37) | Tris: 12, Bounds: 1,00x0,05x4,00
+
+--- Categoria: Architecture (201 nós) ---
+  • balcao.001                   | Pos: (11.75, -1.47, -1.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.002                   | Pos: (12.75, -1.40, -10.32) | Tris: 88, Bounds: 1,00x0,75x1,10
+  • balcao.003                   | Pos: (11.75, -1.47, -2.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.004                   | Pos: (11.75, -1.47, -3.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.005                   | Pos: (11.75, -1.47, -4.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.006                   | Pos: (11.75, -1.47, -5.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.007                   | Pos: (11.75, -1.47, -6.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.008                   | Pos: (11.75, -1.47, -7.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.009                   | Pos: (11.75, -1.47, -8.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.010                   | Pos: (11.75, -1.47, -0.98) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.011                   | Pos: (11.75, -1.47, 0.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.012                   | Pos: (11.75, -1.47, 1.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.013                   | Pos: (11.75, -1.47, 2.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.014                   | Pos: (11.75, -1.47, 3.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.015                   | Pos: (11.75, -1.47, 4.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.016                   | Pos: (11.75, -1.47, 5.02) | Tris: 88, Bounds: 1,10x0,75x1,00
+  • balcao.017                   | Pos: (12.75, -1.40, 6.36) | Tris: 88, Bounds: 1,00x0,75x1,10
+  • balcao.018                   | Pos: (13.75, -1.40, 6.36) | Tris: 88, Bounds: 1,00x0,75x1,10
+  • balcao.019                   | Pos: (14.75, -1.40, 6.36) | Tris: 88, Bounds: 1,00x0,75x1,10
+  • balcao.020                   | Pos: (15.75, -1.40, 6.36) | Tris: 88, Bounds: 1,00x0,75x1,10
+  • balcaopabertura.001          | Pos: (13.83, -1.36, -10.27) | Tris: 100, Bounds: 1,10x0,75x1,10
+  • batentefachada.001           | Pos: (0.00, -0.42, -1.98) | Tris: 44, Bounds: 0,14x2,92x4,27
+  • paredecomum.001              | Pos: (17.60, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.002              | Pos: (31.59, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.003              | Pos: (1.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.004              | Pos: (3.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.005              | Pos: (7.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.006              | Pos: (5.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.007              | Pos: (13.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.008              | Pos: (15.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.009              | Pos: (11.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.010              | Pos: (9.20, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.011              | Pos: (1.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.012              | Pos: (3.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.013              | Pos: (5.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.014              | Pos: (7.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.015              | Pos: (9.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.016              | Pos: (11.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.017              | Pos: (13.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.018              | Pos: (15.20, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.020              | Pos: (31.59, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.021              | Pos: (16.40, -0.01, -3.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.022              | Pos: (16.40, -0.01, -5.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.023              | Pos: (16.40, -0.01, -7.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.024              | Pos: (16.40, -0.01, -9.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.025              | Pos: (16.40, -0.01, -11.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.026              | Pos: (16.40, -0.01, 0.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.027              | Pos: (16.40, -0.01, 2.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.028              | Pos: (16.40, -0.01, 4.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.029              | Pos: (16.40, -0.01, 6.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.030              | Pos: (16.40, -0.01, 8.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.031              | Pos: (29.59, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.032              | Pos: (31.59, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.033              | Pos: (29.59, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.034              | Pos: (27.59, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.035              | Pos: (29.59, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.038              | Pos: (21.59, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.039              | Pos: (19.59, -0.01, -13.18) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.040              | Pos: (23.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.041              | Pos: (25.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.043              | Pos: (27.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.045              | Pos: (21.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.046              | Pos: (19.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.047              | Pos: (17.60, -0.01, 9.21) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.049              | Pos: (32.79, -0.01, 8.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.050              | Pos: (32.79, -0.01, 6.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.051              | Pos: (32.79, -0.01, 4.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.052              | Pos: (32.79, -0.01, 2.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.053              | Pos: (32.79, -0.01, 0.02) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.054              | Pos: (32.79, -0.01, -11.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.055              | Pos: (32.79, -0.01, -9.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.056              | Pos: (32.79, -0.01, -7.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.057              | Pos: (32.79, -0.01, -5.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.058              | Pos: (32.79, -0.01, -3.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.060              | Pos: (32.79, -0.01, -1.98) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.061              | Pos: (32.79, -0.01, -16.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.062              | Pos: (32.79, -0.01, -26.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.063              | Pos: (32.79, -0.01, -18.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.064              | Pos: (32.79, -0.01, -20.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.065              | Pos: (32.79, -0.01, -22.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.067              | Pos: (32.79, -0.01, -24.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.068              | Pos: (32.79, -0.01, -14.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.069              | Pos: (17.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.070              | Pos: (19.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.072              | Pos: (21.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.073              | Pos: (23.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.074              | Pos: (25.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.075              | Pos: (27.60, -0.01, -27.57) | Tris: 180, Bounds: 2,00x4,00x0,30
+  • paredecomum.077              | Pos: (16.40, -0.01, -14.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.080              | Pos: (16.40, -0.01, -22.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.081              | Pos: (16.40, -0.01, -20.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.082              | Pos: (16.40, -0.01, -18.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.083              | Pos: (16.40, -0.01, -26.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredecomum.084              | Pos: (16.40, -0.01, -16.38) | Tris: 180, Bounds: 0,30x4,00x2,00
+  • paredefachadadir.001         | Pos: (0.00, 0.38, -4.31) | Tris: 196, Bounds: 0,30x4,00x2,00
+  • paredefachadaesq.001         | Pos: (0.00, 0.38, 0.36) | Tris: 196, Bounds: 0,30x4,00x2,00
+  • paredejaneladir.001          | Pos: (0.00, -0.38, -12.07) | Tris: 212, Bounds: 0,30x4,00x2,00
+  • paredejaneladir.002          | Pos: (0.00, -0.14, 1.86) | Tris: 212, Bounds: 0,30x4,00x2,00
+  • paredejanelaesq.001          | Pos: (0.00, -0.14, -5.82) | Tris: 212, Bounds: 0,30x4,00x2,00
+  • paredejanelaesq.002          | Pos: (0.00, -0.14, 8.18) | Tris: 212, Bounds: 0,30x4,00x2,00
+  • paredejanelameio.001         | Pos: (0.00, -0.28, -7.98) | Tris: 160, Bounds: 0,30x4,00x2,00
+  • paredejanelameio.002         | Pos: (0.00, -0.28, 4.02) | Tris: 160, Bounds: 0,30x4,00x2,00
+  • paredejanelameio.003         | Pos: (0.00, -0.28, -9.98) | Tris: 160, Bounds: 0,30x4,00x2,00
+  • paredejanelameio.004         | Pos: (0.00, -0.28, 6.02) | Tris: 160, Bounds: 0,30x4,00x2,00
+  • paredeporta2variante.001     | Pos: (24.59, 0.35, -13.18) | Tris: 384, Bounds: 4,00x4,00x0,30
+  • paredeportapequena.001       | Pos: (16.40, -0.01, -1.98) | Tris: 296, Bounds: 0,30x4,00x2,00
+  • paredeportapequena.002       | Pos: (16.40, -0.01, -24.38) | Tris: 296, Bounds: 0,30x4,00x2,00
+  • paredesuperiorexterna.001    | Pos: (31.59, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.002    | Pos: (-0.34, 3.23, -11.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.003    | Pos: (-0.34, 3.23, -9.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.004    | Pos: (-0.34, 3.23, -7.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.005    | Pos: (-0.34, 3.23, -5.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.006    | Pos: (-0.34, 3.23, -3.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.007    | Pos: (-0.34, 3.23, -1.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.008    | Pos: (-0.34, 3.23, 0.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.009    | Pos: (-0.34, 3.23, 2.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.010    | Pos: (-0.33, 3.24, 4.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.011    | Pos: (-0.33, 3.24, 6.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.012    | Pos: (-0.33, 3.24, 8.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.013    | Pos: (29.59, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.014    | Pos: (1.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.015    | Pos: (3.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.016    | Pos: (5.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.017    | Pos: (7.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.018    | Pos: (9.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.019    | Pos: (11.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.020    | Pos: (13.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.021    | Pos: (15.20, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.022    | Pos: (17.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.023    | Pos: (19.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.024    | Pos: (31.59, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.025    | Pos: (21.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.026    | Pos: (23.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.027    | Pos: (25.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.028    | Pos: (27.60, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.029    | Pos: (29.59, 3.24, 9.55) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.031    | Pos: (33.12, 3.24, 8.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.032    | Pos: (33.12, 3.24, 6.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.033    | Pos: (33.12, 3.24, 4.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.034    | Pos: (33.12, 3.24, 2.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.035    | Pos: (33.12, 3.24, 0.02) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.036    | Pos: (33.12, 3.24, -1.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.037    | Pos: (33.12, 3.24, -3.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.038    | Pos: (33.12, 3.24, -5.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.039    | Pos: (33.12, 3.24, -7.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.040    | Pos: (33.12, 3.24, -9.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.041    | Pos: (33.12, 3.24, -11.98) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.043    | Pos: (33.12, 3.24, -26.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.044    | Pos: (33.12, 3.24, -24.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.046    | Pos: (33.12, 3.24, -22.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.047    | Pos: (33.12, 3.24, -20.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.048    | Pos: (33.12, 3.24, -18.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.049    | Pos: (33.12, 3.24, -16.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.050    | Pos: (33.12, 3.24, -14.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.051    | Pos: (17.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.052    | Pos: (19.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.054    | Pos: (21.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.055    | Pos: (23.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.056    | Pos: (25.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.057    | Pos: (27.60, 3.24, -27.91) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.059    | Pos: (16.07, 3.24, -26.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.060    | Pos: (16.07, 3.24, -24.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.062    | Pos: (16.07, 3.24, -22.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.063    | Pos: (16.07, 3.24, -20.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.064    | Pos: (16.07, 3.24, -18.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.065    | Pos: (16.07, 3.24, -16.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.066    | Pos: (16.07, 3.24, -14.38) | Tris: 44, Bounds: 0,95x2,00x2,00
+  • paredesuperiorexterna.067    | Pos: (1.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.068    | Pos: (3.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.069    | Pos: (5.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.070    | Pos: (7.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.071    | Pos: (9.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.072    | Pos: (11.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.073    | Pos: (13.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorexterna.074    | Pos: (15.20, 3.24, -13.51) | Tris: 44, Bounds: 2,00x2,00x0,95
+  • paredesuperiorfachada.001    | Pos: (0.00, 1.62, -1.98) | Tris: 44, Bounds: 0,18x1,09x2,00
+  • paredesuperiorinterna.001    | Pos: (23.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.002    | Pos: (19.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.003    | Pos: (21.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.004    | Pos: (17.60, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.005    | Pos: (25.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.006    | Pos: (27.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.007    | Pos: (29.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.008    | Pos: (31.59, 3.14, -13.18) | Tris: 12, Bounds: 2,00x2,00x0,20
+  • paredesuperiorinterna.010    | Pos: (16.41, 3.14, 8.02) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.011    | Pos: (16.41, 3.14, 6.02) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.012    | Pos: (16.41, 3.14, 4.02) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.013    | Pos: (16.41, 3.13, 0.02) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.014    | Pos: (16.41, 3.14, -1.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.015    | Pos: (16.41, 3.14, -3.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.016    | Pos: (16.41, 3.14, 2.02) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.017    | Pos: (16.41, 3.14, -5.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.018    | Pos: (16.41, 3.14, -7.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.019    | Pos: (16.41, 3.14, -9.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • paredesuperiorinterna.020    | Pos: (16.41, 3.14, -11.98) | Tris: 12, Bounds: 0,20x2,00x2,00
+  • porta_maior.001              | Pos: (27.19, -1.11, 8.45) | Tris: 496, Bounds: 0,82x1,33x0,29
+  • porta_maior.002              | Pos: (25.19, -0.30, 8.45) | Tris: 362, Bounds: 0,82x0,57x0,28
+  • porta_maior.003              | Pos: (25.19, -1.11, 8.45) | Tris: 496, Bounds: 0,82x1,33x0,29
+  • porta_maior.004              | Pos: (27.19, -0.30, 8.45) | Tris: 362, Bounds: 0,82x0,57x0,28
+  • quinabalcao.001              | Pos: (11.75, -1.47, -9.98) | Tris: 152, Bounds: 1,10x0,75x1,10
+  • quinabalcao.002              | Pos: (11.75, -1.47, 6.02) | Tris: 152, Bounds: 1,10x0,75x1,10
+
+--- Categoria: ItemCandidate_Box (10 nós) ---
+  • caixa.001                    | Pos: (16.96, -1.44, 1.91) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.002                    | Pos: (16.96, -1.44, 4.02) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.003                    | Pos: (16.96, -1.44, 6.02) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.004                    | Pos: (16.96, -1.44, 8.02) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.005                    | Pos: (16.96, -1.44, -5.95) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.006                    | Pos: (16.96, -1.44, -7.94) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.007                    | Pos: (16.96, -1.44, -9.94) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixa.008                    | Pos: (16.96, -1.44, -12.05) | Tris: 156, Bounds: 0,81x0,81x0,81
+  • caixaregistradora.001        | Pos: (11.64, -0.94, 3.04) | Tris: 110, Bounds: 0,60x0,40x0,70
+  • gavetacaixa.001              | Pos: (11.72, -1.02, 3.04) | Tris: 76, Bounds: 0,56x0,16x0,56
+
+--- Categoria: ItemCandidate_Cutter (2 nós) ---
+  • cortador de pizza.001        | Pos: (31.26, -0.91, -24.76) | Tris: 812, Bounds: 0,94x0,14x0,70
+  • cortador de pizza.002        | Pos: (31.26, -0.91, -25.19) | Tris: 812, Bounds: 0,85x0,14x0,54
+
+--- Categoria: ItemCandidate_Backpack (4 nós) ---
+  • deliverybag.001              | Pos: (17.15, -0.64, -20.69) | Tris: 1668, Bounds: 0,81x0,53x0,68
+  • deliverybag.002              | Pos: (17.15, -0.64, -19.79) | Tris: 1668, Bounds: 0,81x0,53x0,68
+  • deliverybag.003              | Pos: (17.15, -0.64, -18.92) | Tris: 1668, Bounds: 0,81x0,53x0,68
+  • deliverybag.004              | Pos: (17.15, -0.64, -18.09) | Tris: 1668, Bounds: 0,81x0,53x0,68
+
+--- Categoria: ItemCandidate_Spatula (8 nós) ---
+  • espatula sla.001             | Pos: (27.97, -0.85, -13.04) | Tris: 60, Bounds: 0,55x1,68x0,03
+  • espatula sla.002             | Pos: (27.23, -0.85, -13.04) | Tris: 60, Bounds: 0,55x1,68x0,03
+  • panela e concha.001          | Pos: (26.30, -0.82, -3.03) | Tris: 820, Bounds: 0,64x0,60x0,73
+  • panela e concha.002          | Pos: (26.30, -0.82, 0.15) | Tris: 820, Bounds: 0,64x0,60x0,73
+  • panela e concha.003          | Pos: (26.30, -0.82, -6.22) | Tris: 820, Bounds: 0,64x0,60x0,73
+  • panela e concha.004          | Pos: (26.30, -0.82, 3.71) | Tris: 820, Bounds: 0,64x0,60x0,73
+  • tampa do lixo.001            | Pos: (26.61, -1.35, -9.51) | Tris: 660, Bounds: 0,68x0,11x0,69
+  • tampa do lixo.002            | Pos: (22.55, -1.35, -9.51) | Tris: 660, Bounds: 0,68x0,11x0,69
+
+--- Categoria: ItemCandidate_Knife (12 nós) ---
+  • faca.001                     | Pos: (22.54, -0.51, 3.32) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.002                     | Pos: (22.63, -0.51, 3.32) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.003                     | Pos: (22.63, -0.51, -0.24) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.004                     | Pos: (22.54, -0.51, -0.24) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.005                     | Pos: (22.63, -0.51, -3.43) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.006                     | Pos: (22.54, -0.51, -3.43) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.007                     | Pos: (22.63, -0.51, -6.62) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • faca.008                     | Pos: (22.54, -0.51, -6.62) | Tris: 92, Bounds: 0,02x0,52x0,25
+  • suportefaca.001              | Pos: (22.58, -0.79, -0.32) | Tris: 164, Bounds: 0,23x0,45x0,38
+  • suportefaca.002              | Pos: (22.58, -0.79, -3.51) | Tris: 164, Bounds: 0,23x0,45x0,38
+  • suportefaca.003              | Pos: (22.58, -0.79, -6.70) | Tris: 164, Bounds: 0,23x0,45x0,38
+  • suportefaca.005              | Pos: (22.58, -0.79, 3.23) | Tris: 164, Bounds: 0,23x0,45x0,38
+
+--- Categoria: Station_Oven (3 nós) ---
+  • forno.001                    | Pos: (32.12, -0.49, -1.98) | Tris: 272, Bounds: 1,30x5,99x2,20
+  • forno.002                    | Pos: (32.12, -0.49, -5.98) | Tris: 272, Bounds: 1,30x5,99x2,20
+  • forno.003                    | Pos: (32.12, -0.49, 2.02) | Tris: 272, Bounds: 1,30x5,99x2,20
+
+--- Categoria: Station_Fridge (4 nós) ---
+  • Geladeira.001                | Pos: (27.54, -0.97, 8.81) | Tris: 655, Bounds: 0,82x1,91x0,67
+  • Geladeira.002                | Pos: (21.54, -0.97, 8.81) | Tris: 655, Bounds: 0,82x1,91x0,67
+  • Geladeira.003                | Pos: (25.54, -0.97, 8.81) | Tris: 655, Bounds: 0,82x1,91x0,67
+  • Geladeira.004                | Pos: (23.54, -0.97, 8.81) | Tris: 655, Bounds: 0,82x1,91x0,67
+
+--- Categoria: Station_Counter (12 nós) ---
+  • mesa comum.001               | Pos: (8.91, -1.20, 2.91) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.002               | Pos: (8.91, -1.20, -1.95) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.003               | Pos: (8.91, -1.20, -6.99) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.004               | Pos: (5.93, -1.20, -4.52) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.005               | Pos: (5.93, -1.20, 0.51) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.006               | Pos: (5.93, -1.20, 5.37) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.007               | Pos: (5.93, -1.20, -9.51) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.008               | Pos: (3.00, -1.20, -6.99) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa comum.010               | Pos: (3.00, -1.20, 2.91) | Tris: 468, Bounds: 1,16x0,81x1,15
+  • mesa media.001               | Pos: (22.55, -1.31, -1.98) | Tris: 44, Bounds: 2,00x0,80x14,31
+  • mesa media.002               | Pos: (26.61, -1.31, -1.98) | Tris: 44, Bounds: 2,00x0,80x14,31
+  • mesaempacotamento.001        | Pos: (31.58, -1.31, -20.38) | Tris: 52, Bounds: 2,00x0,80x12,00
+
+--- Categoria: Ignored_EmptyMesh (1 nós) ---
+  • paredecomum.019              | Pos: (16.40, -0.01, 12.00) | [MESH VAZIA]
+
+--- Categoria: Auxiliary_Player (1 nós) ---
+  • player                       | Pos: (28.03, -0.97, -27.03) | Tris: 7076, Bounds: 0,71x1,71x0,97
+
+--- Categoria: Furniture_Door (8 nós) ---
+  • portaforno.001               | Pos: (31.49, -0.71, -0.97) | Tris: 80, Bounds: 0,31x1,19x2,03
+  • portaforno.002               | Pos: (31.49, -0.71, -4.96) | Tris: 80, Bounds: 0,31x1,19x2,03
+  • portaforno.003               | Pos: (31.49, -0.71, 3.04) | Tris: 80, Bounds: 0,31x1,19x2,03
+  • portamaiorgeldeira.001       | Pos: (21.19, -1.11, 8.45) | Tris: 496, Bounds: 0,82x1,33x0,29
+  • portamaiorgeldeira.002       | Pos: (23.19, -1.11, 8.45) | Tris: 496, Bounds: 0,82x1,33x0,29
+  • portapequena.001             | Pos: (16.41, -0.60, -23.86) | Tris: 92, Bounds: 0,22x1,99x1,04
+  • portapequenageldeira.001     | Pos: (21.19, -0.30, 8.45) | Tris: 362, Bounds: 0,82x0,57x0,28
+  • portapequenageldeira.002     | Pos: (23.19, -0.30, 8.45) | Tris: 362, Bounds: 0,82x0,57x0,28
+
+--- Categoria: ItemCandidate_PizzaPan (4 nós) ---
+  • prato/forma.001              | Pos: (27.02, -0.93, -3.49) | Tris: 156, Bounds: 0,94x0,09x0,91
+  • prato/forma.002              | Pos: (27.02, -0.93, -6.68) | Tris: 156, Bounds: 0,94x0,09x0,91
+  • prato/forma.003              | Pos: (27.02, -0.93, -0.30) | Tris: 156, Bounds: 0,94x0,09x0,91
+  • prato/forma.004              | Pos: (27.02, -0.93, 3.26) | Tris: 156, Bounds: 0,94x0,09x0,91
+
+--- Categoria: ItemCandidate_Board (4 nós) ---
+  • tabua de cortar.002          | Pos: (23.15, -0.95, 3.26) | Tris: 224, Bounds: 0,58x0,06x0,97
+  • tabua de cortar.003          | Pos: (23.15, -0.95, -0.30) | Tris: 224, Bounds: 0,58x0,06x0,97
+  • tabua de cortar.004          | Pos: (23.15, -0.95, -3.49) | Tris: 224, Bounds: 0,58x0,06x0,97
+  • tabua de cortar.005          | Pos: (23.15, -0.95, -6.68) | Tris: 224, Bounds: 0,58x0,06x0,97

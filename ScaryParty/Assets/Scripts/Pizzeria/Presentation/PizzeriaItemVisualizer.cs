@@ -404,7 +404,7 @@ namespace ScaryParty.Pizzeria.Presentation
                         : st.transform;
 
                     var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
-                    wrapper.AttachTo(slotT, pose, 0);
+                    wrapper.AttachTo(slotT, pose, 0, useSupportPoint: true);
                 }
             }
             else if (item.LocationType == (byte)LocationType.Hand)
@@ -422,7 +422,7 @@ namespace ScaryParty.Pizzeria.Presentation
                             ? (profile != null ? profile.fpLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.fpRightHandPose : ItemPoseOffset.Identity);
 
-                        wrapper.AttachTo(socket, pose, fpLayer);
+                        wrapper.AttachTo(socket, pose, fpLayer, useSupportPoint: false);
                     }
                 }
                 else if (_playerHandCache.TryGetValue(item.HolderId, out var hands))
@@ -434,7 +434,7 @@ namespace ScaryParty.Pizzeria.Presentation
                             ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
 
-                        wrapper.AttachTo(socket, pose, 0);
+                        wrapper.AttachTo(socket, pose, 0, useSupportPoint: false);
                     }
                 }
             }
@@ -447,7 +447,7 @@ namespace ScaryParty.Pizzeria.Presentation
                         : stg.transform;
 
                     var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
-                    wrapper.AttachTo(slotT, pose, 0);
+                    wrapper.AttachTo(slotT, pose, 0, useSupportPoint: true);
                 }
             }
             else if (item.LocationType == (byte)LocationType.Stack)
@@ -474,7 +474,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
                     var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
                     pose.position += Vector3.up * (item.SlotId * 0.12f);
-                    wrapper.AttachTo(slotT, pose, 0);
+                    wrapper.AttachTo(slotT, pose, 0, useSupportPoint: true);
                 }
             }
         }
@@ -482,65 +482,83 @@ namespace ScaryParty.Pizzeria.Presentation
         private void UpdateItemAppearance(ItemVisualWrapper wrapper, NetItemDto item)
         {
             if (wrapper.VisualInstance == null) return;
-            var rend = wrapper.VisualInstance.GetComponent<Renderer>();
+            var renderers = wrapper.VisualInstance.GetComponentsInChildren<Renderer>(true);
 
             if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
             {
-                if (rend != null) rend.material.color = new Color(0.6f, 0.4f, 0.2f);
+                ApplyColorToRenderers(renderers, new Color(0.6f, 0.4f, 0.2f));
                 UpdateBoxLabel(wrapper.VisualInstance, item);
             }
             else if (item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza)
             {
-                if (rend != null)
-                {
-                    Color doughColor = new Color(0.95f, 0.88f, 0.72f);
-                    Color bakedColor = new Color(0.80f, 0.48f, 0.15f);
-                    Color burnedColor = new Color(0.12f, 0.10f, 0.10f);
+                Color doughColor = new Color(0.95f, 0.88f, 0.72f);
+                Color bakedColor = new Color(0.80f, 0.48f, 0.15f);
+                Color burnedColor = new Color(0.12f, 0.10f, 0.10f);
 
-                    if (item.CookingStage == (byte)CookingStage.Burned)
-                    {
-                        rend.material.color = burnedColor;
-                    }
-                    else if (item.BurnProgress > 0f)
-                    {
-                        rend.material.color = Color.Lerp(bakedColor, burnedColor, item.BurnProgress);
-                    }
-                    else if (item.CookingStage == (byte)CookingStage.Baked)
-                    {
-                        rend.material.color = bakedColor;
-                    }
-                    else
-                    {
-                        rend.material.color = Color.Lerp(doughColor, bakedColor, Mathf.Clamp01(item.CookProgress));
-                    }
+                Color targetColor;
+                if (item.CookingStage == (byte)CookingStage.Burned)
+                {
+                    targetColor = burnedColor;
+                }
+                else if (item.BurnProgress > 0f)
+                {
+                    targetColor = Color.Lerp(bakedColor, burnedColor, item.BurnProgress);
+                }
+                else if (item.CookingStage == (byte)CookingStage.Baked)
+                {
+                    targetColor = bakedColor;
+                }
+                else
+                {
+                    targetColor = Color.Lerp(doughColor, bakedColor, Mathf.Clamp01(item.CookProgress));
                 }
 
+                ApplyColorToRenderers(renderers, targetColor);
                 UpdatePizzaIngredientLayers(wrapper.VisualInstance, item);
                 UpdatePizzaSmoke(wrapper.VisualInstance, item);
             }
             else
             {
                 // Ingrediente
-                if (rend != null)
+                if (item.Category == (byte)ItemCategory.Dough) ApplyColorToRenderers(renderers, new Color(0.92f, 0.85f, 0.70f));
+                else if (item.Category == (byte)ItemCategory.Sauce) ApplyColorToRenderers(renderers, new Color(0.80f, 0.15f, 0.10f));
+                else if (item.Category == (byte)ItemCategory.Cheese) ApplyColorToRenderers(renderers, new Color(0.98f, 0.88f, 0.35f));
+                else if (item.Category == (byte)ItemCategory.Topping) ApplyColorToRenderers(renderers, new Color(0.65f, 0.15f, 0.15f));
+            }
+        }
+
+        private static void ApplyColorToRenderers(Renderer[] renderers, Color color)
+        {
+            if (renderers == null) return;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i] == null || renderers[i] is ParticleSystemRenderer) continue;
+                if (renderers[i].material != null)
                 {
-                    if (item.Category == (byte)ItemCategory.Dough) rend.material.color = new Color(0.92f, 0.85f, 0.70f);
-                    else if (item.Category == (byte)ItemCategory.Sauce) rend.material.color = new Color(0.80f, 0.15f, 0.10f);
-                    else if (item.Category == (byte)ItemCategory.Cheese) rend.material.color = new Color(0.98f, 0.88f, 0.35f);
-                    else if (item.Category == (byte)ItemCategory.Topping) rend.material.color = new Color(0.65f, 0.15f, 0.15f);
+                    renderers[i].material.color = color;
                 }
             }
         }
 
         private void UpdateBoxLabel(GameObject boxGo, NetItemDto item)
         {
-            var labelTrans = boxGo.transform.Find("BoxLabel");
+            Transform anchor = ItemVisualWrapper.FindDeepChild(boxGo.transform, "BoxLabelAnchor") ?? boxGo.transform;
+            var labelTrans = anchor.Find("BoxLabel") ?? boxGo.transform.Find("BoxLabel");
             TMPro.TextMeshPro tmp;
             if (labelTrans == null)
             {
                 var labelGo = new GameObject("BoxLabel");
-                labelGo.transform.SetParent(boxGo.transform, false);
-                labelGo.transform.localPosition = new Vector3(0f, 0.52f, 0f);
-                labelGo.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                labelGo.transform.SetParent(anchor, false);
+                if (anchor == boxGo.transform)
+                {
+                    labelGo.transform.localPosition = new Vector3(0f, 0.52f, 0f);
+                    labelGo.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                }
+                else
+                {
+                    labelGo.transform.localPosition = Vector3.zero;
+                    labelGo.transform.localRotation = Quaternion.identity;
+                }
                 labelGo.transform.localScale = Vector3.one * 0.1f;
                 tmp = labelGo.AddComponent<TMPro.TextMeshPro>();
                 tmp.alignment = TMPro.TextAlignmentOptions.Center;
@@ -569,13 +587,21 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void UpdatePizzaSmoke(GameObject pizzaGo, NetItemDto item)
         {
-            var smokeTrans = pizzaGo.transform.Find("PizzaSmoke");
+            Transform anchor = ItemVisualWrapper.FindDeepChild(pizzaGo.transform, "SmokeAnchor") ?? pizzaGo.transform;
+            var smokeTrans = anchor.Find("PizzaSmoke") ?? pizzaGo.transform.Find("PizzaSmoke");
             ParticleSystem ps;
             if (smokeTrans == null)
             {
                 var smokeGo = new GameObject("PizzaSmoke");
-                smokeGo.transform.SetParent(pizzaGo.transform, false);
-                smokeGo.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+                smokeGo.transform.SetParent(anchor, false);
+                if (anchor == pizzaGo.transform)
+                {
+                    smokeGo.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+                }
+                else
+                {
+                    smokeGo.transform.localPosition = Vector3.zero;
+                }
                 ps = smokeGo.AddComponent<ParticleSystem>();
                 var main = ps.main;
                 main.startLifetime = 0.8f;
@@ -611,14 +637,16 @@ namespace ScaryParty.Pizzeria.Presentation
                 _pizzaIngredientLayers[item.ItemId] = layers;
             }
 
+            Transform layerParent = ItemVisualWrapper.FindDeepChild(pizzaGo.transform, "IngredientLayerAnchor") ?? pizzaGo.transform;
+
             // Sauce: Bit 0
             bool hasSauce = (item.IngredientMask & 1) != 0;
             if (hasSauce && layers[0] == null)
             {
                 var sauce = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                sauce.transform.SetParent(pizzaGo.transform);
-                sauce.transform.localPosition = new Vector3(0, 1.25f, 0);
-                sauce.transform.localScale = new Vector3(0.875f, 0.25f, 0.875f);
+                sauce.transform.SetParent(layerParent, false);
+                sauce.transform.localPosition = new Vector3(0, 0.02f, 0);
+                sauce.transform.localScale = new Vector3(0.38f, 0.005f, 0.38f);
                 sauce.transform.localRotation = Quaternion.identity;
                 sauce.GetComponent<Renderer>().material.color = new Color(0.80f, 0.15f, 0.10f);
                 Destroy(sauce.GetComponent<Collider>());
@@ -631,9 +659,9 @@ namespace ScaryParty.Pizzeria.Presentation
             if (hasCheese && layers[1] == null)
             {
                 var cheese = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                cheese.transform.SetParent(pizzaGo.transform);
-                cheese.transform.localPosition = new Vector3(0, 1.75f, 0);
-                cheese.transform.localScale = new Vector3(0.825f, 0.25f, 0.825f);
+                cheese.transform.SetParent(layerParent, false);
+                cheese.transform.localPosition = new Vector3(0, 0.03f, 0);
+                cheese.transform.localScale = new Vector3(0.36f, 0.005f, 0.36f);
                 cheese.transform.localRotation = Quaternion.identity;
                 cheese.GetComponent<Renderer>().material.color = new Color(0.98f, 0.88f, 0.35f);
                 Destroy(cheese.GetComponent<Collider>());
@@ -646,20 +674,20 @@ namespace ScaryParty.Pizzeria.Presentation
             if (hasTopping && layers[2] == null)
             {
                 var toppingRoot = new GameObject("Toppings");
-                toppingRoot.transform.SetParent(pizzaGo.transform);
-                toppingRoot.transform.localPosition = new Vector3(0, 2.25f, 0);
+                toppingRoot.transform.SetParent(layerParent, false);
+                toppingRoot.transform.localPosition = new Vector3(0, 0.04f, 0);
                 toppingRoot.transform.localRotation = Quaternion.identity;
                 toppingRoot.transform.localScale = Vector3.one;
 
                 for (int i = 0; i < 4; i++)
                 {
                     var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    sphere.transform.SetParent(toppingRoot.transform);
+                    sphere.transform.SetParent(toppingRoot.transform, false);
 
                     float angle = i * Mathf.PI / 2f + UnityEngine.Random.Range(-0.2f, 0.2f);
-                    float radius = UnityEngine.Random.Range(0.1f, 0.3f) / 0.4f;
+                    float radius = UnityEngine.Random.Range(0.04f, 0.12f);
                     sphere.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
-                    sphere.transform.localScale = new Vector3(0.25f, 5f, 0.25f);
+                    sphere.transform.localScale = new Vector3(0.05f, 0.02f, 0.05f);
                     sphere.GetComponent<Renderer>().material.color = new Color(0.4f, 0.1f, 0.1f);
                     Destroy(sphere.GetComponent<Collider>());
                 }

@@ -653,8 +653,8 @@ public class CityGenerator : NetworkBehaviour
     }
 
     /// <summary>
-    /// Lê o objeto "Floor" do prefab da pizzaria e devolve tamanho (x,z) e centro (x,z)
-    /// no espaço local do prefab. Fallback: 12x12 centrado.
+    /// Lê as dimensões da pizzaria. Prioriza o componente PizzeriaFootprint com geometria explícita;
+    /// se ausente, faz fallback para o objeto "Floor" do prefab. Fallback geral: 12x12 centrado.
     /// </summary>
     private void GetPizzeriaFootprint(out Vector2 size, out Vector2 center, out Vector2 frontLocal)
     {
@@ -662,6 +662,16 @@ public class CityGenerator : NetworkBehaviour
         center = Vector2.zero;
         frontLocal = new Vector2(0f, -1f); // fallback: frente em -Z
         if (pizzeriaPrefab == null) return;
+
+        // Se houver PizzeriaFootprint explícito no prefab, usar metadados de alta fidelidade
+        var footprint = pizzeriaPrefab.GetComponent<ScaryParty.Pizzeria.Composition.PizzeriaFootprint>();
+        if (footprint != null)
+        {
+            size = footprint.footprintSize;
+            center = footprint.footprintCenter;
+            frontLocal = footprint.entranceDirectionLocal;
+            return;
+        }
 
         Transform floor = null;
         foreach (Transform t in pizzeriaPrefab.GetComponentsInChildren<Transform>(true))
@@ -709,6 +719,10 @@ public class CityGenerator : NetworkBehaviour
     {
         if (CityData == null || CityData.blocks == null || CityData.blocks.Count == 0) return -1;
 
+        GetPizzeriaFootprint(out Vector2 reqSize, out _, out _);
+        float minRequiredDim = Mathf.Min(reqSize.x, reqSize.y);
+        float requiredArea = (reqSize.x * reqSize.y) * 0.65f;
+
         Vector3 gridCenter = Vector3.zero; // Origem orgânica é 0,0,0
         int bestIndex = -1;
         float bestScore = float.MaxValue;
@@ -727,7 +741,15 @@ public class CityGenerator : NetworkBehaviour
                 case ZoneType.MonsterZone: zoneBonus = 100f; break;
             }
 
-            float score = distToCenter + zoneBonus;
+            // Penalizar quadras menores do que o footprint necessário para o prédio da pizzaria
+            float sizePenalty = 0f;
+            float maxBlockDim = Mathf.Max(block.size.x, block.size.z);
+            if (maxBlockDim < minRequiredDim || (block.area > 0 && block.area < requiredArea))
+            {
+                sizePenalty = 500f;
+            }
+
+            float score = distToCenter + zoneBonus + sizePenalty;
             if (score < bestScore)
             {
                 bestScore = score;

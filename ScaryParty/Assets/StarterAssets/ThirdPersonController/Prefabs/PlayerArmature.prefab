@@ -1616,6 +1616,7 @@ MonoBehaviour:
   gamepadSensitivity: 60
   topClamp: 89
   bottomClamp: -85
+  invertPitch: 0
   enableHandSwayBob: 0
   handSwayAmount: 0
   handBobAmount: 0

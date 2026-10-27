@@ -211,7 +211,8 @@ namespace StarterAssets
             if (!IsOwner) return;
             if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible) return;
 
-            if (GetComponent<ScaryParty.Player.FirstPersonCameraController>() != null)
+            var fpc = GetComponent<ScaryParty.Player.FirstPersonCameraController>();
+            if (fpc != null && fpc.enabled)
             {
                 return;
             }
@@ -317,11 +318,22 @@ namespace StarterAssets
             // normalise input direction
             Vector3 inputDirection = new Vector3(_input.move.x, 0.0f, _input.move.y).normalized;
 
-            // set target rotation to camera yaw
-            _targetRotation = _cinemachineTargetYaw;
-            
-            // rotate player to face camera yaw continuously
-            transform.rotation = Quaternion.Euler(0.0f, _targetRotation, 0.0f);
+            var fpc = GetComponent<ScaryParty.Player.FirstPersonCameraController>();
+            if (fpc != null && fpc.enabled)
+            {
+                // Em primeira pessoa, a rotação horizontal da raiz é conduzida pelo FirstPersonCameraController.
+                // Sincroniza _cinemachineTargetYaw e _targetRotation com o ângulo atual da visão sem sobrescrever transform.rotation.
+                _cinemachineTargetYaw = transform.eulerAngles.y;
+                _targetRotation = transform.eulerAngles.y;
+            }
+            else
+            {
+                // set target rotation to camera yaw
+                _targetRotation = _cinemachineTargetYaw;
+                
+                // rotate player to face camera yaw continuously
+                transform.rotation = Quaternion.Euler(0.0f, _targetRotation, 0.0f);
+            }
 
             // move direction relative to player rotation
             Vector3 targetDirection = Quaternion.Euler(0.0f, _targetRotation, 0.0f) * inputDirection;

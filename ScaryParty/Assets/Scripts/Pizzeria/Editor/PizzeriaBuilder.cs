@@ -282,12 +282,13 @@ namespace ScaryParty.Pizzeria.Editor
         private static GameObject EnsurePizzeriaPrefab(Dictionary<string, Material> materials, PizzeriaConfig config)
         {
             string path = $"{PrefabsFolder}/PizzeriaPrefab.prefab";
-            var existing = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (existing != null) 
+
+            // Se houver perfil modular FBX disponível, delega a construção ao PizzeriaFunctionalPrefabBuilder
+            string profilePath = "Assets/ScriptableObjects/Pizzeria/Import/PizzeriaFbxImportProfile.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxImportProfile>(profilePath);
+            if (profile != null || File.Exists(ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxAnalyzer.DefaultFbxPath))
             {
-                // To ensure a clean state without missing scripts or missing anchors,
-                // we delete the old prefab and rebuild it from scratch.
-                AssetDatabase.DeleteAsset(path);
+                return ScaryParty.Pizzeria.Editor.Migration.PizzeriaFunctionalPrefabBuilder.BuildOrUpdateModularPrefab(profile);
             }
 
             var root = new GameObject("PizzeriaPrefab");

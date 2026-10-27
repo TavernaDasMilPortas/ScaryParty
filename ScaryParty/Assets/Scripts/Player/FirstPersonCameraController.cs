@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 
 namespace ScaryParty.Player
 {
-    [DefaultExecutionOrder(50)]
+    [DefaultExecutionOrder(-10)]
     public class FirstPersonCameraController : NetworkBehaviour
     {
         public static FirstPersonCameraController LocalInstance { get; private set; }
@@ -29,10 +29,14 @@ namespace ScaryParty.Player
         public float forwardOffset = 0.05f;
         public float mouseSensitivity = 1.0f;
         public float gamepadSensitivity = 60.0f;
+        [Tooltip("Limite superior de inclinação em graus (olhar para baixo, ângulo Euler X positivo)")]
         public float topClamp = 89.0f;
+        [Tooltip("Limite inferior de inclinação em graus (olhar para cima, ângulo Euler X negativo)")]
         public float bottomClamp = -85.0f;
         [Tooltip("Inverte o controle vertical da visão (olhar para cima/baixo)")]
         public bool invertPitch = false;
+        [Tooltip("Inverte o controle horizontal da visão (olhar para esquerda/direita)")]
+        public bool invertYaw = false;
 
         [Header("Efeitos de Mão (Desativados por padrão)")]
         public bool enableHandSwayBob = false;
@@ -170,8 +174,13 @@ namespace ScaryParty.Player
                 float deltaMult = isMouse ? 1.0f : Time.deltaTime;
                 float sens = isMouse ? mouseSensitivity : gamepadSensitivity;
 
-                _yaw += _starterInputs.look.x * sens * deltaMult;
-                float pitchFactor = invertPitch ? -1f : 1f;
+                float yawFactor = invertYaw ? -1f : 1f;
+                _yaw += _starterInputs.look.x * sens * deltaMult * yawFactor;
+
+                // Em Unity Euler X, rotação positiva inclina a câmera para baixo e negativa para cima.
+                // Padrão (invertPitch == false): mover mouse para cima (look.y > 0) deve inclinar para cima (-1f).
+                // Invertido (invertPitch == true): mover mouse para cima inclina para baixo (+1f).
+                float pitchFactor = invertPitch ? 1f : -1f;
                 _pitch = Mathf.Clamp(_pitch + (_starterInputs.look.y * sens * deltaMult * pitchFactor), bottomClamp, topClamp);
 
                 // O yaw gira a raiz do personagem no plano horizontal

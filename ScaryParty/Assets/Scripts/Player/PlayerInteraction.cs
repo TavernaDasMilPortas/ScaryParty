@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using ScaryParty.Interaction;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif

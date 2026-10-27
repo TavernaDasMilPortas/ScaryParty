@@ -1,22 +1,726 @@
 [Licensing::Module] Trying to connect to existing licensing client channel...
 Built from '6000.3/respin/6000.3.6f1-732c1ec89f18' branch; Version is '6000.3.6f1 (bbb010bdb8a3) revision 12300304'; Using compiler version '194234433'; Build Type 'Release'
 OS: 'Windows 11  (10.0.22631) Professional' Language: 'pt' Physical Memory: 16178 MB
-[Licensing::IpcConnector] Successfully connected to: "LicenseClient-Rubens" at "2026-10-26T19:41:06.3263301Z"
 BatchMode: 1, IsHumanControllingUs: 0, StartBugReporterOnCrash: 0, Is64bit: 1
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-Rubens" at "2026-10-26T21:18:27.0813514Z"
 System  architecture: x64
 Process architecture: x64
-Date: 2026-10-26T19:41:06Z
+Date: 2026-10-26T21:18:27Z
 
 COMMAND LINE ARGUMENTS:
 D:\programas\unity\6000.3.6f1\Editor\Unity.exe
--batchmode
--quit
 -projectPath
 D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty
+-batchmode
+-quit
 -executeMethod
 ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder.ApplyFromCommandLine
 -logFile
 D:\Arquivos\Documentos\GitHub\ScaryParty\UnityBatchLog.txt
 Successfully changed project path to: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty
 D:/Arquivos/Documentos/GitHub/ScaryParty/ScaryParty
-Exiting without the bug reporter. Application will terminate with return code 1
+[UnityMemory] Configuration Parameters - Can be set up in boot.config
+    "memorysetup-temp-allocator-size-nav-mesh-worker=65536"
+    "memorysetup-temp-allocator-size-audio-worker=65536"
+    "memorysetup-temp-allocator-size-gfx=262144"
+    "memorysetup-allocator-temp-initial-block-size-main=262144"
+    "memorysetup-allocator-temp-initial-block-size-worker=262144"
+    "memorysetup-temp-allocator-size-background-worker=32768"
+    "memorysetup-temp-allocator-size-job-worker=262144"
+    "memorysetup-temp-allocator-size-preload-manager=33554432"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-temp-allocator-size-gi-baking-worker=262144"
+    "memorysetup-bucket-allocator-granularity=16"
+    "memorysetup-bucket-allocator-bucket-count=8"
+    "memorysetup-bucket-allocator-block-size=33554432"
+    "memorysetup-bucket-allocator-block-count=8"
+    "memorysetup-main-allocator-block-size=16777216"
+    "memorysetup-thread-allocator-block-size=16777216"
+    "memorysetup-gfx-main-allocator-block-size=16777216"
+    "memorysetup-gfx-thread-allocator-block-size=16777216"
+    "memorysetup-cache-allocator-block-size=4194304"
+    "memorysetup-typetree-allocator-block-size=2097152"
+    "memorysetup-profiler-bucket-allocator-granularity=16"
+    "memorysetup-profiler-bucket-allocator-bucket-count=8"
+    "memorysetup-profiler-bucket-allocator-block-size=33554432"
+    "memorysetup-profiler-bucket-allocator-block-count=8"
+    "memorysetup-profiler-allocator-block-size=16777216"
+    "memorysetup-profiler-editor-allocator-block-size=1048576"
+    "memorysetup-temp-allocator-size-main=16777216"
+    "memorysetup-job-temp-allocator-block-size=2097152"
+    "memorysetup-job-temp-allocator-block-size-background=1048576"
+    "memorysetup-job-temp-allocator-reduction-small-platforms=262144"
+    "memorysetup-temp-allocator-size-cloud-worker=32768"
+Player connection [13436]  Target information:
+
+Player connection [13436]  * "[IP] 192.168.15.29 [Port] 55504 [Flags] 2 [Guid] 2750270611 [EditorId] 2750270611 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-BU0I653) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [13436]  * "[IP] 26.147.72.96 [Port] 55504 [Flags] 2 [Guid] 2750270611 [EditorId] 2750270611 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-BU0I653) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+
+Player connection [13436] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [13436] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Input System module state changed to: Initialized.
+[Physics::Module] Initialized fallback backend.
+[Physics::Module] Id: 0xdecafbad
+[Package Manager] Connected to IPC stream "Upm-14416" after 0.3 seconds.
+[Licensing::Module] Licensing is not yet initialized.
+[Licensing::Client] Handshaking with LicensingClient:
+  Version:                 1.17.4+4293ba1
+  Session Id:              06e922f94a054042acba979744bbe343
+  Correlation Id:          f354baf6bbab9e44ddfe39e4fe88b593
+  External correlation Id: 8463544080212453963
+  Machine Id:              smISB5if1TBHewsr2J5uO4nDMLM=
+[Licensing::Module] Successfully connected to LicensingClient on channel: "LicenseClient-Rubens" (connect: 0.00s, validation: 0.00s, handshake: 0.68s)
+[Licensing::IpcConnector] Successfully connected to: "LicenseClient-Rubens-notifications" at "2026-10-26T21:18:27.7674014Z"
+[Licensing::Module] Error: Access token is unavailable; failed to update
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] License group:
+  Id: 4672959833963-UnityPersXXXX
+  Product: Unity Personal
+  Type: Assigned
+  Expiration: Unlimited
+[Licensing::Client] Successfully updated license, isAsync: True, time: 0.00
+[Licensing::Client] Successfully resolved entitlement details
+[Licensing::Module] Licensing Background thread has ended after 0.69s
+[Licensing::Module] Licensing is initialized (took 0.28s).
+[Licensing::Client] Successfully resolved entitlement details
+Library Redirect Path: Library/
+[Physics::Module] Selected backend.
+[Physics::Module] Name: PhysX
+[Physics::Module] Id: 0xf2b8ea05
+[Physics::Module] SDK Version: 4.1.2
+[Physics::Module] Integration Version: 1.0.0
+[Physics::Module] Threading Mode: Multi-Threaded
+Artifact Garbage Collection - Removed 7 unused hashed content files
+Refreshing native plugins compatible for Editor in 1.68 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Initialize engine version: 6000.3.6f1 (bbb010bdb8a3)
+[Subsystems] Discovering subsystems at path D:/programas/unity/6000.3.6f1/Editor/Data/Resources/UnitySubsystems
+[Subsystems] Discovering subsystems at path D:/Arquivos/Documentos/GitHub/ScaryParty/ScaryParty/Assets
+GfxDevice: creating device client; kGfxThreadingModeNonThreaded
+Direct3D:
+    Version:  Direct3D 11.0 [level 11.1]
+    Renderer: NVIDIA GeForce RTX 3060 (ID=0x2504)
+    Vendor:   NVIDIA
+    VRAM:     12115 MB
+    Driver:   32.0.15.9186
+Shader 'MoreMountains/MMRipple': fallback shader 'Particle/AlphaBlended' not found
+Initialize mono
+Mono path[0] = 'D:/programas/unity/6000.3.6f1/Editor/Data/Managed'
+Mono path[1] = 'D:/programas/unity/6000.3.6f1/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
+Mono config path = 'D:/programas/unity/6000.3.6f1/Editor/Data/MonoBleedingEdge/etc'
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56416
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+Using cacheserver namespaces - metadata:defaultmetadata, artifacts:defaultartifacts
+ImportWorker Server TCP listen port: 0
+AcceleratorClientConnectionCallback - disconnected - :0
+Begin MonoManager ReloadAssembly
+Registering precompiled unity dll's ...
+Register platform support module: D:/programas/unity/6000.3.6f1/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
+[Licensing::Client] Successfully resolved entitlement details
+Register platform support module: D:/programas/unity/6000.3.6f1/Editor/Data/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll
+Registered in 0.003314 seconds.
+- Loaded All Assemblies, in  0.389 seconds
+Native extension for Android target not found
+Android Extension - Scanning For ADB Devices 2188 ms
+Native extension for WindowsStandalone target not found
+ScheduleIndexationOnStartup MainProcess:False IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  2.568 seconds
+Domain Reload Profiling: 2957ms
+	BeginReloadAssembly (150ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (0ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (18ms)
+	RebuildCommonClasses (33ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (41ms)
+	LoadAllAssembliesAndSetupDomain (153ms)
+		LoadAssemblies (133ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (149ms)
+			TypeCache.Refresh (147ms)
+				TypeCache.ScanAssembly (135ms)
+			BuildScriptInfoCaches (0ms)
+			ResolveRequiredComponents (0ms)
+	FinalizeReload (2569ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (2537ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (2268ms)
+			SetLoadedEditorAssemblies (3ms)
+			BeforeProcessingInitializeOnLoad (71ms)
+			ProcessInitializeOnLoadAttributes (131ms)
+			ProcessInitializeOnLoadMethodAttributes (63ms)
+			AfterProcessingInitializeOnLoad (0ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (0ms)
+[Licensing::Client] Successfully resolved entitlement details
+Application.AssetDatabase Initial Refresh Start
+Package Manager log level set to [2]
+[Package Manager] Restoring resolved packages state from cache
+[Licensing::Client] Successfully resolved entitlement details
+[Package Manager] Registered 75 packages:
+  Packages from [https://packages.unity.com]:
+    com.unity.ai.navigation@2.0.14 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.ai.navigation@134dd6a3b97b)
+    com.unity.cinemachine@2.10.5 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.cinemachine@f26b20ca78a2)
+    com.unity.collab-proxy@2.13.6 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.collab-proxy@4628d2ba6ea4)
+    com.unity.ide.rider@3.0.38 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.ide.rider@1f60b3138684)
+    com.unity.ide.visualstudio@2.0.26 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.ide.visualstudio@a99d56dec63f)
+    com.unity.inputsystem@1.20.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.inputsystem@7a4e1a2a8194)
+    com.unity.multiplayer.center.quickstart@1.1.2 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.multiplayer.center.quickstart@8b78178ca163)
+    com.unity.multiplayer.playmode@2.0.2 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.multiplayer.playmode@d8888f6ed6aa)
+    com.unity.multiplayer.tools@2.2.10 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.multiplayer.tools@6a01704219ea)
+    com.unity.multiplayer.widgets@1.0.5 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.multiplayer.widgets@5e458f651b7a)
+    com.unity.netcode.gameobjects@2.13.1 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.netcode.gameobjects@d43d28498f17)
+    com.unity.services.multiplayer@2.3.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.multiplayer@17f5d8518517)
+    com.unity.services.vivox@16.11.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.vivox@50a15770bdad)
+    com.unity.timeline@1.8.12 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.timeline@8cd8509afae5)
+    com.unity.visualscripting@1.9.12 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.visualscripting@4edfcc09512f)
+    com.unity.settings-manager@2.1.1 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.settings-manager@0b8638c5ce86)
+    com.unity.nuget.newtonsoft-json@3.2.2 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.nuget.newtonsoft-json@4dfd81071c64)
+    com.unity.transport@2.7.3 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.transport@56cfdfbf9d44)
+    com.unity.collections@2.6.7 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.collections@31e963071226)
+    com.unity.services.qos@1.4.1 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.qos@03d4b52d4980)
+    com.unity.services.core@1.18.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.core@3464cb68d709)
+    com.unity.services.wire@1.4.4 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.wire@aba8a6fb1fe2)
+    com.unity.services.deployment@1.7.2 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.deployment@c07c64f9804b)
+    com.unity.services.authentication@3.7.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.authentication@ea91a087a2b7)
+    com.unity.nuget.mono-cecil@1.11.6 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.nuget.mono-cecil@ecb9724e46ff)
+    com.unity.mathematics@1.3.3 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.mathematics@19a9377c4ffa)
+    com.unity.profiling.core@1.0.3 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.profiling.core@8a49f7027d06)
+    com.unity.services.deployment.api@1.1.3 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.services.deployment.api@9becf6da0f1a)
+    com.unity.burst@1.8.29 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.burst@6bb9aca3ef38)
+    com.unity.test-framework.performance@3.2.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.test-framework.performance@0840f58e4562)
+    com.unity.searcher@4.9.4 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.searcher@d45a78918735)
+  Built-in packages:
+    com.unity.multiplayer.center@1.0.1 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.multiplayer.center@f01f4ba8d00a)
+    com.unity.render-pipelines.universal@17.3.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.render-pipelines.universal@1e87cf1dccb8)
+    com.unity.test-framework@1.6.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.test-framework@0b7a23ab2e1d)
+    com.unity.ugui@2.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.ugui@b9d1dd437cb9)
+    com.unity.modules.accessibility@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.accessibility)
+    com.unity.modules.adaptiveperformance@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.adaptiveperformance)
+    com.unity.modules.ai@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.ai)
+    com.unity.modules.androidjni@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.androidjni)
+    com.unity.modules.animation@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.animation)
+    com.unity.modules.assetbundle@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.assetbundle)
+    com.unity.modules.audio@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.audio)
+    com.unity.modules.cloth@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.cloth)
+    com.unity.modules.director@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.director)
+    com.unity.modules.imageconversion@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.imageconversion)
+    com.unity.modules.imgui@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.imgui)
+    com.unity.modules.jsonserialize@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.jsonserialize)
+    com.unity.modules.particlesystem@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.particlesystem)
+    com.unity.modules.physics@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.physics)
+    com.unity.modules.physics2d@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.physics2d)
+    com.unity.modules.screencapture@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.screencapture)
+    com.unity.modules.terrain@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.terrain)
+    com.unity.modules.terrainphysics@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.terrainphysics)
+    com.unity.modules.tilemap@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.tilemap)
+    com.unity.modules.ui@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.ui)
+    com.unity.modules.uielements@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.uielements)
+    com.unity.modules.umbra@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.umbra)
+    com.unity.modules.unityanalytics@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unityanalytics)
+    com.unity.modules.unitywebrequest@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unitywebrequest)
+    com.unity.modules.unitywebrequestassetbundle@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unitywebrequestassetbundle)
+    com.unity.modules.unitywebrequestaudio@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unitywebrequestaudio)
+    com.unity.modules.unitywebrequesttexture@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unitywebrequesttexture)
+    com.unity.modules.unitywebrequestwww@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.unitywebrequestwww)
+    com.unity.modules.vectorgraphics@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.vectorgraphics)
+    com.unity.modules.vehicles@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.vehicles)
+    com.unity.modules.video@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.video)
+    com.unity.modules.wind@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.wind)
+    com.unity.modules.xr@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.xr)
+    com.unity.modules.subsystems@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.subsystems)
+    com.unity.modules.hierarchycore@1.0.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.modules.hierarchycore)
+    com.unity.ext.nunit@2.0.5 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.ext.nunit@d8c07649098d)
+    com.unity.render-pipelines.core@17.3.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.render-pipelines.core@9a9c0155552c)
+    com.unity.shadergraph@17.3.0 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.shadergraph@3e48e962d639)
+    com.unity.render-pipelines.universal-config@17.0.3 (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.unity.render-pipelines.universal-config@8dc1aab4af1d)
+  Git packages:
+    com.veriorpies.parrelsync@https://github.com/VeriorPies/ParrelSync.git?path=/ParrelSync (location: D:\Arquivos\Documentos\GitHub\ScaryParty\ScaryParty\Library\PackageCache\com.veriorpies.parrelsync@ca2a190a45f6)
+[Package Manager] com.unity.multiplayer.widgets is deprecated: Multiplayer Widgets is deprecated and will receive limited support. It remains functional in Unity 6000.3, but no further updates are planned. Use Unity Building Block - Multiplayer Session from the Asset Store for a supported alternative.
+[Subsystems] No new subsystems found in resolved package list.
+[Package Manager] Done registering packages in 0.02 seconds
+The GUID inside 'Assets/_Recovery/0 (3).unity.meta' cannot be extracted by the YAML Parser. Attempting to extract it via string matching instead. Please verify the file does not contain unexpected data.
+The GUID inside 'Assets/Scripts/Pizzeria/Presentation/NotificationManager.cs.meta' cannot be extracted by the YAML Parser. Attempting to extract it via string matching instead. Please verify the file does not contain unexpected data.
+The GUID inside 'Assets/Scripts/Pizzeria/Presentation/PizzeriaSoundManager.cs.meta' cannot be extracted by the YAML Parser. Attempting to extract it via string matching instead. Please verify the file does not contain unexpected data.
+Starting: D:\programas\unity\6000.3.6f1\Editor\Data\Tools\BuildPipeline\bee_backend.exe --ipc --defer-dag-verification --dagfile="Library/Bee/1900b0aE.dag" --continue-on-failure --profile="Library/Bee/backend1.traceevents" ScriptAssemblies
+WorkingDir: D:/Arquivos/Documentos/GitHub/ScaryParty/ScaryParty
+DisplayProgressbar: Compiling Scripts
+ExitCode: 0 Duration: 0s281ms
+[1429/1895  0s] ILPP-Configuration Library/ilpp-configuration.nevergeneratedoutput
+*** Tundra build success (0.26 seconds), 1 items updated, 1895 evaluated
+AssetDatabase: script compilation time: 0.759188s
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.129 seconds
+Refreshing native plugins compatible for Editor in 6.70 ms, found 7 plugins.
+Missing types referenced from component UniversalRenderPipelineGlobalSettings on game object UniversalRenderPipelineGlobalSettings:
+	UnityEngine.PathTracing.Core.WorldRenderPipelineResources, Unity.PathTracing.Runtime (1 object)
+	UnityEngine.Rendering.Universal.URPTerrainShaderSetting, Unity.RenderPipelines.Universal.Runtime (1 object)
+	UnityEngine.Rendering.Universal.UniversalRenderPipelineRuntimeTerrainShaders, Unity.RenderPipelines.Universal.Runtime (1 object)
+Native extension for Android target not found
+Native extension for WindowsStandalone target not found
+Refreshing native plugins compatible for Editor in 6.82 ms, found 7 plugins.
+ScheduleIndexationOnStartup MainProcess:True IndexOnStartup:True
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  4.538 seconds
+Domain Reload Profiling: 5665ms
+	BeginReloadAssembly (289ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (11ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (144ms)
+	RebuildCommonClasses (31ms)
+	RebuildNativeTypeToScriptingClass (11ms)
+	initialDomainReloadingComplete (51ms)
+	LoadAllAssembliesAndSetupDomain (744ms)
+		LoadAssemblies (438ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (414ms)
+			TypeCache.Refresh (269ms)
+				TypeCache.ScanAssembly (250ms)
+			BuildScriptInfoCaches (122ms)
+			ResolveRequiredComponents (18ms)
+	FinalizeReload (4539ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (4196ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (31ms)
+			SetLoadedEditorAssemblies (7ms)
+			BeforeProcessingInitializeOnLoad (189ms)
+			ProcessInitializeOnLoadAttributes (3711ms)
+			ProcessInitializeOnLoadMethodAttributes (255ms)
+			AfterProcessingInitializeOnLoad (2ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (7ms)
+Asset Pipeline Refresh (id=99a6a9fb25dc2874081c1278a0c20bd0): Total: 7.424 seconds - Initiated by InitialRefreshV2(ForceSynchronousImport)
+	Summary:
+		Imports: total=0 (actual=0, local cache=0, cache server=0)
+		Asset DB Process Time: managed=0 ms, native=5227 ms
+		Asset DB Callback time: managed=199 ms, native=21 ms
+		Scripting: domain reloads=1, domain reload time=1129 ms, compile time=761 ms, other=85 ms
+		Project Asset Count: scripts=3055, non-scripts=5344
+		Asset File Changes: new=0, changed=0, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeCustomDependenciesCallbacks: 0.001ms
+	InvokePackagesCallback: 23.284ms
+	ApplyChangesToAssetFolders: 0.628ms
+	Scan: 150.261ms
+	OnSourceAssetsModified: 0.002ms
+	CategorizeAssetsWithTransientArtifact: 80.835ms
+	ProcessAssetsWithTransientArtifactChanges: 152.499ms
+	CategorizeAssets: 91.237ms
+	ImportOutOfDateAssets: 4565.357ms (3801.016ms without children)
+		CompileScripts: 760.739ms
+		ReloadNativeAssets: 0.028ms
+		UnloadImportedAssets: 1.624ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 1.400ms
+		InitializingProgressBar: 0.001ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.001ms
+		OnDemandSchedulerStart: 0.549ms
+	PostProcessAllAssets: 199.961ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.003ms
+	UnloadStreamsBegin: 2.340ms
+	PersistCurrentRevisions: 0.218ms
+	UnloadStreamsEnd: 0.001ms
+	GenerateScriptTypeHashes: 7.758ms
+	Untracked: 2157.446ms
+
+Application.AssetDatabase Initial Refresh End
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.01 seconds
+Scanning for USB devices : 19.065ms
+Initializing Unity extensions:
+[MODES] ModeService[none].Initialize
+[MODES] ModeService[none].LoadModes
+[MODES] Loading mode Default (0) for mode-current-id-ScaryParty
+Unloading 20 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 12013 unused Assets / (8.2 MB). Loaded Objects now: 12931.
+Memory consumption went from 279.1 MB to 270.9 MB.
+Total: 37.767200 ms (FindLiveObjects: 1.177800 ms CreateObjectMapping: 1.141400 ms MarkObjects: 30.181500 ms  DeleteObjects: 5.264700 ms)
+
+[CLI] Iniciando aplicação de setup...
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:257)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Iniciando aplicação de setup...
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:257)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+[CLI] Layers configuradas (LocalPlayerModel, FirstPersonOnly, MinimapOnly).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:261)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Layers configuradas (LocalPlayerModel, FirstPersonOnly, MinimapOnly).
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:261)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+[CLI] Materiais de Outline URP conferidos.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:265)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Materiais de Outline URP conferidos.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:265)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+Start importing ProjectSettings/ProjectSettings.asset using Guid(00000000000000004000000000000000) (LibraryAssetImporter) -> (artifact id: 'dd1fd343751b1211ef395d95aa7cef79') in 0.0081662 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_Cheese.asset using Guid(51eec81cc961fe346a1ec971886a2252) (NativeFormatImporter) -> (artifact id: '6a67cfd61a79d4d1cb9b81efbb60629e') in 0.0082832 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_Pepperoni.asset using Guid(8286f37ac80a7fa4893df8604d533fcc) (NativeFormatImporter) -> (artifact id: '7eadd183368786c8ddf546adf594baf3') in 0.0338559 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_MassaAberta.asset using Guid(53bac505643e30a4ca47147c9725c19e) (NativeFormatImporter) -> (artifact id: '0ff13b44f1bf1616bbe7c588c8815249') in 0.04577 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_SlicedMushroom.asset using Guid(93552faced883f64799fc84c8b04814b) (NativeFormatImporter) -> (artifact id: 'a60f060a272dd373586dbd6ede3ec28d') in 0.0077215 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Tool_Knife.asset using Guid(b6414722b399d8c4193208d214454f72) (NativeFormatImporter) -> (artifact id: '97e2ff6fd0a42952098f3e9291e94ea7') in 0.0018036 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_PizzaBase.asset using Guid(5799520f9a4b6d4439a291328649db23) (NativeFormatImporter) -> (artifact id: '0e72cd0d1ef65ceb52dfc01c3e4e29d3') in 0.0016089 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_SlicedPepperoni.asset using Guid(a7e1fd4f31ec0904b97eab310a49f148) (NativeFormatImporter) -> (artifact id: 'abf11fe94aafa598b1ccb661037f1cb0') in 0.0075419 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_Sauce.asset using Guid(49dfffcae1a581748a9007095d0c8b2d) (NativeFormatImporter) -> (artifact id: '650cb2358038f3c78daa5e1a67751f90') in 0.0437416 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_Dough.asset using Guid(5a680d2195a7a87409025947a3364ad9) (NativeFormatImporter) -> (artifact id: 'fd0c54aedcaafa5d1a55344fcae824db') in 0.0093518 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/ItemPresentationCatalog.asset using Guid(8ab051e2454dde5419dc47aa8365e66d) (NativeFormatImporter) -> (artifact id: '154cefc91e893cab35a7f5c3919f5abb') in 0.0080121 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_PizzaBox.asset using Guid(ca5b5bc5eb146a9499728c2f86956e91) (NativeFormatImporter) -> (artifact id: 'fb2a0ea55d46ffc96918093965d027dd') in 0.0013045 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Pizza.asset using Guid(2bdadbb48474dd746b2202e7c108cabd) (NativeFormatImporter) -> (artifact id: '3077eacb916007d0750756c9949984ee') in 0.001755 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_Mushroom.asset using Guid(2c0e6b4bac0bcdd4e951541abb0f59e5) (NativeFormatImporter) -> (artifact id: 'a825d9a0ecb2a55d1d31bc9f769e2bd6') in 0.0075065 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Tool_Grater.asset using Guid(8cb9c8a1d29dfcf488c44c8536f89468) (NativeFormatImporter) -> (artifact id: '18c9c1e6eb077bec66b47fdeaca34e94') in 0.0523163 seconds
+Start importing Assets/ScriptableObjects/Pizzeria/Profiles/Profile_Ingredient_GratedCheese.asset using Guid(4df2d02217348f3428cd8222b4697718) (NativeFormatImporter) -> (artifact id: 'bcf0ce36a0705b379fabb975ec6fa3c7') in 0.0070409 seconds
+Shader 'MoreMountains/MMRipple': fallback shader 'Particle/AlphaBlended' not found
+Refreshing native plugins compatible for Editor in 7.17 ms, found 7 plugins.
+Preloading 1 native plugins for Editor in 1.56 ms.
+Asset Pipeline Refresh (id=ec0e1ae6a9bf0274288584268672b891): Total: 2.452 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+	Summary:
+		Imports: total=16 (actual=16, local cache=0, cache server=0)
+		Asset DB Process Time: managed=3 ms, native=1725 ms
+		Asset DB Callback time: managed=418 ms, native=304 ms
+		Scripting: domain reloads=0, domain reload time=0 ms, compile time=0 ms, other=0 ms
+		Project Asset Count: scripts=3055, non-scripts=5344
+		Asset File Changes: new=0, changed=14, moved=0, deleted=0
+		Scan Filter Count: 0
+	InvokeCustomDependenciesCallbacks: 0.001ms
+	InvokePackagesCallback: 0.001ms
+	ApplyChangesToAssetFolders: 0.225ms
+	Scan: 24.886ms
+	OnSourceAssetsModified: 0.763ms
+	CategorizeAssetsWithTransientArtifact: 0.032ms
+	ProcessAssetsWithTransientArtifactChanges: 0.277ms
+	CategorizeAssets: 93.409ms
+	ImportOutOfDateAssets: 1595.589ms (0.905ms without children)
+		ImportManagerImport: 1591.277ms (2.412ms without children)
+			ImportInProcess: 1588.698ms
+			UpdateCategorizedAssets: 0.166ms
+		ReloadNativeAssets: 0.111ms
+		UnloadImportedAssets: 0.508ms
+		ReloadImportedAssets: 0.003ms
+		EnsureUptoDateAssetsAreRegisteredWithGuidPM: 1.991ms
+		InitializingProgressBar: 0.004ms
+		PostProcessAllAssetNotificationsAddChangedAssets: 0.002ms
+		OnDemandSchedulerStart: 0.790ms
+	PostProcessAllAssets: 775.533ms
+	Hotreload: 9.361ms
+	GatherAllCurrentPrimaryArtifactRevisions: 0.587ms
+	UnloadStreamsBegin: 1.497ms
+	PersistCurrentRevisions: 0.527ms
+	UnloadStreamsEnd: 0.001ms
+	Untracked: -50.985ms
+
+[CLI] Catálogo de Apresentação e perfis de itens gerados/atualizados.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:269)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Catálogo de Apresentação e perfis de itens gerados/atualizados.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:269)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+Loaded scene 'Library/Unused/c895022f0c5b0a641b9a7abdedfe4dda'
+	Deserialize:            2.988 ms
+	Integration:            809.401 ms
+	Integration of assets:  0.005 ms
+	Thread Wait Time:       0.007 ms
+	Total Operation Time:   812.400 ms
+Asset Pipeline Refresh (id=8666dbfba2f18be4ea6871896f4f83ae): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[CLI] PlayerArmature.prefab configurado com Rig fixo e referências serializadas.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:273)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] PlayerArmature.prefab configurado com Rig fixo e referências serializadas.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:273)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+Loaded scene 'Library/Unused/95e8e29adb4225247b5bacea741f871d'
+	Deserialize:            0.341 ms
+	Integration:            0.250 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.009 ms
+	Total Operation Time:   0.602 ms
+Asset Pipeline Refresh (id=8f7662b7a5f77bf44ac2a2181d5b8585): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/90bae845fd43cf44dad5d0150d766859'
+	Deserialize:            25.107 ms
+	Integration:            0.139 ms
+	Integration of assets:  0.007 ms
+	Thread Wait Time:       0.122 ms
+	Total Operation Time:   25.375 ms
+Asset Pipeline Refresh (id=b7d795f1526c57341bb92de6a845c260): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/2b162f45fb1c8904687530013d597d62'
+	Deserialize:            0.345 ms
+	Integration:            0.177 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.007 ms
+	Total Operation Time:   0.531 ms
+Asset Pipeline Refresh (id=b7cd36facd6350e4c922e1717b066652): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/009751ff1589fc145b36a187549b5603'
+	Deserialize:            0.282 ms
+	Integration:            0.190 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.008 ms
+	Total Operation Time:   0.480 ms
+Asset Pipeline Refresh (id=7e2290746d200eb47a8ad2a623db498a): Total: 0.012 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/39d4bac994192224f9993dc6000a2797'
+	Deserialize:            0.348 ms
+	Integration:            0.221 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.008 ms
+	Total Operation Time:   0.578 ms
+Asset Pipeline Refresh (id=f932f4cce4ce95d48ab9bbb0b9406f84): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/07312c861ce549942ac9a3ef4907b801'
+	Deserialize:            0.338 ms
+	Integration:            0.226 ms
+	Integration of assets:  0.003 ms
+	Thread Wait Time:       0.019 ms
+	Total Operation Time:   0.586 ms
+Asset Pipeline Refresh (id=829e7a41686d032449a3215bbd336aea): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/19c07f334933b0949adb502d296ef426'
+	Deserialize:            0.315 ms
+	Integration:            0.204 ms
+	Integration of assets:  0.001 ms
+	Thread Wait Time:       0.007 ms
+	Total Operation Time:   0.527 ms
+Asset Pipeline Refresh (id=9dc02a0cebf0ca843a3bbaa4c39d4a92): Total: 0.013 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+Loaded scene 'Library/Unused/4a56ac745442d7a46a91df23a13dfcc4'
+	Deserialize:            0.333 ms
+	Integration:            0.203 ms
+	Integration of assets:  0.003 ms
+	Thread Wait Time:       0.016 ms
+	Total Operation Time:   0.555 ms
+Asset Pipeline Refresh (id=fa30883a5f4d9e542b135d967054b064): Total: 0.012 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[CLI] Prefabs de Pizzaria configurados com OutlineTarget.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:277)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Prefabs de Pizzaria configurados com OutlineTarget.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:277)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+Opening scene 'Assets/StarterAssets/ThirdPersonController/Scenes/GameScene.unity additively'
+LightingSettings: switching bake backend from 2 to 1.
+Loaded scene 'Assets/StarterAssets/ThirdPersonController/Scenes/GameScene.unity'
+	Deserialize:            491.196 ms
+	Integration:            2431.786 ms
+	Integration of assets:  76.214 ms
+	Thread Wait Time:       -64.882 ms
+	Total Operation Time:   2934.314 ms
+Start importing Assets/StarterAssets/ThirdPersonController/Scenes/GameScene.unity using Guid(e9017d5f96b9f09489b4b37e1d6eb914) (DefaultImporter) -> (artifact id: '59aeba10e634e4af384093da2bd2ef0c') in 0.006348 seconds
+Refreshing native plugins compatible for Editor in 6.95 ms, found 7 plugins.
+Preloading 1 native plugins for Editor in 0.04 ms.
+Asset Pipeline Refresh (id=0273022b8715dbb438464ac4f5df5601): Total: 0.064 seconds - Initiated by StopAssetImportingV2(NoUpdateAssetOptions)
+[CLI] GameScene conferida.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:281)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] GameScene conferida.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:281)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+Asset Pipeline Refresh (id=87d73c8e7b6d04d4baf98585af71ee28): Total: 0.011 seconds - Initiated by RefreshV2(NoUpdateAssetOptions)
+[CLI] Setup aplicado com sucesso.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c:<ApplyFromCommandLine>b__8_0 (string) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:253)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:285)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 42)
+
+[FPBuilder] Setup aplicado com sucesso.
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:<ApplyAll>g__Log|17_0 (string,ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder/<>c__DisplayClass17_0&) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:254)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyAll (System.Action`1<string>) (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:285)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:42)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 254)
+
+=== RELATÓRIO DE VALIDAÇÃO ===
+[OK] Catálogo contém 14 perfis vinculados.
+
+>>> SUCESSO: Todos os testes de validação passaram com êxito! <<<
+UnityEngine.Debug:ExtractStackTraceNoAlloc (byte*,int,string)
+UnityEngine.StackTraceUtility:ExtractStackTrace ()
+UnityEngine.DebugLogHandler:Internal_Log (UnityEngine.LogType,UnityEngine.LogOption,string,UnityEngine.Object)
+UnityEngine.DebugLogHandler:LogFormat (UnityEngine.LogType,UnityEngine.Object,string,object[])
+UnityEngine.Logger:Log (UnityEngine.LogType,object)
+UnityEngine.Debug:Log (object)
+ScaryParty.EditorScripts.FirstPersonInteractionSetupBuilder:ApplyFromCommandLine () (at Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs:44)
+
+(Filename: Assets/Scripts/Editor/FirstPersonInteractionSetupBuilder.cs Line: 44)
+
+Killing ADB server in 0,10055 seconds.
+[Physics::Module] Cleanup current backend.
+[Physics::Module] Id: 0xf2b8ea05
+Input System module state changed to: ShutdownInProgress.
+Input System polling thread exited.
+Input System module state changed to: Shutdown.
+[Licensing::IpcConnector] LicenseClient-Rubens-notifications channel disconnected successfully.
+[Licensing::IpcConnector] LicenseClient-Rubens channel disconnected successfully.
+AcceleratorClientConnectionCallback - disconnected - :0
+Cleanup mono
+Checking for leaked weakptr:
+  Found no leaked weakptrs.
+[Package Manager] Server process was shutdown
+##utp:{"type":"MemoryLeaks","version":2,"phase":"Immediate","time":1793049531569,"processId":14416,"allocatedMemory":20047482,"memoryLabels":[{"Default":29313},{"Permanent":15524},{"NewDelete":74811},{"Thread":4230344},{"Manager":821725},{"VertexData":8},{"Geometry":816},{"Texture":160},{"Shader":88565},{"Material":24},{"GfxDevice":55257},{"Animation":392},{"Audio":2664},{"FreeType":8},{"FontEngine":736},{"Physics":2090},{"Physics2D":16},{"Serialization":13015},{"Input":14984},{"JobScheduler":33024},{"TextLib":216},{"Mono":32},{"MonoCode":184},{"ScriptingNativeRuntime":155060},{"BaseObject":1620272},{"Resource":1336},{"Renderer":3000},{"Transform":4685},{"File":12704},{"WebCam":616},{"Culling":32},{"Terrain":11394},{"Wind":24},{"STL":40},{"String":19140},{"DynamicArray":179753},{"HashMap":102037},{"Utility":2660678},{"Curl":2579},{"PoolAlloc":2344},{"AI":40},{"TypeTree":5341},{"ScriptManager":512},{"RuntimeInitializeOnLoadManager":64},{"SpriteAtlas":112},{"GI":7792},{"Director":8240},{"CloudService":9360},{"WebRequest":808},{"VR":47994},{"SceneManager":504},{"Video":64},{"LazyScriptCache":32},{"Camera":17},{"Secure":2113},{"SerializationCache":1576},{"APIUpdating":10320},{"Subsystems":336},{"VirtualTexturing":57888},{"StaticSafetyDebugInfo":278528},{"Analytics":384},{"Hierarchy":608},{"CoreStats":13032},{"Identifiers":12960},{"Gui":96},{"EditorUtility":158558},{"VersionControl":4},{"Undo":947},{"AssetDatabase":9224246},{"EditorGi":328},{"UnityConnect":29208},{"Upm":1896},{"AssetCompliance":64},{"DrivenProperties":72},{"ChannelService":384},{"LocalIPC":212},{"ProfilerEditor":9746},{"CoreBusinessMetrics":2870},{"Licensing":664},{"AssetReference":32},{"IPCStream":32}]}

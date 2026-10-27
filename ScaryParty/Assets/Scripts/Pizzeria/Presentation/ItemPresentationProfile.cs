@@ -44,6 +44,9 @@ namespace ScaryParty.Pizzeria.Presentation
         [Tooltip("Nome do ponto de alinhamento opcional contido no prefab")]
         public string gripPointName = "GripPoint";
 
+        [Tooltip("Nome do ponto de apoio opcional para bancadas e superfícies")]
+        public string supportPointName = "SupportPoint";
+
         [Header("Poses FP (Sockets da Câmera em Primeira Pessoa)")]
         public ItemPoseOffset fpLeftHandPose = ItemPoseOffset.Identity;
         public ItemPoseOffset fpRightHandPose = ItemPoseOffset.Identity;

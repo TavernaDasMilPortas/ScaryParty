@@ -1,0 +1,253 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1ba35569e57e3145afcf0e7d8f093ea, type: 3}
+  m_Name: PizzeriaFbxImportProfile
+  m_EditorClassIdentifier: Assembly-CSharp-Editor::ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxImportProfile
+  fbxAssetPath: Assets/Art/Pizzeria/Source/pizzariamodular (2)2 (1) (1) (2).fbx
+  fbxGuid: f41c1a5c11441dc458d5fb3728a59962
+  floorElevationY: 1.45
+  diningHallRect:
+    serializedVersion: 2
+    x: 0
+    y: -13.2
+    width: 16.4
+    height: 22.4
+  kitchenRect:
+    serializedVersion: 2
+    x: 16.4
+    y: -27.6
+    width: 16.6
+    height: 36.8
+  floorThickness: 0.2
+  entranceAnchorPos: {x: 0, y: 0, z: -1.98}
+  receivingAnchorPos: {x: 33, y: 0, z: -27}
+  recoveryAnchorPos: {x: 5.5, y: 0, z: -2.5}
+  playerSpawnPositions:
+  - {x: 4, y: 0.1, z: -1.5}
+  - {x: 4, y: 0.1, z: -3}
+  - {x: 2.5, y: 0.1, z: -1.5}
+  - {x: 2.5, y: 0.1, z: -3}
+  itemScaleRules:
+  - nodePrefix: faca
+    targetPrefabName: Visual_Knife
+    scaleFactor: 0.577
+    gripPointOffset: {x: 0, y: 0, z: -0.08}
+    supportPointOffset: {x: 0, y: -0.02, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  - nodePrefix: cortador de pizza
+    targetPrefabName: Visual_PizzaCutter
+    scaleFactor: 0.266
+    gripPointOffset: {x: 0, y: 0, z: -0.06}
+    supportPointOffset: {x: 0, y: -0.02, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  - nodePrefix: prato/forma
+    targetPrefabName: Visual_PizzaPan
+    scaleFactor: 0.447
+    gripPointOffset: {x: 0, y: 0, z: 0}
+    supportPointOffset: {x: 0, y: 0, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  - nodePrefix: deliverybag
+    targetPrefabName: Visual_DeliveryBag
+    scaleFactor: 0.617
+    gripPointOffset: {x: 0, y: 0, z: 0}
+    supportPointOffset: {x: 0, y: -0.25, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  - nodePrefix: tabua
+    targetPrefabName: Visual_CuttingBoard
+    scaleFactor: 1
+    gripPointOffset: {x: 0, y: 0, z: 0}
+    supportPointOffset: {x: 0, y: 0, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  - nodePrefix: caixa
+    targetPrefabName: Visual_SupplyCrate
+    scaleFactor: 1
+    gripPointOffset: {x: 0, y: 0, z: 0}
+    supportPointOffset: {x: 0, y: 0, z: 0}
+    visualRotationEuler: {x: 0, y: 0, z: 0}
+  stationMappings:
+  - stationId: 1
+    stationName: Station_Storage_Fridge
+    category: 1
+    primaryNodeName: geladeira.001
+    localPosition: {x: 20.5, y: 0, z: 8.8}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1.2}
+    slotOffsets:
+    - {x: -0.3, y: 0.8, z: 0}
+    - {x: 0.3, y: 0.8, z: 0}
+    - {x: -0.3, y: 1.3, z: 0}
+    - {x: 0.3, y: 1.3, z: 0}
+  - stationId: 2
+    stationName: Station_Storage_Cupboard
+    category: 2
+    primaryNodeName: armario.001
+    localPosition: {x: 24, y: 0, z: 8.8}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1.2}
+    slotOffsets:
+    - {x: 0, y: 0.9, z: 0}
+  - stationId: 3
+    stationName: Station_ToolRack
+    category: 3
+    primaryNodeName: suportefaca.001
+    localPosition: {x: 17.2, y: 0.8, z: 3}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: -0.3, y: 0, z: 0}
+    - {x: -0.1, y: 0, z: 0}
+    - {x: 0.1, y: 0, z: 0}
+    - {x: 0.3, y: 0, z: 0}
+  - stationId: 4
+    stationName: Station_Counter
+    category: 4
+    primaryNodeName: balcao.001
+    localPosition: {x: 14, y: 0, z: -2}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1, y: 0, z: 0}
+    slotOffsets:
+    - {x: 0, y: 0.85, z: -0.4}
+    - {x: 0, y: 0.85, z: 0.4}
+  - stationId: 5
+    stationName: Station_Prep_A
+    category: 5
+    primaryNodeName: mesa media.001
+    localPosition: {x: 19, y: 0, z: 2}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: -1.5, y: 0.82, z: 0}
+    - {x: -0.5, y: 0.82, z: 0}
+  - stationId: 6
+    stationName: Station_Prep_B
+    category: 5
+    primaryNodeName: mesa media.001
+    localPosition: {x: 23, y: 0, z: 2}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: 0.5, y: 0.82, z: 0}
+    - {x: 1.5, y: 0.82, z: 0}
+  - stationId: 7
+    stationName: Station_Assembly
+    category: 7
+    primaryNodeName: mesa media.002
+    localPosition: {x: 21, y: 0, z: -5}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: -0.6, y: 0.82, z: 0}
+    - {x: 0.6, y: 0.82, z: 0}
+  - stationId: 8
+    stationName: Station_Oven_1
+    category: 8
+    primaryNodeName: forno.001
+    localPosition: {x: 31.8, y: 0, z: 4}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1.2, y: 0, z: 0}
+    slotOffsets:
+    - {x: -0.2, y: 0.85, z: -0.3}
+    - {x: -0.2, y: 0.85, z: 0.3}
+  - stationId: 17
+    stationName: Station_Oven_2
+    category: 8
+    primaryNodeName: forno.002
+    localPosition: {x: 31.8, y: 0, z: 0.5}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1.2, y: 0, z: 0}
+    slotOffsets:
+    - {x: -0.2, y: 0.85, z: -0.3}
+    - {x: -0.2, y: 0.85, z: 0.3}
+  - stationId: 18
+    stationName: Station_Oven_3
+    category: 8
+    primaryNodeName: forno.003
+    localPosition: {x: 31.8, y: 0, z: -3}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1.2, y: 0, z: 0}
+    slotOffsets:
+    - {x: -0.2, y: 0.85, z: -0.3}
+    - {x: -0.2, y: 0.85, z: 0.3}
+  - stationId: 9
+    stationName: Station_Packaging
+    category: 9
+    primaryNodeName: mesa_empacotamento
+    localPosition: {x: 21, y: 0, z: -12}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: -0.5, y: 0.82, z: 0}
+    - {x: 0.5, y: 0.82, z: 0}
+  - stationId: 10
+    stationName: Station_Staging
+    category: 10
+    primaryNodeName: balcao_expedicao
+    localPosition: {x: 15, y: 0, z: -12}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1, y: 0, z: 0}
+    slotOffsets:
+    - {x: 0, y: 0.85, z: -0.6}
+    - {x: 0, y: 0.85, z: -0.2}
+    - {x: 0, y: 0.85, z: 0.2}
+    - {x: 0, y: 0.85, z: 0.6}
+  - stationId: 11
+    stationName: Station_SupplierTerminal
+    category: 11
+    primaryNodeName: computador_terminal
+    localPosition: {x: 28, y: 0.82, z: -12}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets: []
+  - stationId: 12
+    stationName: Station_Phone
+    category: 12
+    primaryNodeName: telefone
+    localPosition: {x: 14, y: 0.85, z: -4}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -0.8, y: 0, z: 0}
+    slotOffsets: []
+  - stationId: 13
+    stationName: Station_Receiving
+    category: 13
+    primaryNodeName: porta_fundos
+    localPosition: {x: 32.5, y: 0, z: -26}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: -1, y: 0, z: 0}
+    slotOffsets: []
+  - stationId: 14
+    stationName: Station_Trash
+    category: 14
+    primaryNodeName: lixeira
+    localPosition: {x: 18, y: 0, z: -25}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: 1}
+    slotOffsets: []
+  - stationId: 15
+    stationName: Station_TicketBoard
+    category: 15
+    primaryNodeName: quadro_comandas
+    localPosition: {x: 21, y: 1.6, z: -3.5}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets: []
+  - stationId: 16
+    stationName: Station_Stack
+    category: 16
+    primaryNodeName: palete_caixas
+    localPosition: {x: 17.5, y: 0, z: -12}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    interactionOffset: {x: 0, y: 0, z: -1}
+    slotOffsets:
+    - {x: 0, y: 0.1, z: 0}
+  ignoredNodeNames:
+  - paredecomum.019
+  - player

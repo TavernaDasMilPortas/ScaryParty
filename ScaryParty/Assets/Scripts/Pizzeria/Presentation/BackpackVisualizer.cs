@@ -10,6 +10,9 @@ namespace ScaryParty.Pizzeria.Presentation
 {
     public class BackpackVisualizer : MonoBehaviour
     {
+        [Header("Prefab Visual Modular")]
+        public GameObject deliveryBagPrefab;
+
         private Transform _backpackAnchor;
         private GameObject _bagVisual;
         private readonly List<GameObject> _boxVisuals = new List<GameObject>();
@@ -61,23 +64,36 @@ namespace ScaryParty.Pizzeria.Presentation
             mountGo.transform.localRotation = Quaternion.identity;
             _backpackAnchor = mountGo.transform;
 
-            // Criar a bolsa térmica vermelha
-            _bagVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            _bagVisual.name = "ThermalDeliveryBag";
-            _bagVisual.transform.SetParent(_backpackAnchor, false);
-            _bagVisual.transform.localPosition = Vector3.zero;
-            _bagVisual.transform.localScale = new Vector3(0.48f, 0.42f, 0.38f);
-
-            var col = _bagVisual.GetComponent<Collider>();
-            if (col != null) Destroy(col);
-
-            var renderer = _bagVisual.GetComponent<Renderer>();
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (shader != null)
+            if (deliveryBagPrefab != null)
             {
-                var mat = new Material(shader);
-                mat.color = new Color(0.85f, 0.15f, 0.15f); // Vermelho térmico de delivery
-                renderer.sharedMaterial = mat;
+                _bagVisual = Instantiate(deliveryBagPrefab, _backpackAnchor, false);
+                _bagVisual.name = "ThermalDeliveryBag";
+                _bagVisual.transform.localPosition = Vector3.zero;
+                _bagVisual.transform.localRotation = Quaternion.identity;
+
+                var cols = _bagVisual.GetComponentsInChildren<Collider>(true);
+                for (int i = 0; i < cols.Length; i++) Destroy(cols[i]);
+            }
+            else
+            {
+                // Fallback: criar a bolsa térmica primitiva vermelha
+                _bagVisual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                _bagVisual.name = "ThermalDeliveryBag";
+                _bagVisual.transform.SetParent(_backpackAnchor, false);
+                _bagVisual.transform.localPosition = Vector3.zero;
+                _bagVisual.transform.localScale = new Vector3(0.48f, 0.42f, 0.38f);
+
+                var col = _bagVisual.GetComponent<Collider>();
+                if (col != null) Destroy(col);
+
+                var renderer = _bagVisual.GetComponent<Renderer>();
+                var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                if (shader != null)
+                {
+                    var mat = new Material(shader);
+                    mat.color = new Color(0.85f, 0.15f, 0.15f); // Vermelho térmico de delivery
+                    renderer.sharedMaterial = mat;
+                }
             }
 
             // Se for o jogador local em 1ª pessoa, esconder para não atrapalhar o campo de visão

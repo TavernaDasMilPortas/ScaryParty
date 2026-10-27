@@ -18,6 +18,7 @@ MonoBehaviour:
   isTool: 0
   visualPrefab: {fileID: 5562431162684135168, guid: f6746612ddd468247bf52f5ee76948a3, type: 3}
   gripPointName: GripPoint
+  supportPointName: SupportPoint
   fpLeftHandPose:
     position: {x: 0, y: -0.12, z: 0.35}
     rotationEuler: {x: 0, y: 0, z: 0}
