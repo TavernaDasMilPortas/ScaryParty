@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.ProcessDef
   id: 3
   processName: Fatiar Calabresa
-  inputIngredientId: 6
+  inputIngredient: {fileID: 11400000, guid: c722554170625814ab0451de4a645eba, type: 2}
   inputStage: 0
-  outputIngredientId: 7
+  outputIngredient: {fileID: 11400000, guid: aabad261ce4aa654fbd74b9d4b0d96bb, type: 2}
   outputStage: 1
   requiredToolCapability: 2
   baseDuration: 2
+  inputIngredientId: 6
+  outputIngredientId: 7

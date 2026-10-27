@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Unity.Netcode;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
@@ -7,7 +8,9 @@ namespace ScaryParty.Pizzeria.Presentation
     public class ItemVisualWrapper : MonoBehaviour
     {
         public ulong ItemId { get; set; }
+        public int DefinitionId { get; set; }
         public bool IsTool { get; set; }
+        public bool IsFallbackPrimitive { get; set; }
         public ItemPresentationProfile CurrentProfile { get; private set; }
         public GameObject VisualInstance { get; private set; }
         public Transform GripPoint { get; private set; }
@@ -20,6 +23,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (visualInstance != null)
             {
+                StripNetworkComponents(visualInstance);
+
                 visualInstance.transform.SetParent(transform, false);
 
                 // Desativa colisores para evitar bloquear raycasts e empurrar o jogador
@@ -36,6 +41,42 @@ namespace ScaryParty.Pizzeria.Presentation
                 SupportPoint = (profile != null && !string.IsNullOrEmpty(profile.supportPointName))
                     ? FindDeepChild(visualInstance.transform, profile.supportPointName)
                     : null;
+            }
+        }
+
+        private static void StripNetworkComponents(GameObject target)
+        {
+            if (target == null) return;
+
+            // Remove NetworkBehaviours primeiro (ex: PhysicalItem) para evitar quebra de dependências
+            var behaviours = target.GetComponentsInChildren<NetworkBehaviour>(true);
+            for (int i = 0; i < behaviours.Length; i++)
+            {
+                if (behaviours[i] != null)
+                {
+                    DestroyImmediate(behaviours[i]);
+                }
+            }
+
+            // Remove NetworkObjects para evitar que o Netcode intercepte transform.SetParent()
+            // e reverta o parent ao mesmo tempo que lança erro de objeto não spawnado
+            var netObjects = target.GetComponentsInChildren<NetworkObject>(true);
+            for (int i = 0; i < netObjects.Length; i++)
+            {
+                if (netObjects[i] != null)
+                {
+                    DestroyImmediate(netObjects[i]);
+                }
+            }
+
+            // Remove Rigidbodies para evitar que a física puxe o visual da mão
+            var rigidbodies = target.GetComponentsInChildren<Rigidbody>(true);
+            for (int i = 0; i < rigidbodies.Length; i++)
+            {
+                if (rigidbodies[i] != null)
+                {
+                    DestroyImmediate(rigidbodies[i]);
+                }
             }
         }
 

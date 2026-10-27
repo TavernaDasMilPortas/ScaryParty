@@ -180,7 +180,7 @@ namespace ScaryParty.Player
                 // Em Unity Euler X, rotação positiva inclina a câmera para baixo e negativa para cima.
                 // Padrão (invertPitch == false): mover mouse para cima (look.y > 0) deve inclinar para cima (-1f).
                 // Invertido (invertPitch == true): mover mouse para cima inclina para baixo (+1f).
-                float pitchFactor = invertPitch ? 1f : -1f;
+                float pitchFactor = invertPitch ? -1f : 1f;
                 _pitch = Mathf.Clamp(_pitch + (_starterInputs.look.y * sens * deltaMult * pitchFactor), bottomClamp, topClamp);
 
                 // O yaw gira a raiz do personagem no plano horizontal

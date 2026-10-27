@@ -11,6 +11,8 @@ public class RoomDiscoveryService : MonoBehaviour
     private const float BROADCAST_INTERVAL = 2f;
     private const float ROOM_TIMEOUT = 5f;
 
+    public static RoomDiscoveryService Instance { get; private set; }
+
     public Action<List<RoomInfo>> OnRoomsUpdated;
 
     private UdpClient _udpClient;
@@ -26,9 +28,36 @@ public class RoomDiscoveryService : MonoBehaviour
         public float LastSeenTime;
     }
 
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this);
+            return;
+        }
+
+        // Se este GameObject tiver outros componentes (ex: LobbyUIController), cria um GameObject dedicado persistente
+        if (GetComponent<LobbyUIController>() != null || GetComponent<LobbyManager>() != null)
+        {
+            var go = new GameObject("[RoomDiscoveryService]");
+            var persistentService = go.AddComponent<RoomDiscoveryService>();
+            DontDestroyOnLoad(go);
+            Instance = persistentService;
+            Destroy(this);
+            return;
+        }
+
+        Instance = this;
+        transform.SetParent(null);
+        DontDestroyOnLoad(gameObject);
+    }
+
     private void Start()
     {
-        StartListening();
+        if (_udpClient == null)
+        {
+            StartListening();
+        }
     }
 
     private void Update()
@@ -44,6 +73,10 @@ public class RoomDiscoveryService : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
         StopListening();
     }
 
@@ -68,6 +101,19 @@ public class RoomDiscoveryService : MonoBehaviour
         Debug.Log("[RoomDiscovery] Stopped hosting.");
     }
 
+    public List<RoomInfo> GetDiscoveredRooms()
+    {
+        var list = new List<RoomInfo>();
+        foreach (var entry in _discoveredRooms.Values)
+        {
+            if (entry != null)
+            {
+                list.Add(entry.Info);
+            }
+        }
+        return list;
+    }
+
     private void StartListening()
     {
         try
@@ -90,7 +136,11 @@ public class RoomDiscoveryService : MonoBehaviour
     {
         if (_udpClient != null)
         {
-            _udpClient.Close();
+            try
+            {
+                _udpClient.Close();
+            }
+            catch {}
             _udpClient = null;
             Debug.Log("[RoomDiscovery] UDP listener stopped.");
         }
@@ -211,16 +261,36 @@ public class RoomDiscoveryService : MonoBehaviour
         {
             using (Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0))
             {
-                // Conectar a um IP externo forca o SO a usar a placa de rede com internet (ignora adaptadores virtuais)
+                // Conectar a um IP externo força o SO a usar a placa de rede com rota/internet
                 socket.Connect("8.8.8.8", 65530);
                 IPEndPoint endPoint = socket.LocalEndPoint as IPEndPoint;
-                return endPoint.Address.ToString();
+                if (endPoint != null)
+                {
+                    return endPoint.Address.ToString();
+                }
             }
         } 
-        catch(Exception e) 
+        catch (Exception e) 
+        {
+            Debug.LogWarning($"[RoomDiscovery] Connect socket method failed ({e.Message}), falling back to Dns lookup.");
+        }
+
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(ip))
+                {
+                    return ip.ToString();
+                }
+            }
+        }
+        catch (Exception e)
         {
             Debug.LogError($"[RoomDiscovery] Failed to get Local IP: {e.Message}");
         }
+
         return "127.0.0.1";
     }
 }

@@ -27,6 +27,8 @@ public class LobbyUIController : MonoBehaviour
     private Button _btnCreateLAN;
     private Button _btnJoinLAN;
 
+    private List<RoomInfo> _latestLANRooms = new List<RoomInfo>();
+
     private void OnEnable()
     {
         _document = GetComponent<UIDocument>();
@@ -70,6 +72,17 @@ public class LobbyUIController : MonoBehaviour
         _btnCreateLAN = root.Q<Button>("BtnCreateLAN");
         _btnJoinLAN = root.Q<Button>("BtnJoinLAN");
 
+        if (_lanIpInput != null && string.IsNullOrEmpty(_lanIpInput.value))
+        {
+            _lanIpInput.value = RoomDiscoveryService.GetLocalIPAddress();
+        }
+
+        if (RoomDiscoveryService.Instance != null)
+        {
+            RoomDiscoveryService.Instance.OnRoomsUpdated += OnLANRoomsDiscovered;
+            OnLANRoomsDiscovered(RoomDiscoveryService.Instance.GetDiscoveredRooms());
+        }
+
         Debug.Log("[LobbyUI] Elements queried, registering callbacks...");
         RegisterCallbacks();
         LoadProfileData();
@@ -77,6 +90,23 @@ public class LobbyUIController : MonoBehaviour
 
     private void OnDisable()
     {
+        if (RoomDiscoveryService.Instance != null)
+        {
+            RoomDiscoveryService.Instance.OnRoomsUpdated -= OnLANRoomsDiscovered;
+        }
+    }
+
+    private void OnLANRoomsDiscovered(List<RoomInfo> rooms)
+    {
+        _latestLANRooms = rooms ?? new List<RoomInfo>();
+
+        if (_latestLANRooms.Count > 0)
+        {
+            if (_lanIpInput != null && (string.IsNullOrEmpty(_lanIpInput.value) || _lanIpInput.value == "127.0.0.1" || _lanIpInput.value == RoomDiscoveryService.GetLocalIPAddress()))
+            {
+                _lanIpInput.value = _latestLANRooms[0].HostIP;
+            }
+        }
     }
 
     private void RegisterCallbacks()
@@ -139,49 +169,89 @@ public class LobbyUIController : MonoBehaviour
     {
         _roomList.Clear();
 
-        if (lobbies == null || lobbies.Count == 0)
+        int totalRooms = 0;
+
+        // Primeiro, adiciona as salas LAN encontradas
+        if (_latestLANRooms != null && _latestLANRooms.Count > 0)
+        {
+            foreach (var lanRoom in _latestLANRooms)
+            {
+                totalRooms++;
+                var roomElement = new VisualElement();
+                roomElement.AddToClassList("room-entry");
+
+                var roomNameLabel = new Label($"🌐 [LAN] {lanRoom.RoomName}");
+                roomNameLabel.AddToClassList("room-name");
+
+                var roomDetailsLabel = new Label($"IP: {lanRoom.HostIP}:{lanRoom.Port}");
+                roomDetailsLabel.AddToClassList("room-details");
+
+                var joinBtn = new Button(() => {
+                    Debug.Log($"[LobbyUI] Entrando na sala LAN {lanRoom.RoomName} ({lanRoom.HostIP})");
+                    SaveProfileData();
+                    LobbyManager.JoinLANClient(lanRoom.HostIP);
+                });
+                joinBtn.text = "ENTRAR LAN";
+                joinBtn.AddToClassList("join-btn");
+
+                var infoContainer = new VisualElement();
+                infoContainer.Add(roomNameLabel);
+                infoContainer.Add(roomDetailsLabel);
+
+                roomElement.Add(infoContainer);
+                roomElement.Add(joinBtn);
+
+                _roomList.Add(roomElement);
+            }
+        }
+
+        // Em seguida, adiciona as salas Relay / Unity Lobby
+        if (lobbies != null && lobbies.Count > 0)
+        {
+            foreach (var lobby in lobbies)
+            {
+                totalRooms++;
+                var roomElement = new VisualElement();
+                roomElement.AddToClassList("room-entry");
+
+                var roomNameLabel = new Label($"🎃 {lobby.Name}");
+                roomNameLabel.AddToClassList("room-name");
+
+                int players = lobby.MaxPlayers - lobby.AvailableSlots;
+                var roomDetailsLabel = new Label($"Players: {players}/{lobby.MaxPlayers}");
+                roomDetailsLabel.AddToClassList("room-details");
+
+                string joinCode = "";
+                if (lobby.Data != null && lobby.Data.ContainsKey("JoinCode"))
+                {
+                    joinCode = lobby.Data["JoinCode"].Value;
+                }
+
+                var joinBtn = new Button(() => {
+                    Debug.Log($"[LobbyUI] Clicked Join on {lobby.Name} with Code {joinCode}");
+                    SaveProfileData();
+                    LobbyManager.JoinRelayRoom(joinCode);
+                });
+                joinBtn.text = "ENTRAR";
+                joinBtn.AddToClassList("join-btn");
+                if (string.IsNullOrEmpty(joinCode)) joinBtn.SetEnabled(false);
+
+                var infoContainer = new VisualElement();
+                infoContainer.Add(roomNameLabel);
+                infoContainer.Add(roomDetailsLabel);
+
+                roomElement.Add(infoContainer);
+                roomElement.Add(joinBtn);
+
+                _roomList.Add(roomElement);
+            }
+        }
+
+        if (totalRooms == 0)
         {
             var noRoomsLabel = new Label("Nenhuma sala encontrada...");
             noRoomsLabel.AddToClassList("no-rooms-label");
             _roomList.Add(noRoomsLabel);
-            return;
-        }
-
-        foreach (var lobby in lobbies)
-        {
-            var roomElement = new VisualElement();
-            roomElement.AddToClassList("room-entry");
-
-            var roomNameLabel = new Label($"🎃 {lobby.Name}");
-            roomNameLabel.AddToClassList("room-name");
-
-            int players = lobby.MaxPlayers - lobby.AvailableSlots;
-            var roomDetailsLabel = new Label($"Players: {players}/{lobby.MaxPlayers}");
-            roomDetailsLabel.AddToClassList("room-details");
-
-            string joinCode = "";
-            if (lobby.Data != null && lobby.Data.ContainsKey("JoinCode"))
-            {
-                joinCode = lobby.Data["JoinCode"].Value;
-            }
-
-            var joinBtn = new Button(() => {
-                Debug.Log($"[LobbyUI] Clicked Join on {lobby.Name} with Code {joinCode}");
-                SaveProfileData();
-                LobbyManager.JoinRelayRoom(joinCode);
-            });
-            joinBtn.text = "ENTRAR";
-            joinBtn.AddToClassList("join-btn");
-            if (string.IsNullOrEmpty(joinCode)) joinBtn.SetEnabled(false);
-
-            var infoContainer = new VisualElement();
-            infoContainer.Add(roomNameLabel);
-            infoContainer.Add(roomDetailsLabel);
-
-            roomElement.Add(infoContainer);
-            roomElement.Add(joinBtn);
-
-            _roomList.Add(roomElement);
         }
     }
 
@@ -233,7 +303,12 @@ public class LobbyUIController : MonoBehaviour
         }
 
         SaveProfileData();
+        if (_btnJoinLAN != null)
+        {
+            _btnJoinLAN.text = "CONECTANDO...";
+            _btnJoinLAN.SetEnabled(false);
+        }
+
         LobbyManager.JoinLANClient(ip);
     }
 }
-

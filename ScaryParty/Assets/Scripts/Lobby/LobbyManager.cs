@@ -19,6 +19,42 @@ public class LobbyManager : MonoBehaviour
     private Lobby _currentLobby;
     private Coroutine _heartbeatCoroutine;
 
+    private void OnEnable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnected;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnected;
+            NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnected;
+        }
+    }
+
+    private void HandleClientConnected(ulong id)
+    {
+        Debug.Log($"[LobbyManager] 🟢 Client Connected! Client ID: {id}");
+    }
+
+    private void HandleClientDisconnected(ulong id)
+    {
+        Debug.Log($"[LobbyManager] 🔴 Client Disconnected or failed to connect! Client ID: {id}");
+        if (NetworkManager.Singleton != null && id == NetworkManager.Singleton.LocalClientId)
+        {
+            string reason = NetworkManager.Singleton.DisconnectReason;
+            if (!string.IsNullOrEmpty(reason))
+            {
+                Debug.LogWarning($"[LobbyManager] Disconnect Reason: {reason}");
+            }
+        }
+    }
+
     private async void Start()
     {
         Debug.Log("[LobbyManager] Start called. Loading PlayerData...");
@@ -27,19 +63,6 @@ public class LobbyManager : MonoBehaviour
             PlayerData = Resources.Load<PlayerData>("PlayerData");
         }
         Debug.Log($"[LobbyManager] PlayerData loaded: {PlayerData?.PlayerName}");
-
-        if (NetworkManager.Singleton != null)
-        {
-            NetworkManager.Singleton.OnClientConnectedCallback += (id) =>
-            {
-                Debug.Log($"[LobbyManager] 🟢 Client Connected! Client ID: {id}");
-            };
-
-            NetworkManager.Singleton.OnClientDisconnectCallback += (id) =>
-            {
-                Debug.Log($"[LobbyManager] 🔴 Client Disconnected or failed to connect! Client ID: {id}");
-            };
-        }
 
         await InitializeUnityServices();
     }
@@ -93,7 +116,6 @@ public class LobbyManager : MonoBehaviour
                     host = endpoint.Host;
                     port = (ushort)endpoint.Port;
                     isSecure = endpoint.Secure;
-                    // Note: If we find one on port 443, we should definitely prefer it
                     if (port == 443) 
                     {
                         Debug.Log($"[LobbyManager] Preferring WSS endpoint on port 443: {host}:{port}");
@@ -261,11 +283,10 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.Log("[LobbyManager] ✅ Host LAN iniciado com sucesso. Carregando ReadyScene...");
             
-            // Try starting Room Discovery broadcast
-            var discovery = GetComponent<RoomDiscoveryService>();
-            if (discovery != null)
+            // Inicia Room Discovery broadcast no singleton persistente
+            if (RoomDiscoveryService.Instance != null)
             {
-                discovery.StartHosting(roomName, 7777, 4);
+                RoomDiscoveryService.Instance.StartHosting(roomName, 7777, 4);
             }
 
             NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
@@ -286,6 +307,11 @@ public class LobbyManager : MonoBehaviour
             Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
             NetworkManager.Singleton.Shutdown();
             await Task.Delay(500);
+        }
+
+        if (RoomDiscoveryService.Instance != null)
+        {
+            RoomDiscoveryService.Instance.StopHosting();
         }
 
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();

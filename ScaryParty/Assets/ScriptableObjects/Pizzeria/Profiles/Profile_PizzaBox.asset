@@ -16,7 +16,7 @@ MonoBehaviour:
   category: 7
   definitionId: 0
   isTool: 0
-  visualPrefab: {fileID: 3030745894583852412, guid: 6eb4ca470e649754bb8601c8127fd86d, type: 3}
+  visualPrefab: {fileID: 1729609213595616771, guid: dc696be22dc4fb14daae1de8750bbe0f, type: 3}
   gripPointName: GripPoint
   supportPointName: SupportPoint
   fpLeftHandPose:

@@ -19,6 +19,31 @@ public class ReadySceneController : MonoBehaviour
 
     private float _lastUpdate = -999f;
 
+    private void OnEnable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (NetworkManager.Singleton != null)
+        {
+            NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+        }
+    }
+
+    private void OnClientDisconnected(ulong clientId)
+    {
+        if (NetworkManager.Singleton != null && clientId == NetworkManager.Singleton.LocalClientId)
+        {
+            Debug.Log("[ReadyScene] Fomos desconectados da sessão. Retornando ao LobbyScene...");
+            SceneManager.LoadScene("LobbyScene");
+        }
+    }
+
     private void Start()
     {
         // Garante cursor visível e solto nesta cena
@@ -39,7 +64,7 @@ public class ReadySceneController : MonoBehaviour
     private IEnumerator InitUIWhenReady()
     {
         // Aguarda até o rootVisualElement ser não-nulo E ter filhos
-        while (_document.rootVisualElement == null ||
+        while (_document == null || _document.rootVisualElement == null ||
                _document.rootVisualElement.childCount == 0)
         {
             yield return null;
@@ -70,8 +95,8 @@ public class ReadySceneController : MonoBehaviour
         if (!NetworkManager.Singleton.IsConnectedClient && !NetworkManager.Singleton.IsServer) return;
         if (_playersContainer == null) return;
 
-        // Throttle: atualiza lista a cada 0.5s
-        if (Time.time - _lastUpdate < 0.5f) return;
+        // Throttle: atualiza lista a cada 0.3s para rápida resposta
+        if (Time.time - _lastUpdate < 0.3f) return;
         _lastUpdate = Time.time;
 
         var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
@@ -90,7 +115,13 @@ public class ReadySceneController : MonoBehaviour
             row.AddToClassList("player-row");
             row.style.backgroundColor = ps.PlayerColor.Value;
 
-            var nameLbl = new Label(ps.PlayerName.Value.ToString());
+            string nameStr = ps.PlayerName.Value.ToString();
+            if (string.IsNullOrWhiteSpace(nameStr))
+            {
+                nameStr = $"Player {ps.OwnerClientId}";
+            }
+
+            var nameLbl = new Label(nameStr);
             nameLbl.AddToClassList("player-name");
 
             var statusLbl = new Label(ps.IsReady.Value ? "✅ PRONTO" : "⏳ AGUARDANDO...");
@@ -110,7 +141,9 @@ public class ReadySceneController : MonoBehaviour
             bool isHost = NetworkManager.Singleton.IsServer;
             _btnStartGame.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
             if (isHost)
+            {
                 _btnStartGame.SetEnabled(allReady && playerCount > 0);
+            }
         }
     }
 
@@ -137,6 +170,17 @@ public class ReadySceneController : MonoBehaviour
         Debug.Log("[ReadyScene] Botão START clicado");
         if (!NetworkManager.Singleton.IsServer) return;
 
+        if (_btnStartGame != null)
+        {
+            _btnStartGame.SetEnabled(false);
+        }
+
+        // Para a divulgação da sala em LAN ao começar o jogo
+        if (RoomDiscoveryService.Instance != null)
+        {
+            RoomDiscoveryService.Instance.StopHosting();
+        }
+
         // Carrega o GameScene para todos via NetworkSceneManager.
         // O PlayerState detecta automaticamente que está no GameScene e libera os controles.
         NetworkManager.Singleton.SceneManager.LoadScene(
@@ -148,6 +192,12 @@ public class ReadySceneController : MonoBehaviour
     private void OnCancelClicked()
     {
         Debug.Log("[ReadyScene] Botão CANCELAR clicado");
+
+        if (RoomDiscoveryService.Instance != null)
+        {
+            RoomDiscoveryService.Instance.StopHosting();
+        }
+
         if (NetworkManager.Singleton != null)
             NetworkManager.Singleton.Shutdown();
 
@@ -160,14 +210,18 @@ public class ReadySceneController : MonoBehaviour
         if (NetworkManager.Singleton?.SpawnManager != null)
         {
             var po = NetworkManager.Singleton.SpawnManager.GetLocalPlayerObject();
-            if (po != null) return po.GetComponent<PlayerState>();
+            if (po != null)
+            {
+                var ps = po.GetComponent<PlayerState>();
+                if (ps != null) return ps;
+            }
         }
 
         // Fallback: varre todos e pega o que é dono
         var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
         foreach (var ps in allPlayers)
         {
-            if (ps.IsOwner) return ps;
+            if (ps != null && ps.IsOwner) return ps;
         }
 
         return null;

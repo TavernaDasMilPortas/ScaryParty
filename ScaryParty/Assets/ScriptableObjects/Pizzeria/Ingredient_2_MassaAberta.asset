@@ -16,6 +16,7 @@ MonoBehaviour:
   ingredientName: Massa Aberta
   category: 1
   requiresPrep: 0
+  preparedIngredient: {fileID: 11400000}
   preparedIngredientId: 0
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  placeholderPrefab: {fileID: 0}
+  placeholderPrefab: {fileID: 5562431162684135168, guid: f6746612ddd468247bf52f5ee76948a3, type: 3}

@@ -1135,12 +1135,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GlobalObjectIdHash: 471146044
-  InScenePlacedSourceGlobalObjectIdHash: 471146044
+  InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
-  m_InScenePlaced: 1
+  m_InScenePlaced: 0
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
@@ -1617,6 +1617,7 @@ MonoBehaviour:
   topClamp: 89
   bottomClamp: -85
   invertPitch: 0
+  invertYaw: 0
   enableHandSwayBob: 0
   handSwayAmount: 0
   handBobAmount: 0

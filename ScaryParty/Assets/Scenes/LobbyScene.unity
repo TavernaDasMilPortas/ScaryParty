@@ -486,7 +486,7 @@ MonoBehaviour:
     TimeResyncInterval: 30
     EnsureNetworkVariableLengthSafety: 0
     EnableSceneManagement: 1
-    ForceSamePrefabs: 1
+    ForceSamePrefabs: 0
     RecycleNetworkIds: 1
     NetworkIdRecycleDelay: 120
     RpcHashSize: 0
@@ -495,7 +495,7 @@ MonoBehaviour:
     EnableNetworkLogs: 1
     NetworkTopology: 0
     UseCMBService: 0
-    AutoSpawnPlayerPrefabClientSide: 1
+    AutoSpawnPlayerPrefabClientSide: 0
     NetworkMessageMetrics: 1
     NetworkProfilingMetrics: 1
     OldPrefabList: []

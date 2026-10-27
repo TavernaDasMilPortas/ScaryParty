@@ -16,6 +16,7 @@ MonoBehaviour:
   ingredientName: Queijo Ralado
   category: 3
   requiresPrep: 0
+  preparedIngredient: {fileID: 11400000}
   preparedIngredientId: 0
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  placeholderPrefab: {fileID: 0}
+  placeholderPrefab: {fileID: 5220987321227752152, guid: fa6c064843c9c48458d742d0a30fe08c, type: 3}

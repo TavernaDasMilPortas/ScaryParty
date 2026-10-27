@@ -1,15 +1,23 @@
-using System.Collections.Generic;
-using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.SceneManagement;
 
 public class InGameLobbyUIController : MonoBehaviour
 {
     private void Awake()
     {
         // Script obsoleto. O lobby de espera foi movido para a cena 'ReadyScene'.
-        // Destrói a interface antiga (que ainda existe no prefab da cena GameScene) para não poluir a tela.
+        // Oculta e destrói imediatamente para garantir que nenhum resquício visual persista na GameScene.
+        var doc = GetComponent<UIDocument>();
+        if (doc != null)
+        {
+            if (doc.rootVisualElement != null)
+            {
+                doc.rootVisualElement.style.display = DisplayStyle.None;
+            }
+            doc.enabled = false;
+        }
+
+        gameObject.SetActive(false);
         Destroy(gameObject);
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 using StarterAssets;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PlayerState : NetworkBehaviour
 {
@@ -70,6 +71,10 @@ public class PlayerState : NetworkBehaviour
                 IsGameStarted.Value = false;
             }
         }
+        else if (IsOwner)
+        {
+            UpdateMovementLock(IsGameStarted.Value);
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -130,25 +135,44 @@ public class PlayerState : NetworkBehaviour
                 if (cc != null) cc.enabled = true;
             }
 
-            // O Cliente local lê seus dados salvos e manda pro Servidor
-            var pd = Resources.Load<PlayerData>("PlayerData");
-            if (pd != null)
+            // O Cliente local lê seus dados salvos e manda pro Servidor de forma diferida (após o registro do spawn)
+            StartCoroutine(SubmitProfileDeferred());
+        }
+    }
+
+    private IEnumerator SubmitProfileDeferred()
+    {
+        yield return null; // Aguarda 1 frame para estabilização de rede e registro no NetworkManager
+
+        string pName = "";
+        Color pColor = Color.white;
+
+        var pd = Resources.Load<PlayerData>("PlayerData");
+        if (pd != null)
+        {
+            pName = pd.PlayerName;
+            pColor = pd.PlayerColor;
+        }
+        else
+        {
+            pName = PlayerPrefs.GetString("PlayerName", "");
+            if (PlayerPrefs.HasKey("PlayerColorR"))
             {
-                SubmitProfileServerRpc(pd.PlayerName, pd.PlayerColor);
-            }
-            else
-            {
-                // Fallback direto do PlayerPrefs caso o ScriptableObject não persista no build
-                string pName = PlayerPrefs.GetString("PlayerName", "Player" + Random.Range(1000, 9999));
-                Color pColor = new Color(
+                pColor = new Color(
                     PlayerPrefs.GetFloat("PlayerColorR", 1f),
                     PlayerPrefs.GetFloat("PlayerColorG", 1f),
                     PlayerPrefs.GetFloat("PlayerColorB", 1f),
                     1f
                 );
-                SubmitProfileServerRpc(pName, pColor);
             }
         }
+
+        if (string.IsNullOrWhiteSpace(pName))
+        {
+            pName = $"Player {OwnerClientId}";
+        }
+
+        SubmitProfileServerRpc(pName, pColor);
     }
 
     public override void OnNetworkDespawn()
@@ -161,6 +185,11 @@ public class PlayerState : NetworkBehaviour
     [ServerRpc]
     private void SubmitProfileServerRpc(string pName, Color pColor)
     {
+        if (string.IsNullOrWhiteSpace(pName))
+        {
+            pName = $"Player {OwnerClientId}";
+        }
+
         PlayerName.Value = new FixedString32Bytes(pName);
         
         // Verifica se alguém já tem essa cor
@@ -179,22 +208,25 @@ public class PlayerState : NetworkBehaviour
         Color result = desiredColor;
         float shiftAmount = 0.3f;
 
-        foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClientsList != null)
         {
-            if (client.PlayerObject == null) continue; // <--- NULL CHECK VITAL AQUI
-            if (client.PlayerObject == this.NetworkObject) continue;
-            
-            var otherState = client.PlayerObject.GetComponent<PlayerState>();
-            if (otherState != null)
+            foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
             {
-                // Se a cor for quase igual (distância RGB muito curta)
-                float dist = Vector4.Distance(result, otherState.PlayerColor.Value);
-                if (dist < 0.15f)
+                if (client == null || client.PlayerObject == null) continue;
+                if (client.PlayerObject == this.NetworkObject) continue;
+                
+                var otherState = client.PlayerObject.GetComponent<PlayerState>();
+                if (otherState != null)
                 {
-                    // Muda o brilho/luminosidade da cor
-                    Color.RGBToHSV(result, out float h, out float s, out float v);
-                    v = (v > 0.5f) ? v - shiftAmount : v + shiftAmount;
-                    result = Color.HSVToRGB(h, s, Mathf.Clamp01(v));
+                    // Se a cor for quase igual (distância RGB muito curta)
+                    float dist = Vector4.Distance(result, otherState.PlayerColor.Value);
+                    if (dist < 0.15f)
+                    {
+                        // Muda o brilho/luminosidade da cor
+                        Color.RGBToHSV(result, out float h, out float s, out float v);
+                        v = (v > 0.5f) ? v - shiftAmount : v + shiftAmount;
+                        result = Color.HSVToRGB(h, s, Mathf.Clamp01(v));
+                    }
                 }
             }
         }

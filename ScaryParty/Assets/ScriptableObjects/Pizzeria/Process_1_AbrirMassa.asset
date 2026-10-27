@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.ProcessDef
   id: 1
   processName: Abrir Massa
-  inputIngredientId: 1
+  inputIngredient: {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
   inputStage: 0
-  outputIngredientId: 2
+  outputIngredient: {fileID: 11400000, guid: 2c665dd7e6ec4324baf3a0c66c1db920, type: 2}
   outputStage: 1
   requiredToolCapability: 0
   baseDuration: 3
+  inputIngredientId: 1
+  outputIngredientId: 2
