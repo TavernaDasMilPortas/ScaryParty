@@ -1,0 +1,188 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a71073ccfea27840a71123a2db8c489, type: 3}
+  m_Name: PizzeriaConfig_PizzeriaModular_Manual
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaConfig
+  ingredients:
+  - {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
+  - {fileID: 11400000, guid: 2c665dd7e6ec4324baf3a0c66c1db920, type: 2}
+  - {fileID: 11400000, guid: 29fb612360a74b14f9a100967765464c, type: 2}
+  - {fileID: 11400000, guid: 846a2e739d83d364c85a86cbe520531e, type: 2}
+  - {fileID: 11400000, guid: 34af672c39d86054aae28b94edbc96f4, type: 2}
+  - {fileID: 11400000, guid: c722554170625814ab0451de4a645eba, type: 2}
+  - {fileID: 11400000, guid: aabad261ce4aa654fbd74b9d4b0d96bb, type: 2}
+  - {fileID: 11400000, guid: 69485157e190c6a4c962eaecb8dd3689, type: 2}
+  - {fileID: 11400000, guid: bb29ddd994767134eb644c5080459ab5, type: 2}
+  recipes:
+  - {fileID: 11400000, guid: 7f38f2b5aaa2ee647b851896d774669f, type: 2}
+  - {fileID: 11400000, guid: c268141a07193cf41a22f627f1e1518c, type: 2}
+  tools:
+  - {fileID: 11400000, guid: 2acded21d6df6774494e454adfe440f1, type: 2}
+  - {fileID: 11400000, guid: 46d7f665373555644ae05e04a22abacb, type: 2}
+  processes:
+  - {fileID: 11400000, guid: e81cf19f289fefc4b8eefae80cb2671c, type: 2}
+  - {fileID: 11400000, guid: 5c4fbb40ee5d58a4b92d813b12ff807b, type: 2}
+  - {fileID: 11400000, guid: b24bc8e57cece87428365b823402380e, type: 2}
+  stations:
+  - {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
+  - {fileID: 11400000, guid: 534dfbf25e962684889c8f67bc2404b5, type: 2}
+  - {fileID: 11400000, guid: 2fb3bbc377870f34494d45962c21fad4, type: 2}
+  - {fileID: 11400000, guid: 493a48c87f2e7c94aa39c7afb8d9df5b, type: 2}
+  - {fileID: 11400000, guid: e27863efa6eab4544b9134ace3e45961, type: 2}
+  - {fileID: 11400000, guid: 331a740e33a07344cb037e5f0eda3828, type: 2}
+  - {fileID: 11400000, guid: 969f023251d17894cab14f3820fd518d, type: 2}
+  - {fileID: 11400000, guid: 5e04f84f7b3f81b4d8530da7728763a1, type: 2}
+  - {fileID: 11400000, guid: 8f25919c6df0b4e4f89d0a4b72a75ed3, type: 2}
+  - {fileID: 11400000, guid: 6fb2c2556f769374795c17e0eb786135, type: 2}
+  - {fileID: 11400000, guid: 83b17d71500b53b4891661016cd12aac, type: 2}
+  - {fileID: 11400000, guid: c74915cdffdfcc14585222ff7ae7b1c9, type: 2}
+  - {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
+  - {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
+  stationInstances:
+  - instanceId: 19
+    definition: {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
+    displayName: Lixeira
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 1
+    definition: {fileID: 11400000, guid: 534dfbf25e962684889c8f67bc2404b5, type: 2}
+    displayName: Lixeira
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 8
+    definition: {fileID: 11400000, guid: 2fb3bbc377870f34494d45962c21fad4, type: 2}
+    displayName: Forno
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 2
+    definition: {fileID: 11400000, guid: 493a48c87f2e7c94aa39c7afb8d9df5b, type: 2}
+    displayName: Forno
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 3
+    definition: {fileID: 11400000, guid: e27863efa6eab4544b9134ace3e45961, type: 2}
+    displayName: Forno
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 5
+    definition: {fileID: 11400000, guid: 969f023251d17894cab14f3820fd518d, type: 2}
+    displayName: Geladeira (Estoque Frio)
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 12
+    definition: {fileID: 11400000, guid: 83b17d71500b53b4891661016cd12aac, type: 2}
+    displayName: Telefone
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 7
+    definition: {fileID: 11400000, guid: c74915cdffdfcc14585222ff7ae7b1c9, type: 2}
+    displayName: "Suporte de Utens\xEDlios"
+    overrideSlotCount: 4
+    durationOverrides: []
+  - instanceId: 10
+    definition: {fileID: 11400000, guid: 6fb2c2556f769374795c17e0eb786135, type: 2}
+    displayName: Pilha de Caixas
+    overrideSlotCount: 2
+    durationOverrides: []
+  - instanceId: 13
+    definition: {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
+    displayName: Bancada de Montagem
+    overrideSlotCount: 5
+    durationOverrides: []
+  - instanceId: 6
+    definition: {fileID: 11400000, guid: 5e04f84f7b3f81b4d8530da7728763a1, type: 2}
+    displayName: Dispensa (Estoque Seco)
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 11
+    definition: {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
+    displayName: Bancada de Montagem
+    overrideSlotCount: 4
+    durationOverrides: []
+  - instanceId: 9
+    definition: {fileID: 11400000, guid: 8f25919c6df0b4e4f89d0a4b72a75ed3, type: 2}
+    displayName: Bancada de Embalagem
+    overrideSlotCount: 3
+    durationOverrides: []
+  supplyItems:
+  - {fileID: 11400000, guid: abc5fc56a0c0657459df2394c1e3e5c7, type: 2}
+  - {fileID: 11400000, guid: 686d3429140d2504d8b801f80cdb8893, type: 2}
+  - {fileID: 11400000, guid: 1c0cf04e594efc74993067871e185672, type: 2}
+  - {fileID: 11400000, guid: 8d8dfa47e53c70b46a21dbccf345a7e0, type: 2}
+  upgrades:
+  - {fileID: 11400000, guid: 9a7bfe5279b4e5042a9b75380a355680, type: 2}
+  - {fileID: 11400000, guid: 0f17f1ffb5614a542ade38164846f855, type: 2}
+  - {fileID: 11400000, guid: b849a2e27c1ae3344872bc727bc4a85c, type: 2}
+  - {fileID: 11400000, guid: 5c9dd468d83f0d845bf91593512c63d4, type: 2}
+  - {fileID: 11400000, guid: 68c0e4be0155bb44fb5adc933cac8e51, type: 2}
+  - {fileID: 11400000, guid: 8ff7c5c5bf201534da8dbf97681a32f0, type: 2}
+  initialStorageSlots:
+  - storageId: 5
+    ingredient: {fileID: 11400000, guid: 29fb612360a74b14f9a100967765464c, type: 2}
+    ingredientId: 3
+    initialStock: 20
+    capacity: 100
+  - storageId: 5
+    ingredient: {fileID: 11400000, guid: 846a2e739d83d364c85a86cbe520531e, type: 2}
+    ingredientId: 4
+    initialStock: 20
+    capacity: 100
+  - storageId: 5
+    ingredient: {fileID: 11400000, guid: c722554170625814ab0451de4a645eba, type: 2}
+    ingredientId: 6
+    initialStock: 20
+    capacity: 100
+  - storageId: 5
+    ingredient: {fileID: 11400000, guid: 69485157e190c6a4c962eaecb8dd3689, type: 2}
+    ingredientId: 8
+    initialStock: 20
+    capacity: 100
+  - storageId: 6
+    ingredient: {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
+    ingredientId: 1
+    initialStock: 20
+    capacity: 30
+  workLeaseSeconds: 0.75
+  serverDistanceTolerance: 1.5
+  interactDistance: 3
+  defaultBakeDuration: 15
+  packagingDuration: 2
+  discardDuration: 1
+  archiveHoldDuration: 1
+  maxActiveOrders: 6
+  maxPendingCalls: 4
+  callExpireSeconds: 30
+  stackCount: 2
+  stackHeight: 4
+  backpackCount: 2
+  backpackCapacity: 4
+  ticketBoardCapacity: 6
+  startingBudget: 500
+  deliveryTimeLimit: 300
+  phoneRingDuration: 30
+  minOrderInterval: 15
+  maxOrderInterval: 35
+  maxPendingSupplyOrders: 3
+  ovenBurnGraceDuration: 10
+  burnedPayoutFactor: 0
+  unbakedPayoutFactor: 0
+  restaurantBaseBonus: 10
+  fridgeCapacityPerIngredient: 20
+  cupboardCapacityPerIngredient: 30
+  backpackInitialSlots: 2
+  stagingInitialSlots: 4
+  ovenInitialSlots: 2
+  initialDoughStock: 20
+  initialSauceStock: 20
+  initialCheeseStock: 20
+  initialCalabresaStock: 10
+  initialMushroomStock: 0

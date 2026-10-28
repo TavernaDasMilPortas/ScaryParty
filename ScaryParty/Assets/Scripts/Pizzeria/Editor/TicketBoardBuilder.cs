@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using ScaryParty.Pizzeria.Authoring;
+using ScaryParty.Pizzeria.Editor.Authoring;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Integration;
 using ScaryParty.Interaction;
@@ -11,13 +13,42 @@ namespace ScaryParty.Pizzeria.Editor
     {
         private const string PrefabPath = "Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Quadro de Comandas", false, 120)]
+        /// <summary>
+        /// Rotina reutilizável que configura TicketBoardStation e slots de comandas no objeto-alvo
+        /// sem recriar primitivas nem alterar posição/escala.
+        /// </summary>
+        public static TicketBoardStation ConfigureTicketBoardOnTarget(GameObject targetGo, int stationId = 15, int slotCount = 6, string stationName = "Quadro de Comandas")
+        {
+            if (targetGo == null) return null;
+            var ticketBoard = BuilderToolkit.GetOrAddComponent<TicketBoardStation>(targetGo);
+            ticketBoard.stationId = stationId;
+            ticketBoard.stationName = stationName;
+            ticketBoard.maxVisibleTickets = slotCount;
+            BuilderToolkit.GetOrAddComponent<OutlineTarget>(targetGo);
+
+            PizzeriaSelectionConverter.ConfigureTicketBoardComponentsOnTarget(targetGo, ticketBoard, slotCount);
+            return ticketBoard;
+        }
+
+        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Quadro de Comandas (Legado)", false, 120)]
         public static void BuildTicketBoard()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             if (prefab == null)
             {
-                EditorUtility.DisplayDialog("Erro", $"Prefab não encontrado em: {PrefabPath}. Execute 'Build or Update' primeiro.", "OK");
+                EditorUtility.DisplayDialog("Erro", $"Prefab não encontrado em: {PrefabPath}.", "OK");
+                return;
+            }
+
+            var bindings = prefab.GetComponent<PizzeriaAuthoringBindings>();
+            if (bindings != null && bindings.isManualAuthoring)
+            {
+                Debug.LogWarning("[TicketBoardBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Pizzaria Modular' (Aba 3: Bancadas e Objetos) para atribuir o quadro de comandas.");
+                if (Application.isBatchMode) return;
+                EditorUtility.DisplayDialog(
+                    "Autoria Manual Ativa",
+                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Pizzaria Modular' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Quadro de Comandas'.",
+                    "OK");
                 return;
             }
 
@@ -45,29 +76,13 @@ namespace ScaryParty.Pizzeria.Editor
                 boardObj.transform.localRotation = Quaternion.Euler(0, 180, 0);
                 boardObj.transform.localScale = new Vector3(2.2f, 0.9f, 0.08f);
 
-                // Material de madeira / quadro de cortiça
-                var renderer = boardObj.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-                    var mat = new Material(shader);
-                    mat.color = new Color(0.45f, 0.32f, 0.20f);
-                    renderer.sharedMaterial = mat;
-                }
-
-                // Componente TicketBoardStation
-                var ticketBoard = BuilderToolkit.GetOrAddComponent<TicketBoardStation>(boardObj);
-                ticketBoard.stationId = 15;
-                ticketBoard.stationName = "Quadro de Comandas";
-                ticketBoard.maxVisibleTickets = 4;
-                BuilderToolkit.GetOrAddComponent<OutlineTarget>(boardObj);
-
-                // Marcar como gerado
+                ConfigureTicketBoardOnTarget(boardObj, 15, 4, "Quadro de Comandas");
                 BuilderToolkit.MarkGenerated(boardObj, "TicketBoardBuilder", "Station_TicketBoard");
 
                 PrefabUtility.SaveAsPrefabAsset(root, prefabAssetPath);
                 Debug.Log("[TicketBoardBuilder] ✅ Quadro de Comandas construído e salvo no prefab com sucesso!");
-                EditorUtility.DisplayDialog("Scary Party", "Quadro de Comandas construído com sucesso no PizzeriaPrefab!", "OK");
+                if (!Application.isBatchMode)
+                    EditorUtility.DisplayDialog("Scary Party", "Quadro de Comandas construído com sucesso no PizzeriaPrefab!", "OK");
             }
             finally
             {

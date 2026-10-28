@@ -48,7 +48,7 @@ namespace ScaryParty.Pizzeria.Stations
             base.Start();
             stationName = "Bancada de Preparo";
 
-            if (slotAnchors == null || slotAnchors.Length < 2)
+            if (!slotsBoundToObjects && (slotAnchors == null || slotAnchors.Length < 2))
             {
                 var slotsParent = transform.Find("Slots");
                 if (slotsParent == null)
@@ -61,12 +61,12 @@ namespace ScaryParty.Pizzeria.Stations
                 slotAnchors = new Transform[2];
                 var s0 = new GameObject("Slot_0");
                 s0.transform.SetParent(slotsParent, false);
-                s0.transform.localPosition = new Vector3(-0.35f, 0.55f, 0f);
+                s0.transform.localPosition = new Vector3(-0.35f, 0.38f, 0f);
                 slotAnchors[0] = s0.transform;
 
                 var s1 = new GameObject("Slot_1");
                 s1.transform.SetParent(slotsParent, false);
-                s1.transform.localPosition = new Vector3(0.35f, 0.55f, 0f);
+                s1.transform.localPosition = new Vector3(0.35f, 0.38f, 0f);
                 slotAnchors[1] = s1.transform;
             }
         }

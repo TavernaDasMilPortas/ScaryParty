@@ -322,6 +322,16 @@ namespace ScaryParty.Pizzeria.Network
             CommitAndReplicate();
         }
 
+        private static int ResolvePrimaryOvenStationId(PizzeriaRoot root)
+        {
+            if (root != null)
+            {
+                var oven = root.GetComponentInChildren<ScaryParty.Pizzeria.Stations.OvenStation>(true);
+                if (oven != null && oven.stationId > 0) return oven.stationId;
+            }
+            return 1;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void InsertOvenServerRpc(ulong pizzaIdVal, int slotIndex, ServerRpcParams rpcParams = default)
         {
@@ -329,7 +339,8 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            var slotId = new StationSlotId(1 /* Oven Station ID */, slotIndex);
+            int ovenStationId = ResolvePrimaryOvenStationId(root);
+            var slotId = new StationSlotId(ovenStationId, slotIndex);
             var res = root.OvenService.InsertPizza(root.DomainState, slotId, new ItemId(pizzaIdVal), sender, root.Catalog, root.Config.defaultBakeDuration);
             if (!res.Success)
             {
@@ -347,7 +358,8 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            var slotId = new StationSlotId(1, slotIndex);
+            int ovenStationId = ResolvePrimaryOvenStationId(root);
+            var slotId = new StationSlotId(ovenStationId, slotIndex);
             var handLoc = LocationRef.InHand(sender, targetHand);
             if (TransferService.IsLocationOccupied(root.DomainState, handLoc))
             {

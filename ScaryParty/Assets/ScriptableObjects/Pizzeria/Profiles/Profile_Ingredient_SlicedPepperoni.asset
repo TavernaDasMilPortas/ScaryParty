@@ -16,15 +16,15 @@ MonoBehaviour:
   category: 4
   definitionId: 7
   isTool: 0
-  visualPrefab: {fileID: 0}
+  visualPrefab: {fileID: 1000000071, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
   gripPointName: GripPoint
   supportPointName: SupportPoint
   fpLeftHandPose:
-    position: {x: -0.02, y: -0.05, z: 0.2}
+    position: {x: -0.04, y: -0.04, z: 0.22}
     rotationEuler: {x: 0, y: 0, z: 0}
     scale: {x: 1, y: 1, z: 1}
   fpRightHandPose:
-    position: {x: 0.02, y: -0.05, z: 0.2}
+    position: {x: 0.04, y: -0.04, z: 0.22}
     rotationEuler: {x: 0, y: 0, z: 0}
     scale: {x: 1, y: 1, z: 1}
   remoteLeftHandPose:
@@ -39,5 +39,5 @@ MonoBehaviour:
     position: {x: 0, y: 0, z: 0}
     rotationEuler: {x: 0, y: 0, z: 0}
     scale: {x: 1, y: 1, z: 1}
-  isPlaceholder: 1
+  isPlaceholder: 0
   notes: 

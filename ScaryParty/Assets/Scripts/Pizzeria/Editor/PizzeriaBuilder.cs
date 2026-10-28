@@ -283,10 +283,21 @@ namespace ScaryParty.Pizzeria.Editor
         {
             string path = $"{PrefabsFolder}/PizzeriaPrefab.prefab";
 
-            // Se houver perfil modular FBX disponível, delega a construção ao PizzeriaFunctionalPrefabBuilder
+            var existingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+            if (existingPrefab != null)
+            {
+                var bindings = existingPrefab.GetComponent<ScaryParty.Pizzeria.Authoring.PizzeriaAuthoringBindings>();
+                if (bindings != null && bindings.isManualAuthoring)
+                {
+                    Debug.Log("[PizzeriaBuilder] PizzeriaPrefab possui PizzeriaAuthoringBindings (Autoria Manual). Preservando prefab existente sem sobrescrever.");
+                    return existingPrefab;
+                }
+            }
+
+            // Só delega ao construtor legado se existir explicitamente o perfil legado e o prefab não estiver em autoria manual
             string profilePath = "Assets/ScriptableObjects/Pizzeria/Import/PizzeriaFbxImportProfile.asset";
             var profile = AssetDatabase.LoadAssetAtPath<ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxImportProfile>(profilePath);
-            if (profile != null || File.Exists(ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxAnalyzer.DefaultFbxPath))
+            if (profile != null)
             {
                 return ScaryParty.Pizzeria.Editor.Migration.PizzeriaFunctionalPrefabBuilder.BuildOrUpdateModularPrefab(profile);
             }

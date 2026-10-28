@@ -82,13 +82,13 @@ namespace ScaryParty.Interaction
                 var r = allRenderers[i];
                 if (r == null || excludeSet.Contains(r)) continue;
 
-                // Não incluir renderers de outros interagíveis/alvos filhos
+                // Não incluir renderers de outros interagíveis/alvos filhos (nem de slots vinculados com seu próprio OutlineTarget)
                 if (r.transform != transform)
                 {
-                    var childTarget = r.GetComponent<OutlineTarget>();
+                    var childTarget = r.GetComponentInParent<OutlineTarget>();
                     if (childTarget != null && childTarget != this) continue;
 
-                    var childInteractable = r.GetComponent<IInteractable>();
+                    var childInteractable = r.GetComponentInParent<IInteractable>();
                     if (childInteractable != null && (childInteractable as Component) != (this.GetComponent<IInteractable>() as Component))
                         continue;
                 }

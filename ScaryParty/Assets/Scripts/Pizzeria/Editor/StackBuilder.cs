@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
+using ScaryParty.Pizzeria.Authoring;
+using ScaryParty.Pizzeria.Editor.Authoring;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Pizzeria.Integration;
 using ScaryParty.Interaction;
@@ -11,13 +13,41 @@ namespace ScaryParty.Pizzeria.Editor
     {
         private const string PrefabPath = "Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Pilha de Staging", false, 122)]
+        /// <summary>
+        /// Rotina reutilizável que configura StackStation no objeto-alvo sem recriar primitivas nem alterar posição/escala.
+        /// </summary>
+        public static StackStation ConfigureStackOnTarget(GameObject targetGo, int stationId = 16, ulong stackId = 1, int capacity = 6, string stationName = "Pilha de Caixas")
+        {
+            if (targetGo == null) return null;
+            var stackStation = BuilderToolkit.GetOrAddComponent<StackStation>(targetGo);
+            stackStation.stationId = stationId;
+            stackStation.stationName = stationName;
+            BuilderToolkit.GetOrAddComponent<OutlineTarget>(targetGo);
+
+            PizzeriaSelectionConverter.ConfigureStackStationComponentsOnTarget(targetGo, stackStation, stackId, capacity);
+            PizzeriaSelectionConverter.EnsureStationSlots(targetGo, stackStation, 1, PizzeriaStationKind.BoxStack, Vector3.forward);
+            return stackStation;
+        }
+
+        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Pilha de Staging (Legado)", false, 122)]
         public static void BuildStagingStack()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
             if (prefab == null)
             {
-                EditorUtility.DisplayDialog("Erro", $"Prefab não encontrado em: {PrefabPath}. Execute 'Build or Update' primeiro.", "OK");
+                EditorUtility.DisplayDialog("Erro", $"Prefab não encontrado em: {PrefabPath}.", "OK");
+                return;
+            }
+
+            var bindings = prefab.GetComponent<PizzeriaAuthoringBindings>();
+            if (bindings != null && bindings.isManualAuthoring)
+            {
+                Debug.LogWarning("[StackBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Pizzaria Modular' (Aba 3: Bancadas e Objetos) para atribuir a pilha de caixas.");
+                if (Application.isBatchMode) return;
+                EditorUtility.DisplayDialog(
+                    "Autoria Manual Ativa",
+                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Pizzaria Modular' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Pilha de Caixas'.",
+                    "OK");
                 return;
             }
 
@@ -45,30 +75,13 @@ namespace ScaryParty.Pizzeria.Editor
                 stackObj.transform.localRotation = Quaternion.identity;
                 stackObj.transform.localScale = new Vector3(0.6f, 0.1f, 0.6f);
 
-                // Material de pallet de madeira
-                var renderer = stackObj.GetComponent<Renderer>();
-                if (renderer != null)
-                {
-                    var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-                    var mat = new Material(shader);
-                    mat.color = new Color(0.55f, 0.40f, 0.25f);
-                    renderer.sharedMaterial = mat;
-                }
-
-                // Componente StackStation
-                var stackStation = BuilderToolkit.GetOrAddComponent<StackStation>(stackObj);
-                stackStation.stationId = 16;
-                stackStation.stationName = "Pilha de Staging";
-                stackStation.stackId = 1;
-                stackStation.capacity = 6;
-                BuilderToolkit.GetOrAddComponent<OutlineTarget>(stackObj);
-
-                // Marcar como gerado
+                ConfigureStackOnTarget(stackObj, 16, 1, 6, "Pilha de Staging");
                 BuilderToolkit.MarkGenerated(stackObj, "StackBuilder", "Station_Stack_Staging");
 
                 PrefabUtility.SaveAsPrefabAsset(root, prefabAssetPath);
                 Debug.Log("[StackBuilder] ✅ Pilha de Staging construída e salva no prefab com sucesso!");
-                EditorUtility.DisplayDialog("Scary Party", "Pilha de Staging construída com sucesso no PizzeriaPrefab!", "OK");
+                if (!Application.isBatchMode)
+                    EditorUtility.DisplayDialog("Scary Party", "Pilha de Staging construída com sucesso no PizzeriaPrefab!", "OK");
             }
             finally
             {

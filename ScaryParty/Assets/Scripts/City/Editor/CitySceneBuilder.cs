@@ -1,6 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 using Unity.Netcode;
+using ScaryParty.EditorScripts;
 
 /// <summary>
 /// Editor window for setting up the complete game scene structure.
@@ -137,6 +138,13 @@ public class CitySceneBuilder : EditorWindow
         if (GUILayout.Button("🛠️ Fix GameScene Bugs (AI Diagnostics)", GUILayout.Height(35)))
         {
             FixGameSceneBugs();
+        }
+
+        EditorGUILayout.Space(5);
+        GUI.backgroundColor = new Color(0.2f, 0.8f, 0.6f);
+        if (GUILayout.Button("🍕 Legacy Cleanup Builder (Pizzas & Armas)", GUILayout.Height(35)))
+        {
+            LegacyCleanupBuilder.ShowWindow();
         }
         GUI.backgroundColor = Color.white;
 
@@ -420,11 +428,17 @@ public class CitySceneBuilder : EditorWindow
         DrawStatusLine("NetworkManager", FindObjectOfType<NetworkManager>() != null);
         
         PizzariaManager pManager = FindObjectOfType<PizzariaManager>();
-        DrawStatusLine("PizzariaManager", pManager != null);
         if (pManager != null)
         {
-            DrawStatusLine(" ↳ Pizza Prefab Assigned", pManager.pizzaBoxPrefab != null);
+            DrawStatusLine("⚠️ Legacy PizzariaManager (Remove!)", false);
         }
+        else
+        {
+            DrawStatusLine("Legacy PizzariaManager Cleaned", true);
+        }
+
+        var pizzeriaRoot = FindObjectOfType<ScaryParty.Pizzeria.Composition.PizzeriaRoot>();
+        DrawStatusLine("PizzeriaRoot (Modern)", pizzeriaRoot != null);
 
         DrawStatusLine("UIManager", FindObjectOfType<UIManager>() != null);
 
@@ -454,9 +468,6 @@ public class CitySceneBuilder : EditorWindow
     private void SetupGameplaySystems()
     {
         GameObject gameplayRoot = CreateRootIfMissing("--- GAMEPLAY ---");
-
-        // Generate Pizza Prefab if missing
-        GameObject pizzaPrefab = GeneratePizzaPrefab();
 
         // UI Manager & Document
         GameObject uiObj = GameObject.Find("MainGameUI");
@@ -493,24 +504,12 @@ public class CitySceneBuilder : EditorWindow
             doc.panelSettings = panelSettings;
         }
 
-        // Pizzaria Manager
-        PizzariaManager pizzariaManager = gameplayRoot.GetComponentInChildren<PizzariaManager>();
-        if (pizzariaManager == null)
+        // Clean legacy PizzariaManager if present
+        var legacyMgr = gameplayRoot.GetComponentInChildren<PizzariaManager>();
+        if (legacyMgr != null)
         {
-            GameObject pizzariaObj = new GameObject("PizzariaManager");
-            pizzariaObj.transform.SetParent(gameplayRoot.transform);
-            
-            pizzariaManager = pizzariaObj.AddComponent<PizzariaManager>();
-            pizzariaObj.AddComponent<NetworkObject>();
-            
-            Undo.RegisterCreatedObjectUndo(pizzariaObj, "Create Pizzaria Manager");
-        }
-
-        // Assign prefab
-        if (pizzariaManager.pizzaBoxPrefab == null && pizzaPrefab != null)
-        {
-            pizzariaManager.pizzaBoxPrefab = pizzaPrefab;
-            EditorUtility.SetDirty(pizzariaManager);
+            Undo.DestroyObjectImmediate(legacyMgr.gameObject);
+            Debug.Log("[SceneBuilder] 🧹 Removed legacy PizzariaManager from gameplayRoot.");
         }
 
         // Setup Minimap Systems
@@ -1098,6 +1097,10 @@ public class CitySceneBuilder : EditorWindow
             }
         }
 
-        Debug.Log($"[SceneBuilder] 🧹 GameScene cleaned! Removed {removedCount} environment objects.");
+        // Clean legacy pizza systems (PizzariaManager & PizzaItems)
+        removedCount += ScaryParty.EditorScripts.LegacyCleanupBuilder.CleanLegacyPizzaSpawners(msg => Debug.Log($"[SceneBuilder] {msg}"));
+        ScaryParty.EditorScripts.LegacyCleanupBuilder.DisableWeaponControlsOnPrefabsAndScene(msg => Debug.Log($"[SceneBuilder] {msg}"));
+
+        Debug.Log($"[SceneBuilder] 🧹 GameScene cleaned! Removed {removedCount} legacy/environment objects.");
     }
 }

@@ -181,29 +181,52 @@ MonoBehaviour:
   - tracker:
       mostClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        - 
+        count: 4
+        gameObjects: []
+      - paths:
+        - 
+        count: 2
+        gameObjects: []
+      - paths:
+        - 
         count: 1
-        gameObjects:
-        - {fileID: 0}
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
       recentlyClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths: []
+        - 
         count: 1
         gameObjects: []
-      - paths: []
+      - paths:
+        - 
         count: 1
         gameObjects: []
-      - paths: []
+      - paths:
+        - 
         count: 1
         gameObjects: []
-      - paths: []
+      - paths:
+        - 
         count: 1
         gameObjects: []
-      - paths: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
         count: 1
         gameObjects: []
       - paths: []
@@ -222,7 +245,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 10:48 AM (October 27, 2026)
+    lastSaveTimePrint: 07:48 PM (October 28, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -236,28 +259,28 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 92
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
       paths: []
-      tabWidth: 0
+      tabWidth: 89
       name: --- CITY ---
       icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
       shortName: --- CITY ---
       filterString: 
       newTab: 0
       scrollPosition: 0
-      isSelected: 0
+      isSelected: 1
       allCollapsed: 0
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: 
+        m_Text: --- CITY ---
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: 
+        m_TextWithWhitespace: "--- CITY ---\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -301,48 +324,57 @@ MonoBehaviour:
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: transform
+        niceComponentName: transform
       - index: 0
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: networkobject
+        niceComponentName: network object
       - index: 0
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: citygenerator
+        niceComponentName: city generator
       - index: 0
         component: {fileID: 0}
         missingComponentID:
           m_Data: 0
-        foldout: 0
+        foldout: 1
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: 
-        niceComponentName: 
+        componentName: citygizmos
+        niceComponentName: city gizmos
       historyPaths:
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
         prefab: 0
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- UI ---[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_0[0]/The_Pizzeria_Building[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_0[0]/The_Pizzeria_Building[0]/Comodo_01_Salao[0]/Arquitetura[0]/Paredes[0]/Externas[0]/paredesuperiorexterna.005[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityRoadNetwork[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Blocks[0]/Block_0[0]/The_Pizzeria_Building[0]/Comodo_01_Salao[0]/Arquitetura[0]/Paredes[0]/Externas[0]/paredesuperiorexterna.068[0]"}'
         prefab: 0
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
@@ -352,6 +384,12 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - fc7266d1e4dbc5a46aa1445238583bbe
+    - assetGUIDs:
+      - 39c844dff8ef83248b8903e1f0018250
+    - assetGUIDs:
+      - 8401d286b31cb8e4d94aa1ff61a76128
+    - assetGUIDs:
       - 7783d6705f3297f488cd0a40b809bab5
     - assetGUIDs:
       - f6746612ddd468247bf52f5ee76948a3
@@ -367,17 +405,11 @@ MonoBehaviour:
       - e69a6f50e95ec5444bda598457229993
     - assetGUIDs:
       - f07f1056d8ff47042b26f2cf585ffc80
-    - assetGUIDs:
-      - fd3693b5f6cac18438a6dd5d4bebfe87
-    - assetGUIDs:
-      - 2c8f7ba36479c5543b5ba07cfda2cf41
-    - assetGUIDs:
-      - c13e4e6357835224b980d7fe639d0b83
     targetObject: {fileID: 0}
     targetObjects: []
     lastSelectedAsset: 
     lastClickedTab: -1
-    previousTab: 0
+    previousTab: 3
   - tracker:
       mostClicked: []
       recentlyClicked: []
@@ -385,7 +417,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 10:46 AM (October 27, 2026)
+    lastSaveTimePrint: 12:50 PM (October 28, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -491,7 +523,7 @@ MonoBehaviour:
     targetObjects: []
     lastSelectedAsset: 
     lastClickedTab: -1
-    previousTab: 0
+    previousTab: 3
   - tracker:
       mostClicked: []
       recentlyClicked: []
@@ -499,7 +531,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 10:46 AM (October 27, 2026)
+    lastSaveTimePrint: 09:40 AM (October 28, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -605,7 +637,7 @@ MonoBehaviour:
     targetObjects: []
     lastSelectedAsset: 
     lastClickedTab: -1
-    previousTab: 0
+    previousTab: 3
   - tracker:
       mostClicked: []
       recentlyClicked: []
@@ -706,6 +738,6 @@ MonoBehaviour:
     lastSelectedAsset: Assets/ScriptableObjects/DefaultCityConfig.asset
     lastClickedTab: -1
     previousTab: 3
-  tipsShown: 01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  tipsShown: 01000000000000000000000000000000000000000000000000000000000000000000000001000000000000000100000001000000000000000100000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000100000001000000000000000000000001000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000001000000
   playModeStartScene: {}
   enteringPlayMode: 0

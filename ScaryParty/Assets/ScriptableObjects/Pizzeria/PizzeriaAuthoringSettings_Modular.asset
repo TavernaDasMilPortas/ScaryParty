@@ -1,0 +1,341 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c55c658f3a38cb0408ed5628f85c1a8c, type: 3}
+  m_Name: PizzeriaAuthoringSettings_Modular
+  m_EditorClassIdentifier: 
+  sourceModel: {fileID: 919132149155446097, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+  targetPrefab: {fileID: 3084738830506233021, guid: fc7266d1e4dbc5a46aa1445238583bbe, type: 3}
+  outputFolder: Assets/Prefabs/Pizzeria
+  outputPrefabName: PizzeriaModular_Manual
+  organizeHierarchyOnCreate: 1
+  groupByRooms: 1
+  parentItemsOnSurfaces: 1
+  parentChairsToTables: 1
+  explicitScaleFactor: 1
+  roomRegions:
+  - roomName: Comodo_01_Salao
+    minXZ: {x: -2, y: -13.8}
+    maxXZ: {x: 16.25, y: 11}
+    priority: 1
+  - roomName: Comodo_02_Cozinha
+    minXZ: {x: 16.25, y: -13}
+    maxXZ: {x: 34, y: 12.5}
+    priority: 2
+  - roomName: Comodo_03_Logistica
+    minXZ: {x: 15.8, y: -29}
+    maxXZ: {x: 34, y: -13}
+    priority: 3
+  floorMaterial: {fileID: 0}
+  floorRegions:
+  - regionName: Floor_Salao
+    minXZ: {x: 0, y: -13.2}
+    maxXZ: {x: 32.8, y: 9.2}
+    floorY: -1.6
+    thickness: 0.2
+  - regionName: Floor_Cozinha
+    minXZ: {x: 16.4, y: -27.6}
+    maxXZ: {x: 32.8, y: -13.2}
+    floorY: -1.6
+    thickness: 0.2
+  cloneConfigForNewPrefab: 1
+  pizzeriaConfig: {fileID: 11400000, guid: 4ba25ff91c36c954cbb84f3c9e67283d, type: 2}
+  presentationCatalog: {fileID: 11400000, guid: 8ab051e2454dde5419dc47aa8365e66d, type: 2}
+  defaultFootprintSize: {x: 34.5, y: 38.5}
+  defaultFootprintCenterOffset: {x: 16.5, y: 0, z: -9.2}
+  defaultEntranceDirectionXZ: {x: -1, y: 0}
+  defaultEntranceOffsetAlongFacade: 7.2
+  defaultSideClearance: 2
+  defaultFrontSidewalkDepth: 3
+  multiSelectionMode: 1
+  stationDefOutputFolder: Assets/ScriptableObjects/Pizzeria/Stations
+  extractedVisualsOutputFolder: Assets/Prefabs/Pizzeria/Visuals
+  showSceneGizmos: 1
+  showSlotHandles: 1
+  showInteractionReachGizmos: 1
+  validationProfile: 0
+  customMinimumCoverage:
+  - kind: 1
+    minimumRequired: 1
+  - kind: 2
+    minimumRequired: 1
+  - kind: 3
+    minimumRequired: 1
+  - kind: 4
+    minimumRequired: 1
+  - kind: 5
+    minimumRequired: 1
+  - kind: 6
+    minimumRequired: 1
+  - kind: 7
+    minimumRequired: 1
+  - kind: 8
+    minimumRequired: 1
+  - kind: 9
+    minimumRequired: 1
+  - kind: 10
+    minimumRequired: 1
+  - kind: 11
+    minimumRequired: 1
+  - kind: 12
+    minimumRequired: 1
+  - kind: 13
+    minimumRequired: 1
+  - kind: 14
+    minimumRequired: 1
+  - kind: 15
+    minimumRequired: 1
+  assemblyRules:
+  - setRuleName: Lixeira + Tampa
+    enabled: 1
+    groupNamePrefix: Lixeira
+    parentPrefixes:
+    - latadelixo
+    - lixeira
+    childPrefixes:
+    - tampadolixo
+    - tampalixeira
+    - tampalixo
+    maxBoundsDistance: 0.65
+    minScoreGapForAutoAssign: 0.15
+    maxChildrenPerParent: 1
+    createNormalizedUnitRoot: 1
+    targetCategory: 8
+  - setRuleName: Forno + Porta de Forno
+    enabled: 1
+    groupNamePrefix: Forno
+    parentPrefixes:
+    - forno
+    childPrefixes:
+    - portaforno
+    maxBoundsDistance: 1.5
+    minScoreGapForAutoAssign: 0.15
+    maxChildrenPerParent: 2
+    createNormalizedUnitRoot: 1
+    targetCategory: 8
+  - setRuleName: Geladeira + Portas (Grande/Pequena)
+    enabled: 1
+    groupNamePrefix: Geladeira
+    parentPrefixes:
+    - geladeira
+    childPrefixes:
+    - portamaiorgeldeira
+    - portamaiorgeladeira
+    - portapequenageldeira
+    - portapequenageladeira
+    - portamaior
+    - portageladeira
+    maxBoundsDistance: 1.25
+    minScoreGapForAutoAssign: 0.12
+    maxChildrenPerParent: 2
+    createNormalizedUnitRoot: 1
+    targetCategory: 8
+  - setRuleName: Caixa Registradora + Gaveta
+    enabled: 1
+    groupNamePrefix: CaixaRegistradora
+    parentPrefixes:
+    - caixaregistradora
+    childPrefixes:
+    - gavetacaixa
+    maxBoundsDistance: 0.65
+    minScoreGapForAutoAssign: 0.15
+    maxChildrenPerParent: 2
+    createNormalizedUnitRoot: 1
+    targetCategory: 8
+  - setRuleName: "Abertura Arquitet\xF4nica (Batente + Folha de Porta)"
+    enabled: 1
+    groupNamePrefix: ConjuntoPorta
+    parentPrefixes:
+    - batenteportapequena
+    - batenteportamediainterior
+    - batentefachada
+    childPrefixes:
+    - portapequena
+    - portamediainterior
+    - portafachada
+    maxBoundsDistance: 1.25
+    minScoreGapForAutoAssign: 0.15
+    maxChildrenPerParent: 2
+    createNormalizedUnitRoot: 1
+    targetCategory: 7
+  classificationRules:
+  - ruleName: Suporte de Faca (Equipamento)
+    enabled: 1
+    priority: 10
+    exactOrPrefixAliases:
+    - suportefaca
+    - suportedefaca
+    - rackfaca
+    targetCategory: 8
+  - ruleName: Paredes com Porta ou Janela (Arquitetura/Paredes)
+    enabled: 1
+    priority: 11
+    exactOrPrefixAliases:
+    - paredeporta
+    - paredeportapequena
+    - paredeporta2variante
+    - paredejanela
+    - paredejaneladir
+    - paredejanelaesq
+    - paredejanelameio
+    - paredefachada
+    - paredefachadadir
+    - paredefachadaesq
+    - paredesuperiorfachada
+    targetCategory: 3
+  - ruleName: Paredes Superiores Externas
+    enabled: 1
+    priority: 12
+    exactOrPrefixAliases:
+    - paredesuperiorexterna
+    - paredeexterna
+    targetCategory: 3
+  - ruleName: Paredes Superiores Internas
+    enabled: 1
+    priority: 13
+    exactOrPrefixAliases:
+    - paredesuperiorinterna
+    - paredeinterna
+    targetCategory: 2
+  - ruleName: Paredes Comuns
+    enabled: 1
+    priority: 14
+    exactOrPrefixAliases:
+    - paredecomum
+    - parede
+    targetCategory: 1
+  - ruleName: Portas de Equipamentos (Forno/Geladeira)
+    enabled: 1
+    priority: 15
+    exactOrPrefixAliases:
+    - portaforno
+    - portamaiorgeldeira
+    - portamaiorgeladeira
+    - portapequenageldeira
+    - portapequenageladeira
+    - portageladeira
+    - portamaior
+    targetCategory: 8
+  - ruleName: "Batentes e Portas Arquitet\xF4nicas"
+    enabled: 1
+    priority: 16
+    exactOrPrefixAliases:
+    - batenteportapequena
+    - batenteportamediainterior
+    - batentefachada
+    - portapequena
+    - portamediainterior
+    - abertura
+    targetCategory: 7
+  - ruleName: Pilastras, Colunas e Vigas
+    enabled: 1
+    priority: 20
+    exactOrPrefixAliases:
+    - pilastra
+    - coluna
+    - viga
+    targetCategory: 6
+  - ruleName: Pisos
+    enabled: 1
+    priority: 21
+    exactOrPrefixAliases:
+    - piso
+    - chao
+    - floor
+    targetCategory: 4
+  - ruleName: Tetos
+    enabled: 1
+    priority: 22
+    exactOrPrefixAliases:
+    - teto
+    - forro
+    - telhado
+    - cobertura
+    targetCategory: 5
+  - ruleName: "Equipamentos Principais (Forno, Geladeira, Arm\xE1rio, Lixeira, Caixa
+      Registradora)"
+    enabled: 1
+    priority: 30
+    exactOrPrefixAliases:
+    - forno
+    - geladeira
+    - armario
+    - latadelixo
+    - tampadolixo
+    - lixeira
+    - caixaregistradora
+    - gavetacaixa
+    targetCategory: 8
+  - ruleName: "Mobili\xE1rio (Mesas, Cadeiras, Balc\xF5es, Prateleiras)"
+    enabled: 1
+    priority: 40
+    exactOrPrefixAliases:
+    - mesacomum
+    - mesamedia
+    - mesaempacotamento
+    - mesa
+    - cadeira
+    - balcaopabertura
+    - quinabalcao
+    - balcao
+    - prateleira
+    targetCategory: 9
+  - ruleName: "Utens\xEDlios e Caixas/Mochilas Soltas"
+    enabled: 1
+    priority: 50
+    exactOrPrefixAliases:
+    - faca
+    - tabuadecortar
+    - pratoforma
+    - cortadordepizza
+    - panelaeconcha
+    - espatulasla
+    - espatula
+    - deliverybag
+    - caixa
+    - prancheta
+    targetCategory: 10
+  - ruleName: "Decora\xE7\xE3o"
+    enabled: 1
+    priority: 60
+    exactOrPrefixAliases:
+    - cardapio
+    - molhos
+    - quadro
+    - placa
+    targetCategory: 11
+  - ruleName: "Objetos Amb\xEDguos ou de Refer\xEAncia de Escala (Revisar)"
+    enabled: 1
+    priority: 90
+    exactOrPrefixAliases:
+    - coiso
+    - player
+    targetCategory: 12
+  toolVersion: 2
+  configuredBindingGuids:
+  - aa4c86f08db84572b736cfed7bd4fb66
+  - 7d70fba57d1d4fabac478c66dd205424
+  - 5c097e307fcd42c3aa80cae3e78eef12
+  - ce292a57e9274cc3be5ec83aa88f2648
+  - 9726b798ac6f474cb1f76113ed1ffa75
+  - 62702f91823b4d6489e3329ed5977712
+  - 241f4be2c33e4facbdce428b8ecb6a06
+  - 0035e2bb9948427a9e8fa3a3189ebab7
+  - e4edb956a1da497194143e3104f67c6d
+  - 6980403773ed422c8e9ba6d6300aff7f
+  - bb8154b9540a4f8fbab02b22ccc79625
+  - 0d76475d34564b5782e210824f4e1dcf
+  - a0b73c3ce84945aeb7d30c2142747469
+  - 9c7fd244ec5e48fa9c495b7c36080b30
+  - 7a014dd6620e48a4bb5549a8f807a61c
+  - e2958986354f43cea35f54957d2cca5f
+  - 9522270ccfae4613912960ab6e0820ea
+  - 25b49ca51e4342518c7277941e8aa0a5

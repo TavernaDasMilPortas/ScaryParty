@@ -3,20 +3,24 @@ using Unity.Netcode;
 using System.Collections.Generic;
 
 /// <summary>
-/// Manages generating pizza orders, spawning pizzas at the base, and paying the players for deliveries.
-/// Waits for the city to be generated before opening orders.
-/// Race-condition safe: if the city is already ready when this spawns, orders start immediately.
+/// [LEGACY - DEPRECATED]
+/// Antigo gerenciador de testes que gerava pedidos automáticos e caixas de pizza prontas na bancada.
+/// Substituído pelo ecossistema modular da Pizzaria (PizzeriaRoot, OrderScheduler, estações de preparo, etc.).
 /// </summary>
+[System.Obsolete("PizzariaManager é um sistema legado de teste. O novo fluxo utiliza PizzeriaRoot, estações e PhoneStation.")]
 public class PizzariaManager : NetworkBehaviour
 {
     public static PizzariaManager Instance { get; private set; }
 
-    [Header("Settings")]
+    [Header("Settings (LEGADO)")]
     public float orderGenerationInterval = 20f;
     public int maxActiveOrders = 3;
     
-    [Header("Prefabs")]
+    [Header("Prefabs (LEGADO)")]
     public GameObject pizzaBoxPrefab;
+
+    [Tooltip("Se falso, não gera caixas de pizza automaticamente na bancada.")]
+    public bool enableLegacyAutoSpawn = false;
 
     // Whether the city is ready and orders can be generated
     private bool _cityReady = false;
@@ -68,7 +72,7 @@ public class PizzariaManager : NetworkBehaviour
         // the city is already generated — check for it and start immediately.
         if (IsServer && _cityGen.CityData != null && _cityGen.CityData.DeliveryPointCount > 0)
         {
-            Debug.Log("[PizzariaManager] City was already generated before PizzariaManager spawned — starting orders now.");
+            Debug.Log("[PizzariaManager] City was already generated before PizzariaManager spawned.");
             OnCityReady();
         }
     }
@@ -98,8 +102,7 @@ public class PizzariaManager : NetworkBehaviour
         if (_cityReady) return; // Guard against double-call
 
         _cityReady = true;
-        _orderTimer = 2f; // Small delay after city is ready before first pizza
-        Debug.Log("[PizzariaManager] City is ready — pizza orders will start in 2 seconds. Starting game for all players.");
+        _orderTimer = 2f;
 
         var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
         foreach (var pState in allPlayers)
@@ -114,7 +117,6 @@ public class PizzariaManager : NetworkBehaviour
         if (!_cityReady) return;
 
         // Se algum jogador ainda estiver com IsGameStarted = false após a cidade estar pronta, garante a ativação
-        // (Resolve a condição de corrida do spawn do jogador local no Host ou late-join)
         var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
         foreach (var pState in allPlayers)
         {
@@ -123,6 +125,9 @@ public class PizzariaManager : NetworkBehaviour
                 pState.IsGameStarted.Value = true;
             }
         }
+
+        // LEGADO DESATIVADO: A geração automática de pizzas prontas está desativada por padrão.
+        if (!enableLegacyAutoSpawn) return;
 
         // Não gera pedidos até que o jogo tenha começado
         if (!IsGameActuallyStarted()) return;

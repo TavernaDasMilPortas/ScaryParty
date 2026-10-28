@@ -55,6 +55,14 @@ namespace ScaryParty.Pizzeria.Editor
         {
             GameObjectUtility.RemoveMonoBehavioursWithMissingScript(target);
 
+            var bindings = target.GetComponent<ScaryParty.Pizzeria.Authoring.PizzeriaAuthoringBindings>();
+            if (bindings != null)
+            {
+                var settings = ScaryParty.Pizzeria.Editor.Authoring.PizzeriaAuthoringSettings.FindOrCreateDefault();
+                ScaryParty.Pizzeria.Editor.Authoring.PizzeriaPrefabAuthoringService.InjectOrUpdateBaseFunctioning(target, settings, out _);
+                return;
+            }
+
             if (target.GetComponent<Unity.Netcode.NetworkObject>() == null)
                 target.AddComponent<Unity.Netcode.NetworkObject>();
 

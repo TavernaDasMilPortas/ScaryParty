@@ -316,6 +316,9 @@ namespace ScaryParty.Pizzeria.Stations
             var cmd = PizzeriaCommandHandler.Instance;
             if (state == null || cmd == null) return;
 
+            int slotIndex = ResolveTargetSlotIndex();
+            int totalSlots = slotAnchors != null && slotAnchors.Length > 0 ? slotAnchors.Length : 1;
+
             NetItemDto itemOnStation = default;
             bool hasItemOnStation = false;
 
@@ -325,7 +328,7 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < state.Items.Count; i++)
             {
                 var item = state.Items[i];
-                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.SlotId == slotIndex)
                 {
                     itemOnStation = item;
                     hasItemOnStation = true;
@@ -334,6 +337,55 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     itemInHand = item;
                     hasItemInHand = true;
+                }
+            }
+
+            if (totalSlots > 1 && LastAimExplicitSlot < 0)
+            {
+                if (hasItemInHand && hasItemOnStation)
+                {
+                    // Se o jogador segura uma pizza e o slot mirado já está ocupado, tentar achar um slot vazio no forno
+                    for (int s = 0; s < totalSlots; s++)
+                    {
+                        bool occupied = false;
+                        for (int i = 0; i < state.Items.Count; i++)
+                        {
+                            var it = state.Items[i];
+                            if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId && it.SlotId == s)
+                            { occupied = true; break; }
+                        }
+                        if (!occupied)
+                        {
+                            slotIndex = s;
+                            hasItemOnStation = false;
+                            break;
+                        }
+                    }
+                }
+                else if (!hasItemOnStation)
+                {
+                    // Se o slot mirado está vazio e não estamos inserindo, procurar qualquer slot ocupado (priorizando assadas/queimando)
+                    int bestOccupiedSlot = -1;
+                    float bestScore = -1f;
+                    for (int i = 0; i < state.Items.Count; i++)
+                    {
+                        var it = state.Items[i];
+                        if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId)
+                        {
+                            float score = it.CookProgress + it.BurnProgress * 2f;
+                            if (score > bestScore)
+                            {
+                                bestScore = score;
+                                bestOccupiedSlot = it.SlotId;
+                                itemOnStation = it;
+                            }
+                        }
+                    }
+                    if (bestOccupiedSlot >= 0 && !hasItemInHand)
+                    {
+                        slotIndex = bestOccupiedSlot;
+                        hasItemOnStation = true;
+                    }
                 }
             }
 
@@ -365,11 +417,11 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 if (!hasItemInHand)
                 {
-                    cmd.RemoveOvenServerRpc(stationId, 0, (byte)activeHand);
+                    cmd.RemoveOvenServerRpc(stationId, slotIndex, (byte)activeHand);
                 }
                 else if (otherHandFree)
                 {
-                    cmd.RemoveOvenServerRpc(stationId, 0, (byte)otherHand);
+                    cmd.RemoveOvenServerRpc(stationId, slotIndex, (byte)otherHand);
                 }
                 else
                 {
@@ -378,7 +430,7 @@ namespace ScaryParty.Pizzeria.Stations
             }
             else if (!hasItemOnStation && hasItemInHand)
             {
-                cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, 0);
+                cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, slotIndex);
                 if (invAdapter != null && !otherHandFree)
                 {
                     invAdapter.SetActiveHand((HandSlotIndex)otherHand);

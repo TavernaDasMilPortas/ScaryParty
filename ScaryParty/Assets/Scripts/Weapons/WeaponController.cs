@@ -93,6 +93,12 @@ public class WeaponController : MonoBehaviour
 
     public void CycleWeapon(int direction)
     {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && (!inputHandler.enableWeaponControls || !inputHandler.enableWeaponScroll))
+        {
+            return;
+        }
+
         int mode = (int)currentMode;
         mode += direction;
         if (mode > 2) mode = 0;
@@ -103,6 +109,12 @@ public class WeaponController : MonoBehaviour
 
     public void SetWeaponMode(WeaponMode mode)
     {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls && mode != WeaponMode.Unarmed)
+        {
+            mode = WeaponMode.Unarmed;
+        }
+
         if (currentMode == mode) return;
 
         if (currentWeaponInstance != null)
@@ -135,6 +147,8 @@ public class WeaponController : MonoBehaviour
 
     public void StartAim()
     {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
         if (currentMode == WeaponMode.Unarmed) return;
         isAiming = true;
         animator.SetBool(AnimIsAiming, true);
@@ -149,6 +163,8 @@ public class WeaponController : MonoBehaviour
 
     public void TriggerFire()
     {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
         if (currentMode == WeaponMode.Unarmed || currentWeaponInstance == null) return;
 
         if (Time.time >= lastFireTime + currentWeaponInstance.fireRate)

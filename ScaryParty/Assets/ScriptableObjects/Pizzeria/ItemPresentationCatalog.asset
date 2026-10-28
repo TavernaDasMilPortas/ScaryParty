@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: ItemPresentationCatalog
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.ItemPresentationCatalog
   profiles:
-  - {fileID: 11400000, guid: 5a680d2195a7a87409025947a3364ad9, type: 2}
-  - {fileID: 11400000, guid: 53bac505643e30a4ca47147c9725c19e, type: 2}
-  - {fileID: 11400000, guid: 49dfffcae1a581748a9007095d0c8b2d, type: 2}
   - {fileID: 11400000, guid: 51eec81cc961fe346a1ec971886a2252, type: 2}
+  - {fileID: 11400000, guid: 5a680d2195a7a87409025947a3364ad9, type: 2}
   - {fileID: 11400000, guid: 4df2d02217348f3428cd8222b4697718, type: 2}
-  - {fileID: 11400000, guid: 8286f37ac80a7fa4893df8604d533fcc, type: 2}
-  - {fileID: 11400000, guid: a7e1fd4f31ec0904b97eab310a49f148, type: 2}
+  - {fileID: 11400000, guid: 53bac505643e30a4ca47147c9725c19e, type: 2}
   - {fileID: 11400000, guid: 2c0e6b4bac0bcdd4e951541abb0f59e5, type: 2}
+  - {fileID: 11400000, guid: 8286f37ac80a7fa4893df8604d533fcc, type: 2}
+  - {fileID: 11400000, guid: 49dfffcae1a581748a9007095d0c8b2d, type: 2}
   - {fileID: 11400000, guid: 93552faced883f64799fc84c8b04814b, type: 2}
-  - {fileID: 11400000, guid: ca5b5bc5eb146a9499728c2f86956e91, type: 2}
-  - {fileID: 11400000, guid: 5799520f9a4b6d4439a291328649db23, type: 2}
+  - {fileID: 11400000, guid: a7e1fd4f31ec0904b97eab310a49f148, type: 2}
   - {fileID: 11400000, guid: 2bdadbb48474dd746b2202e7c108cabd, type: 2}
+  - {fileID: 11400000, guid: 5799520f9a4b6d4439a291328649db23, type: 2}
+  - {fileID: 11400000, guid: ca5b5bc5eb146a9499728c2f86956e91, type: 2}
   - {fileID: 11400000, guid: 8cb9c8a1d29dfcf488c44c8536f89468, type: 2}
   - {fileID: 11400000, guid: b6414722b399d8c4193208d214454f72, type: 2}

@@ -1593,6 +1593,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbfa6f5d5dcd47749bbef1615d525d85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponInputHandler
+  enableWeaponControls: 0
+  enableWeaponScroll: 0
 --- !u!114 &8514070523068972431
 MonoBehaviour:
   m_ObjectHideFlags: 0

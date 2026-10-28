@@ -63,29 +63,66 @@ namespace ScaryParty.Pizzeria.Composition
 
         public void EnsureAnchorsResolved()
         {
+            var bindings = GetComponent<PizzeriaAuthoringBindings>();
+
             if (playerSpawnAnchors == null || playerSpawnAnchors.Length == 0)
             {
                 var list = new System.Collections.Generic.List<Transform>();
                 for (int i = 0; i < 4; i++)
                 {
                     Transform t = transform.Find($"Anchors/PlayerSpawn_{i}") 
-                               ?? transform.Find($"PlayerSpawn_{i}");
+                               ?? transform.Find($"PlayerSpawn_{i}")
+                               ?? FindDeepChildByName(transform, $"PlayerSpawn_{i}");
                     if (t != null) list.Add(t);
                 }
                 if (list.Count > 0) playerSpawnAnchors = list.ToArray();
             }
 
             if (entranceAnchor == null)
-                entranceAnchor = transform.Find("Anchors/EntranceAnchor") ?? transform.Find("EntranceAnchor");
+                entranceAnchor = transform.Find("Anchors/EntranceAnchor") ?? transform.Find("EntranceAnchor") ?? FindDeepChildByName(transform, "EntranceAnchor");
 
             if (receivingAnchor == null)
-                receivingAnchor = transform.Find("Anchors/ReceivingAnchor") ?? transform.Find("ReceivingAnchor");
+            {
+                if (bindings != null && bindings.primaryReceivingStation != null)
+                {
+                    receivingAnchor = bindings.primaryReceivingStation.slotAnchors != null && bindings.primaryReceivingStation.slotAnchors.Length > 0
+                        ? bindings.primaryReceivingStation.slotAnchors[0]
+                        : bindings.primaryReceivingStation.transform;
+                }
+                if (receivingAnchor == null)
+                    receivingAnchor = transform.Find("Anchors/ReceivingAnchor") ?? transform.Find("ReceivingAnchor") ?? FindDeepChildByName(transform, "ReceivingAnchor");
+            }
 
             if (recoveryAnchor == null)
-                recoveryAnchor = transform.Find("Anchors/RecoveryAnchor") ?? transform.Find("RecoveryAnchor");
+                recoveryAnchor = transform.Find("Anchors/RecoveryAnchor") ?? transform.Find("RecoveryAnchor") ?? FindDeepChildByName(transform, "RecoveryAnchor");
 
             if (toolRackAnchor == null)
-                toolRackAnchor = transform.Find("Stations/Station_ToolRack") ?? transform.Find("Station_ToolRack");
+            {
+                if (bindings != null && bindings.primaryToolRackStation != null)
+                    toolRackAnchor = bindings.primaryToolRackStation.transform;
+
+                if (toolRackAnchor == null)
+                {
+                    var rackComp = GetComponentInChildren<ScaryParty.Pizzeria.Stations.ToolRackStation>(true);
+                    if (rackComp != null) toolRackAnchor = rackComp.transform;
+                }
+
+                if (toolRackAnchor == null)
+                    toolRackAnchor = transform.Find("Stations/Station_ToolRack") ?? transform.Find("Station_ToolRack");
+            }
+        }
+
+        private static Transform FindDeepChildByName(Transform parent, string targetName)
+        {
+            if (parent == null) return null;
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                var child = parent.GetChild(i);
+                if (child.name == targetName) return child;
+                var found = FindDeepChildByName(child, targetName);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         public override void OnDestroy()
@@ -186,6 +223,8 @@ namespace ScaryParty.Pizzeria.Composition
             CallService = new CallService();
             PlayerHoldService = new PlayerHoldService();
 
+            var bindings = GetComponent<PizzeriaAuthoringBindings>();
+
             // Inicializar Estoque nos StorageSlots
             if (_config.initialStorageSlots != null && _config.initialStorageSlots.Count > 0)
             {
@@ -197,17 +236,28 @@ namespace ScaryParty.Pizzeria.Composition
             }
             else
             {
-                // Geladeira (ID 1)
-                InitStorageSlot(1, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);     // Molho
-                InitStorageSlot(1, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);    // Queijo Inteiro
-                InitStorageSlot(1, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient); // Calabresa Inteira
-                InitStorageSlot(1, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);  // Cogumelo Inteiro
+                int fridgeId = bindings != null ? bindings.ResolvePrimaryFridgeId(1) : 1;
+                int pantryId = bindings != null ? bindings.ResolvePrimaryPantryId(2) : 2;
 
-                // Armário (ID 2)
-                InitStorageSlot(2, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
+                // Geladeira (ID padrão 1)
+                InitStorageSlot(fridgeId, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);     // Molho
+                InitStorageSlot(fridgeId, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);    // Queijo Inteiro
+                InitStorageSlot(fridgeId, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient); // Calabresa Inteira
+                InitStorageSlot(fridgeId, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);  // Cogumelo Inteiro
+
+                // Armário/Dispensa (ID padrão 2)
+                InitStorageSlot(pantryId, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
             }
 
-            // Inicializar Utensílios Compartilhados no ToolRack (ID 3) com índice contínuo (A12)
+            // Inicializar Utensílios Compartilhados no ToolRack com índice contínuo (A12)
+            int toolRackStationId = bindings != null ? bindings.ResolvePrimaryToolRackId(3) : 3;
+            if (toolRackStationId == 3 && toolRackAnchor != null)
+            {
+                var rackStation = toolRackAnchor.GetComponent<ScaryParty.Pizzeria.Stations.StationView>();
+                if (rackStation != null && rackStation.stationId > 0)
+                    toolRackStationId = rackStation.stationId;
+            }
+
             int globalToolSlotIndex = 0;
             foreach (var kvp in Catalog.Tools)
             {
@@ -215,8 +265,22 @@ namespace ScaryParty.Pizzeria.Composition
                 for (int i = 0; i < toolData.InitialCount; i++)
                 {
                     var toolId = DomainState.GenerateToolId();
-                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(3 /* ToolRack */, globalToolSlotIndex++));
+                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(toolRackStationId, globalToolSlotIndex++));
                     DomainState.Tools[toolId] = toolState;
+                }
+            }
+
+            // Inicializar Pilhas de Caixas configuradas no prefab
+            var stackStations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.StackStation>(true);
+            for (int i = 0; i < stackStations.Length; i++)
+            {
+                var stk = stackStations[i];
+                if (stk == null) continue;
+                var stkId = new StackId(stk.stackId > 0 ? stk.stackId : (ulong)(i + 1));
+                if (!DomainState.Stacks.ContainsKey(stkId))
+                {
+                    int cap = stk.capacity > 0 ? stk.capacity : 6;
+                    DomainState.Stacks[stkId] = new StackState(stkId, stk.stationId, cap);
                 }
             }
 

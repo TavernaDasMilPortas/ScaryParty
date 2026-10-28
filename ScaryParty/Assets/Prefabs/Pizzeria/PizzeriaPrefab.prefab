@@ -1057,7 +1057,7 @@ Transform:
   m_GameObject: {fileID: 361823836919270514}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 0.82, z: 0}
+  m_LocalPosition: {x: 0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1528,7 +1528,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer
   ShowTopMostFoldoutHeaderGroup: 1
-  catalog: {fileID: 0}
+  catalog: {fileID: 11400000, guid: 8ab051e2454dde5419dc47aa8365e66d, type: 2}
   pizzaBoxPrefab: {fileID: 0}
   pizzaBasePrefab: {fileID: 0}
   doughPrefab: {fileID: 0}
@@ -2258,6 +2258,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 2799114210324706529}
   - {fileID: 3744453956248572523}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &714908700748984002
 GameObject:
   m_ObjectHideFlags: 0
@@ -4411,7 +4414,7 @@ Transform:
   m_GameObject: {fileID: 1088508717303993079}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: -0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4599,6 +4602,9 @@ MonoBehaviour:
   stationId: 11
   stationName: Station_SupplierTerminal
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &1214814333098098290
 GameObject:
   m_ObjectHideFlags: 0
@@ -4701,6 +4707,9 @@ MonoBehaviour:
   stationName: Station_Stack
   slotAnchors:
   - {fileID: 1866671259339782612}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   stackId: 1
   capacity: 6
   linkedAddressId: -1
@@ -8234,6 +8243,9 @@ MonoBehaviour:
   stationId: 15
   stationName: Station_TicketBoard
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   ticketSlots: []
   maxVisibleTickets: 4
 --- !u!1 &2141406930302512071
@@ -9481,6 +9493,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 9119367383900628695}
   - {fileID: 3357503527667903537}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
   audioSource: {fileID: 0}
@@ -9510,7 +9525,7 @@ Transform:
   m_GameObject: {fileID: 2460197228200818697}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: -0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12863,6 +12878,9 @@ MonoBehaviour:
   stationId: 14
   stationName: Station_Trash
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &3666199127112860975
 GameObject:
   m_ObjectHideFlags: 0
@@ -12935,6 +12953,9 @@ MonoBehaviour:
   stationName: Station_Storage_Cupboard
   slotAnchors:
   - {fileID: 8138113549653743446}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   acceptedIngredientIds: 
 --- !u!1 &3673186286059960109
 GameObject:
@@ -15809,6 +15830,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 3125826832793742966}
   - {fileID: 6857660161025746328}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
   audioSource: {fileID: 0}
@@ -17592,6 +17616,9 @@ MonoBehaviour:
   stationId: 13
   stationName: Station_Receiving
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &4957718485265456285
 GameObject:
   m_ObjectHideFlags: 0
@@ -17872,7 +17899,7 @@ Transform:
   m_GameObject: {fileID: 5000935471826752782}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.85, z: 0.4}
+  m_LocalPosition: {x: 0, y: 0.38, z: 0.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17934,7 +17961,7 @@ Transform:
   m_GameObject: {fileID: 5007396098262794158}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: 0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -18514,7 +18541,7 @@ Transform:
   m_GameObject: {fileID: 5174731455968723447}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.6, y: 0.82, z: 0}
+  m_LocalPosition: {x: -0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -20836,6 +20863,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 2712204995257321035}
   - {fileID: 3367124930029424074}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   defaultProcessId: 1
 --- !u!1 &5858492313775747193
 GameObject:
@@ -21532,6 +21562,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 2780547185313636092}
   - {fileID: 8957754594915009552}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
   audioSource: {fileID: 0}
@@ -25103,6 +25136,9 @@ MonoBehaviour:
   - {fileID: 7010255747990965632}
   - {fileID: 4150840324153617846}
   - {fileID: 1710809775423454641}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &6954834434812605529
 GameObject:
   m_ObjectHideFlags: 0
@@ -26135,7 +26171,7 @@ Transform:
   m_GameObject: {fileID: 7219685270931454730}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: 0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27434,6 +27470,9 @@ MonoBehaviour:
   - {fileID: 6341293969122114940}
   - {fileID: 6121745574751812245}
   - {fileID: 7683826836938277407}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &7370468080764018766
 GameObject:
   m_ObjectHideFlags: 0
@@ -28450,7 +28489,7 @@ Transform:
   m_GameObject: {fileID: 7558401901582365754}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: 0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28955,6 +28994,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 894342356078317433}
   - {fileID: 67798324284129495}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &7676138283859140152
 GameObject:
   m_ObjectHideFlags: 0
@@ -31196,7 +31238,7 @@ Transform:
   m_GameObject: {fileID: 8345376513710421361}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5, y: 0.82, z: 0}
+  m_LocalPosition: {x: -0.35, y: 0.38, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -31678,6 +31720,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 7960755452907226371}
   - {fileID: 2881210391254038132}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
 --- !u!1 &8507849738492500827
 GameObject:
   m_ObjectHideFlags: 0
@@ -32043,6 +32088,9 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 8524384185848102207}
   - {fileID: 3366809497685710987}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   defaultProcessId: 1
 --- !u!1 &8568972427860215919
 GameObject:
@@ -32228,6 +32276,9 @@ MonoBehaviour:
   stationId: 12
   stationName: Station_Phone
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   ringer: {fileID: 0}
   isRinging: 0
 --- !u!82 &4043732554802146822
@@ -33141,7 +33192,7 @@ Transform:
   m_GameObject: {fileID: 8816594873272884812}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.85, z: -0.4}
+  m_LocalPosition: {x: 0, y: 0.38, z: -0.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -35047,6 +35098,9 @@ MonoBehaviour:
   - {fileID: 3006045718640883340}
   - {fileID: 4687363602639837927}
   - {fileID: 8774365683917788324}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
   acceptedIngredientIds: 
 --- !u!1 &9073107017787463271
 GameObject:
