@@ -48,6 +48,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c74915cdffdfcc14585222ff7ae7b1c9, type: 2}
   - {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
   - {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
+  - {fileID: 11400000, guid: 90b3b77ee62e49141980d609b2636a26, type: 2}
   stationInstances:
   - instanceId: 19
     definition: {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
@@ -113,6 +114,16 @@ MonoBehaviour:
     definition: {fileID: 11400000, guid: 8f25919c6df0b4e4f89d0a4b72a75ed3, type: 2}
     displayName: Bancada de Embalagem
     overrideSlotCount: 4
+    durationOverrides: []
+  - instanceId: 4
+    definition: {fileID: 11400000, guid: 331a740e33a07344cb037e5f0eda3828, type: 2}
+    displayName: Quadro de Comandas
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 15
+    definition: {fileID: 11400000, guid: 90b3b77ee62e49141980d609b2636a26, type: 2}
+    displayName: Quadro de Comandas
+    overrideSlotCount: 1
     durationOverrides: []
   supplyItems:
   - {fileID: 11400000, guid: abc5fc56a0c0657459df2394c1e3e5c7, type: 2}
