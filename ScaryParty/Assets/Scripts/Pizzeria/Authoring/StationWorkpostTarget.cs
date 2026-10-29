@@ -17,5 +17,14 @@ namespace ScaryParty.Pizzeria.Authoring
 
         [Tooltip("Contorno do objeto do slot. Vazio = slot sem objeto, o contorno vai na estação inteira.")]
         public ScaryParty.Interaction.OutlineTarget outlineTarget;
+
+        /// <summary>
+        /// Retorna true quando este slot está atribuído a um objeto 3D próprio (ex: tábua de corte, prato/forma)
+        /// distinto da malha raiz da bancada/mesa.
+        /// </summary>
+        public bool IsBoundTo3DObject =>
+            targetStation != null &&
+            gameObject != targetStation.gameObject &&
+            GetComponentInChildren<Renderer>(true) != null;
     }
 }

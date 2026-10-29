@@ -26,6 +26,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (tool != null) return tool;
             }
 
+            // Se já virou Pizza montada (ou PizzaBase), usar perfil de Pizza antes de buscar pelo definitionId original da massa
+            if (category == ItemCategory.Pizza || category == ItemCategory.PizzaBase)
+            {
+                var pizzaMatch = profiles.Find(p => p != null && !p.isTool && (p.category == ItemCategory.Pizza || p.presentationKey == "Pizza"));
+                if (pizzaMatch != null) return pizzaMatch;
+            }
+
             // Busca por definição exata
             if (definitionId > 0)
             {

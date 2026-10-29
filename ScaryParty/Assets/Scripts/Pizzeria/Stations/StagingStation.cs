@@ -11,27 +11,16 @@ namespace ScaryParty.Pizzeria.Stations
         {
             get
             {
+                int targetSlot = ResolveTargetSlotIndex();
+                if (targetSlot < 0) return string.Empty;
+
                 var netState = PizzeriaNetworkState.Instance;
                 if (netState != null)
                 {
-                    int targetSlot = ResolveTargetSlotIndex();
-                    // Priorizar caixa no slot mirado
                     for (int i = 0; i < netState.Items.Count; i++)
                     {
                         var item = netState.Items[i];
                         if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.SlotId == targetSlot && item.PackagingState == (byte)PackagingState.Boxed)
-                        {
-                            if (item.LabelDestinationId >= 0)
-                                return $"[E] Pegar Caixa ({AddressFormat.Display(item.LabelDestinationId)})";
-                            else
-                                return $"[E] Etiquetar Caixa em {stationName}";
-                        }
-                    }
-                    // Fallback para qualquer caixa na bancada
-                    for (int i = 0; i < netState.Items.Count; i++)
-                    {
-                        var item = netState.Items[i];
-                        if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.PackagingState == (byte)PackagingState.Boxed)
                         {
                             if (item.LabelDestinationId >= 0)
                                 return $"[E] Pegar Caixa ({AddressFormat.Display(item.LabelDestinationId)})";
@@ -50,8 +39,8 @@ namespace ScaryParty.Pizzeria.Stations
             if (netState == null) return;
 
             int targetSlot = ResolveTargetSlotIndex();
+            if (targetSlot < 0) return;
 
-            // 1. Verificar primeiro o slot mirado
             for (int i = 0; i < netState.Items.Count; i++)
             {
                 var item = netState.Items[i];
@@ -69,26 +58,6 @@ namespace ScaryParty.Pizzeria.Stations
                     {
                         TryPickOrPlace(interactor);
                         return;
-                    }
-                }
-            }
-
-            // 2. Fallback para qualquer caixa na bancada se não estiver colocando outra coisa
-            if (LastAimExplicitSlot < 0)
-            {
-                for (int i = 0; i < netState.Items.Count; i++)
-                {
-                    var item = netState.Items[i];
-                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.PackagingState == (byte)PackagingState.Boxed)
-                    {
-                        if (item.LabelDestinationId < 0)
-                        {
-                            if (ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
-                            {
-                                ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
-                                return;
-                            }
-                        }
                     }
                 }
             }

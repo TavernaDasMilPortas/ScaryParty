@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 407a36667c0cc1b4ca8131632bd4a190, type: 3}
+  m_Name: Process_4_FatiarCogumelo
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.ProcessDef
+  id: 4
+  processName: Fatiar Cogumelo
+  inputIngredient: {fileID: 11400000, guid: 69485157e190c6a4c962eaecb8dd3689, type: 2}
+  inputStage: 0
+  outputIngredient: {fileID: 11400000, guid: bb29ddd994767134eb644c5080459ab5, type: 2}
+  outputStage: 1
+  requiredToolCapability: 2
+  baseDuration: 2
+  inputIngredientId: 8
+  outputIngredientId: 9

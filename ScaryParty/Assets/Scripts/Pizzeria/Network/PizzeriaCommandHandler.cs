@@ -153,26 +153,29 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) return;
+            if (root == null || root.DomainState == null || slotIndex < 0) return;
 
             var slot = new StationSlotId(stationId, slotIndex);
             bool domainMutated = false;
-            
+
             // Check if there is already an item in the slot
-            bool slotHasItem = false;
+            ItemState itemInSlot = null;
             foreach (var kvp in root.DomainState.Items)
             {
                 if (kvp.Value.Location == LocationRef.InStation(stationId, slotIndex))
                 {
-                    slotHasItem = true;
+                    itemInSlot = kvp.Value;
                     break;
                 }
             }
 
-            if (!slotHasItem)
+            if (itemInSlot == null)
             {
-                // Try to transfer item from player's ACTIVE hand only
+                // 1) Try to transfer item from player's ACTIVE hand first;
+                // 2) If active hand holds a tool (or is empty), check the OTHER hand for a raw ingredient!
                 ItemId itemToTransfer = new ItemId(0);
+                int otherHand = activeHand == 0 ? 1 : 0;
+
                 foreach (var kvp in root.DomainState.Items)
                 {
                     if (kvp.Value.Location.Type == LocationType.Hand && kvp.Value.Location.HolderId == senderClientId && kvp.Value.Location.SlotId == activeHand)
@@ -182,35 +185,66 @@ namespace ScaryParty.Pizzeria.Network
                     }
                 }
 
+                if (itemToTransfer.Value == 0)
+                {
+                    foreach (var kvp in root.DomainState.Items)
+                    {
+                        if (kvp.Value.Location.Type == LocationType.Hand && kvp.Value.Location.HolderId == senderClientId && kvp.Value.Location.SlotId == otherHand)
+                        {
+                            itemToTransfer = kvp.Key;
+                            break;
+                        }
+                    }
+                }
+
                 if (itemToTransfer.Value != 0)
                 {
                     var loc = LocationRef.InStation(stationId, slotIndex);
-                    root.TransferService.TransferItem(itemToTransfer, loc);
-                    domainMutated = true;
+                    var transferRes = root.TransferService.TransferItem(itemToTransfer, loc);
+                    if (transferRes.Success)
+                    {
+                        domainMutated = true;
+                        root.DomainState.Items.TryGetValue(itemToTransfer, out itemInSlot);
+                    }
                 }
-                else
+
+                if (itemInSlot == null)
                 {
-                    return; // No item in slot and no item in active hand
+                    return; // No item in slot and no item in player's hands
                 }
             }
 
-            if (processId == 0)
+            // Auto-detect processId from the item in the slot whenever processId <= 0 or does not match the item in the slot
+            bool needsResolve = processId <= 0 ||
+                                !root.Catalog.Processes.TryGetValue(processId, out var currentProc) ||
+                                currentProc.InputIngredientId != itemInSlot.DefinitionId ||
+                                currentProc.InputStage != itemInSlot.PrepStage;
+
+            if (needsResolve)
             {
-                foreach (var item in root.DomainState.Items.Values)
+                processId = 0;
+                foreach (var proc in root.Catalog.Processes.Values)
                 {
-                    if (item.Location.Type == LocationType.StationSlot && item.Location.HolderId == (ulong)stationId && item.Location.SlotId == slotIndex)
+                    if (proc.InputIngredientId == itemInSlot.DefinitionId && proc.InputStage == itemInSlot.PrepStage)
                     {
-                        foreach (var proc in root.Catalog.Processes.Values)
-                        {
-                            if (proc.InputIngredientId == item.DefinitionId && proc.InputStage == item.PrepStage)
-                            {
-                                processId = proc.Id;
-                                break;
-                            }
-                        }
+                        processId = proc.Id;
                         break;
                     }
                 }
+            }
+
+            if (processId <= 0)
+            {
+                if (domainMutated)
+                {
+                    CommitAndReplicate();
+                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                string msg = itemInSlot.PrepStage == ProcessingStage.Prepared
+                    ? "Este ingrediente já está preparado!"
+                    : "Este item não pode ser processado nesta bancada.";
+                NotifyErrorClientRpc(msg, targetParams);
+                return;
             }
 
             var res = root.ProcessingService.StartWork(slot, processId, senderClientId, root.DomainState, root.Catalog, root.Clock);
@@ -256,7 +290,6 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
-
         [ServerRpc(RequireOwnership = false)]
         public void AddIngredientToPizzaServerRpc(ulong pizzaIdVal, ulong ingredientIdVal, ServerRpcParams rpcParams = default)
         {
@@ -268,6 +301,20 @@ namespace ScaryParty.Pizzeria.Network
             if (!state.Items.TryGetValue(new ItemId(pizzaIdVal), out var pizza)) return;
             if (!state.Items.TryGetValue(new ItemId(ingredientIdVal), out var ingItem)) return;
 
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (pizza.Category == ItemCategory.Dough && pizza.PrepStage == ProcessingStage.Raw)
+            {
+                NotifyErrorClientRpc("Abra a massa na bancada de preparo antes de montar a pizza!", targetParams);
+                return;
+            }
+
+            if (ingItem.Category != ItemCategory.Sauce && ingItem.PrepStage == ProcessingStage.Raw)
+            {
+                NotifyErrorClientRpc("Prepare o ingrediente na bancada de preparo primeiro!", targetParams);
+                return;
+            }
+
             // Permissive add: Add ingredient composition to pizza
             if (pizza.AddIngredient(ingItem.DefinitionId, ingItem.PrepStage, 1))
             {
@@ -277,7 +324,6 @@ namespace ScaryParty.Pizzeria.Network
             }
             else
             {
-                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
                 NotifyErrorClientRpc("Não foi possível adicionar ingrediente", targetParams);
             }
         }

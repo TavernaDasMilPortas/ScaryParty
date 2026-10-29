@@ -194,7 +194,7 @@ public class CitySceneBuilder : EditorWindow
         {
             if (gen.pizzeriaPrefab == null)
             {
-                var pizzPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab");
+                var pizzPrefab = ResolvePizzeriaPrefab();
                 if (pizzPrefab != null)
                 {
                     gen.pizzeriaPrefab = pizzPrefab;
@@ -700,7 +700,7 @@ public class CitySceneBuilder : EditorWindow
         // Auto-wire Pizzeria prefab if it exists
         if (generator.pizzeriaPrefab == null)
         {
-            var pizzeriaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab");
+            var pizzeriaPrefab = ResolvePizzeriaPrefab();
             if (pizzeriaPrefab != null)
             {
                 generator.pizzeriaPrefab = pizzeriaPrefab;
@@ -716,6 +716,12 @@ public class CitySceneBuilder : EditorWindow
         }
 
         Debug.Log("[SceneBuilder] ✅ Base scene setup complete.");
+    }
+
+    private static GameObject ResolvePizzeriaPrefab()
+    {
+        return AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaModular_Manual.prefab")
+            ?? AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab");
     }
 
     private void AssignCartoonMaterials(CityGenerator generator)

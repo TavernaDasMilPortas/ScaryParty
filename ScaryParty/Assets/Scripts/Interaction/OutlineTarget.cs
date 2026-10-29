@@ -88,6 +88,10 @@ namespace ScaryParty.Interaction
                     var childTarget = r.GetComponentInParent<OutlineTarget>();
                     if (childTarget != null && childTarget != this) continue;
 
+                    var childWp = r.GetComponentInParent<ScaryParty.Pizzeria.Authoring.StationWorkpostTarget>();
+                    if (childWp != null && childWp.gameObject != gameObject && childWp.IsBoundTo3DObject)
+                        continue;
+
                     var childInteractable = r.GetComponentInParent<IInteractable>();
                     if (childInteractable != null && (childInteractable as Component) != (this.GetComponent<IInteractable>() as Component))
                         continue;

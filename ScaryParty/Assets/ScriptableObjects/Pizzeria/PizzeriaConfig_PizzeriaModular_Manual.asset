@@ -32,6 +32,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e81cf19f289fefc4b8eefae80cb2671c, type: 2}
   - {fileID: 11400000, guid: 5c4fbb40ee5d58a4b92d813b12ff807b, type: 2}
   - {fileID: 11400000, guid: b24bc8e57cece87428365b823402380e, type: 2}
+  - {fileID: 11400000, guid: d48f19c37a124e849b2011fc53a90414, type: 2}
   stations:
   - {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
   - {fileID: 11400000, guid: 534dfbf25e962684889c8f67bc2404b5, type: 2}
@@ -96,7 +97,7 @@ MonoBehaviour:
   - instanceId: 13
     definition: {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
     displayName: Bancada de Montagem
-    overrideSlotCount: 5
+    overrideSlotCount: 4
     durationOverrides: []
   - instanceId: 6
     definition: {fileID: 11400000, guid: 5e04f84f7b3f81b4d8530da7728763a1, type: 2}
@@ -105,13 +106,13 @@ MonoBehaviour:
     durationOverrides: []
   - instanceId: 11
     definition: {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
-    displayName: Bancada de Montagem
+    displayName: Bancada de Preparo
     overrideSlotCount: 4
     durationOverrides: []
   - instanceId: 9
     definition: {fileID: 11400000, guid: 8f25919c6df0b4e4f89d0a4b72a75ed3, type: 2}
     displayName: Bancada de Embalagem
-    overrideSlotCount: 3
+    overrideSlotCount: 4
     durationOverrides: []
   supplyItems:
   - {fileID: 11400000, guid: abc5fc56a0c0657459df2394c1e3e5c7, type: 2}

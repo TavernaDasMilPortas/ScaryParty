@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredientName: Molho
   category: 2
   requiresPrep: 0
-  preparedIngredient: {fileID: 11400000}
+  preparedIngredient: {fileID: 0}
   preparedIngredientId: 0
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
   placeholderPrefab: {fileID: 337704298186362566, guid: 6151f9d903bc64e458a5bb204f8551be, type: 3}

@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredientName: Calabresa Fatiada
   category: 4
   requiresPrep: 0
-  preparedIngredient: {fileID: 11400000}
+  preparedIngredient: {fileID: 0}
   preparedIngredientId: 0
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
   placeholderPrefab: {fileID: 5562431162684135168, guid: 7783d6705f3297f488cd0a40b809bab5, type: 3}

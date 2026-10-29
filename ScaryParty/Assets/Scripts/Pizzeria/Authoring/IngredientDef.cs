@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Authoring
@@ -18,6 +18,9 @@ namespace ScaryParty.Pizzeria.Authoring
         public Color placeholderColor = Color.white;
         public GameObject placeholderPrefab;
 
-        public int EffectivePreparedIngredientId => preparedIngredient != null ? preparedIngredient.id : preparedIngredientId;
+        public int EffectivePreparedIngredientId =>
+            (preparedIngredient != null && preparedIngredient != this && preparedIngredient.id != id)
+                ? preparedIngredient.id
+                : preparedIngredientId;
     }
 }

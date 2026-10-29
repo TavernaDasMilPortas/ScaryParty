@@ -430,6 +430,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // Verificar se já existe um StationView no unitGo
             var existingStation = unitGo.GetComponent<StationView>();
             int preservedStationId = existingStation != null && existingStation.stationId > 0 ? existingStation.stationId : 0;
+            Transform[] preservedSlotAnchors = existingStation != null ? existingStation.slotAnchors : null;
+            bool preservedSlotsBound = existingStation != null && existingStation.slotsBoundToObjects;
 
             if (existingStation != null)
             {
@@ -455,6 +457,15 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (stationComp == null)
             {
                 stationComp = (StationView)Undo.AddComponent(unitGo, descriptor.runtimeComponentType);
+                if (preservedSlotAnchors != null)
+                {
+                    stationComp.slotAnchors = preservedSlotAnchors;
+                    stationComp.slotsBoundToObjects = preservedSlotsBound;
+                }
+                foreach (var wp in unitGo.GetComponentsInChildren<StationWorkpostTarget>(true))
+                {
+                    if (wp != null) wp.targetStation = stationComp;
+                }
             }
 
             // Atribuir stationId único (preservando ID existente se for atualização/troca ou alocando próximo ID livre)
@@ -718,6 +729,12 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             PizzeriaStationKind kind,
             Vector3 operationalForwardLocal)
         {
+            if (station != null && station.slotsBoundToObjects && station.slotAnchors != null && station.slotAnchors.Length > 0)
+            {
+                // Se os slots já foram vinculados a objetos físicos (ex: tábuas, pratos), preservar
+                return;
+            }
+
             desiredSlotCount = Mathf.Max(1, desiredSlotCount);
             Transform slotsContainer = unitGo.transform.Find("Slots");
             if (slotsContainer == null)
@@ -731,7 +748,20 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 slotsContainer.localScale = Vector3.one;
             }
 
-            Bounds worldBounds = PizzeriaHierarchyOrganizer.ComputeWorldBounds(unitGo.transform, out bool hasMesh);
+            // Para mesas/bancadas com adereços altos em cima (ex: panelas), calcular bounds priorizando a malha principal da mesa
+            var rootMf = unitGo.GetComponent<MeshFilter>();
+            Bounds worldBounds;
+            bool hasMesh;
+            if (rootMf != null && rootMf.sharedMesh != null)
+            {
+                worldBounds = rootMf.GetComponent<Renderer>() != null ? rootMf.GetComponent<Renderer>().bounds : new Bounds(unitGo.transform.position, Vector3.one);
+                hasMesh = true;
+            }
+            else
+            {
+                worldBounds = PizzeriaHierarchyOrganizer.ComputeWorldBounds(unitGo.transform, out hasMesh);
+            }
+
             Vector3 forwardWorld = unitGo.transform.TransformDirection(
                 operationalForwardLocal.sqrMagnitude > 0.001f ? operationalForwardLocal.normalized : Vector3.forward);
             Vector3 rightWorld = Vector3.Cross(Vector3.up, forwardWorld).normalized;
@@ -743,7 +773,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             Vector3 spreadAxis = extentAlongRight >= extentAlongForward ? rightWorld : forwardWorld;
             float spreadLength = Mathf.Max(extentAlongRight, extentAlongForward);
 
-            // Altura de trabalho: topo da bancada para bancadas/mesas, ou altura de câmara acessível (~1.05m do chão) para fornos altos
+            // Altura de trabalho: topo da bancada para bancadas/mesas (~0.38m local), ou altura de câmara acessível (~1.05m do chão) para fornos altos
             float slotY = hasMesh ? worldBounds.max.y + 0.03f : unitGo.transform.position.y + 0.85f;
             if (kind == PizzeriaStationKind.Oven && hasMesh)
             {
@@ -757,6 +787,15 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             else if (kind == PizzeriaStationKind.ToolRack && hasMesh)
             {
                 slotY = worldBounds.center.y + 0.05f;
+            }
+            else if (hasMesh)
+            {
+                // Clampar para o tampo da mesa se houver objetos verticais sobre a bancada
+                float maxTableTopY = unitGo.transform.position.y + 0.45f;
+                if (slotY > maxTableTopY && worldBounds.min.y < maxTableTopY)
+                {
+                    slotY = maxTableTopY;
+                }
             }
 
             var newAnchors = new Transform[desiredSlotCount];
@@ -1299,32 +1338,37 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             existingList.Add(slotT);
             station.slotAnchors = existingList.ToArray();
 
-            // Criar sub-alvo de interação (StationWorkpostTarget) com BoxCollider dedicado ao redor do slot
-            Transform workpostsRoot = station.transform.Find("Workposts");
-            if (workpostsRoot == null)
+            // Regra 2: slots sem objeto 3D próprio não devem ter colliders invisíveis de StationWorkpostTarget,
+            // pois a mesa é quem recebe o outline e a interação posiciona no slot mais próximo por distância.
+            // Apenas criamos StationWorkpostTarget quando a estação trabalha com postos vinculados a objetos 3D.
+            if (station.slotsBoundToObjects)
             {
-                var wpRootGo = new GameObject("Workposts");
-                Undo.RegisterCreatedObjectUndo(wpRootGo, "Criar Workposts");
-                workpostsRoot = wpRootGo.transform;
-                workpostsRoot.SetParent(station.transform, false);
-                workpostsRoot.localPosition = Vector3.zero;
-                workpostsRoot.localRotation = Quaternion.identity;
-                workpostsRoot.localScale = Vector3.one;
+                Transform workpostsRoot = station.transform.Find("Workposts");
+                if (workpostsRoot == null)
+                {
+                    var wpRootGo = new GameObject("Workposts");
+                    Undo.RegisterCreatedObjectUndo(wpRootGo, "Criar Workposts");
+                    workpostsRoot = wpRootGo.transform;
+                    workpostsRoot.SetParent(station.transform, false);
+                    workpostsRoot.localPosition = Vector3.zero;
+                    workpostsRoot.localRotation = Quaternion.identity;
+                    workpostsRoot.localScale = Vector3.one;
+                }
+
+                var wpGo = new GameObject($"Workpost_{newIndex}");
+                Undo.RegisterCreatedObjectUndo(wpGo, "Criar Posto de Trabalho");
+                wpGo.transform.SetParent(workpostsRoot, false);
+                wpGo.transform.position = slotT.position - Vector3.up * 0.25f;
+                wpGo.transform.rotation = slotT.rotation;
+
+                var col = wpGo.AddComponent<BoxCollider>();
+                col.size = new Vector3(0.85f, 0.7f, 0.85f);
+
+                var wpTarget = wpGo.AddComponent<StationWorkpostTarget>();
+                wpTarget.targetStation = station;
+                wpTarget.slotIndex = newIndex;
+                wpTarget.slotAnchor = slotT;
             }
-
-            var wpGo = new GameObject($"Workpost_{newIndex}");
-            Undo.RegisterCreatedObjectUndo(wpGo, "Criar Posto de Trabalho");
-            wpGo.transform.SetParent(workpostsRoot, false);
-            wpGo.transform.position = slotT.position - Vector3.up * 0.25f;
-            wpGo.transform.rotation = slotT.rotation;
-
-            var col = wpGo.AddComponent<BoxCollider>();
-            col.size = new Vector3(0.85f, 0.7f, 0.85f);
-
-            var wpTarget = wpGo.AddComponent<StationWorkpostTarget>();
-            wpTarget.targetStation = station;
-            wpTarget.slotIndex = newIndex;
-            wpTarget.slotAnchor = slotT;
 
             // Atualizar slotCount no StationDef / StationInstanceConfig se existir
             var pizzeriaRoot = station.GetComponentInParent<PizzeriaRoot>();
@@ -1378,10 +1422,16 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (g == null || g == station.gameObject || g.GetComponent<StationView>() != null) continue;
                 physicalObjects.Add(g);
             }
-            // Ordem estável: esquerda → direita no espaço local da estação
+            // Ordem estável: ao longo do eixo maior local da bancada (z se for mais comprida em z, senão x)
+            Bounds stBounds = PizzeriaHierarchyOrganizer.ComputeWorldBounds(station.transform, out bool hasStMesh);
+            Vector3 localExtents = station.transform.InverseTransformVector(stBounds.size);
+            bool sortAlongZ = Mathf.Abs(localExtents.z) > Mathf.Abs(localExtents.x);
             physicalObjects.Sort((a, b) =>
-                station.transform.InverseTransformPoint(a.transform.position).x
-                    .CompareTo(station.transform.InverseTransformPoint(b.transform.position).x));
+            {
+                Vector3 pA = station.transform.InverseTransformPoint(a.transform.position);
+                Vector3 pB = station.transform.InverseTransformPoint(b.transform.position);
+                return sortAlongZ ? pA.z.CompareTo(pB.z) : pA.x.CompareTo(pB.x);
+            });
             return station;
         }
 

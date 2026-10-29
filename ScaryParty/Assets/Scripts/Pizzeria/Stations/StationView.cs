@@ -7,9 +7,9 @@ namespace ScaryParty.Pizzeria.Stations
 {
     public class StationView : MonoBehaviour, IInteractable
     {
-        [Header("IdentificaÃ§Ã£o da EstaÃ§Ã£o")]
+        [Header("Identificação da Estação")]
         public int stationId;
-        public string stationName = "EstaÃ§Ã£o";
+        public string stationName = "Estação";
         public Transform[] slotAnchors;
 
         [Tooltip("Slots posicionados por objetos físicos (pratos etc.) via builder. Desativa a auto-calibração em runtime.")]
@@ -18,28 +18,92 @@ namespace ScaryParty.Pizzeria.Stations
         [HideInInspector] public Vector3 LastAimWorldPoint;
         [HideInInspector] public int LastAimExplicitSlot = -1;
 
+        private readonly System.Collections.Generic.HashSet<int> _boundSlotIndices = new System.Collections.Generic.HashSet<int>();
+        private bool _slotBindingInitialized;
+
         public void SetAimContext(Vector3 worldPoint, int explicitSlot = -1)
         {
             LastAimWorldPoint = worldPoint;
             LastAimExplicitSlot = explicitSlot;
         }
 
-        public int ResolveTargetSlotIndex(Vector3? aimWorldPoint = null, int explicitSlot = -1)
+        private void EnsureSlotBindingsInitialized()
         {
-            if (explicitSlot >= 0) return explicitSlot;
-            if (LastAimExplicitSlot >= 0) return LastAimExplicitSlot;
+            if (_slotBindingInitialized) return;
+            ValidateAndCalibrateSlotAnchors();
+        }
 
-            if (slotAnchors == null || slotAnchors.Length <= 1)
-                return 0;
+        /// <summary>
+        /// Retorna true se o slot informado estiver atribuído a um objeto 3D físico (ex: tábua, prato).
+        /// </summary>
+        public bool IsSlotBoundToObject(int slotIndex)
+        {
+            EnsureSlotBindingsInitialized();
+            return _boundSlotIndices.Contains(slotIndex);
+        }
 
-            Vector3 refPoint = aimWorldPoint ?? LastAimWorldPoint;
-            if (refPoint != Vector3.zero)
+        /// <summary>
+        /// Retorna true se pelo menos um slot da estação estiver atribuído a um objeto 3D.
+        /// </summary>
+        public bool HasObjectBoundSlots
+        {
+            get
             {
-                int bestIdx = 0;
-                float bestDistSq = float.MaxValue;
+                EnsureSlotBindingsInitialized();
+                return _boundSlotIndices.Count > 0;
+            }
+        }
+
+        /// <summary>
+        /// Retorna true se a estação possuir pelo menos um slot que NÃO está atribuído a um objeto 3D
+        /// (ou se for uma estação sem slots de bancada, como geladeira/forno/lixeira, que interage pela malha principal).
+        /// </summary>
+        public bool HasUnboundSlots
+        {
+            get
+            {
+                EnsureSlotBindingsInitialized();
+                if (slotAnchors == null || slotAnchors.Length == 0)
+                    return _boundSlotIndices.Count == 0;
+
+                int validSlots = 0;
                 for (int i = 0; i < slotAnchors.Length; i++)
                 {
                     if (slotAnchors[i] == null) continue;
+                    validSlots++;
+                    if (!_boundSlotIndices.Contains(i))
+                        return true;
+                }
+                return validSlots == 0 && _boundSlotIndices.Count == 0;
+            }
+        }
+
+        public int ResolveTargetSlotIndex(Vector3? aimWorldPoint = null, int explicitSlot = -1)
+        {
+            EnsureSlotBindingsInitialized();
+
+            if (explicitSlot >= 0) return explicitSlot;
+            if (LastAimExplicitSlot >= 0) return LastAimExplicitSlot;
+
+            // Regra 1: se todos os slots estão vinculados a objetos 3D e nenhum objeto 3D de slot foi mirado no raycast,
+            // não permite resolver slot pela malha da mesa.
+            if (!HasUnboundSlots)
+                return -1;
+
+            if (slotAnchors == null || slotAnchors.Length == 0)
+                return 0;
+
+            Vector3 refPoint = aimWorldPoint ?? LastAimWorldPoint;
+            int bestIdx = -1;
+            float bestDistSq = float.MaxValue;
+
+            for (int i = 0; i < slotAnchors.Length; i++)
+            {
+                if (slotAnchors[i] == null) continue;
+                if (_boundSlotIndices.Contains(i)) continue; // Slots com objeto 3D só podem ser mirados diretamente no objeto 3D
+
+                if (refPoint != Vector3.zero)
+                {
                     float dSq = (slotAnchors[i].position - refPoint).sqrMagnitude;
                     if (dSq < bestDistSq)
                     {
@@ -47,21 +111,26 @@ namespace ScaryParty.Pizzeria.Stations
                         bestIdx = i;
                     }
                 }
-                return bestIdx;
+                else if (bestIdx < 0)
+                {
+                    bestIdx = i;
+                }
             }
 
-            return 0;
+            return bestIdx >= 0 ? bestIdx : 0;
         }
 
         public virtual string InteractPrompt 
         {
             get
             {
+                int slotIdx = ResolveTargetSlotIndex();
+                if (slotIdx < 0) return string.Empty;
+
                 var netState = PizzeriaNetworkState.Instance;
                 var networkManager = NetworkManager.Singleton;
                 if (netState == null || networkManager == null) return "[E] Interagir com " + stationName;
 
-                int slotIdx = ResolveTargetSlotIndex();
                 ulong localClientId = networkManager.LocalClientId;
                 bool stationHasItem = false;
                 bool playerHasItem = false;
@@ -96,30 +165,6 @@ namespace ScaryParty.Pizzeria.Stations
                     {
                         playerHasTool = true;
                         toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
-                    }
-                }
-
-                // Fallback: se o slot mirado estiver vazio e o jogador tiver mãos vazias, checar qualquer slot ocupado na estação
-                if (!stationHasItem && !stationHasTool && !playerHasItem && !playerHasTool)
-                {
-                    for (int i = 0; i < netState.Items.Count; i++)
-                    {
-                        var item = netState.Items[i];
-                        if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
-                        {
-                            stationHasItem = true;
-                            break;
-                        }
-                    }
-                    for (int i = 0; i < netState.Tools.Count; i++)
-                    {
-                        var tool = netState.Tools[i];
-                        if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId)
-                        {
-                            stationHasTool = true;
-                            toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
-                            break;
-                        }
                     }
                 }
 
@@ -162,6 +207,11 @@ namespace ScaryParty.Pizzeria.Stations
 
         protected ScaryParty.Pizzeria.Presentation.StationProgressBar _progressBar;
 
+        protected virtual void Awake()
+        {
+            ValidateAndCalibrateSlotAnchors();
+        }
+
         protected virtual void Start()
         {
             ValidateAndCalibrateSlotAnchors();
@@ -173,53 +223,70 @@ namespace ScaryParty.Pizzeria.Stations
 
         private void ValidateAndCalibrateSlotAnchors()
         {
-            const float TableTopY = 0.38f;
-            if (slotsBoundToObjects) return;
-            // Apenas para bancadas de preparo, montagem, balcão e empacotamento
-            if (stationId == 5 || stationId == 6 || stationId == 7 || stationId == 4 || stationId == 9)
+            _slotBindingInitialized = true;
+            _boundSlotIndices.Clear();
+
+            // 1. Compactar slotAnchors removendo referências nulas (ex: entradas órfãs no prefab)
+            if (slotAnchors != null)
             {
-                if (slotAnchors == null || slotAnchors.Length < 2 || slotAnchors[0] == null || slotAnchors[0].localPosition.y > 0.5f || Mathf.Abs(slotAnchors[0].localPosition.x) > 1.0f)
+                var validList = new System.Collections.Generic.List<Transform>(slotAnchors.Length);
+                for (int i = 0; i < slotAnchors.Length; i++)
                 {
-                    Transform slotsParent = transform.Find("Slots");
-                    if (slotsParent == null)
+                    if (slotAnchors[i] != null)
+                        validList.Add(slotAnchors[i]);
+                }
+                if (validList.Count != slotAnchors.Length)
+                    slotAnchors = validList.ToArray();
+            }
+
+            // 2. Inspecionar StationWorkpostTarget filhos:
+            // - Se o workpost tem objeto 3D próprio (Renderer), garantir Collider ativo, layer compatível e OutlineTarget próprio (Regra 1).
+            // - Se o workpost NÃO tem objeto 3D próprio (ex: Workpost invisível legado), desativar para que a mesa receba o raycast/outline e posicione pelo slot mais próximo (Regra 2).
+            var workposts = GetComponentsInChildren<ScaryParty.Pizzeria.Authoring.StationWorkpostTarget>(true);
+            for (int i = 0; i < workposts.Length; i++)
+            {
+                var wp = workposts[i];
+                if (wp == null) continue;
+                if (wp.targetStation == null) wp.targetStation = this;
+                if (wp.targetStation != this) continue;
+
+                if (wp.IsBoundTo3DObject)
+                {
+                    _boundSlotIndices.Add(wp.slotIndex);
+                    if (wp.outlineTarget == null)
                     {
-                        var go = new GameObject("Slots");
-                        go.transform.SetParent(transform, false);
-                        slotsParent = go.transform;
+                        wp.outlineTarget = wp.GetComponent<ScaryParty.Interaction.OutlineTarget>();
+                        if (wp.outlineTarget == null)
+                            wp.outlineTarget = wp.gameObject.AddComponent<ScaryParty.Interaction.OutlineTarget>();
                     }
 
-                    Transform s0 = slotsParent.Find("SlotAnchor_0") ?? slotsParent.Find("Slot_0");
-                    if (s0 == null)
+                    var cols = wp.GetComponentsInChildren<Collider>(true);
+                    if (cols == null || cols.Length == 0)
                     {
-                        var go = new GameObject("SlotAnchor_0");
-                        go.transform.SetParent(slotsParent, false);
-                        s0 = go.transform;
-                    }
-
-                    Transform s1 = slotsParent.Find("SlotAnchor_1") ?? slotsParent.Find("Slot_1");
-                    if (s1 == null)
-                    {
-                        var go = new GameObject("SlotAnchor_1");
-                        go.transform.SetParent(slotsParent, false);
-                        s1 = go.transform;
-                    }
-
-                    if (stationId == 4)
-                    {
-                        s0.localPosition = new Vector3(0f, TableTopY, -0.4f);
-                        s1.localPosition = new Vector3(0f, TableTopY, 0.4f);
+                        wp.gameObject.AddComponent<BoxCollider>();
                     }
                     else
                     {
-                        s0.localPosition = new Vector3(-0.35f, TableTopY, 0f);
-                        s1.localPosition = new Vector3(0.35f, TableTopY, 0f);
+                        for (int c = 0; c < cols.Length; c++)
+                        {
+                            if (cols[c] != null) cols[c].enabled = true;
+                        }
                     }
-                    s0.localRotation = Quaternion.identity;
-                    s1.localRotation = Quaternion.identity;
-
-                    slotAnchors = new Transform[] { s0, s1 };
+                }
+                else if (wp.gameObject != gameObject)
+                {
+                    // Workpost invisível sem malha 3D: desativar colisor/componente para obedecer à Regra 2
+                    var col = wp.GetComponent<Collider>();
+                    if (col != null) col.enabled = false;
+                    wp.enabled = false;
                 }
             }
+
+            slotsBoundToObjects = _boundSlotIndices.Count > 0 && !HasUnboundSlots;
+
+            var rootOutline = GetComponent<ScaryParty.Interaction.OutlineTarget>();
+            if (rootOutline != null)
+                rootOutline.InvalidateCache();
         }
 
         protected virtual void Update()
@@ -274,6 +341,7 @@ namespace ScaryParty.Pizzeria.Stations
             if (state == null || cmd == null) return;
 
             int slotIndex = ResolveTargetSlotIndex();
+            if (slotIndex < 0) return;
 
             NetItemDto itemOnStation = default;
             bool hasItemOnStation = false;
@@ -317,74 +385,6 @@ namespace ScaryParty.Pizzeria.Stations
                 }
             }
 
-            // Se o slot mirado está ocupado e o jogador quer colocar um item sem combinar, procurar um slot livre se houver múltiplos slots
-            int totalSlots = slotAnchors != null && slotAnchors.Length > 0 ? slotAnchors.Length : 1;
-            if ((hasItemOnStation || hasToolOnStation) && (hasItemInHand || hasToolInHand) && totalSlots > 1 && LastAimExplicitSlot < 0)
-            {
-                bool canCombine = hasItemOnStation && hasItemInHand &&
-                    (itemOnStation.Category == (byte)ItemCategory.Dough || itemOnStation.Category == (byte)ItemCategory.Pizza) &&
-                    (itemInHand.Category == (byte)ItemCategory.Sauce || itemInHand.Category == (byte)ItemCategory.Cheese || itemInHand.Category == (byte)ItemCategory.Topping);
-
-                if (!canCombine)
-                {
-                    for (int s = 0; s < totalSlots; s++)
-                    {
-                        bool occupied = false;
-                        for (int i = 0; i < state.Items.Count; i++)
-                        {
-                            var it = state.Items[i];
-                            if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId && it.SlotId == s)
-                            { occupied = true; break; }
-                        }
-                        if (!occupied)
-                        {
-                            for (int i = 0; i < state.Tools.Count; i++)
-                            {
-                                var tl = state.Tools[i];
-                                if (tl.LocationType == (byte)LocationType.StationSlot && tl.HolderId == (ulong)stationId && tl.SlotId == s)
-                                { occupied = true; break; }
-                            }
-                        }
-                        if (!occupied)
-                        {
-                            slotIndex = s;
-                            hasItemOnStation = false;
-                            hasToolOnStation = false;
-                            break;
-                        }
-                    }
-                }
-            }
-            else if (!hasItemOnStation && !hasToolOnStation && !hasItemInHand && !hasToolInHand && totalSlots > 1 && LastAimExplicitSlot < 0)
-            {
-                // Mãos vazias e slot mirado vazio: procurar qualquer slot ocupado na estação para pegar
-                for (int i = 0; i < state.Items.Count; i++)
-                {
-                    var item = state.Items[i];
-                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
-                    {
-                        slotIndex = item.SlotId;
-                        itemOnStation = item;
-                        hasItemOnStation = true;
-                        break;
-                    }
-                }
-                if (!hasItemOnStation)
-                {
-                    for (int i = 0; i < state.Tools.Count; i++)
-                    {
-                        var tool = state.Tools[i];
-                        if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId)
-                        {
-                            slotIndex = tool.SlotId;
-                            toolOnStation = tool;
-                            hasToolOnStation = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
             bool handEmpty = !hasItemInHand && !hasToolInHand;
             bool stationEmpty = !hasItemOnStation && !hasToolOnStation;
 
@@ -424,16 +424,18 @@ namespace ScaryParty.Pizzeria.Stations
             }
             else if (hasItemOnStation)
             {
-                // Tenta combinar se a mão ativa tiver ingrediente compatível
-                if (hasItemInHand)
+                // Tenta combinar se a mão ativa tiver ingrediente preparado compatível e a base na bancada já estiver aberta (Massa Aberta / Pizza)
+                if (hasItemInHand && !(this is PrepStation))
                 {
-                    bool isIngredient = itemInHand.Category == (byte)ItemCategory.Sauce || 
-                                        itemInHand.Category == (byte)ItemCategory.Cheese || 
-                                        itemInHand.Category == (byte)ItemCategory.Topping;
-                    
-                    bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.Dough || itemOnStation.Category == (byte)ItemCategory.Pizza;
-                    
-                    if (isPizzaOrBase && isIngredient)
+                    bool isPreparedIngredient = itemInHand.Category == (byte)ItemCategory.Sauce ||
+                                                ((itemInHand.Category == (byte)ItemCategory.Cheese || itemInHand.Category == (byte)ItemCategory.Topping) &&
+                                                 itemInHand.PrepStage == (byte)ProcessingStage.Prepared);
+
+                    bool isPreparedPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.Pizza ||
+                                                 itemOnStation.Category == (byte)ItemCategory.PizzaBase ||
+                                                 (itemOnStation.Category == (byte)ItemCategory.Dough && itemOnStation.PrepStage == (byte)ProcessingStage.Prepared);
+
+                    if (isPreparedPizzaOrBase && isPreparedIngredient)
                     {
                         cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
                         if (invAdapter != null && !otherHandEmpty)
@@ -470,24 +472,6 @@ namespace ScaryParty.Pizzeria.Stations
                 if (invAdapter != null && !otherHandEmpty)
                 {
                     invAdapter.SetActiveHand((HandSlotIndex)otherHand);
-                }
-            }
-            else if (hasItemOnStation && hasItemInHand)
-            {
-                // Combine (Add ingredient to pizza)
-                bool isIngredient = itemInHand.Category == (byte)ItemCategory.Sauce || 
-                                    itemInHand.Category == (byte)ItemCategory.Cheese || 
-                                    itemInHand.Category == (byte)ItemCategory.Topping;
-                
-                bool isPizzaOrBase = itemOnStation.Category == (byte)ItemCategory.Dough || itemOnStation.Category == (byte)ItemCategory.Pizza;
-                
-                if (isPizzaOrBase && isIngredient)
-                {
-                    cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
-                    if (invAdapter != null && !otherHandEmpty)
-                    {
-                        invAdapter.SetActiveHand((HandSlotIndex)otherHand);
-                    }
                 }
             }
         }

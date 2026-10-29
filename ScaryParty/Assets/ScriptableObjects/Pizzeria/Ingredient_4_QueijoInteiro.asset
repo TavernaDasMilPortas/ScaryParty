@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredientName: Queijo Inteiro
   category: 3
   requiresPrep: 1
-  preparedIngredient: {fileID: 11400000}
+  preparedIngredient: {fileID: 11400000, guid: 34af672c39d86054aae28b94edbc96f4, type: 2}
   preparedIngredientId: 5
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
   placeholderPrefab: {fileID: 5220987321227752152, guid: 9ab69ae344fa78c4babd67bf4a945d12, type: 3}

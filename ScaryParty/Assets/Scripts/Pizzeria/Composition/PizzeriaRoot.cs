@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Authoring;
@@ -141,6 +142,7 @@ namespace ScaryParty.Pizzeria.Composition
 
             EnsureAnchorsResolved();
             Catalog = _config.BuildCatalog();
+            SyncCatalogWithSceneStations();
 
             RebuildAddressRegistry();
 
@@ -151,6 +153,75 @@ namespace ScaryParty.Pizzeria.Composition
             }
 
             OnPizzeriaInitialized?.Invoke();
+        }
+
+        /// <summary>
+        /// Garante que o catálogo de domínio (Processos e Estações) esteja sincronizado com os componentes
+        /// reais presentes na cena/prefab (ex: PrepStation aceitando todos os processos 1..4 e SlotCount correto).
+        /// </summary>
+        private void SyncCatalogWithSceneStations()
+        {
+            if (Catalog == null) return;
+
+            // Garantir que os 4 processos essenciais de preparo existam no catálogo em runtime
+            if (!Catalog.Processes.ContainsKey(1))
+                Catalog.RegisterProcess(new ProcessData(1, "Abrir Massa", 1, ProcessingStage.Raw, 2, ProcessingStage.Prepared, ToolCapability.None, 3f));
+            if (!Catalog.Processes.ContainsKey(2))
+                Catalog.RegisterProcess(new ProcessData(2, "Ralar Queijo", 4, ProcessingStage.Raw, 5, ProcessingStage.Prepared, ToolCapability.Grate, 2f));
+            if (!Catalog.Processes.ContainsKey(3))
+                Catalog.RegisterProcess(new ProcessData(3, "Fatiar Calabresa", 6, ProcessingStage.Raw, 7, ProcessingStage.Prepared, ToolCapability.Slice, 2f));
+            if (!Catalog.Processes.ContainsKey(4))
+                Catalog.RegisterProcess(new ProcessData(4, "Fatiar Cogumelo", 8, ProcessingStage.Raw, 9, ProcessingStage.Prepared, ToolCapability.Slice, 2f));
+
+            int[] allPrepProcesses = new int[] { 1, 2, 3, 4 };
+            var stations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.StationView>(true);
+            for (int i = 0; i < stations.Length; i++)
+            {
+                var st = stations[i];
+                if (st == null || st.stationId <= 0) continue;
+
+                int anchorCount = 0;
+                if (st.slotAnchors != null)
+                {
+                    for (int s = 0; s < st.slotAnchors.Length; s++)
+                        if (st.slotAnchors[s] != null) anchorCount++;
+                }
+                if (anchorCount <= 0) anchorCount = 1;
+
+                bool isPrep = st is ScaryParty.Pizzeria.Stations.PrepStation;
+                if (Catalog.Stations.TryGetValue(st.stationId, out var existing))
+                {
+                    int slotCount = Mathf.Max(existing.SlotCount, anchorCount);
+                    var accepted = new List<int>(existing.AcceptedProcessIds);
+                    if (isPrep)
+                    {
+                        for (int p = 0; p < allPrepProcesses.Length; p++)
+                        {
+                            if (!accepted.Contains(allPrepProcesses[p]))
+                                accepted.Add(allPrepProcesses[p]);
+                        }
+                    }
+                    var overrides = existing.DurationOverrides != null
+                        ? new Dictionary<int, float>(existing.DurationOverrides)
+                        : null;
+
+                    Catalog.RegisterStation(new StationData(
+                        existing.Id,
+                        existing.Name,
+                        slotCount,
+                        accepted,
+                        overrides));
+                }
+                else
+                {
+                    var accepted = isPrep ? allPrepProcesses : Array.Empty<int>();
+                    Catalog.RegisterStation(new StationData(
+                        st.stationId,
+                        st.stationName,
+                        anchorCount,
+                        accepted));
+                }
+            }
         }
 
         public void RebuildAddressRegistry()

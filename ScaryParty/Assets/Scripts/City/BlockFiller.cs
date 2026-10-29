@@ -10,23 +10,23 @@ public class BlockFiller : MonoBehaviour
     /// <summary>
     /// Fills a block with procedurally generated buildings.
     /// </summary>
-    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex)
+    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null)
     {
         if (block.polygon != null && block.polygon.Length >= 3)
         {
-            FillBlockPerimeter(block, config, rng, parent, buildingMaterials, blockIndex);
+            FillBlockPerimeter(block, config, rng, parent, buildingMaterials, blockIndex, reservedOBBs);
         }
         else
         {
             // Backward Compatibility: Fall back to rectangular grid
-            FillBlockGrid(block, config, rng, parent, buildingMaterials, blockIndex);
+            FillBlockGrid(block, config, rng, parent, buildingMaterials, blockIndex, reservedOBBs);
         }
     }
 
     /// <summary>
     /// Places buildings tightly along the edges (perimeter) of the block polygon, facing outward.
     /// </summary>
-    private void FillBlockPerimeter(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex)
+    private void FillBlockPerimeter(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null)
     {
         GameObject blockParent = new GameObject($"Block_{blockIndex}");
         blockParent.transform.SetParent(parent);
@@ -46,6 +46,12 @@ public class BlockFiller : MonoBehaviour
         MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
         int buildingCount = 0;
         List<OBB2D> placedBuildings = new List<OBB2D>();
+
+        // Inclui as reservas da pizzaria para impedir sobreposição de prédios
+        if (reservedOBBs != null && reservedOBBs.Count > 0)
+        {
+            placedBuildings.AddRange(reservedOBBs);
+        }
 
         // Calculate winding sign once for the polygon
         float signedArea = 0f;
@@ -288,8 +294,8 @@ public class BlockFiller : MonoBehaviour
         }
         } // Closing the pass loop
 
-        // Gera o miolo maciço para impedir visão interna (apenas se configurado)
-        if (config.generateSolidCore)
+        // Gera o miolo maciço para impedir visão interna (apenas se configurado e a quadra NÃO contém a pizzaria)
+        if (config.generateSolidCore && !block.hasPizzaria)
         {
             GenerateSolidCore(poly, centroid, blockParent.transform, GetRandomHeight(block.zoneType, rng) * 0.8f, Color.gray);
         }
@@ -404,7 +410,7 @@ public class BlockFiller : MonoBehaviour
     /// <summary>
     /// Old method for rectangular grid subdivision (used as fallback).
     /// </summary>
-    private void FillBlockGrid(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex)
+    private void FillBlockGrid(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null)
     {
         GameObject blockParent = new GameObject($"Block_{blockIndex}");
         blockParent.transform.SetParent(parent);
@@ -445,6 +451,22 @@ public class BlockFiller : MonoBehaviour
 
                 localPos.x += (float)((rng.NextDouble() - 0.5) * spacing);
                 localPos.z += (float)((rng.NextDouble() - 0.5) * spacing);
+
+                Vector3 worldBPos = block.worldCenter + localPos;
+                if (reservedOBBs != null && reservedOBBs.Count > 0)
+                {
+                    OBB2D candidate = new OBB2D(new Vector2(worldBPos.x, worldBPos.z), new Vector2(bWidth * 0.5f, bDepth * 0.5f), Vector2.right, Vector2.up);
+                    bool overlaps = false;
+                    for (int o = 0; o < reservedOBBs.Count; o++)
+                    {
+                        if (OBBOverlap(candidate, reservedOBBs[o], out _, out _))
+                        {
+                            overlaps = true;
+                            break;
+                        }
+                    }
+                    if (overlaps) continue;
+                }
 
                 GameObject buildingObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 buildingObj.name = $"Building_{x}_{z}";

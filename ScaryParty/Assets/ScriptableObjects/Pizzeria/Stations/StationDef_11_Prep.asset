@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: StationDef_11_Prep
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationDef
   id: 11
-  stationName: Bancada de Montagem
+  stationName: Bancada de Preparo
   slotCount: 4
-  acceptedProcesses: []
-  acceptedProcessIds: 
+  acceptedProcesses:
+  - {fileID: 11400000, guid: e81cf19f289fefc4b8eefae80cb2671c, type: 2}
+  - {fileID: 11400000, guid: 5c4fbb40ee5d58a4b92d813b12ff807b, type: 2}
+  - {fileID: 11400000, guid: b24bc8e57cece87428365b823402380e, type: 2}
+  - {fileID: 11400000, guid: d48f19c37a124e849b2011fc53a90414, type: 2}
+  acceptedProcessIds: 01000000020000000300000004000000
   durationOverrides: []

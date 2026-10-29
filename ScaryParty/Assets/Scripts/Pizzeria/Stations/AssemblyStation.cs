@@ -7,7 +7,7 @@ namespace ScaryParty.Pizzeria.Stations
 {
     public class AssemblyStation : StationView
     {
-        public override string InteractPrompt => "[E] Montar Pizza";
+        public override string InteractPrompt => ResolveTargetSlotIndex() < 0 ? string.Empty : base.InteractPrompt;
 
         protected override void Start()
         {

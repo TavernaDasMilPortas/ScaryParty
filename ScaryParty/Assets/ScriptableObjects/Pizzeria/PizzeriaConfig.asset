@@ -32,6 +32,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e81cf19f289fefc4b8eefae80cb2671c, type: 2}
   - {fileID: 11400000, guid: 5c4fbb40ee5d58a4b92d813b12ff807b, type: 2}
   - {fileID: 11400000, guid: b24bc8e57cece87428365b823402380e, type: 2}
+  - {fileID: 11400000, guid: d48f19c37a124e849b2011fc53a90414, type: 2}
   stations: []
   supplyItems:
   - {fileID: 11400000, guid: abc5fc56a0c0657459df2394c1e3e5c7, type: 2}

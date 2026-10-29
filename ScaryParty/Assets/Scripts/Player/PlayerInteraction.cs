@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Interaction;
@@ -30,12 +30,17 @@ public class PlayerInteraction : NetworkBehaviour
 
     /// <summary>
     /// Resolve o interagível a partir dos hits (ordenados por distância).
-    /// Se o primeiro alvo for uma estação, procura entre os hits um posto/slot (StationWorkpostTarget)
-    /// dessa mesma estação — assim o volume do slot (ex: prato) tem prioridade sobre o corpo da mesa.
+    /// Obedece às duas regras de slots:
+    /// 1) Se o slot estiver atribuído a um objeto 3D (StationWorkpostTarget.IsBoundTo3DObject), apenas esse objeto
+    ///    recebe outline e só é possível interagir com o raycast diretamente nele (não na malha da mesa).
+    /// 2) Se o slot não tiver objeto 3D atribuído, a mesa recebe outline, é possível interagir com a malha da mesa
+    ///    e o item usa apenas o slot mais próximo em distância ao ponto mirado.
     /// </summary>
     private void ResolveInteractableFromHits(RaycastHit[] hits, ref IInteractable interactable, ref Vector3 hitPoint,
-        ref ScaryParty.Pizzeria.Authoring.StationWorkpostTarget workpostOut)
+        ref ScaryParty.Pizzeria.Authoring.StationWorkpostTarget workpostOut, out bool blockedByBoundStationBody)
     {
+        blockedByBoundStationBody = false;
+
         for (int h = 0; h < hits.Length; h++)
         {
             var hit = hits[h];
@@ -43,35 +48,60 @@ public class PlayerInteraction : NetworkBehaviour
                 continue;
 
             var workpost = hit.collider.GetComponentInParent<ScaryParty.Pizzeria.Authoring.StationWorkpostTarget>();
-            if (workpost != null && workpost.targetStation != null && !string.IsNullOrEmpty(workpost.targetStation.InteractPrompt))
+            if (workpost != null && workpost.targetStation != null && workpost.IsBoundTo3DObject)
             {
-                interactable = workpost.targetStation;
-                hitPoint = hit.point;
-                workpostOut = workpost;
-                return;
+                workpost.targetStation.SetAimContext(hit.point, workpost.slotIndex);
+                if (!string.IsNullOrEmpty(workpost.targetStation.InteractPrompt))
+                {
+                    interactable = workpost.targetStation;
+                    hitPoint = hit.point;
+                    workpostOut = workpost;
+                    return;
+                }
             }
 
             var candidate = hit.collider.GetComponentInParent<IInteractable>();
-            if (candidate != null && !string.IsNullOrEmpty(candidate.InteractPrompt))
+            if (candidate != null)
             {
-                interactable = candidate;
-                hitPoint = hit.point;
-
                 if (candidate is ScaryParty.Pizzeria.Stations.StationView station)
                 {
+                    // Verificar se o mesmo raio atravessa o BoxCollider externo da estação e atinge um objeto 3D de slot nela
                     for (int k = h + 1; k < hits.Length; k++)
                     {
                         if (hits[k].collider == null) continue;
                         var wp = hits[k].collider.GetComponentInParent<ScaryParty.Pizzeria.Authoring.StationWorkpostTarget>();
-                        if (wp != null && wp.targetStation == station)
+                        if (wp != null && wp.targetStation == station && wp.IsBoundTo3DObject)
                         {
-                            hitPoint = hits[k].point;
-                            workpostOut = wp;
-                            break;
+                            station.SetAimContext(hits[k].point, wp.slotIndex);
+                            if (!string.IsNullOrEmpty(station.InteractPrompt))
+                            {
+                                interactable = station;
+                                hitPoint = hits[k].point;
+                                workpostOut = wp;
+                                return;
+                            }
                         }
                     }
+
+                    // Regra 1: se todos os slots desta estação estão vinculados a objetos 3D e o raycast acertou apenas
+                    // o corpo da mesa (ou adereços não-interagíveis), bloquear interação com a mesa!
+                    if (!station.HasUnboundSlots)
+                    {
+                        blockedByBoundStationBody = true;
+                        return;
+                    }
+
+                    // Regra 2: estação possui slots sem objeto 3D -> interage com a malha da mesa no slot mais próximo
+                    station.SetAimContext(hit.point, -1);
                 }
-                return;
+
+                if (!string.IsNullOrEmpty(candidate.InteractPrompt))
+                {
+                    interactable = candidate;
+                    hitPoint = hit.point;
+                    workpostOut = null;
+                    return;
+                }
             }
         }
     }
@@ -283,18 +313,15 @@ public class PlayerInteraction : NetworkBehaviour
         int explicitWorkpostSlot = -1;
         ScaryParty.Pizzeria.Authoring.StationWorkpostTarget aimedWorkpost = null;
 
-        ResolveInteractableFromHits(hits, ref interactable, ref hitPoint, ref aimedWorkpost);
+        ResolveInteractableFromHits(hits, ref interactable, ref hitPoint, ref aimedWorkpost, out bool blockedByBoundStationBody);
 
-        // Fallback SphereCast com raio estreito (0.08m) limitado pelo mesmo alcance do obstáculo
-        if (interactable == null)
+        // Fallback SphereCast com raio estreito (0.08m) apenas se o raio direto não bateu no corpo de uma bancada bloqueada pela Regra 1
+        if (interactable == null && !blockedByBoundStationBody)
         {
             RaycastHit[] sphereHits = Physics.SphereCastAll(ray, 0.08f, maxReach, mask, QueryTriggerInteraction.Collide);
             System.Array.Sort(sphereHits, (a, b) => a.distance.CompareTo(b.distance));
-            ResolveInteractableFromHits(sphereHits, ref interactable, ref hitPoint, ref aimedWorkpost);
+            ResolveInteractableFromHits(sphereHits, ref interactable, ref hitPoint, ref aimedWorkpost, out _);
         }
-
-        // Regra: o collider do slot (objeto vinculado ou collider gerado) define a área de interação.
-        // Se a mira acerta o slot → aimedWorkpost; se acerta só a mesa → interage/contorna a mesa.
 
         if (aimedWorkpost != null) explicitWorkpostSlot = aimedWorkpost.slotIndex;
 
@@ -316,9 +343,22 @@ public class PlayerInteraction : NetworkBehaviour
                 _currentInteractable.OnFocus();
             }
 
-            // Outline: prioriza o objeto físico do slot mirado (ex: prato); senão, a estação inteira
-            ScaryParty.Interaction.OutlineTarget outline = aimedWorkpost != null ? aimedWorkpost.outlineTarget : null;
-            if (outline == null && interactable is Component comp)
+            // Outline:
+            // - Regra 1 (aimedWorkpost != null): APENAS o objeto 3D do slot recebe outline (nunca a bancada toda).
+            // - Regra 2 (aimedWorkpost == null): a mesa/estação recebe outline.
+            ScaryParty.Interaction.OutlineTarget outline = null;
+            if (aimedWorkpost != null)
+            {
+                outline = aimedWorkpost.outlineTarget != null
+                    ? aimedWorkpost.outlineTarget
+                    : aimedWorkpost.GetComponent<ScaryParty.Interaction.OutlineTarget>();
+                if (outline == null)
+                {
+                    outline = aimedWorkpost.gameObject.AddComponent<ScaryParty.Interaction.OutlineTarget>();
+                    aimedWorkpost.outlineTarget = outline;
+                }
+            }
+            else if (interactable is Component comp)
             {
                 outline = comp.GetComponent<ScaryParty.Interaction.OutlineTarget>()
                           ?? comp.GetComponentInParent<ScaryParty.Interaction.OutlineTarget>();
@@ -375,63 +415,66 @@ public class PlayerInteraction : NetworkBehaviour
         base.OnDestroy();
     }
 
-        private float _lastHeartbeatTime = 0f;
-        private int _activeWorkSlotIndex = 0;
+    private float _lastHeartbeatTime = 0f;
+    private int _activeWorkSlotIndex = 0;
 
 #if ENABLE_INPUT_SYSTEM
-        private void HandleInput()
+    private void HandleInput()
+    {
+        bool interactPressed = false;
+        
+        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame)
         {
-            bool interactPressed = false;
-            
-            if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame)
-            {
-                interactPressed = true;
-            }
+            interactPressed = true;
+        }
 
-            if (interactPressed && _currentInteractable != null)
-            {
-                _currentInteractable.OnInteract(this.gameObject);
-            }
+        if (interactPressed && _currentInteractable != null)
+        {
+            _currentInteractable.OnInteract(this.gameObject);
+        }
 
-            if (UnityEngine.InputSystem.Keyboard.current != null)
-            {
-                var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
-                var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+        if (UnityEngine.InputSystem.Keyboard.current != null)
+        {
+            var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
 
-                if (_currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
+            if (_currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
+            {
+                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
                 {
-                    if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
+                    if (cmd != null && netState != null && NetworkManager.Singleton != null)
                     {
-                        if (cmd != null && netState != null && NetworkManager.Singleton != null)
+                        var adapter = GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+                        byte hand = adapter != null ? (byte)adapter.ActiveHand : (byte)0;
+                        _activeWorkSlotIndex = prep.ResolveTargetSlotIndex();
+                        if (_activeWorkSlotIndex >= 0)
                         {
-                            var adapter = GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
-                            byte hand = adapter != null ? (byte)adapter.ActiveHand : (byte)0;
-                            _activeWorkSlotIndex = prep.ResolveTargetSlotIndex();
-                            cmd.StartWorkAtomicServerRpc(prep.stationId, _activeWorkSlotIndex, 0, hand); 
+                            cmd.StartWorkAtomicServerRpc(prep.stationId, _activeWorkSlotIndex, 0, hand);
                         }
-                    }
-                    else if (UnityEngine.InputSystem.Keyboard.current.fKey.isPressed)
-                    {
-                        if (cmd != null && Time.time - _lastHeartbeatTime > 0.2f)
-                        {
-                            cmd.HeartbeatWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
-                            _lastHeartbeatTime = Time.time;
-                        }
-                    }
-                    else if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame)
-                    {
-                        if (cmd != null) cmd.CancelWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
                     }
                 }
-                else if (_currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
+                else if (UnityEngine.InputSystem.Keyboard.current.fKey.isPressed)
                 {
-                    if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
+                    if (cmd != null && _activeWorkSlotIndex >= 0 && Time.time - _lastHeartbeatTime > 0.2f)
                     {
-                        if (netState != null && cmd != null)
+                        cmd.HeartbeatWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
+                        _lastHeartbeatTime = Time.time;
+                    }
+                }
+                else if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame)
+                {
+                    if (cmd != null && _activeWorkSlotIndex >= 0) cmd.CancelWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
+                }
+            }
+            else if (_currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
+            {
+                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
+                {
+                    if (netState != null && cmd != null)
+                    {
+                        int targetSlot = pkg.ResolveTargetSlotIndex();
+                        if (targetSlot >= 0)
                         {
-                            int targetSlot = pkg.ResolveTargetSlotIndex();
-                            bool started = false;
-                            // Tentar primeiro o slot mirado
                             for (int i = 0; i < netState.Items.Count; i++)
                             {
                                 var item = netState.Items[i];
@@ -442,82 +485,53 @@ public class PlayerInteraction : NetworkBehaviour
                                     if (canPackage && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
                                     {
                                         cmd.StartPackagingServerRpc(item.ItemId);
-                                        started = true;
                                     }
                                     break;
-                                }
-                            }
-                            // Fallback para qualquer pizza na bancada se não houver posto explícito
-                            if (!started && pkg.LastAimExplicitSlot < 0)
-                            {
-                                for (int i = 0; i < netState.Items.Count; i++)
-                                {
-                                    var item = netState.Items[i];
-                                    if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)pkg.stationId)
-                                    {
-                                        bool canPackage = item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase || 
-                                                          item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza;
-                                        if (canPackage && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
-                                        {
-                                            cmd.StartPackagingServerRpc(item.ItemId);
-                                            break;
-                                        }
-                                    }
                                 }
                             }
                         }
                     }
                 }
-                else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StagingStation stg)
+            }
+            else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StagingStation stg)
+            {
+                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
                 {
-                    if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
+                    if (netState != null && ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
                     {
-                        if (netState != null && ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
+                        int targetSlot = stg.ResolveTargetSlotIndex();
+                        if (targetSlot >= 0)
                         {
-                            int targetSlot = stg.ResolveTargetSlotIndex();
-                            bool opened = false;
                             for (int i = 0; i < netState.Items.Count; i++)
                             {
                                 var item = netState.Items[i];
                                 if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)stg.stationId && item.SlotId == targetSlot && item.PackagingState == (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
                                 {
                                     ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
-                                    opened = true;
                                     break;
-                                }
-                            }
-                            if (!opened && stg.LastAimExplicitSlot < 0)
-                            {
-                                for (int i = 0; i < netState.Items.Count; i++)
-                                {
-                                    var item = netState.Items[i];
-                                    if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)stg.stationId && item.PackagingState == (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
-                                    {
-                                        ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
-                                        break;
-                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                // If F was released but we lost focus of the interactable
-                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame && _currentInteractable == null)
-                {
-                    // Tricky: we don't know which station we were interacting with. 
-                    // Better to just let the server timeout the lease (LeaseExpiration).
-                }
-            }
-        }
-#else
-        private void HandleInput()
-        {
-            if (Input.GetKeyDown(KeyCode.E) && _currentInteractable != null)
+            // If F was released but we lost focus of the interactable
+            if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame && _currentInteractable == null)
             {
-                _currentInteractable.OnInteract(this.gameObject);
+                // Tricky: we don't know which station we were interacting with. 
+                // Better to just let the server timeout the lease (LeaseExpiration).
             }
         }
+    }
+#else
+    private void HandleInput()
+    {
+        if (Input.GetKeyDown(KeyCode.E) && _currentInteractable != null)
+        {
+            _currentInteractable.OnInteract(this.gameObject);
+        }
+    }
 #endif
 
     public bool IsHandFull(ScaryParty.Pizzeria.Domain.Types.HandSlotIndex hand)

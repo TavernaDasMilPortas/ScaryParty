@@ -21,20 +21,50 @@ namespace ScaryParty.Pizzeria.Integration
             float frontDistance = 7.5f,
             Vector3 streetDirOverride = default)
         {
-            // Alinha a altura ao nível da calçada
-            position.y = sidewalkHeight;
+            PizzeriaFootprint footprint = pizzeriaPrefab != null ? pizzeriaPrefab.GetComponent<PizzeriaFootprint>() : null;
+
+            // Preserva a pose calculada pelo resolvedor. Se Y estiver na altura cega da calçada, corrige usando o nível real do piso
+            float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : 0f;
+            if (Mathf.Abs(position.y - sidewalkHeight) < 0.001f && Mathf.Abs(floorLocalY) > 0.01f)
+            {
+                position.y = sidewalkHeight - floorLocalY;
+            }
 
             if (cityData != null)
             {
                 cityData.pizzariaPosition = position;
+                cityData.pizzariaRotation = rotation;
 
-                // Bancada externa de frente para a rua
-                Vector3 streetDir = streetDirOverride.sqrMagnitude > 0.01f ? streetDirOverride : -(rotation * Vector3.forward);
+                // Bancada externa de frente para a rua calculada a partir da fachada/âncoras da pose final
+                Vector3 streetDir;
+                if (streetDirOverride.sqrMagnitude > 0.01f)
+                {
+                    streetDir = streetDirOverride;
+                }
+                else if (footprint != null)
+                {
+                    Vector3 fDir = new Vector3(footprint.entranceDirectionLocal.x, 0f, footprint.entranceDirectionLocal.y);
+                    streetDir = (rotation * fDir).normalized;
+                }
+                else
+                {
+                    streetDir = -(rotation * Vector3.forward);
+                }
                 streetDir.y = 0;
                 if (streetDir.sqrMagnitude < 0.01f) streetDir = Vector3.forward;
                 streetDir.Normalize();
 
-                Vector3 bancadaPos = position + streetDir * frontDistance;
+                Vector3 bancadaPos;
+                if (footprint != null && footprint.entranceAnchor != null)
+                {
+                    Vector3 entranceWorld = position + rotation * footprint.entranceAnchor.localPosition;
+                    bancadaPos = entranceWorld + streetDir * 1.8f;
+                }
+                else
+                {
+                    bancadaPos = position + streetDir * frontDistance;
+                }
+
                 bancadaPos.y = sidewalkHeight + 0.5f;
                 cityData.bancadaPosition = bancadaPos;
             }

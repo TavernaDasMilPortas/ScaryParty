@@ -332,15 +332,21 @@ namespace ScaryParty.Pizzeria.Presentation
                 var wrapperGo = new GameObject($"ItemVisual_{item.ItemId}");
                 wrapper = wrapperGo.AddComponent<ItemVisualWrapper>();
                 wrapper.ItemId = item.ItemId;
+                wrapper.DefinitionId = item.DefinitionId;
+                wrapper.Category = item.Category;
+                wrapper.PrepStage = item.PrepStage;
                 wrapper.IsTool = false;
 
                 GameObject model = CreateItemModel(item, profile);
                 wrapper.BindVisual(profile, model);
                 _visualWrappers[item.ItemId] = wrapper;
             }
-            else if (wrapper.CurrentProfile != profile)
+            else if (wrapper.CurrentProfile != profile ||
+                     wrapper.DefinitionId != item.DefinitionId ||
+                     wrapper.Category != item.Category ||
+                     wrapper.PrepStage != item.PrepStage)
             {
-                // Re-bind quando perfil muda (ex: pizza empacotada em caixa)
+                // Re-bind quando perfil, definição (ex: ingrediente cru -> preparado) ou categoria muda
                 if (wrapper.VisualInstance != null) Destroy(wrapper.VisualInstance);
                 if (_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers))
                 {
@@ -352,6 +358,9 @@ namespace ScaryParty.Pizzeria.Presentation
                     _pizzaIngredientLayers.Remove(item.ItemId);
                 }
 
+                wrapper.DefinitionId = item.DefinitionId;
+                wrapper.Category = item.Category;
+                wrapper.PrepStage = item.PrepStage;
                 GameObject model = CreateItemModel(item, profile);
                 wrapper.BindVisual(profile, model);
             }

@@ -97,7 +97,20 @@ public class CityData : ScriptableObject
 {
     public StreetGraph streetGraph = new StreetGraph();
     public List<BlockInfo> blocks = new List<BlockInfo>();
+
+    /// <summary>
+    /// Posição no mundo da raiz do edifício da pizzaria.
+    /// </summary>
     public Vector3 pizzariaPosition;
+
+    /// <summary>
+    /// Rotação no mundo da raiz da pizzaria (fachada alinhada para a rua).
+    /// </summary>
+    public Quaternion pizzariaRotation = Quaternion.identity;
+
+    /// <summary>
+    /// Posição da bancada externa de entrega sobre a calçada.
+    /// </summary>
     public Vector3 bancadaPosition;
 
     /// <summary>
@@ -105,6 +118,11 @@ public class CityData : ScriptableObject
     /// -1 if no block has been assigned yet.
     /// </summary>
     public int pizzariaBlockIndex = -1;
+
+    /// <summary>
+    /// Indica se a reserva geométrica da pizzaria foi resolvida com sucesso na geração.
+    /// </summary>
+    public bool hasPizzariaReserved;
 
     public List<EnemySpawnPoint> enemySpawnPoints = new List<EnemySpawnPoint>();
 
@@ -126,6 +144,10 @@ public class CityData : ScriptableObject
         _streetWidth = streetWidth;
         blocks = new List<BlockInfo>();
         pizzariaBlockIndex = -1;
+        pizzariaPosition = Vector3.zero;
+        pizzariaRotation = Quaternion.identity;
+        bancadaPosition = Vector3.zero;
+        hasPizzariaReserved = false;
         enemySpawnPoints.Clear();
     }
 

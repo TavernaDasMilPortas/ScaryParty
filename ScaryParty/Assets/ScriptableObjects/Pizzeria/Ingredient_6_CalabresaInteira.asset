@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredientName: Calabresa Inteira
   category: 4
   requiresPrep: 1
-  preparedIngredient: {fileID: 11400000}
+  preparedIngredient: {fileID: 11400000, guid: aabad261ce4aa654fbd74b9d4b0d96bb, type: 2}
   preparedIngredientId: 7
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
   placeholderPrefab: {fileID: 6659788359894402159, guid: 0b4713dbc3fe5ca478f303e88df93e9f, type: 3}

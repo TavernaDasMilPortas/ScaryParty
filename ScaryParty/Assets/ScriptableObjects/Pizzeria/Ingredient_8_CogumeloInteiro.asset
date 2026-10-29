@@ -16,7 +16,7 @@ MonoBehaviour:
   ingredientName: Cogumelo Inteiro
   category: 4
   requiresPrep: 1
-  preparedIngredient: {fileID: 11400000}
+  preparedIngredient: {fileID: 11400000, guid: bb29ddd994767134eb644c5080459ab5, type: 2}
   preparedIngredientId: 9
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
   placeholderPrefab: {fileID: 0}

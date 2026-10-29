@@ -15,31 +15,81 @@ namespace ScaryParty.Pizzeria.Stations
         {
             get
             {
+                int slotIdx = ResolveTargetSlotIndex();
+                if (slotIdx < 0) return string.Empty;
+
                 var netState = PizzeriaNetworkState.Instance;
                 var networkManager = NetworkManager.Singleton;
                 if (netState == null || networkManager == null) return "Bancada de Preparo";
 
                 ulong localClientId = networkManager.LocalClientId;
-                bool stationHasItem = false;
+                bool slotHasItem = false;
+                NetItemDto slotItem = default;
+                bool slotHasTool = false;
+                NetToolDto slotTool = default;
+
                 bool playerHasItem = false;
+                NetItemDto handItem = default;
+                bool playerHasTool = false;
 
                 for (int i = 0; i < netState.Items.Count; i++)
                 {
                     var item = netState.Items[i];
-                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.SlotId == slotIdx)
                     {
-                        stationHasItem = true;
+                        slotHasItem = true;
+                        slotItem = item;
                     }
                     if (item.LocationType == (byte)LocationType.Hand && item.HolderId == localClientId)
                     {
                         playerHasItem = true;
+                        handItem = item;
                     }
                 }
 
-                if (stationHasItem) return "[F] Segurar para Trabalhar";
-                if (!stationHasItem && playerHasItem) return "[E] Colocar na bancada / [F] Colocar e Trabalhar";
-                
-                return "Bancada de Preparo vazia";
+                for (int i = 0; i < netState.Tools.Count; i++)
+                {
+                    var tool = netState.Tools[i];
+                    if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId && tool.SlotId == slotIdx)
+                    {
+                        slotHasTool = true;
+                        slotTool = tool;
+                    }
+                    if (tool.LocationType == (byte)LocationType.Hand && tool.HolderId == localClientId)
+                    {
+                        playerHasTool = true;
+                    }
+                }
+
+                if (slotHasItem)
+                {
+                    if (slotItem.PrepStage == (byte)ProcessingStage.Raw)
+                    {
+                        if (slotItem.DefinitionId == 1) return "[F] Segurar para Abrir Massa / [E] Pegar";
+                        if (slotItem.DefinitionId == 4) return "[F] Segurar para Ralar Queijo / [E] Pegar";
+                        if (slotItem.DefinitionId == 6 || slotItem.DefinitionId == 8) return "[F] Segurar para Fatiar / [E] Pegar";
+                        return "[F] Segurar para Trabalhar / [E] Pegar";
+                    }
+                    return "[E] Pegar Ingrediente Preparado";
+                }
+
+                if (slotHasTool)
+                {
+                    string tName = slotTool.DefinitionId == 1 ? "Ralador" : "Faca";
+                    return $"[E] Pegar {tName}";
+                }
+
+                if (playerHasItem)
+                {
+                    if (handItem.PrepStage == (byte)ProcessingStage.Raw)
+                        return "[E] Colocar / [F] Colocar e Trabalhar";
+                    return "[E] Colocar na bancada";
+                }
+
+                if (playerHasTool)
+                    return "[E] Colocar Utensílio";
+
+                return "Bancada de Preparo";
             }
         }
 
@@ -48,7 +98,7 @@ namespace ScaryParty.Pizzeria.Stations
             base.Start();
             stationName = "Bancada de Preparo";
 
-            if (!slotsBoundToObjects && (slotAnchors == null || slotAnchors.Length < 2))
+            if (!slotsBoundToObjects && (slotAnchors == null || slotAnchors.Length == 0))
             {
                 var slotsParent = transform.Find("Slots");
                 if (slotsParent == null)

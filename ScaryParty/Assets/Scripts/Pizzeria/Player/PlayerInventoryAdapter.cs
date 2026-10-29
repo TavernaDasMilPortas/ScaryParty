@@ -10,10 +10,17 @@ namespace ScaryParty.Pizzeria.Player
         public HandSlotIndex ActiveHand { get; private set; } = HandSlotIndex.Left;
 
         private NetworkObject _netObj;
+        private float _lastScrollTime = 0f;
+        private const float ScrollCooldown = 0.15f;
 
         private void Awake()
         {
             _netObj = GetComponent<NetworkObject>();
+        }
+
+        private void Start()
+        {
+            UpdateUi();
         }
 
         private bool IsOwnerPlayer()
@@ -33,107 +40,106 @@ namespace ScaryParty.Pizzeria.Player
             }
         }
 
+        public void ToggleActiveHand()
+        {
+            SetActiveHand(ActiveHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left);
+        }
+
         private void Update()
         {
             if (!IsOwnerPlayer()) return;
             if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked) return;
 
-            // Teclado (New Input System)
+            // 1. Teclado: 1 (Mão Esquerda), 2 (Mão Direita), Q (Alternar)
+            bool key1 = false;
+            bool key2 = false;
+            bool toggleKey = false;
+
             if (UnityEngine.InputSystem.Keyboard.current != null)
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
-                if (kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame)
-                {
-                    SetActiveHand(HandSlotIndex.Left);
-                }
-                else if (kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame)
-                {
-                    SetActiveHand(HandSlotIndex.Right);
-                }
-                else if (kb.qKey.wasPressedThisFrame)
-                {
-                    SetActiveHand(ActiveHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left);
-                }
-            }
-            else
-            {
-                // Fallback para Input legado
-                if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
-                    SetActiveHand(HandSlotIndex.Left);
-                else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
-                    SetActiveHand(HandSlotIndex.Right);
-                else if (Input.GetKeyDown(KeyCode.Q))
-                    SetActiveHand(ActiveHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left);
+                key1 = kb.digit1Key.wasPressedThisFrame || kb.numpad1Key.wasPressedThisFrame;
+                key2 = kb.digit2Key.wasPressedThisFrame || kb.numpad2Key.wasPressedThisFrame;
+                toggleKey = kb.qKey.wasPressedThisFrame;
             }
 
-            // Scroll do mouse para alternar mãos
+            // Fallback para Input legado
+            if (!key1 && (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))) key1 = true;
+            if (!key2 && (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))) key2 = true;
+            if (!toggleKey && Input.GetKeyDown(KeyCode.Q)) toggleKey = true;
+
+            if (key1)
+            {
+                SetActiveHand(HandSlotIndex.Left);
+            }
+            else if (key2)
+            {
+                SetActiveHand(HandSlotIndex.Right);
+            }
+            else if (toggleKey)
+            {
+                ToggleActiveHand();
+            }
+
+            // 2. Scroll do mouse para alternar/ciclar mãos
+            float scrollDelta = 0f;
             if (UnityEngine.InputSystem.Mouse.current != null)
             {
-                float scroll = UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y;
-                if (scroll > 0.1f)
-                    SetActiveHand(HandSlotIndex.Left);
-                else if (scroll < -0.1f)
-                    SetActiveHand(HandSlotIndex.Right);
+                scrollDelta = UnityEngine.InputSystem.Mouse.current.scroll.ReadValue().y;
             }
-            else if (Mathf.Abs(Input.mouseScrollDelta.y) > 0.1f)
+            if (Mathf.Abs(scrollDelta) < 0.01f && Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f)
             {
-                if (Input.mouseScrollDelta.y > 0.1f)
-                    SetActiveHand(HandSlotIndex.Left);
-                else if (Input.mouseScrollDelta.y < -0.1f)
-                    SetActiveHand(HandSlotIndex.Right);
+                scrollDelta = Input.mouseScrollDelta.y;
             }
 
+            if (Mathf.Abs(scrollDelta) > 0.1f)
+            {
+                if (Time.time - _lastScrollTime >= ScrollCooldown)
+                {
+                    _lastScrollTime = Time.time;
+                    ToggleActiveHand();
+                }
+            }
+
+            // Atualiza o estado da interface HUD a cada frame
             UpdateUi();
         }
 
-        private bool _hadItemInActiveHand = false;
-
         private void UpdateUi()
         {
-            var netState = PizzeriaNetworkState.Instance;
-            if (netState == null || UIManager.Instance == null) return;
+            if (UIManager.Instance == null) return;
 
+            var netState = PizzeriaNetworkState.Instance;
             ulong myId = _netObj != null ? _netObj.OwnerClientId : (NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0);
             string leftDesc = "Vazio";
             string rightDesc = "Vazio";
-            bool leftHasContent = false;
-            bool rightHasContent = false;
 
-            // Verificar itens nas mãos
-            for (int i = 0; i < netState.Items.Count; i++)
+            if (netState != null)
             {
-                var it = netState.Items[i];
-                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == myId)
+                // Verificar itens nas mãos
+                for (int i = 0; i < netState.Items.Count; i++)
                 {
-                    string name = GetItemDisplayName(it);
-                    if (it.SlotId == (int)HandSlotIndex.Left) { leftDesc = name; leftHasContent = true; }
-                    else if (it.SlotId == (int)HandSlotIndex.Right) { rightDesc = name; rightHasContent = true; }
+                    var it = netState.Items[i];
+                    if (it.LocationType == (byte)LocationType.Hand && it.HolderId == myId)
+                    {
+                        string name = GetItemDisplayName(it);
+                        if (it.SlotId == (int)HandSlotIndex.Left) leftDesc = name;
+                        else if (it.SlotId == (int)HandSlotIndex.Right) rightDesc = name;
+                    }
+                }
+
+                // Verificar ferramentas nas mãos
+                for (int i = 0; i < netState.Tools.Count; i++)
+                {
+                    var tool = netState.Tools[i];
+                    if (tool.LocationType == (byte)LocationType.Hand && tool.HolderId == myId)
+                    {
+                        string toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
+                        if (tool.SlotId == (int)HandSlotIndex.Left) leftDesc = toolName;
+                        else if (tool.SlotId == (int)HandSlotIndex.Right) rightDesc = toolName;
+                    }
                 }
             }
-
-            // Verificar ferramentas nas mãos
-            for (int i = 0; i < netState.Tools.Count; i++)
-            {
-                var tool = netState.Tools[i];
-                if (tool.LocationType == (byte)LocationType.Hand && tool.HolderId == myId)
-                {
-                    string toolName = tool.DefinitionId == 1 ? "Ralador" : "Faca";
-                    if (tool.SlotId == (int)HandSlotIndex.Left) { leftDesc = toolName; leftHasContent = true; }
-                    else if (tool.SlotId == (int)HandSlotIndex.Right) { rightDesc = toolName; rightHasContent = true; }
-                }
-            }
-
-            bool activeHandHasContent = ActiveHand == HandSlotIndex.Left ? leftHasContent : rightHasContent;
-            bool otherHandHasContent = ActiveHand == HandSlotIndex.Left ? rightHasContent : leftHasContent;
-
-            // Se a mão ativa tinha algo e acabou de esvaziar, mas a outra mão tem item/utensílio:
-            if (_hadItemInActiveHand && !activeHandHasContent && otherHandHasContent)
-            {
-                ActiveHand = ActiveHand == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left;
-                activeHandHasContent = otherHandHasContent;
-            }
-
-            _hadItemInActiveHand = activeHandHasContent;
 
             UIManager.Instance.SetHandState(false, ActiveHand == HandSlotIndex.Left, leftDesc);
             UIManager.Instance.SetHandState(true, ActiveHand == HandSlotIndex.Right, rightDesc);

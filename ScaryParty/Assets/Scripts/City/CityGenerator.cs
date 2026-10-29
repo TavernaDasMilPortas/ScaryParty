@@ -297,7 +297,22 @@ public class CityGenerator : NetworkBehaviour
         );
         CityData.streetGraph = graph;
 
-        GenerateBlocks(rng, blockPolygons);
+        GenerateBlocks(rng, blockPolygons, out ScaryParty.City.PlacementResult placementResult);
+
+        if (placementResult != null && placementResult.success)
+        {
+            InstantiatePizzeriaFromPlacement(placementResult);
+        }
+        else if (config.pizzariaInsideBlock)
+        {
+            Debug.LogWarning($"[CityGenerator] Falha na implantação geométrica da pizzaria: {placementResult?.failureReason}. Tentando fallback perimetral.");
+            PlacePizzariaInBlock(rng);
+        }
+        else
+        {
+            CityData.pizzariaPosition = Vector3.zero;
+            GeneratePizzariaLegacy();
+        }
 
         _intersectionBuilder.BuildIntersections(graph, config, rng, _intersectionsRoot.transform, intersectionMaterial);
 
@@ -309,13 +324,6 @@ public class CityGenerator : NetworkBehaviour
 
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
         if (routeManager != null) routeManager.Initialize(_pathfinder);
-
-        if (config.pizzariaInsideBlock) PlacePizzariaInBlock(rng);
-        else
-        {
-            CityData.pizzariaPosition = Vector3.zero;
-            GeneratePizzariaLegacy();
-        }
 
         _enemySpawnGen.GenerateSpawnPoints(CityData, config, rng);
 
@@ -397,6 +405,103 @@ public class CityGenerator : NetworkBehaviour
                 if (cc != null) cc.enabled = true;
             }
         }
+    }
+
+    private void InstantiatePizzeriaFromPlacement(ScaryParty.City.PlacementResult placement)
+    {
+        string blockParentName = $"Block_{placement.blockIndex}";
+        Transform blockTransform = _blocksRoot.transform.Find(blockParentName);
+        Transform parentTransform = blockTransform != null ? blockTransform : _blocksRoot.transform;
+
+        if (pizzeriaPrefab != null)
+        {
+            var pObj = ScaryParty.Pizzeria.Integration.CityPizzeriaPlacementAdapter.SpawnPizzeria(
+                pizzeriaPrefab, placement.position, placement.rotation, parentTransform, CityData, config.sidewalkHeight, 7.5f, placement.entranceDirectionWorld);
+
+            if (pObj != null)
+            {
+                var pRoot = pObj.GetComponent<ScaryParty.Pizzeria.Composition.PizzeriaRoot>();
+                for (int i = 0; i < 4; i++)
+                {
+                    GameObject sp = new GameObject($"NetworkSpawnPoint_{i}");
+                    sp.transform.SetParent(pObj.transform);
+                    if (pRoot != null)
+                    {
+                        sp.transform.position = pRoot.GetPlayerSpawnPosition(i);
+                        sp.transform.rotation = pRoot.GetPlayerSpawnRotation(i);
+                    }
+                    else
+                    {
+                        sp.transform.position = placement.position + Vector3.up * 0.1f;
+                        sp.transform.rotation = placement.rotation;
+                    }
+                }
+
+                GameObject spLegacy = new GameObject("NetworkSpawnPoint");
+                spLegacy.transform.SetParent(pObj.transform);
+                if (pRoot != null)
+                {
+                    spLegacy.transform.position = pRoot.GetPlayerSpawnPosition(0);
+                    spLegacy.transform.rotation = pRoot.GetPlayerSpawnRotation(0);
+                }
+                else
+                {
+                    spLegacy.transform.position = placement.position + Vector3.up * 0.1f;
+                    spLegacy.transform.rotation = placement.rotation;
+                }
+            }
+            return;
+        }
+
+        SpawnPrimitivePizzeria(placement.position, placement.rotation, placement.entranceDirectionWorld, parentTransform, blockTransform);
+    }
+
+    private void SpawnPrimitivePizzeria(Vector3 pizzariaPos, Quaternion pizzariaRot, Vector3 entranceDir, Transform parentTransform, Transform blockTransform)
+    {
+        Vector3 pizzariaScale = new Vector3(12f, 6f, 12f);
+        CityData.pizzariaPosition = pizzariaPos;
+        CityData.pizzariaRotation = pizzariaRot;
+
+        GameObject pizzariaBuilding = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        pizzariaBuilding.name = "The_Pizzaria_Building";
+        pizzariaBuilding.transform.position = pizzariaPos;
+        pizzariaBuilding.transform.rotation = pizzariaRot;
+        pizzariaBuilding.transform.localScale = pizzariaScale;
+        pizzariaBuilding.transform.SetParent(parentTransform);
+
+        Material mat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        mat.color = new Color(0.8f, 0.1f, 0.1f);
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", mat.color);
+        pizzariaBuilding.GetComponent<Renderer>().sharedMaterial = mat;
+
+        float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
+        Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk;
+        bancadaPos.y = config.sidewalkHeight + 0.5f;
+
+        GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        bancada.name = "Bancada_Pizzas";
+        bancada.transform.position = bancadaPos;
+        bancada.transform.rotation = pizzariaRot;
+        bancada.transform.localScale = new Vector3(4f, 1f, 1.5f);
+        bancada.transform.SetParent(blockTransform != null ? blockTransform : _blocksRoot.transform);
+
+        Material bancadaMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        bancadaMat.color = new Color(0.4f, 0.2f, 0.1f);
+        if (bancadaMat.HasProperty("_BaseColor")) bancadaMat.SetColor("_BaseColor", bancadaMat.color);
+        bancada.GetComponent<Renderer>().sharedMaterial = bancadaMat;
+
+        CityData.bancadaPosition = bancadaPos + new Vector3(0, 0.5f, 0);
+
+        GameObject sign = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        sign.name = "Pizzaria_Sign";
+        sign.transform.SetParent(pizzariaBuilding.transform);
+        sign.transform.localPosition = new Vector3(0, 0.6f, 0.5f);
+        sign.transform.localScale = new Vector3(0.8f, 0.2f, 0.1f);
+        Material signMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
+        signMat.color = Color.yellow;
+        if (signMat.HasProperty("_BaseColor")) signMat.SetColor("_BaseColor", signMat.color);
+        sign.GetComponent<Renderer>().sharedMaterial = signMat;
+        sign.GetComponent<Collider>().enabled = false;
     }
 
     private void PlacePizzariaInBlock(System.Random rng)
@@ -896,6 +1001,12 @@ public class CityGenerator : NetworkBehaviour
 
     private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons)
     {
+        GenerateBlocks(rng, blockPolygons, out _);
+    }
+
+    private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons, out ScaryParty.City.PlacementResult placementResult)
+    {
+        placementResult = null;
         CityGenLogger.StartLog();
         CityData.blocks = new List<BlockInfo>();
 
@@ -960,25 +1071,45 @@ public class CityGenerator : NetworkBehaviour
             CityData.blocks.Add(block);
         }
 
-        // Identify Pizzeria block before filling
+        // Identify and reserve Pizzeria block before filling buildings
         if (config.pizzariaInsideBlock && CityData.blocks.Count > 0)
         {
-            int bestBlock = FindBestPizzariaBlock();
-            if (bestBlock >= 0)
+            placementResult = ScaryParty.City.PizzeriaPlacementSolver.Solve(CityData.blocks, pizzeriaPrefab, config, rng);
+            if (placementResult != null && placementResult.success)
             {
-                BlockInfo pBlock = CityData.blocks[bestBlock];
+                BlockInfo pBlock = CityData.blocks[placementResult.blockIndex];
                 pBlock.hasPizzaria = true;
-                CityData.blocks[bestBlock] = pBlock;
-                CityData.pizzariaBlockIndex = bestBlock;
+                CityData.blocks[placementResult.blockIndex] = pBlock;
+                CityData.pizzariaBlockIndex = placementResult.blockIndex;
+                CityData.pizzariaPosition = placementResult.position;
+                CityData.pizzariaRotation = placementResult.rotation;
+                CityData.bancadaPosition = placementResult.bancadaPosition;
+                CityData.hasPizzariaReserved = true;
+                Debug.Log($"[CityGenerator] ✅ Pizzaria reservada com sucesso na quadra {placementResult.blockIndex}!");
+            }
+            else
+            {
+                // Fallback legado de índice se o solver não encontrar quadra
+                int bestBlock = FindBestPizzariaBlock();
+                if (bestBlock >= 0)
+                {
+                    BlockInfo pBlock = CityData.blocks[bestBlock];
+                    pBlock.hasPizzaria = true;
+                    CityData.blocks[bestBlock] = pBlock;
+                    CityData.pizzariaBlockIndex = bestBlock;
+                }
             }
         }
 
-        // PASS 2: Fill Blocks
+        // PASS 2: Fill Blocks (respeitando reservas da pizzaria)
         for (int i = 0; i < CityData.blocks.Count; i++)
         {
             BlockInfo block = CityData.blocks[i];
             CityGenLogger.StartBlock(i, block.area, block.polygon.Length);
-            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i);
+            var reserved = (placementResult != null && placementResult.success && i == placementResult.blockIndex)
+                ? placementResult.reservedOBBs
+                : null;
+            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i, reserved);
         }
         
         CityGenLogger.SaveLog();

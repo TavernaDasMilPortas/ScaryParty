@@ -16,22 +16,43 @@ MonoBehaviour:
     nodes:
     - id: 0
       worldPosition: {x: 0, y: 0, z: 0}
-      connectedEdges: 0000000002000000
+      connectedEdges: 000000000200000003000000
     - id: 1
-      worldPosition: {x: 119.90988, y: 0, z: 4.649851}
-      connectedEdges: 0000000001000000
+      worldPosition: {x: -4.118311, y: 0, z: 119.92931}
+      connectedEdges: 000000000100000009000000
     - id: 2
-      worldPosition: {x: 117.181915, y: 0, z: 62.374107}
-      connectedEdges: 0100000005000000
+      worldPosition: {x: 73.978065, y: 0, z: 114.70222}
+      connectedEdges: 010000000d0000000f000000
     - id: 3
-      worldPosition: {x: 7.1517878, y: 0, z: 119.7867}
-      connectedEdges: 0200000003000000
+      worldPosition: {x: 119.98413, y: 0, z: 1.9517735}
+      connectedEdges: 020000000a000000
     - id: 4
-      worldPosition: {x: 60.91715, y: 0, z: 115.87869}
+      worldPosition: {x: -119.66789, y: 0, z: 8.921604}
       connectedEdges: 0300000004000000
     - id: 5
-      worldPosition: {x: 94.15344, y: 0, z: 114.32613}
+      worldPosition: {x: -118.08971, y: 0, z: 55.91771}
       connectedEdges: 0400000005000000
+    - id: 6
+      worldPosition: {x: -87.386215, y: 0, z: 55.959602}
+      connectedEdges: 050000000600000007000000
+    - id: 7
+      worldPosition: {x: -22.08142, y: 0, z: 54.156372}
+      connectedEdges: 060000000e000000
+    - id: 8
+      worldPosition: {x: -89.4325, y: 0, z: 115.96738}
+      connectedEdges: 0700000008000000
+    - id: 9
+      worldPosition: {x: -47.543774, y: 0, z: 113.02753}
+      connectedEdges: 08000000090000000e000000
+    - id: 10
+      worldPosition: {x: 119.01644, y: 0, z: 49.505375}
+      connectedEdges: 0a0000000b0000000c000000
+    - id: 11
+      worldPosition: {x: 117.5337, y: 0, z: 102.18547}
+      connectedEdges: 0b0000000f000000
+    - id: 12
+      worldPosition: {x: 67.29834, y: 0, z: 48.251205}
+      connectedEdges: 0c0000000d000000
     edges:
     - id: 0
       nodeA: 0
@@ -42,7 +63,7 @@ MonoBehaviour:
     - id: 1
       nodeA: 1
       nodeB: 2
-      length: 57.78868
+      length: 78.27111
       isBlocked: 0
       streetType: 1
     - id: 2
@@ -52,39 +73,137 @@ MonoBehaviour:
       isBlocked: 0
       streetType: 0
     - id: 3
-      nodeA: 3
+      nodeA: 0
       nodeB: 4
-      length: 53.907204
+      length: 120
       isBlocked: 0
-      streetType: 1
+      streetType: 0
     - id: 4
       nodeA: 4
       nodeB: 5
-      length: 33.272537
+      length: 47.0226
       isBlocked: 0
       streetType: 1
     - id: 5
-      nodeA: 2
-      nodeB: 5
-      length: 56.827137
+      nodeA: 5
+      nodeB: 6
+      length: 30.70352
+      isBlocked: 0
+      streetType: 1
+    - id: 6
+      nodeA: 6
+      nodeB: 7
+      length: 65.32969
+      isBlocked: 0
+      streetType: 1
+    - id: 7
+      nodeA: 6
+      nodeB: 8
+      length: 60.042652
+      isBlocked: 0
+      streetType: 1
+    - id: 8
+      nodeA: 8
+      nodeB: 9
+      length: 41.991764
+      isBlocked: 0
+      streetType: 1
+    - id: 9
+      nodeA: 9
+      nodeB: 1
+      length: 43.970505
+      isBlocked: 0
+      streetType: 1
+    - id: 10
+      nodeA: 3
+      nodeB: 10
+      length: 47.563446
+      isBlocked: 0
+      streetType: 1
+    - id: 11
+      nodeA: 10
+      nodeB: 11
+      length: 52.70096
+      isBlocked: 0
+      streetType: 1
+    - id: 12
+      nodeA: 10
+      nodeB: 12
+      length: 51.733307
+      isBlocked: 0
+      streetType: 1
+    - id: 13
+      nodeA: 12
+      nodeB: 2
+      length: 66.7859
+      isBlocked: 0
+      streetType: 1
+    - id: 14
+      nodeA: 7
+      nodeB: 9
+      length: 64.141594
+      isBlocked: 0
+      streetType: 1
+    - id: 15
+      nodeA: 11
+      nodeB: 2
+      length: 45.31845
       isBlocked: 0
       streetType: 1
   blocks:
-  - worldCenter: {x: 65.9234, y: 0, z: 59.595226}
-    size: {x: 93.52881, y: 0, z: 93.50071}
+  - worldCenter: {x: 58.10315, y: 0, z: 51.44784}
+    size: {x: 98.38229, y: 0, z: 93.8354}
     zoneType: 0
     deliveryPointIndices: 
     polygon:
-    - {x: 13.299918, y: 0, z: 13.025141}
-    - {x: 106.82873, y: 0, z: 16.651985}
-    - {x: 104.80628, y: 0, z: 59.447296}
-    - {x: 85.79976, y: 0, z: 102.32585}
-    - {x: 18.882317, y: 0, z: 106.52585}
-    area: 7548.0938
+    - {x: 12.071325, y: 0, z: 12.698017}
+    - {x: 107.23136, y: 0, z: 14.245979}
+    - {x: 106.77434, y: 0, z: 36.704826}
+    - {x: 53.444695, y: 0, z: 35.41158}
+    - {x: 60.248123, y: 0, z: 103.093216}
+    - {x: 8.849068, y: 0, z: 106.53342}
+    area: 5376.672
     hasPizzaria: 1
-  pizzariaPosition: {x: 18.124733, y: 1, z: 95.63411}
-  bancadaPosition: {x: 15.874733, y: 1.5, z: 95.63411}
+  - worldCenter: {x: -45.74335, y: 0, z: 54.511185}
+    size: {x: 103.8693, y: 0, z: 91.86235}
+    zoneType: 0
+    deliveryPointIndices: 
+    polygon:
+    - {x: -12.971011, y: 0, z: 13.5017185}
+    - {x: -16.125515, y: 0, z: 105.36407}
+    - {x: -29.678547, y: 0, z: 103.21003}
+    - {x: -2.9029007, y: 0, z: 41.302425}
+    - {x: -106.00994, y: 0, z: 43.193996}
+    - {x: -106.7722, y: 0, z: 20.49488}
+    area: 2452.0806
+    hasPizzaria: 0
+  - worldCenter: {x: 94.38346, y: 0, z: 78.509315}
+    size: {x: 25.016342, y: 0, z: 37.461716}
+    zoneType: 0
+    deliveryPointIndices: 
+    polygon:
+    - {x: 84.91768, y: 0, z: 98.55255}
+    - {x: 81.151985, y: 0, z: 61.090836}
+    - {x: 106.16833, y: 0, z: 61.697483}
+    - {x: 105.29583, y: 0, z: 92.6964}
+    area: 780.73096
+    hasPizzaria: 0
+  - worldCenter: {x: -62.27491, y: 0, z: 84.73507}
+    size: {x: 35.128, y: 0, z: 35.333786}
+    zoneType: 0
+    deliveryPointIndices: 
+    polygon:
+    - {x: -75.29398, y: 0, z: 68.13047}
+    - {x: -41.338905, y: 0, z: 67.19289}
+    - {x: -55.999847, y: 0, z: 101.09025}
+    - {x: -76.4669, y: 0, z: 102.52667}
+    area: 919.77295
+    hasPizzaria: 0
+  pizzariaPosition: {x: 53.747337, y: 2.6, z: 43.42147}
+  pizzariaRotation: {x: 0, y: 0.99874574, z: 0, w: -0.05007126}
+  bancadaPosition: {x: 55.23885, y: 1.5, z: 45.26152}
   pizzariaBlockIndex: 0
+  hasPizzariaReserved: 1
   enemySpawnPoints: []
   _gridWidth: 3
   _gridHeight: 3

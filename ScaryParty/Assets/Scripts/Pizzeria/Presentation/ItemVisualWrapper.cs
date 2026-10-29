@@ -9,6 +9,8 @@ namespace ScaryParty.Pizzeria.Presentation
     {
         public ulong ItemId { get; set; }
         public int DefinitionId { get; set; }
+        public byte Category { get; set; }
+        public byte PrepStage { get; set; }
         public bool IsTool { get; set; }
         public bool IsFallbackPrimitive { get; set; }
         public ItemPresentationProfile CurrentProfile { get; private set; }
