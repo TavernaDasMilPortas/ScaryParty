@@ -89,6 +89,7 @@
 }
 
 .btn-fallback-text {
+    display: none;
     font-size: 22px;
     -unity-font-style: bold;
     color: var(--color-text-dark);

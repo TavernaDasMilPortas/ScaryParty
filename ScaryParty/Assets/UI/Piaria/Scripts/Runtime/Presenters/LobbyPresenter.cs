@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -29,6 +29,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Button _btnColorOrange, _btnColorGreen, _btnColorBlue, _btnColorPink, _btnColorRed;
         private VisualElement _previewContainer;
         private VisualElement _previewRenderTexture;
+        private VisualElement _previewPlaceholder;
         private VisualElement _previewFrame;
         private Button _btnSaveProfile;
         private Color _selectedColor = new Color(1f, 0.45f, 0.1f);
@@ -73,11 +74,37 @@ namespace ScaryParty.UI.Piaria.Presenters
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
+            if (lobbyManager == null)
+            {
+                lobbyManager = GetComponent<LobbyManager>() ?? GetComponentInParent<LobbyManager>() ?? FindFirstObjectByType<LobbyManager>();
+                if (lobbyManager == null)
+                {
+                    var lobbyGo = GameObject.Find("--- LOBBY ---") ?? GameObject.Find("LobbyManager");
+                    if (lobbyGo != null) lobbyManager = lobbyGo.GetComponent<LobbyManager>();
+                }
+            }
             ResolveReferences();
         }
 
         private void Reset()
         {
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
+            if (lobbyManager == null)
+            {
+                lobbyManager = GetComponent<LobbyManager>() ?? GetComponentInParent<LobbyManager>() ?? FindFirstObjectByType<LobbyManager>();
+                if (lobbyManager == null)
+                {
+                    var lobbyGo = GameObject.Find("--- LOBBY ---") ?? GameObject.Find("LobbyManager");
+                    if (lobbyGo != null) lobbyManager = lobbyGo.GetComponent<LobbyManager>();
+                }
+            }
             ResolveReferences();
         }
 #endif
@@ -89,20 +116,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             EnsureInitialized();
             UIScreenRouter.Instance?.RegisterScreen(this);
 
-            if (FindFirstObjectByType<MainMenuPresenter>() != null)
-            {
-                if (RootElement != null) RootElement.style.display = DisplayStyle.None;
-                State = ScreenState.Hidden;
-            }
-            else
-            {
-                Open();
-            }
-
             if (RoomDiscoveryService.Instance != null)
             {
+                RoomDiscoveryService.Instance.OnRoomsUpdated -= OnLANRoomsDiscovered;
                 RoomDiscoveryService.Instance.OnRoomsUpdated += OnLANRoomsDiscovered;
-                OnLANRoomsDiscovered(RoomDiscoveryService.Instance.GetDiscoveredRooms());
             }
         }
 
@@ -110,8 +127,14 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (State == ScreenState.Active || State == ScreenState.Opening)
             {
-                if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
-                if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
+                if (UnityEngine.Cursor.lockState != CursorLockMode.None)
+                {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                }
+                if (!UnityEngine.Cursor.visible)
+                {
+                    UnityEngine.Cursor.visible = true;
+                }
             }
         }
 
@@ -136,6 +159,11 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (lobbyManager == null)
             {
                 lobbyManager = GetComponent<LobbyManager>() ?? GetComponentInParent<LobbyManager>() ?? FindFirstObjectByType<LobbyManager>();
+                if (lobbyManager == null)
+                {
+                    var lobbyGo = GameObject.Find("--- LOBBY ---") ?? GameObject.Find("LobbyManager");
+                    if (lobbyGo != null) lobbyManager = lobbyGo.GetComponent<LobbyManager>();
+                }
             }
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
@@ -170,6 +198,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             _btnColorRed = RootElement.Q<Button>("BtnColorRed");
             _previewContainer = RootElement.Q<VisualElement>("PreviewContainer");
             _previewRenderTexture = RootElement.Q<VisualElement>("PreviewRenderTexture");
+            _previewPlaceholder = RootElement.Q<VisualElement>("PreviewPlaceholder");
             _previewFrame = RootElement.Q<VisualElement>("PreviewFrame");
             _btnSaveProfile = RootElement.Q<Button>("BtnSaveProfile");
 
@@ -264,22 +293,38 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (noRoomsArt != null && catalog.noRooms != null)
                 noRoomsArt.style.backgroundImage = new StyleBackground(catalog.noRooms);
 
-            // Botões de ação ilustrados
-            if (_btnRefreshRooms != null && catalog.btnRefresh != null)
-                _btnRefreshRooms.style.backgroundImage = new StyleBackground(catalog.btnRefresh);
-            if (_btnCreateRoom != null && catalog.btnCreateRoom != null)
-                _btnCreateRoom.style.backgroundImage = new StyleBackground(catalog.btnCreateRoom);
-            if (_btnJoinManual != null && catalog.btnJoin != null)
-                _btnJoinManual.style.backgroundImage = new StyleBackground(catalog.btnJoin);
-            if (_btnJoinLAN != null && catalog.btnJoin2 != null)
-                _btnJoinLAN.style.backgroundImage = new StyleBackground(catalog.btnJoin2);
+            // NOTA: Os botões de ação (_btnCreateRoom, _btnJoinManual, _btnCreateLAN, _btnJoinLAN, _btnRefreshRooms)
+            // utilizam estilo visual via USS com cores vibrantes e tipografia nítida (--color-orange, --color-blue),
+            // evitando sobreposição de texto duplo com sprites legados.
         }
 
         private void SetupPreview()
         {
-            if (CharacterPreviewRig.Instance != null && _previewRenderTexture != null)
+            if (CharacterPreviewRig.Instance == null)
             {
-                _previewRenderTexture.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(CharacterPreviewRig.Instance.RenderTexture));
+                var existingRig = FindFirstObjectByType<CharacterPreviewRig>();
+                if (existingRig == null)
+                {
+                    var rigGo = new GameObject("CharacterPreviewRig");
+                    rigGo.AddComponent<CharacterPreviewRig>();
+                }
+            }
+
+            if (CharacterPreviewRig.Instance != null)
+            {
+                CharacterPreviewRig.Instance.SetActive(true);
+                if (_previewRenderTexture != null)
+                {
+                    var rt = CharacterPreviewRig.Instance.RenderTexture;
+                    if (rt != null)
+                    {
+                        _previewRenderTexture.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
+                        if (_previewPlaceholder != null)
+                        {
+                            _previewPlaceholder.style.display = DisplayStyle.None;
+                        }
+                    }
+                }
                 CharacterPreviewRig.Instance.BindDragEvents(_previewContainer);
                 CharacterPreviewRig.Instance.SetPlayerColor(_selectedColor);
             }
@@ -291,12 +336,25 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 if (_playerNameInput != null)
                     _playerNameInput.value = lobbyManager.PlayerData.PlayerName;
-                SetColor(lobbyManager.PlayerData.PlayerColor);
+                _selectedColor = lobbyManager.PlayerData.PlayerColor;
+                SetColor(_selectedColor);
+            }
+            else
+            {
+                var savedName = PlayerPrefs.GetString("PlayerName", "rubens");
+                if (_playerNameInput != null)
+                    _playerNameInput.value = savedName;
             }
         }
 
         private void SaveProfileData()
         {
+            if (_playerNameInput != null)
+            {
+                PlayerPrefs.GetString("PlayerName", _playerNameInput.value);
+                PlayerPrefs.Save();
+            }
+
             if (_playerNameInput != null && lobbyManager != null && lobbyManager.PlayerData != null)
             {
                 lobbyManager.PlayerData.PlayerName = _playerNameInput.value;
@@ -396,53 +454,55 @@ namespace ScaryParty.UI.Piaria.Presenters
             _roomList.Clear();
 
             var loadingLabel = new Label("Buscando salas disponíveis...");
-            loadingLabel.AddToClassList("no-rooms-label");
+            loadingLabel.AddToClassList("empty-main-text");
             _roomList.Add(loadingLabel);
-
-            if (lobbyManager != null)
-            {
-                var lobbies = await lobbyManager.QueryLobbiesAsync();
-                UpdateRoomEntries(lobbies);
-            }
-            else
-            {
-                UpdateRoomEntries(null);
-            }
-        }
-
-        private void UpdateRoomEntries(List<Unity.Services.Lobbies.Models.Lobby> lobbies)
-        {
-            if (_roomList == null) return;
-            _roomList.Clear();
 
             int count = 0;
 
-            // Salas LAN
-            if (_latestLANRooms != null && _latestLANRooms.Count > 0)
+            // Busca salas Relay públicas
+            try
             {
-                foreach (var lan in _latestLANRooms)
+                var queryLobbies = await Unity.Services.Lobbies.LobbyService.Instance.QueryLobbiesAsync();
+                _roomList.Clear();
+                foreach (var lobby in queryLobbies.Results)
                 {
                     count++;
-                    AddRoomEntry($"🌐 [LAN] {lan.RoomName}", $"Host: {lan.HostIP}:{lan.Port}", () =>
+                    string roomCode = lobby.Data != null && lobby.Data.ContainsKey("JoinCode") ? lobby.Data["JoinCode"].Value : "";
+                    AddRoomEntry(lobby.Name, $"{lobby.Players.Count}/{lobby.MaxPlayers} jogadores (Relay)", () =>
                     {
-                        SaveProfileData();
-                        lobbyManager?.JoinLANClient(lan.HostIP);
+                        if (lobbyManager != null)
+                        {
+                            lobbyManager.JoinRelayRoom(roomCode);
+                        }
+                        else
+                        {
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                        }
                     });
                 }
             }
-
-            // Salas Relay
-            if (lobbies != null && lobbies.Count > 0)
+            catch (Exception)
             {
-                foreach (var lob in lobbies)
+                // Relay offline ou não autenticado
+                _roomList.Clear();
+            }
+
+            // Salas LAN descobertas via UDP Broadcast
+            if (_latestLANRooms != null)
+            {
+                foreach (var lanRoom in _latestLANRooms)
                 {
                     count++;
-                    string code = (lob.Data != null && lob.Data.ContainsKey("JoinCode")) ? lob.Data["JoinCode"].Value : "";
-                    int players = lob.MaxPlayers - lob.AvailableSlots;
-                    AddRoomEntry($"🍕 {lob.Name}", $"Jogadores: {players}/{lob.MaxPlayers}", () =>
+                    AddRoomEntry(lanRoom.RoomName, $"{lanRoom.PlayerCount}/{lanRoom.MaxPlayers} (LAN @ {lanRoom.HostIP})", () =>
                     {
-                        SaveProfileData();
-                        lobbyManager?.JoinRelayRoom(code);
+                        if (lobbyManager != null)
+                        {
+                            lobbyManager.JoinLANClient(lanRoom.HostIP);
+                        }
+                        else
+                        {
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                        }
                     });
                 }
             }
@@ -472,8 +532,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             var joinBtn = new Button(onJoin);
             joinBtn.text = "ENTRAR";
-            joinBtn.AddToClassList("piaria-button");
-            joinBtn.AddToClassList("piaria-button-primary");
+            joinBtn.AddToClassList("btn-room-enter");
             UIFeedbackService.Instance?.BindButton(joinBtn);
 
             row.Add(info);
@@ -488,7 +547,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                 : $"{_playerNameInput?.value}'s Pizza Party";
 
             SaveProfileData();
-            lobbyManager?.CreateRelayRoom(roomName);
+            if (lobbyManager != null)
+            {
+                lobbyManager.CreateRelayRoom(roomName);
+            }
+            else
+            {
+                Debug.LogWarning("[LobbyPresenter] LobbyManager não encontrado. Carregando ReadyScene...");
+                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            }
         }
 
         private void OnJoinManualClicked()
@@ -502,7 +569,15 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             SaveProfileData();
-            lobbyManager?.JoinRelayRoom(code);
+            if (lobbyManager != null)
+            {
+                lobbyManager.JoinRelayRoom(code);
+            }
+            else
+            {
+                Debug.LogWarning("[LobbyPresenter] LobbyManager não encontrado. Carregando ReadyScene...");
+                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            }
         }
 
         private void OnCreateLANClicked()
@@ -512,7 +587,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                 : $"{_playerNameInput?.value}'s LAN Party";
 
             SaveProfileData();
-            lobbyManager?.StartLANHost(roomName);
+            if (lobbyManager != null)
+            {
+                lobbyManager.StartLANHost(roomName);
+            }
+            else
+            {
+                Debug.LogWarning("[LobbyPresenter] LobbyManager não encontrado. Carregando ReadyScene...");
+                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            }
         }
 
         private void OnJoinLANClicked()
@@ -526,7 +609,15 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             SaveProfileData();
-            lobbyManager?.JoinLANClient(ip);
+            if (lobbyManager != null)
+            {
+                lobbyManager.JoinLANClient(ip);
+            }
+            else
+            {
+                Debug.LogWarning("[LobbyPresenter] LobbyManager não encontrado. Carregando ReadyScene...");
+                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            }
         }
 
         public void Open(Action onComplete = null)

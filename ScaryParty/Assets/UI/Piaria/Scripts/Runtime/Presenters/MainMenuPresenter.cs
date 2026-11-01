@@ -50,11 +50,19 @@ namespace ScaryParty.UI.Piaria.Presenters
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
             ResolveUIDocument();
         }
 
         private void Reset()
         {
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
             ResolveUIDocument();
         }
 #endif
@@ -174,18 +182,26 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnPlay.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg1 != null) _btnPlay.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg1);
                 var art = _btnPlay.Q<VisualElement>("ArtPlay");
-                var fallback = _btnPlay.Q<Label>(className: "btn-fallback-text");
+                var fallback = _btnPlay.Q<Label>("FallbackPlay") ?? _btnPlay.Q<Label>(className: "btn-fallback-text");
                 if (art != null && catalog.btnPlayText != null)
                 {
                     art.style.backgroundImage = new StyleBackground(catalog.btnPlayText);
                     art.style.display = DisplayStyle.Flex;
                     art.pickingMode = PickingMode.Ignore;
-                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                    if (fallback != null)
+                    {
+                        fallback.text = string.Empty;
+                        fallback.style.display = DisplayStyle.None;
+                    }
                 }
                 else
                 {
                     if (art != null) art.style.display = DisplayStyle.None;
-                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                    if (fallback != null)
+                    {
+                        fallback.text = "JOGAR";
+                        fallback.style.display = DisplayStyle.Flex;
+                    }
                 }
             }
 
@@ -194,18 +210,26 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnSettings.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg2 != null) _btnSettings.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg2);
                 var art = _btnSettings.Q<VisualElement>("ArtSettings");
-                var fallback = _btnSettings.Q<Label>(className: "btn-fallback-text");
+                var fallback = _btnSettings.Q<Label>("FallbackSettings") ?? _btnSettings.Q<Label>(className: "btn-fallback-text");
                 if (art != null && catalog.btnSettingsText != null)
                 {
                     art.style.backgroundImage = new StyleBackground(catalog.btnSettingsText);
                     art.style.display = DisplayStyle.Flex;
                     art.pickingMode = PickingMode.Ignore;
-                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                    if (fallback != null)
+                    {
+                        fallback.text = string.Empty;
+                        fallback.style.display = DisplayStyle.None;
+                    }
                 }
                 else
                 {
                     if (art != null) art.style.display = DisplayStyle.None;
-                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                    if (fallback != null)
+                    {
+                        fallback.text = "CONFIGURAÇÕES";
+                        fallback.style.display = DisplayStyle.Flex;
+                    }
                 }
             }
 
@@ -214,18 +238,26 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnQuit.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg3 != null) _btnQuit.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg3);
                 var art = _btnQuit.Q<VisualElement>("ArtQuit");
-                var fallback = _btnQuit.Q<Label>(className: "btn-fallback-text");
+                var fallback = _btnQuit.Q<Label>("FallbackQuit") ?? _btnQuit.Q<Label>(className: "btn-fallback-text");
                 if (art != null && catalog.btnQuitText != null)
                 {
                     art.style.backgroundImage = new StyleBackground(catalog.btnQuitText);
                     art.style.display = DisplayStyle.Flex;
                     art.pickingMode = PickingMode.Ignore;
-                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                    if (fallback != null)
+                    {
+                        fallback.text = string.Empty;
+                        fallback.style.display = DisplayStyle.None;
+                    }
                 }
                 else
                 {
                     if (art != null) art.style.display = DisplayStyle.None;
-                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                    if (fallback != null)
+                    {
+                        fallback.text = "SAIR";
+                        fallback.style.display = DisplayStyle.Flex;
+                    }
                 }
             }
         }

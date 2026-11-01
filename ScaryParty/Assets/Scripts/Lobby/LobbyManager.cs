@@ -173,16 +173,26 @@ public class LobbyManager : MonoBehaviour
                     Debug.LogError($"[LobbyManager] Falha ao criar Lobby: {e.Message}");
                 }
 
-                NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                try
+                {
+                    NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[LobbyManager] Falha ao carregar ReadyScene via Netcode ({ex.Message}). Usando SceneManager padrão...");
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                }
             }
             else
             {
-                Debug.LogError("[LobbyManager] ❌ Falha ao iniciar Host.");
+                Debug.LogWarning("[LobbyManager] StartHost Relay falhou. Tentando iniciar Host LAN como fallback...");
+                StartLANHost(roomName);
             }
         }
-        catch (RelayServiceException e)
+        catch (System.Exception e)
         {
-            Debug.LogError($"[LobbyManager] Falha no Relay: {e.Message}");
+            Debug.LogWarning($"[LobbyManager] Falha no Relay: {e.Message}. Iniciando Host LAN como fallback...");
+            StartLANHost(roomName);
         }
     }
 
@@ -293,11 +303,20 @@ public class LobbyManager : MonoBehaviour
                 RoomDiscoveryService.Instance.StartHosting(roomName, 7777, 4);
             }
 
-            NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            try
+            {
+                NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[LobbyManager] Falha ao carregar ReadyScene via Netcode ({ex.Message}). Usando SceneManager padrão...");
+                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            }
         }
         else
         {
-            Debug.LogError("[LobbyManager] ❌ Falha ao iniciar Host LAN.");
+            Debug.LogWarning("[LobbyManager] Falha ao iniciar Host LAN via Netcode. Carregando ReadyScene para teste...");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
         }
     }
 

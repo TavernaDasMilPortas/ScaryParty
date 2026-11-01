@@ -17,17 +17,17 @@
             <ui:VisualElement class="menu-buttons-group" picking-mode="Ignore">
                 <ui:Button name="BtnPlay" class="ribbon-btn btn-play" picking-mode="Position">
                     <ui:VisualElement name="ArtPlay" class="btn-text-art art-play" picking-mode="Ignore" />
-                    <ui:Label text="JOGAR" class="btn-fallback-text" picking-mode="Ignore" />
+                    <ui:Label name="FallbackPlay" text="" class="btn-fallback-text" picking-mode="Ignore" style="display: none;" />
                 </ui:Button>
 
                 <ui:Button name="BtnSettings" class="ribbon-btn btn-settings" picking-mode="Position">
                     <ui:VisualElement name="ArtSettings" class="btn-text-art art-settings" picking-mode="Ignore" />
-                    <ui:Label text="CONFIGURAÇÕES" class="btn-fallback-text" picking-mode="Ignore" />
+                    <ui:Label name="FallbackSettings" text="" class="btn-fallback-text" picking-mode="Ignore" style="display: none;" />
                 </ui:Button>
 
                 <ui:Button name="BtnQuit" class="ribbon-btn btn-quit" picking-mode="Position">
                     <ui:VisualElement name="ArtQuit" class="btn-text-art art-quit" picking-mode="Ignore" />
-                    <ui:Label text="SAIR" class="btn-fallback-text" picking-mode="Ignore" />
+                    <ui:Label name="FallbackQuit" text="" class="btn-fallback-text" picking-mode="Ignore" style="display: none;" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>

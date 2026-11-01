@@ -1,190 +1,416 @@
+/* ========================================================
+   P.I.A.R.I.A — Tela de Lobby (Design Fiel à Prévia)
+   Layout: 3 Colunas de Papel, Proporções Estáveis,
+   Preview 3D em RawImage, Botões Fita e Cores Ilustradas.
+   ======================================================== */
+
 .lobby-bg {
     background-color: var(--color-bg-peach);
-    padding: 20px 32px;
+    padding: 16px 24px 20px 24px;
     flex-direction: column;
-    -unity-background-scale-mode: scale-and-crop;
-}
-
-.lobby-header {
-    flex-direction: row;
-    justify-content: space-between;
     align-items: center;
-    height: 64px;
-    margin-bottom: 12px;
+    justify-content: center;
 }
 
-.btn-back-lobby {
-    width: 104px;
-    height: 44px;
-    background-color: transparent;
-    border-width: 0;
+/* --- TOPO --- */
+.lobby-header-bar {
+    position: absolute;
+    top: 16px;
+    left: 24px;
+    right: 24px;
+    height: 56px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.btn-back-ribbon {
+    width: 52px;
+    height: 48px;
+    background-color: #cb3428;
+    border-color: #402318;
+    border-width: 3.5px;
+    border-radius: 6px;
     justify-content: center;
     align-items: center;
-    -unity-background-scale-mode: scale-to-fit;
+    padding: 0;
+    transition-property: scale;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out-back;
 }
 
-.btn-back-text {
-    font-size: 16px;
+.btn-back-ribbon:hover {
+    scale: 1.08 1.08;
+}
+
+.btn-back-ribbon:active {
+    scale: 0.94 0.94;
+}
+
+.btn-back-arrow {
+    font-size: 26px;
     -unity-font-style: bold;
-    color: var(--color-text-dark);
+    color: #ffffff;
+    -unity-text-align: middle-center;
 }
 
-.lobby-title-art {
-    width: 280px;
-    height: 56px;
+.lobby-title-logo {
+    width: 250px;
+    height: 60px;
     -unity-background-scale-mode: scale-to-fit;
+    align-self: center;
 }
 
-.lobby-header-spacer {
-    width: 104px;
+.lobby-badge-container {
+    width: 230px;
+    align-items: flex-end;
 }
 
-/* Colunas Proporcionadas 1 : 1.1 : 1 */
-.lobby-three-columns {
-    flex-grow: 1;
+.lobby-preview-badge {
+    font-size: 13px;
+    color: #a37d68;
+    -unity-font-style: bold;
+}
+
+/* --- COLUNAS CENTRAIS --- */
+.lobby-columns-row {
+    width: 1140px;
+    height: 720px;
+    margin-top: 50px;
     flex-direction: row;
+    justify-content: center;
+}
+
+.lobby-column {
+    height: 100%;
+    background-color: #ffebd5;
+    border-color: #402318;
+    border-width: 4px;
+    border-radius: 8px;
+    padding: 16px 18px;
+    margin-left: 10px;
+    margin-right: 10px;
+    flex-direction: column;
 }
 
 .col-profile {
-    flex-grow: 1;
-    flex-basis: 0;
-    flex-direction: column;
-    margin-right: 10px;
+    width: 335px;
 }
 
 .col-roomlist {
-    flex-grow: 1.1;
-    flex-basis: 0;
-    flex-direction: column;
-    margin-left: 10px;
-    margin-right: 10px;
+    width: 405px;
 }
 
 .col-connect {
-    flex-grow: 1;
-    flex-basis: 0;
-    flex-direction: column;
-    margin-left: 10px;
+    width: 360px;
 }
 
-.section-header-art {
-    height: 46px;
-    margin-bottom: 10px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.field-subheading {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: var(--color-text-muted);
-    margin-top: 6px;
-    margin-bottom: 4px;
-}
-
-.color-palette-row {
-    flex-direction: row;
-    margin-bottom: 10px;
-    justify-content: space-between;
-}
-
-.color-dot {
-    width: 44px;
+/* Faixas de Título das Colunas */
+.col-ribbon-banner {
     height: 44px;
-    border-width: 0;
-    border-radius: 0;
-    background-color: transparent;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.color-dot:hover {
-    scale: 1.1;
-}
-
-.character-preview-container {
-    flex-grow: 1;
-    min-height: 190px;
-    position: relative;
+    width: 230px;
+    align-self: center;
     justify-content: center;
     align-items: center;
+    border-color: #402318;
+    border-width: 3px;
+    border-radius: 4px;
     margin-bottom: 12px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
-.character-preview-rt {
+.ribbon-yellow {
+    background-color: #fcd34d;
+}
+
+.col-ribbon-title {
+    color: #402318;
+    font-size: 19px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.section-sub-ribbon {
+    width: 210px;
+    height: 34px;
+    margin-bottom: 6px;
+}
+
+.small-title {
+    font-size: 15px;
+}
+
+/* Rótulos e Campos de Entrada Estilo Papel */
+.field-caption {
+    font-size: 13.5px;
+    -unity-font-style: bold;
+    color: #b07d5b;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.paper-input-box {
+    height: 38px;
+    background-color: #fffbf5;
+    border-color: #402318;
+    border-width: 2.5px;
+    border-radius: 4px;
+    color: #402318;
+    font-size: 17px;
+    -unity-font-style: bold;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-bottom: 10px;
+}
+
+.paper-input-box > .unity-text-field__input {
+    background-color: transparent;
+    border-width: 0;
+    color: #402318;
+    font-size: 17px;
+    -unity-font-style: bold;
+    padding: 0;
+}
+
+/* Moldura e RawImage 3D */
+.character-preview-card {
+    width: 100%;
+    height: 320px;
+    background-color: #fce8d5;
+    border-color: #402318;
+    border-width: 3.5px;
+    border-radius: 6px;
+    margin-top: 4px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.preview-rt-layer {
     position: absolute;
-    width: 88%;
-    height: 88%;
-    border-radius: 10px;
+    width: 100%;
+    height: 100%;
     -unity-background-scale-mode: scale-and-crop;
 }
 
-.character-preview-frame {
+.preview-frame-overlay {
     position: absolute;
     width: 100%;
     height: 100%;
     -unity-background-scale-mode: stretch-to-fill;
 }
 
-.btn-save-profile {
+.preview-placeholder-center {
+    position: absolute;
     width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
 }
 
-.room-scroll-list {
+.avatar-ph-icon {
+    font-size: 40px;
+    margin-bottom: 4px;
+}
+
+.avatar-ph-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #402318;
+}
+
+.avatar-ph-subtitle {
+    font-size: 13.5px;
+    color: #96745f;
+}
+
+/* Amostras de Cores */
+.swatches-paper-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.swatch-paper-card {
+    width: 62px;
+    height: 38px;
+    background-color: #fffbf5;
+    border-color: #402318;
+    border-width: 2.5px;
+    border-radius: 4px;
+    padding: 3px;
+    align-items: center;
+    justify-content: center;
+    transition-property: scale;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out-back;
+}
+
+.swatch-paper-card:hover {
+    scale: 1.1 1.1;
+}
+
+.swatch-paper-card:active {
+    scale: 0.95 0.95;
+}
+
+.swatch-color-pill {
+    width: 48px;
+    height: 24px;
+    border-radius: 3px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.color-pill-orange { background-color: #ff741f; }
+.color-pill-green  { background-color: #7ec850; }
+.color-pill-blue   { background-color: #3b82f6; }
+.color-pill-pink   { background-color: #f472b6; }
+.color-pill-red    { background-color: #ef4444; }
+
+/* Botões Fita */
+.ribbon-action-btn {
+    height: 44px;
+    border-color: #402318;
+    border-width: 3px;
+    border-radius: 6px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition-property: scale;
+    transition-duration: 0.12s;
+    transition-timing-function: ease-out-back;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.ribbon-action-btn:hover {
+    scale: 1.04 1.04;
+}
+
+.ribbon-action-btn:active {
+    scale: 0.96 0.96;
+}
+
+.btn-orange {
+    background-color: #ff741f;
+}
+
+.btn-blue {
+    background-color: #2563eb;
+}
+
+.btn-green {
+    background-color: #8cb836;
+}
+
+.btn-action-label {
+    color: #ffffff;
+    font-size: 19px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+.btn-action-label-small {
+    color: #ffffff;
+    font-size: 15.5px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
+/* Coluna 2: Lista de Salas */
+.room-cards-scrollview {
     flex-grow: 1;
+    margin-top: 4px;
     margin-bottom: 12px;
 }
 
-.empty-rooms-container {
+.empty-room-paper-box {
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 30px 16px;
 }
 
-.no-rooms-art {
-    width: 220px;
-    height: 72px;
+.empty-pizza-art {
+    width: 140px;
+    height: 52px;
     margin-bottom: 8px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.no-rooms-label {
-    font-size: 15px;
-    color: var(--color-text-muted);
-    -unity-text-align: middle-center;
+.empty-main-text {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #7a503e;
+    margin-bottom: 2px;
 }
 
+.empty-sub-text {
+    font-size: 13.5px;
+    color: #a37d68;
+}
+
+.bottom-action-center {
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-refresh-pill {
+    width: 220px;
+}
+
+/* Cartões de Sala Gerados */
 .room-entry {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: #FFFDF7;
-    border-color: var(--color-border-brown);
-    border-width: 2px;
-    border-radius: 8px;
-    padding: 8px 12px;
-    margin-bottom: 6px;
-}
-
-.room-name-lbl {
-    font-size: 17px;
-    -unity-font-style: bold;
-    color: var(--color-text-dark);
-}
-
-.room-details-lbl {
-    font-size: 13px;
-    color: var(--color-text-muted);
-}
-
-.connect-scroll {
-    flex-grow: 1;
-}
-
-.col-divider {
-    height: 2px;
-    background-color: var(--color-border-brown-light);
-    margin-top: 10px;
+    background-color: #fffbf5;
+    border-color: #402318;
+    border-width: 3px;
+    border-radius: 6px;
+    padding: 12px 14px;
     margin-bottom: 10px;
 }
 
-.mb-10 { margin-bottom: 10px; }
-.mb-14 { margin-bottom: 14px; }
+.room-name-lbl {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #402318;
+}
+
+.room-details-lbl {
+    font-size: 13.5px;
+    color: #997561;
+}
+
+.btn-room-enter {
+    background-color: #8cb836;
+    border-color: #402318;
+    border-width: 2.5px;
+    border-radius: 4px;
+    width: 96px;
+    height: 38px;
+    color: #ffffff;
+    font-size: 16px;
+    -unity-font-style: bold;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Coluna 3: Conexões (Sem Scroll) */
+.connect-section-box {
+    margin-bottom: 12px;
+}
+
+.last-box {
+    margin-bottom: 0px;
+}
+
+.lan-buttons-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-1 { flex-grow: 1; }
+.mr-6 { margin-right: 6px; }
+.ml-6 { margin-left: 6px; }

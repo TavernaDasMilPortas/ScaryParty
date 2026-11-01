@@ -1,13 +1,16 @@
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ScaryParty.UI.Piaria.Core
 {
     /// <summary>
     /// Rig isolado de visualização 3D do personagem para a tela de Lobby.
-    /// Renderiza o modelo do jogador com iluminação própria para uma RenderTexture exibida em UI Toolkit.
-    /// Gerencia ativação sob demanda para custo zero de performance em gameplay ou outras telas.
+    /// Renderiza o modelo do jogador com iluminação própria para uma RenderTexture exibida em UI Toolkit (Raw Image).
+    /// Fica isolado no espaço distante (-3000, -3000, -3000) com scripts de gameplay e física desativados.
     /// </summary>
     public class CharacterPreviewRig : MonoBehaviour
     {
@@ -22,7 +25,7 @@ namespace ScaryParty.UI.Piaria.Core
 
         private GameObject _spawnedModel;
         private Renderer[] _renderers;
-        private float _currentRotationY = 180f;
+        private float _currentRotationY = 0f;
         private bool _isDragging = false;
         private Vector2 _lastMousePos;
 
@@ -45,6 +48,9 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void EnsureSetup()
         {
+            // Posiciona o rig longe do mundo jogável
+            transform.position = new Vector3(-3000f, -3000f, -3000f);
+
             if (targetTexture == null)
             {
                 targetTexture = new RenderTexture(512, 512, 16, RenderTextureFormat.ARGB32)
@@ -61,19 +67,19 @@ namespace ScaryParty.UI.Piaria.Core
                 {
                     var camGo = new GameObject("PreviewCamera");
                     camGo.transform.SetParent(transform, false);
-                    camGo.transform.localPosition = new Vector3(0, 1.0f, 2.2f);
-                    camGo.transform.localRotation = Quaternion.Euler(0, 180, 0);
                     previewCamera = camGo.AddComponent<Camera>();
                 }
             }
 
+            previewCamera.transform.localPosition = new Vector3(0f, 1.05f, 2.1f);
+            previewCamera.transform.localRotation = Quaternion.Euler(6f, 180f, 0f);
             previewCamera.targetTexture = targetTexture;
             previewCamera.clearFlags = CameraClearFlags.SolidColor;
-            previewCamera.backgroundColor = new Color(0.92f, 0.85f, 0.76f, 0f); // Transparente
-            previewCamera.fieldOfView = 36f;
+            previewCamera.backgroundColor = new Color(0.99f, 0.94f, 0.88f, 1f); // Creme papel suave
+            previewCamera.fieldOfView = 34f;
             previewCamera.nearClipPlane = 0.1f;
             previewCamera.farClipPlane = 20f;
-            previewCamera.enabled = false; // Só liga quando a UI estiver aberta
+            previewCamera.enabled = false;
 
             if (previewLight == null)
             {
@@ -82,14 +88,15 @@ namespace ScaryParty.UI.Piaria.Core
                 {
                     var lightGo = new GameObject("PreviewLight");
                     lightGo.transform.SetParent(transform, false);
-                    lightGo.transform.localPosition = new Vector3(0.5f, 2f, 1.5f);
-                    lightGo.transform.localRotation = Quaternion.Euler(35, -25, 0);
                     previewLight = lightGo.AddComponent<Light>();
-                    previewLight.type = LightType.Directional;
-                    previewLight.intensity = 1.3f;
-                    previewLight.color = new Color(1f, 0.95f, 0.9f);
                 }
             }
+
+            previewLight.transform.localPosition = new Vector3(0.6f, 2.2f, 1.6f);
+            previewLight.transform.localRotation = Quaternion.Euler(35f, -25f, 0f);
+            previewLight.type = LightType.Directional;
+            previewLight.intensity = 1.35f;
+            previewLight.color = new Color(1f, 0.96f, 0.92f);
 
             if (modelContainer == null)
             {
@@ -116,19 +123,12 @@ namespace ScaryParty.UI.Piaria.Core
 
             if (defaultModelPrefab == null)
             {
-                // Tenta carregar o PlayerArmature do projeto
-                defaultModelPrefab = Resources.Load<GameObject>("PlayerArmature");
+#if UNITY_EDITOR
+                defaultModelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab");
+#endif
                 if (defaultModelPrefab == null)
                 {
-                    var all = Resources.FindObjectsOfTypeAll<GameObject>();
-                    foreach (var go in all)
-                    {
-                        if (go.name == "PlayerArmature" && go.scene.name == null)
-                        {
-                            defaultModelPrefab = go;
-                            break;
-                        }
-                    }
+                    defaultModelPrefab = Resources.Load<GameObject>("PlayerArmature");
                 }
             }
 
@@ -136,22 +136,34 @@ namespace ScaryParty.UI.Piaria.Core
             {
                 _spawnedModel = Instantiate(defaultModelPrefab, modelContainer);
                 _spawnedModel.transform.localPosition = Vector3.zero;
-                _spawnedModel.transform.localRotation = Quaternion.Euler(0, 180, 0);
+                _spawnedModel.transform.localRotation = Quaternion.identity;
 
-                // Desativa scripts de gameplay do clone de preview
-                var behaviours = _spawnedModel.GetComponentsInChildren<MonoBehaviour>();
+                // Desativa completamente componentes de gameplay, física, câmera e áudio do clone de preview
+                var behaviours = _spawnedModel.GetComponentsInChildren<MonoBehaviour>(true);
                 foreach (var b in behaviours)
                 {
                     if (b != null) b.enabled = false;
                 }
 
-                var colliders = _spawnedModel.GetComponentsInChildren<Collider>();
+                var colliders = _spawnedModel.GetComponentsInChildren<Collider>(true);
                 foreach (var c in colliders)
                 {
                     if (c != null) c.enabled = false;
                 }
 
-                _renderers = _spawnedModel.GetComponentsInChildren<Renderer>();
+                var listeners = _spawnedModel.GetComponentsInChildren<AudioListener>(true);
+                foreach (var l in listeners)
+                {
+                    if (l != null) Destroy(l);
+                }
+
+                var cams = _spawnedModel.GetComponentsInChildren<Camera>(true);
+                foreach (var cam in cams)
+                {
+                    if (cam != null && cam != previewCamera) Destroy(cam);
+                }
+
+                _renderers = _spawnedModel.GetComponentsInChildren<Renderer>(true);
             }
         }
 
@@ -159,7 +171,13 @@ namespace ScaryParty.UI.Piaria.Core
         {
             EnsureSetup();
             if (previewCamera != null)
+            {
                 previewCamera.enabled = active;
+                if (active)
+                {
+                    previewCamera.Render();
+                }
+            }
 
             if (previewLight != null)
                 previewLight.enabled = active;
@@ -193,6 +211,11 @@ namespace ScaryParty.UI.Piaria.Core
                 }
                 r.materials = mats;
             }
+
+            if (previewCamera != null && previewCamera.enabled)
+            {
+                previewCamera.Render();
+            }
         }
 
         public void BindDragEvents(VisualElement previewElement)
@@ -208,38 +231,23 @@ namespace ScaryParty.UI.Piaria.Core
 
             previewElement.RegisterCallback<PointerMoveEvent>(evt =>
             {
-                if (_isDragging && modelContainer != null)
+                if (!_isDragging || modelContainer == null) return;
+                float deltaX = evt.position.x - _lastMousePos.x;
+                _lastMousePos = evt.position;
+                _currentRotationY -= deltaX * 0.9f;
+                modelContainer.localRotation = Quaternion.Euler(0, _currentRotationY, 0);
+
+                if (previewCamera != null && previewCamera.enabled)
                 {
-                    float deltaX = evt.position.x - _lastMousePos.x;
-                    _lastMousePos = evt.position;
-                    _currentRotationY -= deltaX * 0.7f;
-                    modelContainer.localRotation = Quaternion.Euler(0, _currentRotationY, 0);
+                    previewCamera.Render();
                 }
             });
 
             previewElement.RegisterCallback<PointerUpEvent>(evt =>
             {
-                if (_isDragging)
-                {
-                    _isDragging = false;
-                    previewElement.ReleasePointer(evt.pointerId);
-                }
-            });
-
-            previewElement.RegisterCallback<PointerLeaveEvent>(evt =>
-            {
                 _isDragging = false;
+                previewElement.ReleasePointer(evt.pointerId);
             });
-        }
-
-        private void OnDestroy()
-        {
-            if (targetTexture != null)
-            {
-                targetTexture.Release();
-                Destroy(targetTexture);
-            }
-            if (Instance == this) Instance = null;
         }
     }
 }
