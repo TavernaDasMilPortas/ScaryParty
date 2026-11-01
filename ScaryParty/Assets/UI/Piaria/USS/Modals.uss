@@ -1,0 +1,31 @@
+.generic-modal-backdrop {
+    display: none;
+}
+
+.generic-modal-card {
+    width: 520px;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.modal-message-text {
+    font-size: 17px;
+    color: var(--color-text-dark);
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+    white-space: normal;
+}
+
+.modal-buttons-row {
+    flex-direction: row;
+    width: 100%;
+    gap: 16px;
+}
+
+.modal-btn {
+    flex-grow: 1;
+}

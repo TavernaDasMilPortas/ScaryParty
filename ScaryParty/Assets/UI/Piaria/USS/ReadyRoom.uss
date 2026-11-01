@@ -1,0 +1,123 @@
+.ready-room-bg {
+    background-color: var(--color-bg-peach);
+    justify-content: center;
+    align-items: center;
+}
+
+.ready-card {
+    width: 820px;
+    height: 700px;
+    flex-direction: column;
+}
+
+.ready-header {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.waiting-title-art {
+    width: 360px;
+    height: 60px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.room-code-banner {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFDF8;
+    border-color: var(--color-border-brown);
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-bottom: 16px;
+}
+
+.room-code-text {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+}
+
+.btn-copy-code {
+    font-size: 16px;
+    padding: 6px 16px;
+}
+
+.players-scroll-container {
+    flex-grow: 1;
+    margin-bottom: 20px;
+}
+
+.player-slot-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 72px;
+    margin-bottom: 12px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border-width: 2px;
+    border-color: var(--color-border-brown);
+    background-color: #FFFDF8;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.player-color-indicator {
+    width: 24px;
+    height: 24px;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: var(--color-border-brown);
+    margin-right: 12px;
+}
+
+.player-name-text {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+}
+
+.player-status-tag {
+    font-size: 17px;
+    -unity-font-style: bold;
+    padding: 6px 14px;
+    border-radius: 6px;
+}
+
+.status-ready {
+    color: #1B5E20;
+    background-color: #C8E6C9;
+}
+
+.status-waiting {
+    color: #E65100;
+    background-color: #FFE0B2;
+}
+
+.slot-empty {
+    opacity: 0.6;
+    border-style: dashed;
+}
+
+.ready-actions-bar {
+    flex-direction: row;
+    gap: 12px;
+    justify-content: space-between;
+}
+
+.btn-action-ready {
+    flex-grow: 1.4;
+}
+
+.btn-action-start {
+    flex-grow: 1.4;
+}
+
+.btn-action-leave {
+    flex-grow: 1;
+}
+
+.btn-action-edit {
+    flex-grow: 1;
+}

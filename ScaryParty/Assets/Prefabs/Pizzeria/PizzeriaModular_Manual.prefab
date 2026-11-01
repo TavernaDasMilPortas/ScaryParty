@@ -408,6 +408,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.3, y: 4, z: 2}
   m_Center: {x: 0, y: 0.13780749, z: 0}
+--- !u!1 &58124423917897960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2838751401859105012}
+  m_Layer: 0
+  m_Name: EntryAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2838751401859105012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 58124423917897960}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.45, z: -0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 282542543211238615}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &62772369082453703
 GameObject:
   m_ObjectHideFlags: 0
@@ -5657,6 +5688,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!114 &5334954791090512058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11184,6 +11216,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!114 &4701774068834751759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11214,6 +11247,7 @@ GameObject:
   - component: {fileID: 5369599492650451916}
   - component: {fileID: 6348598587513324615}
   - component: {fileID: 7237959025604442940}
+  - component: {fileID: 8839054069173593842}
   m_Layer: 0
   m_Name: portaforno.003
   m_TagString: Untagged
@@ -11341,6 +11375,53 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.30830574, y: 1.1874732, z: 2.0333376}
   m_Center: {x: -0.10637379, y: 0.19669741, z: -1.0168586}
+--- !u!114 &8839054069173593842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112283797557630874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 1
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: 1
+  hoverAmount: 0.08
+  openAmount: 0.55
+  durationOpen: 0.25
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: -0.5557461, y: -1.8569314, z: 1.0168586}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &1123228653493909272
 GameObject:
   m_ObjectHideFlags: 0
@@ -11605,7 +11686,7 @@ GameObject:
   - component: {fileID: 205686464171108858}
   - component: {fileID: 8290873734266798044}
   - component: {fileID: 8966502854971001031}
-  - component: {fileID: 3187387350686078207}
+  - component: {fileID: 6115678377341899978}
   m_Layer: 0
   m_Name: mesa media.001
   m_TagString: Untagged
@@ -11763,7 +11844,7 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   outlineWidth: 2.5
   occludedByGeometry: 1
---- !u!114 &3187387350686078207
+--- !u!114 &6115678377341899978
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -11772,9 +11853,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1205488594985812818}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dd38a94f3cc663e4899d8f4de097b567, type: 3}
+  m_Script: {fileID: 11500000, guid: 87e555308e81bcc44a13fc887838a161, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.AssemblyStation
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PrepStation
   stationId: 11
   stationName: Bancada de Montagem
   slotAnchors:
@@ -11785,6 +11866,8 @@ MonoBehaviour:
   slotsBoundToObjects: 1
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
+  defaultProcessId: 1
 --- !u!1 &1216307650320186561
 GameObject:
   m_ObjectHideFlags: 0
@@ -12988,6 +13071,7 @@ GameObject:
   - component: {fileID: 5416363717453503418}
   - component: {fileID: 7949382206466533371}
   - component: {fileID: 995333035506958858}
+  - component: {fileID: 2764654058787003369}
   m_Layer: 0
   m_Name: Geladeira_04
   m_TagString: Untagged
@@ -13009,9 +13093,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1801313216179009789}
-  - {fileID: 8326185540342376233}
-  - {fileID: 2683443326333443147}
   - {fileID: 1609094420169555147}
+  - {fileID: 4105211758190700722}
+  - {fileID: 311102847203707278}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5416363717453503418
@@ -13056,6 +13140,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &995333035506958858
 MonoBehaviour:
@@ -13074,6 +13159,21 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   outlineWidth: 2.5
   occludedByGeometry: 1
+--- !u!114 &2764654058787003369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1400251911580512532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696dfa9e9de133440ab99cdb710dcb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.StationDoorPresenter
+  _doors:
+  - {fileID: 4331029264561251958}
+  - {fileID: 5178848139246670773}
 --- !u!1 &1442563082901247271
 GameObject:
   m_ObjectHideFlags: 0
@@ -14033,6 +14133,7 @@ GameObject:
   - component: {fileID: 7441690806410540388}
   - component: {fileID: 6088971358595067776}
   - component: {fileID: 5570100932970742433}
+  - component: {fileID: 4265014655937819570}
   m_Layer: 0
   m_Name: portaforno.001
   m_TagString: Untagged
@@ -14160,6 +14261,53 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.30830574, y: 1.1874732, z: 2.0333376}
   m_Center: {x: -0.10637379, y: 0.19669741, z: -1.0168586}
+--- !u!114 &4265014655937819570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1573425108054756797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 1
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: 1
+  hoverAmount: 0.08
+  openAmount: 0.55
+  durationOpen: 0.25
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: -0.5557461, y: -1.8569314, z: 1.0073844}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &1593574806104026665
 GameObject:
   m_ObjectHideFlags: 0
@@ -14728,6 +14876,7 @@ GameObject:
   - component: {fileID: 8216507907869709354}
   - component: {fileID: 8383067624635018647}
   - component: {fileID: 1369697468937015449}
+  - component: {fileID: 1694858420763754091}
   m_Layer: 0
   m_Name: Forno_01
   m_TagString: Untagged
@@ -14753,6 +14902,7 @@ Transform:
   - {fileID: 8160976933840439243}
   - {fileID: 4315309726920248298}
   - {fileID: 2311832973648846168}
+  - {fileID: 1272493282620859330}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &143098095256365689
@@ -14797,10 +14947,12 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 1439371185496930971}
   smokeParticles: {fileID: 6508843911688136017}
   audioSource: {fileID: 1369697468937015449}
   customDingClip: {fileID: 0}
+  entryAnchor: {fileID: 1272493282620859330}
 --- !u!114 &8383067624635018647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14915,6 +15067,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1694858420763754091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1707611891773749267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696dfa9e9de133440ab99cdb710dcb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.StationDoorPresenter
+  _doors:
+  - {fileID: 4265014655937819570}
 --- !u!1 &1707954597293684465
 GameObject:
   m_ObjectHideFlags: 0
@@ -15449,6 +15615,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &4578269964356474282
 MonoBehaviour:
@@ -22367,11 +22534,11 @@ Transform:
   m_GameObject: {fileID: 2235612079634336745}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.4103508, y: 0.6061636, z: -0.33438015}
+    m_LocalPosition: {x: -0.8223508, y: -0.06319797, z: 0.00361985}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6373480860524007853}
+  m_Father: {fileID: 5691555698924843551}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8134913148458859422
 MeshFilter:
@@ -23557,6 +23724,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!114 &5899360610066500697
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24393,6 +24561,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2619242316503819267
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 311102847203707278}
+  - component: {fileID: 5178848139246670773}
+  m_Layer: 0
+  m_Name: DoorPivot_Lower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &311102847203707278
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2619242316503819267}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+    m_LocalPosition: {x: 0.412, y: 0.6693616, z: -0.338}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2683443326333443147}
+  m_Father: {fileID: 4778739611837859111}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5178848139246670773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2619242316503819267}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 0
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: -1
+  hoverAmount: 20
+  openAmount: 90
+  durationOpen: 0.3
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: 0.412, y: 0.6693616, z: -0.338}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &2657780617200425809
 GameObject:
   m_ObjectHideFlags: 0
@@ -27576,6 +27824,7 @@ GameObject:
   - component: {fileID: 1886070014207408722}
   - component: {fileID: 4735796491368201144}
   - component: {fileID: 3714442012547383005}
+  - component: {fileID: 4037157860862132058}
   m_Layer: 0
   m_Name: PizzeriaModular_Manual
   m_TagString: Untagged
@@ -27770,9 +28019,9 @@ MonoBehaviour:
   - bindingGuid: 9522270ccfae4613912960ab6e0820ea
     nodeGuid: d761b37a122047d28c91067c15270667
     stationId: 11
-    stationKind: 3
+    stationKind: 2
     storagePreset: 0
-    stationComponent: {fileID: 3187387350686078207}
+    stationComponent: {fileID: 6115678377341899978}
     stationDef: {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
@@ -27827,7 +28076,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 3541361470
+  GlobalObjectIdHash: 2023958570
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -28124,6 +28373,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Composition.Night1Bootstrapper
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &4037157860862132058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3084738830506233021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7721bafb25c0456bb4ad23bb5049f90c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.KitchenProcessEffects
+  effectScale: 1
+  originalMess: {fileID: 8926484042661614526, guid: 646489d496fc6a14694b510bc517e0e8, type: 3}
+  originalSmoke: {fileID: 8926484042661614526, guid: 8401d286b31cb8e4d94aa1ff61a76128, type: 3}
+  transitionDuration: 0.5
+  completionTransitionDuration: 0.1
 --- !u!1 &3116740968597806268
 GameObject:
   m_ObjectHideFlags: 0
@@ -28301,11 +28567,11 @@ Transform:
   m_GameObject: {fileID: 3170647245663280025}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.4103508, y: 0.6061636, z: -0.33438015}
+    m_LocalPosition: {x: -0.8223508, y: -0.06319797, z: 0.00361985}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4778739611837859111}
+  m_Father: {fileID: 311102847203707278}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5757544352315058723
 MeshFilter:
@@ -31366,6 +31632,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &3781951676729082177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1272493282620859330}
+  m_Layer: 0
+  m_Name: EntryAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1272493282620859330
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3781951676729082177}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.45, z: -0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4074574491688362083}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3807043277983427691
 GameObject:
   m_ObjectHideFlags: 0
@@ -31492,6 +31789,7 @@ GameObject:
   - component: {fileID: 5246733962111327702}
   - component: {fileID: 6224278178943848532}
   - component: {fileID: 6627298587396509987}
+  - component: {fileID: 7113389049131966672}
   m_Layer: 0
   m_Name: Geladeira_02
   m_TagString: Untagged
@@ -31513,9 +31811,9 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2753997206146998754}
-  - {fileID: 5847806221662450468}
-  - {fileID: 1563973202347370110}
   - {fileID: 7575346790462468939}
+  - {fileID: 4390635610328379454}
+  - {fileID: 5691555698924843551}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5246733962111327702
@@ -31560,6 +31858,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &6627298587396509987
 MonoBehaviour:
@@ -31578,6 +31877,21 @@ MonoBehaviour:
   outlineColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   outlineWidth: 2.5
   occludedByGeometry: 1
+--- !u!114 &7113389049131966672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3813939669361769772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696dfa9e9de133440ab99cdb710dcb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.StationDoorPresenter
+  _doors:
+  - {fileID: 2756027645017843880}
+  - {fileID: 5412050399675888358}
 --- !u!1 &3836249424920061068
 GameObject:
   m_ObjectHideFlags: 0
@@ -32152,6 +32466,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!114 &5978236023876083016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32182,6 +32497,7 @@ GameObject:
   - component: {fileID: 6613367701856128826}
   - component: {fileID: 1024328783631293104}
   - component: {fileID: 7033949807955610563}
+  - component: {fileID: 6997149532775493613}
   m_Layer: 0
   m_Name: Forno_03
   m_TagString: Untagged
@@ -32207,6 +32523,7 @@ Transform:
   - {fileID: 4293495964523193921}
   - {fileID: 831997137777007638}
   - {fileID: 2220521182232301692}
+  - {fileID: 2838751401859105012}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8171628482812876317
@@ -32251,10 +32568,12 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 9069314065766997243}
   smokeParticles: {fileID: 7174531218687728674}
   audioSource: {fileID: 7033949807955610563}
   customDingClip: {fileID: 0}
+  entryAnchor: {fileID: 2838751401859105012}
 --- !u!114 &1024328783631293104
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32369,6 +32688,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6997149532775493613
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3868240311033067080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696dfa9e9de133440ab99cdb710dcb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.StationDoorPresenter
+  _doors:
+  - {fileID: 8839054069173593842}
 --- !u!1 &3876653008667938511
 GameObject:
   m_ObjectHideFlags: 0
@@ -34304,7 +34637,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8d0e193c54e2687b4213e9c823402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationWorkpostTarget
-  targetStation: {fileID: 2277645632494141116}
+  targetStation: {fileID: 6115678377341899978}
   slotIndex: 1
   slotAnchor: {fileID: 2819972952310367701}
   outlineTarget: {fileID: 1656883158155941682}
@@ -35504,7 +35837,7 @@ Transform:
   m_GameObject: {fileID: 4335826222140238414}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.006679535, y: 0.1403908, z: 0.059999943}
+  m_LocalPosition: {x: -0.006679535, y: 0.1403908, z: 0.728}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -37516,7 +37849,7 @@ Transform:
   m_GameObject: {fileID: 4652150825648485245}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.28667927, y: 0.1403908, z: 0.059999943}
+  m_LocalPosition: {x: -0.28667927, y: 0.1403908, z: -0.719}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -37833,11 +38166,11 @@ Transform:
   m_GameObject: {fileID: 4774853571945587177}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.41039276, y: -0.20684713, z: -0.33868504}
+    m_LocalPosition: {x: -0.82239276, y: 0.07970202, z: -0.00068504}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6373480860524007853}
+  m_Father: {fileID: 4390635610328379454}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5953232119761362817
 MeshFilter:
@@ -39519,6 +39852,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 3027419852511222370}
   - {fileID: 3477067783309565542}
@@ -39665,6 +39999,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 3481673388488982717}
   - {fileID: 8075867051599022630}
@@ -41646,6 +41981,7 @@ GameObject:
   - component: {fileID: 3079012132098214287}
   - component: {fileID: 7073920843507954303}
   - component: {fileID: 6524199145949069089}
+  - component: {fileID: 6633309521714763348}
   m_Layer: 0
   m_Name: Forno_02
   m_TagString: Untagged
@@ -41671,6 +42007,7 @@ Transform:
   - {fileID: 4388238106905140275}
   - {fileID: 447207154202597740}
   - {fileID: 4267873809452007271}
+  - {fileID: 2730680996155876881}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1284742931462775536
@@ -41715,10 +42052,12 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 8720418809891552187}
   smokeParticles: {fileID: 7958976361575360105}
   audioSource: {fileID: 6524199145949069089}
   customDingClip: {fileID: 0}
+  entryAnchor: {fileID: 2730680996155876881}
 --- !u!114 &7073920843507954303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41833,6 +42172,20 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &6633309521714763348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5337955902204362351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 696dfa9e9de133440ab99cdb710dcb1d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.StationDoorPresenter
+  _doors:
+  - {fileID: 2888605818013430940}
 --- !u!1 &5349173734821774810
 GameObject:
   m_ObjectHideFlags: 0
@@ -42699,6 +43052,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &5550822631388380697
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5691555698924843551}
+  - component: {fileID: 5412050399675888358}
+  m_Layer: 0
+  m_Name: DoorPivot_Lower
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5691555698924843551
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5550822631388380697}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+    m_LocalPosition: {x: 0.412, y: 0.6693616, z: -0.338}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1563973202347370110}
+  m_Father: {fileID: 6373480860524007853}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5412050399675888358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5550822631388380697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 0
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: -1
+  hoverAmount: 20
+  openAmount: 90
+  durationOpen: 0.3
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: 0.412, y: 0.6693616, z: -0.338}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &5602275927443168177
 GameObject:
   m_ObjectHideFlags: 0
@@ -44549,6 +44982,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   stackId: 1
   capacity: 6
   linkedAddressId: -1
@@ -49890,6 +50324,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &6010284586757015685
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4390635610328379454}
+  - component: {fileID: 2756027645017843880}
+  m_Layer: 0
+  m_Name: DoorPivot_Upper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4390635610328379454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6010284586757015685}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+    m_LocalPosition: {x: 0.412, y: -0.28654915, z: -0.338}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5847806221662450468}
+  m_Father: {fileID: 6373480860524007853}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2756027645017843880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6010284586757015685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 0
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: -1
+  hoverAmount: 20
+  openAmount: 90
+  durationOpen: 0.3
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: 0.412, y: -0.28654915, z: -0.338}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &6048364558836220403
 GameObject:
   m_ObjectHideFlags: 0
@@ -50131,6 +50645,7 @@ GameObject:
   - component: {fileID: 1333315286949279555}
   - component: {fileID: 8328156166196702790}
   - component: {fileID: 4878961290524899409}
+  - component: {fileID: 2888605818013430940}
   m_Layer: 0
   m_Name: portaforno.002
   m_TagString: Untagged
@@ -50258,6 +50773,53 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.30830574, y: 1.1874732, z: 2.0333376}
   m_Center: {x: -0.10637379, y: 0.19669741, z: -1.0168586}
+--- !u!114 &2888605818013430940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6121603589180165302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 1
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: 1
+  hoverAmount: 0.08
+  openAmount: 0.55
+  durationOpen: 0.25
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: -0.5557461, y: -1.85, z: 1.016859}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &6144601172041082931
 GameObject:
   m_ObjectHideFlags: 0
@@ -50581,6 +51143,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &6225703646792780253
 GameObject:
@@ -51260,6 +51823,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &6291022634895790565
 GameObject:
   m_ObjectHideFlags: 0
@@ -57204,6 +57768,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!114 &8530213485500471242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -57410,7 +57975,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8d0e193c54e2687b4213e9c823402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationWorkpostTarget
-  targetStation: {fileID: 2277645632494141116}
+  targetStation: {fileID: 6115678377341899978}
   slotIndex: 3
   slotAnchor: {fileID: 7716730086115326403}
   outlineTarget: {fileID: 8236650776789115584}
@@ -58388,7 +58953,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8d0e193c54e2687b4213e9c823402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationWorkpostTarget
-  targetStation: {fileID: 2277645632494141116}
+  targetStation: {fileID: 6115678377341899978}
   slotIndex: 0
   slotAnchor: {fileID: 4902528868251290191}
   outlineTarget: {fileID: 7847893541592878261}
@@ -59247,6 +59812,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7810861877503817750
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4105211758190700722}
+  - component: {fileID: 4331029264561251958}
+  m_Layer: 0
+  m_Name: DoorPivot_Upper
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4105211758190700722
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7810861877503817750}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+    m_LocalPosition: {x: 0.412, y: -0.28654915, z: -0.338}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8326185540342376233}
+  m_Father: {fileID: 4778739611837859111}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4331029264561251958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7810861877503817750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d322c9ee00ebb746bf4739d05ddc570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TransformDoorView
+  motionMode: 0
+  localAxis: {x: 0, y: 1, z: 0}
+  sign: -1
+  hoverAmount: 20
+  openAmount: 90
+  durationOpen: 0.3
+  durationClose: 0.25
+  durationHover: 0.15
+  animationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  _hasCustomClosedPose: 1
+  _closedPosition: {x: 0.412, y: -0.28654915, z: -0.338}
+  _closedRotation: {x: -0, y: -0, z: -0, w: 1}
 --- !u!1 &7820348819135726670
 GameObject:
   m_ObjectHideFlags: 0
@@ -60677,6 +61322,7 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ringer: {fileID: 4066358546522567895}
   isRinging: 0
 --- !u!114 &8708397893103743382
@@ -60811,6 +61457,37 @@ MonoBehaviour:
   beaconRenderer: {fileID: 4777659656119818684}
   ringingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+--- !u!1 &8290010139796526223
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2730680996155876881}
+  m_Layer: 0
+  m_Name: EntryAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2730680996155876881
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8290010139796526223}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.45, z: -0.25}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6320952379302696938}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8324534697667091761
 GameObject:
   m_ObjectHideFlags: 0
@@ -62683,11 +63360,11 @@ Transform:
   m_GameObject: {fileID: 8572520339794203336}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.70710677, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.41039276, y: -0.20684713, z: -0.33868504}
+    m_LocalPosition: {x: -0.82239276, y: 0.07970202, z: -0.00068504}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 4778739611837859111}
+  m_Father: {fileID: 4105211758190700722}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4723073881162958976
 MeshFilter:
@@ -63483,7 +64160,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8d0e193c54e2687b4213e9c823402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationWorkpostTarget
-  targetStation: {fileID: 2277645632494141116}
+  targetStation: {fileID: 6115678377341899978}
   slotIndex: 2
   slotAnchor: {fileID: 6009505799140691420}
   outlineTarget: {fileID: 6842390169553600507}

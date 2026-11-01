@@ -13,6 +13,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public OperationPhase Phase { get; set; }
         public TimedProgress Progress;
         public ItemId InputItemId { get; set; }
+        public ItemId SecondaryItemId { get; set; } = ItemId.None;
         public ToolItemId ToolItemId { get; set; }
         public int ProcessId { get; }
         public ulong WorkerId { get; set; } = NoWorker;

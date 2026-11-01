@@ -1,0 +1,88 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Lobby.uss" />
+    
+    <ui:VisualElement name="LobbyScreenRoot" class="fullscreen-root lobby-bg">
+        <!-- Topo: Navegação Voltar e Título -->
+        <ui:VisualElement class="lobby-header">
+            <ui:Button name="BtnBack" class="btn-back-lobby">
+                <ui:Label text="← VOLTAR" class="btn-back-text" />
+            </ui:Button>
+            <ui:VisualElement name="TitleLobby" class="lobby-title-art" />
+            <ui:VisualElement class="lobby-header-spacer" />
+        </ui:VisualElement>
+
+        <!-- Três Colunas em Painéis de Papel -->
+        <ui:VisualElement class="lobby-three-columns">
+            <!-- Coluna 1: Meu Perfil -->
+            <ui:VisualElement name="ColProfile" class="paper-panel lobby-col">
+                <ui:VisualElement name="HeaderMyProfile" class="section-header-art header-profile" />
+                
+                <ui:Label text="NOME DO JOGADOR" class="field-subheading" />
+                <ui:TextField name="PlayerNameInput" class="piaria-input lobby-name-input" max-length="18" />
+
+                <ui:Label text="COR DO PERSONAGEM" class="field-subheading" />
+                <ui:VisualElement class="color-palette-row">
+                    <ui:Button name="BtnColorOrange" class="color-dot color-orange" tooltip="Laranja" />
+                    <ui:Button name="BtnColorGreen" class="color-dot color-green" tooltip="Verde" />
+                    <ui:Button name="BtnColorBlue" class="color-dot color-blue" tooltip="Azul" />
+                    <ui:Button name="BtnColorPink" class="color-dot color-pink" tooltip="Rosa" />
+                    <ui:Button name="BtnColorRed" class="color-dot color-red" tooltip="Vermelho" />
+                </ui:VisualElement>
+
+                <!-- Preview 3D do Personagem -->
+                <ui:VisualElement name="PreviewContainer" class="character-preview-container">
+                    <ui:VisualElement name="PreviewRenderTexture" class="character-preview-rt" />
+                    <ui:VisualElement name="PreviewFrame" class="character-preview-frame" />
+                </ui:VisualElement>
+
+                <ui:Button name="BtnSaveProfile" text="SALVAR PERFIL" class="piaria-button piaria-button-primary btn-save-profile" />
+            </ui:VisualElement>
+
+            <!-- Coluna 2: Salas Disponíveis -->
+            <ui:VisualElement name="ColRoomList" class="paper-panel lobby-col">
+                <ui:VisualElement name="HeaderRooms" class="section-header-art header-rooms" />
+
+                <ui:ScrollView name="RoomList" class="room-scroll-list">
+                    <ui:VisualElement name="EmptyRoomsNotice" class="empty-rooms-container">
+                        <ui:VisualElement name="NoRoomsArt" class="no-rooms-art" />
+                        <ui:Label text="Nenhuma sala encontrada no momento..." class="no-rooms-label" />
+                    </ui:VisualElement>
+                </ui:ScrollView>
+
+                <ui:Button name="BtnRefreshRooms" class="piaria-button piaria-button-secondary btn-refresh-rooms">
+                    <ui:Label text="🔄 ATUALIZAR LISTA" class="btn-refresh-text" />
+                </ui:Button>
+            </ui:VisualElement>
+
+            <!-- Coluna 3: Conexões (Criar / Código / LAN) -->
+            <ui:VisualElement name="ColConnect" class="paper-panel lobby-col">
+                <ui:ScrollView class="connect-scroll">
+                    <!-- Seção Criar Sala Online -->
+                    <ui:VisualElement name="HeaderCreateRoom" class="section-header-art header-create" />
+                    <ui:Label text="NOME DA SALA" class="field-subheading" />
+                    <ui:TextField name="RoomNameInput" class="piaria-input" />
+                    <ui:Button name="BtnCreateRoom" text="CRIAR SALA" class="piaria-button piaria-button-primary mb-14" />
+
+                    <ui:VisualElement class="col-divider" />
+
+                    <!-- Seção Entrar por Código -->
+                    <ui:VisualElement name="HeaderJoinCode" class="section-header-art header-code" />
+                    <ui:Label text="CÓDIGO DA SALA (RELAY)" class="field-subheading" />
+                    <ui:TextField name="ManualCodeInput" class="piaria-input" />
+                    <ui:Button name="BtnJoinManual" text="ENTRAR POR CÓDIGO" class="piaria-button piaria-button-secondary mb-14" />
+
+                    <ui:VisualElement class="col-divider" />
+
+                    <!-- Seção Rede Local (LAN) -->
+                    <ui:VisualElement name="HeaderLan" class="section-header-art header-lan" />
+                    <ui:Button name="BtnCreateLAN" text="CRIAR SALA (LAN)" class="piaria-button piaria-button-primary mb-10" />
+                    
+                    <ui:Label text="IP DO HOST (LAN)" class="field-subheading" />
+                    <ui:TextField name="LanIpInput" text="127.0.0.1" class="piaria-input" />
+                    <ui:Button name="BtnJoinLAN" text="ENTRAR (LAN)" class="piaria-button piaria-button-secondary" />
+                </ui:ScrollView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

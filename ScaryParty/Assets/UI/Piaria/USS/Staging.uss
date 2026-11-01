@@ -1,0 +1,71 @@
+.staging-backdrop {
+    display: none;
+}
+
+.staging-card {
+    width: 580px;
+    align-items: center;
+}
+
+.staging-title {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.staging-subtitle {
+    font-size: 16px;
+    color: var(--color-text-muted);
+    margin-bottom: 20px;
+    -unity-text-align: middle-center;
+}
+
+.destination-picker-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.arrow-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+    padding: 0;
+}
+
+.dest-label-wrapper {
+    flex-grow: 1;
+    background-color: #FFFDF8;
+    border-color: var(--color-border-brown);
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 10px 16px;
+    align-items: center;
+}
+
+.dest-sublabel {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: var(--color-border-brown-light);
+}
+
+.selected-dest-text {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+}
+
+.staging-status-text {
+    min-height: 22px;
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-btn-orange);
+    margin-bottom: 16px;
+}
+
+.staging-actions-row {
+    flex-direction: row;
+    width: 100%;
+    gap: 16px;
+}

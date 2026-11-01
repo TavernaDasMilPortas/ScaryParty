@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Modals.uss" />
+    
+    <ui:VisualElement name="GenericModalRoot" class="modal-backdrop generic-modal-backdrop">
+        <ui:VisualElement name="GenericModalCard" class="modal-card generic-modal-card">
+            <!-- Título -->
+            <ui:Label name="ModalTitle" text="CONFIRMAÇÃO" class="header-title-text modal-title" />
+
+            <!-- Mensagem -->
+            <ui:Label name="ModalMessage" text="Tem certeza de que deseja realizar esta ação?" class="modal-message-text" />
+
+            <!-- Botões -->
+            <ui:VisualElement class="modal-buttons-row">
+                <ui:Button name="BtnModalCancel" text="CANCELAR" class="piaria-button piaria-button-secondary modal-btn" />
+                <ui:Button name="BtnModalConfirm" text="CONFIRMAR" class="piaria-button piaria-button-danger modal-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

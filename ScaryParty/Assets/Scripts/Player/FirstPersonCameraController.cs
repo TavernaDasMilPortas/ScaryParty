@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using StarterAssets;
 using Unity.Netcode;
@@ -7,10 +8,106 @@ using UnityEngine.InputSystem;
 
 namespace ScaryParty.Player
 {
+    /// <summary>
+    /// Token seguro e descartável que representa a concessão de um bloqueio de orientação da visão.
+    /// Ao chamar Dispose(), o bloqueio específico associado a este token é liberado.
+    /// </summary>
+    public readonly struct CameraLookLockToken : System.IDisposable, System.IEquatable<CameraLookLockToken>
+    {
+        public readonly FirstPersonCameraController Controller;
+        public readonly int TokenId;
+        public readonly string Reason;
+        public bool IsValid => Controller != null && TokenId > 0;
+
+        public CameraLookLockToken(FirstPersonCameraController controller, int tokenId, string reason)
+        {
+            Controller = controller;
+            TokenId = tokenId;
+            Reason = reason;
+        }
+
+        public void Dispose()
+        {
+            if (IsValid)
+            {
+                Controller.ReleaseLookLock(TokenId);
+            }
+        }
+
+        public bool Equals(CameraLookLockToken other) => TokenId == other.TokenId && Equals(Controller, other.Controller);
+        public override bool Equals(object obj) => obj is CameraLookLockToken other && Equals(other);
+        public override int GetHashCode() => TokenId.GetHashCode();
+        public static bool operator ==(CameraLookLockToken left, CameraLookLockToken right) => left.Equals(right);
+        public static bool operator !=(CameraLookLockToken left, CameraLookLockToken right) => !left.Equals(right);
+    }
+
     [DefaultExecutionOrder(-10)]
     public class FirstPersonCameraController : NetworkBehaviour
     {
         public static FirstPersonCameraController LocalInstance { get; private set; }
+
+        private readonly HashSet<int> _activeLookLockTokens = new HashSet<int>();
+        private readonly Dictionary<int, string> _lockReasons = new Dictionary<int, string>();
+        private int _nextLockTokenId = 1;
+
+        /// <summary>
+        /// Retorna true se houver qualquer token de bloqueio de visão ativo.
+        /// </summary>
+        public bool IsLookLocked => _activeLookLockTokens.Count > 0;
+
+        /// <summary>
+        /// Adquire um bloqueio de orientação da visão com base em token.
+        /// Enquanto houver tokens ativos, a câmera e a rotação do corpo permanecem congeladas na orientação atual.
+        /// </summary>
+        public CameraLookLockToken AcquireLookLock(string reason)
+        {
+            int tokenId = _nextLockTokenId++;
+            _activeLookLockTokens.Add(tokenId);
+            _lockReasons[tokenId] = reason;
+
+            // Descartar deltas pendentes no momento do bloqueio
+            if (_starterInputs != null)
+            {
+                _starterInputs.look = Vector2.zero;
+            }
+
+            return new CameraLookLockToken(this, tokenId, reason);
+        }
+
+        /// <summary>
+        /// Libera um bloqueio específico por ID de token. É idempotente.
+        /// </summary>
+        public bool ReleaseLookLock(int tokenId)
+        {
+            if (_activeLookLockTokens.Remove(tokenId))
+            {
+                _lockReasons.Remove(tokenId);
+
+                // Descartar deltas de mouse acumulados para evitar salto na mira ao destravar
+                if (_starterInputs != null)
+                {
+                    _starterInputs.look = Vector2.zero;
+                }
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Libera todos os bloqueios de visão ativos (ex: ao desativar, despawnar, morte/respawn).
+        /// </summary>
+        public void ReleaseAllLookLocks()
+        {
+            if (_activeLookLockTokens.Count > 0)
+            {
+                _activeLookLockTokens.Clear();
+                _lockReasons.Clear();
+                if (_starterInputs != null)
+                {
+                    _starterInputs.look = Vector2.zero;
+                }
+            }
+        }
 
         [Header("Rig Serializado")]
         [Tooltip("Pivot fixo da visão (altura dos olhos), independente do osso da cabeça")]
@@ -107,6 +204,7 @@ namespace ScaryParty.Player
 
         public override void OnNetworkDespawn()
         {
+            ReleaseAllLookLocks();
             if (LocalInstance == this)
             {
                 LocalInstance = null;
@@ -116,11 +214,25 @@ namespace ScaryParty.Player
 
         public override void OnDestroy()
         {
+            ReleaseAllLookLocks();
             if (LocalInstance == this)
             {
                 LocalInstance = null;
             }
             base.OnDestroy();
+        }
+
+        private void OnDisable()
+        {
+            ReleaseAllLookLocks();
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus)
+            {
+                ReleaseAllLookLocks();
+            }
         }
 
         public void SetYawPitch(float yaw, float pitch = 0f)
@@ -152,8 +264,8 @@ namespace ScaryParty.Player
         {
             if (!IsOwner) return;
 
-            // Quando estiver em qualquer menu, o mouse não pode rotacionar a câmera
-            if (IsMenuOrInputBlocked())
+            // Quando estiver em qualquer menu ou com bloqueio de orientação ativo (ex: trabalho manual com F)
+            if (IsMenuOrInputBlocked() || IsLookLocked)
             {
                 if (_starterInputs != null)
                 {

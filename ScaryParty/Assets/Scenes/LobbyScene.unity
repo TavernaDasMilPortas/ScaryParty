@@ -129,6 +129,15 @@ GameObject:
   m_Component:
   - component: {fileID: 104864184}
   - component: {fileID: 104864183}
+  - component: {fileID: 104864185}
+  - component: {fileID: 104864186}
+  - component: {fileID: 104864187}
+  - component: {fileID: 104864188}
+  - component: {fileID: 104864189}
+  - component: {fileID: 104864190}
+  - component: {fileID: 104864191}
+  - component: {fileID: 104864192}
+  - component: {fileID: 104864193}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -150,7 +159,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
   m_PanelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}
   m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 4f1929b7006cfd345b47a2cbd30bb098, type: 3}
+  sourceAsset: {fileID: 9197481963319205126, guid: a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2, type: 3}
   m_SortingOrder: 0
   m_Position: 0
   m_WorldSpaceSizeMode: 1
@@ -174,6 +183,131 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &104864185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fdb081312ef844218f05011339fff2bd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Core::UIScreenRouter
+--- !u!114 &104864186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f246290efb84c7fb3a0933e9cb3f937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Core::UIFeedbackService
+  audioSource: {fileID: 0}
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  successClip: {fileID: 0}
+  errorClip: {fileID: 0}
+  readyClip: {fileID: 0}
+--- !u!114 &104864187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8649fc1539084250b86ef24936d9cce9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Core::UIModalStack
+--- !u!114 &104864188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46053efb4c02426c98ece0575795ef3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::ModalPresenter
+  uiDocument: {fileID: 104864183}
+--- !u!114 &104864189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a465f7379054a2697ae09dd75434d86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::SettingsPresenter
+  uiDocument: {fileID: 104864183}
+--- !u!114 &104864190
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f3a0c00f2bc4d2a93a46f6db6de9f8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::MainMenuPresenter
+  uiDocument: {fileID: 104864183}
+--- !u!114 &104864191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63ad03ed3694175a72269c9f10d0b21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::LobbyPresenter
+  uiDocument: {fileID: 104864183}
+  lobbyManager: {fileID: 1598157016}
+--- !u!114 &104864192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d990de7c66784317aeb11630f3ceeafc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::ToastPresenter
+  uiDocument: {fileID: 104864183}
+--- !u!114 &104864193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104864182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76336af7f0944c53ac792877d1034085, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.UI.Piaria.Core::CharacterPreviewRig
+  targetTexture: {fileID: 0}
+  previewCamera: {fileID: 0}
+  previewLight: {fileID: 0}
+  modelContainer: {fileID: 0}
+  defaultModelPrefab: {fileID: 0}
 --- !u!1 &555447036
 GameObject:
   m_ObjectHideFlags: 0
@@ -309,7 +443,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa3607d67b4dc349ba653dadb53b803, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyManager
-  DiscoveryService: {fileID: 1598157015}
   PlayerData: {fileID: 11400000, guid: 311a5c602891d3e4798f108612220040, type: 2}
 --- !u!4 &1598157017
 Transform:

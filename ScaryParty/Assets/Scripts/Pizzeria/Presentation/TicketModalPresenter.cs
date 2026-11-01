@@ -95,6 +95,10 @@ namespace ScaryParty.Pizzeria.Presentation
             _sheetBox.name = "TicketSheetCard";
             _sheetBox.style.width = 580;
             _sheetBox.style.backgroundColor = new Color(0.96f, 0.94f, 0.88f, 1f);
+            if (ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance?.paperPanel1 != null)
+            {
+                _sheetBox.style.backgroundImage = new StyleBackground(ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance.paperPanel1);
+            }
             _sheetBox.style.borderTopWidth = 3;
             _sheetBox.style.borderBottomWidth = 3;
             _sheetBox.style.borderLeftWidth = 3;

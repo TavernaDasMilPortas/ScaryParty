@@ -102,7 +102,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.Items.TryGetValue(itemId, out var itemState))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
-            if (!bypassReservation && itemState.ReservedByHold != 0 && itemState.ReservedByHold != requesterId)
+            if (!bypassReservation && itemState.ReservedByHold != 0 &&
+                (itemState.ReservedByHold == OperationState.ServerWorker || itemState.ReservedByHold != requesterId))
                 return CommandResult.Fail(CommandError.Blocked, "Item reservado por outro processo.");
 
             // Se o item está em um StationSlot com operação ativa
@@ -188,6 +189,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (!state.Items.TryGetValue(itemId, out var item))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
+            if (item.ReservedByHold == OperationState.ServerWorker)
+                return CommandResult.Fail(CommandError.Busy, "Item em processamento.");
 
             if (item.Location.Type == LocationType.Stack)
             {

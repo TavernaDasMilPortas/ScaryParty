@@ -16,6 +16,7 @@ public class LobbyManager : MonoBehaviour
 {
     public PlayerData PlayerData;
 
+    public string CurrentJoinCode { get; set; }
     private Lobby _currentLobby;
     private Coroutine _heartbeatCoroutine;
 
@@ -95,6 +96,7 @@ public class LobbyManager : MonoBehaviour
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
 
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            CurrentJoinCode = joinCode;
             Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
 
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
@@ -190,6 +192,7 @@ public class LobbyManager : MonoBehaviour
         if (string.IsNullOrEmpty(joinCode)) return;
 
         Debug.Log($"[LobbyManager] Tentando entrar na sala com o código: {joinCode} (WSS)...");
+        CurrentJoinCode = joinCode;
 
         try
         {
@@ -281,6 +284,7 @@ public class LobbyManager : MonoBehaviour
 
         if (NetworkManager.Singleton.StartHost())
         {
+            CurrentJoinCode = "LAN HOST";
             Debug.Log("[LobbyManager] ✅ Host LAN iniciado com sucesso. Carregando ReadyScene...");
             
             // Inicia Room Discovery broadcast no singleton persistente

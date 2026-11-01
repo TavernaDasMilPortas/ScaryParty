@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using ScaryParty.Interaction;
+using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Domain.Types;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -151,6 +153,7 @@ public class PlayerInteraction : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        StopTrackedWork();
         CityGenerator cityGen = FindObjectOfType<CityGenerator>();
         if (cityGen != null)
             cityGen.OnCityGenerated -= OnCityGeneratedHandler;
@@ -258,11 +261,148 @@ public class PlayerInteraction : NetworkBehaviour
         if (cc != null) cc.enabled = true;
     }
 
+    private int _workStation = -1;
+    private int _workSlot;
+    private float _nextWorkHeartbeat;
+    private ScaryParty.Player.CameraLookLockToken _workCameraLock;
+    private int _workAttemptGeneration = 0;
+    private bool _workCompletedAwaitingFRelease = false;
+    private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
+
+    private bool IsWorkFKeyHeld()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.fKey.isPressed)
+            return true;
+#endif
+        return Input.GetKey(KeyCode.F);
+    }
+
+    private void ReleaseWorkLockOnly()
+    {
+        if (_workCameraLock.IsValid)
+        {
+            _workCameraLock.Dispose();
+            _workCameraLock = default;
+        }
+    }
+
+    private void StopTrackedWork()
+    {
+        ReleaseWorkLockOnly();
+        if (_workStation < 0) return;
+        int station = _workStation;
+        int slot = _workSlot;
+        _workStation = -1;
+        if (IsSpawned && IsOwner)
+            ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CancelWorkServerRpc(station, slot);
+    }
+
+    private void UpdateTrackedWork()
+    {
+        if (_workStation < 0 && !_workCameraLock.IsValid) return;
+
+        // 1. Soltar F libera imediatamente o lock e cancela o trabalho
+        if (!IsWorkFKeyHeld())
+        {
+            _workCompletedAwaitingFRelease = false;
+            StopTrackedWork();
+            return;
+        }
+
+        // 2. Verificar se o alvo ainda está em alcance
+        if (mainCamera == null || !(_currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep) ||
+            prep.stationId != _workStation || prep.ResolveTargetSlotIndex() != _workSlot)
+        {
+            StopTrackedWork();
+            return;
+        }
+
+        // 3. Verificar estado replicado do slot no servidor
+        var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+        if (netState != null && NetworkManager.Singleton != null)
+        {
+            ulong myId = NetworkManager.Singleton.LocalClientId;
+            for (int i = 0; i < netState.StationSlots.Count; i++)
+            {
+                var slot = netState.StationSlots[i];
+                if (slot.StationId == _workStation && slot.SlotIndex == _workSlot)
+                {
+                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Completed)
+                    {
+                        // Conclusão: liberar câmera mesmo que F continue pressionado; exigir nova pressão
+                        _workCompletedAwaitingFRelease = true;
+                        ReleaseWorkLockOnly();
+                        _workStation = -1;
+                        return;
+                    }
+                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Cancelled ||
+                        (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Running && slot.WorkerId != myId))
+                    {
+                        // Cancelamento ou tomado por outro jogador
+                        ReleaseWorkLockOnly();
+                        _workStation = -1;
+                        return;
+                    }
+                    break;
+                }
+            }
+        }
+
+        if (Time.unscaledTime < _nextWorkHeartbeat) return;
+        _nextWorkHeartbeat = Time.unscaledTime + 0.2f;
+        ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.HeartbeatWorkServerRpc(_workStation, _workSlot);
+    }
+
     private void Update()
     {
         if (!IsOwner) return;
+
+        // Se F não está pressionado, resetar flag de conclusão aguardando soltura
+        bool isFHeld = IsWorkFKeyHeld();
+        if (!isFHeld)
+        {
+            _workCompletedAwaitingFRelease = false;
+            if (_workStation >= 0 || _workCameraLock.IsValid)
+            {
+                StopTrackedWork();
+            }
+        }
+
+        // Verificar se a mão ativa mudou; se mudou durante trabalho, cancelar
+        var invAdapter = GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+        if (invAdapter != null)
+        {
+            if (invAdapter.ActiveHand != _lastObservedHand)
+            {
+                _lastObservedHand = invAdapter.ActiveHand;
+                if (_workStation >= 0 || _workCameraLock.IsValid)
+                {
+                    StopTrackedWork();
+                }
+            }
+        }
+
+#if ENABLE_INPUT_SYSTEM
+        bool rawFCheck = (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame) || Input.GetKeyDown(KeyCode.F);
+#else
+        bool rawFCheck = Input.GetKeyDown(KeyCode.F);
+#endif
+        if (rawFCheck)
+        {
+            if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked)
+            {
+                Debug.LogWarning("[PlayerInteraction] Tecla F pressionada mas GameplayInputGate estÃ¡ BLOQUEADO!");
+            }
+            else if (Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
+            {
+                Debug.LogWarning($"[PlayerInteraction] Tecla F pressionada mas cursor nÃ£o estÃ¡ bloqueado na janela (lockState={Cursor.lockState}, visible={Cursor.visible})! Clique na tela do jogo.");
+            }
+        }
+
         if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
         {
+            StopTrackedWork();
             if (OutlineService.Instance != null)
             {
                 OutlineService.Instance.SetTarget(null);
@@ -273,6 +413,7 @@ public class PlayerInteraction : NetworkBehaviour
         
         HandleRaycast();
         HandleInput();
+        UpdateTrackedWork();
 
         if (Time.time - _lastSyncTime > 0.5f)
         {
@@ -398,8 +539,15 @@ public class PlayerInteraction : NetworkBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        ScaryParty.Pizzeria.Presentation.NotificationManager.OnNotificationShown += HandleNotificationShown;
+    }
+
     private void OnDisable()
     {
+        ScaryParty.Pizzeria.Presentation.NotificationManager.OnNotificationShown -= HandleNotificationShown;
+        StopTrackedWork();
         if (_currentInteractable != null)
         {
             _currentInteractable.OnLoseFocus();
@@ -411,125 +559,267 @@ public class PlayerInteraction : NetworkBehaviour
 
     public override void OnDestroy()
     {
+        ScaryParty.Pizzeria.Presentation.NotificationManager.OnNotificationShown -= HandleNotificationShown;
+        StopTrackedWork();
         ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
         base.OnDestroy();
     }
 
-    private float _lastHeartbeatTime = 0f;
-    private int _activeWorkSlotIndex = 0;
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            StopTrackedWork();
+        }
+    }
+
+    private void HandleNotificationShown(string message, ScaryParty.Pizzeria.Presentation.NotificationType type)
+    {
+        if (!IsOwner) return;
+        if (type == ScaryParty.Pizzeria.Presentation.NotificationType.Error || type == ScaryParty.Pizzeria.Presentation.NotificationType.Warning)
+        {
+            if (_workCameraLock.IsValid)
+            {
+                ReleaseWorkLockOnly();
+                _workStation = -1;
+            }
+        }
+    }
+
+
+    private void ExecuteWorkInteraction()
+    {
+        var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+        var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
+        var adapter = GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+        byte hand = adapter != null ? (byte)adapter.ActiveHand : (byte)0;
+        int otherHand = hand == 0 ? 1 : 0;
+
+        Debug.Log($"[PlayerInteraction] [F] Pressionado! InteragÃ­vel atual: {(_currentInteractable != null ? _currentInteractable.GetType().Name : "NENHUM (null)")}, MÃ£o Ativa: {hand}");
+
+        if (_currentInteractable == null)
+        {
+            Debug.LogWarning("[PlayerInteraction] [F] Tecla pressionada, mas nenhum objeto/bancada estÃ¡ em foco na mira!");
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Nenhum objeto na mira!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+            return;
+        }
+
+        // Subtipos especÃ­ficos primeiro (evita que a heranÃ§a de StationView engula a chamada)
+        if (_currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
+        {
+            if (netState != null && cmd != null)
+            {
+                int targetSlot = pkg.ResolveTargetSlotIndex();
+                Debug.Log($"[PlayerInteraction] [F] Acionando bancada de embalagem (Slot={targetSlot})");
+                if (targetSlot >= 0)
+                {
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var item = netState.Items[i];
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)pkg.stationId && item.SlotId == targetSlot)
+                        {
+                            bool canPackage = item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase || 
+                                              item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza;
+                            if (canPackage && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
+                            {
+                                Debug.Log($"[PlayerInteraction] [F] Enviando StartPackagingServerRpc para item {item.ItemId}");
+                                cmd.StartPackagingServerRpc(item.ItemId);
+                            }
+                            else
+                            {
+                                Debug.LogWarning($"[PlayerInteraction] [F] Item {item.ItemId} na bancada de embalagem nÃ£o pode ser embalado (CanPackage={canPackage}, Boxed={item.PackagingState})");
+                            }
+                            return;
+                        }
+                    }
+                    Debug.LogWarning($"[PlayerInteraction] [F] Nenhum item encontrado no slot {targetSlot} da bancada de embalagem.");
+                }
+            }
+            return;
+        }
+        else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StagingStation stg)
+        {
+            if (netState != null && ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
+            {
+                int targetSlot = stg.ResolveTargetSlotIndex();
+                Debug.Log($"[PlayerInteraction] [F] Acionando bancada de expediÃ§Ã£o (Slot={targetSlot})");
+                if (targetSlot >= 0)
+                {
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var item = netState.Items[i];
+                        if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)stg.stationId && item.SlotId == targetSlot && item.PackagingState == (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
+                        {
+                            ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
+                            return;
+                        }
+                    }
+                }
+            }
+            return;
+        }
+        else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StationView station)
+        {
+            int slotIndex = station.ResolveTargetSlotIndex();
+            Debug.Log($"[PlayerInteraction] [F] EstaÃ§Ã£o detectada: '{station.stationName}' (ID: {station.stationId}, Classe: {station.GetType().Name}), SlotIndex resolvido: {slotIndex}");
+
+            if (slotIndex < 0)
+            {
+                Debug.LogWarning($"[PlayerInteraction] [F] NÃ£o foi possÃ­vel resolver slot para a estaÃ§Ã£o '{station.stationName}'. (HasUnboundSlots={station.HasUnboundSlots}, LastAimExplicitSlot={station.LastAimExplicitSlot}). Aponte diretamente para o posto/objeto 3D!");
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Aponte diretamente para o posto na bancada!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+                return;
+            }
+
+            if (netState == null || cmd == null || NetworkManager.Singleton == null)
+            {
+                Debug.LogWarning("[PlayerInteraction] [F] netState, cmd ou NetworkManager estÃ¡ nulo!");
+                return;
+            }
+
+            ulong myId = NetworkManager.Singleton.LocalClientId;
+            NetItemDto itemOnStation = default;
+            bool hasItemOnStation = false;
+            NetItemDto itemInHand = default;
+            bool hasItemInHand = false;
+            NetItemDto itemInOtherHand = default;
+            bool hasItemInOtherHand = false;
+
+            for (int i = 0; i < netState.Items.Count; i++)
+            {
+                var it = netState.Items[i];
+                if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && it.HolderId == (ulong)station.stationId && it.SlotId == slotIndex)
+                {
+                    itemOnStation = it;
+                    hasItemOnStation = true;
+                }
+                if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand && it.HolderId == myId)
+                {
+                    if (it.SlotId == hand)
+                    {
+                        itemInHand = it;
+                        hasItemInHand = true;
+                    }
+                    else if (it.SlotId == otherHand)
+                    {
+                        itemInOtherHand = it;
+                        hasItemInOtherHand = true;
+                    }
+                }
+            }
+
+            Debug.Log($"[PlayerInteraction] [F] Itens detectados -> Bancada: {(hasItemOnStation ? $"ItemId={itemOnStation.ItemId}, Def={itemOnStation.DefinitionId}, Cat={(ScaryParty.Pizzeria.Domain.Types.ItemCategory)itemOnStation.Category}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemOnStation.PrepStage}" : "Vazia")} | MÃ£o Ativa ({hand}): {(hasItemInHand ? $"ItemId={itemInHand.ItemId}, Def={itemInHand.DefinitionId}, Cat={(ScaryParty.Pizzeria.Domain.Types.ItemCategory)itemInHand.Category}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemInHand.PrepStage}" : "Vazia")} | Outra MÃ£o ({otherHand}): {(hasItemInOtherHand ? $"ItemId={itemInOtherHand.ItemId}, Def={itemInOtherHand.DefinitionId}" : "Vazia")}");
+
+            bool isPreparedIngredient = hasItemInHand && (itemInHand.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Sauce ||
+                                        ((itemInHand.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Cheese || itemInHand.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Topping) &&
+                                         itemInHand.PrepStage == (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared));
+
+            bool isPreparedPizzaOrBase = hasItemOnStation && (itemOnStation.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza ||
+                                         itemOnStation.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase ||
+                                         (itemOnStation.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Dough && itemOnStation.PrepStage == (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared));
+
+            Debug.Log($"[PlayerInteraction] [F] CondiÃ§Ãµes de montagem -> isPreparedPizzaOrBase={isPreparedPizzaOrBase}, isPreparedIngredient={isPreparedIngredient}");
+
+            if (isPreparedPizzaOrBase && isPreparedIngredient)
+            {
+                Debug.Log($"[PlayerInteraction] [F] CondiÃ§Ãµes satisfeitas! Disparando AddIngredientToPizzaServerRpc (Pizza={itemOnStation.ItemId}, Ingrediente={itemInHand.ItemId})");
+                cmd.AddIngredientToPizzaServerRpc(itemOnStation.ItemId, itemInHand.ItemId);
+                return;
+            }
+
+            if (station is ScaryParty.Pizzeria.Stations.PrepStation prep)
+            {
+                bool hasAnyWorkItem = hasItemOnStation || hasItemInHand || hasItemInOtherHand;
+                if (!hasAnyWorkItem)
+                {
+                    Debug.LogWarning($"[PlayerInteraction] [F] Nenhum item disponível para preparo na bancada {prep.stationName}.");
+                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Coloque um ingrediente ou segure-o para preparar!", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                    return;
+                }
+
+                _workAttemptGeneration++;
+                ReleaseWorkLockOnly();
+                _workCameraLock = ScaryParty.Player.FirstPersonCameraController.LocalInstance != null
+                    ? ScaryParty.Player.FirstPersonCameraController.LocalInstance.AcquireLookLock("PrepStationWorkF")
+                    : default;
+
+                Debug.Log($"[PlayerInteraction] [F] Estação é PrepStation! Disparando StartWorkAtomicServerRpc (Estação={prep.stationId}, Slot={slotIndex}, Hand={hand}, Gen={_workAttemptGeneration})");
+                cmd.StartWorkAtomicServerRpc(prep.stationId, slotIndex, 0, hand);
+                _workStation = prep.stationId;
+                _workSlot = slotIndex;
+                _nextWorkHeartbeat = Time.unscaledTime + 0.2f;
+                return;
+            }
+
+            // DiagnÃ³sticos especÃ­ficos para feedback claro ao usuÃ¡rio quando nada acontece:
+            if (hasItemInHand && !isPreparedIngredient)
+            {
+                Debug.LogWarning($"[PlayerInteraction] [F] O ingrediente segurado (Def={itemInHand.DefinitionId}, Cat={(ScaryParty.Pizzeria.Domain.Types.ItemCategory)itemInHand.Category}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemInHand.PrepStage}) precisa ser preparado antes na Bancada de Preparo!");
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Prepare o ingrediente na bancada de preparo primeiro!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+            }
+            else if (hasItemOnStation && !isPreparedPizzaOrBase)
+            {
+                Debug.LogWarning($"[PlayerInteraction] [F] A massa na bancada (Def={itemOnStation.DefinitionId}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemOnStation.PrepStage}) ainda nÃ£o foi aberta! Abra a massa na Bancada de Preparo primeiro.");
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Abra a massa na bancada de preparo antes de montar!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+            }
+            else if (!hasItemInHand && hasItemInOtherHand)
+            {
+                Debug.LogWarning($"[PlayerInteraction] [F] O ingrediente estÃ¡ na OUTRA mÃ£o (mÃ£o {otherHand}). Use [1], [2] ou [Q] para alternar para a mÃ£o com o item!");
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Alterne para a mÃ£o com o ingrediente (teclas 1, 2 ou Q)!", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+            }
+            else
+            {
+                Debug.LogWarning($"[PlayerInteraction] [F] Nenhuma aÃ§Ã£o compatÃ­vel para [F] na estaÃ§Ã£o '{station.stationName}' ({station.GetType().Name}). (hasItemOnStation={hasItemOnStation}, hasItemInHand={hasItemInHand})");
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"Esta bancada ({station.stationName}) nÃ£o aceita a tecla [F] no estado atual.", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+            }
+        }
+    }
 
 #if ENABLE_INPUT_SYSTEM
     private void HandleInput()
     {
         bool interactPressed = false;
-        
-        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame)
+        bool workPressed = false;
+
+        if (UnityEngine.InputSystem.Keyboard.current != null)
         {
-            interactPressed = true;
+            if (UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame) interactPressed = true;
+            if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame) workPressed = true;
         }
+        if (Input.GetKeyDown(KeyCode.E)) interactPressed = true;
+        if (Input.GetKeyDown(KeyCode.F)) workPressed = true;
 
         if (interactPressed && _currentInteractable != null)
         {
             _currentInteractable.OnInteract(this.gameObject);
         }
 
-        if (UnityEngine.InputSystem.Keyboard.current != null)
+        if (workPressed)
         {
-            var netState = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
-            var cmd = ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance;
-
-            if (_currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep)
+            if (_workCompletedAwaitingFRelease)
             {
-                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
-                {
-                    if (cmd != null && netState != null && NetworkManager.Singleton != null)
-                    {
-                        var adapter = GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
-                        byte hand = adapter != null ? (byte)adapter.ActiveHand : (byte)0;
-                        _activeWorkSlotIndex = prep.ResolveTargetSlotIndex();
-                        if (_activeWorkSlotIndex >= 0)
-                        {
-                            cmd.StartWorkAtomicServerRpc(prep.stationId, _activeWorkSlotIndex, 0, hand);
-                        }
-                    }
-                }
-                else if (UnityEngine.InputSystem.Keyboard.current.fKey.isPressed)
-                {
-                    if (cmd != null && _activeWorkSlotIndex >= 0 && Time.time - _lastHeartbeatTime > 0.2f)
-                    {
-                        cmd.HeartbeatWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
-                        _lastHeartbeatTime = Time.time;
-                    }
-                }
-                else if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame)
-                {
-                    if (cmd != null && _activeWorkSlotIndex >= 0) cmd.CancelWorkServerRpc(prep.stationId, _activeWorkSlotIndex);
-                }
+                return;
             }
-            else if (_currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
-            {
-                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
-                {
-                    if (netState != null && cmd != null)
-                    {
-                        int targetSlot = pkg.ResolveTargetSlotIndex();
-                        if (targetSlot >= 0)
-                        {
-                            for (int i = 0; i < netState.Items.Count; i++)
-                            {
-                                var item = netState.Items[i];
-                                if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)pkg.stationId && item.SlotId == targetSlot)
-                                {
-                                    bool canPackage = item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.PizzaBase || 
-                                                      item.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Pizza;
-                                    if (canPackage && item.PackagingState != (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
-                                    {
-                                        cmd.StartPackagingServerRpc(item.ItemId);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StagingStation stg)
-            {
-                if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame)
-                {
-                    if (netState != null && ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
-                    {
-                        int targetSlot = stg.ResolveTargetSlotIndex();
-                        if (targetSlot >= 0)
-                        {
-                            for (int i = 0; i < netState.Items.Count; i++)
-                            {
-                                var item = netState.Items[i];
-                                if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)stg.stationId && item.SlotId == targetSlot && item.PackagingState == (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
-                                {
-                                    ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // If F was released but we lost focus of the interactable
-            if (UnityEngine.InputSystem.Keyboard.current.fKey.wasReleasedThisFrame && _currentInteractable == null)
-            {
-                // Tricky: we don't know which station we were interacting with. 
-                // Better to just let the server timeout the lease (LeaseExpiration).
-            }
+            ExecuteWorkInteraction();
         }
     }
 #else
     private void HandleInput()
     {
-        if (Input.GetKeyDown(KeyCode.E) && _currentInteractable != null)
+        bool interactPressed = Input.GetKeyDown(KeyCode.E);
+        bool workPressed = Input.GetKeyDown(KeyCode.F);
+
+        if (interactPressed && _currentInteractable != null)
         {
             _currentInteractable.OnInteract(this.gameObject);
+        }
+
+        if (workPressed)
+        {
+            if (_workCompletedAwaitingFRelease)
+            {
+                return;
+            }
+            ExecuteWorkInteraction();
         }
     }
 #endif

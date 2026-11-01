@@ -237,22 +237,21 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (!pizza.CanAddIngredient(ingredient.DefinitionId))
-            {
-                PizzeriaSession.Notifier?.NotifyClient(sender, "Não é possível adicionar ingredientes a esta pizza.", true);
+            if (pizza.Location.Type != LocationType.StationSlot ||
+                !StationRegistry.TryGetStation((int)pizza.Location.HolderId, out var station) || station == null ||
+                !InteractionValidator.ValidateDistanceAndSight(sender, station.position,
+                    root.Config.interactDistance, root.Config.serverDistanceTolerance))
                 return;
-            }
 
-            bool added = pizza.AddIngredient(ingredient.DefinitionId, ingredient.PrepStage, 1);
-            if (added)
-            {
-                TransferService.DestroyItem(root.DomainState, ingId);
+            float duration = root.Config.addIngredientDuration;
+            if (duration <= 0f)
+                duration = root.Catalog.Processes.TryGetValue(1, out var dough) ? dough.BaseDuration : 3f;
+            var result = PizzaAssemblyService.Begin(root.DomainState, pizzaId, ingId, sender,
+                (float)root.Clock.Now, Mathf.Max(0.1f, duration));
+            if (result.Success)
                 CommitAndReplicate();
-            }
             else
-            {
-                PizzeriaSession.Notifier?.NotifyClient(sender, "Falha ao adicionar ingrediente.", true);
-            }
+                PizzeriaSession.Notifier?.NotifyClient(sender, result.Message, true);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -262,13 +261,11 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            if (StationRegistry.TryGetStation(stationId, out var stTrans))
+            if (!StationRegistry.TryGetStation(stationId, out var stTrans) || stTrans == null ||
+                !InteractionValidator.ValidateDistanceAndSight(sender, stTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
             {
-                if (!InteractionValidator.ValidateDistanceAndSight(sender, stTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
-                {
-                    PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada.", true);
-                    return;
-                }
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Muito longe da bancada.", true);
+                return;
             }
 
             var slotId = new StationSlotId(stationId, slotIndex);
@@ -290,6 +287,24 @@ namespace ScaryParty.Pizzeria.Network
                 root.DomainState, slotId, OperationKind.Process, ResumePolicy.Resumable,
                 inputItemId, toolId, processId, sender, root.Catalog, (float)root.Clock.Now, root.Config.workLeaseSeconds);
 
+            if (res.Success && root.DomainState.ActiveOperations.TryGetValue(slotId, out var started))
+            {
+                started.WorkerId = OperationState.ServerWorker;
+                if (root.DomainState.Items.TryGetValue(started.InputItemId, out var lockedInput))
+                {
+                    lockedInput.ReservedByHold = OperationState.ServerWorker;
+                    lockedInput.Revision++;
+                }
+                started.Progress.LeaseExpiry = (float)root.Clock.Now + started.Progress.Duration + 1f;
+                if (started.ToolItemId.IsValid && root.DomainState.Tools.TryGetValue(started.ToolItemId, out var workTool))
+                {
+                    workTool.ReleaseLease(sender);
+                    workTool.TryAcquireLease(OperationState.ServerWorker, (float)root.Clock.Now, started.Progress.Duration + 1f);
+                }
+                started.Revision++;
+                root.DomainState.IncrementRevision();
+            }
+
             if (!res.Success)
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);
@@ -307,6 +322,8 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             var slotId = new StationSlotId(stationId, slotIndex);
+            if (root.DomainState.ActiveOperations.TryGetValue(slotId, out var op) && op.WorkerId == OperationState.ServerWorker)
+                return;
             root.ProcessingService.Heartbeat(root.DomainState, slotId, sender, (float)root.Clock.Now, root.Config.workLeaseSeconds);
         }
 
@@ -318,6 +335,8 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             var slotId = new StationSlotId(stationId, slotIndex);
+            if (root.DomainState.ActiveOperations.TryGetValue(slotId, out var op) && op.WorkerId == OperationState.ServerWorker)
+                return;
             root.ProcessingService.CancelOperation(root.DomainState, slotId, sender, (float)root.Clock.Now);
             CommitAndReplicate();
         }

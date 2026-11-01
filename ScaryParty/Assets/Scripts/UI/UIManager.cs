@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using ScaryParty.UI.Piaria.Presenters;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -8,7 +9,7 @@ using UnityEngine.InputSystem;
 /// <summary>
 /// Singleton manager for the Main Game UI using UI Toolkit.
 /// Updates the HUD dynamically during gameplay.
-/// Includes a Tab-activated scoreboard showing all players, their pizza slots, and money.
+/// Bridges seamlessly with the Piaria UI Toolkit presenters while maintaining complete API compatibility.
 /// </summary>
 public class UIManager : MonoBehaviour
 {
@@ -72,14 +73,14 @@ public class UIManager : MonoBehaviour
         UpdateMoneyDisplay(0);
         UpdateScore(0);
         HideInteractionPrompt();
-        UpdateHand(true, "Empty");
-        UpdateHand(false, "Empty");
+        UpdateHand(true, "Vazio");
+        UpdateHand(false, "Vazio");
         HideScoreboard();
 
         // Minimap drag and drop setup
         if (_minimapImage != null)
         {
-            _minimapImage.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop; // Prevents distortion/off-center
+            _minimapImage.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
             _minimapImage.RegisterCallback<PointerDownEvent>(OnMinimapPointerDown);
             _minimapImage.RegisterCallback<PointerMoveEvent>(OnMinimapPointerMove);
             _minimapImage.RegisterCallback<PointerUpEvent>(OnMinimapPointerUp);
@@ -124,15 +125,12 @@ public class UIManager : MonoBehaviour
         if (_isDraggingMap)
         {
             _isDraggingMap = false;
-            // PointerLeave doesn't require ReleasePointer for pointerId usually, but just in case
         }
     }
 
     private void Update()
     {
-        // Continuously try to bind the RenderTexture if it exists and hasn't been bound yet
-        // UGUIWorldImage generates the RT dynamically, so it might not be ready in OnEnable.
-        if (_minimapImage != null && _minimapImage.resolvedStyle.backgroundImage == null)
+        if (_minimapImage != null && _minimapImage.resolvedStyle.backgroundImage.texture == null)
         {
             var worldImage = FindObjectOfType<Kamgam.UGUIWorldImage.WorldImage>();
             if (worldImage != null && worldImage.RenderTexture != null)
@@ -141,8 +139,10 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        // Scoreboard: mostra enquanto Tab está pressionado
-        HandleScoreboardInput();
+        if (ScoreboardPresenter.Instance == null)
+        {
+            HandleScoreboardInput();
+        }
     }
 
     // ========================================
@@ -205,18 +205,11 @@ public class UIManager : MonoBehaviour
         HideScoreboard();
     }
 
-    /// <summary>
-    /// Lê todos os PlayerState na cena e monta as linhas do scoreboard.
-    /// Cada linha: Nome ············ ■/□ slots ············ R$xxx
-    /// ■ = slot com pizza, □ = slot vazio
-    /// </summary>
     private void RefreshScoreboardData()
     {
         if (_scoreboardList == null) return;
 
         _scoreboardList.Clear();
-
-        // Busca todos os jogadores ativos
         var allPlayers = Object.FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
 
         foreach (var player in allPlayers)
@@ -230,34 +223,29 @@ public class UIManager : MonoBehaviour
             int money = player.Money.Value;
             Color playerColor = player.PlayerColor.Value;
 
-            // Monta a string de slots: ■ para pizza, □ para vazio (2 slots = 2 mãos)
             const int maxSlots = 2;
             string slotsDisplay = "";
             for (int i = 0; i < maxSlots; i++)
             {
                 if (i < heldPizzas)
-                    slotsDisplay += "●  "; // Círculo cheio = slot com pizza
+                    slotsDisplay += "●  ";
                 else
-                    slotsDisplay += "■  "; // Quadrado = slot vazio
+                    slotsDisplay += "■  ";
             }
             slotsDisplay = slotsDisplay.TrimEnd();
 
-            // Cria a row do scoreboard
             var row = new VisualElement();
             row.AddToClassList("scoreboard-row");
 
-            // Nome do jogador (com cor)
             var nameLabel = new Label(playerName);
             nameLabel.AddToClassList("scoreboard-cell");
             nameLabel.AddToClassList("scoreboard-name");
             nameLabel.style.color = new StyleColor(playerColor);
 
-            // Indicador de slots (pizzas)
             var slotsLabel = new Label(slotsDisplay);
             slotsLabel.AddToClassList("scoreboard-cell");
             slotsLabel.AddToClassList("scoreboard-slots");
 
-            // Dinheiro
             var moneyLabel = new Label($"R${money}");
             moneyLabel.AddToClassList("scoreboard-cell");
             moneyLabel.AddToClassList("scoreboard-money");
@@ -271,24 +259,21 @@ public class UIManager : MonoBehaviour
     }
 
     // ========================================
-    // MONEY (agora via NetworkVariable)
+    // MONEY & SCORE
     // ========================================
 
-    /// <summary>
-    /// Atualiza o display de dinheiro no HUD.
-    /// Chamado pelo callback OnMoneyChanged do PlayerState (NetworkVariable).
-    /// </summary>
     public void UpdateMoneyDisplay(int total)
     {
-        if (_moneyLabel != null)
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.SetMoney(total);
+        }
+        else if (_moneyLabel != null)
         {
             _moneyLabel.text = $"R${total}";
         }
     }
 
-    /// <summary>
-    /// Adds a completed delivery and updates the score UI.
-    /// </summary>
     public void AddCompletedDelivery()
     {
         _completedDeliveries++;
@@ -297,7 +282,11 @@ public class UIManager : MonoBehaviour
 
     private void UpdateScore(int total)
     {
-        if (_scoreLabel != null)
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.SetDeliveries(total);
+        }
+        else if (_scoreLabel != null)
         {
             _scoreLabel.text = $"Entregas: {total}";
         }
@@ -307,19 +296,19 @@ public class UIManager : MonoBehaviour
     // HANDS / INTERACTION
     // ========================================
 
-    /// <summary>
-    /// Updates the text shown in a hand slot.
-    /// </summary>
     public void UpdateHand(bool isRightHand, string itemName)
     {
         SetHandState(isRightHand, false, itemName);
     }
 
-    /// <summary>
-    /// Updates the text shown in a hand slot and visually highlights the active/selected hand.
-    /// </summary>
     public void SetHandState(bool isRightHand, bool isSelected, string itemName)
     {
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.SetHandState(isRightHand, isSelected, itemName);
+            return;
+        }
+
         var contentLabel = isRightHand ? _rightHandContent : _leftHandContent;
         if (contentLabel == null) return;
 
@@ -333,79 +322,51 @@ public class UIManager : MonoBehaviour
             {
                 string handName = isRightHand ? "Mão Direita [2]" : "Mão Esquerda [1]";
                 titleLabel.text = isSelected ? $"★ {handName}" : handName;
-                titleLabel.style.color = isSelected ? new StyleColor(new Color(1f, 0.9f, 0.2f)) : new StyleColor(new Color(0.7f, 0.7f, 0.7f));
-                titleLabel.style.unityFontStyleAndWeight = isSelected ? FontStyle.Bold : FontStyle.Normal;
             }
 
             if (isSelected)
             {
-                slotContainer.style.borderTopColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
-                slotContainer.style.borderBottomColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
-                slotContainer.style.borderLeftColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
-                slotContainer.style.borderRightColor = new StyleColor(new Color(1f, 0.85f, 0.2f, 1f));
-                slotContainer.style.borderTopWidth = 2.5f;
-                slotContainer.style.borderBottomWidth = 2.5f;
-                slotContainer.style.borderLeftWidth = 2.5f;
-                slotContainer.style.borderRightWidth = 2.5f;
-                slotContainer.style.backgroundColor = new StyleColor(new Color(0.18f, 0.16f, 0.05f, 0.85f));
+                slotContainer.AddToClassList("hand-card-active");
             }
             else
             {
-                slotContainer.style.borderTopColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
-                slotContainer.style.borderBottomColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
-                slotContainer.style.borderLeftColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
-                slotContainer.style.borderRightColor = new StyleColor(new Color(0.35f, 0.35f, 0.35f, 0.6f));
-                slotContainer.style.borderTopWidth = 1f;
-                slotContainer.style.borderBottomWidth = 1f;
-                slotContainer.style.borderLeftWidth = 1f;
-                slotContainer.style.borderRightWidth = 1f;
-                slotContainer.style.backgroundColor = new StyleColor(new Color(0.08f, 0.08f, 0.08f, 0.6f));
+                slotContainer.RemoveFromClassList("hand-card-active");
             }
         }
     }
 
-    /// <summary>
-    /// Shows the interaction prompt with a specific message.
-    /// Explicitly styles it to show [E] clearly.
-    /// </summary>
     public void ShowInteractionPrompt(string message)
     {
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.ShowPrompt(message);
+            return;
+        }
+
         if (_interactionPrompt != null)
         {
-            // Ensure the UI shows [E] prominently
-            if (!message.Contains("[E]"))
+            if (!message.Contains("[E]") && !message.Contains("[F]"))
             {
                 message = $"[E] {message}";
             }
-            
             _interactionPrompt.text = message;
-            _interactionPrompt.style.opacity = 0.8f;
-            _interactionPrompt.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.8f));
-            _interactionPrompt.style.color = new StyleColor(Color.white);
-            _interactionPrompt.style.paddingLeft = 36;
-            _interactionPrompt.style.paddingRight = 36;
-            _interactionPrompt.style.paddingTop = 16;
-            _interactionPrompt.style.paddingBottom = 16;
-            _interactionPrompt.style.borderTopLeftRadius = 32;
-            _interactionPrompt.style.borderTopRightRadius = 32;
-            _interactionPrompt.style.borderBottomLeftRadius = 32;
-            _interactionPrompt.style.borderBottomRightRadius = 32;
-            
-            _interactionPrompt.RemoveFromClassList("hidden");
-            // Also ensure display is block in case class list isn't working
             _interactionPrompt.style.display = DisplayStyle.Flex;
+            _interactionPrompt.RemoveFromClassList("hidden");
         }
     }
 
-    /// <summary>
-    /// Hides the interaction prompt.
-    /// </summary>
     public void HideInteractionPrompt()
     {
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.HidePrompt();
+            return;
+        }
+
         if (_interactionPrompt != null)
         {
-            _interactionPrompt.AddToClassList("hidden");
             _interactionPrompt.style.display = DisplayStyle.None;
+            _interactionPrompt.AddToClassList("hidden");
         }
     }
 
@@ -413,18 +374,19 @@ public class UIManager : MonoBehaviour
     // MINIMAP
     // ========================================
 
-    /// <summary>
-    /// Toggles the minimap VisualElement to cover most of the screen.
-    /// </summary>
     public void ToggleMinimapFullscreen(bool isFullscreen)
     {
-        if (_minimapImage == null || _minimapImage.parent == null) return;
+        if (HudPresenter.Instance != null)
+        {
+            HudPresenter.Instance.ToggleMinimapFullscreen(isFullscreen);
+            return;
+        }
 
+        if (_minimapImage == null || _minimapImage.parent == null) return;
         var container = _minimapImage.parent;
 
         if (isFullscreen)
         {
-            // Center and expand the CONTAINER
             container.style.width = Length.Percent(80);
             container.style.height = Length.Percent(80);
             container.style.bottom = Length.Percent(10);
@@ -434,7 +396,6 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            // Restore to original HUD position
             container.style.width = StyleKeyword.Null;
             container.style.height = StyleKeyword.Null;
             container.style.bottom = StyleKeyword.Null;
@@ -448,13 +409,9 @@ public class UIManager : MonoBehaviour
     // ORDERS LIST
     // ========================================
 
-    /// <summary>
-    /// Updates the orders list on the right side of the screen.
-    /// </summary>
     public void UpdateOrdersList(List<string> activeOrders)
     {
         if (_ordersList == null) return;
-
         _ordersList.Clear();
 
         foreach (var order in activeOrders)
@@ -463,7 +420,6 @@ public class UIManager : MonoBehaviour
             orderLabel.AddToClassList("order-item");
             orderLabel.AddToClassList("order-item-text");
 
-            // Apply route color to the left border and the text itself so it's very visible
             if (MinimapRouteManager.Instance != null)
             {
                 Color routeColor = MinimapRouteManager.Instance.GetOrderColor(order);
@@ -475,3 +431,9 @@ public class UIManager : MonoBehaviour
         }
     }
 }
+ 
+ 
+ 
+ 
+ 
+ 

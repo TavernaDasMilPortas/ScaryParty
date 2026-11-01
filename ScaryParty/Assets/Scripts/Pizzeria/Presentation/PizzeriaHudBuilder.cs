@@ -123,6 +123,26 @@ namespace ScaryParty.Pizzeria.Presentation
                 RefreshActiveOrdersDisplay();
             }
 
+            if (_storagePanel != null && _storagePanel.style.display == DisplayStyle.Flex)
+            {
+                if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.escapeKey.wasPressedThisFrame)
+                {
+                    CloseStoragePicker();
+                }
+                else if (_storageStationId >= 0)
+                {
+                    var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+                    if (localPlayer != null && StationRegistry.TryGetStation(_storageStationId, out var stTrans) && stTrans != null)
+                    {
+                        float distSq = (localPlayer.transform.position - stTrans.position).sqrMagnitude;
+                        if (distSq > 16f) // Mais de 4 metros de distância
+                        {
+                            CloseStoragePicker();
+                        }
+                    }
+                }
+            }
+
             UpdateUIMode();
         }
 
@@ -275,6 +295,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void OpenStoragePicker(int stationId)
         {
+            if (ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance != null)
+            {
+                ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance.Open(stationId);
+                return;
+            }
             EnsureUIInitialized();
             _storageStationId = stationId;
             if (_storagePanel == null)
@@ -287,8 +312,18 @@ namespace ScaryParty.Pizzeria.Presentation
             UpdateUIMode();
         }
 
-        public void CloseStoragePicker()
+        public void CloseStoragePicker(bool notifyServer = true)
         {
+            if (ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance.IsOpen)
+            {
+                ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance.Close();
+                return;
+            }
+            if (notifyServer && _storageStationId >= 0 && NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient)
+            {
+                PizzeriaCommandHandler.Instance?.CloseStorageSessionServerRpc(_storageStationId);
+            }
+            _storageStationId = -1;
             if (_storagePanel != null)
                 _storagePanel.style.display = DisplayStyle.None;
             UpdateUIMode();
@@ -358,7 +393,6 @@ namespace ScaryParty.Pizzeria.Presentation
                         if (cmd != null && adapter != null)
                         {
                             cmd.DispenseIngredientServerRpc(capturedStorageId, capturedIngId, (byte)adapter.ActiveHand);
-                            CloseStoragePicker();
                         }
                     });
                     btn.text = "Pegar";
@@ -406,7 +440,6 @@ namespace ScaryParty.Pizzeria.Presentation
                         if (cmd != null && adapter != null && NetworkManager.Singleton != null)
                         {
                             cmd.TransferToolServerRpc(capturedToolId, (byte)LocationType.Hand, NetworkManager.Singleton.LocalClientId, (int)adapter.ActiveHand);
-                            CloseStoragePicker();
                         }
                     });
                     btn.text = "Pegar";
@@ -540,6 +573,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void OpenStagingAddressPicker(ulong boxId, int slotIndex)
         {
+            if (ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance != null)
+            {
+                ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance.Open(boxId, slotIndex);
+                return;
+            }
             EnsureUIInitialized();
             _stagingBoxId = boxId;
             _stagingSlotIndex = slotIndex;

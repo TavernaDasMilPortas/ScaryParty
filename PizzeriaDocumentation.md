@@ -1,8 +1,14 @@
-﻿# Documentação Técnica e Arquitetural do Sistema de Pizzaria e Criação de Pizza (ScaryParty)
+# Documentação Técnica e Arquitetural do Sistema de Pizzaria e Criação de Pizza (ScaryParty)
 
 Este documento detalha de ponta a ponta o funcionamento, a arquitetura de código, a física espacial, a sincronização em rede e as regras de negócio de todo o ecossistema da **Pizzaria** e da **Criação de Pizza** no projeto **ScaryParty**.
 
 ---
+
+## Reparo do prefab modular manual (Unity Editor)
+
+No Project, use `Tools > Scary Party > Pizzeria > Reparar prefab modular manual...` para o asset `Assets/Prefabs/Pizzeria/PizzeriaModular_Manual.prefab`, ou selecione um prefab da pizzaria e use `Reparar prefab selecionado...`. Confirme o diálogo antes de gravar. O reparador carrega uma cópia editável com `LoadPrefabContents`, valida antes de alterar e só salva via `SaveAsPrefabAsset` se houver correções; descarrega a cópia mesmo em caso de erro. A ferramenta não é executada automaticamente na importação ou durante o desenvolvimento.
+
+O tipo Prep é inferido exclusivamente da definição compartilhada pela instância no `PizzeriaRoot.Config` e pelo registro em `PizzeriaAuthoringBindings` (processos aceitos), com receita `PrepStation` do registry; a troca de `AssemblyStation` conserva stationId, âncoras, transforms, objetos e materiais e atualiza referências serializadas ao componente. Postos com `slotAnchor` são ligados apenas se aquela instância exata de `Transform` aparecer uma única vez em `StationView.slotAnchors`; o índice é o índice real da âncora. Âncoras de postos sem destino único (ausentes do inventário ou duplicadas) e bindings/config de preparo conflitantes bloqueiam o reparo inteiro sem salvar. Postos com `slotAnchor` nulo (como `Workpost_4`) ficam intactos e são reportados para revisão manual: não há inferência por nomes, posição ou `slotIndex`. Execute novamente para conferir idempotência (nenhuma alteração). Os testes EditMode `PizzeriaModularPrefabRepairTests` exercitam a troca, referências, preservação, ambiguidade e segunda execução.
 
 ## 1. Visão Geral e Filosofia Arquitetural
 
@@ -107,8 +113,8 @@ O interior da Pizzaria (12m x 12m) é planejado de forma ergonômica para suport
 | **2** | `Storage_Cupboard` | `StorageStation` | Armário seco para bolas de massa. | `[E]` Abre o menu para retirar porções de massa. |
 | **3** | `Station_ToolRack` | `ToolRackStation` | Suporte compartilhado de ferramentas (Faca e Ralador). | `[E]` Pega ou devolve utensílios nas mãos. |
 | **4** | `Station_NeutralCounter`| `CounterStation` | Bancada lisa de apoio para descanso e troca de itens entre jogadores. | `[E]` Coloca o item da mão ou pega o item depositado. |
-| **5** | `Station_Prep_A` | `PrepStation` | Bancada prioritária para abertura de massa (Processo 1). | `[E]` Apoia item / `[F]` Segura para abrir a massa. |
-| **6** | `Station_Prep_B` | `PrepStation` | Bancada prioritária para corte e ralagem com utensílios. | `[E]` Apoia item / `[F]` Segura com faca ou ralador na mão. |
+| **5** | `Station_Prep_A` | `PrepStation` | Bancada prioritária para abertura de massa (Processo 1). | `[E]` Apoia item / `[F]` Inicia a abertura automática da massa. |
+| **6** | `Station_Prep_B` | `PrepStation` | Bancada prioritária para corte e ralagem com utensílios. | `[E]` Apoia item / `[F]` Inicia o preparo com faca ou ralador na mão. |
 | **7** | `Station_Assembly` | `AssemblyStation` | Estação de montagem das pizzas (camadas sobre a massa aberta). | `[E]` Adiciona molho, queijo ou coberturas à massa. |
 | **8** | `Station_Oven` | `OvenStation` | Forno industrial de alta capacidade com cozimento autônomo. | `[E]` Insere pizza crua / `[E]` Retira pizza assada. |
 | **9** | `Station_Packaging` | `PackagingStation` | Bancada com caixas térmicas de papelão. | `[F]` Segura para embalar a pizza em caixa. |
@@ -160,9 +166,9 @@ A produção de uma pizza no jogo segue um fluxo industrial rigoroso:
 ### Passo 1: Obter e Abrir a Massa
 1. O jogador vai ao Armário (`StorageStation` ID 2), abre o painel e clica em "Pegar" na **Massa** (ID 1, `Category: Dough`).
 2. A massa surge instantaneamente na mão ativa do jogador (esquerda ou direita).
-3. O jogador vai à `PrepStation A` (ID 5) e pressiona `[E]` para colocá-la ou segura `[F]` diretamente.
-4. Segurar `[F]` executa `StartWorkAtomicServerRpc` para o processo `Process_1_AbrirMassa`. 
-5. Durante os 3 segundos de trabalho, a barra de progresso verde sobe. Se o jogador soltar a tecla antes, a operação pausa; ao segurar novamente, continua de onde parou.
+3. O jogador vai à `PrepStation A` (ID 5) e pressiona `[E]` para colocá-la ou pressiona `[F]` uma vez para iniciar o preparo.
+4. Pressionar `[F]` executa `StartWorkAtomicServerRpc` para o processo `Process_1_AbrirMassa`. 
+5. Durante os 3 segundos de trabalho, a barra de progresso verde sobe. O servidor conclui automaticamente após a duração configurada, sem exigir que o jogador mantenha a tecla pressionada.
 6. Ao término, a massa bruta é transformada atomicamente em **Massa Aberta** (`DefinitionId: 2`, `PrepStage: Prepared`).
 
 ### Passo 2: Preparação dos Ingredientes (Processos e Utensílios)
@@ -170,13 +176,13 @@ Alguns ingredientes exigem processamento prévio com ferramentas:
 - **Queijo Ralado:**
   1. Pegar o **Ralador** (`Tool_Grater`, ID 1, `ToolCapability.Grate`) no Suporte de Utensílios (`ToolRackStation` ID 3).
   2. Pegar o **Queijo Inteiro** (ID 4) na Geladeira (`StorageStation` ID 1).
-  3. Ir à bancada de preparo (`PrepStation B` ID 6) e segurar `[F]`.
+  3. Ir à bancada de preparo (`PrepStation B` ID 6) e pressionar `[F]` uma vez.
   4. O servidor valida se o jogador possui o item e a ferramenta com a habilidade necessária (`Grate`). Duração: 3.0s.
   5. Resultado: **Queijo Ralado** (ID 5, `PrepStage: Prepared`).
 - **Calabresa Fatiada:**
   1. Pegar a **Faca** (`Tool_Knife`, ID 2, `ToolCapability.Slice`).
   2. Pegar a **Calabresa Inteira** (ID 6) na Geladeira.
-  3. Ir à `PrepStation` e segurar `[F]`. Duração: 2.0s.
+  3. Ir à `PrepStation` e pressionar `[F]` uma vez. Duração: 2.0s.
   4. Resultado: **Calabresa Fatiada** (ID 7, `PrepStage: Prepared`).
 - **Molho:** O molho já é dispensado pronto para uso (`requiresPrep: false`).
 - **Cogumelos (Especial):** Desbloqueados através do sistema de upgrades.
@@ -184,7 +190,7 @@ Alguns ingredientes exigem processamento prévio com ferramentas:
 ### Passo 3: Montagem da Pizza (`AssemblyStation`)
 1. A **Massa Aberta** é colocada sobre a `AssemblyStation` (ID 7).
 2. O cozinheiro carrega os ingredientes preparados na mão ativa e pressiona `[E]` mirando na massa (`AddIngredientToPizzaServerRpc`).
-3. O domínio adiciona o ingrediente à lista interna (`ItemState.Ingredients`), consome o item segurado e atualiza a máscara visual (`IngredientMask`):
+3. Após o tempo de montagem (por padrão o mesmo do processo de abrir massa; `PizzeriaConfig.addIngredientDuration` permite sobrescrever), o domínio adiciona o ingrediente à lista interna (`ItemState.Ingredients`), consome o item segurado e atualiza a máscara visual (`IngredientMask`):
    - **Bit 0 (Valor 1):** Molho
    - **Bit 1 (Valor 2):** Queijo
    - **Bit 2 (Valor 4):** Cobertura (Calabresa / Cogumelo)
@@ -254,11 +260,13 @@ A função de avaliação faz um emparelhamento guloso (*greedy match*) decresce
 
 ### 5.3 Sistema de Leases de Utensílios e Bancadas
 Para evitar que dois jogadores manipulem a mesma estação simultaneamente ou que uma desconexão trave uma bancada:
-- Ao iniciar o corte ou ralagem, o jogador adquire um **Lease** de 0.75 segundos no utensílio e no slot da estação (`ProcessingService.StartWork`).
-- Enquanto mantém a tecla `[F]` pressionada, o cliente envia mensagens de `HeartbeatWorkServerRpc` a cada 0.2 segundos, renovando a expiração do lease.
-- Se a tecla for solta, o jogador morrer ou a conexão cair, o lease expira em menos de 1 segundo, pausando o progresso acumulado e liberando a bancada e a ferramenta para os outros jogadores.
+- Ao iniciar o corte ou ralagem, o servidor assume o temporizador e reserva o item, utensílio e slot até terminar (`ProcessingService.StartWork`).
+- Um toque em `[F]` inicia o preparo; não há heartbeat dependente da tecla.
+- Soltar a tecla ou sair da área não interrompe a operação; montagens cujo ingrediente pertence a um jogador desconectado são canceladas e liberadas antes da recuperação dos itens.
 
 ---
+
+O preparo e a montagem reservam os itens envolvidos até a conclusão no servidor. Os clientes exibem `KitchenProcessEffects` com cópias de `VFX_Mess` e `VFX_Smoke` em `Assets/Resources/PizzeriaVFX`, arcos procedurais para uma ou duas entradas, ocultação temporária e barra de progresso. A malha de fumaça foi exportada do Blender para `Assets/VFX/Models/Smoke01_Export.fbx`; os grafos originais em `Assets/VFX` permanecem intactos.
 
 ## 6. Sincronização em Rede e DTOs (NGO)
 
@@ -358,3 +366,17 @@ O projeto conta com ferramentas integradas no menu superior do Unity (`Tools > S
 | `Player/` | `PlayerInventoryAdapter.cs`, `BackpackController.cs` | Controle de mãos ativas (teclas 1 e 2), HUD de itens e mochila de caixas. |
 | `Presentation/` | `PizzeriaItemVisualizer.cs`, `PizzeriaHudBuilder.cs`, `TicketBoardPresenter.cs`, `StationProgressBar.cs`, `NotificationManager.cs`, `PizzeriaSoundManager.cs` | Renderização procedural de pizzas, UI Toolkit, áudio e toasts na tela. |
 | `Editor/` | `PizzeriaBuilder.cs`, `PizzeriaContentWizard.cs`, `PizzeriaLogicInjector.cs`, `PizzeriaValidator.cs` | Ferramentas de menu para criação, validação e configuração da pizzaria no Unity Editor. |
+
+### VFX de preparo e montagem
+
+Um clique inicia o preparo ou a adicao de ingrediente. O servidor controla o tempo e reserva os itens ate a conclusao; nao e necessario manter o botao pressionado. `PizzeriaConfig.addIngredientDuration` configura a montagem; zero usa a duracao do processo de abrir massa. Os processos de preparo mantem suas duracoes de catalogo.
+
+`KitchenProcessEffects` anima copias dos inputs em arco, oculta os originais e mantem os efeitos durante a operacao replicada. Ao terminar, remove os efeitos e revela o resultado. O componente e adicionado automaticamente pelo visualizador, inclusive em prefabs existentes.
+
+Use **Tools > Pizzeria > Build Kitchen VFX** para recriar as copias em `Assets/Resources/PizzeriaVFX`. Os originais permanecem intactos. O builder resolve o ID do mesh importado no FBX, evitando referencias a subassets invalidos. Para converter novamente o `.blend`, use **Re-export Smoke FBX and Build Kitchen VFX** e selecione o executavel do Blender; o caminho fica salvo nas preferencias locais. A exportacao tem limite de dois minutos. O shader de espiral ausente no merge e substituido pelo shader de fumaca disponivel: isso nao reproduz necessariamente o acabamento artistico original.
+
+Validacao manual: no host e em um cliente, iniciar preparo e montagem, soltar o botao e se afastar; verificar bloqueio dos inputs, arco, barra de progresso, efeito durante toda a acao e resultado somente ao concluir. Verificar tambem desconexao durante montagem e encerramento da sessao.
+
+### Escala dos visuais nas bancadas
+
+Os visuais apoiados em bancadas, staging e pilhas acompanham a posicao e a rotacao da ancora em `LateUpdate`, sem se tornarem filhos dela. Assim, escalas nao uniformes da bancada nao deformam os ingredientes. A escala configurada em `stationSlotPose` continua sendo aplicada; os offsets de posicao continuam no espaco local da ancora. Nas maos, o parenting existente permanece inalterado. Quando a ancora e destruida, o visual associado tambem e removido.

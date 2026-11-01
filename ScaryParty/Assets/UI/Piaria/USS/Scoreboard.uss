@@ -1,0 +1,86 @@
+.scoreboard-overlay-root {
+    background-color: rgba(20, 15, 10, 0.7);
+    display: none;
+}
+
+.scoreboard-card {
+    width: 720px;
+    max-height: 520px;
+    flex-direction: column;
+}
+
+.mb-16 {
+    margin-bottom: 16px;
+}
+
+.scoreboard-header-row {
+    flex-direction: row;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-border-brown);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.scoreboard-header-cell {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-border-brown-light);
+}
+
+.col-name {
+    flex-grow: 2;
+    flex-basis: 0;
+}
+
+.col-pizzas {
+    flex-grow: 1.2;
+    flex-basis: 0;
+    -unity-text-align: middle-center;
+}
+
+.col-money {
+    flex-grow: 1;
+    flex-basis: 0;
+    -unity-text-align: middle-right;
+}
+
+.scoreboard-scroll {
+    flex-grow: 1;
+}
+
+.scoreboard-item-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: #FFFDF8;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: var(--color-border-brown-light);
+    padding: 8px 12px;
+    margin-bottom: 6px;
+}
+
+.scoreboard-item-cell {
+    font-size: 17px;
+    -unity-font-style: bold;
+}
+
+.scoreboard-player-name {
+    color: var(--color-text-dark);
+}
+
+.scoreboard-pizzas-cell {
+    color: var(--color-text-muted);
+    -unity-text-align: middle-center;
+}
+
+.scoreboard-money-cell {
+    color: var(--color-btn-green);
+    -unity-text-align: middle-right;
+}
+
+.scoreboard-hint {
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--color-text-muted);
+    -unity-text-align: middle-center;
+}

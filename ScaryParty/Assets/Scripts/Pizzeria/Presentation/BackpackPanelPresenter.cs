@@ -94,7 +94,11 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.name = "BackpackPanelCard";
             _card.style.width = 600;
             _card.style.maxHeight = 620;
-            _card.style.backgroundColor = new Color(0.12f, 0.12f, 0.14f, 0.98f);
+            _card.style.backgroundColor = new Color(0.96f, 0.94f, 0.88f, 1f);
+            if (ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance?.paperPanel2 != null)
+            {
+                _card.style.backgroundImage = new StyleBackground(ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance.paperPanel2);
+            }
             _card.style.borderTopLeftRadius = 12;
             _card.style.borderTopRightRadius = 12;
             _card.style.borderBottomLeftRadius = 12;

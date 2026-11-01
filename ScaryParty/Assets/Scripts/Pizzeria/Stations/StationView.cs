@@ -171,7 +171,7 @@ namespace ScaryParty.Pizzeria.Stations
                 if (stationHasTool && !playerHasItem && !playerHasTool) return $"[E] Pegar {toolName}";
                 if (stationHasItem && !playerHasItem && !playerHasTool) return $"[E] Pegar {itemName}";
                 if (!stationHasItem && !stationHasTool && (playerHasItem || playerHasTool)) return "[E] Colocar";
-                if (stationHasItem && playerHasItem) return "[E] Adicionar ingrediente";
+                if (stationHasItem && playerHasItem) return "[F] ou [E] Adicionar ingrediente";
 
                 return "[E] Interagir com " + stationName;
             }
@@ -184,11 +184,13 @@ namespace ScaryParty.Pizzeria.Stations
 
         public virtual void OnFocus()
         {
+            _doorPresenter?.OnHoverEnter();
         }
 
         public virtual void OnLoseFocus()
         {
             LastAimExplicitSlot = -1;
+            _doorPresenter?.OnHoverExit();
         }
 
         public Vector3 GetSlotPosition(int slotIndex)
@@ -206,10 +208,23 @@ namespace ScaryParty.Pizzeria.Stations
         }
 
         protected ScaryParty.Pizzeria.Presentation.StationProgressBar _progressBar;
+        [Header("Apresentação de Portas")]
+        [SerializeField] protected ScaryParty.Pizzeria.Presentation.StationDoorPresenter _doorPresenter;
+        public ScaryParty.Pizzeria.Presentation.StationDoorPresenter DoorPresenter => _doorPresenter;
 
         protected virtual void Awake()
         {
+            if (_doorPresenter == null)
+            {
+                _doorPresenter = GetComponent<ScaryParty.Pizzeria.Presentation.StationDoorPresenter>();
+            }
             ValidateAndCalibrateSlotAnchors();
+            ScaryParty.Pizzeria.Network.StationRegistry.Register(stationId, transform);
+        }
+
+        protected virtual void OnDestroy()
+        {
+            ScaryParty.Pizzeria.Network.StationRegistry.Unregister(stationId);
         }
 
         protected virtual void Start()
@@ -302,7 +317,8 @@ namespace ScaryParty.Pizzeria.Stations
                 if (slot.StationId == stationId && slot.HeldItemId != 0)
                 {
                     float currentP = slot.Progress;
-                    if (slot.CapturedDuration > 0 && NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Running &&
+                        slot.CapturedDuration > 0 && NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                     {
                         double now = NetworkManager.Singleton.ServerTime.Time;
                         if (now > slot.OperationStartTime)
@@ -425,7 +441,7 @@ namespace ScaryParty.Pizzeria.Stations
             else if (hasItemOnStation)
             {
                 // Tenta combinar se a mão ativa tiver ingrediente preparado compatível e a base na bancada já estiver aberta (Massa Aberta / Pizza)
-                if (hasItemInHand && !(this is PrepStation))
+                if (hasItemInHand)
                 {
                     bool isPreparedIngredient = itemInHand.Category == (byte)ItemCategory.Sauce ||
                                                 ((itemInHand.Category == (byte)ItemCategory.Cheese || itemInHand.Category == (byte)ItemCategory.Topping) &&

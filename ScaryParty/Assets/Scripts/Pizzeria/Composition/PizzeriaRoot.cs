@@ -386,10 +386,35 @@ namespace ScaryParty.Pizzeria.Composition
                 {
                     if (DomainState.ActiveOperations.TryGetValue(slot, out var op))
                     {
-                        float oldProgress = op.AccumulatedProgress;
+                        if (op.Phase != OperationPhase.Running) continue;
+
+                        // Autonomous jobs finish without player heartbeats; manual jobs must release on timeout.
+                        if (op.WorkerId != OperationState.ServerWorker && Clock.Now > op.Progress.LeaseExpiry &&
+                            op.ComputeCurrentProgress(Clock.Now) < 1f)
+                        {
+                            if (op.Kind == OperationKind.Assemble)
+                                PizzaAssemblyService.Cancel(DomainState, slot);
+                            else
+                                ProcessingService.CancelOperation(DomainState, slot, op.WorkerId, (float)Clock.Now);
+                            dirty = true;
+                            continue;
+                        }
                         
+                        if (op.Kind == OperationKind.Assemble)
+                        {
+                            if (op.ComputeCurrentProgress(Clock.Now) >= 1f)
+                            {
+                                Debug.Log($"[PizzeriaRoot] Concluindo operacao Assemble no slot {slot}!");
+                                bool completed = PizzaAssemblyService.Complete(DomainState, slot);
+                                if (completed)
+                                    Debug.Log($"[PizzeriaRoot] PizzaAssemblyService.Complete executado com sucesso no slot {slot}.");
+                                else
+                                    Debug.LogWarning($"[PizzeriaRoot] PizzaAssemblyService.Complete falhou ou retornou false no slot {slot}.");
+                                dirty |= completed;
+                            }
+                        }
                         // Se for um forno (processo autônomo sem workerId)
-                        if (op.WorkerId == OperationState.ServerWorker)
+                        else if (op.WorkerId == OperationState.ServerWorker && op.ProcessId == 0)
                         {
                             float oldCookProgress = 0f;
                             float oldBurnProgress = 0f;
@@ -419,8 +444,17 @@ namespace ScaryParty.Pizzeria.Composition
                             // Para trabalho manual: auto-completar se atingir 1.0
                             if (op.ComputeCurrentProgress(Clock.Now) >= 1f)
                             {
-                                ProcessingService.CompleteWork(slot, DomainState, Catalog);
-                                dirty = true;
+                                Debug.Log($"[PizzeriaRoot] Concluindo trabalho de preparo no slot {slot} (Processo: {op.ProcessId})!");
+                                var compRes = ProcessingService.CompleteWork(slot, DomainState, Catalog);
+                                if (compRes.Success)
+                                {
+                                    Debug.Log($"[PizzeriaRoot] ProcessingService.CompleteWork concluido com sucesso para o slot {slot}!");
+                                    dirty = true;
+                                }
+                                else
+                                {
+                                    Debug.LogWarning($"[PizzeriaRoot] ProcessingService.CompleteWork falhou no slot {slot}: {compRes.Error} - {compRes.Message}");
+                                }
                             }
                         }
                     }

@@ -14,6 +14,26 @@ namespace ScaryParty.Pizzeria.Stations
         public AudioSource audioSource;
         public AudioClip customDingClip;
 
+        [Header("Âncoras de Transferência")]
+        [Tooltip("Âncora na boca/abertura do forno pela qual a pizza entra e sai")]
+        public Transform entryAnchor;
+
+        public Transform GetEntryAnchor()
+        {
+            if (entryAnchor != null) return entryAnchor;
+            var mouth = transform.Find("EntryAnchor");
+            if (mouth != null)
+            {
+                entryAnchor = mouth;
+                return mouth;
+            }
+            var go = new GameObject("EntryAnchor");
+            go.transform.SetParent(transform, false);
+            go.transform.localPosition = new Vector3(0f, 0.45f, -0.25f);
+            entryAnchor = go.transform;
+            return entryAnchor;
+        }
+
         private static AudioClip _proceduralDingClip;
         private bool _hasPlayedDing = false;
         private float _lastHighestCookProgress = 0f;

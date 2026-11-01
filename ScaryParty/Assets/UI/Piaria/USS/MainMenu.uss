@@ -1,0 +1,96 @@
+.main-menu-bg {
+    background-color: var(--color-bg-peach);
+    justify-content: center;
+    align-items: center;
+}
+
+.checkered-deco {
+    position: absolute;
+    width: 280px;
+    height: 100px;
+    top: 20px;
+}
+
+.deco-left {
+    left: 20px;
+}
+
+.deco-right {
+    right: 20px;
+}
+
+.menu-center-container {
+    width: 600px;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-piaria {
+    width: 480px;
+    height: 100px;
+    margin-bottom: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.logo-subtitle {
+    width: 440px;
+    height: 65px;
+    margin-bottom: 36px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.menu-buttons-group {
+    width: 100%;
+    align-items: center;
+    gap: 16px;
+}
+
+.ribbon-btn {
+    width: 420px;
+    height: 76px;
+    background-color: var(--color-accent-yellow);
+    border-color: var(--color-border-brown);
+    border-width: 3px;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    transition-property: scale;
+    transition-duration: 0.12s;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.ribbon-btn:hover {
+    scale: 1.03;
+}
+
+.ribbon-btn:active {
+    scale: 0.97;
+}
+
+.btn-text-art {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.btn-fallback-text {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+    -unity-text-align: middle-center;
+}
+
+.menu-footer {
+    position: absolute;
+    bottom: 16px;
+    left: 24px;
+    right: 24px;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.footer-text {
+    font-size: 15px;
+    color: var(--color-text-muted);
+}

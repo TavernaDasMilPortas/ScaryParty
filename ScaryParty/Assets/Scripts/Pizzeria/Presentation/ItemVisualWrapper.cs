@@ -17,6 +17,8 @@ namespace ScaryParty.Pizzeria.Presentation
         public GameObject VisualInstance { get; private set; }
         public Transform GripPoint { get; private set; }
         public Transform SupportPoint { get; private set; }
+        public Vector3 LastHandPosition { get; private set; }
+        public float LastHandTime { get; private set; } = float.NegativeInfinity;
 
         public void BindVisual(ItemPresentationProfile profile, GameObject visualInstance)
         {
@@ -82,9 +84,41 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        private Transform _surfaceAnchor;
+        private ItemPoseOffset _surfacePose;
+        private bool _followsSurface;
+
+        private void LateUpdate()
+        {
+            if (!_followsSurface && transform.parent != null)
+            {
+                LastHandPosition = VisualInstance != null ? VisualInstance.transform.position : transform.position;
+                LastHandTime = Time.unscaledTime;
+            }
+            if (!_followsSurface) return;
+            if (_surfaceAnchor == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            UpdateSurfacePose();
+        }
+
+        private void UpdateSurfacePose()
+        {
+            transform.SetPositionAndRotation(
+                _surfaceAnchor.TransformPoint(_surfacePose.position),
+                _surfaceAnchor.rotation * Quaternion.Euler(_surfacePose.rotationEuler));
+        }
+
         public void AttachTo(Transform parent, ItemPoseOffset pose, int targetLayer, bool useSupportPoint = false)
         {
-            transform.SetParent(parent, false);
+            _followsSurface = useSupportPoint && parent != null;
+            _surfaceAnchor = _followsSurface ? parent : null;
+            _surfacePose = pose;
+            // Surface visuals follow the anchor without inheriting non-uniform scale or shear.
+            transform.SetParent(_followsSurface ? null : parent, false);
             SetLayerRecursively(gameObject, targetLayer);
 
             Transform anchorPoint = (useSupportPoint && SupportPoint != null) ? SupportPoint : GripPoint;
@@ -109,6 +143,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             pose.ApplyTo(transform);
+            if (_followsSurface) UpdateSurfacePose();
         }
 
         public static void SetLayerRecursively(GameObject obj, int layer)

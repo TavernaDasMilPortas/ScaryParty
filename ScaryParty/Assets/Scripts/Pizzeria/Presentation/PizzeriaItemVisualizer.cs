@@ -10,6 +10,7 @@ using ScaryParty.Player;
 namespace ScaryParty.Pizzeria.Presentation
 {
     [DefaultExecutionOrder(150)]
+    [RequireComponent(typeof(KitchenProcessEffects))]
     public class PizzeriaItemVisualizer : NetworkBehaviour
     {
         public static PizzeriaItemVisualizer Instance { get; private set; }
@@ -23,6 +24,44 @@ namespace ScaryParty.Pizzeria.Presentation
         public GameObject doughPrefab;
 
         private readonly Dictionary<ulong, ItemVisualWrapper> _visualWrappers = new Dictionary<ulong, ItemVisualWrapper>();
+        private readonly HashSet<ulong> _processHiddenItems = new HashSet<ulong>();
+
+        public ItemVisualWrapper GetItemVisual(ulong id)
+            => _visualWrappers.TryGetValue(id, out var wrapper) ? wrapper : null;
+
+        public ItemVisualWrapper GetToolVisual(ulong id)
+            => _toolVisualWrappers.TryGetValue(id, out var wrapper) ? wrapper : null;
+
+        public void SetProcessHiddenItems(HashSet<ulong> hidden)
+        {
+            _processHiddenItems.Clear();
+            _processHiddenItems.UnionWith(hidden);
+            foreach (var pair in _visualWrappers)
+            {
+                if (pair.Value != null && pair.Value.VisualInstance != null)
+                    pair.Value.VisualInstance.SetActive(!_processHiddenItems.Contains(pair.Key));
+            }
+        }
+
+        private readonly HashSet<ulong> _inTransitItems = new HashSet<ulong>();
+
+        public void SetItemInTransit(ulong itemId, bool inTransit)
+        {
+            if (inTransit) _inTransitItems.Add(itemId);
+            else _inTransitItems.Remove(itemId);
+        }
+
+        public bool IsItemInTransit(ulong itemId) => _inTransitItems.Contains(itemId);
+
+        public Transform GetPlayerHandAnchor(ulong clientId, int handIndex)
+        {
+            if (!_playerHandCache.TryGetValue(clientId, out var hands) || hands.left == null || hands.right == null)
+            {
+                UpdateCaches();
+                _playerHandCache.TryGetValue(clientId, out hands);
+            }
+            return handIndex == 0 ? hands.left : hands.right;
+        }
         private readonly Dictionary<ulong, ItemVisualWrapper> _toolVisualWrappers = new Dictionary<ulong, ItemVisualWrapper>();
         private readonly Dictionary<ulong, GameObject[]> _pizzaIngredientLayers = new Dictionary<ulong, GameObject[]>();
 
@@ -36,6 +75,8 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             Instance = this;
             EnsureCatalog();
+            if (GetComponent<KitchenProcessEffects>() == null)
+                gameObject.AddComponent<KitchenProcessEffects>();
         }
 
         public void EnsureCatalog()
@@ -339,6 +380,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 GameObject model = CreateItemModel(item, profile);
                 wrapper.BindVisual(profile, model);
+                if (_processHiddenItems.Contains(item.ItemId) && model != null) model.SetActive(false);
                 _visualWrappers[item.ItemId] = wrapper;
             }
             else if (wrapper.CurrentProfile != profile ||
@@ -363,6 +405,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 wrapper.PrepStage = item.PrepStage;
                 GameObject model = CreateItemModel(item, profile);
                 wrapper.BindVisual(profile, model);
+                if (_processHiddenItems.Contains(item.ItemId) && model != null) model.SetActive(false);
             }
 
             // Atualiza aparência conforme o estado de cozimento / ingredientes
@@ -378,7 +421,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (!wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(true);
 
-            AttachItemToLocation(wrapper, item, profile);
+            if (!_inTransitItems.Contains(item.ItemId))
+            {
+                AttachItemToLocation(wrapper, item, profile);
+            }
         }
 
         private GameObject CreateItemModel(NetItemDto item, ItemPresentationProfile profile)
@@ -478,10 +524,12 @@ namespace ScaryParty.Pizzeria.Presentation
                         // Fallback quando não há âncora explícita: usa a posição exata da bancada calculada pela estação
                         Vector3 slotPos = st.GetSlotPosition(item.SlotId);
                         Quaternion slotRot = st.GetSlotRotation(item.SlotId);
-                        wrapper.transform.SetParent(st.transform, true);
-                        wrapper.transform.position = slotPos;
-                        wrapper.transform.rotation = slotRot;
-                        ItemVisualWrapper.SetLayerRecursively(wrapper.gameObject, 0);
+                        wrapper.AttachTo(st.transform, new ItemPoseOffset
+                        {
+                            position = st.transform.InverseTransformPoint(slotPos),
+                            rotationEuler = (Quaternion.Inverse(st.transform.rotation) * slotRot).eulerAngles,
+                            scale = pose.scale
+                        }, 0, useSupportPoint: true);
                         if (wrapper.VisualInstance != null)
                         {
                             wrapper.VisualInstance.transform.localPosition = Vector3.zero;

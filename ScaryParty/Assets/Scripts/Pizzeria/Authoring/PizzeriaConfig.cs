@@ -63,6 +63,8 @@ namespace ScaryParty.Pizzeria.Authoring
 
         [Header("Durações Padrão de Trabalho")]
         public float defaultBakeDuration = 15.0f;
+        [Tooltip("Tempo de montagem; 0 usa a duração do processo de abrir massa.")]
+        public float addIngredientDuration = 0f;
         public float packagingDuration = 2.0f;
         public float discardDuration = 1.0f;
         public float archiveHoldDuration = 1.0f;

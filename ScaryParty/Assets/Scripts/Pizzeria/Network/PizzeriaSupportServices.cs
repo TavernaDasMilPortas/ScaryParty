@@ -52,7 +52,8 @@ namespace ScaryParty.Pizzeria.Network
 
         public static void Register(int stationId, Transform transform)
         {
-            _stations[stationId] = transform;
+            if (transform != null)
+                _stations[stationId] = transform;
         }
 
         public static void Unregister(int stationId)
@@ -67,7 +68,22 @@ namespace ScaryParty.Pizzeria.Network
 
         public static bool TryGetStation(int stationId, out Transform transform)
         {
-            return _stations.TryGetValue(stationId, out transform);
+            if (_stations.TryGetValue(stationId, out transform) && transform != null)
+                return true;
+
+            var all = Object.FindObjectsByType<Stations.StationView>(FindObjectsSortMode.None);
+            for (int i = 0; i < all.Length; i++)
+            {
+                if (all[i] != null && all[i].stationId == stationId)
+                {
+                    transform = all[i].transform;
+                    _stations[stationId] = transform;
+                    return true;
+                }
+            }
+
+            transform = null;
+            return false;
         }
     }
 
@@ -77,27 +93,37 @@ namespace ScaryParty.Pizzeria.Network
             ulong clientId, 
             Vector3 targetPosition, 
             float maxDistance = 3.0f, 
-            float tolerance = 1.5f, 
+            float tolerance = 1.8f, 
             bool requireLineOfSight = true)
         {
             if (!PlayerContextResolver.TryGetPlayer(clientId, out var playerObj, out var head))
+            {
+                Debug.LogWarning($"[InteractionValidator] Validacao falhou: Jogador {clientId} nao encontrado por PlayerContextResolver!");
                 return false;
+            }
 
             float allowedDist = maxDistance + tolerance;
             float actualDist = Vector3.Distance(head.position, targetPosition);
             if (actualDist > allowedDist)
+            {
+                Debug.LogWarning($"[InteractionValidator] Validacao falhou para cliente {clientId}: Distancia ({actualDist:F2}m) > Permitido ({allowedDist:F2}m). Cabeca: {head.position}, Alvo: {targetPosition}");
                 return false;
+            }
 
             if (requireLineOfSight)
             {
-                // Raycast simples do ponto de visão até o alvo, ignorando triggers e o próprio player
                 int layerMask = ~LayerMask.GetMask("Ignore Raycast");
                 if (Physics.Linecast(head.position, targetPosition, out RaycastHit hit, layerMask, QueryTriggerInteraction.Ignore))
                 {
-                    // Se bateu em algo que não seja o alvo próximo
-                    if (Vector3.Distance(hit.point, targetPosition) > 0.8f && hit.transform != playerObj.transform)
+                    if (Vector3.Distance(hit.point, targetPosition) > 1.2f &&
+                        hit.transform != playerObj.transform &&
+                        !hit.transform.IsChildOf(playerObj.transform))
                     {
-                        return false;
+                        if (Vector3.Distance(hit.transform.position, targetPosition) > 1.5f)
+                        {
+                            Debug.LogWarning($"[InteractionValidator] Validacao falhou para cliente {clientId}: Linha de visao bloqueada por '{hit.collider?.name}' (Ponto impacto a alvo: {Vector3.Distance(hit.point, targetPosition):F2}m, Transform a alvo: {Vector3.Distance(hit.transform.position, targetPosition):F2}m).");
+                            return false;
+                        }
                     }
                 }
             }

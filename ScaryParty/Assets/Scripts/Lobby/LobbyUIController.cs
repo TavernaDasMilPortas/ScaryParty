@@ -31,6 +31,14 @@ public class LobbyUIController : MonoBehaviour
 
     private void OnEnable()
     {
+        if (FindFirstObjectByType<ScaryParty.UI.Piaria.Presenters.LobbyPresenter>() != null ||
+            FindFirstObjectByType<ScaryParty.UI.Piaria.Presenters.MainMenuPresenter>() != null)
+        {
+            // O novo sistema de interface P.I.A.R.I.A gerencia a cena
+            enabled = false;
+            return;
+        }
+
         _document = GetComponent<UIDocument>();
         if (_document == null)
         {

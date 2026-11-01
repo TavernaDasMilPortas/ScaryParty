@@ -1,0 +1,130 @@
+/* ========================================================
+   P.I.A.R.I.A — Identidade Visual e Tokens Comuns
+   Fundo pêssego, papel texturizado, bordas marrons e botões coloridos
+   ======================================================== */
+
+:root {
+    --color-bg-peach: #E4A785;
+    --color-paper-light: #F7F1E1;
+    --color-paper-dark: #ECE0C8;
+    --color-border-brown: #5A3D28;
+    --color-border-brown-light: #8B6239;
+    --color-text-dark: #2B1D0C;
+    --color-text-muted: #6E5338;
+    --color-accent-yellow: #F6C84C;
+    --color-btn-orange: #E86B28;
+    --color-btn-green: #3CA34D;
+    --color-btn-blue: #2E79B9;
+    --color-btn-red: #C83232;
+    --color-btn-pink: #D94578;
+    
+    font-size: 18px;
+    color: var(--color-text-dark);
+}
+
+.fullscreen-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.paper-panel {
+    background-color: var(--color-paper-light);
+    border-color: var(--color-border-brown);
+    border-width: 3px;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.paper-panel-dark {
+    background-color: var(--color-paper-dark);
+    border-color: var(--color-border-brown);
+    border-width: 3px;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.piaria-button {
+    background-color: var(--color-btn-orange);
+    border-color: var(--color-border-brown);
+    border-width: 3px;
+    border-radius: 10px;
+    padding: 10px 24px;
+    color: #FFFFFF;
+    font-size: 20px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: scale;
+    transition-duration: 0.1s;
+}
+
+.piaria-button:hover {
+    scale: 1.025;
+}
+
+.piaria-button:active {
+    scale: 0.97;
+}
+
+.piaria-button-primary {
+    background-color: var(--color-btn-orange);
+}
+
+.piaria-button-secondary {
+    background-color: var(--color-btn-blue);
+}
+
+.piaria-button-success {
+    background-color: var(--color-btn-green);
+}
+
+.piaria-button-danger {
+    background-color: var(--color-btn-red);
+}
+
+.piaria-input {
+    background-color: #FFFDF8;
+    border-color: var(--color-border-brown);
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 18px;
+    color: var(--color-text-dark);
+}
+
+.piaria-input:focus {
+    border-color: var(--color-accent-yellow);
+    border-width: 3px;
+}
+
+.modal-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(30, 20, 10, 0.65);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-card {
+    background-color: var(--color-paper-light);
+    border-color: var(--color-border-brown);
+    border-width: 4px;
+    border-radius: 16px;
+    padding: 30px;
+    max-width: 800px;
+}
+
+.header-title-text {
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+    -unity-text-align: middle-center;
+}

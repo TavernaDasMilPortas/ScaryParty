@@ -65,11 +65,26 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     if (slotItem.PrepStage == (byte)ProcessingStage.Raw)
                     {
-                        if (slotItem.DefinitionId == 1) return "[F] Segurar para Abrir Massa / [E] Pegar";
-                        if (slotItem.DefinitionId == 4) return "[F] Segurar para Ralar Queijo / [E] Pegar";
-                        if (slotItem.DefinitionId == 6 || slotItem.DefinitionId == 8) return "[F] Segurar para Fatiar / [E] Pegar";
-                        return "[F] Segurar para Trabalhar / [E] Pegar";
+                        if (slotItem.DefinitionId == 1) return "[F] Iniciar Abrir Massa / [E] Pegar";
+                        if (slotItem.DefinitionId == 4) return "[F] Iniciar Ralar Queijo / [E] Pegar";
+                        if (slotItem.DefinitionId == 6 || slotItem.DefinitionId == 8) return "[F] Iniciar Fatiar / [E] Pegar";
+                        return "[F] Iniciar Trabalhar / [E] Pegar";
                     }
+
+                    if (playerHasItem)
+                    {
+                        bool isPreparedIngredient = handItem.Category == (byte)ItemCategory.Sauce ||
+                                                    ((handItem.Category == (byte)ItemCategory.Cheese || handItem.Category == (byte)ItemCategory.Topping) &&
+                                                     handItem.PrepStage == (byte)ProcessingStage.Prepared);
+                        bool isPreparedBase = slotItem.Category == (byte)ItemCategory.Pizza ||
+                                              slotItem.Category == (byte)ItemCategory.PizzaBase ||
+                                              (slotItem.Category == (byte)ItemCategory.Dough && slotItem.PrepStage == (byte)ProcessingStage.Prepared);
+                        if (isPreparedBase && isPreparedIngredient)
+                        {
+                            return "[F] ou [E] Adicionar Ingrediente na Pizza";
+                        }
+                    }
+
                     return "[E] Pegar Ingrediente Preparado";
                 }
 

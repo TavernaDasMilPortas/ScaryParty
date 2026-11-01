@@ -1,0 +1,104 @@
+.storage-backdrop {
+    display: none;
+}
+
+.storage-card {
+    width: 620px;
+    height: 520px;
+    flex-direction: column;
+}
+
+.storage-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 2px;
+    border-bottom-color: var(--color-border-brown);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.storage-title {
+    font-size: 24px;
+}
+
+.hand-selector-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.hand-selector-label {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-border-brown-light);
+}
+
+.hand-select-btn {
+    flex-grow: 1;
+    font-size: 15px;
+    padding: 8px 14px;
+    background-color: var(--color-paper-dark);
+    color: var(--color-text-dark);
+}
+
+.hand-btn-active {
+    background-color: var(--color-accent-yellow);
+    border-color: var(--color-border-brown);
+    border-width: 3px;
+}
+
+.storage-scroll-list {
+    flex-grow: 1;
+    margin-bottom: 10px;
+}
+
+.storage-item-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFFDF8;
+    border-color: var(--color-border-brown);
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.storage-item-info {
+    flex-direction: row;
+    align-items: center;
+}
+
+.storage-item-name {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: var(--color-text-dark);
+    margin-right: 10px;
+}
+
+.storage-item-qty {
+    font-size: 15px;
+    background-color: var(--color-paper-dark);
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: var(--color-text-muted);
+}
+
+.btn-take-item {
+    font-size: 16px;
+    padding: 6px 18px;
+}
+
+.storage-status-box {
+    min-height: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+.storage-status-text {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: var(--color-btn-orange);
+}

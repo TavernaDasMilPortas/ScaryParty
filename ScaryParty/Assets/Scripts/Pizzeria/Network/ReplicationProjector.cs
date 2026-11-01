@@ -540,6 +540,8 @@ namespace ScaryParty.Pizzeria.Network
                 StationId = op.SlotId.StationId,
                 SlotIndex = op.SlotId.SlotIndex,
                 HeldItemId = op.InputItemId.Value,
+                SecondaryItemId = op.SecondaryItemId.Value,
+                Kind = (byte)op.Kind,
                 ToolItemId = op.ToolItemId.Value,
                 WorkerId = op.WorkerId,
                 Phase = (byte)op.Phase,

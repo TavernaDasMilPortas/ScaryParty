@@ -28,6 +28,8 @@ namespace ScaryParty.Pizzeria.Network
 
         private void OnClientDisconnected(ulong clientId)
         {
+            PizzeriaCommandHandler.Instance?.ReleasePlayerSessions(clientId);
+
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
@@ -45,6 +47,19 @@ namespace ScaryParty.Pizzeria.Network
                 }
                 state.PlayerHolds.Remove(clientId);
             }
+
+            // Cancelar montagens cujos ingredientes estavam nas mãos do jogador desconectado.
+            var assemblySlots = new List<StationSlotId>();
+            foreach (var pair in state.ActiveOperations)
+            {
+                var op = pair.Value;
+                if (op.Kind == OperationKind.Assemble &&
+                    state.Items.TryGetValue(op.SecondaryItemId, out var ingredient) &&
+                    ingredient.Location.Type == LocationType.Hand && ingredient.Location.HolderId == clientId)
+                    assemblySlots.Add(pair.Key);
+            }
+            foreach (var slot in assemblySlots)
+                PizzaAssemblyService.Cancel(state, slot);
 
             // 2. Pausar operações onde o jogador era o executor
             foreach (var op in state.ActiveOperations.Values)

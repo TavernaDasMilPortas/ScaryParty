@@ -33,6 +33,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 {
                     if (existing.Phase == OperationPhase.Paused && existing.InputItemId == inputItemId && existing.ToolItemId == toolItemId && existing.ProcessId == processId)
                     {
+                        if (existing.ToolItemId.IsValid && state.Tools.TryGetValue(existing.ToolItemId, out var resumeTool) &&
+                            !resumeTool.TryAcquireLease(workerId, now, leaseDuration))
+                            return CommandResult.Fail(CommandError.ToolBusy, "Ferramenta em uso.");
+                        if (state.Items.TryGetValue(inputItemId, out var resumeItem))
+                        {
+                            resumeItem.ReservedByHold = workerId;
+                            resumeItem.Revision++;
+                        }
                         existing.Resume(workerId, now, leaseDuration);
                         state.IncrementRevision();
                         return CommandResult.Ok();
@@ -65,6 +73,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
                 if (inputItem.DefinitionId != procData.InputIngredientId || inputItem.PrepStage != procData.InputStage)
                     return CommandResult.Fail(CommandError.Incompatible, "Ingrediente incompatível com o processo.");
+                if (inputItem.Location != LocationRef.InStation(slotId.StationId, slotId.SlotIndex) || inputItem.ReservedByHold != 0)
+                    return CommandResult.Fail(CommandError.Busy, "Ingrediente fora do slot ou em uso.");
 
                 if (procData.RequiredCapability != ToolCapability.None)
                 {
@@ -123,6 +133,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             op.Pause(now);
 
+            if (state.Items.TryGetValue(op.InputItemId, out var releasedItem))
+            {
+                releasedItem.ReservedByHold = 0;
+                releasedItem.Revision++;
+            }
+
             if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
             {
                 tool.ReleaseLease(workerId);
@@ -154,10 +170,16 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 {
                     if (now > op.Progress.LeaseExpiry)
                     {
+                        ulong workerId = op.WorkerId;
                         op.Pause(now);
+                        if (state.Items.TryGetValue(op.InputItemId, out var releasedItem))
+                        {
+                            releasedItem.ReservedByHold = 0;
+                            releasedItem.Revision++;
+                        }
                         if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
                         {
-                            tool.ReleaseLease(op.WorkerId);
+                            tool.ReleaseLease(workerId);
                         }
 
                         if (op.ResumePolicy == ResumePolicy.ResetOnCancel)
@@ -177,11 +199,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     op.Progress.Materialize(now);
                     if (op.Progress.IsComplete)
                     {
+                        ulong completedWorkerId = op.WorkerId;
                         op.Complete(now);
 
                         if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
                         {
-                            tool.ReleaseLease(op.WorkerId);
+                            tool.ReleaseLease(completedWorkerId);
                         }
 
                         if (op.Kind == OperationKind.Process)
@@ -237,6 +260,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
             if (itemInSlot == null)
                 return CommandResult<OperationId>.Fail(CommandError.SlotEmpty, "Bancada vazia.");
+            if (itemInSlot.ReservedByHold != 0)
+                return CommandResult<OperationId>.Fail(CommandError.Busy, "Ingrediente em uso.");
 
             ToolItemId toolId = ToolItemId.None;
             if (catalog.Processes.TryGetValue(processId, out var proc) && proc.RequiredCapability != ToolCapability.None)

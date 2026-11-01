@@ -87,7 +87,11 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.name = "RecipeBookCard";
             _card.style.width = 780;
             _card.style.maxHeight = 720;
-            _card.style.backgroundColor = new Color(0.14f, 0.12f, 0.11f, 0.98f);
+            _card.style.backgroundColor = new Color(0.96f, 0.94f, 0.88f, 1f);
+            if (ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance?.paperPanel3 != null)
+            {
+                _card.style.backgroundImage = new StyleBackground(ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance.paperPanel3);
+            }
             _card.style.borderTopLeftRadius = 14;
             _card.style.borderTopRightRadius = 14;
             _card.style.borderBottomLeftRadius = 14;

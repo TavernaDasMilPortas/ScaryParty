@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/MainMenu.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Lobby.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Settings.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Modals.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/Toasts.uss" />
+
+    <ui:Template name="MainMenuTemplate" src="project://database/Assets/UI/Piaria/UXML/MainMenuScreen.uxml" />
+    <ui:Template name="LobbyTemplate" src="project://database/Assets/UI/Piaria/UXML/LobbyScreen.uxml" />
+    <ui:Template name="SettingsTemplate" src="project://database/Assets/UI/Piaria/UXML/SettingsModal.uxml" />
+    <ui:Template name="GenericModalTemplate" src="project://database/Assets/UI/Piaria/UXML/GenericModal.uxml" />
+    <ui:Template name="ToastTemplate" src="project://database/Assets/UI/Piaria/UXML/ToastContainer.uxml" />
+
+    <ui:VisualElement name="LobbySceneMasterRoot" class="fullscreen-root">
+        <ui:Instance template="MainMenuTemplate" />
+        <ui:Instance template="LobbyTemplate" style="display: none;" />
+        <ui:Instance template="SettingsTemplate" style="display: none;" />
+        <ui:Instance template="GenericModalTemplate" style="display: none;" />
+        <ui:Instance template="ToastTemplate" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/UI/Piaria/USS/ReadyRoom.uss" />
+    
+    <ui:VisualElement name="ReadyRoomRoot" class="fullscreen-root ready-room-bg">
+        <ui:VisualElement name="ReadyCard" class="paper-panel ready-card">
+            <!-- Título da Sala de Espera -->
+            <ui:VisualElement class="ready-header">
+                <ui:VisualElement name="TitleWaitingRoom" class="waiting-title-art" />
+            </ui:VisualElement>
+
+            <!-- Faixa do Código da Sala -->
+            <ui:VisualElement class="room-code-banner">
+                <ui:Label name="RoomCodeLabel" text="CÓDIGO: CARREGANDO..." class="room-code-text" />
+                <ui:Button name="BtnCopyCode" text="COPIAR" class="piaria-button piaria-button-secondary btn-copy-code" />
+            </ui:VisualElement>
+
+            <!-- Lista de Jogadores na Sala -->
+            <ui:ScrollView name="PlayersContainer" class="players-scroll-container">
+                <!-- Linhas de jogadores inseridas dinamicamente pelo presenter -->
+            </ui:ScrollView>
+
+            <!-- Barra de Ações Inferior -->
+            <ui:VisualElement class="ready-actions-bar">
+                <ui:Button name="BtnReady" text="ESTOU PRONTO" class="piaria-button piaria-button-success btn-action-ready" />
+                <ui:Button name="BtnStartGame" text="INICIAR JOGO" class="piaria-button piaria-button-primary btn-action-start" />
+                <ui:Button name="BtnLeaveRoom" text="SAIR DA SALA" class="piaria-button piaria-button-danger btn-action-leave" />
+                <ui:Button name="BtnEditProfile" text="EDITAR PERFIL" class="piaria-button piaria-button-secondary btn-action-edit" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

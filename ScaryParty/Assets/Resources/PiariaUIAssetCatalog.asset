@@ -1,0 +1,89 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df8777e9129b4561912423420cc9a974, type: 3}
+  m_Name: PiariaUIAssetCatalog
+  m_EditorClassIdentifier: 
+  logoPiaria: {fileID: 21300000, guid: 4c749e92dcdf5f944965dcbf7e4b958f, type: 3}
+  logoSubtitle: {fileID: 21300000, guid: 3d20a58f1ae1411478e6d5e5cbbdb709, type: 3}
+  btnPlayText: {fileID: 21300000, guid: 475746dc3cb7e944eb8c8187b1ec470c, type: 3}
+  btnSettingsText: {fileID: 21300000, guid: 0cb7c15be93a050409d0ae95e7055558, type: 3}
+  btnQuitText: {fileID: 21300000, guid: c8c65cd88c59b6f44baa7a0bc1e1dc77, type: 3}
+  ribbonButtonBg1: {fileID: 21300000, guid: acf86dd581ef8ed4aa5c97a36d4f95d9, type: 3}
+  ribbonButtonBg2: {fileID: 21300000, guid: 7ca8ec80c9a3d0a4886e8d783d48bd95, type: 3}
+  ribbonButtonBg3: {fileID: 21300000, guid: 6bce028541e1e7c4d9a6c56179f8cd57, type: 3}
+  checkeredDeco1: {fileID: 21300000, guid: 14d6466beaebd9d419470a5ec4c61783, type: 3}
+  checkeredDeco2: {fileID: 21300000, guid: 69c90fd204068c04a9e4d37c568715db, type: 3}
+  backgroundLobby: {fileID: 21300000, guid: b4629574d227b4c4b9babacaf6ccd3b2, type: 3}
+  titleLobby: {fileID: 21300000, guid: 4b904e4926282ef43a35368eec527b0d, type: 3}
+  paperPanel1: {fileID: 21300000, guid: 79aa531424c281a42a81fd1c12ec377f, type: 3}
+  paperPanel2: {fileID: 21300000, guid: 012bc263cd29dc6458eec65040f81ff0, type: 3}
+  paperPanel3: {fileID: 21300000, guid: 6fe0803036021b348b3356574fce2581, type: 3}
+  headerMyProfile: {fileID: 21300000, guid: e8f22cb7004d85c4b8320218b1e82630, type: 3}
+  headerAvailableRooms: {fileID: 21300000, guid: 7113b008d27d6d144814d38fe0aaefce, type: 3}
+  headerCreateRoom: {fileID: 21300000, guid: 5f500e2119b86624f89e43c54342b372, type: 3}
+  headerJoinCode: {fileID: 21300000, guid: 0c38fc5a93102b04ba7a4ad75f0b0ebd, type: 3}
+  headerLan: {fileID: 21300000, guid: a542c400965af8b429060deae1439f03, type: 3}
+  fieldMyProfileName: {fileID: 21300000, guid: 89c034e945e983f4b831142d4d980097, type: 3}
+  fieldCreateRoomName: {fileID: 21300000, guid: cf22cede34fdccd4d9a441be1e74f1b2, type: 3}
+  fieldJoinCode: {fileID: 21300000, guid: 237c36533d16f0e488530f24adfcfd3d, type: 3}
+  fieldLanIp: {fileID: 21300000, guid: 33b6be071a2d97148900c64333793c4e, type: 3}
+  frame3DPreview: {fileID: 21300000, guid: d3344a142b8dec04cb155d0acad30e28, type: 3}
+  colorBlue: {fileID: 21300000, guid: c76f364822d13034a9aaf211949885b6, type: 3}
+  colorOrange: {fileID: 21300000, guid: 67e64aa53ac08824485c39575d6e8e65, type: 3}
+  colorPink: {fileID: 21300000, guid: 6aeeb2bd535fbb847b421e400b373477, type: 3}
+  colorGreen: {fileID: 21300000, guid: 564e47ce37e515c4d8a4828fa96f451f, type: 3}
+  colorRed: {fileID: 21300000, guid: 36e66153a0b8b074cbce370b88be431a, type: 3}
+  templatePublicRoom: {fileID: 21300000, guid: 95acfe1d778055446b17e2c9e6108977, type: 3}
+  noRooms: {fileID: 21300000, guid: fc1bd77d155b2834fa0dc4c19f92d352, type: 3}
+  btnCreateRoom: {fileID: 21300000, guid: a397580d5be38034b86d18112089321b, type: 3}
+  btnJoin: {fileID: 21300000, guid: 021c2ca214827e94eb85edaa56a2bf8c, type: 3}
+  btnJoin2: {fileID: 21300000, guid: ef08af345e2cb734f91b391bd119f78f, type: 3}
+  btnRefresh: {fileID: 21300000, guid: bfb3d4c3140d9ef4e9cd3d20d4567fc7, type: 3}
+  btnBack: {fileID: 21300000, guid: 6d6fd11c3e2562a4790c21bf5e8f3d46, type: 3}
+  titleWaitingRoom: {fileID: 21300000, guid: ccd69f2ca7d658241b5d42010fa1de53, type: 3}
+  playerNameBar1: {fileID: 21300000, guid: 31b49737172aac74dac14184c1b142f8, type: 3}
+  playerNameBar2: {fileID: 21300000, guid: 3eb2c374b068670409d96264a36482dd, type: 3}
+  playerNameBar3: {fileID: 21300000, guid: 96a9eac2dba91f84ebfbfe7ed49339ff, type: 3}
+  playerNameBar4: {fileID: 21300000, guid: 7d93aaa738174ef4cbe3c2b61acd76c7, type: 3}
+  waitingPaperPanel: {fileID: 21300000, guid: caaa2bd046637df41b6413e723d2a4f1, type: 3}
+  waitingPaperPanelAlt: {fileID: 21300000, guid: 7fb9f404b87a1d8438388d80cf73c45b, type: 3}
+  btnReady: {fileID: 21300000, guid: df679e524bbaddf418b0125554dc4df1, type: 3}
+  btnStartGame: {fileID: 21300000, guid: 4d9631451b1843b4e99d9041d9bd20cc, type: 3}
+  btnLeaveRoom: {fileID: 21300000, guid: 3fbdb91fd31b4434c9d5b57cc5c48786, type: 3}
+  btnEditProfile: {fileID: 21300000, guid: 2c9c05827ec9b7b4ab3a58be8937b64f, type: 3}
+  iconDeliveries: {fileID: 21300000, guid: 1bcb06aa8de9cb544b4a2f02aedef097, type: 3}
+  iconMoneyCoin: {fileID: 21300000, guid: cf45f7676586acd4a91bbcf55a71c42c, type: 3}
+  iconMoneyBill: {fileID: 21300000, guid: d7604aa179ac7b24bb21be32e724ccbb, type: 3}
+  handFrameLeft: {fileID: 21300000, guid: 6a8582682a5155145923a0422d380cec, type: 3}
+  handFrameRight: {fileID: 21300000, guid: 6e0e0434f394e9c4895b663c8a766ca6, type: 3}
+  digit1: {fileID: 21300000, guid: 56877293fee67f8498242fd77c42b8d8, type: 3}
+  digit2: {fileID: 21300000, guid: 66052a98cb3ecea429c081d373405525, type: 3}
+  progressBarFrame: {fileID: 21300000, guid: 81a0eaa8e5a095f449511b63a4ce74d6, type: 3}
+  progressBarFill: {fileID: 21300000, guid: b3298aecd306bd84ea9f5c5cbff21eba, type: 3}
+  minimapPaperBase: {fileID: 21300000, guid: bb677ba301a67a44fa1f9c2dcc10022e, type: 3}
+  backpackPizzas:
+  - {fileID: 21300000, guid: 90b4d729b6e7bd1439da1c7aa4481b36, type: 3}
+  - {fileID: 21300000, guid: a23cfbf4d38a886498614febc9474c66, type: 3}
+  - {fileID: 21300000, guid: 174b8d0ffaa24e84d8a03f208448cd4d, type: 3}
+  - {fileID: 21300000, guid: 7ef4ed18dff87d9458ac65862a56a83c, type: 3}
+  - {fileID: 21300000, guid: 890d5c801f7b76549bb64284710e53bc, type: 3}
+  backpackGradients:
+  - {fileID: 21300000, guid: 90b4d729b6e7bd1439da1c7aa4481b36, type: 3}
+  - {fileID: 21300000, guid: a23cfbf4d38a886498614febc9474c66, type: 3}
+  - {fileID: 21300000, guid: 174b8d0ffaa24e84d8a03f208448cd4d, type: 3}
+  - {fileID: 21300000, guid: 7ef4ed18dff87d9458ac65862a56a83c, type: 3}
+  - {fileID: 21300000, guid: 890d5c801f7b76549bb64284710e53bc, type: 3}
+  fontCastleChunk: {fileID: 12800000, guid: 6590be8a4bbef6740b81964bf685ce17, type: 3}
+  fontLostTumbler: {fileID: 12800000, guid: af2c240b154825b4cb3d923b086b07d5, type: 3}
+  fontMunstar: {fileID: 12800000, guid: de449113a433c7f44beecb197c65e32f, type: 3}
+  fontDeanna: {fileID: 12800000, guid: e4846b3a6dcfd964790183124b7bb2f2, type: 3}
+  panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}

@@ -8,6 +8,7 @@ namespace ScaryParty.Pizzeria.Presentation
     public class NotificationManager : MonoBehaviour
     {
         public static NotificationManager Instance { get; private set; }
+        public static event System.Action<string, NotificationType> OnNotificationShown;
 
         private class Toast
         {
@@ -35,6 +36,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public static void Show(string message, NotificationType type = NotificationType.Info)
         {
+            OnNotificationShown?.Invoke(message, type);
             if (Instance != null)
             {
                 Instance.AddToast(message, type);
@@ -62,45 +64,6 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
-        private void OnGUI()
-        {
-            if (toasts.Count == 0) return;
-
-            int toastHeight = 44;
-            int spacing = 8;
-            int width = 500;
-            int startY = Screen.height - 70 - (toasts.Count * (toastHeight + spacing));
-
-            for (int i = 0; i < toasts.Count; i++)
-            {
-                var toast = toasts[i];
-                Color bgColor = Color.white;
-                switch (toast.Type)
-                {
-                    case NotificationType.Success: bgColor = Color.green; break;
-                    case NotificationType.Error: bgColor = Color.red; break;
-                    case NotificationType.Warning: bgColor = Color.yellow; break;
-                    case NotificationType.Info: bgColor = Color.white; break;
-                }
-
-                bgColor.a = 0.85f;
-                GUI.backgroundColor = bgColor;
-
-                GUIStyle style = new GUIStyle(GUI.skin.box);
-                style.alignment = TextAnchor.MiddleCenter;
-                style.normal.textColor = Color.black;
-                style.fontStyle = FontStyle.Bold;
-                style.fontSize = 18;
-
-                float alpha = Mathf.Clamp01(toast.TimeRemaining / 0.5f);
-                Color originalColor = GUI.color;
-                GUI.color = new Color(1, 1, 1, alpha);
-
-                Rect rect = new Rect((Screen.width - width) / 2, startY + (i * (toastHeight + spacing)), width, toastHeight);
-                GUI.Box(rect, toast.Message, style);
-
-                GUI.color = originalColor;
-            }
-        }
+        // OnGUI removido: todas as notificações são apresentadas via ToastPresenter em UI Toolkit.
     }
 }

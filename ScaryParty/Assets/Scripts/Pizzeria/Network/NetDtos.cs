@@ -131,6 +131,8 @@ namespace ScaryParty.Pizzeria.Network
         public int StationId;
         public int SlotIndex;
         public ulong HeldItemId;
+        public ulong SecondaryItemId;
+        public byte Kind;
         public ulong ToolItemId;
         public ulong WorkerId;
         public byte Phase;
@@ -149,6 +151,8 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref StationId);
             serializer.SerializeValue(ref SlotIndex);
             serializer.SerializeValue(ref HeldItemId);
+            serializer.SerializeValue(ref SecondaryItemId);
+            serializer.SerializeValue(ref Kind);
             serializer.SerializeValue(ref ToolItemId);
             serializer.SerializeValue(ref WorkerId);
             serializer.SerializeValue(ref Phase);
@@ -160,7 +164,7 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         public bool Equals(NetStationSlotDto other)
-            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && WorkerId == other.WorkerId && Phase == other.Phase && Revision == other.Revision && Math.Abs(Accumulated - other.Accumulated) < 0.005f;
+            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && SecondaryItemId == other.SecondaryItemId && Kind == other.Kind && WorkerId == other.WorkerId && Phase == other.Phase && Revision == other.Revision && Math.Abs(Accumulated - other.Accumulated) < 0.005f;
 
         public override bool Equals(object obj) => obj is NetStationSlotDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(StationId, SlotIndex, Revision);

@@ -385,7 +385,8 @@ namespace ScaryParty.Pizzeria.Domain.Types
     public enum OperationKind : byte
     {
         Process = 1,
-        Package = 2
+        Package = 2,
+        Assemble = 3
     }
 
     public enum OperationPhase : byte
