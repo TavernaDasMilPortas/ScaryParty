@@ -197,6 +197,13 @@ namespace ScaryParty.UI.Piaria.Core
             };
         }
 
+        public Sprite GetBackpackPizza(int indexOrCount)
+        {
+            if (backpackPizzas == null || backpackPizzas.Length == 0) return null;
+            int idx = Mathf.Clamp(indexOrCount, 0, backpackPizzas.Length - 1);
+            return backpackPizzas[idx];
+        }
+
         public Sprite GetBackpackPizzaSprite(int count)
         {
             if (backpackPizzas == null || backpackPizzas.Length == 0) return null;

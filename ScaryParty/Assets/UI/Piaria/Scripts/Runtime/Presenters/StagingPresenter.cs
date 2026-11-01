@@ -131,9 +131,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _stagingCard.style.backgroundImage = new StyleBackground(catalog.paperPanel2);
 
             var boxArt = RootElement.Q<VisualElement>("VisualPizzaBox");
-            if (boxArt != null && catalog.GetBackpackPizza(0) != null)
+            if (boxArt != null && catalog.GetBackpackPizzaSprite(1) != null)
             {
-                boxArt.style.backgroundImage = new StyleBackground(catalog.GetBackpackPizza(0));
+                boxArt.style.backgroundImage = new StyleBackground(catalog.GetBackpackPizzaSprite(1));
             }
         }
 
