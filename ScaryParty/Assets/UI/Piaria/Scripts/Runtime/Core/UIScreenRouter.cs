@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 namespace ScaryParty.UI.Piaria.Core
 {
@@ -43,7 +44,17 @@ namespace ScaryParty.UI.Piaria.Core
         private IScreenView _activeScreen;
         private readonly Stack<string> _history = new Stack<string>();
 
-        public IScreenView ActiveScreen => _activeScreen;
+        public IScreenView ActiveScreen
+        {
+            get
+            {
+                if (_activeScreen is UnityEngine.Object obj && obj == null)
+                {
+                    _activeScreen = null;
+                }
+                return _activeScreen;
+            }
+        }
 
         private void Awake()
         {
@@ -58,6 +69,27 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (scene.name == "GameScene")
+            {
+                _activeScreen = null;
+                _history.Clear();
+                _screens.Clear();
+                ScaryParty.Pizzeria.Presentation.GameplayInputGate.Reset();
+            }
+        }
+
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
@@ -65,10 +97,19 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void Update()
         {
-            if (_activeScreen != null && _activeScreen.State != ScreenState.Hidden)
+            if (_activeScreen is UnityEngine.Object obj)
             {
-                if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
-                if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
+                if (obj == null)
+                {
+                    _activeScreen = null;
+                    return;
+                }
+
+                if (_activeScreen.State != ScreenState.Hidden)
+                {
+                    if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
+                    if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
+                }
             }
         }
 
@@ -84,6 +125,10 @@ namespace ScaryParty.UI.Piaria.Core
             if (_screens.ContainsKey(screen.ScreenId))
             {
                 _screens.Remove(screen.ScreenId);
+            }
+            if (_activeScreen == screen || (_activeScreen is UnityEngine.Object obj && obj == null))
+            {
+                _activeScreen = null;
             }
         }
 

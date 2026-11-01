@@ -568,9 +568,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             RefreshPlayers();
         }
 
-        private void OnStartGameClicked()
+                private void OnStartGameClicked()
         {
-            CharacterPreviewRig.Instance?.SetActive(false);
+            if (CharacterPreviewRig.Instance != null)
+            {
+                Destroy(CharacterPreviewRig.Instance.gameObject);
+            }
+
             if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
 
@@ -584,20 +588,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
             {
-                try
-                {
-                    var status = NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
-                    if (status != SceneEventProgressStatus.Started)
-                    {
-                        Debug.LogWarning($"[ReadyRoomPresenter] Netcode LoadScene status={status}. Carregando GameScene via SceneManager padrão...");
-                        SceneManager.LoadScene("GameScene");
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogWarning($"[ReadyRoomPresenter] Netcode LoadScene falhou ({ex.Message}). Carregando via SceneManager padrão...");
-                    SceneManager.LoadScene("GameScene");
-                }
+                NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
             }
             else
             {

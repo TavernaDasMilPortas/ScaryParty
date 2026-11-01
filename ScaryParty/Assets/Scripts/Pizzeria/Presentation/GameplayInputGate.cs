@@ -62,7 +62,8 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             bool isMenuOpen = (ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance != null && 
-                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen != null &&
+                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen is UnityEngine.Object screenObj &&
+                               screenObj != null &&
                                ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
                               (ScaryParty.UI.Piaria.Core.UIModalStack.Instance != null && ScaryParty.UI.Piaria.Core.UIModalStack.Instance.HasActiveModal) ||
                               (ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
