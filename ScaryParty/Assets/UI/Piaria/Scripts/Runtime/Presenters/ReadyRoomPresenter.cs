@@ -432,7 +432,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnStartGame.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
                 if (isHost)
                 {
-                    _btnStartGame.SetEnabled(playerCount == 0 ? true : (allReady && playerCount > 0));
+                    _btnStartGame.SetEnabled(playerCount <= 1 || allReady);
                 }
             }
 
@@ -478,6 +478,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
 
             UIFeedbackService.Instance?.PlaySuccess();
+
+            var myState = GetLocalPlayerState();
+            if (myState != null && !myState.IsReady.Value)
+            {
+                myState.SetReadyServerRpc(true);
+            }
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
             {

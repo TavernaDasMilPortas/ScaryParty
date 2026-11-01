@@ -48,6 +48,12 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void OnDestroy()
         {
+            if (targetTexture != null)
+            {
+                targetTexture.Release();
+                Destroy(targetTexture);
+                targetTexture = null;
+            }
             if (Instance == this)
             {
                 Instance = null;
@@ -159,16 +165,34 @@ namespace ScaryParty.UI.Piaria.Core
                     if (c != null) c.enabled = false;
                 }
 
-                var listeners = _spawnedModel.GetComponentsInChildren<AudioListener>(true);
-                foreach (var l in listeners)
-                {
-                    if (l != null) Destroy(l);
-                }
-
+                // Desativa e remove com segurança câmeras de gameplay do modelo clonado
                 var cams = _spawnedModel.GetComponentsInChildren<Camera>(true);
                 foreach (var cam in cams)
                 {
-                    if (cam != null && cam != previewCamera) Destroy(cam);
+                    if (cam != null && cam != previewCamera)
+                    {
+                        cam.enabled = false;
+                        if (cam.gameObject != _spawnedModel)
+                        {
+                            cam.gameObject.SetActive(false);
+                            Destroy(cam.gameObject);
+                        }
+                    }
+                }
+
+                // Desativa listeners de áudio do modelo clonado
+                var listeners = _spawnedModel.GetComponentsInChildren<AudioListener>(true);
+                foreach (var l in listeners)
+                {
+                    if (l != null)
+                    {
+                        l.enabled = false;
+                        if (l.gameObject != _spawnedModel)
+                        {
+                            l.gameObject.SetActive(false);
+                            Destroy(l.gameObject);
+                        }
+                    }
                 }
 
                 _renderers = _spawnedModel.GetComponentsInChildren<Renderer>(true);

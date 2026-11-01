@@ -53,6 +53,7 @@ public class ReadySceneController : MonoBehaviour
         if (FindObjectOfType<ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter>() != null)
         {
             // O novo ReadyRoomPresenter gerencia a sala de espera do sistema P.I.A.R.I.A
+            enabled = false;
             return;
         }
 
