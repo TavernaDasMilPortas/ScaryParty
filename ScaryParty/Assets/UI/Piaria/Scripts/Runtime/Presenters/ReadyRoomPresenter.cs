@@ -48,6 +48,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private float _lastUpdate = -999f;
         private string _currentRoomCode = "";
+        private bool _offlineReady = false;
 
         private void Awake()
         {
@@ -370,14 +371,57 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
             }
 
+            // Se não houver jogadores instanciados em rede ainda, exibe o host local no Slot 0
+            if (playerCount == 0 && _slots[0].Initialized)
+            {
+                if (_slots[0].Occupied != null) _slots[0].Occupied.style.display = DisplayStyle.Flex;
+                if (_slots[0].Empty != null) _slots[0].Empty.style.display = DisplayStyle.None;
+
+                string localName = PlayerPrefs.GetString("PlayerName", "rubens");
+                var pd = Resources.Load<PlayerData>("PlayerData");
+                Color localColor = pd != null ? pd.PlayerColor : new Color(1f, 0.45f, 0.1f);
+                if (PlayerPrefs.HasKey("PlayerColorR"))
+                {
+                    localColor = new Color(
+                        PlayerPrefs.GetFloat("PlayerColorR"),
+                        PlayerPrefs.GetFloat("PlayerColorG"),
+                        PlayerPrefs.GetFloat("PlayerColorB")
+                    );
+                }
+
+                if (_slots[0].NameLabel != null) _slots[0].NameLabel.text = $"👑 {localName}";
+                if (_slots[0].ColorBox != null) _slots[0].ColorBox.style.backgroundColor = localColor;
+                if (_slots[0].RoleLabel != null) _slots[0].RoleLabel.text = "👑 Líder da Sala";
+                if (_slots[0].ReadyBadge != null)
+                {
+                    if (_offlineReady)
+                    {
+                        _slots[0].ReadyBadge.text = "PRONTO!";
+                        _slots[0].ReadyBadge.RemoveFromClassList("status-waiting");
+                        _slots[0].ReadyBadge.AddToClassList("status-ready");
+                    }
+                    else
+                    {
+                        _slots[0].ReadyBadge.text = "PREPARANDO...";
+                        _slots[0].ReadyBadge.RemoveFromClassList("status-ready");
+                        _slots[0].ReadyBadge.AddToClassList("status-waiting");
+                    }
+                }
+
+                if (_btnReady != null)
+                {
+                    _btnReady.text = _offlineReady ? "CANCELAR PRONTO" : "ESTOU PRONTO";
+                }
+            }
+
             // Botão Iniciar Jogo (somente Host)
             if (_btnStartGame != null)
             {
-                bool isHost = NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer;
+                bool isHost = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
                 _btnStartGame.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
                 if (isHost)
                 {
-                    _btnStartGame.SetEnabled(allReady && playerCount > 0);
+                    _btnStartGame.SetEnabled(playerCount == 0 ? true : (allReady && playerCount > 0));
                 }
             }
 
@@ -409,27 +453,64 @@ namespace ScaryParty.UI.Piaria.Presenters
                 myState.SetReadyServerRpc(newState);
                 UIFeedbackService.Instance?.PlayReady();
             }
+            else
+            {
+                _offlineReady = !_offlineReady;
+                UIFeedbackService.Instance?.PlayReady();
+                RefreshPlayers();
+            }
         }
 
         private void OnStartGameClicked()
         {
-            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsServer) return;
-
             if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
 
             UIFeedbackService.Instance?.PlaySuccess();
-            NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
+            {
+                try
+                {
+                    var status = NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+                    if (status != SceneEventProgressStatus.Started)
+                    {
+                        Debug.LogWarning($"[ReadyRoomPresenter] Netcode LoadScene status={status}. Carregando GameScene via SceneManager padrão...");
+                        SceneManager.LoadScene("GameScene");
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogWarning($"[ReadyRoomPresenter] Netcode LoadScene falhou ({ex.Message}). Carregando via SceneManager padrão...");
+                    SceneManager.LoadScene("GameScene");
+                }
+            }
+            else
+            {
+                SceneManager.LoadScene("GameScene");
+            }
         }
 
         private void OnLeaveRoomClicked()
         {
-            ModalPresenter.Instance?.ShowConfirmation("Deseja sair da sala de espera?", () =>
+            Action doLeave = () =>
             {
                 if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
-                if (NetworkManager.Singleton != null) NetworkManager.Singleton.Shutdown();
+                if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                {
+                    NetworkManager.Singleton.Shutdown();
+                }
                 SceneManager.LoadScene("LobbyScene");
-            });
+            };
+
+            if (ModalPresenter.Instance != null)
+            {
+                ModalPresenter.Instance.ShowConfirmation("Deseja sair da sala de espera?", doLeave);
+            }
+            else
+            {
+                doLeave();
+            }
         }
 
         private PlayerState GetLocalPlayerState()

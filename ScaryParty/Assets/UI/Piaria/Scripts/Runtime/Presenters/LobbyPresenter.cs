@@ -344,6 +344,16 @@ namespace ScaryParty.UI.Piaria.Presenters
                 var savedName = PlayerPrefs.GetString("PlayerName", "rubens");
                 if (_playerNameInput != null)
                     _playerNameInput.value = savedName;
+
+                if (PlayerPrefs.HasKey("PlayerColorR"))
+                {
+                    _selectedColor = new Color(
+                        PlayerPrefs.GetFloat("PlayerColorR"),
+                        PlayerPrefs.GetFloat("PlayerColorG"),
+                        PlayerPrefs.GetFloat("PlayerColorB")
+                    );
+                    SetColor(_selectedColor);
+                }
             }
         }
 
@@ -351,7 +361,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (_playerNameInput != null)
             {
-                PlayerPrefs.GetString("PlayerName", _playerNameInput.value);
+                PlayerPrefs.SetString("PlayerName", _playerNameInput.value);
+                PlayerPrefs.SetFloat("PlayerColorR", _selectedColor.r);
+                PlayerPrefs.SetFloat("PlayerColorG", _selectedColor.g);
+                PlayerPrefs.SetFloat("PlayerColorB", _selectedColor.b);
                 PlayerPrefs.Save();
             }
 
@@ -547,6 +560,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 : $"{_playerNameInput?.value}'s Pizza Party";
 
             SaveProfileData();
+            CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
                 lobbyManager.CreateRelayRoom(roomName);
@@ -569,6 +583,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             SaveProfileData();
+            CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
                 lobbyManager.JoinRelayRoom(code);
@@ -587,6 +602,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 : $"{_playerNameInput?.value}'s LAN Party";
 
             SaveProfileData();
+            CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
                 lobbyManager.StartLANHost(roomName);
@@ -609,6 +625,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             SaveProfileData();
+            CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
                 lobbyManager.JoinLANClient(ip);

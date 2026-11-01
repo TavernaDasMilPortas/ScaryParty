@@ -40,7 +40,6 @@ namespace ScaryParty.UI.Piaria.Core
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
                 if (audioSource == null) audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
 
                 if (clickClip == null)
@@ -52,7 +51,7 @@ namespace ScaryParty.UI.Piaria.Core
             }
             else if (Instance != this)
             {
-                Destroy(gameObject);
+                Destroy(this);
             }
         }
 

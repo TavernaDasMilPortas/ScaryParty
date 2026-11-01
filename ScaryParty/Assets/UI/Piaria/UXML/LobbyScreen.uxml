@@ -35,7 +35,7 @@
                     <ui:VisualElement name="PreviewRenderTexture" class="preview-rt-layer" picking-mode="Ignore" />
                     
                     <!-- Placeholder quando RT ainda não desenhou ou está carregando -->
-                    <ui:VisualElement name="PreviewPlaceholder" class="preview-placeholder-center" picking-mode="Ignore">
+                    <ui:VisualElement name="PreviewPlaceholder" class="preview-placeholder-center" picking-mode="Ignore" style="display: none;">
                         <ui:Label text="👤" class="avatar-ph-icon" picking-mode="Ignore" />
                         <ui:Label text="Seu personagem" class="avatar-ph-title" picking-mode="Ignore" />
                         <ui:Label text="Espaço do modelo 3D" class="avatar-ph-subtitle" picking-mode="Ignore" />

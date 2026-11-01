@@ -175,7 +175,19 @@ public class LobbyManager : MonoBehaviour
 
                 try
                 {
-                    NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                    if (NetworkManager.Singleton.SceneManager != null)
+                    {
+                        var status = NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                        if (status != SceneEventProgressStatus.Started)
+                        {
+                            Debug.LogWarning($"[LobbyManager] Netcode LoadScene não iniciou (status: {status}). Usando SceneManager padrão...");
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                        }
+                    }
+                    else
+                    {
+                        UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                    }
                 }
                 catch (System.Exception ex)
                 {
@@ -305,7 +317,19 @@ public class LobbyManager : MonoBehaviour
 
             try
             {
-                NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                if (NetworkManager.Singleton.SceneManager != null)
+                {
+                    var status = NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+                    if (status != SceneEventProgressStatus.Started)
+                    {
+                        Debug.LogWarning($"[LobbyManager] Netcode LoadScene não iniciou (status: {status}). Usando SceneManager padrão...");
+                        UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                    }
+                }
+                else
+                {
+                    UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                }
             }
             catch (System.Exception ex)
             {
