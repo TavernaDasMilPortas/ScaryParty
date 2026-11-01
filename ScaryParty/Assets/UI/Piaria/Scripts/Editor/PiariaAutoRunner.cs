@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
@@ -110,9 +110,44 @@ namespace ScaryParty.UI.Piaria.Editor
             {
                 ConfigureReadyScene(panelSettings);
             }
+            else if (sceneName.IndexOf("Demo", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                ConfigureDemoScene(panelSettings);
+            }
             else if (sceneName.IndexOf("Game", StringComparison.OrdinalIgnoreCase) >= 0 || sceneName.IndexOf("Sample", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 ConfigureGameScene(panelSettings);
+            }
+
+            // Universal fallback para qualquer cena: conecta UIDocument e LobbyManager em todos os presenters
+            var sceneDoc = UnityEngine.Object.FindFirstObjectByType<UIDocument>();
+            var sceneLobbyMgr = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            if (sceneDoc != null)
+            {
+                var allPresenters = UnityEngine.Object.FindObjectsOfType<MonoBehaviour>();
+                foreach (var mb in allPresenters)
+                {
+                    if (mb == null) continue;
+                    var type = mb.GetType();
+                    if (type.Namespace != null && type.Namespace.StartsWith("ScaryParty.UI.Piaria.Presenters"))
+                    {
+                        var docProp = type.GetField("uiDocument");
+                        if (docProp != null && docProp.GetValue(mb) == null)
+                        {
+                            PiariaPresenterUtils.SetSerializedPropertyRef(mb, "uiDocument", sceneDoc);
+                        }
+
+                        if (mb is LobbyPresenter lp && lp.lobbyManager == null && sceneLobbyMgr != null)
+                        {
+                            PiariaPresenterUtils.SetSerializedPropertyRef(lp, "lobbyManager", sceneLobbyMgr);
+                        }
+                    }
+                }
+            }
+
+            if (activeScene.isLoaded)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
             }
         }
 
@@ -158,28 +193,47 @@ namespace ScaryParty.UI.Piaria.Editor
             RemoveComp<StoragePresenter>(uiGo);
             RemoveComp<StagingPresenter>(uiGo);
 
-            // Auto-conecta presenters em quaisquer outros GameObjects da cena para evitar campos None
-            var strayPresenters = UnityEngine.Object.FindObjectsOfType<MonoBehaviour>();
-            foreach (var mb in strayPresenters)
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (activeScene.isLoaded)
             {
-                if (mb == null) continue;
-                var type = mb.GetType();
-                if (type.Namespace != null && type.Namespace.StartsWith("ScaryParty.UI.Piaria.Presenters"))
-                {
-                    var docProp = type.GetField("uiDocument");
-                    if (docProp != null && docProp.GetValue(mb) == null)
-                    {
-                        docProp.SetValue(mb, doc);
-                        EditorUtility.SetDirty(mb);
-                    }
-                    if (mb is LobbyPresenter lp && lp.lobbyManager == null)
-                    {
-                        lp.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
-                        EditorUtility.SetDirty(lp);
-                    }
-                }
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
             }
+        }
 
+        private static void ConfigureDemoScene(PanelSettings panelSettings)
+        {
+            var uiGo = GameObject.Find("--- PIARIA UI DEMO ---") ?? GameObject.Find("--- UI ---");
+            if (uiGo == null) uiGo = new GameObject("--- PIARIA UI DEMO ---");
+
+            var doc = uiGo.GetComponent<UIDocument>() ?? uiGo.AddComponent<UIDocument>();
+            doc.panelSettings = panelSettings;
+            var demoUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/LobbySceneContainer.uxml")
+                           ?? AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/MainMenuScreen.uxml");
+            if (demoUxml != null) doc.visualTreeAsset = demoUxml;
+            EditorUtility.SetDirty(doc);
+
+            EnsureComp<UIScreenRouter>(uiGo);
+            EnsureComp<UIFeedbackService>(uiGo);
+            EnsureComp<UIModalStack>(uiGo);
+
+            var mPres = EnsureComp<ModalPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(mPres, "uiDocument", doc);
+            var sPres = EnsureComp<SettingsPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(sPres, "uiDocument", doc);
+            var mmPres = EnsureComp<MainMenuPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(mmPres, "uiDocument", doc);
+            var lobbyPres = EnsureComp<LobbyPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "uiDocument", doc);
+            var lMgr = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            if (lMgr != null) PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "lobbyManager", lMgr);
+
+            var rrPres = EnsureComp<ReadyRoomPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(rrPres, "uiDocument", doc);
+            var hPres = EnsureComp<HudPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(hPres, "uiDocument", doc);
+            var scPres = EnsureComp<ScoreboardPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(scPres, "uiDocument", doc);
+            var stgPres = EnsureComp<StoragePresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(stgPres, "uiDocument", doc);
+            var staPres = EnsureComp<StagingPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(staPres, "uiDocument", doc);
+            var tPres = EnsureComp<ToastPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(tPres, "uiDocument", doc);
+
+            EnsureComp<CharacterPreviewRig>(uiGo);
+            EnsureComp<PiariaDemoSceneController>(uiGo);
+
+            EditorUtility.SetDirty(uiGo);
             var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
             if (activeScene.isLoaded)
             {
@@ -198,22 +252,21 @@ namespace ScaryParty.UI.Piaria.Editor
             if (readyUxml != null) doc.visualTreeAsset = readyUxml;
             EditorUtility.SetDirty(doc);
 
+            EnsureComp<UIScreenRouter>(uiGo);
+            EnsureComp<UIFeedbackService>(uiGo);
             EnsureComp<UIModalStack>(uiGo);
+
             var modal = EnsureComp<ModalPresenter>(uiGo);
-            modal.uiDocument = doc;
-            EditorUtility.SetDirty(modal);
+            PiariaPresenterUtils.SetSerializedPropertyRef(modal, "uiDocument", doc);
 
             var settings = EnsureComp<SettingsPresenter>(uiGo);
-            settings.uiDocument = doc;
-            EditorUtility.SetDirty(settings);
+            PiariaPresenterUtils.SetSerializedPropertyRef(settings, "uiDocument", doc);
 
             var ready = EnsureComp<ReadyRoomPresenter>(uiGo);
-            ready.uiDocument = doc;
-            EditorUtility.SetDirty(ready);
+            PiariaPresenterUtils.SetSerializedPropertyRef(ready, "uiDocument", doc);
 
             var toast = EnsureComp<ToastPresenter>(uiGo);
-            toast.uiDocument = doc;
-            EditorUtility.SetDirty(toast);
+            PiariaPresenterUtils.SetSerializedPropertyRef(toast, "uiDocument", doc);
 
             EditorUtility.SetDirty(uiGo);
             var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
@@ -234,34 +287,30 @@ namespace ScaryParty.UI.Piaria.Editor
             if (hudUxml != null) doc.visualTreeAsset = hudUxml;
             EditorUtility.SetDirty(doc);
 
+            EnsureComp<UIScreenRouter>(mainUIGo);
+            EnsureComp<UIFeedbackService>(mainUIGo);
             EnsureComp<UIModalStack>(mainUIGo);
+
             var modal = EnsureComp<ModalPresenter>(mainUIGo);
-            modal.uiDocument = doc;
-            EditorUtility.SetDirty(modal);
+            PiariaPresenterUtils.SetSerializedPropertyRef(modal, "uiDocument", doc);
 
             var settings = EnsureComp<SettingsPresenter>(mainUIGo);
-            settings.uiDocument = doc;
-            EditorUtility.SetDirty(settings);
+            PiariaPresenterUtils.SetSerializedPropertyRef(settings, "uiDocument", doc);
 
             var hud = EnsureComp<HudPresenter>(mainUIGo);
-            hud.uiDocument = doc;
-            EditorUtility.SetDirty(hud);
+            PiariaPresenterUtils.SetSerializedPropertyRef(hud, "uiDocument", doc);
 
             var score = EnsureComp<ScoreboardPresenter>(mainUIGo);
-            score.uiDocument = doc;
-            EditorUtility.SetDirty(score);
+            PiariaPresenterUtils.SetSerializedPropertyRef(score, "uiDocument", doc);
 
             var storage = EnsureComp<StoragePresenter>(mainUIGo);
-            storage.uiDocument = doc;
-            EditorUtility.SetDirty(storage);
+            PiariaPresenterUtils.SetSerializedPropertyRef(storage, "uiDocument", doc);
 
             var staging = EnsureComp<StagingPresenter>(mainUIGo);
-            staging.uiDocument = doc;
-            EditorUtility.SetDirty(staging);
+            PiariaPresenterUtils.SetSerializedPropertyRef(staging, "uiDocument", doc);
 
             var toast = EnsureComp<ToastPresenter>(mainUIGo);
-            toast.uiDocument = doc;
-            EditorUtility.SetDirty(toast);
+            PiariaPresenterUtils.SetSerializedPropertyRef(toast, "uiDocument", doc);
 
             EnsureComp<MinimapPresenter>(mainUIGo);
             EnsureComp<OrderBoardPresenter>(mainUIGo);

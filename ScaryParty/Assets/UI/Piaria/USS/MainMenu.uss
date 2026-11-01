@@ -60,6 +60,18 @@
     align-items: center;
     -unity-background-scale-mode: stretch-to-fill;
     padding: 0;
+    transition-property: scale, rotate;
+    transition-duration: 0.14s;
+    transition-timing-function: ease-out-back;
+    scale: 1 1;
+}
+
+.ribbon-btn:hover {
+    scale: 1.06 1.06;
+}
+
+.ribbon-btn:active {
+    scale: 0.95 0.95;
 }
 
 .btn-text-art {
@@ -67,6 +79,13 @@
     height: 70%;
     position: absolute;
     -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale;
+    transition-duration: 0.14s;
+    transition-timing-function: ease-out-back;
+}
+
+.ribbon-btn:hover .btn-text-art {
+    scale: 1.02 1.02;
 }
 
 .btn-fallback-text {

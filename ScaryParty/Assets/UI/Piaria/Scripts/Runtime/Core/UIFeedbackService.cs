@@ -42,6 +42,13 @@ namespace ScaryParty.UI.Piaria.Core
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
                 if (audioSource == null) audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+
+                if (clickClip == null)
+                {
+#if UNITY_EDITOR
+                    clickClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/EasyGridBuilder Pro/Misc Assets/Sound/UIClick.wav");
+#endif
+                }
             }
             else if (Instance != this)
             {
@@ -55,6 +62,12 @@ namespace ScaryParty.UI.Piaria.Core
             if (!_boundButtons.Add(btn)) return; // Garante idempotência
 
             btn.RegisterCallback<MouseEnterEvent>(evt =>
+            {
+                if (!btn.enabledSelf) return;
+                OnButtonHover(btn);
+            });
+
+            btn.RegisterCallback<PointerEnterEvent>(evt =>
             {
                 if (!btn.enabledSelf) return;
                 OnButtonHover(btn);
@@ -76,6 +89,11 @@ namespace ScaryParty.UI.Piaria.Core
             {
                 OnButtonReset(btn);
             });
+
+            btn.RegisterCallback<PointerLeaveEvent>(evt =>
+            {
+                OnButtonReset(btn);
+            });
         }
 
         public void BindHierarchy(VisualElement root)
@@ -88,6 +106,18 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        private float GetSafeScale(VisualElement el)
+        {
+            if (el == null) return 1f;
+            try
+            {
+                if (el.resolvedStyle.scale.value.x > 0.01f)
+                    return el.resolvedStyle.scale.value.x;
+            }
+            catch { }
+            return 1f;
+        }
+
         private void OnButtonHover(VisualElement el)
         {
             PlaySound(hoverClip);
@@ -98,8 +128,8 @@ namespace ScaryParty.UI.Piaria.Core
             if (UIToolkitTweenService.ReduceMotion) return;
 
             UIToolkitTweenService.KillTweens(el);
-            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1f : el.style.scale.value.value.x;
-            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.12f)
+            float currentScale = GetSafeScale(el);
+            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.05f, 0.12f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }
@@ -114,8 +144,8 @@ namespace ScaryParty.UI.Piaria.Core
             if (UIToolkitTweenService.ReduceMotion) return;
 
             UIToolkitTweenService.KillTweens(el);
-            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1.025f : el.style.scale.value.value.x;
-            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 0.97f, 0.08f)
+            float currentScale = GetSafeScale(el);
+            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 0.95f, 0.08f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }
@@ -125,8 +155,8 @@ namespace ScaryParty.UI.Piaria.Core
             if (UIToolkitTweenService.ReduceMotion) return;
 
             UIToolkitTweenService.KillTweens(el);
-            float currentScale = (el.style.scale.value.value.x <= 0f) ? 0.97f : el.style.scale.value.value.x;
-            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.08f)
+            float currentScale = GetSafeScale(el);
+            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.05f, 0.08f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }
@@ -140,8 +170,8 @@ namespace ScaryParty.UI.Piaria.Core
                 return;
             }
 
-            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1f : el.style.scale.value.value.x;
-            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.1f)
+            float currentScale = GetSafeScale(el);
+            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.1f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }

@@ -12,11 +12,11 @@
     <ui:Template name="GenericModalTemplate" src="project://database/Assets/UI/Piaria/UXML/GenericModal.uxml" />
     <ui:Template name="ToastTemplate" src="project://database/Assets/UI/Piaria/UXML/ToastContainer.uxml" />
 
-    <ui:VisualElement name="LobbySceneMasterRoot" class="fullscreen-root">
-        <ui:Instance template="MainMenuTemplate" class="fullscreen-root" />
-        <ui:Instance template="LobbyTemplate" class="fullscreen-root" style="display: none;" />
-        <ui:Instance template="SettingsTemplate" class="fullscreen-root" style="display: none;" />
-        <ui:Instance template="GenericModalTemplate" class="fullscreen-root" style="display: none;" />
-        <ui:Instance template="ToastTemplate" class="fullscreen-root" />
+    <ui:VisualElement name="LobbySceneMasterRoot" class="fullscreen-root" picking-mode="Ignore">
+        <ui:Instance template="MainMenuTemplate" class="fullscreen-root" picking-mode="Ignore" />
+        <ui:Instance template="LobbyTemplate" class="fullscreen-root" picking-mode="Ignore" style="display: none;" />
+        <ui:Instance template="SettingsTemplate" class="fullscreen-root" picking-mode="Ignore" style="display: none;" />
+        <ui:Instance template="GenericModalTemplate" class="fullscreen-root" picking-mode="Ignore" style="display: none;" />
+        <ui:Instance template="ToastTemplate" class="fullscreen-root" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

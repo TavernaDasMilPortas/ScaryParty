@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.UI.Piaria.Core;
@@ -110,6 +110,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
+            PiariaPresenterUtils.ConfigureHierarchyPicking(uiDocument.rootVisualElement);
+
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("MainMenuRoot");
             if (RootElement == null)
             {
@@ -125,6 +127,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
             }
             if (RootElement == null) return;
+
+            RootElement.pickingMode = PickingMode.Ignore;
+            PiariaPresenterUtils.ConfigureHierarchyPicking(RootElement);
 
             _logoPiaria = RootElement.Q<VisualElement>("LogoPiaria");
             _logoSubtitle = RootElement.Q<VisualElement>("LogoSubtitle");
@@ -166,23 +171,62 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_btnPlay != null)
             {
+                _btnPlay.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg1 != null) _btnPlay.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg1);
                 var art = _btnPlay.Q<VisualElement>("ArtPlay");
-                if (art != null && catalog.btnPlayText != null) art.style.backgroundImage = new StyleBackground(catalog.btnPlayText);
+                var fallback = _btnPlay.Q<Label>(className: "btn-fallback-text");
+                if (art != null && catalog.btnPlayText != null)
+                {
+                    art.style.backgroundImage = new StyleBackground(catalog.btnPlayText);
+                    art.style.display = DisplayStyle.Flex;
+                    art.pickingMode = PickingMode.Ignore;
+                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    if (art != null) art.style.display = DisplayStyle.None;
+                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                }
             }
 
             if (_btnSettings != null)
             {
+                _btnSettings.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg2 != null) _btnSettings.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg2);
                 var art = _btnSettings.Q<VisualElement>("ArtSettings");
-                if (art != null && catalog.btnSettingsText != null) art.style.backgroundImage = new StyleBackground(catalog.btnSettingsText);
+                var fallback = _btnSettings.Q<Label>(className: "btn-fallback-text");
+                if (art != null && catalog.btnSettingsText != null)
+                {
+                    art.style.backgroundImage = new StyleBackground(catalog.btnSettingsText);
+                    art.style.display = DisplayStyle.Flex;
+                    art.pickingMode = PickingMode.Ignore;
+                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    if (art != null) art.style.display = DisplayStyle.None;
+                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                }
             }
 
             if (_btnQuit != null)
             {
+                _btnQuit.pickingMode = PickingMode.Position;
                 if (catalog.ribbonButtonBg3 != null) _btnQuit.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg3);
                 var art = _btnQuit.Q<VisualElement>("ArtQuit");
-                if (art != null && catalog.btnQuitText != null) art.style.backgroundImage = new StyleBackground(catalog.btnQuitText);
+                var fallback = _btnQuit.Q<Label>(className: "btn-fallback-text");
+                if (art != null && catalog.btnQuitText != null)
+                {
+                    art.style.backgroundImage = new StyleBackground(catalog.btnQuitText);
+                    art.style.display = DisplayStyle.Flex;
+                    art.pickingMode = PickingMode.Ignore;
+                    if (fallback != null) fallback.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    if (art != null) art.style.display = DisplayStyle.None;
+                    if (fallback != null) fallback.style.display = DisplayStyle.Flex;
+                }
             }
         }
 
@@ -191,48 +235,96 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnPlay != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnPlay);
-                _btnPlay.clicked += () =>
-                {
-                    UnityEngine.Cursor.lockState = CursorLockMode.None;
-                    UnityEngine.Cursor.visible = true;
-                    if (UIScreenRouter.Instance != null)
-                    {
-                        UIScreenRouter.Instance.NavigateTo("LobbyScreen");
-                    }
-                    else
-                    {
-                        Close(() => LobbyPresenter.Instance?.Open());
-                    }
-                };
+                _btnPlay.clicked -= OnPlayClicked;
+                _btnPlay.clicked += OnPlayClicked;
             }
 
             if (_btnSettings != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnSettings);
-                _btnSettings.clicked += () =>
-                {
-                    UnityEngine.Cursor.lockState = CursorLockMode.None;
-                    UnityEngine.Cursor.visible = true;
-                    SettingsPresenter.Instance?.OpenModal();
-                };
+                _btnSettings.clicked -= OnSettingsClicked;
+                _btnSettings.clicked += OnSettingsClicked;
             }
 
             if (_btnQuit != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnQuit);
-                _btnQuit.clicked += () =>
+                _btnQuit.clicked -= OnQuitClicked;
+                _btnQuit.clicked += OnQuitClicked;
+            }
+        }
+
+        private void OnPlayClicked()
+        {
+            Debug.Log("[MainMenuPresenter] Ação acionada: Jogar");
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+
+            if (UIScreenRouter.Instance != null && UIScreenRouter.Instance.HasScreen("LobbyScreen"))
+            {
+                UIScreenRouter.Instance.NavigateTo("LobbyScreen");
+            }
+            else
+            {
+                Close(() =>
                 {
-                    UnityEngine.Cursor.lockState = CursorLockMode.None;
-                    UnityEngine.Cursor.visible = true;
-                    ModalPresenter.Instance?.ShowConfirmation("Deseja realmente sair do jogo?", () =>
+                    if (LobbyPresenter.Instance != null)
                     {
+                        LobbyPresenter.Instance.Open();
+                    }
+                    else
+                    {
+                        try
+                        {
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.LogWarning($"[MainMenuPresenter] Não foi possível carregar LobbyScene: {ex.Message}");
+                        }
+                    }
+                });
+            }
+        }
+
+        private void OnSettingsClicked()
+        {
+            Debug.Log("[MainMenuPresenter] Ação acionada: Configurações");
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+            if (SettingsPresenter.Instance != null)
+            {
+                SettingsPresenter.Instance.OpenModal();
+            }
+            else
+            {
+                Debug.LogWarning("[MainMenuPresenter] SettingsPresenter não encontrado na cena.");
+            }
+        }
+
+        private void OnQuitClicked()
+        {
+            Debug.Log("[MainMenuPresenter] Ação acionada: Sair");
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+            if (ModalPresenter.Instance != null)
+            {
+                ModalPresenter.Instance.ShowConfirmation("Deseja realmente sair do jogo?", () =>
+                {
 #if UNITY_EDITOR
-                        EditorApplication.isPlaying = false;
+                    EditorApplication.isPlaying = false;
 #else
-                        Application.Quit();
+                    Application.Quit();
 #endif
-                    });
-                };
+                });
+            }
+            else
+            {
+#if UNITY_EDITOR
+                EditorApplication.isPlaying = false;
+#else
+                Application.Quit();
+#endif
             }
         }
 

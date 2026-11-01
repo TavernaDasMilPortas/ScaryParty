@@ -9,6 +9,26 @@ namespace ScaryParty.UI.Piaria.Core
 {
     public static class PiariaPresenterUtils
     {
+        public static void ConfigureHierarchyPicking(VisualElement root)
+        {
+            if (root == null) return;
+            // Configura todos os TemplateContainers da hierarquia para ignorar raycasts (não bloquear elementos abaixo)
+            var containers = root.Query<TemplateContainer>().ToList();
+            foreach (var tc in containers)
+            {
+                tc.pickingMode = PickingMode.Ignore;
+            }
+
+            var fullscreens = root.Query(className: "fullscreen-root").ToList();
+            foreach (var fs in fullscreens)
+            {
+                if (fs is not Button && fs is not TextField)
+                {
+                    fs.pickingMode = PickingMode.Ignore;
+                }
+            }
+        }
+
         public static void ResolveUIDocument(MonoBehaviour presenter, ref UIDocument uiDoc, string fallbackUxmlPath = null)
         {
             if (uiDoc == null)

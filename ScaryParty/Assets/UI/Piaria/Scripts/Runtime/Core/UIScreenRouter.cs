@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -85,6 +85,11 @@ namespace ScaryParty.UI.Piaria.Core
             {
                 _screens.Remove(screen.ScreenId);
             }
+        }
+
+        public bool HasScreen(string screenId)
+        {
+            return !string.IsNullOrEmpty(screenId) && _screens.ContainsKey(screenId);
         }
 
         public void NavigateTo(string screenId, bool recordHistory = true, Action onComplete = null)

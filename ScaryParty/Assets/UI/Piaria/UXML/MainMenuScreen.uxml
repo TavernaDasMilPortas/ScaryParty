@@ -2,40 +2,40 @@
     <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
     <Style src="project://database/Assets/UI/Piaria/USS/MainMenu.uss" />
     
-    <ui:VisualElement name="MainMenuRoot" class="fullscreen-root main-menu-bg">
+    <ui:VisualElement name="MainMenuRoot" class="fullscreen-root main-menu-bg" picking-mode="Ignore">
         <!-- Decorações de Fita Quadriculada -->
-        <ui:VisualElement name="CheckeredTopLeft" class="checkered-deco deco-left" />
-        <ui:VisualElement name="CheckeredTopRight" class="checkered-deco deco-right" />
+        <ui:VisualElement name="CheckeredTopLeft" class="checkered-deco deco-left" picking-mode="Ignore" />
+        <ui:VisualElement name="CheckeredTopRight" class="checkered-deco deco-right" picking-mode="Ignore" />
 
         <!-- Centro: Marca, Subtítulo e Menu -->
-        <ui:VisualElement class="menu-center-container">
+        <ui:VisualElement class="menu-center-container" picking-mode="Ignore">
             <!-- Logotipo P.I.A.R.I.A -->
-            <ui:VisualElement name="LogoPiaria" class="logo-piaria" />
-            <ui:VisualElement name="LogoSubtitle" class="logo-subtitle" />
+            <ui:VisualElement name="LogoPiaria" class="logo-piaria" picking-mode="Ignore" />
+            <ui:VisualElement name="LogoSubtitle" class="logo-subtitle" picking-mode="Ignore" />
 
             <!-- Faixas de Navegação -->
-            <ui:VisualElement class="menu-buttons-group">
-                <ui:Button name="BtnPlay" class="ribbon-btn btn-play">
-                    <ui:VisualElement name="ArtPlay" class="btn-text-art art-play" />
-                    <ui:Label text="JOGAR" class="btn-fallback-text" />
+            <ui:VisualElement class="menu-buttons-group" picking-mode="Ignore">
+                <ui:Button name="BtnPlay" class="ribbon-btn btn-play" picking-mode="Position">
+                    <ui:VisualElement name="ArtPlay" class="btn-text-art art-play" picking-mode="Ignore" />
+                    <ui:Label text="JOGAR" class="btn-fallback-text" picking-mode="Ignore" />
                 </ui:Button>
 
-                <ui:Button name="BtnSettings" class="ribbon-btn btn-settings">
-                    <ui:VisualElement name="ArtSettings" class="btn-text-art art-settings" />
-                    <ui:Label text="CONFIGURAÇÕES" class="btn-fallback-text" />
+                <ui:Button name="BtnSettings" class="ribbon-btn btn-settings" picking-mode="Position">
+                    <ui:VisualElement name="ArtSettings" class="btn-text-art art-settings" picking-mode="Ignore" />
+                    <ui:Label text="CONFIGURAÇÕES" class="btn-fallback-text" picking-mode="Ignore" />
                 </ui:Button>
 
-                <ui:Button name="BtnQuit" class="ribbon-btn btn-quit">
-                    <ui:VisualElement name="ArtQuit" class="btn-text-art art-quit" />
-                    <ui:Label text="SAIR" class="btn-fallback-text" />
+                <ui:Button name="BtnQuit" class="ribbon-btn btn-quit" picking-mode="Position">
+                    <ui:VisualElement name="ArtQuit" class="btn-text-art art-quit" picking-mode="Ignore" />
+                    <ui:Label text="SAIR" class="btn-fallback-text" picking-mode="Ignore" />
                 </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Rodapé -->
-        <ui:VisualElement class="menu-footer">
-            <ui:Label text="v1.0.0 — P.I.A.R.I.A Prototype" class="footer-text footer-left" />
-            <ui:Label text="Taverna das Mil Portas" class="footer-text footer-right" />
+        <ui:VisualElement class="menu-footer" picking-mode="Ignore">
+            <ui:Label text="v1.0.0 — P.I.A.R.I.A Prototype" class="footer-text footer-left" picking-mode="Ignore" />
+            <ui:Label text="Taverna das Mil Portas" class="footer-text footer-right" picking-mode="Ignore" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

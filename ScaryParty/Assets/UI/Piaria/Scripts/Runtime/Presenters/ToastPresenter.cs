@@ -90,6 +90,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _toastContainer = uiDocument.rootVisualElement.Q<VisualElement>("ToastContainerRoot");
                 }
             }
+
+            if (_toastContainer != null)
+            {
+                _toastContainer.pickingMode = PickingMode.Ignore;
+                if (_toastContainer.parent != null)
+                {
+                    _toastContainer.parent.pickingMode = PickingMode.Ignore;
+                }
+            }
         }
 
         private void HandleNotification(string message, NotificationType type)
@@ -107,6 +116,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             var toast = new VisualElement();
             toast.AddToClassList("toast-item");
+            toast.pickingMode = PickingMode.Ignore;
 
             string iconStr = "ℹ️";
             switch (type)
@@ -131,9 +141,11 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             var iconLbl = new Label(iconStr);
             iconLbl.AddToClassList("toast-icon");
+            iconLbl.pickingMode = PickingMode.Ignore;
 
             var msgLbl = new Label(message);
             msgLbl.AddToClassList("toast-message");
+            msgLbl.pickingMode = PickingMode.Ignore;
 
             toast.Add(iconLbl);
             toast.Add(msgLbl);
