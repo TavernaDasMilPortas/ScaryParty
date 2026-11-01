@@ -83,7 +83,6 @@
     top: 24px;
     left: 50%;
     translate: -50% 0;
-    pointer-events: auto;
 }
 
 .orders-hint-card {
@@ -107,7 +106,6 @@
     top: 52%;
     translate: -50% -50%;
     align-items: center;
-    pointer-events: none;
 }
 
 .interaction-prompt-box {
@@ -155,12 +153,10 @@
     position: absolute;
     bottom: 24px;
     left: 28px;
-    pointer-events: auto;
 }
 
 .hands-row {
     flex-direction: row;
-    gap: 16px;
 }
 
 .hand-card {
@@ -170,6 +166,7 @@
     border-width: 2px;
     border-radius: 10px;
     padding: 10px 14px;
+    margin-right: 16px;
 }
 
 .hand-card-active {
@@ -210,7 +207,6 @@
     left: 50%;
     translate: -50% 0;
     align-items: center;
-    pointer-events: auto;
 }
 
 .hud-hints-bar {
@@ -232,7 +228,6 @@
     bottom: 24px;
     right: 28px;
     align-items: center;
-    pointer-events: auto;
 }
 
 .minimap-paper-wrapper {
