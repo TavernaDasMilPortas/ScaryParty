@@ -86,7 +86,6 @@ MonoBehaviour:
   fontLostTumbler: {fileID: 12800000, guid: af2c240b154825b4cb3d923b086b07d5, type: 3}
   fontMunstar: {fileID: 12800000, guid: de449113a433c7f44beecb197c65e32f, type: 3}
   fontDeanna: {fileID: 12800000, guid: e4846b3a6dcfd964790183124b7bb2f2, type: 3}
-  panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}
   templateMainMenu: {fileID: 9197481963319205126, guid: 347de89302ed47d1870edd7e0c5976b7, type: 3}
   templateLobby: {fileID: 9197481963319205126, guid: d27660a6d50949b88434aabee8f2f44f, type: 3}
   templateReadyRoom: {fileID: 9197481963319205126, guid: eed9ff7e7f7441289ee5a6626fa682bd, type: 3}
@@ -98,3 +97,4 @@ MonoBehaviour:
   templateStagingModal: {fileID: 9197481963319205126, guid: bb6ad47dffb84bf5aee87d54811253b8, type: 3}
   templateScoreboardOverlay: {fileID: 9197481963319205126, guid: db1109197b064d9db8f15a9d6da5996f, type: 3}
   templatePlayerReadyCard: {fileID: 0}
+  panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}

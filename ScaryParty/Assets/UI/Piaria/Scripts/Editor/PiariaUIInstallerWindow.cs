@@ -493,14 +493,38 @@ namespace ScaryParty.UI.Piaria.Editor
             panelSettings.referenceResolution = new Vector2Int(1920, 1080);
             panelSettings.match = 0.5f;
 
-            var theme = AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>("Packages/com.unity.ui/PackageResources/StyleSheets/UnityDefaultRuntimeTheme.tss");
+            var themePath = AssetDatabase.GUIDToAssetPath("d69ba10a5cfd9d748bd38f539b6646d9");
+            if (string.IsNullOrEmpty(themePath))
+                themePath = "Packages/com.unity.ui/PackageResources/StyleSheets/UnityDefaultRuntimeTheme.tss";
+            var theme = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(themePath);
+
             var so = new SerializedObject(panelSettings);
-            var themeProp = so.FindProperty("themeUss");
+            var themeProp = so.FindProperty("themeUss") ?? so.FindProperty("m_ThemeUss");
             if (themeProp != null && theme != null)
             {
                 themeProp.objectReferenceValue = theme;
-                so.ApplyModifiedProperties();
             }
+
+            var scaleModeProp = so.FindProperty("m_ScaleMode");
+            if (scaleModeProp != null)
+            {
+                scaleModeProp.intValue = 1; // ScaleWithScreenSize
+            }
+
+            var refResProp = so.FindProperty("m_ReferenceResolution");
+            if (refResProp != null)
+            {
+                refResProp.vector2IntValue = new Vector2Int(1920, 1080);
+            }
+
+            var matchProp = so.FindProperty("m_Match");
+            if (matchProp != null)
+            {
+                matchProp.floatValue = 0.5f;
+            }
+
+            so.ApplyModifiedProperties();
+            EditorUtility.SetDirty(panelSettings);
 
             catalog.panelSettings = panelSettings;
             EditorUtility.SetDirty(catalog);

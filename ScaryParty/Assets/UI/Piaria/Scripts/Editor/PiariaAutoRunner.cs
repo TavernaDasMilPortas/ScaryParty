@@ -96,6 +96,10 @@ namespace ScaryParty.UI.Piaria.Editor
             var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/UI/Piaria/Config/PiariaUIAssetCatalog.asset")
                           ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset");
             var panelSettings = catalog?.panelSettings ?? AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/PanelSettings.asset");
+            if (panelSettings != null)
+            {
+                EnsurePanelSettingsConfigured(panelSettings);
+            }
 
             if (sceneName.IndexOf("Lobby", StringComparison.OrdinalIgnoreCase) >= 0 &&
                 sceneName.IndexOf("Ready", StringComparison.OrdinalIgnoreCase) < 0)
@@ -285,6 +289,53 @@ namespace ScaryParty.UI.Piaria.Editor
         {
             var comp = go.GetComponent<T>();
             if (comp != null) UnityEngine.Object.DestroyImmediate(comp);
+        }
+
+        public static void EnsurePanelSettingsConfigured(PanelSettings panelSettings)
+        {
+            if (panelSettings == null) return;
+            var themePath = AssetDatabase.GUIDToAssetPath("d69ba10a5cfd9d748bd38f539b6646d9");
+            if (string.IsNullOrEmpty(themePath))
+                themePath = "Packages/com.unity.ui/PackageResources/StyleSheets/UnityDefaultRuntimeTheme.tss";
+            var theme = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(themePath);
+
+            var so = new SerializedObject(panelSettings);
+            bool changed = false;
+
+            var themeProp = so.FindProperty("themeUss") ?? so.FindProperty("m_ThemeUss");
+            if (themeProp != null && theme != null && themeProp.objectReferenceValue == null)
+            {
+                themeProp.objectReferenceValue = theme;
+                changed = true;
+            }
+
+            var scaleModeProp = so.FindProperty("m_ScaleMode");
+            if (scaleModeProp != null && scaleModeProp.intValue != 1)
+            {
+                scaleModeProp.intValue = 1; // ScaleWithScreenSize
+                changed = true;
+            }
+
+            var refResProp = so.FindProperty("m_ReferenceResolution");
+            if (refResProp != null)
+            {
+                refResProp.vector2IntValue = new Vector2Int(1920, 1080);
+                changed = true;
+            }
+
+            var matchProp = so.FindProperty("m_Match");
+            if (matchProp != null)
+            {
+                matchProp.floatValue = 0.5f;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(panelSettings);
+                AssetDatabase.SaveAssets();
+            }
         }
     }
 }
