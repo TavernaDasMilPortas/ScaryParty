@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.UI.Piaria.Core;
@@ -61,6 +61,9 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Start()
         {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+
             EnsureInitialized();
             if (UIScreenRouter.Instance != null)
             {
@@ -76,6 +79,21 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
         }
 
+        private void Update()
+        {
+            if (State == ScreenState.Active || State == ScreenState.Opening)
+            {
+                if (UnityEngine.Cursor.lockState != CursorLockMode.None)
+                {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                }
+                if (!UnityEngine.Cursor.visible)
+                {
+                    UnityEngine.Cursor.visible = true;
+                }
+            }
+        }
+
         private void OnDestroy()
         {
             UIScreenRouter.Instance?.UnregisterScreen(this);
@@ -86,6 +104,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (RootElement != null) return;
             ResolveUIDocument();
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("MainMenuRoot");
@@ -123,18 +145,25 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (catalog == null) return;
 
             if (_logoPiaria != null && catalog.logoPiaria != null)
+            {
                 _logoPiaria.style.backgroundImage = new StyleBackground(catalog.logoPiaria);
+            }
 
             if (_logoSubtitle != null && catalog.logoSubtitle != null)
+            {
                 _logoSubtitle.style.backgroundImage = new StyleBackground(catalog.logoSubtitle);
+            }
 
             if (_checkeredLeft != null && catalog.checkeredDeco1 != null)
+            {
                 _checkeredLeft.style.backgroundImage = new StyleBackground(catalog.checkeredDeco1);
+            }
 
             if (_checkeredRight != null && catalog.checkeredDeco2 != null)
+            {
                 _checkeredRight.style.backgroundImage = new StyleBackground(catalog.checkeredDeco2);
+            }
 
-            // Fundos e artes dos botões
             if (_btnPlay != null)
             {
                 if (catalog.ribbonButtonBg1 != null) _btnPlay.style.backgroundImage = new StyleBackground(catalog.ribbonButtonBg1);
@@ -164,6 +193,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 UIFeedbackService.Instance?.BindButton(_btnPlay);
                 _btnPlay.clicked += () =>
                 {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                    UnityEngine.Cursor.visible = true;
                     if (UIScreenRouter.Instance != null)
                     {
                         UIScreenRouter.Instance.NavigateTo("LobbyScreen");
@@ -180,6 +211,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 UIFeedbackService.Instance?.BindButton(_btnSettings);
                 _btnSettings.clicked += () =>
                 {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                    UnityEngine.Cursor.visible = true;
                     SettingsPresenter.Instance?.OpenModal();
                 };
             }
@@ -189,6 +222,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 UIFeedbackService.Instance?.BindButton(_btnQuit);
                 _btnQuit.clicked += () =>
                 {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                    UnityEngine.Cursor.visible = true;
                     ModalPresenter.Instance?.ShowConfirmation("Deseja realmente sair do jogo?", () =>
                     {
 #if UNITY_EDITOR
@@ -203,6 +238,9 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void Open(Action onComplete = null)
         {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+
             EnsureInitialized();
             if (RootElement == null)
             {
@@ -222,6 +260,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.FadeIn(RootElement, 0.22f, () =>
             {
                 State = ScreenState.Active;
+                UnityEngine.Cursor.lockState = CursorLockMode.None;
+                UnityEngine.Cursor.visible = true;
                 onComplete?.Invoke();
             });
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
@@ -132,25 +132,21 @@ namespace ScaryParty.UI.Piaria.Editor
             EnsureComp<UIModalStack>(uiGo);
 
             var modal = EnsureComp<ModalPresenter>(uiGo);
-            modal.uiDocument = doc;
-            EditorUtility.SetDirty(modal);
+            PiariaPresenterUtils.SetSerializedPropertyRef(modal, "uiDocument", doc);
 
             var settings = EnsureComp<SettingsPresenter>(uiGo);
-            settings.uiDocument = doc;
-            EditorUtility.SetDirty(settings);
+            PiariaPresenterUtils.SetSerializedPropertyRef(settings, "uiDocument", doc);
 
             var menu = EnsureComp<MainMenuPresenter>(uiGo);
-            menu.uiDocument = doc;
-            EditorUtility.SetDirty(menu);
+            PiariaPresenterUtils.SetSerializedPropertyRef(menu, "uiDocument", doc);
 
             var lobby = EnsureComp<LobbyPresenter>(uiGo);
-            lobby.uiDocument = doc;
-            lobby.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
-            EditorUtility.SetDirty(lobby);
+            PiariaPresenterUtils.SetSerializedPropertyRef(lobby, "uiDocument", doc);
+            var lm = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            if (lm != null) PiariaPresenterUtils.SetSerializedPropertyRef(lobby, "lobbyManager", lm);
 
             var toast = EnsureComp<ToastPresenter>(uiGo);
-            toast.uiDocument = doc;
-            EditorUtility.SetDirty(toast);
+            PiariaPresenterUtils.SetSerializedPropertyRef(toast, "uiDocument", doc);
 
             EnsureComp<CharacterPreviewRig>(uiGo);
             EditorUtility.SetDirty(uiGo);

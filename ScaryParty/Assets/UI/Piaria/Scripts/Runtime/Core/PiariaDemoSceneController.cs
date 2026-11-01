@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.UI.Piaria.Presenters;
@@ -53,6 +53,8 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void Update()
         {
+            if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
+            if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
             // Controles de atalho na cena de demonstração
             if (Input.GetKeyDown(KeyCode.F1))
             {

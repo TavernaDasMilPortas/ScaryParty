@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -84,6 +84,8 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Start()
         {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
             EnsureInitialized();
             UIScreenRouter.Instance?.RegisterScreen(this);
 
@@ -104,6 +106,15 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
         }
 
+        private void Update()
+        {
+            if (State == ScreenState.Active || State == ScreenState.Opening)
+            {
+                if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
+                if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
+            }
+        }
+
         private void OnDestroy()
         {
             if (RoomDiscoveryService.Instance != null)
@@ -118,6 +129,14 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (RootElement != null) return;
             ResolveReferences();
+            if (uiDocument == null)
+            {
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInParent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            }
+            if (lobbyManager == null)
+            {
+                lobbyManager = GetComponent<LobbyManager>() ?? GetComponentInParent<LobbyManager>() ?? FindFirstObjectByType<LobbyManager>();
+            }
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("LobbyScreenRoot");
@@ -512,6 +531,8 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void Open(Action onComplete = null)
         {
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
             EnsureInitialized();
             if (RootElement == null)
             {

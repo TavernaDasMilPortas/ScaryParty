@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -61,6 +61,15 @@ namespace ScaryParty.UI.Piaria.Core
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+        }
+
+        private void Update()
+        {
+            if (_activeScreen != null && _activeScreen.State != ScreenState.Hidden)
+            {
+                if (UnityEngine.Cursor.lockState != CursorLockMode.None) UnityEngine.Cursor.lockState = CursorLockMode.None;
+                if (!UnityEngine.Cursor.visible) UnityEngine.Cursor.visible = true;
+            }
         }
 
         public void RegisterScreen(IScreenView screen)

@@ -11,16 +11,19 @@ namespace ScaryParty.UI.Piaria.Core
     {
         public static void ResolveUIDocument(MonoBehaviour presenter, ref UIDocument uiDoc, string fallbackUxmlPath = null)
         {
-            if (uiDoc != null) return;
-
-            uiDoc = presenter.GetComponent<UIDocument>() ?? UnityEngine.Object.FindFirstObjectByType<UIDocument>();
-
             if (uiDoc == null)
             {
-                var uiGo = GameObject.Find("--- UI ---") ?? GameObject.Find("MainGameUI") ?? GameObject.Find("--- PIARIA UI DEMO ---");
-                if (uiGo != null)
+                uiDoc = presenter.GetComponent<UIDocument>() 
+                     ?? presenter.GetComponentInParent<UIDocument>()
+                     ?? UnityEngine.Object.FindFirstObjectByType<UIDocument>();
+
+                if (uiDoc == null)
                 {
-                    uiDoc = uiGo.GetComponent<UIDocument>();
+                    var uiGo = GameObject.Find("--- UI ---") ?? GameObject.Find("MainGameUI") ?? GameObject.Find("--- PIARIA UI DEMO ---");
+                    if (uiGo != null)
+                    {
+                        uiDoc = uiGo.GetComponent<UIDocument>();
+                    }
                 }
             }
 
@@ -62,19 +65,16 @@ namespace ScaryParty.UI.Piaria.Core
 #if UNITY_EDITOR
             else
             {
-                if (uiDoc != null)
+                if (presenter != null)
                 {
-                    EditorUtility.SetDirty(presenter);
-                }
-                else
-                {
+                    var currentDoc = uiDoc;
                     EditorApplication.delayCall += () =>
                     {
                         if (presenter == null || presenter.gameObject == null) return;
-                        var doc = presenter.GetComponent<UIDocument>() ?? UnityEngine.Object.FindFirstObjectByType<UIDocument>();
+                        var doc = currentDoc ?? presenter.GetComponent<UIDocument>() ?? presenter.GetComponentInParent<UIDocument>() ?? UnityEngine.Object.FindFirstObjectByType<UIDocument>();
                         if (doc == null)
                         {
-                            var uiRoot = GameObject.Find("--- UI ---") ?? GameObject.Find("MainGameUI");
+                            var uiRoot = GameObject.Find("--- UI ---") ?? GameObject.Find("MainGameUI") ?? GameObject.Find("--- PIARIA UI DEMO ---");
                             if (uiRoot != null) doc = uiRoot.GetComponent<UIDocument>();
                         }
 
@@ -93,11 +93,25 @@ namespace ScaryParty.UI.Piaria.Core
                             EditorUtility.SetDirty(doc);
                         }
 
-                        var prop = presenter.GetType().GetField("uiDocument");
+                        var so = new SerializedObject(presenter);
+                        so.Update();
+                        var prop = so.FindProperty("uiDocument");
                         if (prop != null)
                         {
-                            prop.SetValue(presenter, doc);
-                            EditorUtility.SetDirty(presenter);
+                            prop.objectReferenceValue = doc;
+                            so.ApplyModifiedProperties();
+                        }
+
+                        var field = presenter.GetType().GetField("uiDocument");
+                        if (field != null)
+                        {
+                            field.SetValue(presenter, doc);
+                        }
+
+                        EditorUtility.SetDirty(presenter);
+                        if (!string.IsNullOrEmpty(presenter.gameObject.scene.path))
+                        {
+                            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(presenter.gameObject.scene);
                         }
                     };
                 }
@@ -107,24 +121,77 @@ namespace ScaryParty.UI.Piaria.Core
 
         public static void ResolveLobbyManager(MonoBehaviour presenter, ref LobbyManager lobbyMgr)
         {
-            if (lobbyMgr != null) return;
-
-            lobbyMgr = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
             if (lobbyMgr == null)
             {
-                var lobbyGo = GameObject.Find("--- LOBBY ---") ?? GameObject.Find("LobbyManager");
-                if (lobbyGo != null)
+                lobbyMgr = presenter.GetComponent<LobbyManager>()
+                        ?? presenter.GetComponentInParent<LobbyManager>()
+                        ?? UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+
+                if (lobbyMgr == null)
                 {
-                    lobbyMgr = lobbyGo.GetComponent<LobbyManager>();
+                    var lobbyGo = GameObject.Find("--- LOBBY ---") ?? GameObject.Find("LobbyManager");
+                    if (lobbyGo != null)
+                    {
+                        lobbyMgr = lobbyGo.GetComponent<LobbyManager>();
+                    }
                 }
             }
 
 #if UNITY_EDITOR
-            if (lobbyMgr != null && !Application.isPlaying)
+            if (!Application.isPlaying && presenter != null)
             {
-                EditorUtility.SetDirty(presenter);
+                var currentMgr = lobbyMgr;
+                EditorApplication.delayCall += () =>
+                {
+                    if (presenter == null) return;
+                    var targetMgr = currentMgr ?? presenter.GetComponent<LobbyManager>() ?? presenter.GetComponentInParent<LobbyManager>() ?? UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+                    if (targetMgr != null)
+                    {
+                        var so = new SerializedObject(presenter);
+                        so.Update();
+                        var prop = so.FindProperty("lobbyManager");
+                        if (prop != null)
+                        {
+                            prop.objectReferenceValue = targetMgr;
+                            so.ApplyModifiedProperties();
+                        }
+
+                        var field = presenter.GetType().GetField("lobbyManager");
+                        if (field != null)
+                        {
+                            field.SetValue(presenter, targetMgr);
+                        }
+
+                        EditorUtility.SetDirty(presenter);
+                        if (!string.IsNullOrEmpty(presenter.gameObject.scene.path))
+                        {
+                            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(presenter.gameObject.scene);
+                        }
+                    }
+                };
             }
 #endif
         }
+
+#if UNITY_EDITOR
+        public static void SetSerializedPropertyRef(MonoBehaviour target, string propertyName, UnityEngine.Object refValue)
+        {
+            if (target == null || refValue == null) return;
+            var so = new SerializedObject(target);
+            so.Update();
+            var prop = so.FindProperty(propertyName);
+            if (prop != null)
+            {
+                prop.objectReferenceValue = refValue;
+                so.ApplyModifiedProperties();
+            }
+            var field = target.GetType().GetField(propertyName);
+            if (field != null)
+            {
+                field.SetValue(target, refValue);
+            }
+            EditorUtility.SetDirty(target);
+        }
+#endif
     }
 }

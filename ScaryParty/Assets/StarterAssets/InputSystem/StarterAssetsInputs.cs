@@ -27,6 +27,10 @@ namespace StarterAssets
 
 		public bool IsInputBlockedByMenu =>
 			ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked ||
+			(ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance != null && ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen != null && ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+			(ScaryParty.UI.Piaria.Core.UIModalStack.Instance != null && ScaryParty.UI.Piaria.Core.UIModalStack.Instance.HasActiveModal) ||
+			(ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+			(ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
 			!cursorInputForLook ||
 			!cursorLocked ||
 			Cursor.lockState != CursorLockMode.Locked ||
@@ -134,12 +138,22 @@ namespace StarterAssets
 
 		private void OnApplicationFocus(bool hasFocus)
 		{
+			if (IsInputBlockedByMenu)
+			{
+				SetCursorState(false);
+				return;
+			}
 			SetCursorState(cursorLocked);
 		}
 
-		private void SetCursorState(bool newState)
+		public void SetCursorState(bool newState)
 		{
+			if (newState && IsInputBlockedByMenu)
+			{
+				newState = false;
+			}
 			Cursor.lockState = newState ? CursorLockMode.Locked : CursorLockMode.None;
+			Cursor.visible = !newState;
 		}
 	}
 	

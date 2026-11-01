@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
@@ -588,25 +588,21 @@ namespace ScaryParty.UI.Piaria.Editor
                 EnsureComponent<UIModalStack>(uiGo);
 
                 var modalPres = EnsureComponent<ModalPresenter>(uiGo);
-                modalPres.uiDocument = doc;
-                EditorUtility.SetDirty(modalPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(modalPres, "uiDocument", doc);
 
                 var setPres = EnsureComponent<SettingsPresenter>(uiGo);
-                setPres.uiDocument = doc;
-                EditorUtility.SetDirty(setPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(setPres, "uiDocument", doc);
 
                 var mainPres = EnsureComponent<MainMenuPresenter>(uiGo);
-                mainPres.uiDocument = doc;
-                EditorUtility.SetDirty(mainPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(mainPres, "uiDocument", doc);
 
                 var lobbyPres = EnsureComponent<LobbyPresenter>(uiGo);
-                lobbyPres.uiDocument = doc;
-                lobbyPres.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
-                EditorUtility.SetDirty(lobbyPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "uiDocument", doc);
+                var lm = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+                if (lm != null) PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "lobbyManager", lm);
 
                 var toastPres = EnsureComponent<ToastPresenter>(uiGo);
-                toastPres.uiDocument = doc;
-                EditorUtility.SetDirty(toastPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(toastPres, "uiDocument", doc);
 
                 EnsureComponent<CharacterPreviewRig>(uiGo);
                 EditorUtility.SetDirty(doc);
@@ -660,20 +656,16 @@ namespace ScaryParty.UI.Piaria.Editor
 
                 EnsureComponent<UIModalStack>(uiGo);
                 var modalPres = EnsureComponent<ModalPresenter>(uiGo);
-                modalPres.uiDocument = doc;
-                EditorUtility.SetDirty(modalPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(modalPres, "uiDocument", doc);
 
                 var setPres = EnsureComponent<SettingsPresenter>(uiGo);
-                setPres.uiDocument = doc;
-                EditorUtility.SetDirty(setPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(setPres, "uiDocument", doc);
 
                 var readyPres = EnsureComponent<ReadyRoomPresenter>(uiGo);
-                readyPres.uiDocument = doc;
-                EditorUtility.SetDirty(readyPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(readyPres, "uiDocument", doc);
 
                 var toastPres = EnsureComponent<ToastPresenter>(uiGo);
-                toastPres.uiDocument = doc;
-                EditorUtility.SetDirty(toastPres);
+                PiariaPresenterUtils.SetSerializedPropertyRef(toastPres, "uiDocument", doc);
 
                 EditorUtility.SetDirty(doc);
                 EditorUtility.SetDirty(uiGo);
@@ -697,28 +689,22 @@ namespace ScaryParty.UI.Piaria.Editor
 
                     EnsureComponent<UIModalStack>(mainUIGo);
                     var modalPres = EnsureComponent<ModalPresenter>(mainUIGo);
-                    modalPres.uiDocument = doc;
-                    EditorUtility.SetDirty(modalPres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(modalPres, "uiDocument", doc);
 
                     var setPres = EnsureComponent<SettingsPresenter>(mainUIGo);
-                    setPres.uiDocument = doc;
-                    EditorUtility.SetDirty(setPres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(setPres, "uiDocument", doc);
 
                     var hudPres = EnsureComponent<HudPresenter>(mainUIGo);
-                    hudPres.uiDocument = doc;
-                    EditorUtility.SetDirty(hudPres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(hudPres, "uiDocument", doc);
 
                     var scorePres = EnsureComponent<ScoreboardPresenter>(mainUIGo);
-                    scorePres.uiDocument = doc;
-                    EditorUtility.SetDirty(scorePres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(scorePres, "uiDocument", doc);
 
                     var storPres = EnsureComponent<StoragePresenter>(mainUIGo);
-                    storPres.uiDocument = doc;
-                    EditorUtility.SetDirty(storPres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(storPres, "uiDocument", doc);
 
                     var stagPres = EnsureComponent<StagingPresenter>(mainUIGo);
-                    stagPres.uiDocument = doc;
-                    EditorUtility.SetDirty(stagPres);
+                    PiariaPresenterUtils.SetSerializedPropertyRef(stagPres, "uiDocument", doc);
 
                     var toastPres = EnsureComponent<ToastPresenter>(mainUIGo);
                     toastPres.uiDocument = doc;
@@ -792,19 +778,19 @@ namespace ScaryParty.UI.Piaria.Editor
             EnsureComponent<UIScreenRouter>(uiGo);
             EnsureComponent<UIFeedbackService>(uiGo);
             EnsureComponent<UIModalStack>(uiGo);
-            var mPres = EnsureComponent<ModalPresenter>(uiGo); mPres.uiDocument = doc; EditorUtility.SetDirty(mPres);
-            var sPres = EnsureComponent<SettingsPresenter>(uiGo); sPres.uiDocument = doc; EditorUtility.SetDirty(sPres);
-            var mmPres = EnsureComponent<MainMenuPresenter>(uiGo); mmPres.uiDocument = doc; EditorUtility.SetDirty(mmPres);
+            var mPres = EnsureComponent<ModalPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(mPres, "uiDocument", doc);
+            var sPres = EnsureComponent<SettingsPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(sPres, "uiDocument", doc);
+            var mmPres = EnsureComponent<MainMenuPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(mmPres, "uiDocument", doc);
             var lobbyPres = EnsureComponent<LobbyPresenter>(uiGo);
-            lobbyPres.uiDocument = doc;
-            lobbyPres.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
-            EditorUtility.SetDirty(lobbyPres);
-            var rrPres = EnsureComponent<ReadyRoomPresenter>(uiGo); rrPres.uiDocument = doc; EditorUtility.SetDirty(rrPres);
-            var hPres = EnsureComponent<HudPresenter>(uiGo); hPres.uiDocument = doc; EditorUtility.SetDirty(hPres);
-            var scPres = EnsureComponent<ScoreboardPresenter>(uiGo); scPres.uiDocument = doc; EditorUtility.SetDirty(scPres);
-            var stgPres = EnsureComponent<StoragePresenter>(uiGo); stgPres.uiDocument = doc; EditorUtility.SetDirty(stgPres);
-            var staPres = EnsureComponent<StagingPresenter>(uiGo); staPres.uiDocument = doc; EditorUtility.SetDirty(staPres);
-            var tPres = EnsureComponent<ToastPresenter>(uiGo); tPres.uiDocument = doc; EditorUtility.SetDirty(tPres);
+            PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "uiDocument", doc);
+            var lMgr = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            if (lMgr != null) PiariaPresenterUtils.SetSerializedPropertyRef(lobbyPres, "lobbyManager", lMgr);
+            var rrPres = EnsureComponent<ReadyRoomPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(rrPres, "uiDocument", doc);
+            var hPres = EnsureComponent<HudPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(hPres, "uiDocument", doc);
+            var scPres = EnsureComponent<ScoreboardPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(scPres, "uiDocument", doc);
+            var stgPres = EnsureComponent<StoragePresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(stgPres, "uiDocument", doc);
+            var staPres = EnsureComponent<StagingPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(staPres, "uiDocument", doc);
+            var tPres = EnsureComponent<ToastPresenter>(uiGo); PiariaPresenterUtils.SetSerializedPropertyRef(tPres, "uiDocument", doc);
             EnsureComponent<CharacterPreviewRig>(uiGo);
             EnsureComponent<PiariaDemoSceneController>(uiGo);
             EditorUtility.SetDirty(uiGo);
