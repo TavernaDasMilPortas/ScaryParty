@@ -202,10 +202,6 @@ namespace ScaryParty.UI.Piaria.Presenters
                 UIModalStack.Instance?.PopModal(this);
             });
         }
-                RootElement.style.display = DisplayStyle.None;
-                UIModalStack.Instance?.PopModal(this);
-            });
-        }
 
         private void CollectValidDestinations()
         {
