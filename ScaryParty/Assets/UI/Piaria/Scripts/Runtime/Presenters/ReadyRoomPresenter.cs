@@ -51,6 +51,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private float _lastUpdate = -999f;
         private string _currentRoomCode = "";
         private bool _offlineReady = false;
+        private bool? _optimisticReadyState = null;
         private readonly HashSet<PlayerState> _observedPlayers = new HashSet<PlayerState>();
 
         private void Awake()
@@ -299,6 +300,17 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
             }
 
+            var localPs = GetLocalPlayerState();
+
+            // Sincroniza estado otimista se a rede já confirmou
+            if (_optimisticReadyState.HasValue && localPs != null)
+            {
+                if (localPs.IsReady.Value == _optimisticReadyState.Value)
+                {
+                    _optimisticReadyState = null;
+                }
+            }
+
             bool allReady = true;
             int playerCount = allPlayers.Length;
 
@@ -310,7 +322,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 {
                     var ps = allPlayers[i];
                     bool isHost = ps.OwnerClientId == 0;
-                    bool isReady = ps.IsReady.Value;
+                    bool isMe = (localPs != null && ps == localPs) || ps.IsOwner;
+
+                    bool isReady = (isMe && _optimisticReadyState.HasValue)
+                        ? _optimisticReadyState.Value
+                        : ps.IsReady.Value;
 
                     if (_slots[i].Occupied != null) _slots[i].Occupied.style.display = DisplayStyle.Flex;
                     if (_slots[i].Empty != null) _slots[i].Empty.style.display = DisplayStyle.None;
@@ -327,7 +343,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                         _slots[i].ColorBox.style.backgroundColor = ps.PlayerColor.Value;
                     }
 
-                    if (ps.IsOwner)
+                    if (isMe)
                     {
                         SetupPreviewRig(ps.PlayerColor.Value);
                     }
@@ -391,7 +407,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                     var nameLbl = new Label(ps.OwnerClientId == 0 ? $"👑 {pName} (Host)" : pName);
                     nameLbl.AddToClassList("player-name-text");
 
-                    bool isReady = ps.IsReady.Value;
+                    bool isMe = (localPs != null && ps == localPs) || ps.IsOwner;
+                    bool isReady = (isMe && _optimisticReadyState.HasValue) ? _optimisticReadyState.Value : ps.IsReady.Value;
                     var statusLbl = new Label(isReady ? "✅ PRONTO" : "⏳ AGUARDANDO...");
                     statusLbl.AddToClassList("player-status-tag");
                     statusLbl.AddToClassList(isReady ? "status-ready" : "status-waiting");
@@ -427,9 +444,10 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (_slots[0].RoleLabel != null) _slots[0].RoleLabel.text = "👑 Líder da Sala";
 
                 SetupPreviewRig(localColor);
+                bool isReady = _optimisticReadyState ?? _offlineReady;
                 if (_slots[0].ReadyBadge != null)
                 {
-                    if (_offlineReady)
+                    if (isReady)
                     {
                         _slots[0].ReadyBadge.text = "PRONTO!";
                         _slots[0].ReadyBadge.RemoveFromClassList("status-waiting");
@@ -442,10 +460,22 @@ namespace ScaryParty.UI.Piaria.Presenters
                         _slots[0].ReadyBadge.AddToClassList("status-waiting");
                     }
                 }
+            }
 
-                if (_btnReady != null)
+            // Atualiza texto e estilo do botão Pronto para o jogador local
+            bool effectiveMyReady = _optimisticReadyState ?? (localPs != null ? localPs.IsReady.Value : _offlineReady);
+            if (_btnReady != null)
+            {
+                _btnReady.text = effectiveMyReady ? "CANCELAR PRONTO" : "ESTOU PRONTO";
+                if (effectiveMyReady)
                 {
-                    _btnReady.text = _offlineReady ? "CANCELAR PRONTO" : "ESTOU PRONTO";
+                    _btnReady.RemoveFromClassList("piaria-button-success");
+                    _btnReady.AddToClassList("piaria-button-secondary");
+                }
+                else
+                {
+                    _btnReady.RemoveFromClassList("piaria-button-secondary");
+                    _btnReady.AddToClassList("piaria-button-success");
                 }
             }
 
@@ -456,25 +486,10 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnStartGame.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
                 if (isHost)
                 {
-                    _btnStartGame.SetEnabled(playerCount <= 1 || allReady || _offlineReady);
-                }
-            }
-
-            // Atualiza texto do botão Pronto para o jogador local
-            var localPs = GetLocalPlayerState();
-            if (localPs != null && _btnReady != null)
-            {
-                bool myReady = localPs.IsReady.Value;
-                _btnReady.text = myReady ? "CANCELAR PRONTO" : "ESTOU PRONTO";
-                if (myReady)
-                {
-                    _btnReady.RemoveFromClassList("piaria-button-success");
-                    _btnReady.AddToClassList("piaria-button-secondary");
-                }
-                else
-                {
-                    _btnReady.RemoveFromClassList("piaria-button-secondary");
-                    _btnReady.AddToClassList("piaria-button-success");
+                    bool canStart = (playerCount > 0)
+                        ? (allReady && effectiveMyReady)
+                        : effectiveMyReady;
+                    _btnStartGame.SetEnabled(canStart);
                 }
             }
         }
@@ -516,26 +531,39 @@ namespace ScaryParty.UI.Piaria.Presenters
             bool isHost = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
             if (_btnStartGame != null && isHost)
             {
-                _btnStartGame.SetEnabled(true);
+                _btnStartGame.SetEnabled(ready);
             }
         }
 
         private void OnReadyClicked()
         {
             var myState = GetLocalPlayerState();
-            bool newReady;
+            bool targetReady;
 
-            if (myState != null)
+            if (_optimisticReadyState.HasValue)
             {
-                newReady = !myState.IsReady.Value;
-                myState.SetReady(newReady);
+                targetReady = !_optimisticReadyState.Value;
+            }
+            else if (myState != null)
+            {
+                targetReady = !myState.IsReady.Value;
             }
             else
             {
-                newReady = !_offlineReady;
+                targetReady = !_offlineReady;
             }
 
-            ApplyLocalReadyUI(newReady);
+            _optimisticReadyState = targetReady;
+            _offlineReady = targetReady;
+
+            Debug.Log($"[ReadyRoomPresenter] ✅ Ready alternado: novo={targetReady}, jogador={(myState != null ? myState.OwnerClientId.ToString() : "offline")}");
+
+            if (myState != null)
+            {
+                myState.SetReady(targetReady);
+            }
+
+            ApplyLocalReadyUI(targetReady);
             UIFeedbackService.Instance?.PlayReady();
             RefreshPlayers();
         }

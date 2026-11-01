@@ -354,40 +354,30 @@ public class CityGenerator : NetworkBehaviour
     {
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
         {
-            if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+            var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+            System.Array.Sort(allPlayers, (a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
+
+            for (int i = 0; i < allPlayers.Length; i++)
             {
-                var po = NetworkManager.Singleton.LocalClient.PlayerObject;
-                var cc = po.GetComponent<CharacterController>();
-                if (cc != null) cc.enabled = false;
-                
-                int playerIndex = 0;
-                var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-                System.Array.Sort(allPlayers, (a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
-                
-                for (int i = 0; i < allPlayers.Length; i++)
-                {
-                    if (allPlayers[i].OwnerClientId == NetworkManager.Singleton.LocalClientId)
-                    {
-                        playerIndex = i;
-                        break;
-                    }
-                }
-                
+                var ps = allPlayers[i];
+                if (ps == null) continue;
+
                 Vector3 targetPos = Vector3.zero;
                 Quaternion targetRot = Quaternion.identity;
                 bool foundPos = false;
 
                 if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
                 {
-                    targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(playerIndex);
-                    targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(playerIndex);
+                    targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(i);
+                    targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(i);
                     foundPos = true;
                 }
                 else
                 {
-                    GameObject spawnPoint = GameObject.Find($"NetworkSpawnPoint_{playerIndex % 4}");
-                    if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint_0");
-                    if (spawnPoint == null) spawnPoint = GameObject.Find("NetworkSpawnPoint");
+                    GameObject spawnPoint = GameObject.Find($"NetworkSpawnPoint_{i % 4}")
+                        ?? GameObject.Find("NetworkSpawnPoint_0")
+                        ?? GameObject.Find("NetworkSpawnPoint");
+
                     if (spawnPoint != null)
                     {
                         targetPos = spawnPoint.transform.position;
@@ -398,11 +388,26 @@ public class CityGenerator : NetworkBehaviour
 
                 if (foundPos)
                 {
-                    po.transform.position = targetPos;
-                    po.transform.rotation = targetRot;
+                    if (ps.IsOwner)
+                    {
+                        ps.PerformTeleport(targetPos, targetRot);
+                    }
+                    else if (IsServer)
+                    {
+                        ps.ForceTeleportClientRpc(targetPos, targetRot);
+                    }
                 }
-                
-                if (cc != null) cc.enabled = true;
+            }
+
+            // Fallback caso LocalClient.PlayerObject ainda nao conste em allPlayers
+            if (NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
+            {
+                var po = NetworkManager.Singleton.LocalClient.PlayerObject;
+                var ps = po.GetComponent<PlayerState>();
+                if (ps != null && ps.IsOwner)
+                {
+                    ps.RequestTeleportToSpawn();
+                }
             }
         }
     }

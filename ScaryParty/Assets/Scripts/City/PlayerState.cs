@@ -1,5 +1,6 @@
 using Unity.Collections;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 using StarterAssets;
 using UnityEngine.InputSystem;
@@ -59,21 +60,26 @@ public class PlayerState : NetworkBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        bool isGameplayScene = (scene.name == "GameScene" || (scene.name != "ReadyScene" && scene.name != "LobbyScene"));
+
         if (IsServer)
         {
-            // Libera os controles automaticamente quando entrar na GameScene ou cena de gameplay
-            if (scene.name == "GameScene" || (scene.name != "ReadyScene" && scene.name != "LobbyScene"))
+            IsGameStarted.Value = isGameplayScene;
+        }
+
+        if (isGameplayScene)
+        {
+            if (IsOwner)
             {
-                IsGameStarted.Value = true;
-            }
-            else
-            {
-                IsGameStarted.Value = false;
+                RequestTeleportToSpawn();
             }
         }
-        else if (IsOwner)
+        else
         {
-            UpdateMovementLock(IsGameStarted.Value);
+            if (IsOwner)
+            {
+                UpdateMovementLock(false);
+            }
         }
     }
 
@@ -84,11 +90,13 @@ public class PlayerState : NetworkBehaviour
         PlayerColor.OnValueChanged += OnColorChanged;
         Money.OnValueChanged += OnMoneyChanged;
 
+        string currentScene = SceneManager.GetActiveScene().name;
+        bool isGameplayScene = (currentScene == "GameScene" || (currentScene != "ReadyScene" && currentScene != "LobbyScene"));
+
         // Se formos o servidor e a cena atual for o GameScene (ou cena de teste), inicia o jogo imediatamente
         if (IsServer)
         {
-            string currentScene = SceneManager.GetActiveScene().name;
-            if (currentScene == "GameScene" || (currentScene != "ReadyScene" && currentScene != "LobbyScene"))
+            if (isGameplayScene)
             {
                 IsGameStarted.Value = true;
             }
@@ -104,39 +112,129 @@ public class PlayerState : NetworkBehaviour
 
         if (IsOwner)
         {
-            // Tenta teleportar para a pizzaria caso a cidade já tenha sido gerada antes de nascer
-            Vector3 targetPos = Vector3.zero;
-            Quaternion targetRot = Quaternion.identity;
-            bool foundSpawn = false;
-
-            if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+            if (isGameplayScene)
             {
-                targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(0);
-                targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(0);
-                foundSpawn = true;
-            }
-            else
-            {
-                var spawnPoint = GameObject.Find("NetworkSpawnPoint");
-                if (spawnPoint != null)
-                {
-                    targetPos = spawnPoint.transform.position;
-                    targetRot = spawnPoint.transform.rotation;
-                    foundSpawn = true;
-                }
-            }
-
-            if (foundSpawn)
-            {
-                var cc = GetComponent<CharacterController>();
-                if (cc != null) cc.enabled = false;
-                transform.position = targetPos;
-                transform.rotation = targetRot;
-                if (cc != null) cc.enabled = true;
+                RequestTeleportToSpawn();
             }
 
             // O Cliente local lê seus dados salvos e manda pro Servidor de forma diferida (após o registro do spawn)
             StartCoroutine(SubmitProfileDeferred());
+        }
+    }
+
+    private Coroutine _teleportRoutine;
+
+    /// <summary>
+    /// Inicia o processo assíncrono de teleporte para a pizzaria/ponto de spawn assim que a cidade estiver pronta.
+    /// </summary>
+    public void RequestTeleportToSpawn()
+    {
+        if (!IsOwner) return;
+        if (_teleportRoutine != null) StopCoroutine(_teleportRoutine);
+        _teleportRoutine = StartCoroutine(RespawnOrTeleportToSpawnRoutine());
+    }
+
+    private IEnumerator RespawnOrTeleportToSpawnRoutine()
+    {
+        float elapsed = 0f;
+        Vector3 targetPos = Vector3.zero;
+        Quaternion targetRot = Quaternion.identity;
+        bool found = false;
+
+        // Determina o índice de spawn do jogador (0..3)
+        int playerIndex = (int)OwnerClientId;
+        var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+        if (allPlayers != null && allPlayers.Length > 0)
+        {
+            System.Array.Sort(allPlayers, (a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
+            for (int i = 0; i < allPlayers.Length; i++)
+            {
+                if (allPlayers[i] != null && allPlayers[i].OwnerClientId == OwnerClientId)
+                {
+                    playerIndex = i;
+                    break;
+                }
+            }
+        }
+
+        while (elapsed < 10f)
+        {
+            if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
+            {
+                targetPos = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition(playerIndex);
+                targetRot = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation(playerIndex);
+                found = true;
+                break;
+            }
+
+            var spawnPoint = GameObject.Find($"NetworkSpawnPoint_{playerIndex % 4}")
+                ?? GameObject.Find("NetworkSpawnPoint_0")
+                ?? GameObject.Find("NetworkSpawnPoint");
+
+            if (spawnPoint != null)
+            {
+                targetPos = spawnPoint.transform.position;
+                targetRot = spawnPoint.transform.rotation;
+                found = true;
+                break;
+            }
+
+            elapsed += 0.15f;
+            yield return new WaitForSeconds(0.15f);
+        }
+
+        if (found)
+        {
+            PerformTeleport(targetPos, targetRot);
+        }
+        else
+        {
+            Debug.LogWarning($"[PlayerState] Timeout aguardando ponto de spawn para Player {OwnerClientId}. Posicionando em fallback (0, 1, 0).");
+            PerformTeleport(new Vector3(0f, 1f, 0f), Quaternion.identity);
+        }
+
+        UpdateMovementLock(true);
+        _teleportRoutine = null;
+    }
+
+    /// <summary>
+    /// Executa o teletransporte com segurança física (CharacterController) e de rede (NetworkTransform).
+    /// </summary>
+    public void PerformTeleport(Vector3 targetPos, Quaternion targetRot)
+    {
+        var cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+        Physics.SyncTransforms();
+
+        transform.position = targetPos;
+        transform.rotation = targetRot;
+        Physics.SyncTransforms();
+
+        var netTransform = GetComponent<NetworkTransform>();
+        if (netTransform != null && netTransform.IsSpawned)
+        {
+            netTransform.Teleport(targetPos, targetRot, transform.localScale);
+        }
+        Physics.SyncTransforms();
+
+        if (cc != null) cc.enabled = true;
+
+        var fpCam = GetComponent<ScaryParty.Player.FirstPersonCameraController>();
+        if (fpCam != null)
+        {
+            fpCam.SetYawPitch(targetRot.eulerAngles.y, 0f);
+        }
+
+        Debug.Log($"[PlayerState] ✅ Player {OwnerClientId} teletransportado com sucesso para {targetPos} (rot={targetRot.eulerAngles}).");
+    }
+
+    [ClientRpc]
+    public void ForceTeleportClientRpc(Vector3 pos, Quaternion rot)
+    {
+        if (IsOwner)
+        {
+            PerformTeleport(pos, rot);
+            UpdateMovementLock(true);
         }
     }
 
