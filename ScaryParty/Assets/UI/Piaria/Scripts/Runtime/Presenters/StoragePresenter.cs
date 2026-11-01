@@ -155,11 +155,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             EnsureInitialized();
         }
 
-        private void OnDestroy()
-        {
-            if (Instance == this) Instance = null;
-        }
-
         public void EnsureInitialized()
         {
             if (RootElement != null) return;
