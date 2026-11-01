@@ -15,8 +15,15 @@
 .staging-subtitle {
     font-size: 16px;
     color: var(--color-text-muted);
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     -unity-text-align: middle-center;
+}
+
+.staging-box-art {
+    width: 140px;
+    height: 90px;
+    margin-bottom: 16px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .destination-picker-row {

@@ -129,6 +129,12 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (catalog.paperPanel2 != null)
                 _stagingCard.style.backgroundImage = new StyleBackground(catalog.paperPanel2);
+
+            var boxArt = RootElement.Q<VisualElement>("VisualPizzaBox");
+            if (boxArt != null && catalog.GetBackpackPizza(0) != null)
+            {
+                boxArt.style.backgroundImage = new StyleBackground(catalog.GetBackpackPizza(0));
+            }
         }
 
         private void BindEvents()
@@ -172,7 +178,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             UpdateDestinationDisplay();
 
             UIModalStack.Instance?.PushModal(this);
-            RootElement.style.display = DisplayStyle.Flex;
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
+            {
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
+            }
             UIToolkitTweenService.PopIn(_stagingCard != null ? _stagingCard : RootElement, 0.2f);
         }
 
@@ -183,6 +194,14 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             UIToolkitTweenService.PopOut(_stagingCard != null ? _stagingCard : RootElement, 0.15f, 0.95f, () =>
             {
+                RootElement.style.display = DisplayStyle.None;
+                if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
+                {
+                    RootElement.parent.style.display = DisplayStyle.None;
+                }
+                UIModalStack.Instance?.PopModal(this);
+            });
+        }
                 RootElement.style.display = DisplayStyle.None;
                 UIModalStack.Instance?.PopModal(this);
             });

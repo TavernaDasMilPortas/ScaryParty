@@ -169,6 +169,19 @@ namespace ScaryParty.UI.Piaria.Core
         [Tooltip("Fonte estilizada (Deanna)")]
         public Font fontDeanna;
 
+        [Header("Templates UXML (Disponíveis em Standalone Build)")]
+        public UnityEngine.UIElements.VisualTreeAsset templateMainMenu;
+        public UnityEngine.UIElements.VisualTreeAsset templateLobby;
+        public UnityEngine.UIElements.VisualTreeAsset templateReadyRoom;
+        public UnityEngine.UIElements.VisualTreeAsset templateMainGameHud;
+        public UnityEngine.UIElements.VisualTreeAsset templateSettingsModal;
+        public UnityEngine.UIElements.VisualTreeAsset templateGenericModal;
+        public UnityEngine.UIElements.VisualTreeAsset templateToastContainer;
+        public UnityEngine.UIElements.VisualTreeAsset templateStorageModal;
+        public UnityEngine.UIElements.VisualTreeAsset templateStagingModal;
+        public UnityEngine.UIElements.VisualTreeAsset templateScoreboardOverlay;
+        public UnityEngine.UIElements.VisualTreeAsset templatePlayerReadyCard;
+
         [Header("Configurações de UI Toolkit")]
         public UnityEngine.UIElements.PanelSettings panelSettings;
 

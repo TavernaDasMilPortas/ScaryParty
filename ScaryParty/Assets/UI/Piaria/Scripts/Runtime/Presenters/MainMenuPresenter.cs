@@ -73,13 +73,15 @@ namespace ScaryParty.UI.Piaria.Presenters
         private void Start()
         {
             EnsureInitialized();
-            UIScreenRouter.Instance?.RegisterScreen(this);
-
-            if (UIScreenRouter.Instance != null && UIScreenRouter.Instance.ActiveScreen == null)
+            if (UIScreenRouter.Instance != null)
             {
-                Open();
+                UIScreenRouter.Instance.RegisterScreen(this);
+                if (UIScreenRouter.Instance.ActiveScreen == null)
+                {
+                    UIScreenRouter.Instance.NavigateTo(ScreenId);
+                }
             }
-            else if (UIScreenRouter.Instance == null)
+            else
             {
                 Open();
             }
@@ -219,9 +221,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 return;
             }
 
-            if (RootElement.parent is TemplateContainer tc)
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
             {
-                tc.style.display = DisplayStyle.Flex;
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
             }
 
             State = ScreenState.Opening;
@@ -245,9 +249,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.FadeOut(RootElement, 0.18f, () =>
             {
                 State = ScreenState.Hidden;
-                if (RootElement.parent is TemplateContainer tc)
+                if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
                 {
-                    tc.style.display = DisplayStyle.None;
+                    RootElement.parent.style.display = DisplayStyle.None;
                 }
                 onComplete?.Invoke();
             });

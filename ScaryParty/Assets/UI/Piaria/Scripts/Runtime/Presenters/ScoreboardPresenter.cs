@@ -152,7 +152,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             _isOpen = true;
             RefreshData();
 
-            _root.style.display = DisplayStyle.Flex;
+            var curr = _root;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
+            {
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
+            }
             UIToolkitTweenService.PopIn(_scoreboardCard != null ? _scoreboardCard : _root, 0.16f, 0.96f);
         }
 
@@ -164,6 +169,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.PopOut(_scoreboardCard != null ? _scoreboardCard : _root, 0.12f, 0.96f, () =>
             {
                 _root.style.display = DisplayStyle.None;
+                if (_root.parent != null && _root.parent != uiDocument?.rootVisualElement)
+                {
+                    _root.parent.style.display = DisplayStyle.None;
+                }
             });
         }
 

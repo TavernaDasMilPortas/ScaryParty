@@ -33,6 +33,8 @@ namespace ScaryParty.UI.Piaria.Core
         public MMF_Player errorPlayer;
 #endif
 
+        private readonly System.Collections.Generic.HashSet<VisualElement> _boundButtons = new System.Collections.Generic.HashSet<VisualElement>();
+
         private void Awake()
         {
             if (Instance == null)
@@ -50,6 +52,7 @@ namespace ScaryParty.UI.Piaria.Core
         public void BindButton(Button btn)
         {
             if (btn == null) return;
+            if (!_boundButtons.Add(btn)) return; // Garante idempotência
 
             btn.RegisterCallback<MouseEnterEvent>(evt =>
             {
@@ -87,50 +90,58 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void OnButtonHover(VisualElement el)
         {
-            if (UIToolkitTweenService.ReduceMotion) return;
-
-            DOTween.To(() => 1f, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.12f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
-
             PlaySound(hoverClip);
 #if MOREMOUNTAINS_FEEL
             if (hoverPlayer != null) hoverPlayer.PlayFeedbacks();
 #endif
+
+            if (UIToolkitTweenService.ReduceMotion) return;
+
+            UIToolkitTweenService.KillTweens(el);
+            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1f : el.style.scale.value.value.x;
+            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.12f)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
         }
 
         private void OnButtonDown(VisualElement el)
         {
-            if (UIToolkitTweenService.ReduceMotion) return;
-
-            DOTween.To(() => 1.025f, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 0.97f, 0.08f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
-
             PlaySound(clickClip);
 #if MOREMOUNTAINS_FEEL
             if (clickPlayer != null) clickPlayer.PlayFeedbacks();
 #endif
+
+            if (UIToolkitTweenService.ReduceMotion) return;
+
+            UIToolkitTweenService.KillTweens(el);
+            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1.025f : el.style.scale.value.value.x;
+            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 0.97f, 0.08f)
+                .SetEase(Ease.OutQuad)
+                .SetUpdate(true);
         }
 
         private void OnButtonUp(VisualElement el)
         {
             if (UIToolkitTweenService.ReduceMotion) return;
 
-            DOTween.To(() => 0.97f, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.08f)
+            UIToolkitTweenService.KillTweens(el);
+            float currentScale = (el.style.scale.value.value.x <= 0f) ? 0.97f : el.style.scale.value.value.x;
+            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.025f, 0.08f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }
 
         private void OnButtonReset(VisualElement el)
         {
+            UIToolkitTweenService.KillTweens(el);
             if (UIToolkitTweenService.ReduceMotion)
             {
                 el.style.scale = new StyleScale(new Scale(Vector2.one));
                 return;
             }
 
-            DOTween.To(() => 1.025f, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.1f)
+            float currentScale = (el.style.scale.value.value.x <= 0f) ? 1f : el.style.scale.value.value.x;
+            var tw = DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.1f)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
         }

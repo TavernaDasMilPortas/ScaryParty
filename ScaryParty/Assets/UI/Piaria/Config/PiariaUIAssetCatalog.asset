@@ -71,11 +71,11 @@ MonoBehaviour:
   progressBarFill: {fileID: 21300000, guid: b3298aecd306bd84ea9f5c5cbff21eba, type: 3}
   minimapPaperBase: {fileID: 21300000, guid: bb677ba301a67a44fa1f9c2dcc10022e, type: 3}
   backpackPizzas:
-  - {fileID: 21300000, guid: 90b4d729b6e7bd1439da1c7aa4481b36, type: 3}
-  - {fileID: 21300000, guid: a23cfbf4d38a886498614febc9474c66, type: 3}
-  - {fileID: 21300000, guid: 174b8d0ffaa24e84d8a03f208448cd4d, type: 3}
-  - {fileID: 21300000, guid: 7ef4ed18dff87d9458ac65862a56a83c, type: 3}
-  - {fileID: 21300000, guid: 890d5c801f7b76549bb64284710e53bc, type: 3}
+  - {fileID: 21300000, guid: d23047ce01d1b5242b233dddbeb875da, type: 3}
+  - {fileID: 21300000, guid: 972836db7841a20449ff7ea895598a46, type: 3}
+  - {fileID: 21300000, guid: 061092cf5c25f6f4fbf6af192c4106b7, type: 3}
+  - {fileID: 21300000, guid: 82ac92359c5441f4e8d5556d45e7e018, type: 3}
+  - {fileID: 21300000, guid: f546ac04c7d39c64987d0acaf1f62ab3, type: 3}
   backpackGradients:
   - {fileID: 21300000, guid: 90b4d729b6e7bd1439da1c7aa4481b36, type: 3}
   - {fileID: 21300000, guid: a23cfbf4d38a886498614febc9474c66, type: 3}
@@ -87,3 +87,14 @@ MonoBehaviour:
   fontMunstar: {fileID: 12800000, guid: de449113a433c7f44beecb197c65e32f, type: 3}
   fontDeanna: {fileID: 12800000, guid: e4846b3a6dcfd964790183124b7bb2f2, type: 3}
   panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}
+  templateMainMenu: {fileID: 9197481963319205126, guid: 347de89302ed47d1870edd7e0c5976b7, type: 3}
+  templateLobby: {fileID: 9197481963319205126, guid: d27660a6d50949b88434aabee8f2f44f, type: 3}
+  templateReadyRoom: {fileID: 9197481963319205126, guid: eed9ff7e7f7441289ee5a6626fa682bd, type: 3}
+  templateMainGameHud: {fileID: 9197481963319205126, guid: 0f89c7d7943440bc8470d4c97364b43c, type: 3}
+  templateSettingsModal: {fileID: 9197481963319205126, guid: 8b06d20734644054bfcc52fb33bd29f6, type: 3}
+  templateGenericModal: {fileID: 9197481963319205126, guid: c46c9f0b32af40febb5446b72f013b1c, type: 3}
+  templateToastContainer: {fileID: 9197481963319205126, guid: beeaea1b36574f29a5a20046216406c7, type: 3}
+  templateStorageModal: {fileID: 9197481963319205126, guid: 641720068d024ad38a0865bf966da86f, type: 3}
+  templateStagingModal: {fileID: 9197481963319205126, guid: bb6ad47dffb84bf5aee87d54811253b8, type: 3}
+  templateScoreboardOverlay: {fileID: 9197481963319205126, guid: db1109197b064d9db8f15a9d6da5996f, type: 3}
+  templatePlayerReadyCard: {fileID: 0}

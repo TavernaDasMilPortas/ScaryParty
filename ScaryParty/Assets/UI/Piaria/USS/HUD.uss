@@ -2,6 +2,7 @@
     pointer-events: none;
 }
 
+/* Topo Esquerdo: Estatísticas */
 .hud-top-left {
     position: absolute;
     top: 24px;
@@ -34,6 +35,49 @@
     color: var(--color-text-dark);
 }
 
+/* Topo Direito: Mochila de Pizzas */
+.hud-top-right {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.backpack-stack-box {
+    width: 90px;
+    height: 60px;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+}
+
+.backpack-art-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.backpack-badge-text {
+    position: absolute;
+    right: -4px;
+    top: -4px;
+    background-color: var(--color-btn-orange);
+    color: #FFFFFF;
+    font-size: 13px;
+    -unity-font-style: bold;
+    border-radius: 10px;
+    padding: 2px 6px;
+}
+
+.backpack-sub-label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+/* Topo Centro: Contextual Comandas */
 .hud-top-center {
     position: absolute;
     top: 24px;
@@ -56,17 +100,18 @@
     color: var(--color-text-dark);
 }
 
+/* Centro: Prompt Contextual e Barra de Progresso na linha 52% */
 .hud-center-anchor {
     position: absolute;
     left: 50%;
-    top: 60%;
+    top: 52%;
     translate: -50% -50%;
     align-items: center;
     pointer-events: none;
 }
 
 .interaction-prompt-box {
-    background-color: rgba(35, 25, 15, 0.82);
+    background-color: rgba(35, 25, 15, 0.85);
     color: #FFFFFF;
     font-size: 19px;
     -unity-font-style: bold;
@@ -105,61 +150,12 @@
     color: #FFFFFF;
 }
 
+/* Rodapé Esquerdo: Mãos */
 .hud-bottom-left {
     position: absolute;
     bottom: 24px;
     left: 28px;
     pointer-events: auto;
-}
-
-.hud-hints-bar {
-    background-color: var(--color-paper-light);
-    border-color: var(--color-border-brown);
-    border-width: 2px;
-    border-radius: 8px;
-    padding: 6px 16px;
-}
-
-.hints-text {
-    font-size: 15px;
-    color: var(--color-text-muted);
-}
-
-.hud-bottom-center {
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    translate: -50% 0;
-    align-items: center;
-    pointer-events: auto;
-}
-
-.backpack-stack-box {
-    width: 90px;
-    height: 60px;
-    position: relative;
-    margin-bottom: 8px;
-    align-items: center;
-    justify-content: center;
-}
-
-.backpack-art-layer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.backpack-badge-text {
-    position: absolute;
-    right: -4px;
-    top: -4px;
-    background-color: var(--color-btn-orange);
-    color: #FFFFFF;
-    font-size: 13px;
-    -unity-font-style: bold;
-    border-radius: 10px;
-    padding: 2px 6px;
 }
 
 .hands-row {
@@ -207,6 +203,30 @@
     color: var(--color-text-dark);
 }
 
+/* Rodapé Centro: Atalhos Rápidos */
+.hud-bottom-center {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    translate: -50% 0;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.hud-hints-bar {
+    background-color: var(--color-paper-light);
+    border-color: var(--color-border-brown);
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 6px 16px;
+}
+
+.hints-text {
+    font-size: 15px;
+    color: var(--color-text-muted);
+}
+
+/* Rodapé Direito: Minimapa */
 .hud-bottom-right {
     position: absolute;
     bottom: 24px;

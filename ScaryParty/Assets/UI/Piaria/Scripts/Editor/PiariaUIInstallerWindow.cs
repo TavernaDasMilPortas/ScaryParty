@@ -309,18 +309,41 @@ namespace ScaryParty.UI.Piaria.Editor
             Log($"Configuração de texturas finalizada. {modifiedCount} texturas importadas/reimportadas com sucesso.");
         }
 
-        private Sprite LoadSprite(Dictionary<string, string> files, string partialKey)
+        private Sprite LoadSprite(Dictionary<string, string> files, string exactNameOrKey)
         {
-            string keyLower = partialKey.ToLower();
-            if (files.TryGetValue(keyLower, out string path))
+            string keyLower = exactNameOrKey.ToLower().Trim();
+            string withPng = keyLower.EndsWith(".png") || keyLower.EndsWith(".jpg") ? keyLower : keyLower + ".png";
+
+            // 1. Tenta match exato por nome completo com extensão
+            if (files.TryGetValue(withPng, out string exactPath))
             {
-                return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                return AssetDatabase.LoadAssetAtPath<Sprite>(exactPath);
+            }
+            if (files.TryGetValue(keyLower, out string exactPath2))
+            {
+                return AssetDatabase.LoadAssetAtPath<Sprite>(exactPath2);
             }
 
+            // 2. Tenta match exato por nome do arquivo sem extensão
             foreach (var kvp in files)
             {
-                if (kvp.Key.Contains(keyLower))
+                string nameOnly = Path.GetFileNameWithoutExtension(kvp.Value).ToLower().Trim();
+                if (nameOnly == keyLower)
                 {
+                    return AssetDatabase.LoadAssetAtPath<Sprite>(kvp.Value);
+                }
+            }
+
+            // 3. Fallback cuidadoso contra falsos positivos de prefixo
+            foreach (var kvp in files)
+            {
+                string nameOnly = Path.GetFileNameWithoutExtension(kvp.Value).ToLower().Trim();
+                if (nameOnly.Contains(keyLower))
+                {
+                    // Rejeita falso positivo onde 'pizza' casaria com 'gradiente pizza'
+                    if (keyLower.StartsWith("pizza ") && nameOnly.Contains("gradiente"))
+                        continue;
+
                     return AssetDatabase.LoadAssetAtPath<Sprite>(kvp.Value);
                 }
             }
@@ -345,10 +368,11 @@ namespace ScaryParty.UI.Piaria.Editor
             Log("--- ETAPA 3: GERANDO CATÁLOGO DE ASSETS E PANEL SETTINGS ---");
             var files = ScanAssetFiles();
 
-            string configDir = "Assets/UI/Piaria/Config";
-            if (!Directory.Exists(configDir)) Directory.CreateDirectory(configDir);
+            string resDir = "Assets/Resources";
+            if (!Directory.Exists(resDir)) Directory.CreateDirectory(resDir);
 
-            string catalogPath = $"{configDir}/PiariaUIAssetCatalog.asset";
+            // Fonte canônica única em Resources para carregamento direto em Player e Editor
+            string catalogPath = $"{resDir}/PiariaUIAssetCatalog.asset";
             var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>(catalogPath);
             if (catalog == null)
             {
@@ -423,11 +447,17 @@ namespace ScaryParty.UI.Piaria.Editor
             catalog.minimapPaperBase = LoadSprite(files, "asset 51");
 
             catalog.backpackPizzas = new Sprite[5];
+            catalog.backpackPizzas = new Sprite[5];
             catalog.backpackGradients = new Sprite[5];
             for (int i = 1; i <= 5; i++)
             {
                 catalog.backpackPizzas[i - 1] = LoadSprite(files, $"pizza {i} (2)");
                 catalog.backpackGradients[i - 1] = LoadSprite(files, $"gradiente pizza {i} (2)");
+
+                if (catalog.backpackPizzas[i - 1] == catalog.backpackGradients[i - 1] && catalog.backpackPizzas[i - 1] != null)
+                {
+                    Log($"[ERRO DE AMBIGUIDADE] Pizza {i} e Gradiente {i} apontam para a mesma referência! Forçando resolução por GUID.");
+                }
             }
 
             // Tipografia
@@ -436,18 +466,26 @@ namespace ScaryParty.UI.Piaria.Editor
             catalog.fontMunstar = LoadFont(files, "munstar");
             catalog.fontDeanna = LoadFont(files, "deanna");
 
+            // Templates UXML (Bake direto para Player Build e Runtime Standalone)
+            catalog.templateMainMenu = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/MainMenuScreen.uxml");
+            catalog.templateLobby = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/LobbyScreen.uxml");
+            catalog.templateReadyRoom = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/ReadyRoomScreen.uxml");
+            catalog.templateMainGameHud = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/MainGameHUD.uxml");
+            catalog.templateSettingsModal = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/SettingsModal.uxml");
+            catalog.templateGenericModal = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/GenericModal.uxml");
+            catalog.templateToastContainer = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/ToastContainer.uxml");
+            catalog.templateStorageModal = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/StorageModal.uxml");
+            catalog.templateStagingModal = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/StagingModal.uxml");
+            catalog.templateScoreboardOverlay = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/ScoreboardOverlay.uxml");
+            catalog.templatePlayerReadyCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/PlayerReadyCard.uxml");
+
             // PanelSettings
-            string panelSettingsPath = $"{configDir}/PanelSettings.asset";
+            string panelSettingsPath = "Assets/UI/PanelSettings.asset";
             var panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>(panelSettingsPath);
             if (panelSettings == null)
             {
-                // Carrega o existente de Assets/UI/PanelSettings.asset se houver
-                panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/PanelSettings.asset");
-                if (panelSettings == null)
-                {
-                    panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
-                    AssetDatabase.CreateAsset(panelSettings, panelSettingsPath);
-                }
+                panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+                AssetDatabase.CreateAsset(panelSettings, panelSettingsPath);
             }
 
             panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
@@ -467,14 +505,22 @@ namespace ScaryParty.UI.Piaria.Editor
             EditorUtility.SetDirty(catalog);
             EditorUtility.SetDirty(panelSettings);
 
-            // Garante cópia em Assets/Resources para carregamento em runtime no Player
-            string resDir = "Assets/Resources";
-            if (!Directory.Exists(resDir)) Directory.CreateDirectory(resDir);
-            AssetDatabase.CopyAsset(catalogPath, $"{resDir}/PiariaUIAssetCatalog.asset");
+            // Sincroniza cópia em Config se a pasta existir
+            string configDir = "Assets/UI/Piaria/Config";
+            if (Directory.Exists(configDir))
+            {
+                string configPath = $"{configDir}/PiariaUIAssetCatalog.asset";
+                var configCat = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>(configPath);
+                if (configCat != null && configCat != catalog)
+                {
+                    EditorUtility.CopySerialized(catalog, configCat);
+                    EditorUtility.SetDirty(configCat);
+                }
+            }
 
             AssetDatabase.SaveAssets();
             PiariaUIAssetCatalog.Instance = catalog;
-            Log($"Catálogo serializado e salvo com sucesso em '{catalogPath}' e 'Assets/Resources'.");
+            Log($"Catálogo canônico e templates serializados com sucesso em '{catalogPath}'.");
         }
 
         [MenuItem("Tools/Scary Party/UI/Configurar Cenas Automaticamente", false, 12)]
@@ -541,13 +587,18 @@ namespace ScaryParty.UI.Piaria.Editor
                 RemoveComponentIfExists<StoragePresenter>(uiGo);
                 RemoveComponentIfExists<StagingPresenter>(uiGo);
 
-                // Procura e limpa GameObjects duplicados que contenham todos os presenters sem UIDocument
-                var allPresenters = UnityEngine.Object.FindObjectsOfType<MainMenuPresenter>();
-                foreach (var mp in allPresenters)
+                // Procura e limpa GameObjects espúrios sem UIDocument ou presenters duplicados
+                var allPresenters = UnityEngine.Object.FindObjectsOfType<MonoBehaviour>();
+                foreach (var mb in allPresenters)
                 {
-                    if (mp.gameObject != uiGo && mp.GetComponent<UIDocument>() == null)
+                    if (mb == null) continue;
+                    var type = mb.GetType();
+                    if (type.Namespace != null && type.Namespace.StartsWith("ScaryParty.UI.Piaria.Presenters"))
                     {
-                        DestroyImmediate(mp.gameObject);
+                        if (mb.gameObject != uiGo && mb.GetComponent<UIDocument>() == null)
+                        {
+                            DestroyImmediate(mb.gameObject);
+                        }
                     }
                 }
 
@@ -683,16 +734,18 @@ namespace ScaryParty.UI.Piaria.Editor
             EnsureComponent<UIScreenRouter>(uiGo);
             EnsureComponent<UIFeedbackService>(uiGo);
             EnsureComponent<UIModalStack>(uiGo);
-            EnsureComponent<ModalPresenter>(uiGo);
-            EnsureComponent<SettingsPresenter>(uiGo);
-            EnsureComponent<MainMenuPresenter>(uiGo);
-            EnsureComponent<LobbyPresenter>(uiGo);
-            EnsureComponent<ReadyRoomPresenter>(uiGo);
-            EnsureComponent<HudPresenter>(uiGo);
-            EnsureComponent<ScoreboardPresenter>(uiGo);
-            EnsureComponent<StoragePresenter>(uiGo);
-            EnsureComponent<StagingPresenter>(uiGo);
-            EnsureComponent<ToastPresenter>(uiGo);
+            EnsureComponent<ModalPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<SettingsPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<MainMenuPresenter>(uiGo).uiDocument = doc;
+            var lobbyPres = EnsureComponent<LobbyPresenter>(uiGo);
+            lobbyPres.uiDocument = doc;
+            lobbyPres.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            EnsureComponent<ReadyRoomPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<HudPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<ScoreboardPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<StoragePresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<StagingPresenter>(uiGo).uiDocument = doc;
+            EnsureComponent<ToastPresenter>(uiGo).uiDocument = doc;
             EnsureComponent<CharacterPreviewRig>(uiGo);
             EnsureComponent<PiariaDemoSceneController>(uiGo);
 

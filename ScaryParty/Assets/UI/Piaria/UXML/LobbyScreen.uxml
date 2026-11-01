@@ -12,10 +12,10 @@
             <ui:VisualElement class="lobby-header-spacer" />
         </ui:VisualElement>
 
-        <!-- Três Colunas em Painéis de Papel -->
+        <!-- Três Colunas Proporcionadas 1 : 1.1 : 1 -->
         <ui:VisualElement class="lobby-three-columns">
             <!-- Coluna 1: Meu Perfil -->
-            <ui:VisualElement name="ColProfile" class="paper-panel lobby-col">
+            <ui:VisualElement name="ColProfile" class="paper-panel col-profile">
                 <ui:VisualElement name="HeaderMyProfile" class="section-header-art header-profile" />
                 
                 <ui:Label text="NOME DO JOGADOR" class="field-subheading" />
@@ -40,7 +40,7 @@
             </ui:VisualElement>
 
             <!-- Coluna 2: Salas Disponíveis -->
-            <ui:VisualElement name="ColRoomList" class="paper-panel lobby-col">
+            <ui:VisualElement name="ColRoomList" class="paper-panel col-roomlist">
                 <ui:VisualElement name="HeaderRooms" class="section-header-art header-rooms" />
 
                 <ui:ScrollView name="RoomList" class="room-scroll-list">
@@ -56,7 +56,7 @@
             </ui:VisualElement>
 
             <!-- Coluna 3: Conexões (Criar / Código / LAN) -->
-            <ui:VisualElement name="ColConnect" class="paper-panel lobby-col">
+            <ui:VisualElement name="ColConnect" class="paper-panel col-connect">
                 <ui:ScrollView class="connect-scroll">
                     <!-- Seção Criar Sala Online -->
                     <ui:VisualElement name="HeaderCreateRoom" class="section-header-art header-create" />

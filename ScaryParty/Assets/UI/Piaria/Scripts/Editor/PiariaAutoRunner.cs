@@ -17,7 +17,7 @@ namespace ScaryParty.UI.Piaria.Editor
 
         static PiariaAutoRunner()
         {
-            EditorApplication.delayCall += CheckAndRun;
+            EditorApplication.update += CheckAndRun;
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
         }
 
@@ -152,12 +152,17 @@ namespace ScaryParty.UI.Piaria.Editor
             RemoveComp<StagingPresenter>(uiGo);
 
             // Limpa GameObjects órfãos criados manualmente sem UIDocument
-            var strayMenus = UnityEngine.Object.FindObjectsOfType<MainMenuPresenter>();
-            foreach (var m in strayMenus)
+            var strayPresenters = UnityEngine.Object.FindObjectsOfType<MonoBehaviour>();
+            foreach (var mb in strayPresenters)
             {
-                if (m.gameObject != uiGo && m.GetComponent<UIDocument>() == null)
+                if (mb == null) continue;
+                var type = mb.GetType();
+                if (type.Namespace != null && type.Namespace.StartsWith("ScaryParty.UI.Piaria.Presenters"))
                 {
-                    UnityEngine.Object.DestroyImmediate(m.gameObject);
+                    if (mb.gameObject != uiGo && mb.GetComponent<UIDocument>() == null)
+                    {
+                        UnityEngine.Object.DestroyImmediate(mb.gameObject);
+                    }
                 }
             }
         }

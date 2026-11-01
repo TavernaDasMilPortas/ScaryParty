@@ -200,6 +200,18 @@ namespace ScaryParty.UI.Piaria.Presenters
             var catalog = PiariaUIAssetCatalog.Instance;
             if (catalog == null) return;
 
+            // Fundo ilustrado do Lobby
+            if (catalog.backgroundLobby != null)
+                RootElement.style.backgroundImage = new StyleBackground(catalog.backgroundLobby);
+
+            // Botão Voltar Ilustrado
+            if (_btnBack != null && catalog.btnBack != null)
+            {
+                _btnBack.style.backgroundImage = new StyleBackground(catalog.btnBack);
+                var backLbl = _btnBack.Q<Label>();
+                if (backLbl != null) backLbl.style.display = DisplayStyle.None;
+            }
+
             if (_titleLobby != null && catalog.titleLobby != null)
                 _titleLobby.style.backgroundImage = new StyleBackground(catalog.titleLobby);
 
@@ -211,6 +223,18 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_colConnect != null && catalog.paperPanel3 != null)
                 _colConnect.style.backgroundImage = new StyleBackground(catalog.paperPanel3);
+
+            // Botões de Amostra de Cores Ilustrados
+            if (_btnColorOrange != null && catalog.colorOrange != null)
+                _btnColorOrange.style.backgroundImage = new StyleBackground(catalog.colorOrange);
+            if (_btnColorGreen != null && catalog.colorGreen != null)
+                _btnColorGreen.style.backgroundImage = new StyleBackground(catalog.colorGreen);
+            if (_btnColorBlue != null && catalog.colorBlue != null)
+                _btnColorBlue.style.backgroundImage = new StyleBackground(catalog.colorBlue);
+            if (_btnColorPink != null && catalog.colorPink != null)
+                _btnColorPink.style.backgroundImage = new StyleBackground(catalog.colorPink);
+            if (_btnColorRed != null && catalog.colorRed != null)
+                _btnColorRed.style.backgroundImage = new StyleBackground(catalog.colorRed);
 
             // Cabeçalhos
             var headProf = RootElement.Q<VisualElement>("HeaderMyProfile");
@@ -236,6 +260,16 @@ namespace ScaryParty.UI.Piaria.Presenters
             var noRoomsArt = RootElement.Q<VisualElement>("NoRoomsArt");
             if (noRoomsArt != null && catalog.noRooms != null)
                 noRoomsArt.style.backgroundImage = new StyleBackground(catalog.noRooms);
+
+            // Botões de ação ilustrados
+            if (_btnRefreshRooms != null && catalog.btnRefresh != null)
+                _btnRefreshRooms.style.backgroundImage = new StyleBackground(catalog.btnRefresh);
+            if (_btnCreateRoom != null && catalog.btnCreateRoom != null)
+                _btnCreateRoom.style.backgroundImage = new StyleBackground(catalog.btnCreateRoom);
+            if (_btnJoinManual != null && catalog.btnJoin != null)
+                _btnJoinManual.style.backgroundImage = new StyleBackground(catalog.btnJoin);
+            if (_btnJoinLAN != null && catalog.btnJoin2 != null)
+                _btnJoinLAN.style.backgroundImage = new StyleBackground(catalog.btnJoin2);
         }
 
         private void SetupPreview()
@@ -501,9 +535,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 return;
             }
 
-            if (RootElement.parent is TemplateContainer tc)
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
             {
-                tc.style.display = DisplayStyle.Flex;
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
             }
 
             State = ScreenState.Opening;
@@ -532,9 +568,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.FadeOut(RootElement, 0.18f, () =>
             {
                 State = ScreenState.Hidden;
-                if (RootElement.parent is TemplateContainer tc)
+                if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
                 {
-                    tc.style.display = DisplayStyle.None;
+                    RootElement.parent.style.display = DisplayStyle.None;
                 }
                 CharacterPreviewRig.Instance?.SetActive(false);
                 onComplete?.Invoke();

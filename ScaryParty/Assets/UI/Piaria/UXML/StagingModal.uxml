@@ -8,6 +8,9 @@
             <ui:Label text="ETIQUETAR CAIXA" class="header-title-text staging-title" />
             <ui:Label text="Escolha o endereço de destino para o entregador:" class="staging-subtitle" />
 
+            <!-- Ilustração da Caixa de Pizza -->
+            <ui:VisualElement name="VisualPizzaBox" class="staging-box-art" />
+
             <!-- Seletor de Endereço -->
             <ui:VisualElement class="destination-picker-row">
                 <ui:Button name="BtnPrevDest" text="◀" class="piaria-button piaria-button-secondary arrow-btn" />

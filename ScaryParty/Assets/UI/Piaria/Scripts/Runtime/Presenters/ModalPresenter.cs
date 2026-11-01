@@ -156,7 +156,12 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             _isOpen = true;
             UIModalStack.Instance?.PushModal(this);
-            RootElement.style.display = DisplayStyle.Flex;
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
+            {
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
+            }
             UIToolkitTweenService.PopIn(_modalCard != null ? _modalCard : RootElement, 0.2f);
         }
 
@@ -179,7 +184,12 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             _isOpen = true;
             UIModalStack.Instance?.PushModal(this);
-            RootElement.style.display = DisplayStyle.Flex;
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
+            {
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
+            }
             UIToolkitTweenService.PopIn(_modalCard != null ? _modalCard : RootElement, 0.2f);
         }
 
@@ -191,6 +201,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.PopOut(_modalCard != null ? _modalCard : RootElement, 0.15f, 0.95f, () =>
             {
                 RootElement.style.display = DisplayStyle.None;
+                if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
+                {
+                    RootElement.parent.style.display = DisplayStyle.None;
+                }
                 UIModalStack.Instance?.PopModal(this);
             });
         }

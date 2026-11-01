@@ -19,6 +19,22 @@ namespace ScaryParty.UI.Piaria.Presenters
         [Header("Configuração de UI Document")]
         public UIDocument uiDocument;
 
+        private struct SlotCardElements
+        {
+            public VisualElement SlotRoot;
+            public VisualElement Occupied;
+            public VisualElement Empty;
+            public VisualElement NameBar;
+            public Label NameLabel;
+            public VisualElement ColorBox;
+            public Label RoleLabel;
+            public Label ReadyBadge;
+            public bool LastKnownReady;
+            public bool Initialized;
+        }
+
+        private readonly SlotCardElements[] _slots = new SlotCardElements[4];
+
         private VisualElement _readyCard;
         private VisualElement _titleWaitingRoom;
         private Label _roomCodeLabel;
@@ -122,6 +138,28 @@ namespace ScaryParty.UI.Piaria.Presenters
             _btnLeaveRoom = RootElement.Q<Button>("BtnLeaveRoom");
             _btnEditProfile = RootElement.Q<Button>("BtnEditProfile");
 
+            // 4 Cartões persistentes
+            for (int i = 0; i < 4; i++)
+            {
+                var slotRoot = RootElement.Q<VisualElement>($"SlotCard{i}");
+                if (slotRoot != null)
+                {
+                    _slots[i] = new SlotCardElements
+                    {
+                        SlotRoot = slotRoot,
+                        Occupied = slotRoot.Q<VisualElement>($"CardOccupied{i}"),
+                        Empty = slotRoot.Q<VisualElement>($"CardEmpty{i}"),
+                        NameBar = slotRoot.Q<VisualElement>($"PlayerNameBar{i}"),
+                        NameLabel = slotRoot.Q<Label>($"PlayerNameLabel{i}"),
+                        ColorBox = slotRoot.Q<VisualElement>($"PlayerColor{i}"),
+                        RoleLabel = slotRoot.Q<Label>($"PlayerRoleLabel{i}"),
+                        ReadyBadge = slotRoot.Q<Label>($"PlayerReadyBadge{i}"),
+                        LastKnownReady = false,
+                        Initialized = true
+                    };
+                }
+            }
+
             ApplyCatalogAssets();
             BindEvents();
             UpdateRoomCodeDisplay();
@@ -137,6 +175,16 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_readyCard != null && catalog.waitingPaperPanel != null)
                 _readyCard.style.backgroundImage = new StyleBackground(catalog.waitingPaperPanel);
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (!_slots[i].Initialized) continue;
+                var barSprite = catalog.GetPlayerNameBar(i);
+                if (_slots[i].NameBar != null && barSprite != null)
+                {
+                    _slots[i].NameBar.style.backgroundImage = new StyleBackground(barSprite);
+                }
+            }
         }
 
         private void BindEvents()
@@ -212,75 +260,115 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void RefreshPlayers()
         {
-            if (_playersContainer == null) return;
-
             var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-            bool allReady = true;
-            int playerCount = 0;
-
-            _playersContainer.Clear();
-            var catalog = PiariaUIAssetCatalog.Instance;
-
-            for (int i = 0; i < allPlayers.Length; i++)
+            Array.Sort(allPlayers, (a, b) =>
             {
-                var ps = allPlayers[i];
-                if (ps == null) continue;
-                playerCount++;
+                if (a == null && b == null) return 0;
+                if (a == null) return 1;
+                if (b == null) return -1;
+                if (a.OwnerClientId == 0) return -1;
+                if (b.OwnerClientId == 0) return 1;
+                return a.OwnerClientId.CompareTo(b.OwnerClientId);
+            });
 
-                var row = new VisualElement();
-                row.AddToClassList("player-slot-row");
+            bool allReady = true;
+            int playerCount = allPlayers.Length;
 
-                var bgSprite = catalog != null ? catalog.GetPlayerNameBar(i) : null;
-                if (bgSprite != null)
+            for (int i = 0; i < 4; i++)
+            {
+                if (!_slots[i].Initialized) continue;
+
+                if (i < playerCount && allPlayers[i] != null)
                 {
-                    row.style.backgroundImage = new StyleBackground(bgSprite);
+                    var ps = allPlayers[i];
+                    bool isHost = ps.OwnerClientId == 0;
+                    bool isReady = ps.IsReady.Value;
+
+                    if (_slots[i].Occupied != null) _slots[i].Occupied.style.display = DisplayStyle.Flex;
+                    if (_slots[i].Empty != null) _slots[i].Empty.style.display = DisplayStyle.None;
+
+                    string pName = ps.PlayerName.Value.ToString();
+                    if (string.IsNullOrWhiteSpace(pName)) pName = $"Jogador #{ps.OwnerClientId}";
+                    if (_slots[i].NameLabel != null)
+                    {
+                        _slots[i].NameLabel.text = isHost ? $"👑 {pName}" : pName;
+                    }
+
+                    if (_slots[i].ColorBox != null)
+                    {
+                        _slots[i].ColorBox.style.backgroundColor = ps.PlayerColor.Value;
+                    }
+
+                    if (_slots[i].RoleLabel != null)
+                    {
+                        _slots[i].RoleLabel.text = isHost ? "👑 Líder da Sala" : (i == 1 ? "🍕 Pizzaiolo" : (i == 2 ? "🛵 Entregador" : "🧑‍🍳 Ajudante"));
+                    }
+
+                    if (_slots[i].ReadyBadge != null)
+                    {
+                        if (isReady)
+                        {
+                            _slots[i].ReadyBadge.text = "PRONTO!";
+                            _slots[i].ReadyBadge.RemoveFromClassList("status-waiting");
+                            _slots[i].ReadyBadge.AddToClassList("status-ready");
+                            if (!_slots[i].LastKnownReady)
+                            {
+                                UIFeedbackService.Instance?.PlayReady();
+                            }
+                        }
+                        else
+                        {
+                            _slots[i].ReadyBadge.text = "PREPARANDO...";
+                            _slots[i].ReadyBadge.RemoveFromClassList("status-ready");
+                            _slots[i].ReadyBadge.AddToClassList("status-waiting");
+                            allReady = false;
+                        }
+                    }
+
+                    _slots[i].LastKnownReady = isReady;
                 }
-
-                // Lado Esquerdo: Cor e Nome
-                var leftGroup = new VisualElement();
-                leftGroup.style.flexDirection = FlexDirection.Row;
-                leftGroup.style.alignItems = Align.Center;
-
-                var colorDot = new VisualElement();
-                colorDot.AddToClassList("player-color-indicator");
-                colorDot.style.backgroundColor = ps.PlayerColor.Value;
-
-                string pName = ps.PlayerName.Value.ToString();
-                if (string.IsNullOrWhiteSpace(pName)) pName = $"Jogador #{ps.OwnerClientId}";
-                if (ps.OwnerClientId == 0) pName = $"👑 {pName} (Host)";
-
-                var nameLbl = new Label(pName);
-                nameLbl.AddToClassList("player-name-text");
-
-                leftGroup.Add(colorDot);
-                leftGroup.Add(nameLbl);
-
-                // Lado Direito: Status Pronto
-                bool isReady = ps.IsReady.Value;
-                var statusLbl = new Label(isReady ? "✅ PRONTO" : "⏳ AGUARDANDO...");
-                statusLbl.AddToClassList("player-status-tag");
-                statusLbl.AddToClassList(isReady ? "status-ready" : "status-waiting");
-
-                row.Add(leftGroup);
-                row.Add(statusLbl);
-                _playersContainer.Add(row);
-
-                if (!isReady) allReady = false;
+                else
+                {
+                    if (_slots[i].Occupied != null) _slots[i].Occupied.style.display = DisplayStyle.None;
+                    if (_slots[i].Empty != null) _slots[i].Empty.style.display = DisplayStyle.Flex;
+                    _slots[i].LastKnownReady = false;
+                }
             }
 
-            // Exibir vagas livres se houver menos de 4
-            int maxSlots = 4;
-            for (int j = playerCount; j < maxSlots; j++)
+            // Fallback legado se a tela usar PlayersContainer
+            if (_playersContainer != null && !_slots[0].Initialized)
             {
-                var emptyRow = new VisualElement();
-                emptyRow.AddToClassList("player-slot-row");
-                emptyRow.AddToClassList("slot-empty");
+                _playersContainer.Clear();
+                var catalog = PiariaUIAssetCatalog.Instance;
+                for (int i = 0; i < allPlayers.Length; i++)
+                {
+                    var ps = allPlayers[i];
+                    if (ps == null) continue;
+                    var row = new VisualElement();
+                    row.AddToClassList("player-slot-row");
+                    var bgSprite = catalog != null ? catalog.GetPlayerNameBar(i) : null;
+                    if (bgSprite != null) row.style.backgroundImage = new StyleBackground(bgSprite);
 
-                var emptyLbl = new Label($"— Vaga Disponível ({j + 1}/{maxSlots}) —");
-                emptyLbl.AddToClassList("player-name-text");
-                emptyRow.Add(emptyLbl);
+                    var colorDot = new VisualElement();
+                    colorDot.AddToClassList("player-color-indicator");
+                    colorDot.style.backgroundColor = ps.PlayerColor.Value;
 
-                _playersContainer.Add(emptyRow);
+                    string pName = ps.PlayerName.Value.ToString();
+                    if (string.IsNullOrWhiteSpace(pName)) pName = $"Jogador #{ps.OwnerClientId}";
+                    var nameLbl = new Label(ps.OwnerClientId == 0 ? $"👑 {pName} (Host)" : pName);
+                    nameLbl.AddToClassList("player-name-text");
+
+                    bool isReady = ps.IsReady.Value;
+                    var statusLbl = new Label(isReady ? "✅ PRONTO" : "⏳ AGUARDANDO...");
+                    statusLbl.AddToClassList("player-status-tag");
+                    statusLbl.AddToClassList(isReady ? "status-ready" : "status-waiting");
+
+                    row.Add(colorDot);
+                    row.Add(nameLbl);
+                    row.Add(statusLbl);
+                    _playersContainer.Add(row);
+                    if (!isReady) allReady = false;
+                }
             }
 
             // Botão Iniciar Jogo (somente Host)
@@ -298,7 +386,18 @@ namespace ScaryParty.UI.Piaria.Presenters
             var localPs = GetLocalPlayerState();
             if (localPs != null && _btnReady != null)
             {
-                _btnReady.text = localPs.IsReady.Value ? "❌ NÃO ESTOU PRONTO" : "✅ ESTOU PRONTO";
+                bool myReady = localPs.IsReady.Value;
+                _btnReady.text = myReady ? "CANCELAR PRONTO" : "ESTOU PRONTO";
+                if (myReady)
+                {
+                    _btnReady.RemoveFromClassList("piaria-button-success");
+                    _btnReady.AddToClassList("piaria-button-secondary");
+                }
+                else
+                {
+                    _btnReady.RemoveFromClassList("piaria-button-secondary");
+                    _btnReady.AddToClassList("piaria-button-success");
+                }
             }
         }
 

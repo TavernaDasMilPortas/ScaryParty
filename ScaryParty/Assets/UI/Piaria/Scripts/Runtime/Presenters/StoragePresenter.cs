@@ -31,6 +31,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private HandSlotIndex _selectedHand = HandSlotIndex.Left;
         private bool _isPending = false;
         private bool _isOpen = false;
+        private Coroutine _timeoutCoroutine;
 
         public bool IsOpen => _isOpen;
 
@@ -47,6 +48,80 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             ResolveUIDocument();
+            SubscribeNetworkEvents();
+        }
+
+        private void OnDestroy()
+        {
+            UnsubscribeNetworkEvents();
+            if (Instance == this) Instance = null;
+        }
+
+        private void SubscribeNetworkEvents()
+        {
+            if (PizzeriaNetworkState.Instance != null)
+            {
+                PizzeriaNetworkState.Instance.StorageSlots.OnListChanged += OnStorageListChanged;
+                PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsListChanged;
+            }
+        }
+
+        private void UnsubscribeNetworkEvents()
+        {
+            if (PizzeriaNetworkState.Instance != null)
+            {
+                PizzeriaNetworkState.Instance.StorageSlots.OnListChanged -= OnStorageListChanged;
+                PizzeriaNetworkState.Instance.Tools.OnListChanged -= OnToolsListChanged;
+            }
+        }
+
+        private void OnStorageListChanged(Unity.Netcode.NetworkListEvent<NetStorageDto> changeEvent)
+        {
+            if (_isPending && _isOpen)
+            {
+                OnAuthoritativeSuccess();
+            }
+            else if (_isOpen)
+            {
+                RefreshItems();
+            }
+        }
+
+        private void OnToolsListChanged(Unity.Netcode.NetworkListEvent<NetToolDto> changeEvent)
+        {
+            if (_isPending && _isOpen)
+            {
+                OnAuthoritativeSuccess();
+            }
+            else if (_isOpen)
+            {
+                RefreshItems();
+            }
+        }
+
+        private void OnAuthoritativeSuccess()
+        {
+            _isPending = false;
+            if (_timeoutCoroutine != null)
+            {
+                StopCoroutine(_timeoutCoroutine);
+                _timeoutCoroutine = null;
+            }
+            UIFeedbackService.Instance?.PlaySuccess();
+            Close();
+        }
+
+        private System.Collections.IEnumerator PendingTimeoutCoroutine()
+        {
+            yield return new WaitForSeconds(3.0f);
+            if (_isPending && _isOpen)
+            {
+                _isPending = false;
+                if (_statusLabel != null) _statusLabel.text = "Tempo esgotado. Tente novamente.";
+                _storageList?.SetEnabled(true);
+                UIFeedbackService.Instance?.PlayError();
+            }
+            _timeoutCoroutine = null;
         }
 
         private void ResolveUIDocument()
@@ -172,10 +247,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             EnsureInitialized();
             if (RootElement == null) return;
 
+            SubscribeNetworkEvents();
             _currentStationId = stationId;
             _isOpen = true;
             _isPending = false;
             if (_statusLabel != null) _statusLabel.text = "";
+            _storageList?.SetEnabled(true);
 
             if (_storageTitle != null)
                 _storageTitle.text = $"ESTOQUE — ARMAZÉM #{stationId}";
@@ -191,7 +268,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             RefreshItems();
 
             UIModalStack.Instance?.PushModal(this);
-            RootElement.style.display = DisplayStyle.Flex;
+            var curr = RootElement;
+            while (curr != null && curr != uiDocument?.rootVisualElement)
+            {
+                curr.style.display = DisplayStyle.Flex;
+                curr = curr.parent;
+            }
             UIToolkitTweenService.PopIn(_storageCard != null ? _storageCard : RootElement, 0.2f);
         }
 
@@ -199,6 +281,13 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (!_isOpen || RootElement == null) return;
             _isOpen = false;
+
+            if (_timeoutCoroutine != null)
+            {
+                StopCoroutine(_timeoutCoroutine);
+                _timeoutCoroutine = null;
+            }
+            _isPending = false;
 
             if (_currentStationId >= 0 && NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient)
             {
@@ -209,6 +298,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIToolkitTweenService.PopOut(_storageCard != null ? _storageCard : RootElement, 0.15f, 0.95f, () =>
             {
                 RootElement.style.display = DisplayStyle.None;
+                if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
+                {
+                    RootElement.parent.style.display = DisplayStyle.None;
+                }
                 UIModalStack.Instance?.PopModal(this);
             });
         }
@@ -258,16 +351,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         if (_isPending) return;
                         _isPending = true;
+                        _storageList?.SetEnabled(false);
                         if (_statusLabel != null) _statusLabel.text = "Retirando ingrediente...";
 
                         PizzeriaCommandHandler.Instance?.DispenseIngredientServerRpc(_currentStationId, ingId, (byte)_selectedHand);
-                        UIFeedbackService.Instance?.PlaySuccess();
-
-                        // Fecha o painel após retirada confirmada com pequeno delay
-                        UIToolkitTweenService.FadeOut(row, 0.15f, () =>
-                        {
-                            Close();
-                        });
+                        _timeoutCoroutine = StartCoroutine(PendingTimeoutCoroutine());
                     });
 
                     _storageList.Add(row);
@@ -288,13 +376,13 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         if (_isPending) return;
                         _isPending = true;
+                        _storageList?.SetEnabled(false);
                         if (_statusLabel != null) _statusLabel.text = "Pegando ferramenta...";
 
                         if (NetworkManager.Singleton != null)
                         {
                             PizzeriaCommandHandler.Instance?.TransferToolServerRpc(tId, (byte)LocationType.Hand, NetworkManager.Singleton.LocalClientId, (int)_selectedHand);
-                            UIFeedbackService.Instance?.PlaySuccess();
-                            Close();
+                            _timeoutCoroutine = StartCoroutine(PendingTimeoutCoroutine());
                         }
                     });
 
