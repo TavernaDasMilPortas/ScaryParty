@@ -51,6 +51,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private float _lastUpdate = -999f;
         private string _currentRoomCode = "";
         private bool _offlineReady = false;
+        private readonly HashSet<PlayerState> _observedPlayers = new HashSet<PlayerState>();
 
         private void Awake()
         {
@@ -102,8 +103,22 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void OnDestroy()
         {
+            foreach (var ps in _observedPlayers)
+            {
+                if (ps != null)
+                {
+                    ps.IsReady.OnValueChanged -= OnPlayerReadyChanged;
+                }
+            }
+            _observedPlayers.Clear();
+
             UIScreenRouter.Instance?.UnregisterScreen(this);
             if (Instance == this) Instance = null;
+        }
+
+        private void OnPlayerReadyChanged(bool previous, bool current)
+        {
+            RefreshPlayers();
         }
 
         public void EnsureInitialized()
@@ -255,7 +270,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
-            if (RootElement == null || State != ScreenState.Active) return;
+            if (RootElement == null || RootElement.style.display == DisplayStyle.None) return;
             if (Time.time - _lastUpdate < 0.25f) return;
             _lastUpdate = Time.time;
 
@@ -274,6 +289,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (b.OwnerClientId == 0) return 1;
                 return a.OwnerClientId.CompareTo(b.OwnerClientId);
             });
+
+            // Inscreve ouvintes de atualização imediata para cada jogador encontrado
+            foreach (var ps in allPlayers)
+            {
+                if (ps != null && _observedPlayers.Add(ps))
+                {
+                    ps.IsReady.OnValueChanged += OnPlayerReadyChanged;
+                }
+            }
 
             bool allReady = true;
             int playerCount = allPlayers.Length;
@@ -432,7 +456,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _btnStartGame.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
                 if (isHost)
                 {
-                    _btnStartGame.SetEnabled(playerCount <= 1 || allReady);
+                    _btnStartGame.SetEnabled(playerCount <= 1 || allReady || _offlineReady);
                 }
             }
 
@@ -455,25 +479,70 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
         }
 
+        private void ApplyLocalReadyUI(bool ready)
+        {
+            _offlineReady = ready;
+
+            if (_btnReady != null)
+            {
+                _btnReady.text = ready ? "CANCELAR PRONTO" : "ESTOU PRONTO";
+                if (ready)
+                {
+                    _btnReady.RemoveFromClassList("piaria-button-success");
+                    _btnReady.AddToClassList("piaria-button-secondary");
+                }
+                else
+                {
+                    _btnReady.RemoveFromClassList("piaria-button-secondary");
+                    _btnReady.AddToClassList("piaria-button-success");
+                }
+            }
+
+            if (_slots[0].Initialized && _slots[0].ReadyBadge != null)
+            {
+                _slots[0].ReadyBadge.text = ready ? "PRONTO!" : "PREPARANDO...";
+                if (ready)
+                {
+                    _slots[0].ReadyBadge.RemoveFromClassList("status-waiting");
+                    _slots[0].ReadyBadge.AddToClassList("status-ready");
+                }
+                else
+                {
+                    _slots[0].ReadyBadge.RemoveFromClassList("status-ready");
+                    _slots[0].ReadyBadge.AddToClassList("status-waiting");
+                }
+            }
+
+            bool isHost = NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer;
+            if (_btnStartGame != null && isHost)
+            {
+                _btnStartGame.SetEnabled(true);
+            }
+        }
+
         private void OnReadyClicked()
         {
             var myState = GetLocalPlayerState();
+            bool newReady;
+
             if (myState != null)
             {
-                bool newState = !myState.IsReady.Value;
-                myState.SetReadyServerRpc(newState);
-                UIFeedbackService.Instance?.PlayReady();
+                newReady = !myState.IsReady.Value;
+                myState.SetReady(newReady);
             }
             else
             {
-                _offlineReady = !_offlineReady;
-                UIFeedbackService.Instance?.PlayReady();
-                RefreshPlayers();
+                newReady = !_offlineReady;
             }
+
+            ApplyLocalReadyUI(newReady);
+            UIFeedbackService.Instance?.PlayReady();
+            RefreshPlayers();
         }
 
         private void OnStartGameClicked()
         {
+            CharacterPreviewRig.Instance?.SetActive(false);
             if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
 
@@ -482,7 +551,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             var myState = GetLocalPlayerState();
             if (myState != null && !myState.IsReady.Value)
             {
-                myState.SetReadyServerRpc(true);
+                myState.SetReady(true);
             }
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
@@ -512,6 +581,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             Action doLeave = () =>
             {
+                CharacterPreviewRig.Instance?.SetActive(false);
                 if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
                 if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 {
@@ -547,6 +617,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 if (ps != null && ps.IsOwner) return ps;
             }
+
+            // Fallback: se houver exatamente 1 jogador e formos o Host/Server, é o jogador local
+            if (all.Length == 1 && (NetworkManager.Singleton == null || NetworkManager.Singleton.IsServer))
+            {
+                return all[0];
+            }
+
             return null;
         }
 

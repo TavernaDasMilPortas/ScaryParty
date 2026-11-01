@@ -19,6 +19,16 @@ public class ReadySceneController : MonoBehaviour
 
     private float _lastUpdate = -999f;
 
+    private void Awake()
+    {
+        if (FindFirstObjectByType<ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter>() != null)
+        {
+            enabled = false;
+            Destroy(this);
+            return;
+        }
+    }
+
     private void OnEnable()
     {
         if (NetworkManager.Singleton != null)

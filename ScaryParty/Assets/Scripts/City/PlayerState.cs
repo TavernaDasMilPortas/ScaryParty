@@ -197,10 +197,25 @@ public class PlayerState : NetworkBehaviour
         PlayerColor.Value = finalColor;
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     public void SetReadyServerRpc(bool ready)
     {
         IsReady.Value = ready;
+    }
+
+    /// <summary>
+    /// Define o estado de pronto do jogador com suporte a execução direta pelo servidor ou via ServerRpc por clientes.
+    /// </summary>
+    public void SetReady(bool ready)
+    {
+        if (IsServer)
+        {
+            IsReady.Value = ready;
+        }
+        else
+        {
+            SetReadyServerRpc(ready);
+        }
     }
 
     private Color EnsureUniqueColor(Color desiredColor)
