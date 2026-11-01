@@ -64,10 +64,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             ResolveUIDocument();
         }
 
-        private void ResolveUIDocument()
+        public void ResolveUIDocument()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            PiariaPresenterUtils.ResolveUIDocument(this, ref uiDocument, "Assets/UI/Piaria/UXML/ReadyRoomScreen.uxml");
         }
 
 #if UNITY_EDITOR

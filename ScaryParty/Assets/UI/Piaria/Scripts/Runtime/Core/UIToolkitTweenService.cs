@@ -56,6 +56,18 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        private static void EnsureDOTweenInitialized()
+        {
+            try
+            {
+                DOTween.Init(true, true, LogBehaviour.ErrorsOnly);
+            }
+            catch
+            {
+                // Ignora se já estiver inicializado
+            }
+        }
+
         public static void FadeIn(VisualElement target, float duration = 0.2f, Action onComplete = null)
         {
             if (target == null) return;
@@ -64,18 +76,24 @@ namespace ScaryParty.UI.Piaria.Core
             target.style.display = DisplayStyle.Flex;
             target.style.visibility = Visibility.Visible;
 
-            if (ReduceMotion)
+            if (ReduceMotion || duration <= 0.001f)
             {
                 target.style.opacity = 1f;
                 onComplete?.Invoke();
                 return;
             }
 
-            target.style.opacity = 0f;
-            var tw = DOTween.To(() => 0f, alpha => target.style.opacity = alpha, 1f, duration)
+            EnsureDOTweenInitialized();
+            target.style.opacity = 0.01f;
+            var tw = DOTween.To(() => 0.01f, alpha => {
+                if (target != null) target.style.opacity = alpha;
+            }, 1f, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true)
-                .OnComplete(() => onComplete?.Invoke());
+                .OnComplete(() => {
+                    if (target != null) target.style.opacity = 1f;
+                    onComplete?.Invoke();
+                });
 
             RegisterTween(target, tw);
         }
@@ -114,7 +132,7 @@ namespace ScaryParty.UI.Piaria.Core
             target.style.display = DisplayStyle.Flex;
             target.style.visibility = Visibility.Visible;
 
-            if (ReduceMotion)
+            if (ReduceMotion || duration <= 0.001f)
             {
                 target.style.opacity = 1f;
                 target.style.scale = new StyleScale(new Scale(Vector2.one));
@@ -122,13 +140,25 @@ namespace ScaryParty.UI.Piaria.Core
                 return;
             }
 
-            target.style.opacity = 0f;
+            EnsureDOTweenInitialized();
+            target.style.opacity = 0.01f;
             target.style.scale = new StyleScale(new Scale(new Vector2(fromScale, fromScale)));
 
             var seq = DOTween.Sequence().SetUpdate(true);
-            seq.Join(DOTween.To(() => 0f, a => target.style.opacity = a, 1f, duration * 0.7f));
-            seq.Join(DOTween.To(() => fromScale, s => target.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, duration).SetEase(Ease.OutBack));
-            seq.OnComplete(() => onComplete?.Invoke());
+            seq.Join(DOTween.To(() => 0.01f, a => {
+                if (target != null) target.style.opacity = a;
+            }, 1f, duration * 0.7f));
+            seq.Join(DOTween.To(() => fromScale, s => {
+                if (target != null) target.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
+            }, 1f, duration).SetEase(Ease.OutBack));
+            seq.OnComplete(() => {
+                if (target != null)
+                {
+                    target.style.opacity = 1f;
+                    target.style.scale = new StyleScale(new Scale(Vector2.one));
+                }
+                onComplete?.Invoke();
+            });
 
             RegisterTween(target, seq);
         }

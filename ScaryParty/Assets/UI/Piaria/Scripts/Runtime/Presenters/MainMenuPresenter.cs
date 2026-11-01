@@ -42,20 +42,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             ResolveUIDocument();
         }
 
-        private void ResolveUIDocument()
+        public void ResolveUIDocument()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
-
-            if (uiDocument == null)
-            {
-                uiDocument = gameObject.AddComponent<UIDocument>();
-                var catalog = PiariaUIAssetCatalog.Instance;
-                if (catalog != null && catalog.panelSettings != null)
-                {
-                    uiDocument.panelSettings = catalog.panelSettings;
-                }
-            }
+            PiariaPresenterUtils.ResolveUIDocument(this, ref uiDocument, "Assets/UI/Piaria/UXML/LobbySceneContainer.uxml");
         }
 
 #if UNITY_EDITOR
@@ -228,6 +217,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 curr = curr.parent;
             }
 
+            RootElement.style.opacity = 1f;
             State = ScreenState.Opening;
             UIToolkitTweenService.FadeIn(RootElement, 0.22f, () =>
             {

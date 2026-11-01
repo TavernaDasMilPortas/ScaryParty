@@ -124,10 +124,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             _timeoutCoroutine = null;
         }
 
-        private void ResolveUIDocument()
+        public void ResolveUIDocument()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
+            PiariaPresenterUtils.ResolveUIDocument(this, ref uiDocument, "Assets/UI/Piaria/UXML/MainGameHUD.uxml");
         }
 
 #if UNITY_EDITOR

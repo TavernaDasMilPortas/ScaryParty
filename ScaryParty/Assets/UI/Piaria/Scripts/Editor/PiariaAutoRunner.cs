@@ -121,6 +121,7 @@ namespace ScaryParty.UI.Piaria.Editor
             doc.panelSettings = panelSettings;
             var containerUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/LobbySceneContainer.uxml");
             if (containerUxml != null) doc.visualTreeAsset = containerUxml;
+            EditorUtility.SetDirty(doc);
 
             EnsureComp<UIScreenRouter>(uiGo);
             EnsureComp<UIFeedbackService>(uiGo);
@@ -128,30 +129,36 @@ namespace ScaryParty.UI.Piaria.Editor
 
             var modal = EnsureComp<ModalPresenter>(uiGo);
             modal.uiDocument = doc;
+            EditorUtility.SetDirty(modal);
 
             var settings = EnsureComp<SettingsPresenter>(uiGo);
             settings.uiDocument = doc;
+            EditorUtility.SetDirty(settings);
 
             var menu = EnsureComp<MainMenuPresenter>(uiGo);
             menu.uiDocument = doc;
+            EditorUtility.SetDirty(menu);
 
             var lobby = EnsureComp<LobbyPresenter>(uiGo);
             lobby.uiDocument = doc;
             lobby.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+            EditorUtility.SetDirty(lobby);
 
             var toast = EnsureComp<ToastPresenter>(uiGo);
             toast.uiDocument = doc;
+            EditorUtility.SetDirty(toast);
 
             EnsureComp<CharacterPreviewRig>(uiGo);
+            EditorUtility.SetDirty(uiGo);
 
-            // Remove presenters de outras cenas que possam ter sido arrastados por engano
+            // Remove presenters de outras cenas que possam ter sido arrastados por engano para o objeto raiz do Lobby
             RemoveComp<ReadyRoomPresenter>(uiGo);
             RemoveComp<HudPresenter>(uiGo);
             RemoveComp<ScoreboardPresenter>(uiGo);
             RemoveComp<StoragePresenter>(uiGo);
             RemoveComp<StagingPresenter>(uiGo);
 
-            // Limpa GameObjects órfãos criados manualmente sem UIDocument
+            // Auto-conecta presenters em quaisquer outros GameObjects da cena para evitar campos None
             var strayPresenters = UnityEngine.Object.FindObjectsOfType<MonoBehaviour>();
             foreach (var mb in strayPresenters)
             {
@@ -159,11 +166,24 @@ namespace ScaryParty.UI.Piaria.Editor
                 var type = mb.GetType();
                 if (type.Namespace != null && type.Namespace.StartsWith("ScaryParty.UI.Piaria.Presenters"))
                 {
-                    if (mb.gameObject != uiGo && mb.GetComponent<UIDocument>() == null)
+                    var docProp = type.GetField("uiDocument");
+                    if (docProp != null && docProp.GetValue(mb) == null)
                     {
-                        UnityEngine.Object.DestroyImmediate(mb.gameObject);
+                        docProp.SetValue(mb, doc);
+                        EditorUtility.SetDirty(mb);
+                    }
+                    if (mb is LobbyPresenter lp && lp.lobbyManager == null)
+                    {
+                        lp.lobbyManager = UnityEngine.Object.FindFirstObjectByType<LobbyManager>();
+                        EditorUtility.SetDirty(lp);
                     }
                 }
+            }
+
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (activeScene.isLoaded)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
             }
         }
 
@@ -176,16 +196,31 @@ namespace ScaryParty.UI.Piaria.Editor
             doc.panelSettings = panelSettings;
             var readyUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/ReadyRoomScreen.uxml");
             if (readyUxml != null) doc.visualTreeAsset = readyUxml;
+            EditorUtility.SetDirty(doc);
 
             EnsureComp<UIModalStack>(uiGo);
             var modal = EnsureComp<ModalPresenter>(uiGo);
             modal.uiDocument = doc;
+            EditorUtility.SetDirty(modal);
+
             var settings = EnsureComp<SettingsPresenter>(uiGo);
             settings.uiDocument = doc;
+            EditorUtility.SetDirty(settings);
+
             var ready = EnsureComp<ReadyRoomPresenter>(uiGo);
             ready.uiDocument = doc;
+            EditorUtility.SetDirty(ready);
+
             var toast = EnsureComp<ToastPresenter>(uiGo);
             toast.uiDocument = doc;
+            EditorUtility.SetDirty(toast);
+
+            EditorUtility.SetDirty(uiGo);
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (activeScene.isLoaded)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
+            }
         }
 
         private static void ConfigureGameScene(PanelSettings panelSettings)
@@ -197,24 +232,46 @@ namespace ScaryParty.UI.Piaria.Editor
             doc.panelSettings = panelSettings;
             var hudUxml = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Piaria/UXML/MainGameHUD.uxml");
             if (hudUxml != null) doc.visualTreeAsset = hudUxml;
+            EditorUtility.SetDirty(doc);
 
             EnsureComp<UIModalStack>(mainUIGo);
             var modal = EnsureComp<ModalPresenter>(mainUIGo);
             modal.uiDocument = doc;
+            EditorUtility.SetDirty(modal);
+
             var settings = EnsureComp<SettingsPresenter>(mainUIGo);
             settings.uiDocument = doc;
+            EditorUtility.SetDirty(settings);
+
             var hud = EnsureComp<HudPresenter>(mainUIGo);
             hud.uiDocument = doc;
+            EditorUtility.SetDirty(hud);
+
             var score = EnsureComp<ScoreboardPresenter>(mainUIGo);
             score.uiDocument = doc;
+            EditorUtility.SetDirty(score);
+
             var storage = EnsureComp<StoragePresenter>(mainUIGo);
             storage.uiDocument = doc;
+            EditorUtility.SetDirty(storage);
+
             var staging = EnsureComp<StagingPresenter>(mainUIGo);
             staging.uiDocument = doc;
+            EditorUtility.SetDirty(staging);
+
             var toast = EnsureComp<ToastPresenter>(mainUIGo);
             toast.uiDocument = doc;
+            EditorUtility.SetDirty(toast);
+
             EnsureComp<MinimapPresenter>(mainUIGo);
             EnsureComp<OrderBoardPresenter>(mainUIGo);
+
+            EditorUtility.SetDirty(mainUIGo);
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (activeScene.isLoaded)
+            {
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(activeScene);
+            }
         }
 
         private static T EnsureComp<T>(GameObject go) where T : Component

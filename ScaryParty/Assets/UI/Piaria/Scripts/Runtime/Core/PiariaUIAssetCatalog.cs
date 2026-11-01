@@ -170,6 +170,7 @@ namespace ScaryParty.UI.Piaria.Core
         public Font fontDeanna;
 
         [Header("Templates UXML (Disponíveis em Standalone Build)")]
+        public UnityEngine.UIElements.VisualTreeAsset templateLobbySceneContainer;
         public UnityEngine.UIElements.VisualTreeAsset templateMainMenu;
         public UnityEngine.UIElements.VisualTreeAsset templateLobby;
         public UnityEngine.UIElements.VisualTreeAsset templateReadyRoom;
