@@ -8,90 +8,90 @@
     <ui:Template name="StagingModalTemplate" src="project://database/Assets/UI/Piaria/UXML/StagingModal.uxml" />
     <ui:Template name="ScoreboardTemplate" src="project://database/Assets/UI/Piaria/UXML/ScoreboardOverlay.uxml" />
 
-    <ui:VisualElement name="MainGameHUDRoot" class="fullscreen-root hud-pass-through">
+    <ui:VisualElement name="MainGameHUDRoot" class="fullscreen-root hud-pass-through" picking-mode="Ignore">
         <!-- Topo Esquerdo: Estatísticas (Dinheiro e Entregas) -->
-        <ui:VisualElement class="hud-top-left">
-            <ui:VisualElement class="stat-badge money-badge">
-                <ui:VisualElement name="IconMoney" class="badge-icon icon-money" />
-                <ui:Label name="MoneyLabel" text="R$0" class="badge-text" />
+        <ui:VisualElement class="hud-top-left" picking-mode="Ignore">
+            <ui:VisualElement class="stat-badge money-badge" picking-mode="Ignore">
+                <ui:VisualElement name="IconMoney" class="badge-icon icon-money" picking-mode="Ignore" />
+                <ui:Label name="MoneyLabel" text="R$0" class="badge-text" picking-mode="Ignore" />
             </ui:VisualElement>
 
-            <ui:VisualElement class="stat-badge deliveries-badge">
-                <ui:VisualElement name="IconDeliveries" class="badge-icon icon-deliveries" />
-                <ui:Label name="ScoreLabel" text="Entregas: 0" class="badge-text" />
+            <ui:VisualElement class="stat-badge deliveries-badge" picking-mode="Ignore">
+                <ui:VisualElement name="IconDeliveries" class="badge-icon icon-deliveries" picking-mode="Ignore" />
+                <ui:Label name="ScoreLabel" text="Entregas: 0" class="badge-text" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Topo Direito: Mochila de Pizzas (Stack) -->
-        <ui:VisualElement class="hud-top-right">
-            <ui:VisualElement name="BackpackContainer" class="backpack-stack-box">
-                <ui:VisualElement name="BackpackGradientLayer" class="backpack-art-layer gradient-layer" />
-                <ui:VisualElement name="BackpackPizzaLayer" class="backpack-art-layer pizza-layer" />
-                <ui:Label name="BackpackCountLabel" text="0" class="backpack-badge-text" />
+        <ui:VisualElement class="hud-top-right" picking-mode="Ignore">
+            <ui:VisualElement name="BackpackContainer" class="backpack-stack-box" picking-mode="Ignore">
+                <ui:VisualElement name="BackpackGradientLayer" class="backpack-art-layer gradient-layer" picking-mode="Ignore" />
+                <ui:VisualElement name="BackpackPizzaLayer" class="backpack-art-layer pizza-layer" picking-mode="Ignore" />
+                <ui:Label name="BackpackCountLabel" text="0" class="backpack-badge-text" picking-mode="Ignore" />
             </ui:VisualElement>
-            <ui:Label text="[B] Mochila" class="backpack-sub-label" />
+            <ui:Label text="[B] Mochila" class="backpack-sub-label" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <!-- Topo Centro: Contextual (oculto por padrão, pois comanda é física) -->
-        <ui:VisualElement class="hud-top-center" style="display: none;">
-            <ui:VisualElement name="ActiveOrdersWidget" class="orders-hint-card">
-                <ui:Label name="ActiveOrdersLabel" text="📋 COMANDAS" class="orders-hint-text" />
+        <ui:VisualElement class="hud-top-center" style="display: none;" picking-mode="Ignore">
+            <ui:VisualElement name="ActiveOrdersWidget" class="orders-hint-card" picking-mode="Ignore">
+                <ui:Label name="ActiveOrdersLabel" text="📋 COMANDAS" class="orders-hint-text" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Centro: Prompt Contextual e Barra de Progresso (linha 52%) -->
-        <ui:VisualElement class="hud-center-anchor">
-            <ui:Label name="InteractionPrompt" text="[E] Interagir" class="interaction-prompt-box" />
+        <ui:VisualElement class="hud-center-anchor" picking-mode="Ignore">
+            <ui:Label name="InteractionPrompt" text="[E] Interagir" class="interaction-prompt-box" picking-mode="Ignore" />
             
-            <ui:VisualElement name="ProgressBarContainer" class="progress-bar-box">
-                <ui:VisualElement name="ProgressBarFrame" class="progress-frame">
-                    <ui:VisualElement name="ProgressBarFill" class="progress-fill" />
+            <ui:VisualElement name="ProgressBarContainer" class="progress-bar-box" picking-mode="Ignore">
+                <ui:VisualElement name="ProgressBarFrame" class="progress-frame" picking-mode="Ignore">
+                    <ui:VisualElement name="ProgressBarFill" class="progress-fill" picking-mode="Ignore" />
                 </ui:VisualElement>
-                <ui:Label name="ProgressBarLabel" text="Preparando..." class="progress-text-label" />
+                <ui:Label name="ProgressBarLabel" text="Preparando..." class="progress-text-label" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Rodapé Esquerdo: Mãos (Slots 1 e 2) -->
-        <ui:VisualElement class="hud-bottom-left">
-            <ui:VisualElement class="hands-row">
+        <ui:VisualElement class="hud-bottom-left" picking-mode="Ignore">
+            <ui:VisualElement class="hands-row" picking-mode="Ignore">
                 <!-- Mão Esquerda (Slot 1) -->
-                <ui:VisualElement name="LeftHandSlot" class="hand-card hand-slot-left">
-                    <ui:VisualElement class="hand-card-header">
-                        <ui:VisualElement name="Digit1Icon" class="hand-digit-art digit-1" />
-                        <ui:Label text="Mão 1" class="hand-slot-title" />
+                <ui:VisualElement name="LeftHandSlot" class="hand-card hand-slot-left" picking-mode="Ignore">
+                    <ui:VisualElement class="hand-card-header" picking-mode="Ignore">
+                        <ui:VisualElement name="Digit1Icon" class="hand-digit-art digit-1" picking-mode="Ignore" />
+                        <ui:Label text="Mão 1" class="hand-slot-title" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:Label name="LeftHandContent" text="Vazio" class="hand-content-label" />
+                    <ui:Label name="LeftHandContent" text="Vazio" class="hand-content-label" picking-mode="Ignore" />
                 </ui:VisualElement>
 
                 <!-- Mão Direita (Slot 2) -->
-                <ui:VisualElement name="RightHandSlot" class="hand-card hand-slot-right">
-                    <ui:VisualElement class="hand-card-header">
-                        <ui:VisualElement name="Digit2Icon" class="hand-digit-art digit-2" />
-                        <ui:Label text="Mão 2" class="hand-slot-title" />
+                <ui:VisualElement name="RightHandSlot" class="hand-card hand-slot-right" picking-mode="Ignore">
+                    <ui:VisualElement class="hand-card-header" picking-mode="Ignore">
+                        <ui:VisualElement name="Digit2Icon" class="hand-digit-art digit-2" picking-mode="Ignore" />
+                        <ui:Label text="Mão 2" class="hand-slot-title" picking-mode="Ignore" />
                     </ui:VisualElement>
-                    <ui:Label name="RightHandContent" text="Vazio" class="hand-content-label" />
+                    <ui:Label name="RightHandContent" text="Vazio" class="hand-content-label" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Rodapé Centro: Atalhos Rápidos -->
-        <ui:VisualElement class="hud-bottom-center">
-            <ui:VisualElement class="hud-hints-bar">
-                <ui:Label text="📖 [H] Receitas  •  Tab [Placar]  •  [M] Mapa" class="hints-text" />
+        <ui:VisualElement class="hud-bottom-center" picking-mode="Ignore">
+            <ui:VisualElement class="hud-hints-bar" picking-mode="Ignore">
+                <ui:Label text="📖 [H] Receitas  •  Tab [Placar]  •  [M] Mapa" class="hints-text" picking-mode="Ignore" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Rodapé Direito: Minimapa com moldura de papel -->
-        <ui:VisualElement name="MinimapContainer" class="hud-bottom-right">
-            <ui:VisualElement name="MinimapPaperFrame" class="minimap-paper-wrapper">
-                <ui:VisualElement name="MinimapImage" class="minimap-render-surface" />
+        <ui:VisualElement name="MinimapContainer" class="hud-bottom-right" picking-mode="Ignore">
+            <ui:VisualElement name="MinimapPaperFrame" class="minimap-paper-wrapper" picking-mode="Ignore">
+                <ui:VisualElement name="MinimapImage" class="minimap-render-surface" picking-mode="Position" />
             </ui:VisualElement>
-            <ui:Label text="[M] Mapa da Cidade" class="minimap-hint-label" />
+            <ui:Label text="[M] Mapa da Cidade" class="minimap-hint-label" picking-mode="Ignore" />
         </ui:VisualElement>
 
         <!-- Modais Embutidos para Build Standalone -->
-        <ui:Instance name="Instance_StorageModal" template="StorageModalTemplate" style="display: none;" />
-        <ui:Instance name="Instance_StagingModal" template="StagingModalTemplate" style="display: none;" />
-        <ui:Instance name="Instance_Scoreboard" template="ScoreboardTemplate" style="display: none;" />
+        <ui:Instance name="Instance_StorageModal" template="StorageModalTemplate" style="display: none;" picking-mode="Ignore" />
+        <ui:Instance name="Instance_StagingModal" template="StagingModalTemplate" style="display: none;" picking-mode="Ignore" />
+        <ui:Instance name="Instance_Scoreboard" template="ScoreboardTemplate" style="display: none;" picking-mode="Ignore" />
     </ui:VisualElement>
 </ui:UXML>

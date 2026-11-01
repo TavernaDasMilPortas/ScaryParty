@@ -46,6 +46,14 @@ namespace ScaryParty.UI.Piaria.Core
             EnsureSetup();
         }
 
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
         private void EnsureSetup()
         {
             // Posiciona o rig longe do mundo jogável

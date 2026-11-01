@@ -127,6 +127,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             if (_root == null) return;
 
+            _root.pickingMode = PickingMode.Ignore;
+            PiariaPresenterUtils.ConfigureHierarchyPicking(_root);
+
             _moneyLabel = _root.Q<Label>("MoneyLabel");
             _scoreLabel = _root.Q<Label>("ScoreLabel");
             _activeOrdersLabel = _root.Q<Label>("ActiveOrdersLabel");

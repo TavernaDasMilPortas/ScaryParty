@@ -27,6 +27,12 @@ namespace ScaryParty.UI.Piaria.Core
                     fs.pickingMode = PickingMode.Ignore;
                 }
             }
+
+            var passthroughs = root.Query(className: "hud-pass-through").ToList();
+            foreach (var pt in passthroughs)
+            {
+                pt.pickingMode = PickingMode.Ignore;
+            }
         }
 
         public static void ResolveUIDocument(MonoBehaviour presenter, ref UIDocument uiDoc, string fallbackUxmlPath = null)

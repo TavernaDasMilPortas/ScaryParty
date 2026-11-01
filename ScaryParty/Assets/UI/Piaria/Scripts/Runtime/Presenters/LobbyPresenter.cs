@@ -29,8 +29,6 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Button _btnColorOrange, _btnColorGreen, _btnColorBlue, _btnColorPink, _btnColorRed;
         private VisualElement _previewContainer;
         private VisualElement _previewRenderTexture;
-        private VisualElement _previewPlaceholder;
-        private VisualElement _previewFrame;
         private Button _btnSaveProfile;
         private Color _selectedColor = new Color(1f, 0.45f, 0.1f);
 
@@ -198,8 +196,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             _btnColorRed = RootElement.Q<Button>("BtnColorRed");
             _previewContainer = RootElement.Q<VisualElement>("PreviewContainer");
             _previewRenderTexture = RootElement.Q<VisualElement>("PreviewRenderTexture");
-            _previewPlaceholder = RootElement.Q<VisualElement>("PreviewPlaceholder");
-            _previewFrame = RootElement.Q<VisualElement>("PreviewFrame");
             _btnSaveProfile = RootElement.Q<Button>("BtnSaveProfile");
 
             // Salas
@@ -227,6 +223,29 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
         }
 
+        private void ApplyHeader(VisualElement headerEl, Sprite sprite)
+        {
+            if (headerEl == null) return;
+            if (sprite != null)
+            {
+                headerEl.style.backgroundImage = new StyleBackground(sprite);
+                var lbl = headerEl.Q<Label>();
+                if (lbl != null)
+                {
+                    lbl.text = string.Empty;
+                    lbl.style.display = DisplayStyle.None;
+                }
+            }
+        }
+
+        private void ClearNativeButtonText(Button btn)
+        {
+            if (btn != null)
+            {
+                btn.text = string.Empty;
+            }
+        }
+
         private void ApplyCatalogAssets()
         {
             var catalog = PiariaUIAssetCatalog.Instance;
@@ -237,11 +256,19 @@ namespace ScaryParty.UI.Piaria.Presenters
                 RootElement.style.backgroundImage = new StyleBackground(catalog.backgroundLobby);
 
             // Botão Voltar Ilustrado
-            if (_btnBack != null && catalog.btnBack != null)
+            if (_btnBack != null)
             {
-                _btnBack.style.backgroundImage = new StyleBackground(catalog.btnBack);
-                var backLbl = _btnBack.Q<Label>();
-                if (backLbl != null) backLbl.style.display = DisplayStyle.None;
+                _btnBack.text = string.Empty;
+                if (catalog.btnBack != null)
+                {
+                    _btnBack.style.backgroundImage = new StyleBackground(catalog.btnBack);
+                    var backLbl = _btnBack.Q<Label>();
+                    if (backLbl != null)
+                    {
+                        backLbl.text = string.Empty;
+                        backLbl.style.display = DisplayStyle.None;
+                    }
+                }
             }
 
             if (_titleLobby != null && catalog.titleLobby != null)
@@ -268,34 +295,25 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnColorRed != null && catalog.colorRed != null)
                 _btnColorRed.style.backgroundImage = new StyleBackground(catalog.colorRed);
 
-            // Cabeçalhos
-            var headProf = RootElement.Q<VisualElement>("HeaderMyProfile");
-            if (headProf != null && catalog.headerMyProfile != null) headProf.style.backgroundImage = new StyleBackground(catalog.headerMyProfile);
-
-            var headRooms = RootElement.Q<VisualElement>("HeaderRooms");
-            if (headRooms != null && catalog.headerAvailableRooms != null) headRooms.style.backgroundImage = new StyleBackground(catalog.headerAvailableRooms);
-
-            var headCreate = RootElement.Q<VisualElement>("HeaderCreateRoom");
-            if (headCreate != null && catalog.headerCreateRoom != null) headCreate.style.backgroundImage = new StyleBackground(catalog.headerCreateRoom);
-
-            var headCode = RootElement.Q<VisualElement>("HeaderJoinCode");
-            if (headCode != null && catalog.headerJoinCode != null) headCode.style.backgroundImage = new StyleBackground(catalog.headerJoinCode);
-
-            var headLan = RootElement.Q<VisualElement>("HeaderLan");
-            if (headLan != null && catalog.headerLan != null) headLan.style.backgroundImage = new StyleBackground(catalog.headerLan);
-
-            // Moldura 3D Viewer
-            if (_previewFrame != null && catalog.frame3DPreview != null)
-                _previewFrame.style.backgroundImage = new StyleBackground(catalog.frame3DPreview);
+            // Cabeçalhos ilustrados — esconde os rótulos de texto duplicados caso o sprite já contenha o texto desenhado
+            ApplyHeader(RootElement.Q<VisualElement>("HeaderMyProfile"), catalog.headerMyProfile);
+            ApplyHeader(RootElement.Q<VisualElement>("HeaderRooms"), catalog.headerAvailableRooms);
+            ApplyHeader(RootElement.Q<VisualElement>("HeaderCreateRoom"), catalog.headerCreateRoom);
+            ApplyHeader(RootElement.Q<VisualElement>("HeaderJoinCode"), catalog.headerJoinCode);
+            ApplyHeader(RootElement.Q<VisualElement>("HeaderLan"), catalog.headerLan);
 
             // Arte sem salas
             var noRoomsArt = RootElement.Q<VisualElement>("NoRoomsArt");
             if (noRoomsArt != null && catalog.noRooms != null)
                 noRoomsArt.style.backgroundImage = new StyleBackground(catalog.noRooms);
 
-            // NOTA: Os botões de ação (_btnCreateRoom, _btnJoinManual, _btnCreateLAN, _btnJoinLAN, _btnRefreshRooms)
-            // utilizam estilo visual via USS com cores vibrantes e tipografia nítida (--color-orange, --color-blue),
-            // evitando sobreposição de texto duplo com sprites legados.
+            // Garante que nenhum botão de ação tenha texto nativo duplicando rótulos internos
+            ClearNativeButtonText(_btnSaveProfile);
+            ClearNativeButtonText(_btnRefreshRooms);
+            ClearNativeButtonText(_btnCreateRoom);
+            ClearNativeButtonText(_btnJoinManual);
+            ClearNativeButtonText(_btnCreateLAN);
+            ClearNativeButtonText(_btnJoinLAN);
         }
 
         private void SetupPreview()
@@ -319,10 +337,6 @@ namespace ScaryParty.UI.Piaria.Presenters
                     if (rt != null)
                     {
                         _previewRenderTexture.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
-                        if (_previewPlaceholder != null)
-                        {
-                            _previewPlaceholder.style.display = DisplayStyle.None;
-                        }
                     }
                 }
                 CharacterPreviewRig.Instance.BindDragEvents(_previewContainer);

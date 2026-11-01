@@ -27,6 +27,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             public VisualElement NameBar;
             public Label NameLabel;
             public VisualElement ColorBox;
+            public VisualElement PreviewRT;
+            public Label AvatarIcon;
             public Label RoleLabel;
             public Label ReadyBadge;
             public bool LastKnownReady;
@@ -152,6 +154,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                         NameBar = slotRoot.Q<VisualElement>($"PlayerNameBar{i}"),
                         NameLabel = slotRoot.Q<Label>($"PlayerNameLabel{i}"),
                         ColorBox = slotRoot.Q<VisualElement>($"PlayerColor{i}"),
+                        PreviewRT = slotRoot.Q<VisualElement>($"PlayerPreviewRT{i}"),
+                        AvatarIcon = slotRoot.Q<Label>($"PlayerAvatarIcon{i}"),
                         RoleLabel = slotRoot.Q<Label>($"PlayerRoleLabel{i}"),
                         ReadyBadge = slotRoot.Q<Label>($"PlayerReadyBadge{i}"),
                         LastKnownReady = false,
@@ -299,6 +303,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                         _slots[i].ColorBox.style.backgroundColor = ps.PlayerColor.Value;
                     }
 
+                    if (ps.IsOwner)
+                    {
+                        SetupPreviewRig(ps.PlayerColor.Value);
+                    }
+
                     if (_slots[i].RoleLabel != null)
                     {
                         _slots[i].RoleLabel.text = isHost ? "👑 Líder da Sala" : (i == 1 ? "🍕 Pizzaiolo" : (i == 2 ? "🛵 Entregador" : "🧑‍🍳 Ajudante"));
@@ -392,6 +401,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (_slots[0].NameLabel != null) _slots[0].NameLabel.text = $"👑 {localName}";
                 if (_slots[0].ColorBox != null) _slots[0].ColorBox.style.backgroundColor = localColor;
                 if (_slots[0].RoleLabel != null) _slots[0].RoleLabel.text = "👑 Líder da Sala";
+
+                SetupPreviewRig(localColor);
                 if (_slots[0].ReadyBadge != null)
                 {
                     if (_offlineReady)
@@ -531,6 +542,36 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (ps != null && ps.IsOwner) return ps;
             }
             return null;
+        }
+
+        private void SetupPreviewRig(Color playerColor)
+        {
+            if (CharacterPreviewRig.Instance == null)
+            {
+                var existingRig = FindFirstObjectByType<CharacterPreviewRig>();
+                if (existingRig == null)
+                {
+                    var rigGo = new GameObject("CharacterPreviewRig");
+                    rigGo.AddComponent<CharacterPreviewRig>();
+                }
+            }
+
+            if (CharacterPreviewRig.Instance != null)
+            {
+                CharacterPreviewRig.Instance.SetActive(true);
+                var rt = CharacterPreviewRig.Instance.RenderTexture;
+                if (rt != null && _slots[0].PreviewRT != null)
+                {
+                    _slots[0].PreviewRT.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
+                    _slots[0].PreviewRT.style.display = DisplayStyle.Flex;
+                    if (_slots[0].AvatarIcon != null)
+                    {
+                        _slots[0].AvatarIcon.style.display = DisplayStyle.None;
+                    }
+                    CharacterPreviewRig.Instance.BindDragEvents(_slots[0].PreviewRT);
+                }
+                CharacterPreviewRig.Instance.SetPlayerColor(playerColor);
+            }
         }
 
         public void Open(Action onComplete = null)

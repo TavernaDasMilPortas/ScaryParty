@@ -176,6 +176,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             CollectValidDestinations();
             UpdateDestinationDisplay();
 
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
             UIModalStack.Instance?.PushModal(this);
             var curr = RootElement;
             while (curr != null && curr != uiDocument?.rootVisualElement)
@@ -199,6 +201,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                     RootElement.parent.style.display = DisplayStyle.None;
                 }
                 UIModalStack.Instance?.PopModal(this);
+                if (UIModalStack.Instance == null || !UIModalStack.Instance.HasActiveModal)
+                {
+                    UnityEngine.Cursor.lockState = CursorLockMode.Locked;
+                    UnityEngine.Cursor.visible = false;
+                }
             });
         }
 

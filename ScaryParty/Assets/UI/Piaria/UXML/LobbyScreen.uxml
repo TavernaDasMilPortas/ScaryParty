@@ -30,18 +30,9 @@
                 <ui:Label text="Nome" class="field-caption" picking-mode="Ignore" />
                 <ui:TextField name="PlayerNameInput" text="Rubens" max-length="18" class="paper-input-box" picking-mode="Position" />
 
-                <!-- Moldura 3D / RawImage do Personagem -->
+                <!-- Moldura 3D / RawImage do Personagem (Sem overlays ou caixas opacas por cima) -->
                 <ui:VisualElement name="PreviewContainer" class="character-preview-card" picking-mode="Position">
                     <ui:VisualElement name="PreviewRenderTexture" class="preview-rt-layer" picking-mode="Ignore" />
-                    
-                    <!-- Placeholder quando RT ainda não desenhou ou está carregando -->
-                    <ui:VisualElement name="PreviewPlaceholder" class="preview-placeholder-center" picking-mode="Ignore" style="display: none;">
-                        <ui:Label text="👤" class="avatar-ph-icon" picking-mode="Ignore" />
-                        <ui:Label text="Seu personagem" class="avatar-ph-title" picking-mode="Ignore" />
-                        <ui:Label text="Espaço do modelo 3D" class="avatar-ph-subtitle" picking-mode="Ignore" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement name="PreviewFrame" class="preview-frame-overlay" picking-mode="Ignore" />
                 </ui:VisualElement>
 
                 <!-- Amostras de Cores (Abaixo do Preview 3D, conforme a referência visual) -->

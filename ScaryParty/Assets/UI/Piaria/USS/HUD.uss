@@ -1,5 +1,5 @@
 .hud-pass-through {
-    pointer-events: none;
+    /* O picking-mode é gerenciado via UXML e Presenter para transparência a cliques 3D */
 }
 
 /* Topo Esquerdo: Estatísticas */
@@ -9,7 +9,6 @@
     left: 28px;
     flex-direction: column;
     gap: 10px;
-    pointer-events: auto;
 }
 
 .stat-badge {
@@ -41,7 +40,6 @@
     top: 24px;
     right: 28px;
     align-items: center;
-    pointer-events: auto;
 }
 
 .backpack-stack-box {

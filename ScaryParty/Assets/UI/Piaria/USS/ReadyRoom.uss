@@ -101,6 +101,15 @@
     justify-content: center;
     align-items: center;
     position: relative;
+    overflow: hidden;
+}
+
+.card-preview-rt {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 .avatar-color-swatch {
