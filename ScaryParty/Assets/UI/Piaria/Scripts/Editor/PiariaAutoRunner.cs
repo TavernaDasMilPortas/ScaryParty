@@ -92,6 +92,8 @@ namespace ScaryParty.UI.Piaria.Editor
             var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
             if (string.IsNullOrEmpty(activeScene.name)) return;
 
+            PlayerPreviewPrefabGenerator.EnsurePreviewPrefabExists();
+
             string sceneName = activeScene.name;
             var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/UI/Piaria/Config/PiariaUIAssetCatalog.asset")
                           ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset");

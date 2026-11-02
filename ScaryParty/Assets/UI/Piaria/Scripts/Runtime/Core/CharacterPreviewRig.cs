@@ -10,7 +10,7 @@ namespace ScaryParty.UI.Piaria.Core
     /// <summary>
     /// Rig isolado de visualização 3D do personagem para a tela de Lobby e Sala de Espera.
     /// Renderiza o modelo do jogador com iluminação própria para uma RenderTexture exibida em UI Toolkit (Raw Image).
-    /// Fica isolado no espaço distante (-3000, -3000, -3000) com scripts de gameplay, física e rede rigorosamente removidos.
+    /// Fica isolado no espaço distante (-3000, -3000, -3000) com scripts de gameplay, física e rede rigorosamente ausentes.
     /// </summary>
     public class CharacterPreviewRig : MonoBehaviour
     {
@@ -143,11 +143,16 @@ namespace ScaryParty.UI.Piaria.Core
             if (defaultModelPrefab == null)
             {
 #if UNITY_EDITOR
-                defaultModelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab");
+                defaultModelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature_Preview.prefab");
+                if (defaultModelPrefab == null)
+                {
+                    defaultModelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab");
+                }
 #endif
                 if (defaultModelPrefab == null)
                 {
-                    defaultModelPrefab = Resources.Load<GameObject>("PlayerArmature");
+                    defaultModelPrefab = Resources.Load<GameObject>("PlayerArmature_Preview") 
+                        ?? Resources.Load<GameObject>("PlayerArmature");
                 }
             }
 
@@ -157,16 +162,13 @@ namespace ScaryParty.UI.Piaria.Core
                 _spawnedModel.transform.localPosition = Vector3.zero;
                 _spawnedModel.transform.localRotation = Quaternion.identity;
 
-                // Remove imediatamente qualquer componente de gameplay, física e rede do clone visual
-                // para que FindObjectsByType<PlayerState>() ou o Netcode NUNCA detectem esse modelo!
-                var playerState = _spawnedModel.GetComponent<PlayerState>();
-                if (playerState != null) DestroyImmediate(playerState);
+                // Higienização segura em ordem inversa de dependência (caso venha do PlayerArmature com scripts)
+                // 1. Destrói primeiro ThirdPersonController para liberar CharacterController e PlayerInput sem conflito de RequireComponent
+                var tpc = _spawnedModel.GetComponent<StarterAssets.ThirdPersonController>();
+                if (tpc != null) DestroyImmediate(tpc);
 
-                var netObj = _spawnedModel.GetComponent<Unity.Netcode.NetworkObject>();
-                if (netObj != null) DestroyImmediate(netObj);
-
-                var cc = _spawnedModel.GetComponent<CharacterController>();
-                if (cc != null) DestroyImmediate(cc);
+                var bPush = _spawnedModel.GetComponent<BasicRigidBodyPush>();
+                if (bPush != null) DestroyImmediate(bPush);
 
                 var starterInputs = _spawnedModel.GetComponent<StarterAssets.StarterAssetsInputs>();
                 if (starterInputs != null) DestroyImmediate(starterInputs);
@@ -174,8 +176,14 @@ namespace ScaryParty.UI.Piaria.Core
                 var playerInput = _spawnedModel.GetComponent<UnityEngine.InputSystem.PlayerInput>();
                 if (playerInput != null) DestroyImmediate(playerInput);
 
-                var tpc = _spawnedModel.GetComponent<StarterAssets.ThirdPersonController>();
-                if (tpc != null) DestroyImmediate(tpc);
+                var cc = _spawnedModel.GetComponent<CharacterController>();
+                if (cc != null) DestroyImmediate(cc);
+
+                var playerState = _spawnedModel.GetComponent<PlayerState>();
+                if (playerState != null) DestroyImmediate(playerState);
+
+                var netObj = _spawnedModel.GetComponent<Unity.Netcode.NetworkObject>();
+                if (netObj != null) DestroyImmediate(netObj);
 
                 var netTransform = _spawnedModel.GetComponent<Unity.Netcode.Components.NetworkTransform>();
                 if (netTransform != null) DestroyImmediate(netTransform);
@@ -185,6 +193,21 @@ namespace ScaryParty.UI.Piaria.Core
 
                 var fpCam = _spawnedModel.GetComponent<ScaryParty.Player.FirstPersonCameraController>();
                 if (fpCam != null) DestroyImmediate(fpCam);
+
+                var pInteraction = _spawnedModel.GetComponent<PlayerInteraction>();
+                if (pInteraction != null) DestroyImmediate(pInteraction);
+
+                var minimap = _spawnedModel.GetComponent<MinimapController>();
+                if (minimap != null) DestroyImmediate(minimap);
+
+                var weaponCtrl = _spawnedModel.GetComponent<WeaponController>();
+                if (weaponCtrl != null) DestroyImmediate(weaponCtrl);
+
+                var weaponInput = _spawnedModel.GetComponent<WeaponInputHandler>();
+                if (weaponInput != null) DestroyImmediate(weaponInput);
+
+                var outline = _spawnedModel.GetComponent<ScaryParty.Interaction.OutlineService>();
+                if (outline != null) DestroyImmediate(outline);
 
                 // Desativa e remove com segurança câmeras de gameplay do modelo clonado
                 var cams = _spawnedModel.GetComponentsInChildren<Camera>(true);
