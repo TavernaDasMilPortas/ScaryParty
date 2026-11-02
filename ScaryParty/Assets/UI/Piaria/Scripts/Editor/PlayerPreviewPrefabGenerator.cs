@@ -54,7 +54,7 @@ namespace ScaryParty.UI.Piaria.Editor
             var tpc = instance.GetComponent<StarterAssets.ThirdPersonController>();
             if (tpc != null) Object.DestroyImmediate(tpc, true);
 
-            var bPush = instance.GetComponent<BasicRigidBodyPush>();
+            var bPush = instance.GetComponent("BasicRigidBodyPush");
             if (bPush != null) Object.DestroyImmediate(bPush, true);
 
             var sInputs = instance.GetComponent<StarterAssets.StarterAssetsInputs>();

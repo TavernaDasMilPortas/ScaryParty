@@ -167,7 +167,7 @@ namespace ScaryParty.UI.Piaria.Core
                 var tpc = _spawnedModel.GetComponent<StarterAssets.ThirdPersonController>();
                 if (tpc != null) DestroyImmediate(tpc);
 
-                var bPush = _spawnedModel.GetComponent<BasicRigidBodyPush>();
+                var bPush = _spawnedModel.GetComponent("BasicRigidBodyPush");
                 if (bPush != null) DestroyImmediate(bPush);
 
                 var starterInputs = _spawnedModel.GetComponent<StarterAssets.StarterAssetsInputs>();
