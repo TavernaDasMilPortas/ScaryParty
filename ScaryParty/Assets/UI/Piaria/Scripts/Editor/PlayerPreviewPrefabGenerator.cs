@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 
@@ -50,37 +51,69 @@ namespace ScaryParty.UI.Piaria.Editor
             var instance = (GameObject)PrefabUtility.InstantiatePrefab(source);
             instance.name = "PlayerArmature_Preview";
 
-            // 1. Destrói primeiro ThirdPersonController para liberar CharacterController e PlayerInput
-            var tpc = instance.GetComponent<StarterAssets.ThirdPersonController>();
-            if (tpc != null) Object.DestroyImmediate(tpc, true);
+            // 1. Remove componentes na ordem correta de dependência inversa
+            // Primeiro os que dependem de outros (folhas)
+            DestroyCompByName(instance, "WeaponInputHandler");
+            DestroyCompByName(instance, "WeaponController");
 
-            var bPush = instance.GetComponent("BasicRigidBodyPush");
-            if (bPush != null) Object.DestroyImmediate(bPush, true);
+            var tpc = instance.GetComponent<StarterAssets.ThirdPersonController>();
+            if (tpc != null) UnityEngine.Object.DestroyImmediate(tpc, true);
+
+            DestroyCompByName(instance, "BasicRigidBodyPush");
 
             var sInputs = instance.GetComponent<StarterAssets.StarterAssetsInputs>();
-            if (sInputs != null) Object.DestroyImmediate(sInputs, true);
+            if (sInputs != null) UnityEngine.Object.DestroyImmediate(sInputs, true);
 
             var pInput = instance.GetComponent<UnityEngine.InputSystem.PlayerInput>();
-            if (pInput != null) Object.DestroyImmediate(pInput, true);
+            if (pInput != null) UnityEngine.Object.DestroyImmediate(pInput, true);
 
             var cc = instance.GetComponent<CharacterController>();
-            if (cc != null) Object.DestroyImmediate(cc, true);
+            if (cc != null) UnityEngine.Object.DestroyImmediate(cc, true);
 
-            // 2. Destrói todos os componentes de gameplay restantes no root
-            var allRemaining = instance.GetComponents<Component>();
-            foreach (var comp in allRemaining)
+            DestroyCompByName(instance, "PlayerCameraSetup");
+            DestroyCompByName(instance, "FirstPersonCameraController");
+            DestroyCompByName(instance, "PlayerInteraction");
+            DestroyCompByName(instance, "MinimapController");
+            DestroyCompByName(instance, "OutlineService");
+            DestroyCompByName(instance, "PlayerState");
+            DestroyCompByName(instance, "ClientNetworkTransform");
+
+            var netObj = instance.GetComponent<Unity.Netcode.NetworkObject>();
+            if (netObj != null) UnityEngine.Object.DestroyImmediate(netObj, true);
+
+            // 2. Loop inteligente de varredura que remove qualquer componente remanescente respeitando [RequireComponent]
+            StripRemainingComponentsSafely(instance);
+
+            // 3. Remove objetos de câmera e pivots filhos desnecessários para a prévia
+            for (int i = instance.transform.childCount - 1; i >= 0; i--)
             {
-                if (comp is Transform || comp is Animator) continue;
-                Object.DestroyImmediate(comp, true);
+                var child = instance.transform.GetChild(i);
+                var childName = child.gameObject.name;
+
+                // Preserva Geometry e Skeleton (onde moram a malha e o esqueleto de animação)
+                if (childName.IndexOf("Geometry", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    childName.IndexOf("Skeleton", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    continue;
+                }
+
+                // Se possuir Renderers, mantém
+                if (child.GetComponentInChildren<Renderer>(true) != null)
+                {
+                    continue;
+                }
+
+                // Destrói PlayerCameraRoot, CameraPivot, etc.
+                UnityEngine.Object.DestroyImmediate(child.gameObject, true);
             }
 
-            // 3. Remove câmeras e listeners filhos
+            // 4. Remove câmeras, listeners e colliders residuais em quaisquer filhos restantes
             var cams = instance.GetComponentsInChildren<Camera>(true);
             foreach (var cam in cams)
             {
                 if (cam != null && cam.gameObject != instance)
                 {
-                    Object.DestroyImmediate(cam.gameObject, true);
+                    UnityEngine.Object.DestroyImmediate(cam.gameObject, true);
                 }
             }
 
@@ -89,24 +122,80 @@ namespace ScaryParty.UI.Piaria.Editor
             {
                 if (l != null && l.gameObject != instance)
                 {
-                    Object.DestroyImmediate(l.gameObject, true);
+                    UnityEngine.Object.DestroyImmediate(l.gameObject, true);
                 }
             }
 
-            // 4. Remove colliders remanescentes nos filhos
             var colliders = instance.GetComponentsInChildren<Collider>(true);
             foreach (var col in colliders)
             {
-                if (col != null) Object.DestroyImmediate(col, true);
+                if (col != null) UnityEngine.Object.DestroyImmediate(col, true);
             }
 
             // 5. Salva como prefab limpo
             PrefabUtility.SaveAsPrefabAsset(instance, TargetPrefabPath);
-            Object.DestroyImmediate(instance);
+            UnityEngine.Object.DestroyImmediate(instance);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             Debug.Log($"[PlayerPreviewPrefabGenerator] ✅ Prefab limpo de preview salvo em '{TargetPrefabPath}' com sucesso!");
+        }
+
+        private static void DestroyCompByName(GameObject go, string componentTypeName)
+        {
+            var comp = go.GetComponent(componentTypeName);
+            if (comp != null)
+            {
+                UnityEngine.Object.DestroyImmediate(comp, true);
+            }
+        }
+
+        private static void StripRemainingComponentsSafely(GameObject go)
+        {
+            int safetyLimit = 50;
+            while (safetyLimit-- > 0)
+            {
+                var comps = go.GetComponents<Component>();
+                Component compToRemove = null;
+
+                foreach (var c in comps)
+                {
+                    if (c == null || c is Transform || c is Animator) continue;
+
+                    if (!IsRequiredByAny(go, c))
+                    {
+                        compToRemove = c;
+                        break;
+                    }
+                }
+
+                if (compToRemove == null) break;
+
+                UnityEngine.Object.DestroyImmediate(compToRemove, true);
+            }
+        }
+
+        private static bool IsRequiredByAny(GameObject go, Component target)
+        {
+            var comps = go.GetComponents<Component>();
+            var targetType = target.GetType();
+
+            foreach (var c in comps)
+            {
+                if (c == null || c == target) continue;
+
+                var reqAttrs = c.GetType().GetCustomAttributes(typeof(RequireComponent), true);
+                foreach (RequireComponent req in reqAttrs)
+                {
+                    if ((req.m_Type0 != null && req.m_Type0.IsAssignableFrom(targetType)) ||
+                        (req.m_Type1 != null && req.m_Type1.IsAssignableFrom(targetType)) ||
+                        (req.m_Type2 != null && req.m_Type2.IsAssignableFrom(targetType)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

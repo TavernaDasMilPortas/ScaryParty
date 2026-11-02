@@ -163,7 +163,13 @@ namespace ScaryParty.UI.Piaria.Core
                 _spawnedModel.transform.localRotation = Quaternion.identity;
 
                 // Higienização segura em ordem inversa de dependência (caso venha do PlayerArmature com scripts)
-                // 1. Destrói primeiro ThirdPersonController para liberar CharacterController e PlayerInput sem conflito de RequireComponent
+                // Remove primeiro os scripts folha (que dependem de outros)
+                var weaponInput = _spawnedModel.GetComponent<WeaponInputHandler>();
+                if (weaponInput != null) DestroyImmediate(weaponInput);
+
+                var weaponCtrl = _spawnedModel.GetComponent<WeaponController>();
+                if (weaponCtrl != null) DestroyImmediate(weaponCtrl);
+
                 var tpc = _spawnedModel.GetComponent<StarterAssets.ThirdPersonController>();
                 if (tpc != null) DestroyImmediate(tpc);
 
@@ -182,11 +188,11 @@ namespace ScaryParty.UI.Piaria.Core
                 var playerState = _spawnedModel.GetComponent<PlayerState>();
                 if (playerState != null) DestroyImmediate(playerState);
 
-                var netObj = _spawnedModel.GetComponent<Unity.Netcode.NetworkObject>();
-                if (netObj != null) DestroyImmediate(netObj);
-
                 var netTransform = _spawnedModel.GetComponent<Unity.Netcode.Components.NetworkTransform>();
                 if (netTransform != null) DestroyImmediate(netTransform);
+
+                var netObj = _spawnedModel.GetComponent<Unity.Netcode.NetworkObject>();
+                if (netObj != null) DestroyImmediate(netObj);
 
                 var camSetup = _spawnedModel.GetComponent<PlayerCameraSetup>();
                 if (camSetup != null) DestroyImmediate(camSetup);
@@ -200,14 +206,10 @@ namespace ScaryParty.UI.Piaria.Core
                 var minimap = _spawnedModel.GetComponent<MinimapController>();
                 if (minimap != null) DestroyImmediate(minimap);
 
-                var weaponCtrl = _spawnedModel.GetComponent<WeaponController>();
-                if (weaponCtrl != null) DestroyImmediate(weaponCtrl);
-
-                var weaponInput = _spawnedModel.GetComponent<WeaponInputHandler>();
-                if (weaponInput != null) DestroyImmediate(weaponInput);
-
                 var outline = _spawnedModel.GetComponent<ScaryParty.Interaction.OutlineService>();
                 if (outline != null) DestroyImmediate(outline);
+
+                StripRemainingComponentsSafely(_spawnedModel);
 
                 // Desativa e remove com segurança câmeras de gameplay do modelo clonado
                 var cams = _spawnedModel.GetComponentsInChildren<Camera>(true);
@@ -248,6 +250,54 @@ namespace ScaryParty.UI.Piaria.Core
 
                 _renderers = _spawnedModel.GetComponentsInChildren<Renderer>(true);
             }
+        }
+
+        private static void StripRemainingComponentsSafely(GameObject go)
+        {
+            int safetyLimit = 50;
+            while (safetyLimit-- > 0)
+            {
+                var comps = go.GetComponents<Component>();
+                Component compToRemove = null;
+
+                foreach (var c in comps)
+                {
+                    if (c == null || c is Transform || c is Animator) continue;
+
+                    if (!IsRequiredByAny(go, c))
+                    {
+                        compToRemove = c;
+                        break;
+                    }
+                }
+
+                if (compToRemove == null) break;
+
+                DestroyImmediate(compToRemove);
+            }
+        }
+
+        private static bool IsRequiredByAny(GameObject go, Component target)
+        {
+            var comps = go.GetComponents<Component>();
+            var targetType = target.GetType();
+
+            foreach (var c in comps)
+            {
+                if (c == null || c == target) continue;
+
+                var reqAttrs = c.GetType().GetCustomAttributes(typeof(RequireComponent), true);
+                foreach (RequireComponent req in reqAttrs)
+                {
+                    if ((req.m_Type0 != null && req.m_Type0.IsAssignableFrom(targetType)) ||
+                        (req.m_Type1 != null && req.m_Type1.IsAssignableFrom(targetType)) ||
+                        (req.m_Type2 != null && req.m_Type2.IsAssignableFrom(targetType)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public void SetActive(bool active)
