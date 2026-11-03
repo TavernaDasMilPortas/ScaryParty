@@ -85,6 +85,10 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        Debug.Log($"[PlayerState] Spawn: owner={OwnerClientId}, local={NetworkManager.LocalClientId}, " +
+            $"object={NetworkObjectId}, server={IsServer}, active={gameObject.activeInHierarchy}, " +
+            $"scene={SceneManager.GetActiveScene().name}", this);
+
         // Listeners for state changes
         IsGameStarted.OnValueChanged += OnGameStartedChanged;
         PlayerColor.OnValueChanged += OnColorChanged;

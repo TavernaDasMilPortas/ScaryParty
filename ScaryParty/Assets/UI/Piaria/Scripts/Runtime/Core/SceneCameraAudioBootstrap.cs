@@ -84,6 +84,7 @@ namespace ScaryParty.UI.Piaria.Core
                     {
                         // Câmera de gameplay encontrada
                         _fallbackCameraGo.SetActive(false);
+                        ValidateSceneCameraAndAudio();
                         break;
                     }
                 }
@@ -102,6 +103,14 @@ namespace ScaryParty.UI.Piaria.Core
         {
             // 1. Garante Câmera Principal
             Camera mainCam = Camera.main;
+            var localPlayer = ScaryParty.Player.FirstPersonCameraController.LocalInstance;
+            if (localPlayer != null && localPlayer.IsSpawned && localPlayer.IsOwner &&
+                localPlayer.PlayerCamera != null && localPlayer.PlayerCamera.isActiveAndEnabled)
+            {
+                mainCam = localPlayer.PlayerCamera;
+                if (_fallbackCameraGo != null && _fallbackCameraGo != mainCam.gameObject)
+                    _fallbackCameraGo.SetActive(false);
+            }
 
             if (mainCam == null)
             {
@@ -144,38 +153,18 @@ namespace ScaryParty.UI.Piaria.Core
 
             // 2. Garante AudioListener
             var listeners = UnityEngine.Object.FindObjectsByType<AudioListener>(FindObjectsSortMode.None);
-            bool hasActiveListener = false;
+            var selectedListener = mainCam != null ? mainCam.GetComponent<AudioListener>() : null;
+            if (selectedListener == null && mainCam != null)
+                selectedListener = mainCam.gameObject.AddComponent<AudioListener>();
 
-            if (listeners != null && listeners.Length > 0)
+            foreach (var listener in listeners)
             {
-                int activeCount = 0;
-                foreach (var l in listeners)
-                {
-                    if (l != null && l.enabled && l.gameObject.activeInHierarchy)
-                    {
-                        activeCount++;
-                        if (activeCount > 1)
-                        {
-                            // Unity só suporta 1 AudioListener ativo ao mesmo tempo
-                            l.enabled = false;
-                        }
-                        else
-                        {
-                            hasActiveListener = true;
-                        }
-                    }
-                }
+                if (listener != null)
+                    listener.enabled = listener == selectedListener;
             }
 
-            if (!hasActiveListener && mainCam != null)
-            {
-                var existingListener = mainCam.GetComponent<AudioListener>();
-                if (existingListener == null)
-                {
-                    existingListener = mainCam.gameObject.AddComponent<AudioListener>();
-                }
-                existingListener.enabled = true;
-            }
+            if (selectedListener != null)
+                selectedListener.enabled = true;
         }
     }
 }

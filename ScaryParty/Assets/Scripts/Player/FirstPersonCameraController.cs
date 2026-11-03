@@ -199,6 +199,7 @@ namespace ScaryParty.Player
                 if (listener != null) listener.enabled = true;
 
                 ConfigureCameraCulling(_playerCamera);
+                ScaryParty.UI.Piaria.Core.SceneCameraAudioBootstrap.ValidateSceneCameraAndAudio();
             }
         }
 
