@@ -30,7 +30,9 @@ namespace ScaryParty.Interaction
             }
             else if (Instance != this)
             {
-                Destroy(gameObject);
+                // This service can live on a network player; never destroy its owner.
+                enabled = false;
+                Destroy(this);
                 return;
             }
 
