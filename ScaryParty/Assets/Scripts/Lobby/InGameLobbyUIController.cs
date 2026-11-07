@@ -5,19 +5,13 @@ public class InGameLobbyUIController : MonoBehaviour
 {
     private void Awake()
     {
-        // Script obsoleto. O lobby de espera foi movido para a cena 'ReadyScene'.
-        // Oculta e destrói imediatamente para garantir que nenhum resquício visual persista na GameScene.
+        // The ready room owns the lobby UI. Keep any shared network components on this object.
         var doc = GetComponent<UIDocument>();
         if (doc != null)
         {
-            if (doc.rootVisualElement != null)
-            {
-                doc.rootVisualElement.style.display = DisplayStyle.None;
-            }
             doc.enabled = false;
+            Destroy(doc);
         }
-
-        gameObject.SetActive(false);
-        Destroy(gameObject);
+        Destroy(this);
     }
 }

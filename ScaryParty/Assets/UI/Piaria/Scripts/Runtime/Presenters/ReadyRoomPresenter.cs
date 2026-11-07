@@ -253,10 +253,9 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void UpdateRoomCodeDisplay()
         {
-            var lobbyMgr = FindFirstObjectByType<LobbyManager>();
-            if (lobbyMgr != null && !string.IsNullOrEmpty(lobbyMgr.CurrentJoinCode))
+            if (!string.IsNullOrEmpty(LobbyManager.CurrentJoinCode))
             {
-                _currentRoomCode = lobbyMgr.CurrentJoinCode;
+                _currentRoomCode = LobbyManager.CurrentJoinCode;
             }
             else
             {

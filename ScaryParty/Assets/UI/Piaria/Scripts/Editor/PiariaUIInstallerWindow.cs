@@ -717,6 +717,7 @@ namespace ScaryParty.UI.Piaria.Editor
                     EditorUtility.SetDirty(mainUIGo);
                 }
 
+                ScaryParty.Pizzeria.Editor.Migration.PiariaGameplayUIMigration.EnsureGameScene(scene);
                 EditorSceneManager.MarkSceneDirty(scene);
                 EditorSceneManager.SaveScene(scene);
                 Log("GameScene configurada e salva com sucesso.");

@@ -48,9 +48,9 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     if (item.LabelDestinationId < 0)
                     {
-                        if (ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
+                        if (ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance != null)
                         {
-                            ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
+                            ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance.Open(item.ItemId, item.SlotId);
                             return;
                         }
                     }

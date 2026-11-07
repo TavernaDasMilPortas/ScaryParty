@@ -110,6 +110,10 @@ public class PlayerInteraction : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // Replicated bag views are needed on remote player avatars too.
+        if (GetComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>() == null)
+            gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>();
+
         // Only the owning client runs interaction logic
         if (!IsOwner)
         {
@@ -126,9 +130,6 @@ public class PlayerInteraction : NetworkBehaviour
 
         if (GetComponent<ScaryParty.Pizzeria.Player.BackpackController>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Player.BackpackController>();
-
-        if (GetComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>() == null)
-            gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>();
 
         if (GetComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Integration.CargoMapAdapter>();
@@ -604,6 +605,12 @@ public class PlayerInteraction : NetworkBehaviour
             return;
         }
 
+        if (_currentInteractable is ScaryParty.Pizzeria.Authoring.DeliveryBagAuthoring bag)
+        {
+            bag.StoreFromHand(gameObject);
+            return;
+        }
+
         // Subtipos especÃ­ficos primeiro (evita que a heranÃ§a de StationView engula a chamada)
         if (_currentInteractable is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
         {
@@ -639,7 +646,7 @@ public class PlayerInteraction : NetworkBehaviour
         }
         else if (_currentInteractable is ScaryParty.Pizzeria.Stations.StagingStation stg)
         {
-            if (netState != null && ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance != null)
+            if (netState != null && ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance != null)
             {
                 int targetSlot = stg.ResolveTargetSlotIndex();
                 Debug.Log($"[PlayerInteraction] [F] Acionando bancada de expediÃ§Ã£o (Slot={targetSlot})");
@@ -650,7 +657,7 @@ public class PlayerInteraction : NetworkBehaviour
                         var item = netState.Items[i];
                         if (item.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && item.HolderId == (ulong)stg.stationId && item.SlotId == targetSlot && item.PackagingState == (byte)ScaryParty.Pizzeria.Domain.Types.PackagingState.Boxed)
                         {
-                            ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance.OpenStagingAddressPicker(item.ItemId, item.SlotId);
+                            ScaryParty.UI.Piaria.Presenters.StagingPresenter.Instance.Open(item.ItemId, item.SlotId);
                             return;
                         }
                     }
@@ -774,6 +781,12 @@ public class PlayerInteraction : NetworkBehaviour
         }
     }
 
+    private void InspectBag()
+    {
+        if (_currentInteractable is ScaryParty.Pizzeria.Authoring.DeliveryBagAuthoring bag)
+            ScaryParty.Pizzeria.Presentation.BackpackPanelPresenter.Instance?.Inspect(bag.BackpackId);
+    }
+
 #if ENABLE_INPUT_SYSTEM
     private void HandleInput()
     {
@@ -784,7 +797,9 @@ public class PlayerInteraction : NetworkBehaviour
         {
             if (UnityEngine.InputSystem.Keyboard.current.eKey.wasPressedThisFrame) interactPressed = true;
             if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame) workPressed = true;
+            if (UnityEngine.InputSystem.Keyboard.current.iKey.wasPressedThisFrame) InspectBag();
         }
+        if (Input.GetKeyDown(KeyCode.I)) InspectBag();
         if (Input.GetKeyDown(KeyCode.E)) interactPressed = true;
         if (Input.GetKeyDown(KeyCode.F)) workPressed = true;
 
@@ -807,6 +822,7 @@ public class PlayerInteraction : NetworkBehaviour
     {
         bool interactPressed = Input.GetKeyDown(KeyCode.E);
         bool workPressed = Input.GetKeyDown(KeyCode.F);
+        if (Input.GetKeyDown(KeyCode.I)) InspectBag();
 
         if (interactPressed && _currentInteractable != null)
         {

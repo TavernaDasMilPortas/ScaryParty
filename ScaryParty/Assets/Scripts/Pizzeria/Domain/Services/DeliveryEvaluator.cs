@@ -179,7 +179,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (!item.IsBoxed)
                     return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.Incompatible, "Apenas caixas fechadas podem ser entregues.");
 
-                bool inHand = item.Location.Type == LocationType.Hand;
+                bool inHand = item.Location.Type == LocationType.Hand && item.Location.HolderId == requesterId;
+                if (item.ReservedByHold != 0)
+                    return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.Blocked, "Caixa reservada por outro processo.");
                 bool inBackpack = item.Location.Type == LocationType.Backpack && state.Backpacks.TryGetValue((BackpackId)item.Location.HolderId, out var bp) && bp.EquippedBy == requesterId;
 
                 if (!inHand && !inBackpack)

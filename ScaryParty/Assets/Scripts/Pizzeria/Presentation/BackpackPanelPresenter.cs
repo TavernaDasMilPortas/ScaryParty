@@ -9,9 +9,9 @@ using ScaryParty.Pizzeria.Player;
 namespace ScaryParty.Pizzeria.Presentation
 {
     /// <summary>
-    /// Modal UI Toolkit para a Mochila Térmica do entregador (tecla B).
+    /// Modal UI Toolkit para a Mochila TÃ©rmica do entregador (tecla B).
     /// Exibe os slots, caixas guardadas com suas etiquetas de destino,
-    /// e ações para guardar da mão, retirar para a mão e largar mochila no chão.
+    /// e aÃ§Ãµes para guardar da mÃ£o, retirar para a mÃ£o e largar mochila no chÃ£o.
     /// </summary>
     public class BackpackPanelPresenter : MonoBehaviour
     {
@@ -31,6 +31,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private bool _isOpen = false;
         private int _openedFrame = -1;
+        private float _nextRefresh;
+        private ulong _inspectedBagId;
         public bool IsOpen => _isOpen;
 
         private void Awake()
@@ -55,21 +57,16 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (_overlay != null) return;
 
-            if (UIManager.Instance != null && UIManager.Instance.uiDocument != null && UIManager.Instance.uiDocument.rootVisualElement != null)
+            var hud = FindFirstObjectByType<ScaryParty.UI.Piaria.Presenters.HudPresenter>();
+            _doc = hud != null ? hud.uiDocument : null;
+            if (_doc == null) _doc = GetComponent<UIDocument>() ?? gameObject.AddComponent<UIDocument>();
+            if (_doc.panelSettings == null)
             {
-                _root = UIManager.Instance.uiDocument.rootVisualElement;
+                var panelSettingsList = Resources.FindObjectsOfTypeAll<PanelSettings>();
+                if (panelSettingsList != null && panelSettingsList.Length > 0)
+                    _doc.panelSettings = panelSettingsList[0];
             }
-            else
-            {
-                _doc = GetComponent<UIDocument>() ?? gameObject.AddComponent<UIDocument>();
-                if (_doc.panelSettings == null)
-                {
-                    var panelSettingsList = Resources.FindObjectsOfTypeAll<PanelSettings>();
-                    if (panelSettingsList != null && panelSettingsList.Length > 0)
-                        _doc.panelSettings = panelSettingsList[0];
-                }
-                _root = _doc.rootVisualElement;
-            }
+            _root = _doc.rootVisualElement;
 
             if (_root == null) return;
 
@@ -115,8 +112,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _card.style.paddingBottom = 20;
             _card.style.paddingLeft = 24;
             _card.style.paddingRight = 24;
-
-            _titleLabel = new Label("🎒 MOCHILA TÉRMICA DO ENTREGADOR");
+            _titleLabel = new Label("MOCHILA TERMICA DO ENTREGADOR");
             _titleLabel.style.fontSize = 24;
             _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _titleLabel.style.color = new Color(0.95f, 0.5f, 0.3f);
@@ -144,9 +140,9 @@ namespace ScaryParty.Pizzeria.Presentation
             _slotsContainer.style.paddingRight = 10;
             _card.Add(_slotsContainer);
 
-            // Botão Guardar da Mão Ativa
+            // BotÃ£o Guardar da MÃ£o Ativa
             _storeHandBtn = new Button(StoreFromActiveHand);
-            _storeHandBtn.text = "Guardar Caixa da Mão Ativa";
+            _storeHandBtn.text = "Guardar caixa da mao ativa";
             _storeHandBtn.style.fontSize = 18;
             _storeHandBtn.style.height = 46;
             _storeHandBtn.style.marginBottom = 10;
@@ -155,7 +151,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _storeHandBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
             _card.Add(_storeHandBtn);
 
-            // Container de Ações Inferiores
+            // Container de AÃ§Ãµes Inferiores
             var bottomRow = new VisualElement();
             bottomRow.style.flexDirection = FlexDirection.Row;
             bottomRow.style.justifyContent = Justify.SpaceBetween;
@@ -185,8 +181,19 @@ namespace ScaryParty.Pizzeria.Presentation
             _root.Add(_overlay);
         }
 
+        public void Inspect(ulong bagId)
+        {
+            if (bagId == 0) return;
+            _inspectedBagId = bagId;
+            if (!IsInspectedBagAccessible()) { _inspectedBagId = 0; return; }
+            if (!_isOpen) Toggle();
+            _inspectedBagId = bagId;
+            RefreshSlots();
+        }
+
         public void Toggle()
         {
+            if (!_isOpen) _inspectedBagId = 0;
             EnsureUIInitialized();
             if (_overlay == null) return;
 
@@ -194,13 +201,14 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_isOpen)
             {
                 _openedFrame = Time.frameCount;
-                RefreshSlots();
                 _overlay.style.display = DisplayStyle.Flex;
                 GameplayInputGate.PushModal();
+                RefreshSlots();
             }
             else
             {
                 _overlay.style.display = DisplayStyle.None;
+                _inspectedBagId = 0;
                 GameplayInputGate.PopModal();
             }
         }
@@ -216,19 +224,48 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             _slotsContainer.Clear();
             var controller = GetLocalBackpackController();
-            if (controller == null)
+            _dropBackpackBtn.style.display = _inspectedBagId == 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            var state = PizzeriaNetworkState.Instance;
+            NetBackpackDto bag = default;
+            bool found = false;
+            if (_inspectedBagId != 0)
             {
-                var lbl = new Label("Você não possui uma mochila equipada no momento.");
+                if (state == null) { if (_isOpen) Toggle(); return; }
+                for (int i = 0; i < state.Backpacks.Count; i++)
+                    if (state.Backpacks[i].BackpackId == _inspectedBagId &&
+                        state.Backpacks[i].EquippedBy == ScaryParty.Pizzeria.Domain.Models.BackpackState.NoOwner)
+                    {
+                        bag = state.Backpacks[i];
+                        found = true;
+                        break;
+                    }
+                if (!found) { if (_isOpen) Toggle(); return; }
+            }
+            else if (controller != null) found = controller.TryGetEquippedBag(out bag);
+            if (!found)
+            {
+                _dropBackpackBtn.SetEnabled(false);
+                _storeHandBtn.SetEnabled(false);
+                var lbl = new Label("Sem mochila equipada.");
                 lbl.style.color = new Color(0.9f, 0.4f, 0.4f);
                 lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
                 lbl.style.marginTop = 20;
                 _slotsContainer.Add(lbl);
-                _capacityLabel.text = "Mochila não equipada";
+                _capacityLabel.text = "Sem mochila equipada";
                 return;
             }
 
-            var boxes = controller.GetBoxesInBackpack();
-            int cap = controller.capacity;
+            _dropBackpackBtn.SetEnabled(_inspectedBagId == 0);
+            _storeHandBtn.SetEnabled(bag.ItemCount < bag.Capacity);
+            var boxes = new List<NetItemDto>();
+            if (state != null)
+                for (int i = 0; i < state.Items.Count; i++)
+                {
+                    var item = state.Items[i];
+                    if (item.LocationType == (byte)LocationType.Backpack && item.HolderId == bag.BackpackId)
+                        boxes.Add(item);
+                }
+            int cap = bag.Capacity;
             _capacityLabel.text = $"Capacidade: {boxes.Count} / {cap} caixas";
 
             for (int i = 0; i < cap; i++)
@@ -251,18 +288,17 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (i < boxes.Count)
                 {
                     var item = boxes[i];
-                    string labelDest = item.LabelDestinationId > 0
-                        ? $"Etiqueta: {AddressFormat.Display(item.LabelDestinationId)}"
+                    string labelDest = item.LabelDestinationId >= 0
+                        ? $"Etiqueta: #{item.LabelDestinationId + 1}"
                         : "Sem etiqueta";
-
-                    var desc = new Label($"Slot {i + 1}: 📦 Caixa #{item.ItemId} ({labelDest})");
+                    var desc = new Label($"Slot {i + 1}: Caixa #{item.ItemId} ({labelDest})");
                     desc.style.fontSize = 17;
                     desc.style.color = new Color(0.95f, 0.8f, 0.4f);
                     row.Add(desc);
 
                     ulong itemId = item.ItemId;
                     var takeBtn = new Button(() => RetrieveToHand(itemId));
-                    takeBtn.text = "Retirar para Mão";
+                    takeBtn.text = "Retirar para mao";
                     takeBtn.style.fontSize = 16;
                     takeBtn.style.backgroundColor = new Color(0.25f, 0.45f, 0.65f);
                     takeBtn.style.color = Color.white;
@@ -290,9 +326,9 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
             var adapter = localPlayer != null ? localPlayer.GetComponent<PlayerInventoryAdapter>() : null;
-            var activeHand = adapter != null ? adapter.ActiveHand : HandSlotIndex.Left;
+            if (adapter == null) return;
 
-            bool success = controller.TryStoreFromHand(activeHand);
+            bool success = controller.TryStoreFromHand(adapter.ActiveHand, _inspectedBagId);
             if (success)
             {
                 RefreshSlots();
@@ -306,9 +342,9 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
             var adapter = localPlayer != null ? localPlayer.GetComponent<PlayerInventoryAdapter>() : null;
-            var activeHand = adapter != null ? adapter.ActiveHand : HandSlotIndex.Left;
+            if (adapter == null) return;
 
-            bool success = controller.TryRetrieveToHand(boxItemId, activeHand);
+            bool success = controller.TryRetrieveToHand(boxItemId, adapter.ActiveHand, _inspectedBagId);
             if (success)
             {
                 RefreshSlots();
@@ -321,14 +357,46 @@ namespace ScaryParty.Pizzeria.Presentation
             if (logistics != null)
             {
                 logistics.DropBackpackServerRpc();
-                NotificationManager.Show("Mochila largada no chão.", NotificationType.Info);
             }
-            Toggle();
+        }
+
+        private bool IsInspectedBagAccessible()
+        {
+            var player = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+            var state = PizzeriaNetworkState.Instance;
+            if (player == null || state == null) return false;
+            for (int i = 0; i < state.Backpacks.Count; i++)
+            {
+                var bag = state.Backpacks[i];
+                if (bag.BackpackId != _inspectedBagId) continue;
+                return bag.EquippedBy == ScaryParty.Pizzeria.Domain.Models.BackpackState.NoOwner &&
+                    Vector3.Distance(player.transform.position, new Vector3(bag.PosX, bag.PosY, bag.PosZ)) <= 4.8f;
+            }
+            return false;
+        }
+
+        private void OnDisable()
+        {
+            if (!_isOpen) return;
+            _isOpen = false;
+            _inspectedBagId = 0;
+            if (_overlay != null) _overlay.style.display = DisplayStyle.None;
+            GameplayInputGate.PopModal();
         }
 
         private void Update()
         {
             if (!_isOpen) return;
+            if (_inspectedBagId != 0 && !IsInspectedBagAccessible())
+            {
+                Toggle();
+                return;
+            }
+            if (Time.unscaledTime >= _nextRefresh)
+            {
+                _nextRefresh = Time.unscaledTime + 0.3f;
+                RefreshSlots();
+            }
             if (Time.frameCount == _openedFrame) return;
 
             if (UnityEngine.InputSystem.Keyboard.current != null)
@@ -343,10 +411,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
-            if (_isOpen)
-            {
-                GameplayInputGate.Reset();
-            }
+            if (_isOpen) GameplayInputGate.PopModal();
+            if (_overlay != null) _overlay.RemoveFromHierarchy();
             if (Instance == this) Instance = null;
         }
     }

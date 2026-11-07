@@ -8,107 +8,24 @@ using ScaryParty.Pizzeria.Network;
 namespace ScaryParty.Pizzeria.Integration
 {
     /// <summary>
-    /// Integra caixas carregadas nas mãos e mochila com o minimapa.
-    /// Gera rotas dinâmicas a partir do AddressRegistry para os destinos rotulados.
+    /// Integra caixas carregadas nas mÃ£os e mochila com o minimapa.
+    /// Gera rotas dinÃ¢micas a partir do AddressRegistry para os destinos rotulados.
     /// </summary>
     public class CargoMapAdapter : MonoBehaviour
     {
-        private readonly HashSet<int> _displayedDestinations = new HashSet<int>();
-        private float _checkTimer = 0f;
-
-        private void Update()
+        // The canonical UI map resolves replicated cargo for every owner. This adapter remains
+        // for compatibility with existing prefab references but does not author duplicate routes.
+        private bool TryFindDeliveryPointPosition(int destId, out Vector3 position)
         {
-            _checkTimer += Time.deltaTime;
-            if (_checkTimer < 0.5f) return;
-            _checkTimer = 0f;
-
-            UpdateCargoRoutes();
-        }
-
-        private void UpdateCargoRoutes()
-        {
-            var routeMgr = MinimapRouteManager.Instance;
-            var netState = PizzeriaNetworkState.Instance;
-            if (routeMgr == null || netState == null || NetworkManager.Singleton == null) return;
-
-            ulong myId = NetworkManager.Singleton.LocalClientId;
-            var currentDestinations = new HashSet<int>();
-
-            // Encontra todos os destinos rotulados nas caixas transportadas pelo jogador
-            for (int i = 0; i < netState.Items.Count; i++)
-            {
-                var item = netState.Items[i];
-                bool isCarriedByMe = false;
-
-                if (item.HolderId == myId && item.LocationType == (byte)LocationType.Hand)
-                {
-                    isCarriedByMe = true;
-                }
-                else if (item.LocationType == (byte)LocationType.Backpack)
-                {
-                    // Valida se a mochila correspondente está equipada pelo jogador local
-                    bool bpEquipped = false;
-                    if (netState.Backpacks != null)
-                    {
-                        for (int b = 0; b < netState.Backpacks.Count; b++)
-                        {
-                            var bp = netState.Backpacks[b];
-                            if (bp.BackpackId == item.HolderId && bp.EquippedBy == myId)
-                            {
-                                bpEquipped = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!bpEquipped)
-                    {
-                        bpEquipped = item.HolderId == myId || item.HolderId == (myId + 1);
-                    }
-                    isCarriedByMe = bpEquipped;
-                }
-
-                if (isCarriedByMe && item.LabelDestinationId > 0)
-                {
-                    currentDestinations.Add(item.LabelDestinationId);
-                }
-            }
-
-            // Remove rotas de destinos não mais transportados
-            var toRemove = new List<int>();
-            foreach (int destId in _displayedDestinations)
-            {
-                if (!currentDestinations.Contains(destId))
-                {
-                    routeMgr.RemoveRoute($"Cargo_Dest_{destId}");
-                    toRemove.Add(destId);
-                }
-            }
-            for (int i = 0; i < toRemove.Count; i++) _displayedDestinations.Remove(toRemove[i]);
-
-            // Adiciona rotas para novos destinos transportados
-            foreach (int destId in currentDestinations)
-            {
-                if (!_displayedDestinations.Contains(destId))
-                {
-                    Vector3 targetPos = FindDeliveryPointPosition(destId);
-                    if (targetPos != Vector3.zero)
-                    {
-                        routeMgr.CreateRoute($"Cargo_Dest_{destId}", transform.position, targetPos);
-                        _displayedDestinations.Add(destId);
-                    }
-                }
-            }
-        }
-
-        private Vector3 FindDeliveryPointPosition(int destId)
-        {
+            position = default;
             // Consulta primeiramente o AddressRegistry autoritativo
             var root = PizzeriaRoot.Instance;
             if (root != null && root.AddressRegistry != null)
             {
                 if (root.AddressRegistry.TryGetPosition(new AddressId(destId), out var dPos))
                 {
-                    return new Vector3(dPos.X, dPos.Y, dPos.Z);
+                    position = new Vector3(dPos.X, dPos.Y, dPos.Z);
+                    return true;
                 }
             }
 
@@ -117,22 +34,13 @@ namespace ScaryParty.Pizzeria.Integration
             for (int i = 0; i < points.Length; i++)
             {
                 if (points[i].AddressId == destId)
-                    return points[i].transform.position;
-            }
-            return Vector3.zero;
-        }
-
-        private void OnDestroy()
-        {
-            var routeMgr = MinimapRouteManager.Instance;
-            if (routeMgr != null)
-            {
-                foreach (int destId in _displayedDestinations)
                 {
-                    routeMgr.RemoveRoute($"Cargo_Dest_{destId}");
+                    position = points[i].transform.position;
+                    return true;
                 }
             }
-            _displayedDestinations.Clear();
+            return false;
         }
+
     }
 }

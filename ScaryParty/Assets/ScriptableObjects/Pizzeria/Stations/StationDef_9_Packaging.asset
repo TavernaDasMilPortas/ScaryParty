@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationDef
   id: 9
   stationName: Bancada de Embalagem
-  slotCount: 4
+  slotCount: 1
   acceptedProcesses: []
   acceptedProcessIds: 
   durationOverrides: []

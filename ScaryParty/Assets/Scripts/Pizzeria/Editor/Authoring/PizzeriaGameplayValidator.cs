@@ -65,8 +65,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
     public static class PizzeriaGameplayValidator
     {
         /// <summary>
-        /// Validação SOMENTE LEITURA do prefab-alvo e suas configurações referenciadas.
-        /// NUNCA modifica o prefab durante a validação e NUNCA busca estações soltas na cena fora do prefab-alvo.
+        /// ValidaÃƒÂ§ÃƒÂ£o SOMENTE LEITURA do prefab-alvo e suas configuraÃƒÂ§ÃƒÂµes referenciadas.
+        /// NUNCA modifica o prefab durante a validaÃƒÂ§ÃƒÂ£o e NUNCA busca estaÃƒÂ§ÃƒÂµes soltas na cena fora do prefab-alvo.
         /// </summary>
         public static PizzeriaGameplayValidationReport ValidatePrefabAndCycle(
             GameObject targetRootOrPrefab,
@@ -84,7 +84,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             {
                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Prefab",
                     "Prefab-alvo ausente",
-                    "Nenhum prefab-alvo selecionado ou aberto para validação.", null);
+                    "Nenhum prefab-alvo selecionado ou aberto para validaÃƒÂ§ÃƒÂ£o.", null);
                 FinalizeReportSummary(report);
                 return report;
             }
@@ -102,7 +102,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // 0. Validar Componentes Raiz (Etapa 2)
             ValidateRootComponents(targetRootOrPrefab, pizzeriaRoot, bindings, footprint, itemVisualizer, config, report);
 
-            // Coletar todas as estações EXCLUSIVAMENTE dentro de targetRootOrPrefab
+            // Coletar todas as estaÃƒÂ§ÃƒÂµes EXCLUSIVAMENTE dentro de targetRootOrPrefab
             var allStations = targetRootOrPrefab.GetComponentsInChildren<StationView>(true);
 
             // A & B. Validar cada equipamento individualmente e montar tabela de cobertura por tipo (15 tipos)
@@ -114,7 +114,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // C. Validar Completude do Ciclo de Gameplay de ponta a ponta por receita ativa
             ValidateGameplayCycleCompleteness(targetRootOrPrefab, allStations, bindings, pizzeriaRoot, footprint, itemVisualizer, config, settings, report);
 
-            // Validar dependências externas de cena separadamente
+            // Validar dependÃƒÂªncias externas de cena separadamente
             if (alsoValidateActiveSceneDependencies)
             {
                 ValidateSceneDependencies(settings != null && settings.targetPrefab != null ? settings.targetPrefab : targetRootOrPrefab, report);
@@ -145,7 +145,6 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 typeof(LogisticsCommands),
                 typeof(PizzeriaNotifier),
                 typeof(PlayerLifecycleBridge),
-                typeof(PizzeriaHudBuilder),
                 typeof(PizzeriaItemVisualizer),
                 typeof(TicketModalPresenter),
                 typeof(Night1Bootstrapper),
@@ -158,7 +157,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 {
                     AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Base (Raiz)",
                         $"Componente raiz ausente: {t.Name}",
-                        $"A raiz '{root.name}' não possui o componente obrigatório '{t.Name}'. Use a aba '2. Funcionamento base' → 'Injetar/atualizar base'.",
+                        $"A raiz '{root.name}' nÃƒÂ£o possui o componente obrigatÃƒÂ³rio '{t.Name}'. Use a aba '2. Funcionamento base' Ã¢â€ â€™ 'Injetar/atualizar base'.",
                         root);
                 }
             }
@@ -170,7 +169,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (no != null && no.gameObject != root)
                 {
                     AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Rede",
-                        $"NetworkObject aninhado inválido em '{no.name}'",
+                        $"NetworkObject aninhado invÃƒÂ¡lido em '{no.name}'",
                         $"Apenas a raiz do prefab deve possuir NetworkObject. Remova o NetworkObject do filho '{no.name}'.",
                         no.gameObject);
                 }
@@ -179,31 +178,31 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (config == null)
             {
                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Base (Config)",
-                    "PizzeriaConfig não atribuído",
-                    "O PizzeriaRoot não possui um PizzeriaConfig serializado.",
+                    "PizzeriaConfig nÃƒÂ£o atribuÃƒÂ­do",
+                    "O PizzeriaRoot nÃƒÂ£o possui um PizzeriaConfig serializado.",
                     pizzeriaRoot != null ? (UnityEngine.Object)pizzeriaRoot : root);
             }
             else
             {
                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.Ok, "Base (Config)",
-                    $"PizzeriaConfig atribuído ({config.name})",
-                    "Configuração de domínio vinculada à raiz.", config);
+                    $"PizzeriaConfig atribuÃƒÂ­do ({config.name})",
+                    "ConfiguraÃƒÂ§ÃƒÂ£o de domÃƒÂ­nio vinculada ÃƒÂ  raiz.", config);
             }
 
             if (itemVisualizer != null)
             {
                 if (itemVisualizer.catalog == null)
                 {
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Apresentação",
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "ApresentaÃƒÂ§ÃƒÂ£o",
                         "ItemPresentationCatalog ausente no PizzeriaItemVisualizer",
-                        "O campo 'catalog' do PizzeriaItemVisualizer deve estar serializado diretamente no prefab (não depender de AssetDatabase em runtime).",
+                        "O campo 'catalog' do PizzeriaItemVisualizer deve estar serializado diretamente no prefab (nÃƒÂ£o depender de AssetDatabase em runtime).",
                         itemVisualizer);
                 }
                 else
                 {
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.Ok, "Apresentação",
-                        $"Catálogo de apresentação serializado ({itemVisualizer.catalog.name})",
-                        "PizzeriaItemVisualizer possui referência direta ao catálogo.", itemVisualizer);
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.Ok, "ApresentaÃƒÂ§ÃƒÂ£o",
+                        $"CatÃƒÂ¡logo de apresentaÃƒÂ§ÃƒÂ£o serializado ({itemVisualizer.catalog.name})",
+                        "PizzeriaItemVisualizer possui referÃƒÂªncia direta ao catÃƒÂ¡logo.", itemVisualizer);
                 }
             }
         }
@@ -257,7 +256,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             int ignoreRaycastLayer = LayerMask.NameToLayer("Ignore Raycast");
             float maxReach = config != null && config.interactDistance > 0f ? config.interactDistance : 3.0f;
 
-            // Validar cada estação encontrada
+            // Validar cada estaÃƒÂ§ÃƒÂ£o encontrada
             for (int i = 0; i < allStations.Length; i++)
             {
                 var st = allStations[i];
@@ -275,26 +274,26 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (!st.gameObject.activeInHierarchy || !st.enabled)
                 {
                     isStationValid = false;
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Estação",
-                        $"Estação desativada: '{st.name}'",
-                        $"O GameObject ou componente {st.GetType().Name} está desativado.", st);
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "EstaÃƒÂ§ÃƒÂ£o",
+                        $"EstaÃƒÂ§ÃƒÂ£o desativada: '{st.name}'",
+                        $"O GameObject ou componente {st.GetType().Name} estÃƒÂ¡ desativado.", st);
                 }
 
-                // 2. stationId > 0 e único
+                // 2. stationId > 0 e ÃƒÂºnico
                 if (st.stationId <= 0)
                 {
                     isStationValid = false;
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Estação",
-                        $"stationId inválido ({st.stationId}) em '{st.name}'",
-                        "Toda estação deve possuir stationId > 0.", st, kind);
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "EstaÃƒÂ§ÃƒÂ£o",
+                        $"stationId invÃƒÂ¡lido ({st.stationId}) em '{st.name}'",
+                        "Toda estaÃƒÂ§ÃƒÂ£o deve possuir stationId > 0.", st, kind);
                 }
                 else if (idToStations.TryGetValue(st.stationId, out var sameIdList) && sameIdList.Count > 1)
                 {
                     isStationValid = false;
                     string others = string.Join(", ", sameIdList.Select(x => x.name));
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Estação",
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "EstaÃƒÂ§ÃƒÂ£o",
                         $"stationId duplicado #{st.stationId} em '{st.name}'",
-                        $"O ID #{st.stationId} está compartilhado entre: {others}. Cada estação deve ter ID único.", st, kind);
+                        $"O ID #{st.stationId} estÃƒÂ¡ compartilhado entre: {others}. Cada estaÃƒÂ§ÃƒÂ£o deve ter ID ÃƒÂºnico.", st, kind);
                 }
 
                 // 3. Registro no PizzeriaConfig (StationDef / StationInstanceConfig)
@@ -304,14 +303,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     bool registeredInDefs = config.stations != null && config.stations.Any(d => d != null && d.id == st.stationId);
                     if (!registeredInInstances && !registeredInDefs)
                     {
-                        // Para estações que usam catálogo de domínio (Prep, Oven, Counter, Assembly, Packaging, Staging, ToolRack), exigir registro
+                        // Para estaÃƒÂ§ÃƒÂµes que usam catÃƒÂ¡logo de domÃƒÂ­nio (Prep, Oven, Counter, Assembly, Packaging, Staging, ToolRack), exigir registro
                         if (kind == PizzeriaStationKind.Prep || kind == PizzeriaStationKind.Oven || kind == PizzeriaStationKind.Assembly ||
                             kind == PizzeriaStationKind.Packaging || kind == PizzeriaStationKind.Staging || kind == PizzeriaStationKind.Counter ||
                             kind == PizzeriaStationKind.ToolRack)
                         {
                             isStationValid = false;
-                            AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Estação",
-                                $"Estação '{st.name}' (#{st.stationId}) não registrada no PizzeriaConfig",
+                            AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "EstaÃƒÂ§ÃƒÂ£o",
+                                $"EstaÃƒÂ§ÃƒÂ£o '{st.name}' (#{st.stationId}) nÃƒÂ£o registrada no PizzeriaConfig",
                                 $"Falta entrada correspondente em stationInstances/stations do PizzeriaConfig.", st, kind);
                         }
                     }
@@ -335,27 +334,27 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (!hasEnabledCollider)
                 {
                     isStationValid = false;
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Interação",
-                        $"Estação '{st.name}' sem Collider ativo",
-                        "O jogador não conseguirá focar ou interagir por raycast sem um Collider habilitado.", st, kind);
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "InteraÃƒÂ§ÃƒÂ£o",
+                        $"EstaÃƒÂ§ÃƒÂ£o '{st.name}' sem Collider ativo",
+                        "O jogador nÃƒÂ£o conseguirÃƒÂ¡ focar ou interagir por raycast sem um Collider habilitado.", st, kind);
                 }
                 else if (allOnIgnoreRaycast)
                 {
                     isStationValid = false;
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Interação",
-                        $"Estação '{st.name}' na layer 'Ignore Raycast'",
-                        "Todos os colliders ativos estão na layer Ignore Raycast, impedindo a interação do jogador.", st, kind);
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "InteraÃƒÂ§ÃƒÂ£o",
+                        $"EstaÃƒÂ§ÃƒÂ£o '{st.name}' na layer 'Ignore Raycast'",
+                        "Todos os colliders ativos estÃƒÂ£o na layer Ignore Raycast, impedindo a interaÃƒÂ§ÃƒÂ£o do jogador.", st, kind);
                 }
 
                 // 5. OutlineTarget e InteractPrompt
                 if (st.GetComponent<OutlineTarget>() == null && st.GetComponentInParent<OutlineTarget>() == null)
                 {
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.Warning, "Apresentação",
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.Warning, "ApresentaÃƒÂ§ÃƒÂ£o",
                         $"OutlineTarget ausente em '{st.name}'",
                         "Recomendado adicionar OutlineTarget para highlight visual ao mirar.", st, kind);
                 }
 
-                // 6. Validação de slotAnchors (pertencentes ao mesmo prefab, não nulos e dentro do alcance de interação)
+                // 6. ValidaÃƒÂ§ÃƒÂ£o de slotAnchors (pertencentes ao mesmo prefab, nÃƒÂ£o nulos e dentro do alcance de interaÃƒÂ§ÃƒÂ£o)
                 bool requiresOperationalSlots = kind == PizzeriaStationKind.Counter ||
                                                 kind == PizzeriaStationKind.Prep ||
                                                 kind == PizzeriaStationKind.Assembly ||
@@ -371,8 +370,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     {
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Slots",
-                            $"Estação '{st.name}' sem slotAnchors configurados",
-                            "A estação precisa de pelo menos 1 slotAnchor válido.", st, kind);
+                            $"EstaÃƒÂ§ÃƒÂ£o '{st.name}' sem slotAnchors configurados",
+                            "A estaÃƒÂ§ÃƒÂ£o precisa de pelo menos 1 slotAnchor vÃƒÂ¡lido.", st, kind);
                     }
                     else
                     {
@@ -384,8 +383,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                             {
                                 isStationValid = false;
                                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Slots",
-                                    $"Slot nulo (índice {s}) em '{st.name}'",
-                                    $"O elemento slotAnchors[{s}] está nulo.", st, kind);
+                                    $"Slot nulo (ÃƒÂ­ndice {s}) em '{st.name}'",
+                                    $"O elemento slotAnchors[{s}] estÃƒÂ¡ nulo.", st, kind);
                                 continue;
                             }
 
@@ -394,24 +393,24 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                                 isStationValid = false;
                                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Slots",
                                     $"Slot '{slotT.name}' fora da hierarquia do prefab em '{st.name}'",
-                                    "O slotAnchor deve ser descendente da raiz do próprio prefab.", slotT, kind);
+                                    "O slotAnchor deve ser descendente da raiz do prÃƒÂ³prio prefab.", slotT, kind);
                             }
 
-                            // Verificar se o slot está em posição alcançável em relação aos colliders da estação
+                            // Verificar se o slot estÃƒÂ¡ em posiÃƒÂ§ÃƒÂ£o alcanÃƒÂ§ÃƒÂ¡vel em relaÃƒÂ§ÃƒÂ£o aos colliders da estaÃƒÂ§ÃƒÂ£o
                             Vector3 closestColliderPoint = stationBounds.ClosestPoint(slotT.position);
                             float distFromSurface = Vector3.Distance(closestColliderPoint, slotT.position);
                             if (distFromSurface > maxReach)
                             {
                                 isStationValid = false;
                                 AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Slots",
-                                    $"Slot '{slotT.name}' fora do alcance de interação ({distFromSurface:F2}m > {maxReach:F2}m) em '{st.name}'",
-                                    "Posicione o slotAnchor próximo à superfície frontal/superior da bancada.", slotT, kind);
+                                    $"Slot '{slotT.name}' fora do alcance de interaÃƒÂ§ÃƒÂ£o ({distFromSurface:F2}m > {maxReach:F2}m) em '{st.name}'",
+                                    "Posicione o slotAnchor prÃƒÂ³ximo ÃƒÂ  superfÃƒÂ­cie frontal/superior da bancada.", slotT, kind);
                             }
                         }
                     }
                 }
 
-                // 7. Validações específicas por tipo de estação
+                // 7. ValidaÃƒÂ§ÃƒÂµes especÃƒÂ­ficas por tipo de estaÃƒÂ§ÃƒÂ£o
                 if (kind == PizzeriaStationKind.Prep)
                 {
                     bool hasValidProcess = false;
@@ -430,7 +429,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Preparo",
                             $"Bancada de preparo '{st.name}' sem processos aceitos",
-                            "O StationDef da bancada de preparo precisa aceitar pelo menos 1 ProcessDef válido.", st, kind);
+                            "O StationDef da bancada de preparo precisa aceitar pelo menos 1 ProcessDef vÃƒÂ¡lido.", st, kind);
                     }
                 }
                 else if (kind == PizzeriaStationKind.Pantry || kind == PizzeriaStationKind.Fridge)
@@ -443,7 +442,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     }
                     else if (config != null)
                     {
-                        // Fallback legado IDs 1 e 2 ou primários
+                        // Fallback legado IDs 1 e 2 ou primÃƒÂ¡rios
                         int fridgeId = bindings != null ? bindings.ResolvePrimaryFridgeId(1) : 1;
                         int pantryId = bindings != null ? bindings.ResolvePrimaryPantryId(2) : 2;
                         if ((kind == PizzeriaStationKind.Fridge && st.stationId == fridgeId) ||
@@ -469,7 +468,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Telefone",
                             $"Telefone '{st.name}' com PhoneRinger/AudioSource incompleto",
-                            "O telefone requer PhoneRinger vinculado ao PhoneStation e um AudioSource válido.", st, kind);
+                            "O telefone requer PhoneRinger vinculado ao PhoneStation e um AudioSource vÃƒÂ¡lido.", st, kind);
                     }
                 }
                 else if (kind == PizzeriaStationKind.TicketBoard && st is TicketBoardStation board)
@@ -480,7 +479,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     {
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Comandas",
-                            $"Quadro de comandas '{st.name}' sem TicketSlots/TicketSheetView válidos",
+                            $"Quadro de comandas '{st.name}' sem TicketSlots/TicketSheetView vÃƒÂ¡lidos",
                             "O TicketBoardStation precisa de ticketSlots preenchidos com TicketSheetView em cada slot.", st, kind);
                     }
                 }
@@ -492,8 +491,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     if (!hasReceivingAnchor)
                     {
                         isStationValid = false;
-                        AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Logística",
-                            $"Área de recebimento '{st.name}' sem slotAnchor/receivingAnchor",
+                        AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "LogÃƒÂ­stica",
+                            $"ÃƒÂrea de recebimento '{st.name}' sem slotAnchor/receivingAnchor",
                             "Configure um slotAnchor na ReceivingStation ou receivingAnchor no PizzeriaRoot.", st, kind);
                     }
                 }
@@ -503,15 +502,15 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     {
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Pilha",
-                            $"Pilha de caixas '{st.name}' com stackId={stk.stackId} ou capacidade={stk.capacity} inválida",
-                            "StackStation requer stackId > 0 único e capacity > 0.", st, kind);
+                            $"Pilha de caixas '{st.name}' com stackId={stk.stackId} ou capacidade={stk.capacity} invÃƒÂ¡lida",
+                            "StackStation requer stackId > 0 ÃƒÂºnico e capacity > 0.", st, kind);
                     }
                     else if (stackIdToStations.TryGetValue(stk.stackId, out var sList) && sList.Count > 1)
                     {
                         isStationValid = false;
                         AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Pilha",
                             $"stackId duplicado #{stk.stackId} em '{st.name}'",
-                            "Cada StackStation deve ter um stackId único.", st, kind);
+                            "Cada StackStation deve ter um stackId ÃƒÂºnico.", st, kind);
                     }
                 }
 
@@ -521,7 +520,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 }
             }
 
-            // Construir Tabela de Cobertura Mínima por Tipo (A)
+            // Construir Tabela de Cobertura MÃƒÂ­nima por Tipo (A)
             foreach (var desc in PizzeriaStationRecipeRegistry.AllRecipes)
             {
                 var kind = desc.kind;
@@ -534,21 +533,21 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (valid >= minReq && total == valid)
                 {
                     rowStatus = PizzeriaValidationSeverity.Ok;
-                    detail = valid > 0 ? $"{valid} unidade(s) válida(s)" : "Opcional neste perfil";
+                    detail = valid > 0 ? $"{valid} unidade(s) vÃƒÂ¡lida(s)" : "Opcional neste perfil";
                 }
                 else if (valid < minReq)
                 {
                     rowStatus = PizzeriaValidationSeverity.BlockingError;
-                    detail = $"Faltam {minReq - valid} unidade(s) válida(s) (encontradas: {total}, válidas: {valid})";
-                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Cobertura Mínima",
-                        $"Tipo faltante ou inválido: {desc.displayName}",
-                        $"Necessário pelo menos {minReq} unidade(s) válida(s) de '{desc.displayName}', mas há {valid} válida(s) de {total} encontrada(s).",
+                    detail = $"Faltam {minReq - valid} unidade(s) vÃƒÂ¡lida(s) (encontradas: {total}, vÃƒÂ¡lidas: {valid})";
+                    AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "Cobertura MÃƒÂ­nima",
+                        $"Tipo faltante ou invÃƒÂ¡lido: {desc.displayName}",
+                        $"NecessÃƒÂ¡rio pelo menos {minReq} unidade(s) vÃƒÂ¡lida(s) de '{desc.displayName}', mas hÃƒÂ¡ {valid} vÃƒÂ¡lida(s) de {total} encontrada(s).",
                         stationsByKind[kind].FirstOrDefault(), kind);
                 }
                 else
                 {
                     rowStatus = PizzeriaValidationSeverity.Warning;
-                    detail = $"Cobertura mínima atendida ({valid}/{minReq}), mas há {total - valid} instância(s) com erro.";
+                    detail = $"Cobertura mÃƒÂ­nima atendida ({valid}/{minReq}), mas hÃƒÂ¡ {total - valid} instÃƒÂ¢ncia(s) com erro.";
                 }
 
                 report.coverageTable.Add(new PizzeriaStationCoverageRow
@@ -566,8 +565,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Determina o tipo funcional de uma estação usando os metadados persistidos no PizzeriaAuthoringBindings
-        /// ou configuração de estoque (Dispensa vs Geladeira), NUNCA dependendo apenas do nome do GameObject.
+        /// Determina o tipo funcional de uma estaÃƒÂ§ÃƒÂ£o usando os metadados persistidos no PizzeriaAuthoringBindings
+        /// ou configuraÃƒÂ§ÃƒÂ£o de estoque (Dispensa vs Geladeira), NUNCA dependendo apenas do nome do GameObject.
         /// </summary>
         public static PizzeriaStationKind ResolveStationKindForValidation(
             StationView st,
@@ -637,14 +636,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (id.pendingReview)
                 {
                     string norm = PizzeriaHierarchyOrganizer.NormalizeNodeNameForMatch(id.originalNodeName ?? id.name, out _);
-                    // Se for uma porta ou tampa solta não associada, é um aviso/erro estrutural importante
+                    // Se for uma porta ou tampa solta nÃƒÂ£o associada, ÃƒÂ© um aviso/erro estrutural importante
                     bool isOrphanDoorOrLid = norm.StartsWith("porta") || norm.StartsWith("tampa") || norm.StartsWith("gaveta");
                     var sev = isOrphanDoorOrLid ? PizzeriaValidationSeverity.Warning : PizzeriaValidationSeverity.Warning;
 
                     AddIssue(report.prefabIssues, report, sev, "Hierarquia / Revisar",
                         $"Objeto pendente em Revisar: '{id.name}'",
                         string.IsNullOrEmpty(id.reviewReason)
-                            ? "Objeto aguarda revisão ou fixação manual de categoria/pai."
+                            ? "Objeto aguarda revisÃƒÂ£o ou fixaÃƒÂ§ÃƒÂ£o manual de categoria/pai."
                             : id.reviewReason,
                         id.gameObject);
                 }
@@ -669,8 +668,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (config == null)
             {
                 AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo de Gameplay",
-                    "Impossível validar cadeia produtiva sem PizzeriaConfig",
-                    "Atribua um PizzeriaConfig válido na Etapa 2.", root);
+                    "ImpossÃƒÂ­vel validar cadeia produtiva sem PizzeriaConfig",
+                    "Atribua um PizzeriaConfig vÃƒÂ¡lido na Etapa 2.", root);
                 return;
             }
 
@@ -680,8 +679,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (catalog.Recipes.Count == 0)
             {
                 AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo de Gameplay",
-                    "Nenhuma receita ativa no catálogo",
-                    "O PizzeriaConfig precisa ter pelo menos 1 RecipeDef válida.", config);
+                    "Nenhuma receita ativa no catÃƒÂ¡logo",
+                    "O PizzeriaConfig precisa ter pelo menos 1 RecipeDef vÃƒÂ¡lida.", config);
                 return;
             }
 
@@ -692,11 +691,11 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 {
                     AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo (Processos)",
                         $"Processo circular detectado: '{proc.Name}' (#{proc.Id})",
-                        $"O processo #{proc.Id} tem a mesma entrada e saída (ingrediente {proc.InputIngredientId}, estágio {proc.InputStage}).", config);
+                        $"O processo #{proc.Id} tem a mesma entrada e saÃƒÂ­da (ingrediente {proc.InputIngredientId}, estÃƒÂ¡gio {proc.InputStage}).", config);
                 }
             }
 
-            // Coletar quais ingredientes estão disponíveis nas dispensas e geladeiras ativas do prefab
+            // Coletar quais ingredientes estÃƒÂ£o disponÃƒÂ­veis nas dispensas e geladeiras ativas do prefab
             var availableIngredientIdsInPrefabStorages = new HashSet<int>();
             var activeStorages = allStations.OfType<StorageStation>().Where(s => s != null && s.gameObject.activeInHierarchy && s.enabled).ToList();
 
@@ -740,7 +739,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 }
             }
 
-            // Coletar capacidades de ferramentas disponíveis no ToolRack ativo do prefab
+            // Coletar capacidades de ferramentas disponÃƒÂ­veis no ToolRack ativo do prefab
             var availableToolCapabilities = new HashSet<ToolCapability> { ToolCapability.None };
             var activeToolRacks = allStations.OfType<ToolRackStation>().Where(r => r != null && r.gameObject.activeInHierarchy && r.enabled).ToList();
             int totalInitialToolsCount = 0;
@@ -756,7 +755,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 }
             }
 
-            // Verificar se o ToolRack primário comporta a contagem inicial de ferramentas
+            // Verificar se o ToolRack primÃƒÂ¡rio comporta a contagem inicial de ferramentas
             if (activeToolRacks.Count > 0)
             {
                 int primaryRackId = bindings != null ? bindings.ResolvePrimaryToolRackId(3) : activeToolRacks[0].stationId;
@@ -764,9 +763,9 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 int rackSlots = primaryRack.slotAnchors != null ? primaryRack.slotAnchors.Length : 0;
                 if (rackSlots < totalInitialToolsCount)
                 {
-                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo (Utensílios)",
-                        $"Suporte de utensílios '{primaryRack.name}' tem menos slots ({rackSlots}) que o total de utensílios iniciais ({totalInitialToolsCount})",
-                        $"Adicione pelo menos {totalInitialToolsCount} slots ao ToolRackStation para comportar todos os utensílios iniciais.",
+                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo (UtensÃƒÂ­lios)",
+                        $"Suporte de utensÃƒÂ­lios '{primaryRack.name}' tem menos slots ({rackSlots}) que o total de utensÃƒÂ­lios iniciais ({totalInitialToolsCount})",
+                        $"Adicione pelo menos {totalInitialToolsCount} slots ao ToolRackStation para comportar todos os utensÃƒÂ­lios iniciais.",
                         primaryRack, PizzeriaStationKind.ToolRack);
                 }
             }
@@ -784,7 +783,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     report);
             }
 
-            // 4. Validar estações de fluxo (Montagem -> Forno -> Embalagem -> Retirada / Pilha / Mochila -> Entrega)
+            // 4. Validar estaÃƒÂ§ÃƒÂµes de fluxo (Montagem -> Forno -> Embalagem -> Retirada / Pilha / Mochila -> Entrega)
             bool hasAssembly = allStations.OfType<AssemblyStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
             bool hasOven = allStations.OfType<OvenStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
             bool hasPackaging = allStations.OfType<PackagingStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
@@ -795,22 +794,22 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (!hasPhone || !hasTicketBoard || !hasAssembly || !hasOven || !hasPackaging || !hasStaging)
             {
                 AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo de Gameplay",
-                    "Fluxo principal de produção incompleto no prefab",
+                    "Fluxo principal de produÃƒÂ§ÃƒÂ£o incompleto no prefab",
                     $"O ciclo exige Telefone ({hasPhone}), Quadro de Comandas ({hasTicketBoard}), Montagem ({hasAssembly}), Forno ({hasOven}), Embalagem ({hasPackaging}) e Retirada ({hasStaging}).",
                     root);
             }
             else
             {
                 AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Ok, "Ciclo de Gameplay",
-                    "Fluxo principal de estações (Pedido -> Montagem -> Forno -> Embalagem -> Retirada) presente",
-                    "Todas as etapas operacionais do ciclo possuem estações ativas no prefab.", root);
+                    "Fluxo principal de estaÃƒÂ§ÃƒÂµes (Pedido -> Montagem -> Forno -> Embalagem -> Retirada) presente",
+                    "Todas as etapas operacionais do ciclo possuem estaÃƒÂ§ÃƒÂµes ativas no prefab.", root);
             }
 
-            // 5. Validar Mochila Térmica e Apresentação de Itens Críticos
+            // 5. Validar Mochila TÃƒÂ©rmica e ApresentaÃƒÂ§ÃƒÂ£o de Itens CrÃƒÂ­ticos
             if (config.backpackInitialSlots <= 0)
             {
                 AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ciclo (Entrega)",
-                    "Capacidade inicial da mochila inválida (backpackInitialSlots <= 0)",
+                    "Capacidade inicial da mochila invÃƒÂ¡lida (backpackInitialSlots <= 0)",
                     "O PizzeriaConfig precisa ter backpackInitialSlots >= 1 para entregas com mochila.", config);
             }
 
@@ -821,19 +820,19 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 var pizzaProf = cat.FindProfile(ItemCategory.Pizza, 2, false, false);
                 if ((boxProf == null || boxProf.visualPrefab == null) && itemVisualizer.pizzaBoxPrefab == null)
                 {
-                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "Apresentação",
-                        "Visual de caixa de pizza não configurado no catálogo nem no fallback",
+                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "ApresentaÃƒÂ§ÃƒÂ£o",
+                        "Visual de caixa de pizza nÃƒÂ£o configurado no catÃƒÂ¡logo nem no fallback",
                         "Configure o visual de caixa na Etapa 3 ou no ItemPresentationCatalog.", itemVisualizer);
                 }
                 if ((pizzaProf == null || pizzaProf.visualPrefab == null) && itemVisualizer.pizzaBasePrefab == null)
                 {
-                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "Apresentação",
-                        "Visual de pizza/forma não configurado no catálogo nem no fallback",
+                    AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "ApresentaÃƒÂ§ÃƒÂ£o",
+                        "Visual de pizza/forma nÃƒÂ£o configurado no catÃƒÂ¡logo nem no fallback",
                         "Configure o visual de pizza/forma na Etapa 3 ou no ItemPresentationCatalog.", itemVisualizer);
                 }
             }
 
-            // 6. Validar Âncoras e Footprint
+            // 6. Validar Ãƒâ€šncoras e Footprint
             ValidateAnchorsAndFootprint(root, pizzeriaRoot, footprint, bindings, report);
         }
 
@@ -856,7 +855,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 availableToolCapabilities,
                 out string baseFailReason))
             {
-                // Também verificar se a base já é fornecida diretamente como Raw ou Prepared
+                // TambÃƒÂ©m verificar se a base jÃƒÂ¡ ÃƒÂ© fornecida diretamente como Raw ou Prepared
                 if (!CanProduceIngredientStage(
                     recipe.BaseIngredientId,
                     ProcessingStage.Raw,
@@ -867,7 +866,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     out _))
                 {
                     AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, $"Receita: {recipe.Name}",
-                        $"Base da receita '{recipe.Name}' (ID {recipe.BaseIngredientId}) não pode ser produzida",
+                        $"Base da receita '{recipe.Name}' (ID {recipe.BaseIngredientId}) nÃƒÂ£o pode ser produzida",
                         baseFailReason, config);
                 }
             }
@@ -890,7 +889,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                             ? ingData.Name
                             : $"ID {req.IngredientDefId}";
                         AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, $"Receita: {recipe.Name}",
-                            $"Ingrediente '{ingName}' ({req.Stage}) da receita '{recipe.Name}' indisponível no ciclo",
+                            $"Ingrediente '{ingName}' ({req.Stage}) da receita '{recipe.Name}' indisponÃƒÂ­vel no ciclo",
                             ingFailReason, config);
                     }
                 }
@@ -909,12 +908,12 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         {
             failureReason = string.Empty;
 
-            // Caso 1: É um ingrediente bruto disponível diretamente em alguma Dispensa/Geladeira ativa
+            // Caso 1: Ãƒâ€° um ingrediente bruto disponÃƒÂ­vel diretamente em alguma Dispensa/Geladeira ativa
             if (targetStage == ProcessingStage.Raw && availableRawIngredients.Contains(targetIngredientId))
                 return true;
 
             // Alguns ingredientes transformados (ex: Massa Aberta ID 2, Queijo Ralado ID 5, Calabresa Fatiada ID 7)
-            // também podem estar estocados diretamente se o usuário configurou assim
+            // tambÃƒÂ©m podem estar estocados diretamente se o usuÃƒÂ¡rio configurou assim
             if (availableRawIngredients.Contains(targetIngredientId) && catalog.Ingredients.TryGetValue(targetIngredientId, out var directIng) && !directIng.RequiresPrep)
                 return true;
 
@@ -923,11 +922,11 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             if (!visited.Add((targetIngredientId, targetStage)))
             {
-                failureReason = $"Dependência circular detectada ao tentar produzir o ingrediente ID {targetIngredientId}.";
+                failureReason = $"DependÃƒÂªncia circular detectada ao tentar produzir o ingrediente ID {targetIngredientId}.";
                 return false;
             }
 
-            // Procurar processo no catálogo que produza targetIngredientId (no targetStage ou Prepared)
+            // Procurar processo no catÃƒÂ¡logo que produza targetIngredientId (no targetStage ou Prepared)
             var matchingProcs = catalog.Processes.Values.Where(p =>
                 p.OutputIngredientId == targetIngredientId &&
                 (p.OutputStage == targetStage || p.OutputStage == ProcessingStage.Prepared)).ToList();
@@ -935,7 +934,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (matchingProcs.Count == 0)
             {
                 string ingName = catalog.Ingredients.TryGetValue(targetIngredientId, out var d) ? d.Name : $"#{targetIngredientId}";
-                failureReason = $"O ingrediente '{ingName}' (ID {targetIngredientId}) não está disponível em nenhuma Dispensa/Geladeira com estoque > 0 e não possui processo de produção.";
+                failureReason = $"O ingrediente '{ingName}' (ID {targetIngredientId}) nÃƒÂ£o estÃƒÂ¡ disponÃƒÂ­vel em nenhuma Dispensa/Geladeira com estoque > 0 e nÃƒÂ£o possui processo de produÃƒÂ§ÃƒÂ£o.";
                 return false;
             }
 
@@ -944,7 +943,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             {
                 if (!supportedProcesses.Contains(proc.Id))
                 {
-                    reasons.Add($"O processo '{proc.Name}' (#{proc.Id}) não é aceito por nenhuma Bancada de Preparo ativa no prefab.");
+                    reasons.Add($"O processo '{proc.Name}' (#{proc.Id}) nÃƒÂ£o ÃƒÂ© aceito por nenhuma Bancada de Preparo ativa no prefab.");
                     continue;
                 }
 
@@ -953,7 +952,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     bool hasCap = availableToolCapabilities.Any(cap => cap.HasFlag(proc.RequiredCapability));
                     if (!hasCap)
                     {
-                        reasons.Add($"O processo '{proc.Name}' exige ferramenta com capacidade '{proc.RequiredCapability}', mas não há suporte de utensílios ativo ou ferramenta inicial configurada.");
+                        reasons.Add($"O processo '{proc.Name}' exige ferramenta com capacidade '{proc.RequiredCapability}', mas nÃƒÂ£o hÃƒÂ¡ suporte de utensÃƒÂ­lios ativo ou ferramenta inicial configurada.");
                         continue;
                     }
                 }
@@ -991,21 +990,21 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             if (pizzeriaRoot.entranceAnchor == null)
             {
-                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Âncoras",
+                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ãƒâ€šncoras",
                     "EntranceAnchor ausente",
-                    "PizzeriaRoot.entranceAnchor não está atribuído.", pizzeriaRoot);
+                    "PizzeriaRoot.entranceAnchor nÃƒÂ£o estÃƒÂ¡ atribuÃƒÂ­do.", pizzeriaRoot);
             }
             if (pizzeriaRoot.receivingAnchor == null)
             {
-                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Âncoras",
+                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ãƒâ€šncoras",
                     "ReceivingAnchor ausente",
-                    "PizzeriaRoot.receivingAnchor não está atribuído.", pizzeriaRoot);
+                    "PizzeriaRoot.receivingAnchor nÃƒÂ£o estÃƒÂ¡ atribuÃƒÂ­do.", pizzeriaRoot);
             }
             if (pizzeriaRoot.recoveryAnchor == null)
             {
-                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Âncoras",
+                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ãƒâ€šncoras",
                     "RecoveryAnchor ausente",
-                    "PizzeriaRoot.recoveryAnchor não está atribuído.", pizzeriaRoot);
+                    "PizzeriaRoot.recoveryAnchor nÃƒÂ£o estÃƒÂ¡ atribuÃƒÂ­do.", pizzeriaRoot);
             }
 
             int validSpawns = pizzeriaRoot.playerSpawnAnchors != null
@@ -1013,7 +1012,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 : 0;
             if (validSpawns < 4)
             {
-                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Âncoras",
+                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Ãƒâ€šncoras",
                     $"PlayerSpawns insuficientes ({validSpawns}/4)",
                     "O PizzeriaRoot requer pelo menos 4 pontos de spawn (PlayerSpawn_0 a PlayerSpawn_3).", pizzeriaRoot);
             }
@@ -1021,9 +1020,9 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (bindings != null && !bindings.anchorsVerifiedByUser &&
                 (bindings.entranceAnchorProvisional || bindings.receivingAnchorProvisional || bindings.recoveryAnchorProvisional || bindings.playerSpawnsProvisional))
             {
-                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "Âncoras",
-                    "Âncoras automáticas ainda marcadas como provisórias",
-                    "Verifique as posições de EntranceAnchor, ReceivingAnchor, RecoveryAnchor e PlayerSpawns na cena/prefab e clique em 'Marcar âncoras como verificadas' na Etapa 2.",
+                AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.Warning, "Ãƒâ€šncoras",
+                    "Ãƒâ€šncoras automÃƒÂ¡ticas ainda marcadas como provisÃƒÂ³rias",
+                    "Verifique as posiÃƒÂ§ÃƒÂµes de EntranceAnchor, ReceivingAnchor, RecoveryAnchor e PlayerSpawns na cena/prefab e clique em 'Marcar ÃƒÂ¢ncoras como verificadas' na Etapa 2.",
                     bindings);
             }
 
@@ -1032,8 +1031,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (footprint.footprintSize.x < 4f || footprint.footprintSize.y < 4f)
                 {
                     AddIssue(report.cycleIssues, report, PizzeriaValidationSeverity.BlockingError, "Footprint",
-                        $"Dimensões do PizzeriaFootprint inválidas ({footprint.footprintSize.x:F1}m x {footprint.footprintSize.y:F1}m)",
-                        "As dimensões footprintSize do PizzeriaFootprint devem cobrir a área da pizzaria.", footprint);
+                        $"DimensÃƒÂµes do PizzeriaFootprint invÃƒÂ¡lidas ({footprint.footprintSize.x:F1}m x {footprint.footprintSize.y:F1}m)",
+                        "As dimensÃƒÂµes footprintSize do PizzeriaFootprint devem cobrir a ÃƒÂ¡rea da pizzaria.", footprint);
                 }
             }
         }
@@ -1049,9 +1048,9 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (netPrefabs == null)
             {
                 sceneOk = false;
-                AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "Dependências de Cena/Rede",
-                    "DefaultNetworkPrefabs.asset não encontrado",
-                    "O arquivo Assets/DefaultNetworkPrefabs.asset não foi localizado.", null);
+                AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "DependÃƒÂªncias de Cena/Rede",
+                    "DefaultNetworkPrefabs.asset nÃƒÂ£o encontrado",
+                    "O arquivo Assets/DefaultNetworkPrefabs.asset nÃƒÂ£o foi localizado.", null);
             }
             else if (targetPrefabAsset != null && EditorUtility.IsPersistent(targetPrefabAsset))
             {
@@ -1059,20 +1058,20 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 if (!isRegistered)
                 {
                     sceneOk = false;
-                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "Dependências de Cena/Rede",
-                        $"Prefab '{targetPrefabAsset.name}' ainda não registrado no DefaultNetworkPrefabs.asset",
+                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "DependÃƒÂªncias de Cena/Rede",
+                        $"Prefab '{targetPrefabAsset.name}' ainda nÃƒÂ£o registrado no DefaultNetworkPrefabs.asset",
                         "Clique em 'Usar esta pizzaria no jogo' na aba 4 para registrar o prefab na rede e atualizar geradores/spawners.",
                         netPrefabs);
                 }
                 else
                 {
-                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Ok, "Dependências de Cena/Rede",
+                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Ok, "DependÃƒÂªncias de Cena/Rede",
                         $"Prefab '{targetPrefabAsset.name}' registrado em DefaultNetworkPrefabs.asset",
                         "Registro de rede Netcode confirmado.", netPrefabs);
                 }
             }
 
-            // 2. Verificar cena aberta (se não estivermos apenas em uma cena vazia de teste)
+            // 2. Verificar cena aberta (se nÃƒÂ£o estivermos apenas em uma cena vazia de teste)
             var activeScene = SceneManager.GetActiveScene();
             if (activeScene.IsValid() && !string.IsNullOrEmpty(activeScene.path))
             {
@@ -1082,16 +1081,16 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
                 if (cityGen == null && spawner == null)
                 {
-                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.NotVerifiedInEditMode, "Dependências de Cena",
-                        $"Cena atual '{activeScene.name}' não contém CityGenerator nem PizzeriaSpawner",
-                        "Abra a GameScene para verificar integração com a cidade ou use 'Usar esta pizzaria no jogo'.", null);
+                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.NotVerifiedInEditMode, "DependÃƒÂªncias de Cena",
+                        $"Cena atual '{activeScene.name}' nÃƒÂ£o contÃƒÂ©m CityGenerator nem PizzeriaSpawner",
+                        "Abra a GameScene para verificar integraÃƒÂ§ÃƒÂ£o com a cidade ou use 'Usar esta pizzaria no jogo'.", null);
                 }
                 else
                 {
                     if (cityGen != null && targetPrefabAsset != null && EditorUtility.IsPersistent(targetPrefabAsset) && cityGen.pizzeriaPrefab != targetPrefabAsset)
                     {
                         sceneOk = false;
-                        AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "Dependências de Cena",
+                        AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "DependÃƒÂªncias de Cena",
                             $"CityGenerator aponta para outro prefab ('{(cityGen.pizzeriaPrefab != null ? cityGen.pizzeriaPrefab.name : "null")}')",
                             "Clique em 'Usar esta pizzaria no jogo' para atualizar CityGenerator.pizzeriaPrefab.", cityGen);
                     }
@@ -1103,7 +1102,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                         if (prop != null && prop.objectReferenceValue != targetPrefabAsset)
                         {
                             sceneOk = false;
-                            AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "Dependências de Cena",
+                            AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.Warning, "DependÃƒÂªncias de Cena",
                                 $"PizzeriaSpawner aponta para outro prefab ('{(prop.objectReferenceValue != null ? prop.objectReferenceValue.name : "null")}')",
                                 "Clique em 'Usar esta pizzaria no jogo' para atualizar PizzeriaSpawner.", spawner);
                         }
@@ -1112,8 +1111,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
                 if (netMgr == null)
                 {
-                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.NotVerifiedInEditMode, "Dependências de Cena",
-                        "NetworkManager não encontrado na cena aberta",
+                    AddIssue(report.sceneDependencyIssues, report, PizzeriaValidationSeverity.NotVerifiedInEditMode, "DependÃƒÂªncias de Cena",
+                        "NetworkManager nÃƒÂ£o encontrado na cena aberta",
                         "O NetworkManager pode residir na cena de menu/bootstrap ou na GameScene.", null);
                 }
             }
@@ -1161,9 +1160,9 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Comando explícito "Usar esta pizzaria no jogo":
+        /// Comando explÃƒÂ­cito "Usar esta pizzaria no jogo":
         /// Atualiza CityGenerator.pizzeriaPrefab, PizzeriaSpawner._pizzeriaPrefab e DefaultNetworkPrefabs.asset
-        /// mesmo quando as referências anteriores não são nulas, preservando o GUID do asset e relatando tudo o que foi alterado.
+        /// mesmo quando as referÃƒÂªncias anteriores nÃƒÂ£o sÃƒÂ£o nulas, preservando o GUID do asset e relatando tudo o que foi alterado.
         /// </summary>
         public static List<string> ApplyPrefabToGameIntegration(
             GameObject targetPrefabAsset,
@@ -1172,7 +1171,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             var changes = new List<string>();
             if (targetPrefabAsset == null || !EditorUtility.IsPersistent(targetPrefabAsset))
             {
-                changes.Add("Erro: O prefab-alvo precisa ser um asset salvo no projeto antes de integrá-lo ao jogo.");
+                changes.Add("Erro: O prefab-alvo precisa ser um asset salvo no projeto antes de integrÃƒÂ¡-lo ao jogo.");
                 return changes;
             }
 
@@ -1193,14 +1192,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 }
                 else
                 {
-                    changes.Add($"'{targetPrefabAsset.name}' já estava registrado em Assets/DefaultNetworkPrefabs.asset.");
+                    changes.Add($"'{targetPrefabAsset.name}' jÃƒÂ¡ estava registrado em Assets/DefaultNetworkPrefabs.asset.");
                 }
             }
 
             // 2. Atualizar CityGenerator e PizzeriaSpawner nas cenas abertas
             int updatedInOpenScenes = UpdateGeneratorsAndSpawnersInLoadedScenes(targetPrefabAsset, changes);
 
-            // 3. Se GameScene.unity não estiver aberta e updateGameSceneIfClosed for verdadeiro, atualizar se o usuário estiver integrando ao projeto
+            // 3. Se GameScene.unity nÃƒÂ£o estiver aberta e updateGameSceneIfClosed for verdadeiro, atualizar se o usuÃƒÂ¡rio estiver integrando ao projeto
             string gameScenePath = "Assets/StarterAssets/ThirdPersonController/Scenes/GameScene.unity";
             var activeScene = SceneManager.GetActiveScene();
             if (updateGameSceneIfClosed && updatedInOpenScenes == 0 && File.Exists(gameScenePath) &&

@@ -14,7 +14,7 @@ public class CityEventManager : NetworkBehaviour
     
     private List<ActiveEvent> _activeEvents = new List<ActiveEvent>();
     
-    private CityGraphPathfinder _pathfinder;
+    private CityGenerator _city;
     private StreetGraph _graph;
     private TrafficManager _trafficManager;
     private Transform _eventRoot;
@@ -32,10 +32,12 @@ public class CityEventManager : NetworkBehaviour
         public GameObject visual;
     }
     
-    public void Initialize(CityGraphPathfinder pathfinder, StreetGraph graph, 
-        TrafficManager trafficManager, CityConfig config, int seed, Transform parent)
+    public void Initialize(StreetGraph graph, TrafficManager trafficManager,
+        CityConfig config, int seed, Transform parent, CityGenerator city)
     {
-        _pathfinder = pathfinder;
+        _activeEvents.Clear();
+        _timer = 0f;
+        _city = city;
         _graph = graph;
         _trafficManager = trafficManager;
         
@@ -56,7 +58,7 @@ public class CityEventManager : NetworkBehaviour
 
     private void Update()
     {
-        if (!_initialized || !IsServer) return;
+        if (!_initialized || _city == null || !_city.IsServer || !_city.ClosuresSynchronized) return;
 
         _timer += Time.deltaTime;
         
@@ -92,15 +94,13 @@ public class CityEventManager : NetworkBehaviour
         int edgeIndex = _rng.Next(0, _graph.edges.Count);
         StreetEdge edge = _graph.edges[edgeIndex];
         
-        // Ensure not already blocked
-        if (IsEdgeBlocked(edgeIndex)) return;
+        // Both event ownership and the graph must agree before creating a closure.
+        if (IsEdgeBlocked(edgeIndex) || edge.isBlocked) return;
 
         string[] eventTypes = { "accident", "construction", "monster_attack" };
         string eventType = eventTypes[_rng.Next(0, eventTypes.Length)];
         
-        // Block edge in pathfinder
-        if (_pathfinder != null)
-            _pathfinder.BlockEdge(edgeIndex);
+        _city.SetRoadBlocked(edgeIndex, true);
         
         if (_trafficManager != null)
         {
@@ -120,15 +120,14 @@ public class CityEventManager : NetworkBehaviour
             visual = visual
         });
 
-        TriggerEventClientRpc(edgeIndex, eventType, _blockadeDuration);
+        // CityGenerator replicates this closure; clients render from its snapshot.
     }
 
     private void RemoveEvent(int index)
     {
         ActiveEvent ev = _activeEvents[index];
         
-        if (_pathfinder != null)
-            _pathfinder.UnblockEdge(ev.edgeId);
+        _city.SetRoadBlocked(ev.edgeId, false);
         
         if (_trafficManager != null)
         {
@@ -137,9 +136,32 @@ public class CityEventManager : NetworkBehaviour
 
         if (ev.visual != null) Destroy(ev.visual);
         
-        RemoveEventClientRpc(ev.edgeId);
+        // CityGenerator propagates the unblocked edge.
         
         _activeEvents.RemoveAt(index);
+    }
+
+    public void SynchronizeVisuals(IReadOnlyCollection<int> blockedEdges)
+    {
+        if (_graph == null || _eventRoot == null) return;
+        var blocked = new HashSet<int>(blockedEdges);
+        for (int i = _activeEvents.Count - 1; i >= 0; i--)
+        {
+            if (blocked.Contains(_activeEvents[i].edgeId)) continue;
+            if (_activeEvents[i].visual != null) Destroy(_activeEvents[i].visual);
+            _activeEvents.RemoveAt(i);
+        }
+        foreach (int edgeId in blocked)
+        {
+            if (edgeId < 0 || edgeId >= _graph.edges.Count || IsEdgeBlocked(edgeId)) continue;
+            _activeEvents.Add(new ActiveEvent
+            {
+                edgeId = edgeId,
+                endTime = float.PositiveInfinity,
+                eventType = "construction",
+                visual = CreateEventVisual("construction", _graph.edges[edgeId])
+            });
+        }
     }
 
     private bool IsEdgeBlocked(int edgeId)
@@ -201,41 +223,4 @@ public class CityEventManager : NetworkBehaviour
         return visual;
     }
 
-    [ClientRpc]
-    private void TriggerEventClientRpc(int edgeId, string eventType, float duration)
-    {
-        if (IsServer) return; // Server already created it
-        
-        if (_graph == null || edgeId < 0 || edgeId >= _graph.edges.Count) return;
-        
-        StreetEdge edge = _graph.edges[edgeId];
-        GameObject visual = CreateEventVisual(eventType, edge);
-        
-        _activeEvents.Add(new ActiveEvent
-        {
-            edgeId = edgeId,
-            endTime = Time.time + duration,
-            eventType = eventType,
-            visual = visual
-        });
-    }
-
-    [ClientRpc]
-    private void RemoveEventClientRpc(int edgeId)
-    {
-        if (IsServer) return;
-        
-        for (int i = 0; i < _activeEvents.Count; i++)
-        {
-            if (_activeEvents[i].edgeId == edgeId)
-            {
-                if (_activeEvents[i].visual != null)
-                {
-                    Destroy(_activeEvents[i].visual);
-                }
-                _activeEvents.RemoveAt(i);
-                break;
-            }
-        }
-    }
 }

@@ -27,8 +27,8 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
     public static class PizzeriaPrefabAuthoringService
     {
         /// <summary>
-        /// Obtém a raiz editável atual se o Prefab Stage estiver aberto para o targetPrefab,
-        /// ou null se não estiver aberto em Prefab Mode.
+        /// ObtÃ©m a raiz editÃ¡vel atual se o Prefab Stage estiver aberto para o targetPrefab,
+        /// ou null se nÃ£o estiver aberto em Prefab Mode.
         /// </summary>
         public static GameObject GetOpenPrefabStageRoot(GameObject targetPrefabAsset)
         {
@@ -83,7 +83,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
                 if (ensureNodeIdentities && t != root.transform && t.name != "Anchors" && !t.IsChildOf(root.transform.Find("Anchors") ?? root.transform))
                 {
-                    // Se o nó tinha um PizzeriaNodeIdentity que ficou Missing antes da separação do arquivo .cs, recriamos
+                    // Se o nÃ³ tinha um PizzeriaNodeIdentity que ficou Missing antes da separaÃ§Ã£o do arquivo .cs, recriamos
                     bool isCategoryContainer = t.parent == root.transform && (
                         t.name == "Arquitetura" || t.name == "Equipamentos" || t.name == "Mobiliario" ||
                         t.name == "Utensilios" || t.name == "Decoracao" || t.name == "Revisar" || t.name == "Anchors");
@@ -133,7 +133,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Etapa 1: Cria um novo prefab editável a partir de settings.sourceModel, ou abre o existente sem sobrescrever silenciosamente.
+        /// Etapa 1: Cria um novo prefab editÃ¡vel a partir de settings.sourceModel, ou abre o existente sem sobrescrever silenciosamente.
         /// </summary>
         public static GameObject CreateOrOpenEditablePrefab(
             PizzeriaAuthoringSettings settings,
@@ -146,13 +146,13 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             if (settings == null)
             {
-                statusMessage = "Configuração do Builder (PizzeriaAuthoringSettings) nula.";
+                statusMessage = "ConfiguraÃ§Ã£o do Builder (PizzeriaAuthoringSettings) nula.";
                 return null;
             }
 
             string targetPath = ResolveTargetPrefabPath(settings);
 
-            // Se já existe um prefab nesse caminho ou referenciado em targetPrefab, NÃO sobrescrever silenciosamente!
+            // Se jÃ¡ existe um prefab nesse caminho ou referenciado em targetPrefab, NÃƒO sobrescrever silenciosamente!
             var existingPrefab = settings.targetPrefab != null
                 ? settings.targetPrefab
                 : AssetDatabase.LoadAssetAtPath<GameObject>(targetPath);
@@ -175,14 +175,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 }
 
                 statusMessage = cleanedOnDisk > 0
-                    ? $"Prefab '{targetPath}' já existe ({cleanedOnDisk} scripts inválidos/missing limpos automaticamente). Pronto para edição."
-                    : $"Prefab '{targetPath}' já existe. Abrindo para continuar edição sem sobrescrever.";
+                    ? $"Prefab '{targetPath}' jÃ¡ existe ({cleanedOnDisk} scripts invÃ¡lidos/missing limpos automaticamente). Pronto para ediÃ§Ã£o."
+                    : $"Prefab '{targetPath}' jÃ¡ existe. Abrindo para continuar ediÃ§Ã£o sem sobrescrever.";
                 return existingPrefab;
             }
 
             if (settings.sourceModel == null)
             {
-                statusMessage = "Modelo de origem não atribuído na configuração.";
+                statusMessage = "Modelo de origem nÃ£o atribuÃ­do na configuraÃ§Ã£o.";
                 return null;
             }
 
@@ -208,7 +208,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     PrefabUtility.UnpackPrefabInstance(modelInstance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
                 }
 
-                // Mover os filhos diretos do modelo para a raiz estável (sem duplicar o prédio)
+                // Mover os filhos diretos do modelo para a raiz estÃ¡vel (sem duplicar o prÃ©dio)
                 var directChildren = new List<Transform>();
                 for (int i = 0; i < modelInstance.transform.childCount; i++)
                 {
@@ -251,13 +251,13 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 bindings.sourceModelAssetPath = sourcePath;
                 bindings.appliedScaleFactor = 1.0f;
 
-                // Aplicar escala explícita se for diferente de 1.0
+                // Aplicar escala explÃ­cita se for diferente de 1.0
                 if (Mathf.Abs(settings.explicitScaleFactor - 1.0f) > 0.0001f && settings.explicitScaleFactor > 0.001f)
                 {
                     ApplyExplicitScaleToRoot(rootGo, settings.explicitScaleFactor);
                 }
 
-                // Organizar hierarquia automaticamente se habilitado (padrão = true)
+                // Organizar hierarquia automaticamente se habilitado (padrÃ£o = true)
                 if (settings.organizeHierarchyOnCreate)
                 {
                     hierarchyReport = PizzeriaHierarchyOrganizer.OrganizeHierarchy(rootGo, settings, respectManualLocks: true);
@@ -291,7 +291,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Gera um preview do que será afetado caso o usuário escolha reconstruir a partir da fonte.
+        /// Gera um preview do que serÃ¡ afetado caso o usuÃ¡rio escolha reconstruir a partir da fonte.
         /// </summary>
         public static PizzeriaRebuildPreviewInfo BuildRebuildPreview(PizzeriaAuthoringSettings settings)
         {
@@ -320,7 +320,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Operação explícita e separada para reconstruir a estrutura visual a partir do sourceModel,
+        /// OperaÃ§Ã£o explÃ­cita e separada para reconstruir a estrutura visual a partir do sourceModel,
         /// preservando Anchors, pisos gerados e os componentes raiz quando existentes.
         /// </summary>
         public static bool RebuildFromSourceModel(
@@ -338,11 +338,11 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             string targetPath = AssetDatabase.GetAssetPath(settings.targetPrefab);
             if (string.IsNullOrEmpty(targetPath))
             {
-                statusMessage = "Caminho do prefab-alvo inválido.";
+                statusMessage = "Caminho do prefab-alvo invÃ¡lido.";
                 return false;
             }
 
-            // Se estiver aberto em Prefab Stage, fechar ou operar no conteúdo
+            // Se estiver aberto em Prefab Stage, fechar ou operar no conteÃºdo
             GameObject contentsRoot = PrefabUtility.LoadPrefabContents(targetPath);
             try
             {
@@ -415,7 +415,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 RemoveMissingScriptsRecursively(contentsRoot, ensureNodeIdentities: false);
 
                 PrefabUtility.SaveAsPrefabAsset(contentsRoot, targetPath);
-                statusMessage = $"Prefab '{targetPath}' reconstruído a partir de '{settings.sourceModel.name}'.";
+                statusMessage = $"Prefab '{targetPath}' reconstruÃ­do a partir de '{settings.sourceModel.name}'.";
                 return true;
             }
             finally
@@ -447,7 +447,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Cria ou atualiza o piso procedural editável (com suporte a regiões em L) sob Arquitetura/Pisos/PisosGerados.
+        /// Cria ou atualiza o piso procedural editÃ¡vel (com suporte a regiÃµes em L) sob Arquitetura/Pisos/PisosGerados.
         /// </summary>
         public static int CreateOrUpdateEditableFloor(
             GameObject editableRoot,
@@ -474,7 +474,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 generatedRoot.localScale = Vector3.one;
             }
 
-            // Limpar regiões antigas geradas
+            // Limpar regiÃµes antigas geradas
             for (int i = generatedRoot.childCount - 1; i >= 0; i--)
             {
                 Undo.DestroyObjectImmediate(generatedRoot.GetChild(i).gameObject);
@@ -501,7 +501,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 float thickness = Mathf.Max(0.05f, reg.thickness);
 
                 GameObject slab = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Undo.RegisterCreatedObjectUndo(slab, "Criar Região de Piso");
+                Undo.RegisterCreatedObjectUndo(slab, "Criar RegiÃ£o de Piso");
                 slab.name = string.IsNullOrWhiteSpace(reg.regionName) ? $"Piso_Regiao_{i + 1}" : reg.regionName;
                 slab.transform.SetParent(generatedRoot, false);
                 slab.transform.localPosition = new Vector3(centerX, reg.floorY - thickness * 0.5f, centerZ);
@@ -528,7 +528,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         }
 
         /// <summary>
-        /// Aplica um fator de escala explícito nos filhos do modelo, preservando a escala unitária dos contêineres.
+        /// Aplica um fator de escala explÃ­cito nos filhos do modelo, preservando a escala unitÃ¡ria dos contÃªineres.
         /// </summary>
         public static void ApplyExplicitScaleToRoot(GameObject editableRoot, float newScaleFactor)
         {
@@ -548,7 +548,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 var rend = id.GetComponent<Renderer>();
                 if (mf == null && rend == null) continue;
 
-                Undo.RecordObject(id.transform, "Escalar Nó de Modelo");
+                Undo.RecordObject(id.transform, "Escalar NÃ³ de Modelo");
                 Vector3 localPosFromRoot = editableRoot.transform.InverseTransformPoint(id.transform.position);
                 id.transform.position = editableRoot.transform.TransformPoint(localPosFromRoot * ratio);
                 id.transform.localScale *= ratio;
@@ -561,7 +561,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
         /// <summary>
         /// Etapa 2: Injeta ou atualiza de forma idempotente todos os componentes de funcionamento base na raiz do prefab,
-        /// além de PizzeriaConfig, ItemPresentationCatalog, PizzeriaFootprint e Anchors.
+        /// alÃ©m de PizzeriaConfig, ItemPresentationCatalog, PizzeriaFootprint e Anchors.
         /// </summary>
         public static bool InjectOrUpdateBaseFunctioning(
             GameObject editableRoot,
@@ -580,7 +580,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             PizzeriaConfig configToUse = ResolveOrClonePizzeriaConfig(editableRoot, settings);
             ItemPresentationCatalog catalogToUse = ResolvePresentationCatalog(settings);
 
-            // 2. Componentes obrigatórios na raiz (GetOrAddComponent idempotente)
+            // 2. Componentes obrigatÃ³rios na raiz (GetOrAddComponent idempotente)
             var netObj = GetOrAddComponent<NetworkObject>(editableRoot);
             var pizzeriaRoot = GetOrAddComponent<PizzeriaRoot>(editableRoot);
             var footprint = GetOrAddComponent<PizzeriaFootprint>(editableRoot);
@@ -591,7 +591,6 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             var logisticsCmds = GetOrAddComponent<LogisticsCommands>(editableRoot);
             var notifier = GetOrAddComponent<PizzeriaNotifier>(editableRoot);
             var lifecycleBridge = GetOrAddComponent<PlayerLifecycleBridge>(editableRoot);
-            var hudBuilder = GetOrAddComponent<PizzeriaHudBuilder>(editableRoot);
             var itemVisualizer = GetOrAddComponent<PizzeriaItemVisualizer>(editableRoot);
             var ticketModal = GetOrAddComponent<TicketModalPresenter>(editableRoot);
             var nightBootstrapper = GetOrAddComponent<Night1Bootstrapper>(editableRoot);
@@ -620,7 +619,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // 4. Serializar ItemPresentationCatalog e prefabs de fallback no PizzeriaItemVisualizer
             if (catalogToUse != null)
             {
-                Undo.RecordObject(itemVisualizer, "Atribuir Catálogo ao PizzeriaItemVisualizer");
+                Undo.RecordObject(itemVisualizer, "Atribuir CatÃ¡logo ao PizzeriaItemVisualizer");
                 itemVisualizer.catalog = catalogToUse;
             }
             if (itemVisualizer.pizzaBoxPrefab == null)
@@ -633,7 +632,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 itemVisualizer.doughPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Pizzeria/Ingredient_Dough.prefab");
             EditorUtility.SetDirty(itemVisualizer);
 
-            // 5. Configurar PizzeriaFootprint preservando valores já ajustados pelo usuário
+            // 5. Configurar PizzeriaFootprint preservando valores jÃ¡ ajustados pelo usuÃ¡rio
             Undo.RecordObject(footprint, "Configurar PizzeriaFootprint");
             if (footprint.footprintSize.x <= 0.1f || footprint.footprintSize.y <= 0.1f || (Mathf.Approximately(footprint.footprintSize.x, 16f) && Mathf.Approximately(footprint.footprintSize.y, 14f)))
             {
@@ -657,7 +656,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorUtility.SetDirty(bindings);
             EditorUtility.SetDirty(editableRoot);
 
-            statusMessage = "Funcionamento base (NetworkObject, PizzeriaRoot, Serviços, Config, Catálogo, Footprint e Anchors) injetado/atualizado com sucesso.";
+            statusMessage = "Funcionamento base (NetworkObject, PizzeriaRoot, ServiÃ§os, Config, CatÃ¡logo, Footprint e Anchors) injetado/atualizado com sucesso.";
             return true;
         }
 
@@ -689,7 +688,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     Undo.RegisterCreatedObjectUndo(go, "Criar EntranceAnchor");
                     existing = go.transform;
                     existing.SetParent(anchorsGroup, false);
-                    // Posição inicial próxima à fachada (x=0.5, y=-1.4, z=-1.98)
+                    // PosiÃ§Ã£o inicial prÃ³xima Ã  fachada (x=0.5, y=-1.4, z=-1.98)
                     existing.localPosition = new Vector3(0.5f, -1.4f, -1.98f);
                     existing.localRotation = Quaternion.Euler(0f, 90f, 0f);
                     bindings.entranceAnchorProvisional = true;
@@ -731,7 +730,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 pizzeriaRoot.recoveryAnchor = existing;
             }
 
-            // PlayerSpawns (mínimo 4)
+            // PlayerSpawns (mÃ­nimo 4)
             var spawnList = new List<Transform>();
             if (pizzeriaRoot.playerSpawnAnchors != null)
             {
@@ -799,7 +798,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (settings != null && settings.cloneConfigForNewPrefab)
             {
                 string basePath = AssetDatabase.GetAssetPath(baseConfig);
-                // Se o config atual é o PizzeriaConfig.asset global compartilhado, criar um clone dedicado para este prefab
+                // Se o config atual Ã© o PizzeriaConfig.asset global compartilhado, criar um clone dedicado para este prefab
                 if (basePath.EndsWith("/PizzeriaConfig.asset", StringComparison.OrdinalIgnoreCase))
                 {
                     EnsureFolderExists("Assets/ScriptableObjects/Pizzeria");

@@ -249,8 +249,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     ? $"Mão {(item.SlotId == 0 ? "Esquerda" : "Direita")}"
                     : $"Mochila (Slot {item.SlotId})";
 
-                string labelStr = item.LabelDestinationId > 0
-                    ? $"Etiqueta: {AddressFormat.Display(item.LabelDestinationId)}"
+                string labelStr = item.LabelDestinationId >= 0
+                    ? $"Etiqueta: #{item.LabelDestinationId + 1}"
                     : "Sem etiqueta";
 
                 bool isMatch = item.LabelDestinationId == _currentAddressId;

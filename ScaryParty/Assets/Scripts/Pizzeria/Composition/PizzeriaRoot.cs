@@ -355,14 +355,21 @@ namespace ScaryParty.Pizzeria.Composition
                 }
             }
 
-            // Inicializar Mochilas Térmicas dos Entregadores no Domínio (ID = PlayerId + 1)
+            // Only authored, physical bags are registered; player IDs never determine bag IDs.
             int bpCap = _config != null && _config.backpackInitialSlots > 0 ? _config.backpackInitialSlots : 3;
-            for (ulong p = 0; p < 4; p++)
+            var bags = GetComponentsInChildren<DeliveryBagAuthoring>(true);
+            foreach (var bag in bags)
             {
-                var bpId = new BackpackId(p + 1);
-                var bp = new BackpackState(bpId, bpCap);
-                bp.EquippedBy = p;
-                DomainState.Backpacks[bpId] = bp;
+                if (bag.BackpackId == 0 || bag.BagRenderer == null || bag.InteractionCollider == null)
+                {
+                    Debug.LogError($"[PizzeriaRoot] Bag binding incomplete: {bag.name}");
+                    continue;
+                }
+                var pos = bag.transform.position;
+                var rot = bag.transform.rotation;
+                var result = BackpackService.Register(DomainState, new BackpackId(bag.BackpackId), bpCap,
+                    new DomainVector3(pos.x, pos.y, pos.z), new DomainQuaternion(rot.x, rot.y, rot.z, rot.w));
+                if (!result.Success) Debug.LogError($"[PizzeriaRoot] {bag.name}: {result.Message}");
             }
 
             Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas.");

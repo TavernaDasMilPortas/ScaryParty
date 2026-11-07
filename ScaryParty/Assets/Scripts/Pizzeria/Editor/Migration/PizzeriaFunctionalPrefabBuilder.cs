@@ -40,24 +40,24 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             var fbx = AssetDatabase.LoadAssetAtPath<GameObject>(profile.fbxAssetPath);
             if (fbx == null)
             {
-                throw new FileNotFoundException($"FBX da Pizzaria não encontrado em: {profile.fbxAssetPath}");
+                throw new FileNotFoundException($"FBX da Pizzaria nÃ£o encontrado em: {profile.fbxAssetPath}");
             }
 
-            // 1. Cria backup prévio do prefab canônico se ele existir
+            // 1. Cria backup prÃ©vio do prefab canÃ´nico se ele existir
             BackupExistingPrefab();
 
-            // 2. Extrai ou atualiza prefabs visuais reutilizáveis
+            // 2. Extrai ou atualiza prefabs visuais reutilizÃ¡veis
             PizzeriaModelPrefabBuilder.BuildVisualPrefabs(profile);
             PizzeriaModelPrefabBuilder.LinkVisualsToPresentationProfiles();
 
-            // 3. Constrói a hierarquia modular em memória
+            // 3. ConstrÃ³i a hierarquia modular em memÃ³ria
             var root = new GameObject("PizzeriaPrefab");
             try
             {
                 root.transform.position = Vector3.zero;
                 root.transform.rotation = Quaternion.identity;
 
-                // Componentes de Rede e Domínio
+                // Componentes de Rede e DomÃ­nio
                 var netObj = BuilderToolkit.GetOrAddComponent<NetworkObject>(root);
                 var rootComp = BuilderToolkit.GetOrAddComponent<PizzeriaRoot>(root);
                 var footprint = BuilderToolkit.GetOrAddComponent<PizzeriaFootprint>(root);
@@ -69,7 +69,6 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 BuilderToolkit.GetOrAddComponent<PizzeriaNotifier>(root);
                 BuilderToolkit.GetOrAddComponent<PizzeriaDebugCommands>(root);
                 BuilderToolkit.GetOrAddComponent<PlayerLifecycleBridge>(root);
-                BuilderToolkit.GetOrAddComponent<PizzeriaHudBuilder>(root);
                 BuilderToolkit.GetOrAddComponent<PizzeriaItemVisualizer>(root);
                 BuilderToolkit.GetOrAddComponent<TicketModalPresenter>(root);
                 BuilderToolkit.GetOrAddComponent<Night1Bootstrapper>(root);
@@ -83,31 +82,31 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                     so.ApplyModifiedProperties();
                 }
 
-                // 4. Constrói Arquitetura e Pisos L
+                // 4. ConstrÃ³i Arquitetura e Pisos L
                 var buildingRoot = new GameObject("Building");
                 buildingRoot.transform.SetParent(root.transform, false);
 
                 BuildProceduralFloor(buildingRoot.transform, profile);
                 BuildArchitectureFromFbx(buildingRoot.transform, fbx, profile);
 
-                // 5. Constrói Mobília do FBX
+                // 5. ConstrÃ³i MobÃ­lia do FBX
                 var furnitureRoot = new GameObject("Furniture");
                 furnitureRoot.transform.SetParent(buildingRoot.transform, false);
                 BuildFurnitureFromFbx(furnitureRoot.transform, fbx, profile);
 
-                // 6. Constrói Estações Canônicas (1 a 18) com slots explícitos
+                // 6. ConstrÃ³i EstaÃ§Ãµes CanÃ´nicas (1 a 18) com slots explÃ­citos
                 var stationsRoot = new GameObject("Stations");
                 stationsRoot.transform.SetParent(root.transform, false);
                 var stationViews = BuildCanonicalStations(stationsRoot.transform, fbx, profile);
 
-                // 7. Constrói Âncoras do Prédio
+                // 7. ConstrÃ³i Ã‚ncoras do PrÃ©dio
                 var anchorsRoot = new GameObject("Anchors");
                 anchorsRoot.transform.SetParent(root.transform, false);
                 BuildAnchors(anchorsRoot.transform, rootComp, footprint, stationViews, profile);
 
-                // 8. Salva o Prefab Canônico preservando seu GUID
+                // 8. Salva o Prefab CanÃ´nico preservando seu GUID
                 var savedPrefab = PrefabUtility.SaveAsPrefabAsset(root, CanonicalPrefabPath);
-                Debug.Log($"[PizzeriaFunctionalPrefabBuilder] ✅ Prefab canônico salvo com sucesso em: {CanonicalPrefabPath}");
+                Debug.Log($"[PizzeriaFunctionalPrefabBuilder] âœ… Prefab canÃ´nico salvo com sucesso em: {CanonicalPrefabPath}");
 
                 // 9. Atualiza NetworkPrefabsList
                 RegisterCanonicalPrefabInNetworkList(savedPrefab);
@@ -129,7 +128,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 if (!Directory.Exists(BackupFolder)) Directory.CreateDirectory(BackupFolder);
                 string backupFile = $"{BackupFolder}/PizzeriaPrefab_Backup.prefab";
                 AssetDatabase.CopyAsset(CanonicalPrefabPath, backupFile);
-                Debug.Log($"[PizzeriaFunctionalPrefabBuilder] Backup do prefab canônico criado em: {backupFile}");
+                Debug.Log($"[PizzeriaFunctionalPrefabBuilder] Backup do prefab canÃ´nico criado em: {backupFile}");
             }
         }
 
@@ -138,14 +137,14 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             string backupFile = $"{BackupFolder}/PizzeriaPrefab_Backup.prefab";
             if (!File.Exists(backupFile))
             {
-                Debug.LogError($"[PizzeriaFunctionalPrefabBuilder] Arquivo de backup não encontrado em: {backupFile}");
+                Debug.LogError($"[PizzeriaFunctionalPrefabBuilder] Arquivo de backup nÃ£o encontrado em: {backupFile}");
                 return false;
             }
 
             AssetDatabase.CopyAsset(backupFile, CanonicalPrefabPath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log($"[PizzeriaFunctionalPrefabBuilder] ✅ Prefab restaurado com sucesso a partir do backup!");
+            Debug.Log($"[PizzeriaFunctionalPrefabBuilder] âœ… Prefab restaurado com sucesso a partir do backup!");
             return true;
         }
 
@@ -161,7 +160,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 floorMat = new Material(shader) { color = new Color(0.35f, 0.35f, 0.38f) };
             }
 
-            // Slab 1: Salão de Atendimento / Entrada (16.4m x 22.4m)
+            // Slab 1: SalÃ£o de Atendimento / Entrada (16.4m x 22.4m)
             // diningHallRect: Min (0, -13.2), Max (16.4, 9.2)
             Vector2 dMin = profile.diningHallRect.min;
             Vector2 dMax = profile.diningHallRect.max;
@@ -175,7 +174,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             diningFloor.transform.localScale = dSize;
             diningFloor.GetComponent<Renderer>().sharedMaterial = floorMat;
 
-            // Slab 2: Cozinha / Área Operacional (16.6m x 36.8m)
+            // Slab 2: Cozinha / Ãrea Operacional (16.6m x 36.8m)
             // kitchenRect: Min (16.4, -27.6), Max (33.0, 9.2)
             Vector2 kMin = profile.kitchenRect.min;
             Vector2 kMax = profile.kitchenRect.max;
@@ -202,16 +201,16 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 string name = child.name;
                 if (ignoredSet.Contains(name)) continue;
 
-                // Ignora itens móveis dinâmicos
+                // Ignora itens mÃ³veis dinÃ¢micos
                 if (IsDynamicItem(name)) continue;
 
-                // Ignora estações específicas que serão tratadas em Stations
+                // Ignora estaÃ§Ãµes especÃ­ficas que serÃ£o tratadas em Stations
                 if (IsStationNode(name, profile)) continue;
 
-                // Ignora mobília decorativa que vai para Furniture
+                // Ignora mobÃ­lia decorativa que vai para Furniture
                 if (IsFurnitureNode(name)) continue;
 
-                // Nós de paredes, pilastras, telhados, portas e batentes
+                // NÃ³s de paredes, pilastras, telhados, portas e batentes
                 var go = new GameObject(name);
                 go.transform.SetParent(archRoot.transform, false);
                 go.transform.localPosition = child.localPosition + new Vector3(0f, profile.floorElevationY, 0f);
@@ -228,7 +227,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                     var newMr = go.AddComponent<MeshRenderer>();
                     newMr.sharedMaterials = mr != null ? mr.sharedMaterials : new Material[0];
 
-                    // Adiciona BoxCollider se for parede, pilastra, batente ou balcão fixo
+                    // Adiciona BoxCollider se for parede, pilastra, batente ou balcÃ£o fixo
                     if (name.StartsWith("parede", StringComparison.OrdinalIgnoreCase) ||
                         name.StartsWith("pilastra", StringComparison.OrdinalIgnoreCase) ||
                         name.StartsWith("balcao", StringComparison.OrdinalIgnoreCase))
@@ -316,18 +315,18 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 }
                 else
                 {
-                    // Fallback para colisor de interação
+                    // Fallback para colisor de interaÃ§Ã£o
                     var col = stGo.AddComponent<BoxCollider>();
                     col.size = new Vector3(1.2f, 1f, 1.2f);
                     col.center = new Vector3(0f, 0.5f, 0f);
                 }
 
-                // Adiciona componente de estação correspondente
+                // Adiciona componente de estaÃ§Ã£o correspondente
                 StationView stView = AttachStationComponent(stGo, mapping.category);
                 stView.stationId = mapping.stationId;
                 stView.stationName = mapping.stationName;
 
-                // Cria âncoras de slots explícitas
+                // Cria Ã¢ncoras de slots explÃ­citas
                 var slotsParent = new GameObject("Slots");
                 slotsParent.transform.SetParent(stGo.transform, false);
 
@@ -425,20 +424,20 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             rootComp.receivingAnchor = recGo.transform;
             footprint.receivingAnchor = recGo.transform;
 
-            // Recuperação
+            // RecuperaÃ§Ã£o
             var recovGo = new GameObject("RecoveryAnchor");
             recovGo.transform.SetParent(parent, false);
             recovGo.transform.localPosition = profile.recoveryAnchorPos;
             recovGo.transform.localRotation = Quaternion.identity;
             rootComp.recoveryAnchor = recovGo.transform;
 
-            // Suporte de Utensílios
+            // Suporte de UtensÃ­lios
             if (stations.TryGetValue(3, out var toolRack))
             {
                 rootComp.toolRackAnchor = toolRack.transform;
             }
 
-            // Metadados explícitos de Footprint
+            // Metadados explÃ­citos de Footprint
             footprint.localBounds = new Bounds(new Vector3(16.5f, 1.5f, -9.2f), new Vector3(34.5f, 6.0f, 38.5f));
             footprint.footprintSize = new Vector2(34.5f, 38.5f);
             footprint.footprintCenter = new Vector2(16.5f, -9.2f);
@@ -507,7 +506,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 netList.Add(new NetworkPrefab { Prefab = prefab });
                 EditorUtility.SetDirty(netList);
                 AssetDatabase.SaveAssets();
-                Debug.Log("[PizzeriaFunctionalPrefabBuilder] ✅ PizzeriaPrefab registrado em DefaultNetworkPrefabs.asset!");
+                Debug.Log("[PizzeriaFunctionalPrefabBuilder] âœ… PizzeriaPrefab registrado em DefaultNetworkPrefabs.asset!");
             }
         }
     }

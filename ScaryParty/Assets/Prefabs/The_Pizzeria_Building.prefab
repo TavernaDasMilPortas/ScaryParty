@@ -123,11 +123,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46da025781058ca4b950ab4533b2d28a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StackStation
   stationId: 16
   stationName: Station_Stack_Staging
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   stackId: 1
   capacity: 6
   linkedAddressId: -1
@@ -509,11 +513,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 50eff1e742d37fa4ab181c4b6c63e022, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.SupplierTerminal
   stationId: 11
   stationName: Terminal_Supplier
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &1444548285772198454
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,11 +570,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79530fd84e44f934baa9dc0373878953, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Integration.GeneratedMarker
   _builderName: PizzeriaBuilder
   _key: Building
-  _configHash: 
+  _configHash:
   _timestamp: 2026-10-13T11:22:21.7619385Z
 --- !u!1 &1455095573959625820
 GameObject:
@@ -691,11 +699,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eb3c93ebbb44e0649bcf7e4dae227b51, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketBoardStation
   stationId: 15
   stationName: Station_TicketBoard
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ticketSlots: []
   maxVisibleTickets: 4
 --- !u!1 &1769130802176304375
@@ -717,11 +729,11 @@ GameObject:
   - component: {fileID: 8176619400681610625}
   - component: {fileID: 6754715514235087452}
   - component: {fileID: 6380641177081123869}
-  - component: {fileID: 2208437618070385746}
   - component: {fileID: 3007164212614424765}
   - component: {fileID: 261256998407457945}
   - component: {fileID: 7843164543424035390}
   - component: {fileID: 8054242224341823044}
+  - component: {fileID: 8907437652007775447}
   m_Layer: 0
   m_Name: The_Pizzeria_Building
   m_TagString: Untagged
@@ -762,7 +774,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
   GlobalObjectIdHash: 3975149814
   InScenePlacedSourceGlobalObjectIdHash: 0
@@ -788,7 +800,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 01daff88cef90b040b6f6bae02305a41, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Composition.PizzeriaRoot
   ShowTopMostFoldoutHeaderGroup: 1
   _config: {fileID: 11400000, guid: 4ba25ff91c36c954cbb84f3c9e67283d, type: 2}
@@ -811,7 +823,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33efb01a14fdc7c428c969a9984bb25f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaNetworkState
   ShowTopMostFoldoutHeaderGroup: 1
   Items:
@@ -888,7 +900,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1f7c2b253ef9fae4085860b2165c4b9e, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaCommandHandler
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &7278957785681620771
@@ -901,7 +913,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f81fd85de45370c4baca09e376e1cb09, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.KitchenCommands
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &1467977226096763784
@@ -914,7 +926,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8340220ac51677343b3b474728f1d381, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.OrderCommands
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &3382585007987248430
@@ -927,7 +939,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7f1593b2e44a3af43be88a5355ed0546, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.LogisticsCommands
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8176619400681610625
@@ -940,7 +952,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba790461e24d35749aa768535e6f8a90, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaNotifier
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &6754715514235087452
@@ -953,7 +965,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 84771a5cf03bb6846a539cc71002eb72, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaDebugCommands
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &6380641177081123869
@@ -966,20 +978,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed984965cbb2a2f4a80d21aefd5b1acf, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PlayerLifecycleBridge
---- !u!114 &2208437618070385746
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1769130802176304375}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c96d945893c97bd4bb2bad4bc756c75b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder
 --- !u!114 &3007164212614424765
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69a9825216ec6b74f9ba9e0d050790a8, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer
   ShowTopMostFoldoutHeaderGroup: 1
   catalog: {fileID: 0}
@@ -1007,7 +1007,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9e9d610f651b9fe4bac62b0eff204f3f, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.TicketModalPresenter
 --- !u!114 &7843164543424035390
 MonoBehaviour:
@@ -1019,7 +1019,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1777cdabb9331149b1b1de79c4400db, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Composition.Night1Bootstrapper
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8054242224341823044
@@ -1032,12 +1032,29 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79530fd84e44f934baa9dc0373878953, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Integration.GeneratedMarker
   _builderName: PizzeriaBuilder
   _key: Root
-  _configHash: 
+  _configHash:
   _timestamp: 2026-10-13T11:22:21.7478194Z
+--- !u!114 &8907437652007775447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1769130802176304375}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7721bafb25c0456bb4ad23bb5049f90c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.KitchenProcessEffects
+  effectScale: 1
+  originalMess: {fileID: 8926484042661614526, guid: 646489d496fc6a14694b510bc517e0e8, type: 3}
+  originalSmoke: {fileID: 8926484042661614526, guid: 8401d286b31cb8e4d94aa1ff61a76128, type: 3}
+  transitionDuration: 0.5
+  completionTransitionDuration: 0.1
 --- !u!1 &2290099482065157776
 GameObject:
   m_ObjectHideFlags: 0
@@ -1193,11 +1210,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6fd169d8e08b8d4cbabe25281be7a80, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StagingStation
   stationId: 10
   stationName: Station_Staging
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &3592390819053070613
 GameObject:
   m_ObjectHideFlags: 0
@@ -1278,11 +1299,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79530fd84e44f934baa9dc0373878953, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Integration.GeneratedMarker
   _builderName: PizzeriaBuilder
   _key: Anchors
-  _configHash: 
+  _configHash:
   _timestamp: 2026-10-13T11:22:21.7948971Z
 --- !u!1 &3857568145297332310
 GameObject:
@@ -1407,11 +1428,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b4b318269adf6a94db9f9e4488a2e9bf, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PackagingStation
   stationId: 9
   stationName: Station_Packaging
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &4417455876449540382
 GameObject:
   m_ObjectHideFlags: 0
@@ -1470,11 +1495,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 79530fd84e44f934baa9dc0373878953, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Integration.GeneratedMarker
   _builderName: PizzeriaBuilder
   _key: Stations
-  _configHash: 
+  _configHash:
   _timestamp: 2026-10-13T11:22:21.7754120Z
 --- !u!1 &4592631419473133046
 GameObject:
@@ -1630,15 +1655,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cc4215f65ddee854391923118383f7ea, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.OvenStation
   stationId: 8
   stationName: Station_Oven
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
   audioSource: {fileID: 0}
   customDingClip: {fileID: 0}
+  entryAnchor: {fileID: 0}
 --- !u!1 &4941786078017378143
 GameObject:
   m_ObjectHideFlags: 0
@@ -1793,11 +1823,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 935cd4c283547e140b431b3c8e01c661, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StorageStation
   stationId: 1
   stationName: Storage_Fridge
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 03000000040000000600000008000000
 --- !u!1 &5221444240958056294
 GameObject:
@@ -1953,11 +1987,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b63e2482ccac2c140a85ce80f048250a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.CounterStation
   stationId: 4
   stationName: Station_NeutralCounter
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &5321547780846289012
 GameObject:
   m_ObjectHideFlags: 0
@@ -2112,11 +2150,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 935cd4c283547e140b431b3c8e01c661, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StorageStation
   stationId: 2
   stationName: Storage_Cupboard
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 01000000
 --- !u!1 &5798377868339470889
 GameObject:
@@ -2477,11 +2519,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dd38a94f3cc663e4899d8f4de097b567, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.AssemblyStation
   stationId: 7
   stationName: Station_Assembly
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &7114255841953661286
 GameObject:
   m_ObjectHideFlags: 0
@@ -2605,11 +2651,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 07a509b8e06a1f94baf6db3b0ed8e374, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TrashStation
   stationId: 14
   stationName: Station_Trash
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &7271619899098375327
 GameObject:
   m_ObjectHideFlags: 0
@@ -2988,11 +3038,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87e555308e81bcc44a13fc887838a161, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PrepStation
   stationId: 6
   stationName: Station_Prep_B
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   defaultProcessId: 2
 --- !u!1 &8197003620947381330
 GameObject:
@@ -3117,11 +3171,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8dd8df22401a8d643829499ff8b5220e, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.ToolRackStation
   stationId: 3
   stationName: Station_ToolRack
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
 --- !u!1 &8551607366177381286
 GameObject:
   m_ObjectHideFlags: 0
@@ -3357,11 +3415,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87e555308e81bcc44a13fc887838a161, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PrepStation
   stationId: 5
   stationName: Station_Prep_A
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &8951319080752529895
 GameObject:
@@ -3488,11 +3550,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fbd243620b7146543881093455b38ba0, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PhoneStation
   stationId: 12
   stationName: Station_Phone
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
   ringer: {fileID: 7997895371801797517}
   isRinging: 0
 --- !u!82 &3347104807049872700
@@ -3602,7 +3668,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ea4779cd4db4fe143a819eefb0c66374, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.PhoneRinger
   audioSource: {fileID: 0}
   customRingClip: {fileID: 0}
@@ -3733,8 +3799,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f788b8b363036042980e95c0ff9219a, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.ReceivingStation
   stationId: 13
   stationName: Area_Receiving
   slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}

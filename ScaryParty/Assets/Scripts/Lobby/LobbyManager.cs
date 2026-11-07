@@ -16,7 +16,15 @@ public class LobbyManager : MonoBehaviour
 {
     public PlayerData PlayerData;
 
-    public string CurrentJoinCode { get; set; }
+    // Keep the Relay code available after the scene-local manager is destroyed.
+    public static string CurrentJoinCode { get; private set; }
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetJoinCode()
+    {
+        CurrentJoinCode = null;
+    }
+
     private Lobby _currentLobby;
     private Coroutine _heartbeatCoroutine;
 
@@ -288,6 +296,7 @@ public class LobbyManager : MonoBehaviour
     public async void StartLANHost(string roomName)
     {
         if (NetworkManager.Singleton == null) return;
+        CurrentJoinCode = null;
         Debug.Log("[LobbyManager] Tentando iniciar Host (LAN)...");
 
         if (NetworkManager.Singleton.IsListening)
@@ -306,7 +315,6 @@ public class LobbyManager : MonoBehaviour
 
         if (NetworkManager.Singleton.StartHost())
         {
-            CurrentJoinCode = "LAN HOST";
             Debug.Log("[LobbyManager] ✅ Host LAN iniciado com sucesso. Carregando ReadyScene...");
             
             // Inicia Room Discovery broadcast no singleton persistente
@@ -347,6 +355,7 @@ public class LobbyManager : MonoBehaviour
     public async void JoinLANClient(string ipAddress)
     {
         if (NetworkManager.Singleton == null) return;
+        CurrentJoinCode = null;
         Debug.Log($"[LobbyManager] Tentando entrar em Host LAN no IP: {ipAddress}...");
 
         if (NetworkManager.Singleton.IsListening)

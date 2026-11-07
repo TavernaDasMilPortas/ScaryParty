@@ -12,12 +12,12 @@ public class CityGenerator : NetworkBehaviour
     public CityConfig config;
     public GameObject pizzeriaPrefab;
 
-    [Header("Materials — Streets")]
+    [Header("Materials â€” Streets")]
     public Material streetMaterial;
     public Material sidewalkMaterial;
     public Material intersectionMaterial;
 
-    [Header("Materials — Buildings")]
+    [Header("Materials â€” Buildings")]
     public Material[] buildingMaterials;
 
     [SerializeField, HideInInspector]
@@ -32,14 +32,115 @@ public class CityGenerator : NetworkBehaviour
     public int CurrentSeed { get; private set; }
 
     /// <summary>
-    /// Seed persistida via rede. Qualquer cliente que entrar na sessão (inclusive late-joiners)
-    /// lerá este valor no OnNetworkSpawn e gerará a cidade localmente com a mesma seed.
+    /// Seed persistida via rede. Qualquer cliente que entrar na sessÃ£o (inclusive late-joiners)
+    /// lerÃ¡ este valor no OnNetworkSpawn e gerarÃ¡ a cidade localmente com a mesma seed.
     /// </summary>
     private NetworkVariable<int> _networkSeed = new NetworkVariable<int>(
         0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     public event Action OnCityGenerated;
     public event Action OnCityCleared;
+
+    // The list is authoritative; the revision is a synchronization barrier for late joins/rebuilds.
+    private NetworkList<int> _blockedEdges;
+    private readonly NetworkVariable<int> _closureRevision = new NetworkVariable<int>(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private int _appliedClosureRevision = -1;
+    private int _appliedSeed;
+    private bool _awaitingSnapshot;
+    private int _snapshotRevision = -1;
+    private int _snapshotSeed;
+    private int[] _snapshotEdges;
+    public bool ClosuresSynchronized => _pathfinder != null && _pathfinder.IsReady &&
+        _pathfinder.RoutesReady && (!IsSpawned || (IsServer && _networkSeed.Value == CurrentSeed) ||
+            (!_awaitingSnapshot && _appliedSeed == _networkSeed.Value &&
+            _appliedClosureRevision == _closureRevision.Value));
+    public int ClosureRevision => _closureRevision.Value;
+    public event Action OnClosuresChanged;
+
+    public void SetRoadBlocked(int edge, bool blocked)
+    {
+        if (!IsSpawned || !IsServer || _pathfinder == null || !_pathfinder.IsReady ||
+            edge < 0 || edge >= _pathfinder.Graph.edges.Count) return;
+        if (_blockedEdges.Contains(edge) == blocked) return;
+        if (blocked) _blockedEdges.Add(edge);
+        else _blockedEdges.Remove(edge);
+        _closureRevision.Value++;
+        ApplyRoadClosures();
+    }
+
+    private void OnBlockedEdgesChanged(NetworkListEvent<int> change)
+    {
+        if (IsServer) ApplyRoadClosures();
+        else
+        {
+            _awaitingSnapshot = true;
+            _pathfinder?.SetRoutesReady(false);
+            RequestClosures();
+        }
+    }
+
+    private void OnClosureRevisionChanged(int previous, int current)
+    {
+        if (IsServer) return;
+        _awaitingSnapshot = true;
+        _pathfinder?.SetRoutesReady(false);
+        RequestClosures();
+    }
+
+    private void ApplyRoadClosures()
+    {
+        if (_pathfinder == null || !_pathfinder.IsReady || CityData == null) return;
+        if (!IsServer && (_awaitingSnapshot || _snapshotEdges == null ||
+            _snapshotSeed != _networkSeed.Value || _snapshotRevision != _closureRevision.Value)) return;
+        var blocked = new HashSet<int>();
+        if (IsServer)
+        {
+            for (int i = 0; i < _blockedEdges.Count; i++) blocked.Add(_blockedEdges[i]);
+        }
+        else blocked.UnionWith(_snapshotEdges);
+        for (int i = 0; i < _pathfinder.Graph.edges.Count; i++)
+        {
+            if (blocked.Contains(i)) _pathfinder.BlockEdge(i);
+            else _pathfinder.UnblockEdge(i);
+        }
+        _appliedSeed = CurrentSeed;
+        _appliedClosureRevision = _closureRevision.Value;
+        _pathfinder.SetRoutesReady(true);
+        if (IsSpawned && !IsServer) _eventManager?.SynchronizeVisuals(blocked);
+        OnClosuresChanged?.Invoke();
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void RequestClosuresServerRpc(int seed, ServerRpcParams rpcParams = default)
+    {
+        if (seed != CurrentSeed || CityData == null) return;
+        var target = new ClientRpcParams { Send = new ClientRpcSendParams {
+            TargetClientIds = new[] { rpcParams.Receive.SenderClientId } } };
+        var edges = new int[_blockedEdges.Count];
+        for (int i = 0; i < edges.Length; i++) edges[i] = _blockedEdges[i];
+        ReceiveClosuresClientRpc(seed, _closureRevision.Value, edges, target);
+    }
+
+    [ClientRpc]
+    private void ReceiveClosuresClientRpc(int seed, int revision, int[] edges, ClientRpcParams rpcParams = default)
+    {
+        if (IsServer || !IsSpawned || seed != _networkSeed.Value ||
+            revision != _closureRevision.Value) return;
+        _snapshotSeed = seed;
+        _snapshotRevision = revision;
+        _snapshotEdges = edges;
+        _awaitingSnapshot = false;
+        ApplyRoadClosures();
+    }
+
+    private void RequestClosures()
+    {
+        if (IsServer || !IsSpawned || CityData == null || CurrentSeed != _networkSeed.Value) return;
+        _awaitingSnapshot = true;
+        _pathfinder?.SetRoutesReady(false);
+        RequestClosuresServerRpc(CurrentSeed);
+    }
 
     private StreetGridGenerator _streetGridGen;
     private BlockFiller _blockFiller;
@@ -60,6 +161,8 @@ public class CityGenerator : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        _blockedEdges.OnListChanged += OnBlockedEdgesChanged;
+        _closureRevision.OnValueChanged += OnClosureRevisionChanged;
         if (IsServer)
         {
             if (config == null) return;
@@ -69,37 +172,45 @@ public class CityGenerator : NetworkBehaviour
             // a seed e gerar a cidade localmente sem precisar do ClientRpc.
             int useSeed = config.seed == 0 ? UnityEngine.Random.Range(1, int.MaxValue) : config.seed;
             _networkSeed.Value = useSeed;
+            _blockedEdges.Clear();
+            _closureRevision.Value++;
 
             DestroyStaticCity();
             GenerateLocally(useSeed);
-            // ClientRpc é um fast-path para clientes já conectados no momento do spawn.
+            // ClientRpc Ã© um fast-path para clientes jÃ¡ conectados no momento do spawn.
             ClientGenerateCityClientRpc(useSeed);
         }
         else
         {
             // Registra listener ANTES de verificar o valor atual.
-            // Ordem importa: se o server ainda não setou a seed, o OnValueChanged vai disparar quando setar.
+            // Ordem importa: se o server ainda nÃ£o setou a seed, o OnValueChanged vai disparar quando setar.
             _networkSeed.OnValueChanged += OnNetworkSeedChanged;
 
             DestroyStaticCity();
 
-            // Late-join guard: se a seed já foi setada pelo servidor antes de entrarmos,
-            // o OnValueChanged NÃO vai disparar (o valor não vai mudar para nós).
-            // Por isso verificamos o valor atual agora e geramos se necessário.
+            // Late-join guard: se a seed jÃ¡ foi setada pelo servidor antes de entrarmos,
+            // o OnValueChanged NÃƒO vai disparar (o valor nÃ£o vai mudar para nÃ³s).
+            // Por isso verificamos o valor atual agora e geramos se necessÃ¡rio.
             if (_networkSeed.Value != 0)
             {
-                Debug.Log($"[CityGenerator] Late-join detectado — gerando cidade com seed {_networkSeed.Value}");
+                Debug.Log($"[CityGenerator] Late-join detectado â€” gerando cidade com seed {_networkSeed.Value}");
                 GenerateLocally(_networkSeed.Value);
             }
             else
             {
-                Debug.Log("[CityGenerator] Cliente conectou antes do servidor gerar — aguardando OnValueChanged.");
+                Debug.Log("[CityGenerator] Cliente conectou antes do servidor gerar â€” aguardando OnValueChanged.");
             }
         }
     }
 
     public override void OnNetworkDespawn()
     {
+        _blockedEdges.OnListChanged -= OnBlockedEdgesChanged;
+        _closureRevision.OnValueChanged -= OnClosureRevisionChanged;
+        _awaitingSnapshot = true;
+        _snapshotEdges = null;
+        _appliedClosureRevision = -1;
+        _pathfinder?.SetRoutesReady(false);
         if (!IsServer)
         {
             _networkSeed.OnValueChanged -= OnNetworkSeedChanged;
@@ -108,23 +219,21 @@ public class CityGenerator : NetworkBehaviour
 
     /// <summary>
     /// Chamado no cliente quando o servidor seta a seed pela primeira vez.
-    /// Só é relevante para clientes que estavam conectados antes do servidor gerar.
-    /// Clientes que entraram depois (late-join) já leram o valor diretamente no OnNetworkSpawn.
+    /// SÃ³ Ã© relevante para clientes que estavam conectados antes do servidor gerar.
+    /// Clientes que entraram depois (late-join) jÃ¡ leram o valor diretamente no OnNetworkSpawn.
     /// </summary>
     private void OnNetworkSeedChanged(int previousValue, int newValue)
     {
         if (IsServer) return;
-        if (newValue == 0) return;
+        _awaitingSnapshot = true;
+        _pathfinder?.SetRoutesReady(false);
+        if (newValue == 0) { ClearLocalCity(); return; }
 
-        // Evita gerar duas vezes (o ClientRpc também pode ser recebido logo depois)
-        if (CityData != null)
-        {
-            Debug.Log("[CityGenerator] OnNetworkSeedChanged: cidade já gerada via late-join, ignorando.");
-            return;
-        }
+        if (CityData != null && CurrentSeed == newValue) return;
 
-        Debug.Log($"[CityGenerator] Seed recebida via NetworkVariable ({newValue}) — gerando cidade.");
+        Debug.Log($"[CityGenerator] Seed recebida via NetworkVariable ({newValue}) â€” gerando cidade.");
         DestroyStaticCity();
+        ClearLocalCity();
         GenerateLocally(newValue);
     }
 
@@ -168,10 +277,8 @@ public class CityGenerator : NetworkBehaviour
 
     private void Awake()
     {
-        if (Application.isPlaying)
-        {
-            DestroyStaticCity();
-        }
+        _blockedEdges = new NetworkList<int>();
+        if (Application.isPlaying) DestroyStaticCity();
     }
 
     private void DestroyStaticCity()
@@ -187,8 +294,8 @@ public class CityGenerator : NetworkBehaviour
     [ContextMenu("Generate City")]
     public void GenerateCity()
     {
-        if (config == null) return;
-        ClearCity();
+        if (config == null || (IsSpawned && !IsServer)) return;
+        ClearLocalCity();
 
         // Sempre gerar uma nova seed no Quick Rebuild
         config.seed = UnityEngine.Random.Range(1, int.MaxValue);
@@ -202,6 +309,9 @@ public class CityGenerator : NetworkBehaviour
         {
             if (IsServer)
             {
+                _blockedEdges.Clear();
+                _networkSeed.Value = useSeed;
+                _closureRevision.Value++;
                 GenerateLocally(useSeed);
                 ClientGenerateCityClientRpc(useSeed);
             }
@@ -215,20 +325,49 @@ public class CityGenerator : NetworkBehaviour
     [ContextMenu("Clear City")]
     public void ClearCity()
     {
+        if (IsSpawned && !IsServer) return;
+        ClearLocalCity();
+        if (IsSpawned)
+        {
+            _blockedEdges.Clear();
+            _networkSeed.Value = 0;
+            _closureRevision.Value++;
+            ClearCityClientRpc();
+        }
+    }
+
+    [ClientRpc]
+    private void ClearCityClientRpc()
+    {
+        if (!IsServer) ClearLocalCity();
+    }
+
+    private void ClearLocalCity()
+    {
+        _awaitingSnapshot = true;
+        _snapshotEdges = null;
+        _appliedClosureRevision = -1;
+        _appliedSeed = 0;
+        _pathfinder?.SetRoutesReady(false);
+        _pathfinder = null;
+        OnClosuresChanged?.Invoke();
         if (_cityRoot != null)
         {
+            _cityRoot.SetActive(false);
             if (Application.isPlaying) Destroy(_cityRoot);
             else DestroyImmediate(_cityRoot);
         }
 
-        GameObject oldCity = GameObject.Find("__City__");
+        GameObject oldCity = _cityRoot == null ? GameObject.Find("__City__") : null;
         if (oldCity != null)
         {
+            oldCity.SetActive(false);
             if (Application.isPlaying) Destroy(oldCity);
             else DestroyImmediate(oldCity);
         }
 
         CityData = null;
+        CurrentSeed = 0;
         _cityRoot = _streetsRoot = _blocksRoot = _intersectionsRoot = _deliveryPointsRoot = _trafficRoot = _eventsRoot = null;
         _trafficManager = null;
         _eventManager = null;
@@ -239,7 +378,7 @@ public class CityGenerator : NetworkBehaviour
     [ContextMenu("Regenerate City")]
     public void RegenerateCity()
     {
-        ClearCity();
+        if (IsSpawned && !IsServer) return;
         GenerateCity();
     }
 
@@ -252,19 +391,17 @@ public class CityGenerator : NetworkBehaviour
     {
         if (IsServer) return;
 
-        // Evita gerar duas vezes se o cliente já gerou via NetworkVariable (late-join)
-        if (CityData != null)
-        {
-            Debug.Log("[CityGenerator] ClientRpc recebido mas cidade já existe (late-join). Ignorando.");
-            return;
-        }
-
-        Debug.Log($"[CityGenerator] ClientRpc recebido — gerando cidade com seed {seed}.");
+        if (seed != _networkSeed.Value || (CityData != null && CurrentSeed == seed)) return;
+        ClearLocalCity();
         GenerateLocally(seed);
     }
 
     private void GenerateLocally(int seed)
     {
+        if (CityData != null) ClearLocalCity();
+        _awaitingSnapshot = IsSpawned && !IsServer;
+        _snapshotEdges = null;
+        _appliedClosureRevision = -1;
         CurrentSeed = seed;
         System.Random rng = new System.Random(seed);
 
@@ -305,7 +442,7 @@ public class CityGenerator : NetworkBehaviour
         }
         else if (config.pizzariaInsideBlock)
         {
-            Debug.LogWarning($"[CityGenerator] Falha na implantação geométrica da pizzaria: {placementResult?.failureReason}. Tentando fallback perimetral.");
+            Debug.LogWarning($"[CityGenerator] Falha na implantaÃ§Ã£o geomÃ©trica da pizzaria: {placementResult?.failureReason}. Tentando fallback perimetral.");
             PlacePizzariaInBlock(rng);
         }
         else
@@ -321,6 +458,9 @@ public class CityGenerator : NetworkBehaviour
         CityData.DeliveryPointCount = points.Count;
 
         _pathfinder.Initialize(graph);
+        _pathfinder.MaxAccessDistance = Mathf.Max(config.streetWidth + config.sidewalkWidth, 20f);
+        if (IsSpawned && !IsServer) _pathfinder.SetRoutesReady(false);
+        ApplyRoadClosures();
 
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
         if (routeManager != null) routeManager.Initialize(_pathfinder);
@@ -339,6 +479,7 @@ public class CityGenerator : NetworkBehaviour
 
         TeleportPlayersToSpawn();
         OnCityGenerated?.Invoke();
+        RequestClosures();
     }
 
     private void InitializeRuntimeSystems(int seed, StreetGraph graph)
@@ -347,7 +488,9 @@ public class CityGenerator : NetworkBehaviour
         {
             _trafficManager.Initialize(_pathfinder, graph, seed + 1000, config.maxTrafficVehicles, config.trafficBaseSpeed);
         }
-        _eventManager.Initialize(_pathfinder, graph, _trafficManager, config, seed + 2000, _eventsRoot.transform);
+        _eventManager.Initialize(graph, _trafficManager, config, seed + 2000, _eventsRoot.transform, this);
+        if (IsSpawned && !IsServer && ClosuresSynchronized && _snapshotEdges != null)
+            _eventManager.SynchronizeVisuals(new HashSet<int>(_snapshotEdges));
     }
 
     private void TeleportPlayersToSpawn()
@@ -535,9 +678,9 @@ public class CityGenerator : NetworkBehaviour
         // Footprint do prefab, baseado no objeto "Floor" dele (fallback 12x12).
         GetPizzeriaFootprint(out Vector2 floorSize, out Vector2 floorCenter, out Vector2 frontLocal);
         float frontHalfDepth = Mathf.Abs(frontLocal.x) * floorSize.x * 0.5f + Mathf.Abs(frontLocal.y) * floorSize.y * 0.5f;
-        float frontDistance = frontHalfDepth + Vector2.Dot(floorCenter, frontLocal) + 1.5f; // pivô -> bancada
+        float frontDistance = frontHalfDepth + Vector2.Dot(floorCenter, frontLocal) + 1.5f; // pivÃ´ -> bancada
 
-        // ── Pick the building closest to the block edge (= closest to the street) ──
+        // â”€â”€ Pick the building closest to the block edge (= closest to the street) â”€â”€
         if (blockTransform != null)
         {
             Vector3 blockCenter = pBlock.worldCenter;
@@ -549,9 +692,9 @@ public class CityGenerator : NetworkBehaviour
                 CityBuilding building = child.GetComponent<CityBuilding>();
                 if (building == null) continue;
 
-                // Score: distance from block center → farther = closer to street edge.
+                // Score: distance from block center â†’ farther = closer to street edge.
                 // We also need the building to be big enough to be replaced by the
-                // pizzeria (12 m wide). Accept buildings ≥ 6 m wide.
+                // pizzeria (12 m wide). Accept buildings â‰¥ 6 m wide.
                 Vector3 scale = child.localScale;
                 float footprint = Mathf.Max(scale.x, scale.z);
                 if (footprint < 6f) continue;
@@ -569,7 +712,7 @@ public class CityGenerator : NetworkBehaviour
                 }
             }
 
-            // Fallback: if nothing was found with footprint ≥ 6, just pick the largest
+            // Fallback: if nothing was found with footprint â‰¥ 6, just pick the largest
             if (bestBuilding == null)
             {
                 float largestVolume = 0f;
@@ -589,7 +732,7 @@ public class CityGenerator : NetworkBehaviour
 
             if (bestBuilding != null)
             {
-                // ── Calculate street-snapped position ──
+                // â”€â”€ Calculate street-snapped position â”€â”€
                 Vector3 buildingPos = bestBuilding.transform.position;
 
                 // Direction from block center outward (toward the street)
@@ -598,13 +741,13 @@ public class CityGenerator : NetworkBehaviour
                 if (entranceDir.sqrMagnitude < 0.01f) entranceDir = Vector3.forward;
                 entranceDir.Normalize();
 
-                // Snap to the nearest cardinal axis so the 12 × 12 box aligns cleanly
+                // Snap to the nearest cardinal axis so the 12 Ã— 12 box aligns cleanly
                 if (Mathf.Abs(entranceDir.x) > Mathf.Abs(entranceDir.z))
                     entranceDir = new Vector3(Mathf.Sign(entranceDir.x), 0, 0);
                 else
                     entranceDir = new Vector3(0, 0, Mathf.Sign(entranceDir.z));
 
-                // Rotação: a frente do prefab (direção do EntranceAnchor, frontLocal) deve
+                // RotaÃ§Ã£o: a frente do prefab (direÃ§Ã£o do EntranceAnchor, frontLocal) deve
                 // apontar para a rua (entranceDir).
                 Vector3 frontLocal3 = new Vector3(frontLocal.x, 0f, frontLocal.y);
                 pizzariaRot = Quaternion.LookRotation(entranceDir, Vector3.up)
@@ -627,7 +770,7 @@ public class CityGenerator : NetworkBehaviour
                 else
                     streetEdge.x = buildingPos.x;
 
-                // A borda da frente do Floor (centro + frontLocal*halfDepth) fica rente à calçada.
+                // A borda da frente do Floor (centro + frontLocal*halfDepth) fica rente Ã  calÃ§ada.
                 Vector3 frontEdgeLocal = new Vector3(
                     floorCenter.x + frontLocal.x * frontHalfDepth, 0f,
                     floorCenter.y + frontLocal.y * frontHalfDepth);
@@ -636,7 +779,7 @@ public class CityGenerator : NetworkBehaviour
                 if (Application.isPlaying) Destroy(bestBuilding.gameObject);
                 else DestroyImmediate(bestBuilding.gameObject);
 
-                // ── Carve out space for the Pizzeria (tamanho real do Floor) ──
+                // â”€â”€ Carve out space for the Pizzeria (tamanho real do Floor) â”€â”€
                 Vector3 floorWorldCenter = pizzariaPos + pizzariaRot * new Vector3(floorCenter.x, 0f, floorCenter.y);
                 Vector3 rotatedSize = pizzariaRot * new Vector3(floorSize.x, 10f, floorSize.y);
                 Bounds pizzeriaBounds = new Bounds(floorWorldCenter,
@@ -763,7 +906,7 @@ public class CityGenerator : NetworkBehaviour
     }
 
     /// <summary>
-    /// Lê as dimensões da pizzaria. Prioriza o componente PizzeriaFootprint com geometria explícita;
+    /// LÃª as dimensÃµes da pizzaria. Prioriza o componente PizzeriaFootprint com geometria explÃ­cita;
     /// se ausente, faz fallback para o objeto "Floor" do prefab. Fallback geral: 12x12 centrado.
     /// </summary>
     private void GetPizzeriaFootprint(out Vector2 size, out Vector2 center, out Vector2 frontLocal)
@@ -773,7 +916,7 @@ public class CityGenerator : NetworkBehaviour
         frontLocal = new Vector2(0f, -1f); // fallback: frente em -Z
         if (pizzeriaPrefab == null) return;
 
-        // Se houver PizzeriaFootprint explícito no prefab, usar metadados de alta fidelidade
+        // Se houver PizzeriaFootprint explÃ­cito no prefab, usar metadados de alta fidelidade
         var footprint = pizzeriaPrefab.GetComponent<ScaryParty.Pizzeria.Composition.PizzeriaFootprint>();
         if (footprint != null)
         {
@@ -793,7 +936,7 @@ public class CityGenerator : NetworkBehaviour
         MeshFilter mf = floor.GetComponent<MeshFilter>();
         if (mf == null || mf.sharedMesh == null) return;
 
-        // Matriz do Floor relativa à raiz do prefab
+        // Matriz do Floor relativa Ã  raiz do prefab
         Matrix4x4 m = pizzeriaPrefab.transform.worldToLocalMatrix * floor.localToWorldMatrix;
         Bounds mb = mf.sharedMesh.bounds;
         Vector3 min = new Vector3(float.MaxValue, 0, float.MaxValue);
@@ -809,7 +952,7 @@ public class CityGenerator : NetworkBehaviour
         size = new Vector2(max.x - min.x, max.z - min.z);
         center = new Vector2((max.x + min.x) * 0.5f, (max.z + min.z) * 0.5f);
 
-        // Frente = direção do centro do Floor até o "EntranceAnchor" (snap cardinal).
+        // Frente = direÃ§Ã£o do centro do Floor atÃ© o "EntranceAnchor" (snap cardinal).
         foreach (Transform t in pizzeriaPrefab.GetComponentsInChildren<Transform>(true))
         {
             if (t.name != "EntranceAnchor") continue;
@@ -833,7 +976,7 @@ public class CityGenerator : NetworkBehaviour
         float minRequiredDim = Mathf.Min(reqSize.x, reqSize.y);
         float requiredArea = (reqSize.x * reqSize.y) * 0.65f;
 
-        Vector3 gridCenter = Vector3.zero; // Origem orgânica é 0,0,0
+        Vector3 gridCenter = Vector3.zero; // Origem orgÃ¢nica Ã© 0,0,0
         int bestIndex = -1;
         float bestScore = float.MaxValue;
 
@@ -851,7 +994,7 @@ public class CityGenerator : NetworkBehaviour
                 case ZoneType.MonsterZone: zoneBonus = 100f; break;
             }
 
-            // Penalizar quadras menores do que o footprint necessário para o prédio da pizzaria
+            // Penalizar quadras menores do que o footprint necessÃ¡rio para o prÃ©dio da pizzaria
             float sizePenalty = 0f;
             float maxBlockDim = Mathf.Max(block.size.x, block.size.z);
             if (maxBlockDim < minRequiredDim || (block.area > 0 && block.area < requiredArea))
@@ -965,8 +1108,8 @@ public class CityGenerator : NetworkBehaviour
         distanceCleaned.Add(poly[0]);
         for (int i = 1; i < poly.Length; i++)
         {
-            // Apenas remove arestas microscópicas (< 1 metro) que quebram o cálculo da normal.
-            // Não remove segmentos curtos válidos (zig-zags).
+            // Apenas remove arestas microscÃ³picas (< 1 metro) que quebram o cÃ¡lculo da normal.
+            // NÃ£o remove segmentos curtos vÃ¡lidos (zig-zags).
             if (Vector3.Distance(distanceCleaned[distanceCleaned.Count - 1], poly[i]) > 1f)
             {
                 distanceCleaned.Add(poly[i]);
@@ -992,9 +1135,9 @@ public class CityGenerator : NetworkBehaviour
             Vector3 dir2 = (next - curr).normalized;
 
             float angle = Vector3.Angle(dir1, dir2);
-            // Tolerância de 5 graus:
-            // - É o suficiente para fundir T-intersections ligeiramente tortos (que criavam buracos no meio da rua).
-            // - Preserva curvas reais (que normalmente têm ângulos de 10 a 15 graus por segmento).
+            // TolerÃ¢ncia de 5 graus:
+            // - Ã‰ o suficiente para fundir T-intersections ligeiramente tortos (que criavam buracos no meio da rua).
+            // - Preserva curvas reais (que normalmente tÃªm Ã¢ngulos de 10 a 15 graus por segmento).
             if (angle > 5f) 
             {
                 finalCleaned.Add(curr);
@@ -1090,11 +1233,11 @@ public class CityGenerator : NetworkBehaviour
                 CityData.pizzariaRotation = placementResult.rotation;
                 CityData.bancadaPosition = placementResult.bancadaPosition;
                 CityData.hasPizzariaReserved = true;
-                Debug.Log($"[CityGenerator] ✅ Pizzaria reservada com sucesso na quadra {placementResult.blockIndex}!");
+                Debug.Log($"[CityGenerator] âœ… Pizzaria reservada com sucesso na quadra {placementResult.blockIndex}!");
             }
             else
             {
-                // Fallback legado de índice se o solver não encontrar quadra
+                // Fallback legado de Ã­ndice se o solver nÃ£o encontrar quadra
                 int bestBlock = FindBestPizzariaBlock();
                 if (bestBlock >= 0)
                 {

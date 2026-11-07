@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: StationDef_10_Staging
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationDef
   id: 10
-  stationName: Pilha de Caixas
+  stationName: "Bancada de Retirada / Expedi\xE7\xE3o"
   slotCount: 2
   acceptedProcesses: []
   acceptedProcessIds: 

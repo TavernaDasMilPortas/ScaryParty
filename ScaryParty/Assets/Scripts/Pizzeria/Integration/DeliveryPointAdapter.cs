@@ -21,14 +21,11 @@ namespace ScaryParty.Pizzeria.Integration
             ulong myId = NetworkManager.Singleton.LocalClientId;
             var carriedBoxes = new List<ulong>();
 
-            // Coleta todas as caixas transportadas pelo jogador local (mãos ou mochila)
-            for (int i = 0; i < netState.Items.Count; i++)
+            var carried = CarriedCargoResolver.GetCarriedItems(netState, myId);
+            for (int i = 0; i < carried.Count; i++)
             {
-                var item = netState.Items[i];
-                bool isCarriedByMe = item.HolderId == myId &&
-                    (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
-
-                if (isCarriedByMe && (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box))
+                var item = carried[i];
+                if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
                 {
                     // Prioriza caixas com etiqueta do destino ou aceita todas se não houver etiqueta
                     if (item.LabelDestinationId == addressId || item.LabelDestinationId <= 0)
@@ -41,13 +38,10 @@ namespace ScaryParty.Pizzeria.Integration
             // Se não achou nenhuma com etiqueta específica, inclui todas as caixas carregadas
             if (carriedBoxes.Count == 0)
             {
-                for (int i = 0; i < netState.Items.Count; i++)
+                for (int i = 0; i < carried.Count; i++)
                 {
-                    var item = netState.Items[i];
-                    bool isCarriedByMe = item.HolderId == myId &&
-                        (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
-
-                    if (isCarriedByMe && (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box))
+                    var item = carried[i];
+                    if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
                     {
                         carriedBoxes.Add(item.ItemId);
                     }

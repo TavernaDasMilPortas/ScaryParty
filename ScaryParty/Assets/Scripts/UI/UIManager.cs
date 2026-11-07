@@ -1,439 +1,52 @@
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.Collections.Generic;
 using ScaryParty.UI.Piaria.Presenters;
-#if ENABLE_INPUT_SYSTEM
-using UnityEngine.InputSystem;
-#endif
 
-/// <summary>
-/// Singleton manager for the Main Game UI using UI Toolkit.
-/// Updates the HUD dynamically during gameplay.
-/// Bridges seamlessly with the Piaria UI Toolkit presenters while maintaining complete API compatibility.
-/// </summary>
+/// <summary>Compatibility API for gameplay systems; Piaria presenters own every visual.</summary>
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
-
-    [Header("UI Document")]
-    [Tooltip("The UIDocument component in the scene containing MainGameUI")]
     public UIDocument uiDocument;
-
-    // UI Elements
-    private Label _moneyLabel;
-    private Label _scoreLabel;
-    private ScrollView _ordersList;
-    private Label _interactionPrompt;
-    private Label _leftHandContent;
-    private Label _rightHandContent;
-
-    // Scoreboard Elements
-    private VisualElement _scoreboardOverlay;
-    private ScrollView _scoreboardList;
-
-    // State
-    private int _completedDeliveries = 0;
+    private int _completedDeliveries;
 
     private void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this);
             return;
         }
         Instance = this;
-
-        if (uiDocument == null)
-            uiDocument = GetComponent<UIDocument>();
+        if (uiDocument == null) uiDocument = GetComponent<UIDocument>();
     }
 
-    private VisualElement _minimapImage;
-
-    private void OnEnable()
+    private void OnDestroy()
     {
-        if (uiDocument == null || uiDocument.rootVisualElement == null) return;
-
-        var root = uiDocument.rootVisualElement;
-
-        // Bind Elements
-        _moneyLabel = root.Q<Label>("MoneyLabel");
-        _scoreLabel = root.Q<Label>("ScoreLabel");
-        _ordersList = root.Q<ScrollView>("OrdersList");
-        if (_ordersList != null)
-            _ordersList.style.display = DisplayStyle.None;
-        _interactionPrompt = root.Q<Label>("InteractionPrompt");
-        _leftHandContent = root.Q<Label>("LeftHandContent");
-        _rightHandContent = root.Q<Label>("RightHandContent");
-        _minimapImage = root.Q<VisualElement>("MinimapImage");
-
-        // Scoreboard
-        _scoreboardOverlay = root.Q<VisualElement>("ScoreboardOverlay");
-        _scoreboardList = root.Q<ScrollView>("ScoreboardList");
-
-        UpdateMoneyDisplay(0);
-        UpdateScore(0);
-        HideInteractionPrompt();
-        UpdateHand(true, "Vazio");
-        UpdateHand(false, "Vazio");
-        HideScoreboard();
-
-        // Minimap drag and drop setup
-        if (_minimapImage != null)
-        {
-            _minimapImage.style.unityBackgroundScaleMode = ScaleMode.ScaleAndCrop;
-            _minimapImage.RegisterCallback<PointerDownEvent>(OnMinimapPointerDown);
-            _minimapImage.RegisterCallback<PointerMoveEvent>(OnMinimapPointerMove);
-            _minimapImage.RegisterCallback<PointerUpEvent>(OnMinimapPointerUp);
-            _minimapImage.RegisterCallback<PointerLeaveEvent>(OnMinimapPointerLeave);
-        }
+        if (Instance == this) Instance = null;
     }
 
-    private bool _isDraggingMap = false;
-    private Vector2 _lastMousePos;
+    public void UpdateMoneyDisplay(int total) => HudPresenter.Instance?.SetMoney(total);
 
-    private void OnMinimapPointerDown(PointerDownEvent evt)
-    {
-        if (MinimapRouteManager.Instance != null && MinimapRouteManager.Instance.IsFullscreen)
-        {
-            _isDraggingMap = true;
-            _lastMousePos = (Vector2)evt.position;
-            _minimapImage.CapturePointer(evt.pointerId);
-        }
-    }
+    public void AddCompletedDelivery() => HudPresenter.Instance?.SetDeliveries(++_completedDeliveries);
 
-    private void OnMinimapPointerMove(PointerMoveEvent evt)
-    {
-        if (_isDraggingMap && MinimapRouteManager.Instance != null)
-        {
-            Vector2 delta = (Vector2)evt.position - _lastMousePos;
-            _lastMousePos = (Vector2)evt.position;
-            MinimapRouteManager.Instance.PanMap(delta);
-        }
-    }
+    public void UpdateHand(bool isRightHand, string itemName) => SetHandState(isRightHand, false, itemName);
 
-    private void OnMinimapPointerUp(PointerUpEvent evt)
-    {
-        if (_isDraggingMap)
-        {
-            _isDraggingMap = false;
-            _minimapImage.ReleasePointer(evt.pointerId);
-        }
-    }
+    public void SetHandState(bool isRightHand, bool isSelected, string itemName) =>
+        HudPresenter.Instance?.SetHandState(isRightHand, isSelected, itemName);
 
-    private void OnMinimapPointerLeave(PointerLeaveEvent evt)
-    {
-        if (_isDraggingMap)
-        {
-            _isDraggingMap = false;
-        }
-    }
+    public void ShowInteractionPrompt(string message) => HudPresenter.Instance?.ShowPrompt(message);
 
-    private void Update()
-    {
-        if (_minimapImage != null && _minimapImage.resolvedStyle.backgroundImage.texture == null)
-        {
-            var worldImage = FindObjectOfType<Kamgam.UGUIWorldImage.WorldImage>();
-            if (worldImage != null && worldImage.RenderTexture != null)
-            {
-                _minimapImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(worldImage.RenderTexture));
-            }
-        }
+    public void HideInteractionPrompt() => HudPresenter.Instance?.HidePrompt();
 
-        if (ScoreboardPresenter.Instance == null)
-        {
-            HandleScoreboardInput();
-        }
-    }
-
-    // ========================================
-    // SCOREBOARD (Tab)
-    // ========================================
-
-    private void HandleScoreboardInput()
-    {
-        bool tabHeld = false;
-
-#if ENABLE_INPUT_SYSTEM
-        if (Keyboard.current != null)
-            tabHeld = Keyboard.current.tabKey.isPressed;
-#else
-        tabHeld = Input.GetKey(KeyCode.Tab);
-#endif
-
-        if (tabHeld)
-        {
-            ShowScoreboard();
-        }
-        else
-        {
-            HideScoreboard();
-        }
-    }
-
-    private bool _isScoreboardOpen = false;
-
-    private void ShowScoreboard()
-    {
-        if (_scoreboardOverlay == null) return;
-
-        if (!_isScoreboardOpen)
-        {
-            _isScoreboardOpen = true;
-            _scoreboardOverlay.RemoveFromClassList("hidden");
-            _scoreboardOverlay.style.display = DisplayStyle.Flex;
-            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PushModal();
-        }
-
-        RefreshScoreboardData();
-    }
-
-    private void HideScoreboard()
-    {
-        if (_scoreboardOverlay == null) return;
-
-        if (_isScoreboardOpen)
-        {
-            _isScoreboardOpen = false;
-            _scoreboardOverlay.AddToClassList("hidden");
-            _scoreboardOverlay.style.display = DisplayStyle.None;
-            ScaryParty.Pizzeria.Presentation.GameplayInputGate.PopModal();
-        }
-    }
-
-    private void OnDisable()
-    {
-        HideScoreboard();
-    }
-
-    private void RefreshScoreboardData()
-    {
-        if (_scoreboardList == null) return;
-
-        _scoreboardList.Clear();
-        var allPlayers = Object.FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-
-        foreach (var player in allPlayers)
-        {
-            if (player == null) continue;
-
-            string playerName = player.PlayerName.Value.ToString();
-            if (string.IsNullOrEmpty(playerName)) playerName = "???";
-
-            int heldPizzas = player.HeldPizzas.Value;
-            int money = player.Money.Value;
-            Color playerColor = player.PlayerColor.Value;
-
-            const int maxSlots = 2;
-            string slotsDisplay = "";
-            for (int i = 0; i < maxSlots; i++)
-            {
-                if (i < heldPizzas)
-                    slotsDisplay += "●  ";
-                else
-                    slotsDisplay += "■  ";
-            }
-            slotsDisplay = slotsDisplay.TrimEnd();
-
-            var row = new VisualElement();
-            row.AddToClassList("scoreboard-row");
-
-            var nameLabel = new Label(playerName);
-            nameLabel.AddToClassList("scoreboard-cell");
-            nameLabel.AddToClassList("scoreboard-name");
-            nameLabel.style.color = new StyleColor(playerColor);
-
-            var slotsLabel = new Label(slotsDisplay);
-            slotsLabel.AddToClassList("scoreboard-cell");
-            slotsLabel.AddToClassList("scoreboard-slots");
-
-            var moneyLabel = new Label($"R${money}");
-            moneyLabel.AddToClassList("scoreboard-cell");
-            moneyLabel.AddToClassList("scoreboard-money");
-
-            row.Add(nameLabel);
-            row.Add(slotsLabel);
-            row.Add(moneyLabel);
-
-            _scoreboardList.Add(row);
-        }
-    }
-
-    // ========================================
-    // MONEY & SCORE
-    // ========================================
-
-    public void UpdateMoneyDisplay(int total)
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.SetMoney(total);
-        }
-        else if (_moneyLabel != null)
-        {
-            _moneyLabel.text = $"R${total}";
-        }
-    }
-
-    public void AddCompletedDelivery()
-    {
-        _completedDeliveries++;
-        UpdateScore(_completedDeliveries);
-    }
-
-    private void UpdateScore(int total)
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.SetDeliveries(total);
-        }
-        else if (_scoreLabel != null)
-        {
-            _scoreLabel.text = $"Entregas: {total}";
-        }
-    }
-
-    // ========================================
-    // HANDS / INTERACTION
-    // ========================================
-
-    public void UpdateHand(bool isRightHand, string itemName)
-    {
-        SetHandState(isRightHand, false, itemName);
-    }
-
-    public void SetHandState(bool isRightHand, bool isSelected, string itemName)
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.SetHandState(isRightHand, isSelected, itemName);
-            return;
-        }
-
-        var contentLabel = isRightHand ? _rightHandContent : _leftHandContent;
-        if (contentLabel == null) return;
-
-        contentLabel.text = string.IsNullOrEmpty(itemName) ? "Vazio" : itemName;
-
-        var slotContainer = contentLabel.parent;
-        if (slotContainer != null)
-        {
-            var titleLabel = slotContainer.Q<Label>(null, "hand-title");
-            if (titleLabel != null)
-            {
-                string handName = isRightHand ? "Mão Direita [2]" : "Mão Esquerda [1]";
-                titleLabel.text = isSelected ? $"★ {handName}" : handName;
-            }
-
-            if (isSelected)
-            {
-                slotContainer.AddToClassList("hand-card-active");
-            }
-            else
-            {
-                slotContainer.RemoveFromClassList("hand-card-active");
-            }
-        }
-    }
-
-    public void ShowInteractionPrompt(string message)
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.ShowPrompt(message);
-            return;
-        }
-
-        if (_interactionPrompt != null)
-        {
-            if (!message.Contains("[E]") && !message.Contains("[F]"))
-            {
-                message = $"[E] {message}";
-            }
-            _interactionPrompt.text = message;
-            _interactionPrompt.style.display = DisplayStyle.Flex;
-            _interactionPrompt.RemoveFromClassList("hidden");
-        }
-    }
-
-    public void HideInteractionPrompt()
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.HidePrompt();
-            return;
-        }
-
-        if (_interactionPrompt != null)
-        {
-            _interactionPrompt.style.display = DisplayStyle.None;
-            _interactionPrompt.AddToClassList("hidden");
-        }
-    }
-
-    // ========================================
-    // MINIMAP
-    // ========================================
-
-    public void ToggleMinimapFullscreen(bool isFullscreen)
-    {
-        if (HudPresenter.Instance != null)
-        {
-            HudPresenter.Instance.ToggleMinimapFullscreen(isFullscreen);
-            return;
-        }
-
-        if (_minimapImage == null || _minimapImage.parent == null) return;
-        var container = _minimapImage.parent;
-
-        if (isFullscreen)
-        {
-            container.style.width = Length.Percent(80);
-            container.style.height = Length.Percent(80);
-            container.style.bottom = Length.Percent(10);
-            container.style.right = Length.Percent(10);
-            container.style.top = Length.Percent(10);
-            container.style.left = Length.Percent(10);
-        }
-        else
-        {
-            container.style.width = StyleKeyword.Null;
-            container.style.height = StyleKeyword.Null;
-            container.style.bottom = StyleKeyword.Null;
-            container.style.right = StyleKeyword.Null;
-            container.style.top = StyleKeyword.Null;
-            container.style.left = StyleKeyword.Null;
-        }
-    }
-
-    // ========================================
-    // ORDERS LIST
-    // ========================================
+    public void ToggleMinimapFullscreen(bool isFullscreen) =>
+        HudPresenter.Instance?.ToggleMinimapFullscreen(isFullscreen);
 
     public void UpdateOrdersList(List<string> activeOrders)
     {
-        if (_ordersList == null) return;
-        _ordersList.Clear();
-
-        foreach (var order in activeOrders)
-        {
-            Label orderLabel = new Label(order);
-            orderLabel.AddToClassList("order-item");
-            orderLabel.AddToClassList("order-item-text");
-
-            if (MinimapRouteManager.Instance != null)
-            {
-                Color routeColor = MinimapRouteManager.Instance.GetOrderColor(order);
-                orderLabel.style.borderLeftColor = new StyleColor(routeColor);
-                orderLabel.style.color = new StyleColor(routeColor);
-            }
-
-            _ordersList.Add(orderLabel);
-        }
+        if (HudPresenter.Instance != null)
+            HudPresenter.Instance.UpdateActiveOrdersDisplay(activeOrders == null || activeOrders.Count == 0
+                ? "NENHUMA COMANDA ATIVA"
+                : $"COMANDAS ATIVAS ({activeOrders.Count}): {string.Join(", ", activeOrders)}");
     }
 }
- 
- 
- 
- 
- 
- 

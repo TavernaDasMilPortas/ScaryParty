@@ -36,10 +36,9 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     cmd.RequestOpenStorageSessionServerRpc(stationId);
                 }
-                else if (PizzeriaHudBuilder.Instance != null)
+                else
                 {
-                    // Fallback para modo offline/local
-                    PizzeriaHudBuilder.Instance.OpenStoragePicker(stationId);
+                    ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance?.Open(stationId);
                 }
             }
         }

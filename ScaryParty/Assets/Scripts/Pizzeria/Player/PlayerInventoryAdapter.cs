@@ -149,7 +149,7 @@ namespace ScaryParty.Pizzeria.Player
         {
             if (it.PackagingState == (byte)PackagingState.Boxed)
             {
-                return it.LabelDestinationId > 0 ? $"Caixa (Dest #{it.LabelDestinationId})" : "Caixa (Sem Rótulo)";
+                return it.LabelDestinationId >= 0 ? $"Caixa (#{it.LabelDestinationId + 1})" : "Caixa (Sem Rótulo)";
             }
             if (it.Category == (byte)ItemCategory.Pizza)
             {

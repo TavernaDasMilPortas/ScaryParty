@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -691,7 +691,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorGUILayout.HelpBox(
                 "Adiciona de forma idempotente na raiz: NetworkObject, PizzeriaRoot, PizzeriaFootprint, PizzeriaNetworkState, " +
                 "PizzeriaCommandHandler, Kitchen/Order/LogisticsCommands, PizzeriaNotifier, PlayerLifecycleBridge, " +
-                "PizzeriaHudBuilder, PizzeriaItemVisualizer, TicketModalPresenter, Night1Bootstrapper e PizzeriaAuthoringBindings.",
+                "PizzeriaItemVisualizer, TicketModalPresenter, Night1Bootstrapper e PizzeriaAuthoringBindings.",
                 MessageType.Info);
 
             EditorGUI.BeginChangeCheck();

@@ -117,13 +117,13 @@ namespace ScaryParty.Pizzeria.Network
         [ClientRpc]
         public void GrantStorageSessionClientRpc(int stationId, ClientRpcParams rpcParams = default)
         {
-            ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance?.OpenStoragePicker(stationId);
+            ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance?.Open(stationId);
         }
 
         [ClientRpc]
         public void CloseStoragePickerClientRpc(ClientRpcParams rpcParams = default)
         {
-            ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder.Instance?.CloseStoragePicker(false);
+            ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance?.Close();
         }
 
         [ClientRpc]

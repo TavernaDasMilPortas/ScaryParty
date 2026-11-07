@@ -45,6 +45,20 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
     public static class BackpackService
     {
+        public static CommandResult Register(PizzeriaState state, BackpackId backpackId, int capacity, DomainVector3 position, DomainQuaternion rotation)
+        {
+            if (!backpackId.IsValid || capacity <= 0 || state.Backpacks.ContainsKey(backpackId))
+                return CommandResult.Fail(CommandError.InvalidOperation, "Registro de mochila inválido ou repetido.");
+
+            state.Backpacks.Add(backpackId, new BackpackState(backpackId, capacity)
+            {
+                WorldPos = position,
+                WorldRot = rotation
+            });
+            state.IncrementRevision();
+            return CommandResult.Ok();
+        }
+
         public static CommandResult Equip(PizzeriaState state, BackpackId backpackId, ulong playerId)
         {
             if (!state.Backpacks.TryGetValue(backpackId, out var backpack))
@@ -93,13 +107,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.Items.TryGetValue(itemId, out var item))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
-            if (!item.Location.Equals(handLocation))
-                return CommandResult.Fail(CommandError.Blocked, "Item não está na mão.");
+            if (handLocation.Type != LocationType.Hand || handLocation.SlotIndex < 0 || handLocation.SlotIndex > 1 ||
+                !item.Location.Equals(handLocation))
+                return CommandResult.Fail(CommandError.Blocked, "Item não está na mão selecionada.");
 
             if (!item.IsBoxed)
                 return CommandResult.Fail(CommandError.Incompatible, "Apenas caixas prontas podem ser guardadas na mochila.");
 
-            return TransferService.TransferItem(state, itemId, new LocationRef(LocationType.Backpack, backpackId.Value), 0, bypassReservation: true);
+            return TransferService.TransferItem(state, itemId, new LocationRef(LocationType.Backpack, backpackId.Value), handLocation.HolderId);
         }
 
         public static CommandResult RetrieveItem(PizzeriaState state, BackpackId backpackId, ItemId itemId, LocationRef handLocation)
@@ -107,10 +122,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.Backpacks.TryGetValue(backpackId, out var backpack))
                 return CommandResult.Fail(CommandError.InvalidOperation, "Mochila inválida.");
 
-            if (!backpack.Items.Contains(itemId))
+            if (handLocation.Type != LocationType.Hand || handLocation.SlotIndex < 0 || handLocation.SlotIndex > 1)
+                return CommandResult.Fail(CommandError.InvalidOperation, "Mão inválida.");
+
+            if (!backpack.Items.Contains(itemId) || !state.Items.TryGetValue(itemId, out var item) ||
+                !item.Location.Equals(new LocationRef(LocationType.Backpack, backpackId.Value)))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não está na mochila.");
 
-            return TransferService.TransferItem(state, itemId, handLocation, 0, bypassReservation: true);
+            return TransferService.TransferItem(state, itemId, handLocation, handLocation.HolderId);
         }
 
         public static void ReleaseOnDisconnect(PizzeriaState state, ulong playerId, DomainVector3 recoveryPos)

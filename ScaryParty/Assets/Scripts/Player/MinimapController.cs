@@ -1,33 +1,34 @@
+﻿using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
 
-/// <summary>
-/// Placed on the Player prefab. On spawn, registers this player with the MinimapRouteManager
-/// so the minimap camera follows the local player.
-/// Also handles toggling the minimap (M key is handled inside MinimapRouteManager.Update).
-/// </summary>
+/// <summary>Registers the player with the map across either spawn order and removes stale references on despawn.</summary>
 public class MinimapController : NetworkBehaviour
 {
+    private Coroutine _registration;
+
     public override void OnNetworkSpawn()
     {
-        // Only the local owner needs to register with the minimap
-        if (!IsOwner) return;
-
-        // Wait one frame so MinimapRouteManager is guaranteed to be initialized
-        StartCoroutine(RegisterWithMinimap());
+        if (_registration != null) StopCoroutine(_registration);
+        _registration = StartCoroutine(RegisterWhenReady());
     }
 
-    private System.Collections.IEnumerator RegisterWithMinimap()
+    private IEnumerator RegisterWhenReady()
     {
-        yield return null; // One frame delay
+        while (IsSpawned && MinimapRouteManager.Instance == null) yield return null;
+        if (IsSpawned) MinimapRouteManager.Instance.RegisterPlayer(GetComponent<PlayerState>());
+        _registration = null;
+    }
 
-        if (MinimapRouteManager.Instance != null)
-        {
-            MinimapRouteManager.Instance.TrackPlayer(transform);
-        }
-        else
-        {
-            Debug.LogWarning("[MinimapController] MinimapRouteManager not found in scene. Add it via Scene Builder.");
-        }
+    public override void OnNetworkDespawn()
+    {
+        if (_registration != null) { StopCoroutine(_registration); _registration = null; }
+        MinimapRouteManager.Instance?.UnregisterPlayer(NetworkObjectId);
+    }
+
+    private void OnDisable()
+    {
+        if (_registration != null) { StopCoroutine(_registration); _registration = null; }
+        if (IsSpawned) MinimapRouteManager.Instance?.UnregisterPlayer(NetworkObjectId);
     }
 }

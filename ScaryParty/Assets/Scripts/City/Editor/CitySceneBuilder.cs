@@ -22,7 +22,7 @@ public class CitySceneBuilder : EditorWindow
     {
         _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
-        EditorGUILayout.LabelField("🍕 Scary Party — Scene Builder", EditorStyles.boldLabel);
+        EditorGUILayout.LabelField("ðŸ• Scary Party â€” Scene Builder", EditorStyles.boldLabel);
         EditorGUILayout.Space(5);
         EditorGUILayout.HelpBox(
             "Use this tool to set up the default city, networking, and gameplay scene structure.\n" +
@@ -51,7 +51,7 @@ public class CitySceneBuilder : EditorWindow
                 EditorUtility.SetDirty(_currentConfig);
             }
             
-            if (GUILayout.Button("🏗️ Quick Rebuild City", GUILayout.Height(30)))
+            if (GUILayout.Button("ðŸ—ï¸ Quick Rebuild City", GUILayout.Height(30)))
             {
                 CityGenerator gen = FindObjectOfType<CityGenerator>();
                 if (gen != null)
@@ -99,7 +99,7 @@ public class CitySceneBuilder : EditorWindow
 
         EditorGUILayout.Space(10);
         GUI.backgroundColor = new Color(0.3f, 0.9f, 0.3f);
-        if (GUILayout.Button("🚀  Full Setup", GUILayout.Height(45)))
+        if (GUILayout.Button("ðŸš€  Full Setup", GUILayout.Height(45)))
         {
             GenerateDefaultConfig();
             SetupBaseScene();
@@ -115,7 +115,7 @@ public class CitySceneBuilder : EditorWindow
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Lobby Setup", EditorStyles.boldLabel);
         GUI.backgroundColor = new Color(0.4f, 0.7f, 1f);
-        if (GUILayout.Button("🎮 Setup Lobby Scene", GUILayout.Height(35)))
+        if (GUILayout.Button("ðŸŽ® Setup Lobby Scene", GUILayout.Height(35)))
         {
             EditorApplication.delayCall += SetupLobbyScene;
         }
@@ -128,21 +128,21 @@ public class CitySceneBuilder : EditorWindow
             MessageType.Info);
         
         GUI.backgroundColor = new Color(1f, 0.6f, 0.2f);
-        if (GUILayout.Button("🧹 Clean GameScene Scene", GUILayout.Height(35)))
+        if (GUILayout.Button("ðŸ§¹ Clean GameScene Scene", GUILayout.Height(35)))
         {
             CleanGameSceneScene();
         }
         
         EditorGUILayout.Space(5);
         GUI.backgroundColor = new Color(1f, 0.4f, 0.6f);
-        if (GUILayout.Button("🛠️ Fix GameScene Bugs (AI Diagnostics)", GUILayout.Height(35)))
+        if (GUILayout.Button("ðŸ› ï¸ Fix GameScene Bugs (AI Diagnostics)", GUILayout.Height(35)))
         {
             FixGameSceneBugs();
         }
 
         EditorGUILayout.Space(5);
         GUI.backgroundColor = new Color(0.2f, 0.8f, 0.6f);
-        if (GUILayout.Button("🍕 Legacy Cleanup Builder (Pizzas & Armas)", GUILayout.Height(35)))
+        if (GUILayout.Button("ðŸ• Legacy Cleanup Builder (Pizzas & Armas)", GUILayout.Height(35)))
         {
             LegacyCleanupBuilder.ShowWindow();
         }
@@ -161,7 +161,7 @@ public class CitySceneBuilder : EditorWindow
         if (cityRoot != null && cityRoot.GetComponent<NetworkObject>() == null)
         {
             cityRoot.AddComponent<NetworkObject>();
-            Debug.Log("[SceneBuilder] 🛠️ Added NetworkObject to --- CITY ---.");
+            Debug.Log("[SceneBuilder] ðŸ› ï¸ Added NetworkObject to --- CITY ---.");
         }
 
         // 3. Ensure MinimapRouteManager and all gameplay systems
@@ -185,7 +185,7 @@ public class CitySceneBuilder : EditorWindow
         {
             layers.GetArrayElementAtIndex(emptyLayer).stringValue = "MinimapOnly";
             tagManager.ApplyModifiedProperties();
-            Debug.Log("[SceneBuilder] 🛠️ Created 'MinimapOnly' Layer.");
+            Debug.Log("[SceneBuilder] ðŸ› ï¸ Created 'MinimapOnly' Layer.");
         }
 
         // 6. Wire pizzeriaPrefab if missing
@@ -204,7 +204,7 @@ public class CitySceneBuilder : EditorWindow
 
             gen.ClearCity();
             gen.GenerateCity();
-            Debug.Log("[SceneBuilder] 🛠️ City regenerated — DeliveryPoint indices are now correct!");
+            Debug.Log("[SceneBuilder] ðŸ› ï¸ City regenerated â€” DeliveryPoint indices are now correct!");
         }
         else
         {
@@ -214,13 +214,13 @@ public class CitySceneBuilder : EditorWindow
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-        EditorUtility.DisplayDialog("🛠️ GameScene Bugs Fixed",
-            "✅ NetworkObject adicionado ao CITY\n" +
-            "✅ MinimapRouteManager configurado\n" +
-            "✅ Layer 'MinimapOnly' verificada\n" +
-            "✅ PizzeriaPrefab atribuído ao CityGenerator\n" +
-            "✅ Cidade regenerada (DeliveryPoints corretos)\n\n" +
-            "Salve a cena (Ctrl+S) e dê Play!", "OK");
+        EditorUtility.DisplayDialog("ðŸ› ï¸ GameScene Bugs Fixed",
+            "âœ… NetworkObject adicionado ao CITY\n" +
+            "âœ… MinimapRouteManager configurado\n" +
+            "âœ… Layer 'MinimapOnly' verificada\n" +
+            "âœ… PizzeriaPrefab atribuÃ­do ao CityGenerator\n" +
+            "âœ… Cidade regenerada (DeliveryPoints corretos)\n\n" +
+            "Salve a cena (Ctrl+S) e dÃª Play!", "OK");
     }
 
     private void SetupLobbyScene()
@@ -343,7 +343,7 @@ public class CitySceneBuilder : EditorWindow
             EditorBuildSettings.scenes = newScenes.ToArray();
         }
 
-        Debug.Log("[SceneBuilder] ✅ LobbyScene created and saved at Assets/Scenes/LobbyScene.unity");
+        Debug.Log("[SceneBuilder] âœ… LobbyScene created and saved at Assets/Scenes/LobbyScene.unity");
     }
 
     private void EnsurePizzaPrefabInNetworkPrefabs()
@@ -386,7 +386,7 @@ public class CitySceneBuilder : EditorWindow
         prefabList.Add(new NetworkPrefab { Prefab = pizzaPrefab });
         EditorUtility.SetDirty(prefabList);
         AssetDatabase.SaveAssets();
-        Debug.Log("[SceneBuilder] ✅ Pizza prefab added to DefaultNetworkPrefabs.");
+        Debug.Log("[SceneBuilder] âœ… Pizza prefab added to DefaultNetworkPrefabs.");
         AssignPizzaPrefabToManager(pizzaPrefab);
     }
 
@@ -397,7 +397,7 @@ public class CitySceneBuilder : EditorWindow
         {
             manager.pizzaBoxPrefab = pizzaPrefab;
             EditorUtility.SetDirty(manager);
-            Debug.Log("[SceneBuilder] ✅ Assigned pizza prefab to PizzariaManager.");
+            Debug.Log("[SceneBuilder] âœ… Assigned pizza prefab to PizzariaManager.");
         }
     }
 
@@ -415,13 +415,13 @@ public class CitySceneBuilder : EditorWindow
         if (gen != null)
         {
             bool hasMats = gen.buildingMaterials != null && gen.buildingMaterials.Length > 0;
-            DrawStatusLine(" ↳ Building Mats Assigned", hasMats);
+            DrawStatusLine(" â†³ Building Mats Assigned", hasMats);
 
             // CRITICAL: NetworkObject is required for OnNetworkSpawn to fire
             bool hasNetObj = gen.GetComponent<NetworkObject>() != null;
-            DrawStatusLine(" ↳ NetworkObject (OnNetworkSpawn)", hasNetObj);
+            DrawStatusLine(" â†³ NetworkObject (OnNetworkSpawn)", hasNetObj);
 
-            DrawStatusLine(" ↳ PizzeriaPrefab Assigned", gen.pizzeriaPrefab != null);
+            DrawStatusLine(" â†³ PizzeriaPrefab Assigned", gen.pizzeriaPrefab != null);
         }
 
         DrawStatusLine("MinimapRouteManager", FindObjectOfType<MinimapRouteManager>() != null);
@@ -430,7 +430,7 @@ public class CitySceneBuilder : EditorWindow
         PizzariaManager pManager = FindObjectOfType<PizzariaManager>();
         if (pManager != null)
         {
-            DrawStatusLine("⚠️ Legacy PizzariaManager (Remove!)", false);
+            DrawStatusLine("âš ï¸ Legacy PizzariaManager (Remove!)", false);
         }
         else
         {
@@ -446,11 +446,11 @@ public class CitySceneBuilder : EditorWindow
         NetworkManager netManager = FindObjectOfType<NetworkManager>();
         if (netManager != null)
         {
-            DrawStatusLine(" ↳ Player Prefab Assigned", netManager.NetworkConfig.PlayerPrefab != null);
+            DrawStatusLine(" â†³ Player Prefab Assigned", netManager.NetworkConfig.PlayerPrefab != null);
             if (netManager.NetworkConfig.PlayerPrefab != null)
             {
                 bool hasInteraction = netManager.NetworkConfig.PlayerPrefab.GetComponent<PlayerInteraction>() != null;
-                DrawStatusLine(" ↳ Player has Interaction", hasInteraction);
+                DrawStatusLine(" â†³ Player has Interaction", hasInteraction);
             }
         }
     }
@@ -460,7 +460,7 @@ public class CitySceneBuilder : EditorWindow
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField(label, GUILayout.Width(150));
         GUI.color = exists ? Color.green : Color.red;
-        EditorGUILayout.LabelField(exists ? "✅ Found" : "❌ Missing");
+        EditorGUILayout.LabelField(exists ? "âœ… Found" : "âŒ Missing");
         GUI.color = Color.white;
         EditorGUILayout.EndHorizontal();
     }
@@ -469,7 +469,9 @@ public class CitySceneBuilder : EditorWindow
     {
         GameObject gameplayRoot = CreateRootIfMissing("--- GAMEPLAY ---");
 
-        // UI Manager & Document
+        // The migration owns Piaria HUD installation, including logistics presenters.
+        ScaryParty.Pizzeria.Editor.Migration.PiariaGameplayUIMigration.EnsureGameScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene());
         GameObject uiObj = GameObject.Find("MainGameUI");
         UnityEngine.UIElements.UIDocument doc = null;
         if (uiObj == null)
@@ -478,7 +480,7 @@ public class CitySceneBuilder : EditorWindow
             uiObj.transform.SetParent(gameplayRoot.transform);
             
             doc = uiObj.AddComponent<UnityEngine.UIElements.UIDocument>();
-            var visualTree = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>("Assets/UI/MainGameUI.uxml");
+            var visualTree = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>("Assets/UI/Piaria/UXML/MainGameHUD.uxml");
             if (visualTree != null) doc.visualTreeAsset = visualTree;
 
             UIManager uiManager = uiObj.AddComponent<UIManager>();
@@ -493,6 +495,12 @@ public class CitySceneBuilder : EditorWindow
 
         if (doc != null)
         {
+            var piariaTree = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>("Assets/UI/Piaria/UXML/MainGameHUD.uxml");
+            if (piariaTree != null) doc.visualTreeAsset = piariaTree;
+            if (uiObj.GetComponent<ScaryParty.UI.Piaria.Presenters.HudPresenter>() == null)
+                Undo.AddComponent<ScaryParty.UI.Piaria.Presenters.HudPresenter>(uiObj);
+            if (uiObj.GetComponent<ScaryParty.UI.Piaria.Exceptions.MinimapPresenter>() == null)
+                Undo.AddComponent<ScaryParty.UI.Piaria.Exceptions.MinimapPresenter>(uiObj);
             // Ensure PanelSettings is created and assigned (otherwise UI is invisible)
             var panelSettings = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.PanelSettings>("Assets/UI/PanelSettings.asset");
             if (panelSettings == null)
@@ -509,7 +517,7 @@ public class CitySceneBuilder : EditorWindow
         if (legacyMgr != null)
         {
             Undo.DestroyObjectImmediate(legacyMgr.gameObject);
-            Debug.Log("[SceneBuilder] 🧹 Removed legacy PizzariaManager from gameplayRoot.");
+            Debug.Log("[SceneBuilder] ðŸ§¹ Removed legacy PizzariaManager from gameplayRoot.");
         }
 
         // Setup Minimap Systems
@@ -562,7 +570,7 @@ public class CitySceneBuilder : EditorWindow
             Undo.RegisterCreatedObjectUndo(minimapRig, "Create Minimap Rig");
         }
 
-        Debug.Log("[SceneBuilder] ✅ Gameplay systems and Prefabs setup complete.");
+        Debug.Log("[SceneBuilder] âœ… Gameplay systems and Prefabs setup complete.");
     }
 
     private void EnsureMinimapLayerExists()
@@ -684,7 +692,7 @@ public class CitySceneBuilder : EditorWindow
         if (cityRoot.GetComponent<NetworkObject>() == null)
         {
             Undo.AddComponent<NetworkObject>(cityRoot);
-            Debug.Log("[SceneBuilder] ✅ Added NetworkObject to --- CITY --- (required for runtime city generation).");
+            Debug.Log("[SceneBuilder] âœ… Added NetworkObject to --- CITY --- (required for runtime city generation).");
         }
 
         // Assign config if available
@@ -705,7 +713,7 @@ public class CitySceneBuilder : EditorWindow
             {
                 generator.pizzeriaPrefab = pizzeriaPrefab;
                 EditorUtility.SetDirty(generator);
-                Debug.Log("[SceneBuilder] ✅ pizzeriaPrefab atribuído ao CityGenerator.");
+                Debug.Log("[SceneBuilder] âœ… pizzeriaPrefab atribuÃ­do ao CityGenerator.");
             }
         }
 
@@ -715,7 +723,7 @@ public class CitySceneBuilder : EditorWindow
             Undo.AddComponent<CityGizmos>(cityRoot);
         }
 
-        Debug.Log("[SceneBuilder] ✅ Base scene setup complete.");
+        Debug.Log("[SceneBuilder] âœ… Base scene setup complete.");
     }
 
     private static GameObject ResolvePizzeriaPrefab()
@@ -849,27 +857,27 @@ public class CitySceneBuilder : EditorWindow
         if (playerObj.GetComponent<MinimapController>() == null)
         {
             playerObj.AddComponent<MinimapController>();
-            Debug.Log("[SceneBuilder] ✅ MinimapController added to PlayerArmature prefab.");
+            Debug.Log("[SceneBuilder] âœ… MinimapController added to PlayerArmature prefab.");
         }
 
         // Add PlayerInteraction if missing
         if (playerObj.GetComponent<PlayerInteraction>() == null)
         {
             playerObj.AddComponent<PlayerInteraction>();
-            Debug.Log("[SceneBuilder] ✅ PlayerInteraction added to PlayerArmature prefab.");
+            Debug.Log("[SceneBuilder] âœ… PlayerInteraction added to PlayerArmature prefab.");
         }
 
         // Add PlayerState for In-Game Lobby Customization
         if (playerObj.GetComponent<PlayerState>() == null)
         {
             playerObj.AddComponent<PlayerState>();
-            Debug.Log("[SceneBuilder] ✅ PlayerState added to PlayerArmature prefab.");
+            Debug.Log("[SceneBuilder] âœ… PlayerState added to PlayerArmature prefab.");
         }
 
         PrefabUtility.SaveAsPrefabAsset(playerObj, playerPath);
         PrefabUtility.UnloadPrefabContents(playerObj);
         
-        Debug.Log("[SceneBuilder] ✅ PlayerArmature prefab configured with in-prefab cameras!");
+        Debug.Log("[SceneBuilder] âœ… PlayerArmature prefab configured with in-prefab cameras!");
     }
 
     private void SetupNetworkManager()
@@ -945,7 +953,7 @@ public class CitySceneBuilder : EditorWindow
             {
                 netManager.NetworkConfig.PlayerPrefab = playerPrefab;
                 EditorUtility.SetDirty(netManager);
-                Debug.Log("[SceneBuilder] ✅ Assigned PlayerPrefab to NetworkManager.");
+                Debug.Log("[SceneBuilder] âœ… Assigned PlayerPrefab to NetworkManager.");
             }
         }
 
@@ -953,7 +961,7 @@ public class CitySceneBuilder : EditorWindow
         if (networkRoot.GetComponent<NetworkAutoStart>() == null)
         {
             Undo.AddComponent<NetworkAutoStart>(networkRoot);
-            Debug.Log("[SceneBuilder] ✅ NetworkAutoStart added — game will StartHost automatically on Play.");
+            Debug.Log("[SceneBuilder] âœ… NetworkAutoStart added â€” game will StartHost automatically on Play.");
         }
         
         // 3. Clean up any remaining duplicates
@@ -962,7 +970,7 @@ public class CitySceneBuilder : EditorWindow
         {
             if (nm.gameObject != networkRoot)
             {
-                Debug.Log($"[SceneBuilder] 🧹 Destroying redundant NetworkManager on object: {nm.gameObject.name}");
+                Debug.Log($"[SceneBuilder] ðŸ§¹ Destroying redundant NetworkManager on object: {nm.gameObject.name}");
                 Undo.DestroyObjectImmediate(nm.gameObject);
             }
         }
@@ -992,7 +1000,7 @@ public class CitySceneBuilder : EditorWindow
         AssetDatabase.SaveAssets();
 
         _currentConfig = newConfig;
-        Debug.Log("[SceneBuilder] ✅ Created DefaultCityConfig at Assets/ScriptableObjects/");
+        Debug.Log("[SceneBuilder] âœ… Created DefaultCityConfig at Assets/ScriptableObjects/");
     }
 
     private GameObject CreateRootIfMissing(string name)
@@ -1008,46 +1016,16 @@ public class CitySceneBuilder : EditorWindow
 
     private void SetupInGameLobbyUI()
     {
-        GameObject uiRoot = CreateRootIfMissing("--- UI ---");
-
-        // Create EventSystem if it doesn't exist
-        if (FindObjectOfType<UnityEngine.EventSystems.EventSystem>() == null)
+        // ReadyScene owns the waiting-room UI. Gameplay must not recreate it.
+        var obsolete = GameObject.Find("InGameLobbyUI");
+        if (obsolete != null)
         {
-            GameObject eventSystemGo = new GameObject("EventSystem");
-            eventSystemGo.AddComponent<UnityEngine.EventSystems.EventSystem>();
-            
-            System.Type inputModuleType = System.Type.GetType("UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
-            if (inputModuleType != null) eventSystemGo.AddComponent(inputModuleType);
-            else eventSystemGo.AddComponent<UnityEngine.EventSystems.StandaloneInputModule>();
-            
-            eventSystemGo.transform.SetParent(uiRoot.transform);
+            foreach (var controller in obsolete.GetComponents<InGameLobbyUIController>())
+                Undo.DestroyObjectImmediate(controller);
+            foreach (var doc in obsolete.GetComponents<UnityEngine.UIElements.UIDocument>())
+                Undo.DestroyObjectImmediate(doc);
         }
-
-        // Create the UIDocument
-        string docName = "InGameLobbyUI";
-        Transform existingUI = uiRoot.transform.Find(docName);
-        if (existingUI != null) DestroyImmediate(existingUI.gameObject);
-
-        GameObject docGo = new GameObject(docName);
-        docGo.transform.SetParent(uiRoot.transform);
-        
-        var uiDoc = docGo.AddComponent<UnityEngine.UIElements.UIDocument>();
-        var visualTree = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>("Assets/UI/InGameLobbyScreen.uxml");
-        if (visualTree != null) uiDoc.visualTreeAsset = visualTree;
-
-        var panelSettings = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.PanelSettings>("Assets/UI/PanelSettings.asset");
-        if (panelSettings != null) uiDoc.panelSettings = panelSettings;
-
-        // Add NetworkBehaviour controller
-        docGo.AddComponent<InGameLobbyUIController>();
-        
-        // Add NetworkObject is REQUIRED for NetworkBehaviours!
-        if (docGo.GetComponent<NetworkObject>() == null)
-            docGo.AddComponent<NetworkObject>();
-
-        Debug.Log("[SceneBuilder] ✅ In-Game Lobby UI Setup complete in active scene.");
     }
-
     private void CleanGameSceneScene()
     {
         // Define names of root objects that we want to explicitly destroy from the GameScene scene
@@ -1107,6 +1085,6 @@ public class CitySceneBuilder : EditorWindow
         removedCount += ScaryParty.EditorScripts.LegacyCleanupBuilder.CleanLegacyPizzaSpawners(msg => Debug.Log($"[SceneBuilder] {msg}"));
         ScaryParty.EditorScripts.LegacyCleanupBuilder.DisableWeaponControlsOnPrefabsAndScene(msg => Debug.Log($"[SceneBuilder] {msg}"));
 
-        Debug.Log($"[SceneBuilder] 🧹 GameScene cleaned! Removed {removedCount} legacy/environment objects.");
+        Debug.Log($"[SceneBuilder] ðŸ§¹ GameScene cleaned! Removed {removedCount} legacy/environment objects.");
     }
 }

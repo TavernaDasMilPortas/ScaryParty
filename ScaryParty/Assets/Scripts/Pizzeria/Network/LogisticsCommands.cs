@@ -87,14 +87,7 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             var bpId = new BackpackId(backpackIdVal);
-            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
-            {
-                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
-                bp = new BackpackState(bpId, cap);
-                bp.EquippedBy = sender;
-                root.DomainState.Backpacks[bpId] = bp;
-                root.DomainState.IncrementRevision();
-            }
+            if (!CanAccessBackpack(root.DomainState, bpId, sender, false)) return;
 
             var res = BackpackService.Equip(root.DomainState, bpId, sender);
             if (!res.Success)
@@ -114,7 +107,20 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            Vector3 playerPos = PlayerContextResolver.GetPlayerPosition(sender);
+            if (!PlayerContextResolver.TryGetPlayer(sender, out var player, out _)) return;
+            BackpackState equipped = null;
+            foreach (var bag in root.DomainState.Backpacks.Values)
+                if (bag.EquippedBy == sender) { equipped = bag; break; }
+            if (equipped == null)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Nenhuma mochila equipada.", true);
+                return;
+            }
+            if (!TryFindSafeBagPlacement(player.transform, equipped.Id, out var playerPos))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Não há superfície segura para largar a mochila.", true);
+                return;
+            }
             var domainPos = new DomainVector3(playerPos.x, playerPos.y, playerPos.z);
 
             var res = BackpackService.Drop(root.DomainState, sender, domainPos, DomainQuaternion.Identity);
@@ -128,6 +134,46 @@ namespace ScaryParty.Pizzeria.Network
             PizzeriaSession.Notifier?.NotifyClient(sender, "Mochila colocada no chão.");
         }
 
+        public static bool TryFindSafeBagPlacement(Transform player, BackpackId bagId, out Vector3 position)
+        {
+            position = default;
+            if (player == null) return false;
+            var authoredBags = FindObjectsByType<ScaryParty.Pizzeria.Authoring.DeliveryBagAuthoring>(FindObjectsSortMode.None);
+            Collider bagCollider = null;
+            foreach (var authoredBag in authoredBags)
+                if (authoredBag.BackpackId == bagId.Value) { bagCollider = authoredBag.InteractionCollider; break; }
+            if (bagCollider == null) return false;
+            if (!(bagCollider is BoxCollider box)) return false;
+            Vector3 scale = bagCollider.transform.lossyScale;
+            Vector3 extents = Vector3.Scale(box.size * 0.5f, new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z)));
+            extents = new Vector3(Mathf.Max(0.2f, extents.x), Mathf.Max(0.25f, extents.y), Mathf.Max(0.2f, extents.z));
+            Vector3 forward = Vector3.ProjectOnPlane(player.forward, Vector3.up).normalized;
+            if (forward.sqrMagnitude < 0.1f) forward = Vector3.forward;
+            Vector3 side = Vector3.Cross(Vector3.up, forward);
+            float distance = Mathf.Max(0.9f, extents.magnitude + 0.35f);
+            Vector3[] offsets = { forward * distance, side * distance, -side * distance, -forward * distance };
+            int mask = ~LayerMask.GetMask("Ignore Raycast", "Player");
+            foreach (var offset in offsets)
+            {
+                Vector3 candidate = player.position + offset;
+                if (!Physics.Raycast(candidate + Vector3.up * 1.5f, Vector3.down, out var ground, 4f, mask, QueryTriggerInteraction.Ignore) ||
+                    ground.transform.IsChildOf(player) || Vector3.Dot(ground.normal, Vector3.up) < 0.7f)
+                    continue;
+                Vector3 center = ground.point + Vector3.up * extents.y;
+                bool blocked = false;
+                foreach (var collider in Physics.OverlapBox(center, extents * 0.95f, Quaternion.identity, mask, QueryTriggerInteraction.Ignore))
+                {
+                    if (collider == bagCollider || collider.transform.IsChildOf(player)) continue;
+                    blocked = true;
+                    break;
+                }
+                if (blocked) continue;
+                position = ground.point;
+                return true;
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void StoreBackpackItemServerRpc(ulong backpackIdVal, ulong boxItemIdVal, HandSlotIndex hand, ServerRpcParams rpcParams = default)
         {
@@ -137,17 +183,10 @@ namespace ScaryParty.Pizzeria.Network
 
             var bpId = new BackpackId(backpackIdVal);
             var boxId = new ItemId(boxItemIdVal);
+            if (hand != HandSlotIndex.Left && hand != HandSlotIndex.Right) return;
             var handLoc = LocationRef.InHand(sender, hand);
 
-            // Assegura existência da mochila no domínio caso não tenha sido pré-alocada
-            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
-            {
-                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
-                bp = new BackpackState(bpId, cap);
-                bp.EquippedBy = sender;
-                root.DomainState.Backpacks[bpId] = bp;
-                root.DomainState.IncrementRevision();
-            }
+            if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
 
             var res = BackpackService.StoreItem(root.DomainState, bpId, boxId, handLoc);
             if (!res.Success)
@@ -169,6 +208,7 @@ namespace ScaryParty.Pizzeria.Network
 
             var bpId = new BackpackId(backpackIdVal);
             var boxId = new ItemId(boxItemIdVal);
+            if (hand != HandSlotIndex.Left && hand != HandSlotIndex.Right) return;
             var handLoc = LocationRef.InHand(sender, hand);
 
             if (TransferService.IsLocationOccupied(root.DomainState, handLoc))
@@ -177,15 +217,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            // Assegura existência da mochila no domínio
-            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bp))
-            {
-                int cap = root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 3;
-                bp = new BackpackState(bpId, cap);
-                bp.EquippedBy = sender;
-                root.DomainState.Backpacks[bpId] = bp;
-                root.DomainState.IncrementRevision();
-            }
+            if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
 
             var res = BackpackService.RetrieveItem(root.DomainState, bpId, boxId, handLoc);
             if (!res.Success)
@@ -195,6 +227,25 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+        }
+
+        private static bool CanAccessBackpack(PizzeriaState state, BackpackId id, ulong sender, bool allowEquipped)
+        {
+            if (!state.Backpacks.TryGetValue(id, out var bag))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Mochila desconhecida.", true);
+                return false;
+            }
+            if (allowEquipped && bag.IsEquipped && bag.EquippedBy == sender) return true;
+            if (bag.IsEquipped)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Mochila já equipada por outro jogador.", true);
+                return false;
+            }
+            var pos = bag.WorldPos;
+            if (InteractionValidator.ValidateDistanceAndSight(sender, new Vector3(pos.X, pos.Y, pos.Z))) return true;
+            PizzeriaSession.Notifier?.NotifyClient(sender, "Mochila fora de alcance.", true);
+            return false;
         }
 
         [ServerRpc(RequireOwnership = false)]

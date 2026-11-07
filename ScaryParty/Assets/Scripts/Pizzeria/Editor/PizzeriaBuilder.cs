@@ -47,8 +47,8 @@ namespace ScaryParty.Pizzeria.Editor
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-            Debug.Log("[PizzeriaBuilder] ✅ Pizzaria construída/atualizada com sucesso!");
-            EditorUtility.DisplayDialog("Scary Party", "Módulo Pizzaria construído/atualizado com sucesso!", "OK");
+            Debug.Log("[PizzeriaBuilder] âœ… Pizzaria construÃ­da/atualizada com sucesso!");
+            EditorUtility.DisplayDialog("Scary Party", "MÃ³dulo Pizzaria construÃ­do/atualizado com sucesso!", "OK");
         }
 
         private static void EnsureDirectories()
@@ -294,7 +294,7 @@ namespace ScaryParty.Pizzeria.Editor
                 }
             }
 
-            // Só delega ao construtor legado se existir explicitamente o perfil legado e o prefab não estiver em autoria manual
+            // SÃ³ delega ao construtor legado se existir explicitamente o perfil legado e o prefab nÃ£o estiver em autoria manual
             string profilePath = "Assets/ScriptableObjects/Pizzeria/Import/PizzeriaFbxImportProfile.asset";
             var profile = AssetDatabase.LoadAssetAtPath<ScaryParty.Pizzeria.Editor.Migration.PizzeriaFbxImportProfile>(profilePath);
             if (profile != null)
@@ -316,7 +316,6 @@ namespace ScaryParty.Pizzeria.Editor
             BuilderToolkit.GetOrAddComponent<PizzeriaNotifier>(root);
             BuilderToolkit.GetOrAddComponent<PizzeriaDebugCommands>(root);
             BuilderToolkit.GetOrAddComponent<PlayerLifecycleBridge>(root);
-            BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaHudBuilder>(root);
             BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer>(root);
             BuilderToolkit.GetOrAddComponent<ScaryParty.Pizzeria.Presentation.TicketModalPresenter>(root);
             BuilderToolkit.GetOrAddComponent<Night1Bootstrapper>(root);
@@ -484,7 +483,7 @@ namespace ScaryParty.Pizzeria.Editor
             var listAsset = AssetDatabase.LoadAssetAtPath<NetworkPrefabsList>(NetworkPrefabsAssetPath);
             if (listAsset == null)
             {
-                Debug.LogWarning($"[PizzeriaBuilder] NetworkPrefabsList não encontrado em {NetworkPrefabsAssetPath}");
+                Debug.LogWarning($"[PizzeriaBuilder] NetworkPrefabsList nÃ£o encontrado em {NetworkPrefabsAssetPath}");
                 return;
             }
 
@@ -527,7 +526,7 @@ namespace ScaryParty.Pizzeria.Editor
                 {
                     gen.pizzeriaPrefab = pizzeriaPrefab;
                     EditorUtility.SetDirty(gen);
-                    Debug.Log($"[PizzeriaBuilder] ✅ pizzeriaPrefab atribuído ao CityGenerator em '{gen.gameObject.scene.name}'.");
+                    Debug.Log($"[PizzeriaBuilder] âœ… pizzeriaPrefab atribuÃ­do ao CityGenerator em '{gen.gameObject.scene.name}'.");
                 }
             }
         }

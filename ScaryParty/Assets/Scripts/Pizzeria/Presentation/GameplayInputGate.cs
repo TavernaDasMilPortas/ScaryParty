@@ -46,6 +46,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 foreach (var starterInputs in allInputs)
                 {
                     if (starterInputs == null) continue;
+                    var player = starterInputs.GetComponent<Unity.Netcode.NetworkObject>();
+                    if (player != null && player.IsSpawned && !player.IsOwner) continue;
                     starterInputs.cursorInputForLook = !locked;
                     starterInputs.cursorLocked = !locked;
                     if (locked)

@@ -8,7 +8,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class PizzeriaLogicInjector
     {
-        [MenuItem("Tools/Scary Party/Pizzeria/Fix Scene Logic (Injeta Lógica Nova)", false, 20)]
+        [MenuItem("Tools/Scary Party/Pizzeria/Fix Scene Logic (Injeta LÃ³gica Nova)", false, 20)]
         public static void InjectLogic()
         {
             string prefabPath = "Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab";
@@ -16,20 +16,20 @@ namespace ScaryParty.Pizzeria.Editor
 
             if (prefab == null)
             {
-                Debug.LogError($"[PizzeriaLogicInjector] Prefab não encontrado em {prefabPath}");
+                Debug.LogError($"[PizzeriaLogicInjector] Prefab nÃ£o encontrado em {prefabPath}");
                 return;
             }
 
             // 1. Atualizar o Prefab base
             UpdatePizzeriaObject(prefab, true);
             PrefabUtility.SavePrefabAsset(prefab);
-            Debug.Log("[PizzeriaLogicInjector] Prefab base atualizado com a nova lógica.");
+            Debug.Log("[PizzeriaLogicInjector] Prefab base atualizado com a nova lÃ³gica.");
 
-            // 2. Atualizar todas as instâncias na cena aberta
+            // 2. Atualizar todas as instÃ¢ncias na cena aberta
             var rootsInScene = Object.FindObjectsByType<PizzeriaRoot>(FindObjectsSortMode.None);
             if (rootsInScene.Length == 0)
             {
-                // Tentar procurar por nome caso o Root não exista
+                // Tentar procurar por nome caso o Root nÃ£o exista
                 var pizzerias = GameObject.FindObjectsOfType<GameObject>();
                 foreach (var go in pizzerias)
                 {
@@ -47,8 +47,8 @@ namespace ScaryParty.Pizzeria.Editor
                 }
             }
 
-            Debug.Log("[PizzeriaLogicInjector] Instâncias da cena atualizadas. Lógica injetada!");
-            EditorUtility.DisplayDialog("Scary Party", "Lógica nova injetada no Prefab e na Cena com sucesso!", "OK");
+            Debug.Log("[PizzeriaLogicInjector] InstÃ¢ncias da cena atualizadas. LÃ³gica injetada!");
+            EditorUtility.DisplayDialog("Scary Party", "LÃ³gica nova injetada no Prefab e na Cena com sucesso!", "OK");
         }
 
         private static void UpdatePizzeriaObject(GameObject target, bool isPrefab)
@@ -75,8 +75,6 @@ namespace ScaryParty.Pizzeria.Editor
             if (target.GetComponent<PizzeriaCommandHandler>() == null)
                 target.AddComponent<PizzeriaCommandHandler>();
 
-            if (target.GetComponent<PizzeriaHudBuilder>() == null)
-                target.AddComponent<PizzeriaHudBuilder>();
 
             if (!isPrefab)
             {

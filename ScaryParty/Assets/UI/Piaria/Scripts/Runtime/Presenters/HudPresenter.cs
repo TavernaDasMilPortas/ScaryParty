@@ -13,7 +13,7 @@ namespace ScaryParty.UI.Piaria.Presenters
     {
         public static HudPresenter Instance { get; private set; }
 
-        [Header("Configuração de UI Document")]
+        [Header("ConfiguraÃƒÆ’Ã‚Â§ÃƒÆ’Ã‚Â£o de UI Document")]
         public UIDocument uiDocument;
 
         // Elementos do HUD
@@ -34,7 +34,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private VisualElement _backpackGradientLayer;
         private Label _backpackCountLabel;
 
-        // Mãos
+        // MÃƒÆ’Ã‚Â£os
         private VisualElement _leftHandCard;
         private VisualElement _rightHandCard;
         private Label _leftHandContent;
@@ -91,7 +91,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (activeSceneName.IndexOf("Lobby", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 activeSceneName.IndexOf("Ready", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                // Este presenter é exclusivo da gameplay (GameScene). Desativa-se fora dela.
+                // Este presenter ÃƒÆ’Ã‚Â© exclusivo da gameplay (GameScene). Desativa-se fora dela.
                 enabled = false;
                 return;
             }
@@ -156,7 +156,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             _minimapImage = _root.Q<VisualElement>("MinimapImage");
 
             ApplyCatalogAssets();
-            BindMinimapEvents();
+            // The map presenter owns pointer and wheel input.
 
             SetMoney(0, immediate: true);
             SetDeliveries(0);
@@ -330,46 +330,6 @@ namespace ScaryParty.UI.Piaria.Presenters
         // MINIMAPA
         // ========================================
 
-        private void BindMinimapEvents()
-        {
-            if (_minimapImage == null) return;
-
-            _minimapImage.style.backgroundSize = new BackgroundSize(BackgroundSizeType.Cover);
-            _minimapImage.RegisterCallback<PointerDownEvent>(evt =>
-            {
-                if (MinimapRouteManager.Instance != null && MinimapRouteManager.Instance.IsFullscreen)
-                {
-                    _isDraggingMap = true;
-                    _lastMousePos = evt.position;
-                    _minimapImage.CapturePointer(evt.pointerId);
-                }
-            });
-
-            _minimapImage.RegisterCallback<PointerMoveEvent>(evt =>
-            {
-                if (_isDraggingMap && MinimapRouteManager.Instance != null)
-                {
-                    Vector2 delta = (Vector2)evt.position - _lastMousePos;
-                    _lastMousePos = evt.position;
-                    MinimapRouteManager.Instance.PanMap(delta);
-                }
-            });
-
-            _minimapImage.RegisterCallback<PointerUpEvent>(evt =>
-            {
-                if (_isDraggingMap)
-                {
-                    _isDraggingMap = false;
-                    _minimapImage.ReleasePointer(evt.pointerId);
-                }
-            });
-
-            _minimapImage.RegisterCallback<PointerLeaveEvent>(evt =>
-            {
-                _isDraggingMap = false;
-            });
-        }
-
         public void ToggleMinimapFullscreen(bool isFullscreen)
         {
             EnsureInitialized();
@@ -378,10 +338,14 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (isFullscreen)
             {
-                _minimapContainer.style.width = Length.Percent(75);
-                _minimapContainer.style.height = Length.Percent(75);
-                _minimapContainer.style.left = Length.Percent(12.5f);
-                _minimapContainer.style.top = Length.Percent(12.5f);
+                float rootW = _root != null && _root.resolvedStyle.width > 0 ? _root.resolvedStyle.width : Screen.width;
+                float rootH = _root != null && _root.resolvedStyle.height > 0 ? _root.resolvedStyle.height : Screen.height;
+                float side = Mathf.Round(Mathf.Min(rootW, rootH) * 0.78f);
+
+                _minimapContainer.style.width = side;
+                _minimapContainer.style.height = side;
+                _minimapContainer.style.left = Mathf.Round((rootW - side) * 0.5f);
+                _minimapContainer.style.top = Mathf.Round((rootH - side) * 0.5f);
                 _minimapContainer.style.right = StyleKeyword.Null;
                 _minimapContainer.style.bottom = StyleKeyword.Null;
 
@@ -389,7 +353,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 {
                     _minimapPaperFrame.style.width = Length.Percent(100);
                     _minimapPaperFrame.style.height = Length.Percent(100);
-                    SetBorderRadius(_minimapPaperFrame, 16);
+                    _minimapPaperFrame.style.backgroundImage = StyleKeyword.None;
+                    SetBorderRadius(_minimapPaperFrame, 12);
                 }
             }
             else
@@ -405,6 +370,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 {
                     _minimapPaperFrame.style.width = 180;
                     _minimapPaperFrame.style.height = 180;
+                    var catalog = PiariaUIAssetCatalog.Instance;
+                    if (catalog != null && catalog.minimapPaperBase != null)
+                        _minimapPaperFrame.style.backgroundImage = new StyleBackground(catalog.minimapPaperBase);
                     SetBorderRadius(_minimapPaperFrame, 90);
                 }
             }
@@ -421,7 +389,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
-            // Vincula dinamicamente a RenderTexture do WorldImage do minimapa se ainda não estiver vinculada
+            // Vincula dinamicamente a RenderTexture do WorldImage do minimapa se ainda nÃƒÆ’Ã‚Â£o estiver vinculada
             if (_minimapImage != null && _minimapImage.resolvedStyle.backgroundImage.texture == null)
             {
                 var worldImage = FindFirstObjectByType<Kamgam.UGUIWorldImage.WorldImage>();

@@ -213,24 +213,46 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             _availableDestinations.Clear();
 
-            // Coleta os destinos das comandas ativas
+            // Coleta todos os endereços registrados na cidade (para permitir etiquetar para qualquer ponto, inclusive errado)
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.AddressRegistry != null && root.AddressRegistry.GetAllIds().Count > 0)
+            {
+                foreach (var addr in root.AddressRegistry.GetAllIds())
+                {
+                    if (addr.Value >= 0 && !_availableDestinations.Contains(addr.Value))
+                        _availableDestinations.Add(addr.Value);
+                }
+            }
+
+            // Fallback para DeliveryPoints presentes na cena
+            if (_availableDestinations.Count == 0)
+            {
+                var points = FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);
+                for (int i = 0; i < points.Length; i++)
+                {
+                    if (points[i] != null && points[i].AddressId >= 0 && !_availableDestinations.Contains(points[i].AddressId))
+                        _availableDestinations.Add(points[i].AddressId);
+                }
+            }
+
+            // Inclui também destinos de comandas ativas caso ainda não estejam na lista
             var netState = PizzeriaNetworkState.Instance;
             if (netState != null && netState.Orders != null)
             {
                 for (int i = 0; i < netState.Orders.Count; i++)
                 {
                     var o = netState.Orders[i];
-                    if (o.DestinationId > 0 && !_availableDestinations.Contains(o.DestinationId))
+                    if (o.DestinationId >= 0 && !_availableDestinations.Contains(o.DestinationId))
                     {
                         _availableDestinations.Add(o.DestinationId);
                     }
                 }
             }
 
-            // Fallback: se nenhuma comanda estiver ativa, oferece opções padrão 1..8
+            // Fallback: se nenhum endereço foi encontrado, oferece opções padrão 0..7 (#1..#8)
             if (_availableDestinations.Count == 0)
             {
-                for (int i = 1; i <= 8; i++) _availableDestinations.Add(i);
+                for (int i = 0; i < 8; i++) _availableDestinations.Add(i);
             }
 
             _availableDestinations.Sort();
@@ -250,11 +272,11 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_availableDestinations.Count > 0 && _currentDestIndex >= 0 && _currentDestIndex < _availableDestinations.Count)
             {
                 int destId = _availableDestinations[_currentDestIndex];
-                _selectedDestLabel.text = $"Endereço #{destId}";
+                _selectedDestLabel.text = $"Endereço #{destId + 1}";
             }
             else
             {
-                _selectedDestLabel.text = "Destino #1";
+                _selectedDestLabel.text = "Endereço #1";
             }
         }
 
