@@ -1,0 +1,68 @@
+{
+  "project_root": "c:/Users/Rubens/Documents/GitHub/ScaryParty/ScaryParty",
+  "output_dir": "Assets/Piaaria/Art/Characters/Generated",
+  "character_mesh": {
+    "source_blend": "Assets/Piaaria/Animations/Characters/personagemanda.blend",
+    "output_fbx": "Character.fbx"
+  },
+  "source_clips": [
+    {
+      "clip_name": "Walk",
+      "source_blend": "Assets/Piaaria/Animations/Characters/personagemanda.blend",
+      "output_fbx": "Character_Walk.fbx",
+      "start_frame": 1,
+      "end_frame": 33,
+      "loop": true
+    },
+    {
+      "clip_name": "Run",
+      "source_blend": "Assets/Piaaria/Animations/Characters/personagemcorrendo.blend",
+      "output_fbx": "Character_Run.fbx",
+      "start_frame": 1,
+      "end_frame": 11,
+      "loop": true
+    },
+    {
+      "clip_name": "Prepare",
+      "source_blend": "Assets/Piaaria/Animations/Characters/personagempreparando.blend",
+      "output_fbx": "Character_Prepare.fbx",
+      "start_frame": 1,
+      "end_frame": 11,
+      "loop": true
+    }
+  ],
+  "procedural_clips": [
+    {
+      "clip_name": "Idle",
+      "mode": "IDLE",
+      "output_fbx": "Character_Idle.fbx",
+      "start_frame": 1,
+      "end_frame": 49,
+      "loop": true
+    },
+    {
+      "clip_name": "SitIdle",
+      "mode": "SIT_IDLE",
+      "output_fbx": "Character_SitIdle.fbx",
+      "start_frame": 1,
+      "end_frame": 49,
+      "loop": true
+    },
+    {
+      "clip_name": "SitDown",
+      "mode": "SIT_DOWN",
+      "output_fbx": "Character_SitDown.fbx",
+      "start_frame": 1,
+      "end_frame": 16,
+      "loop": false
+    },
+    {
+      "clip_name": "StandUp",
+      "mode": "STAND_UP",
+      "output_fbx": "Character_StandUp.fbx",
+      "start_frame": 1,
+      "end_frame": 16,
+      "loop": false
+    }
+  ]
+}

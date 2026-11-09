@@ -1,0 +1,867 @@
+using System.Collections.Generic;
+using UnityEngine;
+using Unity.Netcode;
+using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Models;
+using ScaryParty.Pizzeria.Domain.Services;
+using ScaryParty.Pizzeria.Domain.Types;
+
+namespace ScaryParty.Pizzeria.Network
+{
+    public class PizzeriaCommandHandler : NetworkBehaviour
+    {
+        public static PizzeriaCommandHandler Instance { get; private set; }
+
+        private ReplicationProjector _projector;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            if (IsServer)
+            {
+                if (_projector == null)
+                {
+                    var netState = GetComponent<PizzeriaNetworkState>();
+                    if (netState != null)
+                        _projector = new ReplicationProjector(netState);
+                }
+                CommitAndReplicate();
+            }
+        }
+
+        public override void OnDestroy()
+        {
+            if (Instance == this) Instance = null;
+            base.OnDestroy();
+        }
+
+        public void CommitAndReplicate()
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.DomainState != null)
+            {
+                if (_projector == null)
+                {
+                    var netState = GetComponent<PizzeriaNetworkState>();
+                    if (netState != null)
+                        _projector = new ReplicationProjector(netState);
+                }
+
+                if (_projector != null)
+                {
+                    _projector.ProjectFullState(root.DomainState);
+                }
+            }
+        }
+
+        private readonly Dictionary<int, (ulong ClientId, float Expiry)> _storageSessions = new Dictionary<int, (ulong, float)>();
+        private readonly Dictionary<int, (ulong PizzaId, int SlotIndex, ulong ClientId, bool IsInsertion)> _activeOvenTransfers = new Dictionary<int, (ulong, int, ulong, bool)>();
+
+        public void ReleasePlayerSessions(ulong clientId)
+        {
+            var stationsToClose = new List<int>();
+            foreach (var kvp in _storageSessions)
+            {
+                if (kvp.Value.ClientId == clientId)
+                    stationsToClose.Add(kvp.Key);
+            }
+            for (int i = 0; i < stationsToClose.Count; i++)
+            {
+                _storageSessions.Remove(stationsToClose[i]);
+                SyncStationDoorStateClientRpc(stationsToClose[i], false);
+            }
+
+            var ovenTransfersToClear = new List<int>();
+            foreach (var kvp in _activeOvenTransfers)
+            {
+                if (kvp.Value.ClientId == clientId)
+                    ovenTransfersToClear.Add(kvp.Key);
+            }
+            for (int i = 0; i < ovenTransfersToClear.Count; i++)
+            {
+                _activeOvenTransfers.Remove(ovenTransfersToClear[i]);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void RequestOpenStorageSessionServerRpc(int stationId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (_storageSessions.TryGetValue(stationId, out var existing) && existing.ClientId != senderClientId && Time.time < existing.Expiry)
+            {
+                NotifyErrorClientRpc("Este armário/geladeira já está em uso por outro jogador!", targetParams);
+                return;
+            }
+
+            _storageSessions[stationId] = (senderClientId, Time.time + 45f);
+            GrantStorageSessionClientRpc(stationId, targetParams);
+            SyncStationDoorStateClientRpc(stationId, true);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CloseStorageSessionServerRpc(int stationId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            if (_storageSessions.TryGetValue(stationId, out var existing) && existing.ClientId == senderClientId)
+            {
+                _storageSessions.Remove(stationId);
+                SyncStationDoorStateClientRpc(stationId, false);
+            }
+        }
+
+        [ClientRpc]
+        public void GrantStorageSessionClientRpc(int stationId, ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance?.Open(stationId);
+        }
+
+        [ClientRpc]
+        public void CloseStoragePickerClientRpc(ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.UI.Piaria.Presenters.StoragePresenter.Instance?.Close();
+        }
+
+        [ClientRpc]
+        public void SyncStationDoorStateClientRpc(int stationId, bool open)
+        {
+            if (StationRegistry.TryGetStation(stationId, out var trans) && trans != null)
+            {
+                var presenter = trans.GetComponent<ScaryParty.Pizzeria.Presentation.StationDoorPresenter>();
+                presenter?.SetSessionOpen(open);
+            }
+        }
+
+        [ClientRpc]
+        public void StartOvenTransferClientRpc(int stationId, ulong pizzaId, int slotIndex, ulong clientId, byte handIndex, bool isInsertion, float doorOpenDuration, float flightDuration, float doorCloseDuration)
+        {
+            ScaryParty.Pizzeria.Presentation.OvenTransferVisualizer.EnsureInstance();
+            ScaryParty.Pizzeria.Presentation.OvenTransferVisualizer.Instance.PlayTransfer(
+                stationId,
+                pizzaId,
+                slotIndex,
+                clientId,
+                handIndex,
+                isInsertion,
+                doorOpenDuration,
+                flightDuration,
+                doorCloseDuration);
+        }
+
+        [ClientRpc]
+        private void NotifyErrorClientRpc(string message, ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show(message, ScaryParty.Pizzeria.Presentation.NotificationType.Error);
+        }
+
+        [ClientRpc]
+        private void NotifySuccessClientRpc(string message, ClientRpcParams rpcParams = default)
+        {
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show(message, ScaryParty.Pizzeria.Presentation.NotificationType.Success);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DispenseIngredientServerRpc(int storageId, int ingredientDefId, byte hand, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var targetHand = (HandSlotIndex)hand;
+            var targetLoc = LocationRef.InHand(senderClientId, targetHand);
+            if (root.TransferService.IsLocationOccupied(targetLoc))
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc("A mão selecionada está ocupada!", targetParams);
+                return;
+            }
+
+            var res = root.TransferService.DispenseFromStorage(storageId, ingredientDefId, senderClientId, targetHand);
+            if (res.Success)
+            {
+                if (_storageSessions.TryGetValue(storageId, out var existing) && existing.ClientId == senderClientId)
+                {
+                    _storageSessions.Remove(storageId);
+                    SyncStationDoorStateClientRpc(storageId, false);
+                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                CloseStoragePickerClientRpc(targetParams);
+                CommitAndReplicate();
+            }
+            else
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Ambas as mãos cheias ou estoque esgotado!" : res.Message, targetParams);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void TransferItemServerRpc(ulong itemIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var loc = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId);
+            if (loc.Type == LocationType.Hand && root.TransferService.IsLocationOccupied(loc))
+            {
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { targetHolderId } } };
+                NotifyErrorClientRpc("A mão selecionada está ocupada!", targetParams);
+                return;
+            }
+
+            var res = root.TransferService.TransferItem(new ItemId(itemIdVal), loc);
+            if (res.Success)
+            {
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void TransferToolServerRpc(ulong toolIdVal, byte targetLocType, ulong targetHolderId, int targetSlotId, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var loc = new LocationRef((LocationType)targetLocType, targetHolderId, targetSlotId);
+            if (loc.Type == LocationType.Hand && root.TransferService.IsLocationOccupied(loc))
+            {
+                var otherHand = loc.SlotId == 0 ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var altLoc = new LocationRef(LocationType.Hand, targetHolderId, (int)otherHand);
+                if (!root.TransferService.IsLocationOccupied(altLoc))
+                {
+                    loc = altLoc;
+                }
+            }
+
+            var res = root.TransferService.TransferTool(new ToolItemId(toolIdVal), loc, root.Clock.Now);
+            if (res.Success)
+            {
+                ulong senderId = rpcParams.Receive.SenderClientId;
+                var toClose = new List<int>();
+                foreach (var kvp in _storageSessions)
+                {
+                    if (kvp.Value.ClientId == senderId) toClose.Add(kvp.Key);
+                }
+                for (int i = 0; i < toClose.Count; i++)
+                {
+                    _storageSessions.Remove(toClose[i]);
+                    SyncStationDoorStateClientRpc(toClose[i], false);
+                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
+                CloseStoragePickerClientRpc(targetParams);
+                CommitAndReplicate();
+            }
+            else
+            {
+                ulong senderClientId = rpcParams.Receive.SenderClientId;
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível mover o utensílio." : res.Message, targetParams);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void StartWorkAtomicServerRpc(int stationId, int slotIndex, int processId, byte activeHand, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            Debug.Log($"[Server] StartWorkAtomicServerRpc recebido: stationId={stationId}, slotIndex={slotIndex}, processId={processId}, hand={activeHand}, client={senderClientId}");
+            if (root == null || root.DomainState == null || slotIndex < 0)
+            {
+                Debug.LogWarning($"[Server] StartWorkAtomicServerRpc rejeitado: root={(root != null)}, domainState={(root?.DomainState != null)}, slotIndex={slotIndex}");
+                return;
+            }
+
+            var slot = new StationSlotId(stationId, slotIndex);
+            bool domainMutated = false;
+
+            // Check if there is already an item in the slot
+            ItemState itemInSlot = null;
+            foreach (var kvp in root.DomainState.Items)
+            {
+                if (kvp.Value.Location == LocationRef.InStation(stationId, slotIndex))
+                {
+                    itemInSlot = kvp.Value;
+                    break;
+                }
+            }
+
+            if (itemInSlot == null)
+            {
+                // 1) Try to transfer item from player's ACTIVE hand first;
+                // 2) If active hand holds a tool (or is empty), check the OTHER hand for a raw ingredient!
+                ItemId itemToTransfer = new ItemId(0);
+                int otherHand = activeHand == 0 ? 1 : 0;
+
+                foreach (var kvp in root.DomainState.Items)
+                {
+                    if (kvp.Value.Location.Type == LocationType.Hand && kvp.Value.Location.HolderId == senderClientId && kvp.Value.Location.SlotId == activeHand)
+                    {
+                        itemToTransfer = kvp.Key;
+                        break;
+                    }
+                }
+
+                if (itemToTransfer.Value == 0)
+                {
+                    foreach (var kvp in root.DomainState.Items)
+                    {
+                        if (kvp.Value.Location.Type == LocationType.Hand && kvp.Value.Location.HolderId == senderClientId && kvp.Value.Location.SlotId == otherHand)
+                        {
+                            itemToTransfer = kvp.Key;
+                            break;
+                        }
+                    }
+                }
+
+                if (itemToTransfer.Value != 0)
+                {
+                    var loc = LocationRef.InStation(stationId, slotIndex);
+                    var transferRes = root.TransferService.TransferItem(itemToTransfer, loc);
+                    if (transferRes.Success)
+                    {
+                        domainMutated = true;
+                        root.DomainState.Items.TryGetValue(itemToTransfer, out itemInSlot);
+                    }
+                }
+
+                if (itemInSlot == null)
+                {
+                    return; // No item in slot and no item in player's hands
+                }
+            }
+
+            // Auto-detect processId from the item in the slot whenever processId <= 0 or does not match the item in the slot
+            bool needsResolve = processId <= 0 ||
+                                !root.Catalog.Processes.TryGetValue(processId, out var currentProc) ||
+                                currentProc.InputIngredientId != itemInSlot.DefinitionId ||
+                                currentProc.InputStage != itemInSlot.PrepStage;
+
+            if (needsResolve)
+            {
+                processId = 0;
+                foreach (var proc in root.Catalog.Processes.Values)
+                {
+                    if (proc.InputIngredientId == itemInSlot.DefinitionId && proc.InputStage == itemInSlot.PrepStage)
+                    {
+                        processId = proc.Id;
+                        break;
+                    }
+                }
+            }
+
+            if (processId <= 0)
+            {
+                if (domainMutated)
+                {
+                    CommitAndReplicate();
+                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                string msg = itemInSlot.PrepStage == ProcessingStage.Prepared
+                    ? "Este ingrediente já está preparado!"
+                    : "Este item não pode ser processado nesta bancada.";
+                NotifyErrorClientRpc(msg, targetParams);
+                return;
+            }
+
+            var res = root.ProcessingService.StartWork(slot, processId, senderClientId, root.DomainState, root.Catalog, root.Clock);
+            Debug.Log($"[Server] ProcessingService.StartWork resultado: Success={res.Success}, Error={res.Error}, Message=\"{res.Message}\"");
+            if (res.Success)
+            {
+                CommitAndReplicate();
+            }
+            else
+            {
+                // Se o domínio foi mutado (item transferido), replicar mesmo com falha no StartWork
+                if (domainMutated)
+                {
+                    CommitAndReplicate();
+                }
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível iniciar o trabalho." : res.Message, targetParams);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void HeartbeatWorkServerRpc(int stationId, int slotIndex, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var slot = new StationSlotId(stationId, slotIndex);
+            root.ProcessingService.HeartbeatWork(slot, senderClientId, root.DomainState, root.Clock);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CancelWorkServerRpc(int stationId, int slotIndex, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var slot = new StationSlotId(stationId, slotIndex);
+            var res = root.ProcessingService.CancelWork(slot, senderClientId, root.DomainState, root.Clock);
+            if (res.Success)
+            {
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void AddIngredientToPizzaServerRpc(ulong pizzaIdVal, ulong ingredientIdVal, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            Debug.Log($"[Server] AddIngredientToPizzaServerRpc recebido: pizzaId={pizzaIdVal}, ingredientId={ingredientIdVal}, client={senderClientId}");
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            var state = root.DomainState;
+
+            if (!state.Items.TryGetValue(new ItemId(pizzaIdVal), out var pizza))
+            {
+                Debug.LogWarning($"[Server] AddIngredientToPizzaServerRpc: Pizza {pizzaIdVal} nao encontrada no estado!");
+                NotifyErrorClientRpc("Pizza nao encontrada no servidor.", targetParams);
+                return;
+            }
+            if (!state.Items.TryGetValue(new ItemId(ingredientIdVal), out var ingItem))
+            {
+                Debug.LogWarning($"[Server] AddIngredientToPizzaServerRpc: Ingrediente {ingredientIdVal} nao encontrado no estado!");
+                NotifyErrorClientRpc("Ingrediente nao encontrado no servidor.", targetParams);
+                return;
+            }
+
+            if (pizza.Category == ItemCategory.Dough && pizza.PrepStage == ProcessingStage.Raw)
+            {
+                NotifyErrorClientRpc("Abra a massa na bancada de preparo antes de montar a pizza!", targetParams);
+                return;
+            }
+
+            if (ingItem.Category != ItemCategory.Sauce && ingItem.PrepStage == ProcessingStage.Raw)
+            {
+                NotifyErrorClientRpc("Prepare o ingrediente na bancada de preparo primeiro!", targetParams);
+                return;
+            }
+
+            // Permissive add: Add ingredient composition to pizza
+            if (pizza.AddIngredient(ingItem.DefinitionId, ingItem.PrepStage, 1))
+            {
+                // Consume ingredient item
+                root.TransferService.DestroyItem(ingItem.Id);
+                CommitAndReplicate();
+            }
+            else
+            {
+                NotifyErrorClientRpc("Não foi possível adicionar ingrediente", targetParams);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void InsertOvenServerRpc(ulong pizzaIdVal, int stationId, int slotIndex, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (_activeOvenTransfers.ContainsKey(stationId))
+            {
+                NotifyErrorClientRpc("O forno está realizando uma transferência!", targetParams);
+                return;
+            }
+
+            var slot = new StationSlotId(stationId, slotIndex);
+            var ovenLocation = LocationRef.InStation(stationId, slotIndex);
+            foreach (var kv in root.DomainState.Items)
+            {
+                if (kv.Value.Location == ovenLocation)
+                {
+                    NotifyErrorClientRpc("Slot do forno ocupado!", targetParams);
+                    return;
+                }
+            }
+
+            if (!root.DomainState.Items.TryGetValue(new ItemId(pizzaIdVal), out var pizza) ||
+                pizza.Location.Type != LocationType.Hand ||
+                pizza.Location.HolderId != senderClientId)
+            {
+                NotifyErrorClientRpc("Pizza não está na mão!", targetParams);
+                return;
+            }
+
+            byte handSlot = (byte)pizza.Location.SlotId;
+            _activeOvenTransfers[stationId] = (pizzaIdVal, slotIndex, senderClientId, true);
+
+            const float doorOpenDuration = 0.25f;
+            const float flightDuration = 0.40f;
+            const float doorCloseDuration = 0.25f;
+
+            StartOvenTransferClientRpc(stationId, pizzaIdVal, slotIndex, senderClientId, handSlot, true, doorOpenDuration, flightDuration, doorCloseDuration);
+            StartCoroutine(CompleteOvenInsertionRoutine(stationId, pizzaIdVal, slotIndex, doorOpenDuration + flightDuration));
+        }
+
+        private System.Collections.IEnumerator CompleteOvenInsertionRoutine(int stationId, ulong pizzaIdVal, int slotIndex, float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) yield break;
+
+            if (_activeOvenTransfers.TryGetValue(stationId, out var transfer) && transfer.PizzaId == pizzaIdVal)
+            {
+                _activeOvenTransfers.Remove(stationId);
+                var slot = new StationSlotId(stationId, slotIndex);
+                var res = root.ProcessingService.InsertOven(new ItemId(pizzaIdVal), slot, root.DomainState, 15f, root.Clock);
+                if (res.Success)
+                {
+                    CommitAndReplicate();
+                }
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void RemoveOvenServerRpc(int stationId, int slotIndex, byte targetHand, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (_activeOvenTransfers.ContainsKey(stationId))
+            {
+                NotifyErrorClientRpc("O forno está realizando uma transferência!", targetParams);
+                return;
+            }
+
+            var slot = new StationSlotId(stationId, slotIndex);
+            var ovenLocation = LocationRef.InStation(stationId, slotIndex);
+            ItemState pizzaInSlot = null;
+            foreach (var kv in root.DomainState.Items)
+            {
+                if (kv.Value.Location == ovenLocation)
+                {
+                    pizzaInSlot = kv.Value;
+                    break;
+                }
+            }
+
+            if (pizzaInSlot == null)
+            {
+                NotifyErrorClientRpc("Forno vazio!", targetParams);
+                return;
+            }
+
+            var targetHandIndex = (HandSlotIndex)targetHand;
+            var targetLoc = LocationRef.InHand(senderClientId, targetHandIndex);
+
+            if (root.TransferService.IsLocationOccupied(targetLoc))
+            {
+                var otherHand = targetHandIndex == HandSlotIndex.Left ? HandSlotIndex.Right : HandSlotIndex.Left;
+                var otherLoc = LocationRef.InHand(senderClientId, otherHand);
+                if (!root.TransferService.IsLocationOccupied(otherLoc))
+                {
+                    targetLoc = otherLoc;
+                    targetHand = (byte)otherHand;
+                }
+                else
+                {
+                    NotifyErrorClientRpc("Ambas as mãos ocupadas! Libere uma mão antes de retirar do forno.", targetParams);
+                    return;
+                }
+            }
+
+            _activeOvenTransfers[stationId] = (pizzaInSlot.Id.Value, slotIndex, senderClientId, false);
+
+            const float doorOpenDuration = 0.25f;
+            const float flightDuration = 0.40f;
+            const float doorCloseDuration = 0.25f;
+
+            StartOvenTransferClientRpc(stationId, pizzaInSlot.Id.Value, slotIndex, senderClientId, targetHand, false, doorOpenDuration, flightDuration, doorCloseDuration);
+            StartCoroutine(CompleteOvenRemovalRoutine(stationId, slotIndex, pizzaInSlot.Id.Value, targetLoc, doorOpenDuration, flightDuration));
+        }
+
+        private System.Collections.IEnumerator CompleteOvenRemovalRoutine(int stationId, int slotIndex, ulong pizzaIdVal, LocationRef targetLoc, float doorOpenDuration, float flightDuration)
+        {
+            var root = PizzeriaRoot.Instance;
+
+            // 1. Aguarda a porta abrir
+            yield return new WaitForSeconds(doorOpenDuration);
+
+            // 2. Para a cocção no exato momento em que a porta abre e a pizza começa a sair
+            if (root != null && root.DomainState != null)
+            {
+                var slot = new StationSlotId(stationId, slotIndex);
+                if (root.DomainState.ActiveOperations.TryGetValue(slot, out var op))
+                {
+                    op.Progress.Materialize((float)root.Clock.Now);
+                    if (root.DomainState.Items.TryGetValue(new ItemId(pizzaIdVal), out var pizza))
+                    {
+                        pizza.CookProgress = op.Progress.Normalized;
+                    }
+                    root.DomainState.ActiveOperations.Remove(slot);
+                    CommitAndReplicate();
+                }
+            }
+
+            // 3. Aguarda o voo até a mão
+            yield return new WaitForSeconds(flightDuration);
+
+            if (root != null && root.DomainState != null)
+            {
+                if (_activeOvenTransfers.TryGetValue(stationId, out var transfer) && transfer.PizzaId == pizzaIdVal)
+                {
+                    _activeOvenTransfers.Remove(stationId);
+                    var slot = new StationSlotId(stationId, slotIndex);
+                    var res = root.ProcessingService.RemoveOven(slot, targetLoc, root.DomainState, root.Clock);
+                    if (res.Success)
+                    {
+                        CommitAndReplicate();
+                    }
+                }
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void StartPackagingServerRpc(ulong pizzaIdVal, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var pizzaId = new ItemId(pizzaIdVal);
+            if (root.DomainState.Items.TryGetValue(pizzaId, out var pizza))
+            {
+                // Permissive packaging: can package raw, baked or burned!
+                pizza.PackagingState = PackagingState.Boxed;
+                pizza.Category = ItemCategory.Box;
+                pizza.Revision++;
+                root.DomainState.IncrementRevision();
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ConfirmStageBoxServerRpc(ulong boxIdVal, int stagingSlotIndex, int chosenDestinationId, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var boxId = new ItemId(boxIdVal);
+            if (root.DomainState.Items.TryGetValue(boxId, out var box))
+            {
+                box.LabelDestinationId = chosenDestinationId;
+                // Mantém a caixa repousando na bancada de expedição (StationSlot) para ser vista e recolhida
+                box.Revision++;
+                root.DomainState.IncrementRevision();
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void AnswerPhoneServerRpc(int phoneStationId, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            // Se houver chamada pendente no CallService, atende a primeira
+            if (root.DomainState.Calls.Count > 0)
+            {
+                var firstCallId = System.Linq.Enumerable.First(root.DomainState.Calls.Keys);
+                var answerRes = root.CallService.AnswerCall(
+                    root.DomainState,
+                    firstCallId,
+                    root.OrderService,
+                    root.Catalog,
+                    root.Clock,
+                    root.Config.maxActiveOrders,
+                    root.Config.deliveryTimeLimit);
+
+                if (answerRes.Success)
+                {
+                    CommitAndReplicate();
+                    Debug.Log($"[PizzeriaCommandHandler] Chamada #{firstCallId.Value} atendida! Pedido #{answerRes.Value.Value} criado.");
+                    return;
+                }
+            }
+
+            // Fallback: gera pedido de pizza por composição de ingredientes
+            var specs = new List<(PizzaSpecification spec, int qty)>
+            {
+                (PizzaOrderGenerator.GenerateRandomSpecification(root.Catalog), 1)
+            };
+
+            int destId = 4;
+            var res = root.OrderService.CreatePhoneOrderBySpecifications(
+                new AddressId(destId),
+                specs,
+                root.DomainState,
+                root.Catalog,
+                root.Clock,
+                root.Config.maxActiveOrders,
+                root.Config.deliveryTimeLimit);
+
+            if (res.Success)
+            {
+                CommitAndReplicate();
+                Debug.Log($"[PizzeriaCommandHandler] Telefone atendido! Pedido #{res.Value.Value} publicado para o destino #{destId}.");
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SubmitDeliveryServerRpc(int destinationId, ulong[] selectedItemIds, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+
+            var state = root.DomainState;
+            var order = root.OrderService.GetActiveOrderForDestination(new AddressId(destinationId), state);
+
+            var deliveredList = new List<ItemState>();
+            if (selectedItemIds != null)
+            {
+                for (int i = 0; i < selectedItemIds.Length; i++)
+                {
+                    if (state.Items.TryGetValue(new ItemId(selectedItemIds[i]), out var item))
+                    {
+                        deliveredList.Add(item);
+                    }
+                }
+            }
+
+            var eval = root.DeliveryEvaluator.EvaluateDelivery(order, deliveredList, root.Catalog, root.Config.burnedPayoutFactor, root.Config.unbakedPayoutFactor, root.Config.restaurantBaseBonus);
+
+            // Destroy delivered items (they have been consumed by customer)
+            for (int i = 0; i < deliveredList.Count; i++)
+            {
+                root.TransferService.DestroyItem(deliveredList[i].Id);
+            }
+
+            // Credit Restaurant Budget
+            state.RestaurantBudget += eval.RestaurantEarned;
+
+            // Credit Player Personal Money (via PlayerState if found)
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderClientId, out var client))
+            {
+                if (client.PlayerObject != null)
+                {
+                    var playerState = client.PlayerObject.GetComponent<PlayerState>();
+                    if (playerState != null)
+                    {
+                        playerState.Money.Value += eval.PersonalEarned;
+                    }
+                }
+            }
+
+            CommitAndReplicate();
+            
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            NotifySuccessClientRpc($"Entrega concluída! +R${eval.PersonalEarned}", targetParams);
+            
+            Debug.Log($"[PizzeriaCommandHandler] Entrega concluída no destino #{destinationId}. Pessoal: +R${eval.PersonalEarned}, Restaurante: +R${eval.RestaurantEarned}.");
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void BeginAttendCustomerHoldServerRpc(ulong customerIdVal, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null || root.PlayerHoldService == null) return;
+
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            float holdDur = root.Config != null && root.Config.customerAttendHoldDuration > 0.1f
+                ? root.Config.customerAttendHoldDuration
+                : 0.6f;
+            float leaseSec = root.Config != null ? root.Config.workLeaseSeconds : 0.75f;
+            int maxOrders = root.Config != null ? root.Config.maxActiveOrders : 6;
+
+            var res = root.PlayerHoldService.BeginAttendCustomer(
+                root.DomainState,
+                senderClientId,
+                new CustomerId(customerIdVal),
+                holdDur,
+                (float)root.Clock.Now,
+                leaseSec,
+                root.CustomerService?.TableService,
+                maxOrders);
+
+            if (!res.Success)
+            {
+                NotifyErrorClientRpc(res.Message, targetParams);
+                return;
+            }
+
+            CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void HeartbeatAttendCustomerHoldServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null || root.PlayerHoldService == null) return;
+
+            float leaseSec = root.Config != null ? root.Config.workLeaseSeconds : 0.75f;
+            root.PlayerHoldService.Heartbeat(root.DomainState, senderClientId, (float)root.Clock.Now, leaseSec);
+            CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CancelAttendCustomerHoldServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null || root.PlayerHoldService == null) return;
+
+            root.PlayerHoldService.Cancel(root.DomainState, senderClientId);
+            CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ServeTablePizzaServerRpc(int tableId, ulong pizzaItemIdVal, ServerRpcParams rpcParams = default)
+        {
+            ulong senderClientId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null || root.CustomerService == null) return;
+
+            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            var res = root.CustomerService.ServeTableUnboxedPizza(
+                root.DomainState,
+                tableId,
+                new ItemId(pizzaItemIdVal),
+                senderClientId,
+                root.Catalog,
+                root.OrderService,
+                root.Config != null ? root.Config.burnedPayoutFactor : 0f,
+                root.Config != null ? root.Config.unbakedPayoutFactor : 0f,
+                root.Config != null ? root.Config.restaurantBaseBonus : 10,
+                root.Config != null ? root.Config.customerEatingDuration : 12f);
+
+            if (!res.Success)
+            {
+                NotifyErrorClientRpc(res.Message, targetParams);
+                return;
+            }
+
+            var eval = res.Value;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderClientId, out var client))
+            {
+                if (client.PlayerObject != null)
+                {
+                    var playerState = client.PlayerObject.GetComponent<PlayerState>();
+                    if (playerState != null)
+                    {
+                        playerState.Money.Value += eval.PersonalEarned;
+                    }
+                }
+            }
+
+            CommitAndReplicate();
+            NotifySuccessClientRpc(eval.SummaryMessage, targetParams);
+        }
+    }
+}

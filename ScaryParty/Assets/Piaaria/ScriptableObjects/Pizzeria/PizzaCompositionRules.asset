@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1bd32fda2656a446b7b867e515fb595, type: 3}
+  m_Name: PizzaCompositionRules
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzaCompositionRules
+  baseDoughIngredientId: 2
+  requiredDoughStage: 1
+  sauceIngredientId: 3
+  requireSauce: 1
+  saucePortions: 1
+  minToppings: 1
+  maxToppings: 2
+  maxSupportedToppings: 4
+  maxDistinctIngredientsOnPizza: 8
+  basePizzaPrice: 10
+  defaultBakeDuration: 15
+  candidateToppings:
+  - ingredientId: 5
+    ingredientAsset: {fileID: 11400000, guid: 34af672c39d86054aae28b94edbc96f4, type: 2}
+    requiredStage: 1
+    portionCount: 1
+    selectionWeight: 1
+    priceContribution: 5
+    unlockedByDefault: 1
+    rawStorageIngredientId: 4
+  - ingredientId: 7
+    ingredientAsset: {fileID: 11400000, guid: aabad261ce4aa654fbd74b9d4b0d96bb, type: 2}
+    requiredStage: 1
+    portionCount: 1
+    selectionWeight: 1
+    priceContribution: 10
+    unlockedByDefault: 1
+    rawStorageIngredientId: 6
+  - ingredientId: 9
+    ingredientAsset: {fileID: 11400000, guid: bb29ddd994767134eb644c5080459ab5, type: 2}
+    requiredStage: 1
+    portionCount: 1
+    selectionWeight: 0.8
+    priceContribution: 12
+    unlockedByDefault: 0
+    rawStorageIngredientId: 8

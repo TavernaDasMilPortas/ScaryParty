@@ -1,0 +1,145 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/Lobby.uss" />
+    
+    <ui:VisualElement name="LobbyScreenRoot" class="fullscreen-root lobby-bg" picking-mode="Ignore">
+        <!-- Topo: Botão Voltar (Esquerda), Logo Central e Badge de Prévia (Direita) -->
+        <ui:VisualElement class="lobby-header-bar" picking-mode="Ignore">
+            <ui:Button name="BtnBack" class="btn-back-ribbon" picking-mode="Position">
+                <ui:Label text="↩" class="btn-back-arrow" picking-mode="Ignore" />
+            </ui:Button>
+
+            <ui:VisualElement name="TitleLobby" class="lobby-title-logo" picking-mode="Ignore" />
+
+            <ui:VisualElement class="lobby-badge-container" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <!-- Três Colunas Perfeitamente Alinhadas e Proporcionadas -->
+        <ui:VisualElement class="lobby-columns-row" picking-mode="Ignore">
+            
+            <!-- =========================================
+                 COLUNA 1: MEU PERFIL
+                 ========================================= -->
+            <ui:VisualElement name="ColProfile" class="lobby-column col-profile paper-panel" picking-mode="Ignore">
+                <!-- Faixa do Título -->
+                <ui:VisualElement name="HeaderMyProfile" class="col-ribbon-banner ribbon-yellow" picking-mode="Ignore">
+                    <ui:Label text="MEU PERFIL" class="col-ribbon-title" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <!-- Campo Nome -->
+                <ui:Label text="Nome" class="field-caption" picking-mode="Ignore" />
+                <ui:TextField name="PlayerNameInput" text="Rubens" max-length="18" class="paper-input-box" picking-mode="Position" />
+
+                <!-- Moldura 3D / RawImage do Personagem (Sem overlays ou caixas opacas por cima) -->
+                <ui:VisualElement name="PreviewContainer" class="character-preview-card" picking-mode="Position">
+                    <ui:VisualElement name="PreviewRenderTexture" class="preview-rt-layer" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <!-- Amostras de Cores (Abaixo do Preview 3D, conforme a referência visual) -->
+                <ui:VisualElement class="swatches-paper-row" picking-mode="Ignore">
+                    <ui:Button name="BtnColorOrange" class="swatch-paper-card" tooltip="Laranja" picking-mode="Position">
+                        <ui:VisualElement class="swatch-color-pill color-pill-orange" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="BtnColorGreen" class="swatch-paper-card" tooltip="Verde" picking-mode="Position">
+                        <ui:VisualElement class="swatch-color-pill color-pill-green" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="BtnColorBlue" class="swatch-paper-card" tooltip="Azul" picking-mode="Position">
+                        <ui:VisualElement class="swatch-color-pill color-pill-blue" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="BtnColorPink" class="swatch-paper-card" tooltip="Rosa" picking-mode="Position">
+                        <ui:VisualElement class="swatch-color-pill color-pill-pink" picking-mode="Ignore" />
+                    </ui:Button>
+                    <ui:Button name="BtnColorRed" class="swatch-paper-card" tooltip="Vermelho" picking-mode="Position" style="display: none;">
+                        <ui:VisualElement class="swatch-color-pill color-pill-red" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- Botão Salvar Perfil -->
+                <ui:Button name="BtnSaveProfile" class="ribbon-action-btn btn-orange" picking-mode="Position">
+                    <ui:Label text="SALVAR PERFIL" class="btn-action-label" picking-mode="Ignore" />
+                </ui:Button>
+            </ui:VisualElement>
+
+            <!-- =========================================
+                 COLUNA 2: SALAS DISPONÍVEIS
+                 ========================================= -->
+            <ui:VisualElement name="ColRoomList" class="lobby-column col-roomlist paper-panel" picking-mode="Ignore">
+                <!-- Faixa do Título -->
+                <ui:VisualElement name="HeaderRooms" class="col-ribbon-banner ribbon-yellow" picking-mode="Ignore">
+                    <ui:Label text="SALAS DISPONÍVEIS" class="col-ribbon-title" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <!-- Lista de Salas (ScrollView estilizado) -->
+                <ui:ScrollView name="RoomList" class="room-cards-scrollview" picking-mode="Position">
+                    <ui:VisualElement name="EmptyRoomsNotice" class="empty-room-paper-box" picking-mode="Ignore">
+                        <ui:VisualElement name="NoRoomsArt" class="empty-pizza-art" picking-mode="Ignore" />
+                        <ui:Label text="Nenhuma sala encontrada..." class="empty-main-text" picking-mode="Ignore" />
+                        <ui:Label text="Que tal criar a sua?" class="empty-sub-text" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:ScrollView>
+
+                <!-- Botão Centralizado Atualizar -->
+                <ui:VisualElement class="bottom-action-center" picking-mode="Ignore">
+                    <ui:Button name="BtnRefreshRooms" class="ribbon-action-btn btn-orange btn-refresh-pill" picking-mode="Position">
+                        <ui:Label text="🔄 Atualizar" class="btn-action-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- =========================================
+                 COLUNA 3: CRIAR SALA / CONEXÃO (SEM SCROLL)
+                 ========================================= -->
+            <ui:VisualElement name="ColConnect" class="lobby-column col-connect paper-panel" picking-mode="Ignore">
+                
+                <!-- SEÇÃO 1: CRIAR SALA -->
+                <ui:VisualElement class="connect-section-box" picking-mode="Ignore">
+                    <ui:VisualElement name="HeaderCreateRoom" class="col-ribbon-banner ribbon-yellow section-sub-ribbon" picking-mode="Ignore">
+                        <ui:Label text="CRIAR SALA" class="col-ribbon-title small-title" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                    
+                    <ui:Label text="Nome da sala" class="field-caption" picking-mode="Ignore" />
+                    <ui:TextField name="RoomNameInput" text="Pizzaria do Rubens" class="paper-input-box" picking-mode="Position" />
+                    
+                    <ui:Button name="BtnCreateRoom" class="ribbon-action-btn btn-orange" picking-mode="Position">
+                        <ui:Label text="Criar Sala" class="btn-action-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- SEÇÃO 2: ENTRAR POR CÓDIGO -->
+                <ui:VisualElement class="connect-section-box" picking-mode="Ignore">
+                    <ui:VisualElement name="HeaderJoinCode" class="col-ribbon-banner ribbon-yellow section-sub-ribbon" picking-mode="Ignore">
+                        <ui:Label text="ENTRAR POR CÓDIGO" class="col-ribbon-title small-title" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:Label text="Código da sala" class="field-caption" picking-mode="Ignore" />
+                    <ui:TextField name="ManualCodeInput" placeholder-text="ABC123" class="paper-input-box" picking-mode="Position" />
+
+                    <ui:Button name="BtnJoinManual" class="ribbon-action-btn btn-blue" picking-mode="Position">
+                        <ui:Label text="Entrar" class="btn-action-label" picking-mode="Ignore" />
+                    </ui:Button>
+                </ui:VisualElement>
+
+                <!-- SEÇÃO 3: CONEXÃO LOCAL -->
+                <ui:VisualElement class="connect-section-box last-box" picking-mode="Ignore">
+                    <ui:VisualElement name="HeaderLan" class="col-ribbon-banner ribbon-yellow section-sub-ribbon" picking-mode="Ignore">
+                        <ui:Label text="CONEXÃO LOCAL" class="col-ribbon-title small-title" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:Label text="IP do host" class="field-caption" picking-mode="Ignore" />
+                    <ui:TextField name="LanIpInput" text="127.0.0.1" class="paper-input-box" picking-mode="Position" />
+
+                    <!-- Dupla de Ações LAN -->
+                    <ui:VisualElement class="lan-buttons-row" picking-mode="Ignore">
+                        <ui:Button name="BtnCreateLAN" class="ribbon-action-btn btn-orange flex-1 mr-6" picking-mode="Position">
+                            <ui:Label text="CRIAR LAN" class="btn-action-label-small" picking-mode="Ignore" />
+                        </ui:Button>
+                        <ui:Button name="BtnJoinLAN" class="ribbon-action-btn btn-blue flex-1 ml-6" picking-mode="Position">
+                            <ui:Label text="ENTRAR LAN" class="btn-action-label-small" picking-mode="Ignore" />
+                        </ui:Button>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

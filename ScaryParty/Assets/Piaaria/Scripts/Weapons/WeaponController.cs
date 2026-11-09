@@ -1,0 +1,239 @@
+using UnityEngine;
+using StarterAssets;
+
+public class WeaponController : MonoBehaviour
+{
+    [Header("Weapons")]
+    public WeaponBase pistolPrefab;
+    public WeaponBase shotgunPrefab;
+    
+    [Header("References")]
+    public Transform rightHandAttachment;
+    public Animator animator;
+    public ThirdPersonController tpc;
+
+    private WeaponMode currentMode = WeaponMode.Unarmed;
+    private WeaponBase currentWeaponInstance;
+    private PistolWeapon pistolInstance;
+    private ShotgunWeapon shotgunInstance;
+    
+    private bool isAiming = false;
+    private float lastFireTime = 0f;
+
+    private readonly int AnimWeaponMode = Animator.StringToHash("WeaponMode");
+    private readonly int AnimIsAiming = Animator.StringToHash("IsAiming");
+    private readonly int AnimFire = Animator.StringToHash("Fire");
+    private readonly int AnimIsMoving = Animator.StringToHash("IsMoving");
+    private readonly int AnimIsSprinting = Animator.StringToHash("IsSprinting");
+
+    private void Start()
+    {
+        var visualCtrl = GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
+        if (animator == null)
+        {
+            if (visualCtrl != null && visualCtrl.Animator != null)
+                animator = visualCtrl.Animator;
+            else
+                animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
+        }
+        if (tpc == null) tpc = GetComponent<ThirdPersonController>();
+        
+        if (rightHandAttachment == null)
+        {
+            if (visualCtrl != null && visualCtrl.RightHandBone != null)
+            {
+                rightHandAttachment = visualCtrl.RightHandBone;
+            }
+            else if (animator != null)
+            {
+                if (animator.isHuman)
+                    rightHandAttachment = animator.GetBoneTransform(HumanBodyBones.RightHand);
+                
+                // Fallback if not a humanoid (Generic rig: arm2.r)
+                if (rightHandAttachment == null)
+                {
+                    Transform[] allTransforms = GetComponentsInChildren<Transform>();
+                    foreach (Transform t in allTransforms)
+                    {
+                        string lowerName = t.name.ToLowerInvariant();
+                        if (lowerName == "arm2.r" || lowerName.Contains("righthand") || lowerName.EndsWith("right_hand"))
+                        {
+                            rightHandAttachment = t;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        Transform targetAttachment = rightHandAttachment;
+        bool isLocal = tpc != null && tpc.IsOwner;
+
+        if (isLocal && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
+        {
+            targetAttachment = ScaryParty.Player.FirstPersonCameraController.LocalInstance.RightHandAnchor;
+        }
+
+        if (pistolPrefab != null && targetAttachment != null)
+        {
+            pistolInstance = Instantiate(pistolPrefab, targetAttachment) as PistolWeapon;
+            if (pistolInstance != null)
+            {
+                pistolInstance.transform.localPosition = Vector3.zero;
+                pistolInstance.transform.localRotation = Quaternion.identity;
+                if (isLocal) SetLayerRecursively(pistolInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
+                pistolInstance.OnUnequip();
+            }
+        }
+
+        if (shotgunPrefab != null && targetAttachment != null)
+        {
+            shotgunInstance = Instantiate(shotgunPrefab, targetAttachment) as ShotgunWeapon;
+            if (shotgunInstance != null)
+            {
+                shotgunInstance.transform.localPosition = Vector3.zero;
+                shotgunInstance.transform.localRotation = Quaternion.identity;
+                if (isLocal) SetLayerRecursively(shotgunInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
+                shotgunInstance.OnUnequip();
+            }
+        }
+
+        SetWeaponMode(WeaponMode.Unarmed);
+    }
+
+    private void Update()
+    {
+        UpdateAnimatorLocomotionBools();
+    }
+
+    public void CycleWeapon(int direction)
+    {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && (!inputHandler.enableWeaponControls || !inputHandler.enableWeaponScroll))
+        {
+            return;
+        }
+
+        int mode = (int)currentMode;
+        mode += direction;
+        if (mode > 2) mode = 0;
+        if (mode < 0) mode = 2;
+        
+        SetWeaponMode((WeaponMode)mode);
+    }
+
+    public void SetWeaponMode(WeaponMode mode)
+    {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls && mode != WeaponMode.Unarmed)
+        {
+            mode = WeaponMode.Unarmed;
+        }
+
+        if (currentMode == mode) return;
+
+        if (currentWeaponInstance != null)
+        {
+            currentWeaponInstance.OnUnequip();
+        }
+
+        currentMode = mode;
+        animator.SetInteger(AnimWeaponMode, (int)currentMode);
+        animator.ResetTrigger(AnimFire); // Reset any pending fire triggers when switching weapons
+
+        switch (currentMode)
+        {
+            case WeaponMode.Pistol:
+                currentWeaponInstance = pistolInstance;
+                break;
+            case WeaponMode.Shotgun:
+                currentWeaponInstance = shotgunInstance;
+                break;
+            default:
+                currentWeaponInstance = null;
+                break;
+        }
+
+        if (currentWeaponInstance != null)
+        {
+            currentWeaponInstance.OnEquip();
+        }
+    }
+
+    public void StartAim()
+    {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
+        if (currentMode == WeaponMode.Unarmed) return;
+        isAiming = true;
+        animator.SetBool(AnimIsAiming, true);
+        // Implementar zoom de câmera ou movimento de ombro aqui futuramente
+    }
+
+    public void StopAim()
+    {
+        isAiming = false;
+        animator.SetBool(AnimIsAiming, false);
+    }
+
+    public void TriggerFire()
+    {
+        var inputHandler = GetComponent<WeaponInputHandler>();
+        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
+        if (currentMode == WeaponMode.Unarmed || currentWeaponInstance == null) return;
+
+        if (Time.time >= lastFireTime + currentWeaponInstance.fireRate)
+        {
+            lastFireTime = Time.time;
+            animator.SetTrigger(AnimFire);
+            currentWeaponInstance.Shoot();
+        }
+    }
+
+    private void UpdateAnimatorLocomotionBools()
+    {
+        if (tpc != null)
+        {
+            // Acessando as velocidades privadas do ThirdPersonController usando reflexão seria o ideal, 
+            // mas como é só leitura para animação, podemos basear no input ou em propriedades conhecidas.
+            // Aqui vamos assumir uma simplificação baseada nos campos públicos do ThirdPersonController.
+            float speed = new Vector3(tpc.GetComponent<CharacterController>().velocity.x, 0, tpc.GetComponent<CharacterController>().velocity.z).magnitude;
+            
+            bool isMoving = speed > 0.1f;
+            bool isSprinting = speed > tpc.MoveSpeed; // Se maior que moveSpeed base, tá correndo
+
+            animator.SetBool(AnimIsMoving, isMoving);
+            animator.SetBool(AnimIsSprinting, isSprinting);
+        }
+    }
+
+    private void SetLayerRecursively(GameObject obj, int newLayer)
+    {
+        if (obj == null) return;
+        obj.layer = newLayer;
+        foreach (Transform child in obj.transform)
+        {
+            SetLayerRecursively(child.gameObject, newLayer);
+        }
+    }
+
+    private void OnGUI()
+    {
+        if (currentMode != WeaponMode.Unarmed)
+        {
+            float size = 10f;
+            float thickness = 2f;
+            float x = Screen.width / 2f;
+            float y = Screen.height / 2f;
+
+            GUI.color = new Color(1, 1, 1, 0.8f);
+            
+            // Draw horizontal line
+            GUI.DrawTexture(new Rect(x - size, y - thickness / 2f, size * 2f, thickness), Texture2D.whiteTexture);
+            // Draw vertical line
+            GUI.DrawTexture(new Rect(x - thickness / 2f, y - size, thickness, size * 2f), Texture2D.whiteTexture);
+
+            GUI.color = Color.white; // Reset color
+        }
+    }
+}

@@ -1,0 +1,25 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/Scoreboard.uss" />
+    
+    <ui:VisualElement name="ScoreboardRoot" class="modal-backdrop scoreboard-overlay-root">
+        <ui:VisualElement class="modal-card scoreboard-card">
+            <!-- Título do Placar -->
+            <ui:Label text="PLACAR DA SESSÃO" class="header-title-text mb-16" />
+
+            <!-- Cabeçalho das Colunas -->
+            <ui:VisualElement class="scoreboard-header-row">
+                <ui:Label text="JOGADOR" class="scoreboard-header-cell col-name" />
+                <ui:Label text="PIZZAS (MÃOS)" class="scoreboard-header-cell col-pizzas" />
+                <ui:Label text="DINHEIRO" class="scoreboard-header-cell col-money" />
+            </ui:VisualElement>
+
+            <!-- Lista de Jogadores -->
+            <ui:ScrollView name="ScoreboardList" class="scoreboard-scroll">
+                <!-- Linhas inseridas dinamicamente -->
+            </ui:ScrollView>
+
+            <ui:Label text="Solte [Tab] para fechar o placar" class="scoreboard-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

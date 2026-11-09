@@ -1,0 +1,31 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/Storage.uss" />
+    
+    <ui:VisualElement name="StorageModalRoot" class="modal-backdrop storage-backdrop">
+        <ui:VisualElement name="StorageCard" class="modal-card storage-card">
+            <!-- Cabeçalho -->
+            <ui:VisualElement class="storage-header">
+                <ui:Label name="StorageTitle" text="ESTOQUE — ARMAZÉM #0" class="header-title-text storage-title" />
+                <ui:Button name="BtnCloseStorage" text="✕" class="close-icon-btn" />
+            </ui:VisualElement>
+
+            <!-- Seletor de Mão Alvo -->
+            <ui:VisualElement class="hand-selector-row">
+                <ui:Label text="DESTINO:" class="hand-selector-label" />
+                <ui:Button name="BtnSelectLeftHand" text="MÃO ESQUERDA [1]" class="piaria-button hand-select-btn hand-btn-active" />
+                <ui:Button name="BtnSelectRightHand" text="MÃO DIREITA [2]" class="piaria-button hand-select-btn" />
+            </ui:VisualElement>
+
+            <!-- Lista de Itens Disponíveis -->
+            <ui:ScrollView name="StorageList" class="storage-scroll-list">
+                <!-- Linhas inseridas dinamicamente -->
+            </ui:ScrollView>
+
+            <!-- Feedback de Operação Pendente -->
+            <ui:VisualElement name="StorageStatusBox" class="storage-status-box">
+                <ui:Label name="StorageStatusLabel" text="" class="storage-status-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

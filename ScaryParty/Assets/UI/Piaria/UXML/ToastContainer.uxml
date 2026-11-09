@@ -1,8 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/Piaria/USS/PiariaCommon.uss" />
-    <Style src="project://database/Assets/UI/Piaria/USS/Toasts.uss" />
-    
-    <ui:VisualElement name="ToastContainerRoot" class="toast-anchor-container" picking-mode="Ignore">
-        <!-- Notificações são instanciadas aqui via ToastPresenter -->
-    </ui:VisualElement>
-</ui:UXML>

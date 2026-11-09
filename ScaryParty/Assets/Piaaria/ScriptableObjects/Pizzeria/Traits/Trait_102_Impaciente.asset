@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfad3067c75bdaa4aa888b6469185d54, type: 3}
+  m_Name: Trait_102_Impaciente
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.CustomerTraitDef
+  traitId: 102
+  displayName: Impaciente
+  description: "Esgota a paci\xEAncia bem mais depressa se o pedido demorar (-30%
+    fila, -25% mesa)."
+  polarity: 1
+  queuePatienceMultiplier: 0.7
+  foodPatienceMultiplier: 0.75
+  stagnationSensitivityMultiplier: 1
+  tipMultiplier: 1
+  perfectionFlatBonus: 0
+  errorToleranceDelta: 0
+  walkSpeedMultiplier: 1
+  incompatibleTraitIds: 01000000

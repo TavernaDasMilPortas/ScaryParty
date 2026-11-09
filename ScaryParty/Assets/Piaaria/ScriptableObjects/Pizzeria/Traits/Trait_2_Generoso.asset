@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfad3067c75bdaa4aa888b6469185d54, type: 3}
+  m_Name: Trait_2_Generoso
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.CustomerTraitDef
+  traitId: 2
+  displayName: Generoso
+  description: Paga gorjeta bem maior quando recebe sua pizza (+45% gorjeta).
+  polarity: 0
+  queuePatienceMultiplier: 1
+  foodPatienceMultiplier: 1
+  stagnationSensitivityMultiplier: 1
+  tipMultiplier: 1.45
+  perfectionFlatBonus: 0
+  errorToleranceDelta: 0
+  walkSpeedMultiplier: 1
+  incompatibleTraitIds: 68000000

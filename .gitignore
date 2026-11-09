@@ -48,3 +48,8 @@ sysinfo.txt
 
 # ParrelSync Clones
 *_clone_*
+
+# Python
+__pycache__/
+*.pyc
+

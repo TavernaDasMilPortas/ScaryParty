@@ -1,0 +1,34 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/Staging.uss" />
+    
+    <ui:VisualElement name="StagingModalRoot" class="modal-backdrop staging-backdrop">
+        <ui:VisualElement name="StagingCard" class="modal-card staging-card">
+            <!-- Cabeçalho -->
+            <ui:Label text="ETIQUETAR CAIXA" class="header-title-text staging-title" />
+            <ui:Label text="Escolha o endereço de destino para o entregador:" class="staging-subtitle" />
+
+            <!-- Ilustração da Caixa de Pizza -->
+            <ui:VisualElement name="VisualPizzaBox" class="staging-box-art" />
+
+            <!-- Seletor de Endereço -->
+            <ui:VisualElement class="destination-picker-row">
+                <ui:Button name="BtnPrevDest" text="◀" class="piaria-button piaria-button-secondary arrow-btn" />
+                <ui:VisualElement class="dest-label-wrapper">
+                    <ui:Label name="DestTitleLabel" text="ENDEREÇO DE ENTREGA" class="dest-sublabel" />
+                    <ui:Label name="SelectedDestLabel" text="Casa #1 (Rua Central)" class="selected-dest-text" />
+                </ui:VisualElement>
+                <ui:Button name="BtnNextDest" text="▶" class="piaria-button piaria-button-secondary arrow-btn" />
+            </ui:VisualElement>
+
+            <!-- Status de Envio -->
+            <ui:Label name="StagingStatusLabel" text="" class="staging-status-text" />
+
+            <!-- Ações -->
+            <ui:VisualElement class="staging-actions-row">
+                <ui:Button name="BtnCancelStaging" text="CANCELAR" class="piaria-button piaria-button-danger action-btn-half" />
+                <ui:Button name="BtnConfirmStaging" text="CONFIRMAR ETIQUETA" class="piaria-button piaria-button-success action-btn-half" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
