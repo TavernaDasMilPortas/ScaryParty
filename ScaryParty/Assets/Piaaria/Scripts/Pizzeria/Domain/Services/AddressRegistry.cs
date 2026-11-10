@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Services
@@ -29,10 +29,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public int ComputeHash()
         {
             int hash = 17;
-            foreach (var kvp in _positions)
+            var sortedKeys = new List<AddressId>(_positions.Keys);
+            sortedKeys.Sort((a, b) => a.Value.CompareTo(b.Value));
+            for (int i = 0; i < sortedKeys.Count; i++)
             {
-                hash = hash * 31 + kvp.Key.Value.GetHashCode();
-                hash = hash * 31 + kvp.Value.GetHashCode();
+                var key = sortedKeys[i];
+                hash = hash * 31 + key.Value.GetHashCode();
+                hash = hash * 31 + _positions[key].GetHashCode();
             }
             return hash;
         }

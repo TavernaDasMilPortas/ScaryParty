@@ -9,12 +9,19 @@ public class BlockFiller : MonoBehaviour
 {
     /// <summary>
     /// Fills a block with procedurally generated buildings.
+    /// Supports both modular 12-piece kit assembly and legacy stretched primitives.
     /// </summary>
-    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null)
+    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null, Material sidewalkMaterial = null)
     {
+        if (config != null && config.buildingGenerationMode == ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit && config.modularCatalog != null)
+        {
+            FillBlockModular(block, config, rng, parent, blockIndex, reservedOBBs);
+            return;
+        }
+
         if (block.polygon != null && block.polygon.Length >= 3)
         {
-            FillBlockPerimeter(block, config, rng, parent, buildingMaterials, blockIndex, reservedOBBs);
+            FillBlockPerimeter(block, config, rng, parent, buildingMaterials, blockIndex, reservedOBBs, sidewalkMaterial);
         }
         else
         {
@@ -24,9 +31,28 @@ public class BlockFiller : MonoBehaviour
     }
 
     /// <summary>
+    /// Preenche a quadra usando o sistema modular de 12 peças sem esticar nem cortar modelos.
+    /// </summary>
+    private void FillBlockModular(BlockInfo block, CityConfig config, System.Random rng, Transform parent, int blockIndex, List<OBB2D> reservedOBBs = null)
+    {
+        GameObject blockParent = new GameObject($"Block_{blockIndex}");
+        blockParent.transform.SetParent(parent);
+        blockParent.transform.position = block.worldCenter;
+
+        var layouts = ScaryParty.City.Modular.ModularLotPlanner.PlanBlock(
+            block, config, blockIndex, config.seed, reservedOBBs, config.modularBuildingProfile);
+
+        for (int i = 0; i < layouts.Count; i++)
+        {
+            ScaryParty.City.Modular.ModularBuildingAssembler.AssembleBuilding(
+                layouts[i], config.modularCatalog, blockParent.transform);
+        }
+    }
+
+    /// <summary>
     /// Places buildings tightly along the edges (perimeter) of the block polygon, facing outward.
     /// </summary>
-    private void FillBlockPerimeter(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null)
+    private void FillBlockPerimeter(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null, Material sidewalkMaterial = null)
     {
         GameObject blockParent = new GameObject($"Block_{blockIndex}");
         blockParent.transform.SetParent(parent);
@@ -255,7 +281,8 @@ public class BlockFiller : MonoBehaviour
                 GameObject buildingObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 buildingObj.name = $"Building_{buildingCount++}";
                 buildingObj.transform.SetParent(blockParent.transform);
-                buildingObj.transform.position = centerPos + new Vector3(0, bHeight * 0.5f, 0);
+                float groundY = 0.02f + (config != null && config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
+                buildingObj.transform.position = new Vector3(centerPos.x, groundY + bHeight * 0.5f, centerPos.z);
                 buildingObj.transform.rotation = rotation;
                 buildingObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
 
@@ -293,65 +320,6 @@ public class BlockFiller : MonoBehaviour
             }
         }
         } // Closing the pass loop
-
-        // Gera o miolo maciço para impedir visão interna (apenas se configurado e a quadra NÃO contém a pizzaria)
-        if (config.generateSolidCore && !block.hasPizzaria)
-        {
-            GenerateSolidCore(poly, centroid, blockParent.transform, GetRandomHeight(block.zoneType, rng) * 0.8f, Color.gray);
-        }
-    }
-
-    private void GenerateSolidCore(Vector3[] poly, Vector3 centroid, Transform parent, float height, Color color)
-    {
-        GameObject core = new GameObject("SolidCore_Maciço");
-        core.transform.SetParent(parent);
-        core.transform.position = Vector3.zero;
-
-        MeshFilter mf = core.AddComponent<MeshFilter>();
-        MeshRenderer mr = core.AddComponent<MeshRenderer>();
-        
-        Mesh mesh = new Mesh();
-        mesh.name = "SolidCoreMesh";
-        
-        int n = poly.Length;
-        Vector3[] vertices = new Vector3[n * 2 + 2];
-        int[] triangles = new int[n * 12];
-        
-        vertices[0] = new Vector3(centroid.x, 0, centroid.z);
-        vertices[1] = new Vector3(centroid.x, height, centroid.z);
-        
-        for (int i = 0; i < n; i++)
-        {
-            // Inset by 15% so the core doesn't clip through the thin building facades
-            Vector3 insetPos = Vector3.Lerp(poly[i], centroid, 0.15f);
-            vertices[i * 2 + 2] = new Vector3(insetPos.x, 0, insetPos.z);
-            vertices[i * 2 + 3] = new Vector3(insetPos.x, height, insetPos.z);
-        }
-
-        int t = 0;
-        for (int i = 0; i < n; i++)
-        {
-            int next = (i + 1) % n;
-            int v0 = i * 2 + 2;
-            int v1 = i * 2 + 3;
-            int v2 = next * 2 + 2;
-            int v3 = next * 2 + 3;
-            
-            triangles[t++] = v0; triangles[t++] = v1; triangles[t++] = v2;
-            triangles[t++] = v2; triangles[t++] = v1; triangles[t++] = v3;
-            
-            triangles[t++] = v1; triangles[t++] = 1; triangles[t++] = v3;
-        }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
-
-        mf.mesh = mesh;
-        
-        Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        Material mat = new Material(shader) { color = color };
-        mr.sharedMaterial = mat;
     }
 
     /// <summary>
@@ -439,10 +407,11 @@ public class BlockFiller : MonoBehaviour
                 if (bWidth <= 1f || bDepth <= 1f) continue;
 
                 float bHeight = GetRandomHeight(block.zoneType, rng);
+                float groundY = 0.02f + (config != null && config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
 
                 Vector3 localPos = new Vector3(
                     -availableWidth / 2f + (cellWidth * x) + (cellWidth / 2f),
-                    bHeight / 2f,
+                    groundY + bHeight / 2f,
                     -availableDepth / 2f + (cellDepth * z) + (cellDepth / 2f)
                 );
 

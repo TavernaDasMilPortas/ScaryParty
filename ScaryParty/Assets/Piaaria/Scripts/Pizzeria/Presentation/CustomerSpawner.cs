@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using Unity.Netcode;
 using Unity.AI.Navigation;
 using ScaryParty.Pizzeria.Composition;
@@ -140,28 +141,38 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (counters[i] != null)
                 {
                     counters[i].EnsureQueueSlotAnchors(3);
+                    counters[i].EnsureNavMeshObstacle();
                     _counterByQueue[counters[i].queueIndex] = counters[i];
                 }
             }
 
-            // Se o prefab ainda não tiver os 2 pontos de fila configurados, cria pontos de fila padrão próximos à entrada
+            // Se o prefab ainda não tiver os 2 pontos de fila configurados, cria pontos de fila padrão alinhados ao fluxo do salão
             if (!_counterByQueue.ContainsKey(0) || !_counterByQueue.ContainsKey(1))
             {
                 Transform entrance = PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.entranceAnchor != null
                     ? PizzeriaRoot.Instance.entranceAnchor
                     : root;
 
+                // Direção para o interior da pizzaria (oposto à fachada/saída da rua)
+                Vector3 intoPizzeria = Vector3.right;
+                if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.GetComponent<PizzeriaFootprint>() is { } fp)
+                {
+                    intoPizzeria = new Vector3(-fp.entranceDirectionLocal.x, 0f, -fp.entranceDirectionLocal.y).normalized;
+                }
+                Quaternion counterRot = Quaternion.LookRotation(intoPizzeria, Vector3.up);
+                Vector3 lateralDir = Vector3.Cross(Vector3.up, intoPizzeria).normalized;
+
                 for (int q = 0; q < 2; q++)
                 {
                     if (_counterByQueue.ContainsKey(q)) continue;
                     var go = new GameObject($"CustomerQueueCounter_{q}");
                     go.transform.SetParent(root, false);
-                    float xOffset = q == 0 ? -0.85f : 0.85f;
+                    float lateralOffset = q == 0 ? -1.0f : 1.0f;
                     Vector3 basePos = entrance != root
-                        ? root.InverseTransformPoint(entrance.position) + new Vector3(xOffset, 0f, 2.2f)
-                        : new Vector3(xOffset, 0f, -2.5f);
+                        ? root.InverseTransformPoint(entrance.position) + intoPizzeria * 4.2f + lateralDir * lateralOffset
+                        : intoPizzeria * 3.5f + lateralDir * lateralOffset;
                     go.transform.localPosition = basePos;
-                    go.transform.localRotation = Quaternion.identity;
+                    go.transform.localRotation = counterRot;
 
                     var col = go.AddComponent<BoxCollider>();
                     col.center = new Vector3(0f, 1.0f, 0f);
@@ -171,6 +182,7 @@ namespace ScaryParty.Pizzeria.Presentation
                     station.queueIndex = q;
                     station.counterName = $"Balcão de Atendimento (Fila {q + 1})";
                     station.EnsureQueueSlotAnchors(3);
+                    station.EnsureNavMeshObstacle();
                     _counterByQueue[q] = station;
                 }
             }
@@ -181,6 +193,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (tables[i] != null && tables[i].tableId > 0)
                 {
                     tables[i].EnsureAnchors();
+                    tables[i].EnsureNavMeshObstacle();
                     _tableById[tables[i].tableId] = tables[i];
                 }
             }
@@ -209,6 +222,7 @@ namespace ScaryParty.Pizzeria.Presentation
                             bc.size = new Vector3(1.1f, 0.9f, 1.1f);
                         }
                         dts.EnsureAnchors();
+                        dts.EnsureNavMeshObstacle();
                         _tableById[nextId] = dts;
                         nextId++;
                     }
@@ -233,7 +247,39 @@ namespace ScaryParty.Pizzeria.Presentation
                     dts.tableId = id;
                     dts.tableName = $"Mesa {id}";
                     dts.EnsureAnchors();
+                    dts.EnsureNavMeshObstacle();
                     _tableById[id] = dts;
+                }
+            }
+
+            // Garantir que todos os balcões e bancadas da pizzaria possuam NavMeshObstacle com carving ativo
+            var allSceneTransforms = root.GetComponentsInChildren<Transform>(true);
+            for (int i = 0; i < allSceneTransforms.Length; i++)
+            {
+                var t = allSceneTransforms[i];
+                if (t == null || t == root) continue;
+                string lower = t.name.ToLowerInvariant();
+                if (lower.Contains("balcao") || lower.Contains("counter"))
+                {
+                    var obs = t.GetComponent<NavMeshObstacle>();
+                    if (obs == null)
+                    {
+                        obs = t.gameObject.AddComponent<NavMeshObstacle>();
+                    }
+                    var rend = t.GetComponentInChildren<Renderer>();
+                    if (rend != null)
+                    {
+                        obs.center = t.InverseTransformPoint(rend.bounds.center);
+                        obs.size = rend.bounds.size;
+                    }
+                    else
+                    {
+                        obs.center = new Vector3(0f, 0.5f, 0f);
+                        obs.size = new Vector3(1f, 1f, 1f);
+                    }
+                    obs.shape = NavMeshObstacleShape.Box;
+                    obs.carving = true;
+                    obs.carveOnlyStationary = true;
                 }
             }
         }
@@ -303,7 +349,17 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 if (!presentIds.Contains(kvp.Key))
                 {
-                    if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+                    if (kvp.Value != null)
+                    {
+                        if (CityPopulationDirector.Instance != null)
+                        {
+                            CityPopulationDirector.Instance.ReturnCustomerToCityPopulation(kvp.Value);
+                        }
+                        else
+                        {
+                            Destroy(kvp.Value.gameObject);
+                        }
+                    }
                     toRemove.Add(kvp.Key);
                 }
             }
@@ -340,7 +396,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 npcGo.transform.position = spawnPos;
                 npcGo.transform.rotation = targetRot;
 
-                var agent = npcGo.AddComponent<UnityEngine.AI.NavMeshAgent>();
+                var agent = npcGo.AddComponent<NavMeshAgent>();
                 agent.speed = 2.4f * Mathf.Clamp(speedMult, 0.7f, 1.5f);
                 agent.angularSpeed = 360f;
                 agent.acceleration = 12f;
@@ -349,9 +405,17 @@ namespace ScaryParty.Pizzeria.Presentation
                 agent.height = 1.65f;
                 agent.radius = 0.35f;
 
-                if (!UnityEngine.AI.NavMesh.SamplePosition(spawnPos, out _, 1.0f, UnityEngine.AI.NavMesh.AllAreas))
+                // NavMesh alignment
+                if (UnityEngine.AI.NavMesh.SamplePosition(spawnPos, out var navHit, 3.5f, UnityEngine.AI.NavMesh.AllAreas))
                 {
-                    agent.enabled = false;
+                    spawnPos = navHit.position;
+                    npcGo.transform.position = spawnPos;
+                }
+                else if (ScaryParty.Navigation.Core.NavigationWorldManager.Instance != null &&
+                         ScaryParty.Navigation.Core.NavigationWorldManager.Instance.SamplePosition(spawnPos, out var managerPos, 4.0f))
+                {
+                    spawnPos = managerPos;
+                    npcGo.transform.position = spawnPos;
                 }
 
                 GameObject visualInst = InstantiateCustomerVisual();

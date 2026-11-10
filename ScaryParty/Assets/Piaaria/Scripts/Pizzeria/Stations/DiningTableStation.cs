@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -10,8 +11,9 @@ namespace ScaryParty.Pizzeria.Stations
     /// <summary>
     /// Estação de Mesa do Salão para atendimento presencial (1 mesa inteira por NPC nesta versão).
     /// - Possui âncora de assento (seatAnchor) para o NPC sentar e âncora de prato (plateAnchor) para exibir a pizza servida.
+    /// - Esculpe automaticamente o NavMesh via NavMeshObstacle com carving para impedir atravessamento.
+    /// - Localiza a cadeira física real no salão para garantir orientação de frente para a mesa.
     /// - Interagir com [E] ou [F] segurando uma pizza assada SEM CAIXA serve a pizza diretamente na mesa.
-    /// - Rejeita pizzas embaladas em caixa com mensagem clara.
     /// </summary>
     public class DiningTableStation : MonoBehaviour, IInteractable
     {
@@ -26,6 +28,37 @@ namespace ScaryParty.Pizzeria.Stations
         private void Awake()
         {
             EnsureAnchors();
+            EnsureNavMeshObstacle();
+        }
+
+        public void EnsureNavMeshObstacle()
+        {
+            var obstacle = GetComponent<NavMeshObstacle>();
+            if (obstacle == null)
+            {
+                obstacle = gameObject.AddComponent<NavMeshObstacle>();
+            }
+
+            obstacle.shape = NavMeshObstacleShape.Box;
+            var rend = GetComponentInChildren<Renderer>();
+            if (rend != null)
+            {
+                Vector3 localCenter = transform.InverseTransformPoint(rend.bounds.center);
+                Vector3 localSize = rend.bounds.size;
+                obstacle.center = localCenter;
+                // Deixa folga de 10% nas bordas para o agente conseguir acessar a cadeira livremente
+                obstacle.size = new Vector3(Mathf.Max(0.6f, localSize.x * 0.9f),
+                                            Mathf.Max(0.8f, localSize.y),
+                                            Mathf.Max(0.6f, localSize.z * 0.9f));
+            }
+            else
+            {
+                obstacle.center = new Vector3(0f, 0.45f, 0f);
+                obstacle.size = new Vector3(1.1f, 0.9f, 1.1f);
+            }
+
+            obstacle.carving = true;
+            obstacle.carveOnlyStationary = true;
         }
 
         public void EnsureAnchors()
@@ -33,26 +66,96 @@ namespace ScaryParty.Pizzeria.Stations
             if (seatAnchor == null)
             {
                 seatAnchor = transform.Find("SeatAnchor");
-                if (seatAnchor == null)
+            }
+
+            if (seatAnchor == null)
+            {
+                // 1. Tentar localizar cadeira próxima ou filha
+                for (int i = 0; i < transform.childCount; i++)
                 {
-                    // Tentar localizar cadeira próxima ou filha
-                    for (int i = 0; i < transform.childCount; i++)
+                    var ch = transform.GetChild(i);
+                    string n = ch.name.ToLowerInvariant();
+                    if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
                     {
-                        var ch = transform.GetChild(i);
-                        string n = ch.name.ToLowerInvariant();
-                        if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
-                        {
-                            seatAnchor = ch;
-                            break;
-                        }
+                        seatAnchor = ch;
+                        break;
                     }
                 }
+
+                // 2. Se não encontrou em filhos, procurar a cadeira mais próxima entre irmãos ou na hierarquia do salão
                 if (seatAnchor == null)
                 {
+                    Transform nearestChair = null;
+                    float minDist = 2.5f;
+
+                    // Procurar em irmãos (ex: sob Furniture)
+                    if (transform.parent != null)
+                    {
+                        for (int i = 0; i < transform.parent.childCount; i++)
+                        {
+                            var sibling = transform.parent.GetChild(i);
+                            if (sibling == transform) continue;
+                            string n = sibling.name.ToLowerInvariant();
+                            if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
+                            {
+                                float dist = Vector3.Distance(new Vector3(sibling.position.x, 0f, sibling.position.z),
+                                                              new Vector3(transform.position.x, 0f, transform.position.z));
+                                if (dist < minDist)
+                                {
+                                    minDist = dist;
+                                    nearestChair = sibling;
+                                }
+                            }
+                        }
+                    }
+
+                    // Se ainda não encontrou, buscar na raiz da pizzaria
+                    if (nearestChair == null)
+                    {
+                        var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
+                            ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.transform
+                            : transform.root;
+                        var all = root.GetComponentsInChildren<Transform>(true);
+                        for (int i = 0; i < all.Length; i++)
+                        {
+                            if (all[i] == transform) continue;
+                            string n = all[i].name.ToLowerInvariant();
+                            if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
+                            {
+                                float dist = Vector3.Distance(new Vector3(all[i].position.x, 0f, all[i].position.z),
+                                                              new Vector3(transform.position.x, 0f, transform.position.z));
+                                if (dist < minDist)
+                                {
+                                    minDist = dist;
+                                    nearestChair = all[i];
+                                }
+                            }
+                        }
+                    }
+
                     var go = new GameObject("SeatAnchor");
-                    go.transform.SetParent(transform, false);
-                    go.transform.localPosition = new Vector3(0f, 0f, -0.75f);
-                    go.transform.localRotation = Quaternion.identity;
+                    go.transform.SetParent(transform, true);
+
+                    if (nearestChair != null)
+                    {
+                        // Posiciona a âncora exatamente na cadeira correspondente
+                        Vector3 chairPos = nearestChair.position;
+                        Vector3 toTable = transform.position - chairPos;
+                        toTable.y = 0f;
+                        Quaternion faceTable = toTable.sqrMagnitude > 0.001f
+                            ? Quaternion.LookRotation(toTable.normalized, Vector3.up)
+                            : nearestChair.rotation;
+
+                        go.transform.position = chairPos;
+                        go.transform.rotation = faceTable;
+                    }
+                    else
+                    {
+                        // Fallback relativo à frente da mesa
+                        go.transform.localPosition = new Vector3(0f, 0f, -0.75f);
+                        go.transform.localRotation = Quaternion.identity;
+                    }
+
                     seatAnchor = go.transform;
                 }
             }
@@ -64,7 +167,9 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     var go = new GameObject("PlateAnchor");
                     go.transform.SetParent(transform, false);
-                    go.transform.localPosition = new Vector3(0f, 0.78f, 0f);
+                    var rend = GetComponentInChildren<Renderer>();
+                    float topY = rend != null ? rend.bounds.max.y - transform.position.y + 0.02f : 0.20f;
+                    go.transform.localPosition = new Vector3(0f, topY, 0f);
                     go.transform.localRotation = Quaternion.identity;
                     plateAnchor = go.transform;
                 }
@@ -74,11 +179,9 @@ namespace ScaryParty.Pizzeria.Stations
         public Vector3 GetSeatPosition()
         {
             EnsureAnchors();
-            if (seatAnchor != null)
-            {
-                return seatAnchor.position;
-            }
-            Vector3 rawPos = transform.position - transform.forward * 0.75f;
+            Vector3 rawPos = seatAnchor != null
+                ? seatAnchor.position
+                : transform.position - transform.forward * 0.75f;
             return Presentation.CustomerSpawner.SnapToFloor(rawPos);
         }
 

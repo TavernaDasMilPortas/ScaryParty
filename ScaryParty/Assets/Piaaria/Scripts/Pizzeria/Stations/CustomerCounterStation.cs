@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.AI;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -10,6 +11,7 @@ namespace ScaryParty.Pizzeria.Stations
     /// <summary>
     /// Ponto de atendimento de clientes presenciais no balcão (distinto de CounterStation que é bancada de cozinha).
     /// Também contém as âncoras de espera da fila correspondente (slots 0..N).
+    /// Esculpe automaticamente o NavMesh via NavMeshObstacle com carving.
     /// Segurar [F] por 0,6 s atende o cliente no slot 0 da fila.
     /// </summary>
     public class CustomerCounterStation : MonoBehaviour, IInteractable
@@ -24,12 +26,32 @@ namespace ScaryParty.Pizzeria.Stations
 
         private StationProgressBar _progressBar;
 
+        private void Awake()
+        {
+            EnsureNavMeshObstacle();
+        }
+
         private void Start()
         {
             EnsureQueueSlotAnchors();
+            EnsureNavMeshObstacle();
             _progressBar = StationProgressBar.Create(transform);
             _progressBar.transform.position = GetQueueSlotPosition(0) + Vector3.up * 2.0f;
             _progressBar.Hide();
+        }
+
+        public void EnsureNavMeshObstacle()
+        {
+            var obstacle = GetComponent<NavMeshObstacle>();
+            if (obstacle == null)
+            {
+                obstacle = gameObject.AddComponent<NavMeshObstacle>();
+            }
+            obstacle.shape = NavMeshObstacleShape.Box;
+            obstacle.center = new Vector3(0f, 0.9f, 0f);
+            obstacle.size = new Vector3(0.9f, 1.8f, 0.9f);
+            obstacle.carving = true;
+            obstacle.carveOnlyStationary = true;
         }
 
         public void EnsureQueueSlotAnchors(int defaultSlots = 3)

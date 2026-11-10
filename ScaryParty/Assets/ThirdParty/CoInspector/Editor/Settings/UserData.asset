@@ -179,17 +179,31 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked: []
+      mostClicked:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]/Minimap_WorldImage_Rig[0]"}'
+        count: 2
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 2
+        gameObjects:
+        - {fileID: 0}
       recentlyClicked:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
       - paths: []
         count: 1
         gameObjects: []
-      - paths: []
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]/Minimap_WorldImage_Rig[0]"}'
         count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
+        gameObjects:
+        - {fileID: 0}
       - paths: []
         count: 1
         gameObjects: []
@@ -215,13 +229,13 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 07:25 PM (November 8, 2026)
+    lastSaveTimePrint: 11:02 PM (November 9, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
     assetsCollapsed: 0
     lockedAsset: 0
-    maximizedAssetView: 0
+    maximizedAssetView: 1
     showImportSettings: 0
     suggestedHeight: 0
     userAssetViewSize: -1
@@ -229,28 +243,28 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 61
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: 
+    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
       paths: []
-      tabWidth: 58
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
+      tabWidth: 90
+      name: --- CITY ---
+      icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
+      shortName: --- CITY ---
       filterString: 
-      newTab: 1
+      newTab: 0
       scrollPosition: 0
       isSelected: 0
       allCollapsed: 0
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: --- CITY ---
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: "--- CITY ---\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -289,37 +303,92 @@ MonoBehaviour:
       savePlayModeTransform: 0
       index: 0
       historyPosition: 0
-      componentMaps: []
-      historyPaths: []
+      componentMaps:
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 0
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: transform
+        niceComponentName: transform
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 0
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: networkobject
+        niceComponentName: network object
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: citygenerator
+        niceComponentName: city generator
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 0
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: citygizmos
+        niceComponentName: city gizmos
+      historyPaths:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        prefab: 0
+      - paths:
+        - 
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]/Minimap_WorldImage_Rig[0]"}'
+        prefab: 0
+      - paths:
+        - 
+        prefab: 0
+      - paths:
+        - 
+        prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - ca14d084d9058bf4bb740f0939df13ff
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - aefe2171e12196c4c988d9e2428d90ab
+    - assetGUIDs:
+      - fd443a703d51ae0408ddfe7d9a12507f
+    - assetGUIDs:
+      - 3c781e3b27a36f14a9e8c5249ea393f2
+    - assetGUIDs:
+      - b587044e97dbec04cb381b939a2ffa22
+    - assetGUIDs:
+      - 9e65156b3bfc41b4ea7b6eba31051d8d
+    - assetGUIDs:
+      - 7125a3c8cb32ba54a92762e1b3f686a4
+    - assetGUIDs:
+      - bc41cc71786303b4ebe3b7b52e6cd2e0
+    - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
       - 64dce48905ffd9b4293e595fa6941544
-    - assetGUIDs:
-      - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - c708a3b79cd542b42bbfedb17e213bc1
-    - assetGUIDs:
-      - 21b0f6c9c179427595fff40e7c931936
-    - assetGUIDs:
-      - 39c844dff8ef83248b8903e1f0018250
-    - assetGUIDs:
-      - 8401d286b31cb8e4d94aa1ff61a76128
-    - assetGUIDs:
-      - 7783d6705f3297f488cd0a40b809bab5
-    - assetGUIDs:
-      - f6746612ddd468247bf52f5ee76948a3
-    - assetGUIDs:
-      - fa6c064843c9c48458d742d0a30fe08c
-    - assetGUIDs:
-      - 9ab69ae344fa78c4babd67bf4a945d12
-    - assetGUIDs:
-      - 022cda3f92304c241a81a440ee69e820
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 11400000, guid: ca14d084d9058bf4bb740f0939df13ff, type: 2}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/DefaultCityConfig.asset
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -329,7 +398,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 08:54 PM (November 8, 2026)
+    lastSaveTimePrint: 10:53 PM (November 9, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -343,13 +412,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 65
+    lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 62
+      tabWidth: 0
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -361,10 +430,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: 
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: 
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -410,30 +479,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - aefe2171e12196c4c988d9e2428d90ab
+    - assetGUIDs:
+      - fd443a703d51ae0408ddfe7d9a12507f
+    - assetGUIDs:
+      - 3c781e3b27a36f14a9e8c5249ea393f2
+    - assetGUIDs:
+      - b587044e97dbec04cb381b939a2ffa22
+    - assetGUIDs:
+      - 9e65156b3bfc41b4ea7b6eba31051d8d
+    - assetGUIDs:
+      - 7125a3c8cb32ba54a92762e1b3f686a4
+    - assetGUIDs:
+      - bc41cc71786303b4ebe3b7b52e6cd2e0
+    - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
       - 64dce48905ffd9b4293e595fa6941544
     - assetGUIDs:
       - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - c708a3b79cd542b42bbfedb17e213bc1
-    - assetGUIDs:
-      - 21b0f6c9c179427595fff40e7c931936
-    - assetGUIDs:
-      - 39c844dff8ef83248b8903e1f0018250
-    - assetGUIDs:
-      - 8401d286b31cb8e4d94aa1ff61a76128
-    - assetGUIDs:
-      - 7783d6705f3297f488cd0a40b809bab5
-    - assetGUIDs:
-      - f6746612ddd468247bf52f5ee76948a3
-    - assetGUIDs:
-      - fa6c064843c9c48458d742d0a30fe08c
-    - assetGUIDs:
-      - 9ab69ae344fa78c4babd67bf4a945d12
-    - assetGUIDs:
-      - 022cda3f92304c241a81a440ee69e820
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -443,7 +512,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 07:23 PM (November 8, 2026)
+    lastSaveTimePrint: 10:54 PM (November 9, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -457,13 +526,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 61
+    lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 58
+      tabWidth: 0
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -475,10 +544,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: 
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: 
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -524,30 +593,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - aefe2171e12196c4c988d9e2428d90ab
+    - assetGUIDs:
+      - fd443a703d51ae0408ddfe7d9a12507f
+    - assetGUIDs:
+      - 3c781e3b27a36f14a9e8c5249ea393f2
+    - assetGUIDs:
+      - b587044e97dbec04cb381b939a2ffa22
+    - assetGUIDs:
+      - 9e65156b3bfc41b4ea7b6eba31051d8d
+    - assetGUIDs:
+      - 7125a3c8cb32ba54a92762e1b3f686a4
+    - assetGUIDs:
+      - bc41cc71786303b4ebe3b7b52e6cd2e0
+    - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
       - 64dce48905ffd9b4293e595fa6941544
     - assetGUIDs:
       - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - c708a3b79cd542b42bbfedb17e213bc1
-    - assetGUIDs:
-      - 21b0f6c9c179427595fff40e7c931936
-    - assetGUIDs:
-      - 39c844dff8ef83248b8903e1f0018250
-    - assetGUIDs:
-      - 8401d286b31cb8e4d94aa1ff61a76128
-    - assetGUIDs:
-      - 7783d6705f3297f488cd0a40b809bab5
-    - assetGUIDs:
-      - f6746612ddd468247bf52f5ee76948a3
-    - assetGUIDs:
-      - fa6c064843c9c48458d742d0a30fe08c
-    - assetGUIDs:
-      - 9ab69ae344fa78c4babd67bf4a945d12
-    - assetGUIDs:
-      - 022cda3f92304c241a81a440ee69e820
-    targetObject: {fileID: 0}
+    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
     targetObjects: []
-    lastSelectedAsset: 
+    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -650,6 +719,120 @@ MonoBehaviour:
     lastSelectedAsset: Assets/ScriptableObjects/DefaultCityConfig.asset
     lastClickedTab: -1
     previousTab: 3
-  tipsShown: 01000000010000000100000001000000010000000000000001000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000000000000010000000100000000000000010000000100000001000000
+  - tracker:
+      mostClicked: []
+      recentlyClicked: []
+      mostClickedContents: []
+      recentlyClickedContents: []
+    sceneGUID: bf0a389f6c22d7d4f9aed511c2d27819
+    sceneName: ModularCityTestScene
+    lastSaveTimePrint: 09:10 PM (November 9, 2026)
+    gracePeriod: 3
+    activeIndex: 0
+    checkingToLoad: 0
+    assetsCollapsed: 0
+    lockedAsset: 0
+    maximizedAssetView: 0
+    showImportSettings: 0
+    suggestedHeight: 0
+    userAssetViewSize: -1
+    previewHeight: 0
+    scrollPosition: {x: 0, y: 0}
+    toolbarScrollPosition: {x: 0, y: 0}
+    rawUserHeight: 0
+    lastValidTabWidth: 0
+    alreadyCalculatedHeight: 0
+    lastKnownHeight: 0
+    tabs:
+    - path: 
+      paths: []
+      tabWidth: 0
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
+      filterString: 
+      newTab: 1
+      scrollPosition: 0
+      isSelected: 0
+      allCollapsed: 0
+      runtimeFoldouts: 
+      runtimeMultiComponents: []
+      tabTextContent:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+        m_TextWithWhitespace: 
+      multiEditMode: 0
+      locked: 0
+      hasPreview: 0
+      previewHeight: 150
+      debug: 0
+      filtering: 0
+      prefab: 0
+      multiFoldout: 1
+      target: {fileID: 0}
+      targets: []
+      linkedPrefabs: []
+      trackMultiTarget: {fileID: 0}
+      serializedTransform:
+        owner: {fileID: 0}
+        localPosition: {x: 0, y: 0, z: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localScale: {x: 0, y: 0, z: 0}
+        originalPosition: {x: 0, y: 0, z: 0}
+        originalRotation: {x: 0, y: 0, z: 0, w: 0}
+        originalLocalScale: {x: 0, y: 0, z: 0}
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 0, y: 0}
+        anchoredPosition: {x: 0, y: 0}
+        sizeDelta: {x: 0, y: 0}
+        pivot: {x: 0, y: 0}
+        originalAnchorMin: {x: 0, y: 0}
+        originalAnchorMax: {x: 0, y: 0}
+        originalAnchoredPosition: {x: 0, y: 0}
+        originalSizeDelta: {x: 0, y: 0}
+        originalPivot: {x: 0, y: 0}
+        isRectTransform: 0
+        appliedTransform: 0
+        undidTransform: 0
+        autoSave: 0
+      serializedTransforms: []
+      savePlayModeTransform: 0
+      index: 0
+      historyPosition: 0
+      componentMaps: []
+      historyPaths: []
+      owner: {fileID: 0}
+    closedTabs: []
+    playModeTransforms: []
+    historyAssets:
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - aefe2171e12196c4c988d9e2428d90ab
+    - assetGUIDs:
+      - fd443a703d51ae0408ddfe7d9a12507f
+    - assetGUIDs:
+      - 3c781e3b27a36f14a9e8c5249ea393f2
+    - assetGUIDs:
+      - b587044e97dbec04cb381b939a2ffa22
+    - assetGUIDs:
+      - 9e65156b3bfc41b4ea7b6eba31051d8d
+    - assetGUIDs:
+      - 7125a3c8cb32ba54a92762e1b3f686a4
+    - assetGUIDs:
+      - bc41cc71786303b4ebe3b7b52e6cd2e0
+    - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
+      - 64dce48905ffd9b4293e595fa6941544
+    - assetGUIDs:
+      - fc7266d1e4dbc5a46aa1445238583bbe
+    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
+    targetObjects: []
+    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
+    lastClickedTab: -1
+    previousTab: 0
+  tipsShown: 01000000010000000100000001000000010000000100000000000000010000000100000001000000000000000100000000000000010000000100000000000000010000000100000000000000000000000000000001000000010000000100000001000000010000000100000001000000010000000100000000000000000000000000000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000000000000000000
   playModeStartScene: {}
   enteringPlayMode: 0

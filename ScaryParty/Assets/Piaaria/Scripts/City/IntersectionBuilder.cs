@@ -70,7 +70,16 @@ public class IntersectionBuilder : MonoBehaviour
 
             if (n >= 3 && rng.NextDouble() < config.trafficLightProbability)
             {
-                PlaceTrafficLight(node.worldPosition, config.streetWidth, rng, parent);
+                GameObject interObj = new GameObject($"Intersection_{node.id}");
+                interObj.transform.SetParent(parent, false);
+                interObj.transform.position = node.worldPosition;
+                var controller = interObj.AddComponent<IntersectionTrafficController>();
+                var tlComp = PlaceTrafficLight(node.worldPosition, config.streetWidth, rng, interObj.transform);
+                if (tlComp != null)
+                {
+                    tlComp.controller = controller;
+                    controller.RegisterTrafficLight(tlComp);
+                }
             }
         }
     }
@@ -100,7 +109,7 @@ public class IntersectionBuilder : MonoBehaviour
         return true;
     }
 
-    private void PlaceTrafficLight(Vector3 center, float size, System.Random rng, Transform parent)
+    private TrafficLight PlaceTrafficLight(Vector3 center, float size, System.Random rng, Transform parent)
     {
         GameObject tlObj = new GameObject("TrafficLight");
         tlObj.transform.SetParent(parent);
@@ -121,5 +130,6 @@ public class IntersectionBuilder : MonoBehaviour
 
         if (Application.isPlaying) { Destroy(pole.GetComponent<Collider>()); Destroy(sphere.GetComponent<Collider>()); }
         else { DestroyImmediate(pole.GetComponent<Collider>()); DestroyImmediate(sphere.GetComponent<Collider>()); }
+        return tlComp;
     }
 }

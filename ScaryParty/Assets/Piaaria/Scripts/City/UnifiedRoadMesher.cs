@@ -13,7 +13,13 @@ public static class UnifiedRoadMesher
 
     public static void BuildUnifiedMesh(StreetGraph graph, CityConfig config, System.Random rng, Transform parent, Material streetMat, Material sidewalkMat)
     {
-        if (graph == null || graph.nodes == null) return;
+        BuildUnifiedMesh(graph, null, config, rng, parent, streetMat, sidewalkMat);
+    }
+
+    public static List<Vector3[]> BuildUnifiedMesh(StreetGraph graph, List<List<int>> innerFaceNodeCycles, CityConfig config, System.Random rng, Transform parent, Material streetMat, Material sidewalkMat)
+    {
+        List<Vector3[]> blockPolygons = new List<Vector3[]>();
+        if (graph == null || graph.nodes == null) return blockPolygons;
 
         GameObject roadNetworkObj = new GameObject("CityRoadNetwork");
         roadNetworkObj.transform.SetParent(parent);
@@ -263,6 +269,85 @@ public static class UnifiedRoadMesher
             }
         }
 
+        // 3. Build Block Interiors (Seamless Ground Infill at Sidewalk Level)
+        if (innerFaceNodeCycles != null)
+        {
+            float yOff = config.sidewalkHeight;
+            float surfaceY = 0.02f + yOff;
+
+            foreach (var faceNodes in innerFaceNodeCycles)
+            {
+                if (faceNodes == null || faceNodes.Count < 3) continue;
+
+                int count = faceNodes.Count;
+                List<Vector3> rawRing = new List<Vector3>(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    int curr = faceNodes[i];
+                    int next = faceNodes[(i + 1) % count];
+
+                    // Find edge connecting curr and next
+                    int edgeId = -1;
+                    if (curr >= 0 && curr < graph.nodes.Count && graph.nodes[curr].connectedEdges != null)
+                    {
+                        foreach (int eId in graph.nodes[curr].connectedEdges)
+                        {
+                            var e = graph.edges[eId];
+                            if ((e.nodeA == curr && e.nodeB == next) || (e.nodeA == next && e.nodeB == curr))
+                            {
+                                edgeId = eId;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (edgeId != -1 && edgeConnections.TryGetValue((curr, edgeId), out var conn))
+                    {
+                        // conn.outerLeftPoint is the exact outer corner matching the sidewalk on the left of edge (curr -> next)
+                        rawRing.Add(conn.outerLeftPoint);
+                    }
+                    else if (curr >= 0 && curr < graph.nodes.Count)
+                    {
+                        rawRing.Add(graph.nodes[curr].worldPosition);
+                    }
+                }
+
+                // Clean ring: remove micro-duplicates and collinears
+                Vector3[] cleanedRing = PolygonUtils.CleanPolygon(rawRing.ToArray(), 0.05f, 0.5f);
+                if (cleanedRing.Length < 3) continue;
+
+                blockPolygons.Add(cleanedRing);
+
+                // Triangulate if fillBlockGroundInRoadMesh is enabled
+                if (config.fillBlockGroundInRoadMesh)
+                {
+                    List<Vector2> pts2D = new List<Vector2>(cleanedRing.Length);
+                    for (int k = 0; k < cleanedRing.Length; k++)
+                    {
+                        pts2D.Add(new Vector2(cleanedRing[k].x, cleanedRing[k].z));
+                    }
+
+                    List<int> triIndices = PolygonUtils.TriangulateEarClipping(pts2D, clockwiseForUnityNormals: true);
+                    if (triIndices != null && triIndices.Count >= 3)
+                    {
+                        int baseV = vertices.Count;
+                        for (int k = 0; k < cleanedRing.Length; k++)
+                        {
+                            Vector3 p = cleanedRing[k];
+                            vertices.Add(new Vector3(p.x, surfaceY, p.z));
+                            uvs.Add(new Vector2(p.x * 0.25f, p.z * 0.25f));
+                        }
+
+                        for (int t = 0; t < triIndices.Count; t++)
+                        {
+                            sidewalkTriangles.Add(baseV + triIndices[t]);
+                        }
+                    }
+                }
+            }
+        }
+
         Mesh mesh = new Mesh();
         mesh.name = "UnifiedRoadMesh";
         // Use 32-bit indices to allow large city meshes (>65k vertices)
@@ -282,6 +367,8 @@ public static class UnifiedRoadMesher
 
         MeshCollider col = roadNetworkObj.AddComponent<MeshCollider>();
         col.sharedMesh = mesh;
+
+        return blockPolygons;
     }
 
     private struct EdgeData

@@ -254,6 +254,15 @@ namespace ScaryParty.UI.Piaria.Core
                 }
 
                 _renderers = _spawnedModel.GetComponentsInChildren<Renderer>(true);
+
+                var visualCtrl = _spawnedModel.GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
+                if (visualCtrl != null)
+                {
+                    visualCtrl.ResolveReferences();
+                    visualCtrl.SetPreparing(false);
+                    visualCtrl.SetSitting(false, false);
+                    visualCtrl.SetLocomotion(0f, 1f, true);
+                }
             }
         }
 

@@ -15,14 +15,24 @@ MonoBehaviour:
   gerarEmTempoReal: 1
   generateBorderWalls: 1
   generateSolidCore: 0
-  seed: 170262271
+  fillBlockGroundInRoadMesh: 1
+  seed: 1682337713
   gridWidth: 3
   gridHeight: 3
   minStreetBranchLength: 30
   maxStreetBranchLength: 80
-  streetWidth: 15
-  sidewalkWidth: 5
-  sidewalkHeight: 1
+  streetWidth: 6
+  sidewalkWidth: 3
+  sidewalkHeight: 0.5
+  buildingGenerationMode: 1
+  modularCatalog: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
+  modularBuildingProfile: {fileID: 0}
+  minBuildingModulesWidth: 2
+  maxBuildingModulesWidth: 8
+  minBuildingModulesDepth: 2
+  maxBuildingModulesDepth: 6
+  minBuildingFloors: 1
+  maxBuildingFloors: 8
   minBuildingWidth: 5
   maxBuildingWidth: 15
   minBuildingDepth: 4
@@ -36,6 +46,17 @@ MonoBehaviour:
   maxEnemySpawnPointsPerZone: 3
   minDeliveryPointsPerBlock: 0
   maxDeliveryPointsPerBlock: 3
+  deliveryBuildingDensity: 0.18
+  minimumDeliveryPoints: 4
+  maximumDeliveryPoints: 50
+  minDeliverySeparation: 8
+  preferZoneDistribution: 1
+  enablePedestrians: 1
+  populationBase: 8
+  populationDensity: 0.15
+  maxActivePedestrians: 40
+  pedestrianCrossingTime: 8
+  pedestrianWaitTrafficLight: 1
   maxTrafficVehicles: 10
   trafficBaseSpeed: 8
   trafficLightProbability: 0.5

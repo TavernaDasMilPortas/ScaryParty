@@ -22,6 +22,7 @@ public class TrafficLight : MonoBehaviour
 
     [Header("Integration")]
     [Tooltip("Edge IDs controlled by this traffic light (vehicles on these edges check this light)")]
+    public IntersectionTrafficController controller;
     public int[] controlledEdgeIds;
 
     [Tooltip("Paired traffic light that runs perpendicular (when this is green, pair is red)")]
@@ -70,6 +71,12 @@ public class TrafficLight : MonoBehaviour
 
     private void Update()
     {
+        if (controller != null)
+        {
+            UpdateVisual();
+            return;
+        }
+
         _timer += Time.deltaTime;
         float cycleDuration = greenDuration + yellowDuration + redDuration;
         float cycleTime = _timer % cycleDuration;

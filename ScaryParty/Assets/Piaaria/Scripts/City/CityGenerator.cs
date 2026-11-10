@@ -20,6 +20,11 @@ public class CityGenerator : NetworkBehaviour
     [Header("Materials â€” Buildings")]
     public Material[] buildingMaterials;
 
+    [Header("Materials - Road Markings & Crosswalks")]
+    public Material roadMarkingYellowMaterial;
+    public Material roadMarkingWhiteMaterial;
+    public Material crosswalkMaterial;
+
     [SerializeField, HideInInspector]
     private CityData _cityData;
 
@@ -67,6 +72,8 @@ public class CityGenerator : NetworkBehaviour
         else _blockedEdges.Remove(edge);
         _closureRevision.Value++;
         ApplyRoadClosures();
+
+
     }
 
     private void OnBlockedEdgesChanged(NetworkListEvent<int> change)
@@ -132,6 +139,8 @@ public class CityGenerator : NetworkBehaviour
         _snapshotEdges = edges;
         _awaitingSnapshot = false;
         ApplyRoadClosures();
+
+
     }
 
     private void RequestClosures()
@@ -158,6 +167,11 @@ public class CityGenerator : NetworkBehaviour
     private GameObject _deliveryPointsRoot;
     private GameObject _trafficRoot;
     private GameObject _eventsRoot;
+    private GameObject _markingsRoot;
+    private GameObject _crosswalksRoot;
+    private GameObject _pedestriansRoot;
+    private ScaryParty.Navigation.Core.NavigationWorldManager _navWorldManager;
+    private CityPopulationDirector _populationDirector;
 
     public override void OnNetworkSpawn()
     {
@@ -289,6 +303,15 @@ public class CityGenerator : NetworkBehaviour
             staticCity.SetActive(false);
             Destroy(staticCity);
         }
+
+        var oldResiduals = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+        foreach (var t in oldResiduals)
+        {
+            if (t != null && (t.name.StartsWith("BlockGround") || t.name.StartsWith("SolidCore")))
+            {
+                Destroy(t.gameObject);
+            }
+        }
     }
 
     [ContextMenu("Generate City")]
@@ -366,9 +389,24 @@ public class CityGenerator : NetworkBehaviour
             else DestroyImmediate(oldCity);
         }
 
+        // Remove qualquer peca antiga residual que tenha ficado na cena (BlockGround ou SolidCore)
+        var oldResiduals = GameObject.FindObjectsByType<Transform>(FindObjectsSortMode.None);
+        foreach (var t in oldResiduals)
+        {
+            if (t != null && (t.name.StartsWith("BlockGround") || t.name.StartsWith("SolidCore")))
+            {
+                if (Application.isPlaying) Destroy(t.gameObject);
+                else DestroyImmediate(t.gameObject);
+            }
+        }
+
         CityData = null;
         CurrentSeed = 0;
-        _cityRoot = _streetsRoot = _blocksRoot = _intersectionsRoot = _deliveryPointsRoot = _trafficRoot = _eventsRoot = null;
+        CityBuildingRegistry.Instance?.Clear();
+        _populationDirector?.ClearPopulation();
+        _populationDirector = null;
+        _navWorldManager = null;
+        _cityRoot = _streetsRoot = _blocksRoot = _intersectionsRoot = _deliveryPointsRoot = _trafficRoot = _eventsRoot = _markingsRoot = _crosswalksRoot = _pedestriansRoot = null;
         _trafficManager = null;
         _eventManager = null;
 
@@ -453,6 +491,15 @@ public class CityGenerator : NetworkBehaviour
 
         _intersectionBuilder.BuildIntersections(graph, config, rng, _intersectionsRoot.transform, intersectionMaterial);
 
+        if (_markingsRoot != null)
+        {
+            RoadMarkingGenerator.GenerateMarkings(graph, config, _markingsRoot.transform, roadMarkingYellowMaterial, roadMarkingWhiteMaterial);
+        }
+        if (_crosswalksRoot != null)
+        {
+            CrosswalkGenerator.GenerateCrosswalks(graph, config, _crosswalksRoot.transform, crosswalkMaterial, out _);
+        }
+
         CityBuilding[] allBuildings = _blocksRoot.GetComponentsInChildren<CityBuilding>();
         List<DeliveryPoint> points = _deliveryPointPlacer.PlaceDeliveryPoints(CityData.blocks.ToArray(), allBuildings, config, rng, _deliveryPointsRoot.transform);
         CityData.DeliveryPointCount = points.Count;
@@ -461,6 +508,11 @@ public class CityGenerator : NetworkBehaviour
         _pathfinder.MaxAccessDistance = Mathf.Max(config.streetWidth + config.sidewalkWidth, 20f);
         if (IsSpawned && !IsServer) _pathfinder.SetRoutesReady(false);
         ApplyRoadClosures();
+
+
+
+        _navWorldManager = _cityRoot.GetComponent<ScaryParty.Navigation.Core.NavigationWorldManager>() ?? _cityRoot.AddComponent<ScaryParty.Navigation.Core.NavigationWorldManager>();
+        _navWorldManager.BuildCityNavMesh();
 
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
         if (routeManager != null) routeManager.Initialize(_pathfinder);
@@ -484,6 +536,12 @@ public class CityGenerator : NetworkBehaviour
 
     private void InitializeRuntimeSystems(int seed, StreetGraph graph)
     {
+        if (config.enablePedestrians)
+        {
+            _populationDirector = _cityRoot.GetComponent<CityPopulationDirector>() ?? _cityRoot.AddComponent<CityPopulationDirector>();
+            _populationDirector.Initialize(config, seed + 3000, _pedestriansRoot.transform);
+        }
+
         if (config.maxTrafficVehicles > 0)
         {
             _trafficManager.Initialize(_pathfinder, graph, seed + 1000, config.maxTrafficVehicles, config.trafficBaseSpeed);
@@ -607,6 +665,8 @@ public class CityGenerator : NetworkBehaviour
     private void SpawnPrimitivePizzeria(Vector3 pizzariaPos, Quaternion pizzariaRot, Vector3 entranceDir, Transform parentTransform, Transform blockTransform)
     {
         Vector3 pizzariaScale = new Vector3(12f, 6f, 12f);
+        float actualGroundLevel = 0.02f + (config != null ? config.sidewalkHeight : 0.15f);
+        pizzariaPos.y = actualGroundLevel + (pizzariaScale.y * 0.5f);
         CityData.pizzariaPosition = pizzariaPos;
         CityData.pizzariaRotation = pizzariaRot;
 
@@ -624,7 +684,7 @@ public class CityGenerator : NetworkBehaviour
 
         float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
         Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk;
-        bancadaPos.y = config.sidewalkHeight + 0.5f;
+        bancadaPos.y = actualGroundLevel + 0.5f;
 
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
@@ -844,6 +904,8 @@ public class CityGenerator : NetworkBehaviour
             return;
         }
 
+        float actualGroundLevel = 0.02f + (config != null ? config.sidewalkHeight : 0.15f);
+        pizzariaPos.y = actualGroundLevel + (pizzariaScale.y * 0.5f);
         CityData.pizzariaPosition = pizzariaPos;
 
         GameObject pizzariaBuilding = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -861,7 +923,7 @@ public class CityGenerator : NetworkBehaviour
         // Bancada outside the pizzaria, on the sidewalk!
         float offsetToSidewalk = (pizzariaScale.z * 0.5f) + 1.5f;
         Vector3 bancadaPos = pizzariaPos + entranceDir * offsetToSidewalk;
-        bancadaPos.y = config.sidewalkHeight + 0.5f;
+        bancadaPos.y = actualGroundLevel + 0.5f;
         
         GameObject bancada = GameObject.CreatePrimitive(PrimitiveType.Cube);
         bancada.name = "Bancada_Pizzas";
@@ -1079,6 +1141,13 @@ public class CityGenerator : NetworkBehaviour
         _deliveryPointsRoot = new GameObject("DeliveryPoints");
         _trafficRoot = new GameObject("Traffic");
         _eventsRoot = new GameObject("Events");
+        _markingsRoot = new GameObject("Markings");
+        _crosswalksRoot = new GameObject("Crosswalks");
+        _pedestriansRoot = new GameObject("Pedestrians");
+
+        _markingsRoot.transform.SetParent(_cityRoot.transform);
+        _crosswalksRoot.transform.SetParent(_cityRoot.transform);
+        _pedestriansRoot.transform.SetParent(_cityRoot.transform);
 
         _streetsRoot.transform.SetParent(_cityRoot.transform);
         _blocksRoot.transform.SetParent(_cityRoot.transform);
@@ -1161,11 +1230,11 @@ public class CityGenerator : NetworkBehaviour
         // PASS 1: Generate all BlockInfo geometry
         foreach (Vector3[] rawPoly in blockPolygons)
         {
-            Vector3[] poly = CleanPolygon(rawPoly);
+            Vector3[] poly = PolygonUtils.CleanPolygon(rawPoly, 0.05f, 0.5f);
             if (poly.Length < 3) continue;
 
-            float totalInset = (config.streetWidth * 0.5f) + config.sidewalkWidth;
-            Vector3[] insetPoly = InsetPolygon(poly, totalInset);
+            // blockPolygons from UnifiedRoadMesher already match the exact sidewalk inner boundary
+            Vector3[] insetPoly = poly;
             
             float insetArea = CalculatePolygonArea(insetPoly);
             if (Mathf.Abs(insetArea) < 100f) continue;
@@ -1257,7 +1326,7 @@ public class CityGenerator : NetworkBehaviour
             var reserved = (placementResult != null && placementResult.success && i == placementResult.blockIndex)
                 ? placementResult.reservedOBBs
                 : null;
-            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i, reserved);
+            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i, reserved, sidewalkMaterial);
         }
         
         CityGenLogger.SaveLog();
@@ -1265,65 +1334,7 @@ public class CityGenerator : NetworkBehaviour
 
     private Vector3[] InsetPolygon(Vector3[] poly, float inset)
     {
-        int n = poly.Length;
-        if (n < 3) return poly;
-
-        // 1. Determine winding order (CW vs CCW) using signed area
-        float signedArea = 0f;
-        for (int i = 0; i < n; i++)
-        {
-            int j = (i + 1) % n;
-            signedArea += poly[i].x * poly[j].z - poly[j].x * poly[i].z;
-        }
-        // sign > 0 means CCW in XZ plane; we want inward normals
-        float windingSign = Mathf.Sign(signedArea);
-
-        // 2. Compute inward normal for each edge
-        Vector3[] edgeNormals = new Vector3[n];
-        for (int i = 0; i < n; i++)
-        {
-            int j = (i + 1) % n;
-            Vector3 edgeDir = (poly[j] - poly[i]);
-            edgeDir.y = 0;
-            edgeDir.Normalize();
-            // Inward normal depends on winding direction
-            // For CCW (signedArea > 0): inward = (-edgeDir.z, 0, edgeDir.x)
-            // For CW  (signedArea < 0): inward = (edgeDir.z, 0, -edgeDir.x)
-            edgeNormals[i] = new Vector3(-edgeDir.z * windingSign, 0, edgeDir.x * windingSign);
-        }
-
-        // 3. Compute miter vector for each vertex
-        Vector3[] insetPoly = new Vector3[n];
-        for (int i = 0; i < n; i++)
-        {
-            int prevEdge = (i - 1 + n) % n;
-            int currEdge = i;
-
-            Vector3 n1 = edgeNormals[prevEdge];
-            Vector3 n2 = edgeNormals[currEdge];
-            Vector3 miter = (n1 + n2);
-            miter.y = 0;
-
-            float miterSqr = miter.sqrMagnitude;
-            if (miterSqr < 0.001f)
-            {
-                // Edges are nearly parallel, just offset by normal
-                insetPoly[i] = poly[i] + n1 * inset;
-            }
-            else
-            {
-                // Miter length = inset / dot(miter_normalized, normal)
-                miter.Normalize();
-                float dot = Vector3.Dot(miter, n1);
-                if (Mathf.Abs(dot) < 0.1f) dot = 0.1f * Mathf.Sign(dot); // Clamp for very acute angles
-                float miterLength = inset / dot;
-                // Cap miter length to avoid spikes on very acute angles
-                miterLength = Mathf.Min(miterLength, inset * 3f);
-                insetPoly[i] = poly[i] + miter * miterLength;
-            }
-        }
-
-        return insetPoly;
+        return PolygonUtils.InsetPolygonSafe(poly, inset);
     }
 
     private Vector3 CalculatePolygonCentroid(Vector3[] polygon)

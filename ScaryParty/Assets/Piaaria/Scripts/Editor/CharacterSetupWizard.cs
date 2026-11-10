@@ -755,6 +755,14 @@ namespace ScaryParty.EditorScripts
                 }
                 DestroyImmediate(modelInstance);
 
+                // Normaliza o osso central para rotacao ereta (elimina pitch de -90 graus herdado do FBX)
+                var centralBone = rootGo.transform.Find("Armature/central");
+                if (centralBone != null)
+                {
+                    centralBone.localPosition = new Vector3(0f, 0.46774173f, 0f);
+                    centralBone.localRotation = Quaternion.identity;
+                }
+
                 // Garantir apenas um Animator ativo na raiz do CharacterVisual
                 var childAnimators = rootGo.GetComponentsInChildren<Animator>(true);
                 foreach (var ca in childAnimators)

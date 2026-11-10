@@ -145,8 +145,9 @@ namespace ScaryParty.City
                         // Posição raiz: recuo frontal para que a fachada fique tangenciando a calçada
                         Vector3 candidatePos = edgePoint - outwardNormal * (maxFrontProj + frontSetback);
 
-                        // Altura exata: a calçada apoia o piso
-                        candidatePos.y = config.sidewalkHeight - floorLocalY;
+                        // Altura exata: a calçada e o miolo apoiam o piso com soleira de 0.03f sobre a malha viária (0.02f)
+                        float groundY = 0.02f + (config != null ? config.sidewalkHeight : 0.15f);
+                        candidatePos.y = groundY + 0.03f - floorLocalY;
 
                         // Validação de contenção estrita no polígono da quadra
                         if (!ValidateContainment(candidatePos, candidateRot, localRegions, poly, minStreetSeparation))
@@ -183,7 +184,7 @@ namespace ScaryParty.City
 
                             // Posição da bancada (na calçada em frente à fachada)
                             Vector3 bancadaPos = edgePoint + outwardNormal * 1.5f;
-                            bancadaPos.y = config.sidewalkHeight + 0.5f;
+                            bancadaPos.y = groundY + 0.5f;
                             bestCandidate.bancadaPosition = bancadaPos;
                         }
                     }

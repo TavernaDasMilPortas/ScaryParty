@@ -227,6 +227,11 @@ namespace ScaryParty.Pizzeria.Composition
                 cfg.customerFoodPatienceMax);
             if (res.Success && root.DomainState.Customers.TryGetValue(res.Value, out var cust))
             {
+                if (CityPopulationDirector.Instance != null)
+                {
+                    Vector3 entrancePos = root.entranceAnchor != null ? root.entranceAnchor.position : root.transform.position;
+                    CityPopulationDirector.Instance.TryRecruitPedestrianForPizzeria(entrancePos, out _);
+                }
                 string summary = PizzaOrderFormatter.FormatShortTitle(cust.RequestedPizza, root.Catalog, false);
                 Debug.Log($"[DemandDirector] 🚶 Cliente presencial #{cust.Id.Value} entrou na Fila {cust.QueueIndex + 1} (Slot {cust.QueueSlotIndex + 1}) desejando {summary}!");
                 ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
@@ -269,9 +274,12 @@ namespace ScaryParty.Pizzeria.Composition
                 }
             }
 
-            AddressId destId = availableAddresses.Count > 0
-                ? availableAddresses[Random.Range(0, availableAddresses.Count)]
-                : new AddressId(Random.Range(0, 8));
+            if (availableAddresses.Count == 0) return false;
+            AddressId destId = availableAddresses[Random.Range(0, availableAddresses.Count)];
+
+
+
+
 
             var lines = new List<OrderLineState>();
             var spec = _orderGenerator.GenerateSpecification(root.Catalog, root.DomainState, root.UpgradeService);

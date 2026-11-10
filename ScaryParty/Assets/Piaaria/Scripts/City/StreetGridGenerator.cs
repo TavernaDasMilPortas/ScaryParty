@@ -306,10 +306,14 @@ public class StreetGridGenerator : MonoBehaviour
         graph.edges = edges;
 
         // 4. Extract organic block faces using the planar graph
-        blockPolygons = ExtractFaces(graph, out List<Vector3[]> voidFaces);
+        List<Vector3[]> centerlineBlocks = ExtractFaces(graph, out List<List<int>> innerFaceNodeCycles, out List<Vector3[]> voidFaces);
 
-        // 5. Generate Geometry using Unified Mesh
-        UnifiedRoadMesher.BuildUnifiedMesh(graph, config, rng, parent, streetMat, sidewalkMat);
+        // 5. Generate Geometry using Unified Mesh (fills block interiors and returns exact sidewalk rings)
+        blockPolygons = UnifiedRoadMesher.BuildUnifiedMesh(graph, innerFaceNodeCycles, config, rng, parent, streetMat, sidewalkMat);
+        if (blockPolygons == null || blockPolygons.Count == 0)
+        {
+            blockPolygons = centerlineBlocks;
+        }
 
         if (config.generateBorderWalls && voidFaces.Count > 0)
         {
@@ -396,25 +400,66 @@ public class StreetGridGenerator : MonoBehaviour
 
                     if (length < 10f) continue;
 
+                    bool useModularBorder = (config.buildingGenerationMode == ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit && config.modularCatalog != null);
+                    float minWidth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesWidth) * 2f) : config.minBuildingWidth;
+                    float maxWidth = useModularBorder ? (Mathf.Max(minWidth, config.maxBuildingModulesWidth * 2f)) : config.maxBuildingWidth;
+                    float minDepth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesDepth) * 2f) : config.minBuildingDepth;
+                    float maxDepth = useModularBorder ? (Mathf.Max(minDepth, config.maxBuildingModulesDepth * 2f)) : config.maxBuildingDepth;
+
                     // Expand the search space backwards and forwards to allow filling convex corner wedges.
                     // The SAT check against streetOBBs will naturally prevent overlapping concave corners.
-                    float currentDist = -config.maxBuildingWidth;
-                    float maxDist = length + config.maxBuildingWidth;
+                    float currentDist = -maxWidth;
+                    float maxDist = length + maxWidth;
                     
                     float buildingOffset = streetHalfWidth;
                     MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 
                     while (currentDist < maxDist)
                     {
-                        float bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
-                        if (currentDist + bWidth > maxDist)
-                        {
-                            bWidth = maxDist - currentDist;
-                            if (bWidth < 2f) break;
-                        }
+                        float bWidth = 0f;
+                        float bDepth = 0f;
+                        float bHeight = 0f;
+                        int widthMods = 0;
+                        int depthMods = 0;
+                        int floorCount = 1;
 
-                        float bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
-                        float bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
+                        if (useModularBorder)
+                        {
+                            int minWMods = Mathf.Max(2, config.minBuildingModulesWidth);
+                            int maxWMods = Mathf.Max(minWMods, config.maxBuildingModulesWidth);
+                            widthMods = rng.Next(minWMods, maxWMods + 1);
+                            bWidth = widthMods * 2f;
+
+                            if (currentDist + bWidth > maxDist)
+                            {
+                                float remaining = maxDist - currentDist;
+                                widthMods = Mathf.FloorToInt(remaining / 2f);
+                                if (widthMods < minWMods) break;
+                                bWidth = widthMods * 2f;
+                            }
+
+                            int minDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                            int maxDMods = Mathf.Max(minDMods, config.maxBuildingModulesDepth);
+                            depthMods = rng.Next(minDMods, maxDMods + 1);
+                            bDepth = depthMods * 2f;
+
+                            int minFl = Mathf.Max(1, config.minBuildingFloors);
+                            int maxFl = Mathf.Max(minFl, config.maxBuildingFloors);
+                            floorCount = rng.Next(minFl, maxFl + 1);
+                            bHeight = floorCount * 3.5f; // Altura aproximada para colisores / bound
+                        }
+                        else
+                        {
+                            bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
+                            if (currentDist + bWidth > maxDist)
+                            {
+                                bWidth = maxDist - currentDist;
+                                if (bWidth < 2f) break;
+                            }
+
+                            bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
+                            bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
+                        }
 
                         // Casas apontam para a rua (-normal)
                         Vector3 bCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
@@ -432,7 +477,7 @@ public class StreetGridGenerator : MonoBehaviour
                         float candidateRadius = bWidth + bDepth; // Safe upper bound
                         
                         // Fast rejection for buildings
-                        float buildingDistThresh = (candidateRadius + config.maxBuildingWidth + config.maxBuildingDepth);
+                        float buildingDistThresh = (candidateRadius + maxWidth + maxDepth);
                         float buildingDistThreshSqr = buildingDistThresh * buildingDistThresh;
                         
                         foreach (var otherOBB in placedBorderBuildings)
@@ -463,39 +508,60 @@ public class StreetGridGenerator : MonoBehaviour
 
                         if (overlap)
                         {
-                            currentDist += 1f; // Step and try again
+                            currentDist += useModularBorder ? 2f : 1f; // Step and try again
                             continue;
                         }
                         
                         placedBorderBuildings.Add(candidateOBB);
 
-                        GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        bObj.name = $"BorderBuilding_{i}_{currentDist}";
-                        bObj.transform.SetParent(borderParent.transform);
-                        bObj.transform.position = bCenter + new Vector3(0, bHeight * 0.5f, 0);
-                        bObj.transform.rotation = Quaternion.LookRotation(-normal, Vector3.up);
-                        bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
+                        float groundY = 0.02f + (config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
+                        Quaternion buildingRot = Quaternion.LookRotation(-normal, Vector3.up);
 
-                        Material baseMat = null;
-                        if (buildingMaterials != null && buildingMaterials.Length > 0)
+                        if (useModularBorder)
                         {
-                            baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
+                            Vector3 modularFrontCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * buildingOffset;
+                            modularFrontCenter.y = groundY;
+
+                            int borderSeed = (config.seed ^ (i * 9973) ^ (int)(currentDist * 101f)) + rng.Next(1, 10000);
+                            string bId = $"BorderBuilding_{i}_{Mathf.RoundToInt(currentDist)}";
+
+                            var layout = ScaryParty.City.Modular.ModularBuildingAssembler.CreateProceduralLayout(
+                                widthMods, depthMods, floorCount, config.modularBuildingProfile,
+                                modularFrontCenter, buildingRot, borderSeed, bId, 9999);
+
+                            ScaryParty.City.Modular.ModularBuildingAssembler.AssembleBuilding(
+                                layout, config.modularCatalog, borderParent.transform);
                         }
-                        if (baseMat == null) baseMat = wallMat;
-                        
-                        Renderer r = bObj.GetComponent<Renderer>();
-                        r.sharedMaterial = baseMat;
-                        
-                        // Zone-like colors for border (sombrias mas coloridas)
-                        float hue = (float)rng.NextDouble();
-                        float sat = 0.5f + (float)rng.NextDouble() * 0.5f; 
-                        float val = 0.3f + (float)rng.NextDouble() * 0.4f;
-                        Color buildingColor = Color.HSVToRGB(hue, sat, val);
-                        
-                        propBlock.SetColor("_Color", buildingColor);
-                        propBlock.SetColor("_BaseColor", buildingColor);
-                        propBlock.SetColor("_MainColor", buildingColor);
-                        r.SetPropertyBlock(propBlock);
+                        else
+                        {
+                            GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                            bObj.name = $"BorderBuilding_{i}_{currentDist}";
+                            bObj.transform.SetParent(borderParent.transform);
+                            bObj.transform.position = bCenter + new Vector3(0, groundY + bHeight * 0.5f, 0);
+                            bObj.transform.rotation = buildingRot;
+                            bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
+
+                            Material baseMat = null;
+                            if (buildingMaterials != null && buildingMaterials.Length > 0)
+                            {
+                                baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
+                            }
+                            if (baseMat == null) baseMat = wallMat;
+                            
+                            Renderer r = bObj.GetComponent<Renderer>();
+                            r.sharedMaterial = baseMat;
+                            
+                            // Zone-like colors for border (sombrias mas coloridas)
+                            float hue = (float)rng.NextDouble();
+                            float sat = 0.5f + (float)rng.NextDouble() * 0.5f; 
+                            float val = 0.3f + (float)rng.NextDouble() * 0.4f;
+                            Color buildingColor = Color.HSVToRGB(hue, sat, val);
+                            
+                            propBlock.SetColor("_Color", buildingColor);
+                            propBlock.SetColor("_BaseColor", buildingColor);
+                            propBlock.SetColor("_MainColor", buildingColor);
+                            r.SetPropertyBlock(propBlock);
+                        }
 
                         currentDist += bWidth;
                     }
@@ -506,8 +572,18 @@ public class StreetGridGenerator : MonoBehaviour
         return graph;
     }
 
+    private struct RawFace
+    {
+        public List<int> nodeIds;
+        public Vector3[] poly;
+    }
 
     private List<Vector3[]> ExtractFaces(StreetGraph graph, out List<Vector3[]> voidFaces)
+    {
+        return ExtractFaces(graph, out _, out voidFaces);
+    }
+
+    private List<Vector3[]> ExtractFaces(StreetGraph graph, out List<List<int>> innerFaceNodeCycles, out List<Vector3[]> voidFaces)
     {
         Dictionary<int, HashSet<int>> tempAdj = new Dictionary<int, HashSet<int>>();
         foreach (var node in graph.nodes)
@@ -536,7 +612,7 @@ public class StreetGridGenerator : MonoBehaviour
             sortedAdj[u] = neighbors;
         }
 
-        List<Vector3[]> faces = new List<Vector3[]>();
+        List<RawFace> rawFaces = new List<RawFace>();
         HashSet<(int, int)> visited = new HashSet<(int, int)>();
 
         foreach (var kvp in sortedAdj)
@@ -575,21 +651,22 @@ public class StreetGridGenerator : MonoBehaviour
                 {
                     Vector3[] poly = new Vector3[faceNodes.Count];
                     for (int i = 0; i < faceNodes.Count; i++) poly[i] = graph.nodes[faceNodes[i]].worldPosition;
-                    faces.Add(poly);
+                    rawFaces.Add(new RawFace { nodeIds = faceNodes, poly = poly });
                 }
             }
         }
         
+        innerFaceNodeCycles = new List<List<int>>();
         List<Vector3[]> innerFaces = new List<Vector3[]>();
         voidFaces = new List<Vector3[]>();
 
-        foreach (var face in faces)
+        foreach (var face in rawFaces)
         {
             float signedArea = 0f;
-            for (int i = 0; i < face.Length; i++)
+            for (int i = 0; i < face.poly.Length; i++)
             {
-                int j = (i + 1) % face.Length;
-                signedArea += face[i].x * face[j].z - face[j].x * face[i].z;
+                int j = (i + 1) % face.poly.Length;
+                signedArea += face.poly[i].x * face.poly[j].z - face.poly[j].x * face.poly[i].z;
             }
             signedArea *= 0.5f;
 
@@ -597,11 +674,12 @@ public class StreetGridGenerator : MonoBehaviour
             // Inner blocks are counter-clockwise. Outer boundaries and zero-area bridges are <= 0.
             if (signedArea > 1.0f)
             {
-                innerFaces.Add(face);
+                innerFaceNodeCycles.Add(face.nodeIds);
+                innerFaces.Add(face.poly);
             }
             else
             {
-                voidFaces.Add(face);
+                voidFaces.Add(face.poly);
             }
         }
 

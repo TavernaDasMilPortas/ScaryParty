@@ -154,8 +154,8 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.IsTrue(result.success, $"Deveria posicionar com sucesso na quadra ampla. Motivo: {result.failureReason}");
             Assert.AreEqual(0, result.blockIndex);
 
-            // Altura do piso deve bater exatamente com a calçada
-            float expectedRootY = config.sidewalkHeight - _tempFootprint.floorSurfaceLocalY;
+            // Altura do piso deve apoiar sobre a calçada e o miolo viário (0.02f) com soleira de 0.03f
+            float expectedRootY = (0.02f + config.sidewalkHeight) + 0.03f - _tempFootprint.floorSurfaceLocalY;
             Assert.AreEqual(expectedRootY, result.position.y, 0.001f);
 
             // Verifica que todos os vértices de ambos os braços do L estão 100% contidos na quadra

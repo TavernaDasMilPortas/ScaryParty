@@ -65,6 +65,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     VisualController.Animator.applyRootMotion = false;
                 }
                 VisualController.SetPreparing(false);
+                VisualController.SetSitting(false, false);
+                VisualController.SetLocomotion(0f, 1f, true);
             }
 
             if (Appearance != null)
@@ -73,13 +75,23 @@ namespace ScaryParty.Pizzeria.Presentation
                 Appearance.ApplyPrimaryColor(c);
             }
 
+            // Garantir Rigidbody cinemático para física consistente e prevenção de ghosting
+            var rb = GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = gameObject.AddComponent<Rigidbody>();
+            }
+            rb.isKinematic = true;
+            rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+
             // Garantir CapsuleCollider para raycast de interação (atender segurando F diretamente no NPC)
             var col = GetComponent<CapsuleCollider>();
             if (col == null)
             {
                 col = gameObject.AddComponent<CapsuleCollider>();
                 col.center = new Vector3(0f, 0.9f, 0f);
-                col.radius = 0.38f;
+                col.radius = 0.35f;
                 col.height = 1.8f;
             }
 
@@ -102,7 +114,7 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             CurrentState = dto;
             _targetPosition = targetPos;
-            _targetRotation = targetRot;
+            _targetRotation = Quaternion.Euler(0f, targetRot.eulerAngles.y, 0f);
             _walkSpeed = 2.4f * Mathf.Clamp(walkSpeedMultiplier, 0.7f, 1.5f);
 
             if (Agent != null && Agent.isOnNavMesh)
@@ -114,7 +126,10 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     _hasReachedSeat = false;
                     Agent.isStopped = false;
-                    Agent.SetDestination(_targetPosition);
+                    if (Vector3.Distance(Agent.destination, _targetPosition) > 0.15f)
+                    {
+                        Agent.SetDestination(_targetPosition);
+                    }
                 }
             }
         }
@@ -131,16 +146,32 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
             {
-                if (wantsSit && distToTarget <= 0.45f)
+                currentSpeed = Agent.velocity.magnitude;
+
+                if (wantsSit)
                 {
-                    Agent.isStopped = true;
-                    _hasReachedSeat = true;
-                    transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 8f);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                    // Chegada suave ao assento da cadeira sem atravessar mesas
+                    bool arrivedAtSeat = distToTarget <= 0.25f || (!Agent.pathPending && Agent.remainingDistance <= 0.25f);
+                    if (arrivedAtSeat)
+                    {
+                        Agent.isStopped = true;
+                        _hasReachedSeat = true;
+                        transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                    }
+                    else
+                    {
+                        Agent.isStopped = false;
+                        _hasReachedSeat = false;
+                        if (distToTarget <= 0.40f)
+                        {
+                            transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 6f);
+                        }
+                    }
                 }
                 else
                 {
-                    currentSpeed = Agent.velocity.magnitude;
+                    _hasReachedSeat = false;
                     if (distToTarget <= 0.25f)
                     {
                         transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 8f);
@@ -149,23 +180,18 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else
             {
-                // Movimento cinemático suave quando fora de NavMesh ou durante transição de assento
-                if (distToTarget > 0.04f)
+                // Tenta recuperar o NavMeshAgent se estiver desabilitado ou fora de malha
+                if (Agent != null && UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
                 {
-                    Vector3 next = Vector3.MoveTowards(transform.position, _targetPosition, _walkSpeed * Time.deltaTime);
-                    Vector3 delta = next - transform.position;
-                    currentSpeed = delta.magnitude / Mathf.Max(0.0001f, Time.deltaTime);
-                    if (!wantsSit || !_hasReachedSeat)
-                    {
-                        next = CustomerSpawner.SnapToFloor(next);
-                    }
-                    transform.position = next;
-
-                    Vector3 flatDir = new Vector3(delta.x, 0f, delta.z);
-                    if (flatDir.sqrMagnitude > 0.0001f)
-                    {
-                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(flatDir.normalized, Vector3.up), Time.deltaTime * 10f);
-                    }
+                    Agent.enabled = true;
+                    Agent.Warp(hit.position);
+                    Agent.SetDestination(_targetPosition);
+                }
+                else if (wantsSit && distToTarget <= 0.35f)
+                {
+                    transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                    _hasReachedSeat = true;
                 }
                 else
                 {
@@ -176,7 +202,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (VisualController != null)
             {
-                bool seatedNow = wantsSit && (_hasReachedSeat || distToTarget <= 0.35f);
+                bool seatedNow = wantsSit && (_hasReachedSeat || distToTarget <= 0.30f);
                 if (seatedNow != _wasSeated)
                 {
                     _wasSeated = seatedNow;

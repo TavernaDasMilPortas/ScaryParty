@@ -338,7 +338,7 @@ Material:
     - _GradientChannelMask: {r: 0, g: 1, b: 0, a: 0}
     - _GradientPositionalOffset: {r: 0, g: 0, b: 0, a: 0}
     - _LightColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MainColor: {r: 0.7735849, g: 0.7699359, b: 0.7699359, a: 1}
+    - _MainColor: {r: 0.554717, g: 0.5348309, b: 0.5348309, a: 1}
     - _MainColor1: {r: 1, g: 1, b: 1, a: 0}
     - _MainGlowFresnel: {r: 0, g: 0, b: 0, a: 0}
     - _NearColor: {r: 1, g: 1, b: 1, a: 1}

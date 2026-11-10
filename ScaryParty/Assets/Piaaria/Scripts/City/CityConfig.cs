@@ -26,6 +26,11 @@ public class CityConfig : ScriptableObject
     [PropertyTooltip("Preenche o centro das quadras com um bloco sólido. Útil se os prédios deixarem frestas.")]
     public bool generateSolidCore = false;
 
+    [ToggleLeft]
+    [LabelText("Preencher Chão da Quadra na Malha Viária")]
+    [PropertyTooltip("Se verdadeiro, o chão do miolo das quadras é gerado como extensão contínua da mesma malha viária (UnifiedRoadMesh) na altura exata da calçada, preenchendo todos os vãos sem frestas.")]
+    public bool fillBlockGroundInRoadMesh = true;
+
     [LabelText("Semente (Seed)")]
     [PropertyTooltip("Semente para a geração. 0 = cidade totalmente nova a cada vez.")]
     public int seed = 0;
@@ -60,8 +65,61 @@ public class CityConfig : ScriptableObject
     public float sidewalkHeight = 0.15f;
 
 
-    // --- CONSTRUÇÕES ---
+    // --- CONSTRUÇÕES MODULARES (KIT 12 PEÇAS) ---
     [TabGroup("Construções (Perímetro)")]
+    [Title("Modo Modular (Kit 12 Peças)", "Substitui cubos esticados por blocos montados")]
+    [LabelText("Modo de Geração dos Prédios")]
+    public ScaryParty.City.Modular.CityBuildingGenerationMode buildingGenerationMode = ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Catálogo de Módulos (12 Peças)")]
+    public ScaryParty.City.Modular.CityModuleCatalog modularCatalog;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Perfil Modular (Opcional)")]
+    public ScaryParty.City.Modular.ModularBuildingProfile modularBuildingProfile;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Largura Mínima (Módulos de 2m)")]
+    [PropertyTooltip("Largura mínima em módulos de 2 metros (Ex: 2 = 4 metros).")]
+    [Range(2, 20)] public int minBuildingModulesWidth = 2;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Largura Máxima (Módulos de 2m)")]
+    [PropertyTooltip("Largura máxima em módulos de 2 metros (Ex: 8 = 16 metros).")]
+    [Range(2, 30)] public int maxBuildingModulesWidth = 6;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Profundidade Mínima (Módulos de 2m)")]
+    [PropertyTooltip("Profundidade mínima em módulos de 2 metros (Ex: 2 = 4 metros).")]
+    [Range(2, 20)] public int minBuildingModulesDepth = 2;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Profundidade Máxima (Módulos de 2m)")]
+    [PropertyTooltip("Profundidade máxima em módulos de 2 metros (Ex: 10 = 20 metros).")]
+    [Range(2, 30)] public int maxBuildingModulesDepth = 6;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Pavimentos Mínimos (Andares)")]
+    [PropertyTooltip("Quantidade mínima de andares do prédio.")]
+    [Range(1, 50)] public int minBuildingFloors = 1;
+
+    [TabGroup("Construções (Perímetro)")]
+    [ShowIf("buildingGenerationMode", ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit)]
+    [LabelText("Pavimentos Máximos (Andares)")]
+    [PropertyTooltip("Quantidade máxima de andares do prédio.")]
+    [Range(1, 50)] public int maxBuildingFloors = 4;
+
+    // --- CONSTRUÇÕES LEGADAS ---
+    [TabGroup("Construções (Perímetro)")]
+    [Title("Parâmetros Legados (Primitivas)", "Usados quando o modo for LegacyPrimitives")]
     [LabelText("Largura Mínima da Casa")]
     public float minBuildingWidth = 4f;
     
@@ -119,6 +177,52 @@ public class CityConfig : ScriptableObject
     [LabelText("Entregas por Quadra (Máx)")]
     public int maxDeliveryPointsPerBlock = 3;
 
+    [TabGroup("Progressão e Zonas")]
+    [LabelText("Densidade de Edifícios com Delivery")]
+    [Range(0.05f, 0.5f)] public float deliveryBuildingDensity = 0.18f;
+
+    [TabGroup("Progressão e Zonas")]
+    [LabelText("Pontos Mínimos de Entrega")]
+    public int minimumDeliveryPoints = 4;
+
+    [TabGroup("Progressão e Zonas")]
+    [LabelText("Pontos Máximos de Entrega")]
+    public int maximumDeliveryPoints = 50;
+
+    [TabGroup("Progressão e Zonas")]
+    [LabelText("Separação Mínima entre Entregas")]
+    public float minDeliverySeparation = 8f;
+
+    [TabGroup("Progressão e Zonas")]
+    [LabelText("Distribuir Entregas por Zonas")]
+    public bool preferZoneDistribution = true;
+
+
+    // --- POPULAÇÃO E PEDESTRES ---
+    [TabGroup("População e Pedestres")]
+    [LabelText("Ativar Pedestres e Cidade Viva")]
+    public bool enablePedestrians = true;
+
+    [TabGroup("População e Pedestres")]
+    [LabelText("População Base de Pedestres")]
+    public int populationBase = 8;
+
+    [TabGroup("População e Pedestres")]
+    [LabelText("Densidade de Pedestres (por Prédio)")]
+    [Range(0.05f, 0.5f)] public float populationDensity = 0.15f;
+
+    [TabGroup("População e Pedestres")]
+    [LabelText("Teto Máximo de Pedestres Ativos")]
+    public int maxActivePedestrians = 40;
+
+    [TabGroup("População e Pedestres")]
+    [LabelText("Tempo de Travessia Verde (s)")]
+    public float pedestrianCrossingTime = 8f;
+
+    [TabGroup("População e Pedestres")]
+    [LabelText("Pedestres Respeitam Semáforo")]
+    public bool pedestrianWaitTrafficLight = true;
+
 
     // --- TRÂNSITO ---
     [TabGroup("Trânsito e Eventos")]
@@ -158,12 +262,28 @@ public class CityConfig : ScriptableObject
 
         minDeliveryPointsPerBlock = Mathf.Max(0, minDeliveryPointsPerBlock);
         maxDeliveryPointsPerBlock = Mathf.Max(minDeliveryPointsPerBlock, maxDeliveryPointsPerBlock);
+        deliveryBuildingDensity = Mathf.Clamp(deliveryBuildingDensity, 0.05f, 0.5f);
+        minimumDeliveryPoints = Mathf.Max(1, minimumDeliveryPoints);
+        maximumDeliveryPoints = Mathf.Max(minimumDeliveryPoints, maximumDeliveryPoints);
+        minDeliverySeparation = Mathf.Max(1f, minDeliverySeparation);
+
+        populationBase = Mathf.Max(0, populationBase);
+        populationDensity = Mathf.Clamp(populationDensity, 0.01f, 1f);
+        maxActivePedestrians = Mathf.Max(1, maxActivePedestrians);
+        pedestrianCrossingTime = Mathf.Max(3f, pedestrianCrossingTime);
 
         minBuildingWidth = Mathf.Max(2f, minBuildingWidth);
         maxBuildingWidth = Mathf.Max(minBuildingWidth, maxBuildingWidth);
         minBuildingDepth = Mathf.Max(2f, minBuildingDepth);
         maxBuildingDepth = Mathf.Max(minBuildingDepth, maxBuildingDepth);
         blockCornerMargin = Mathf.Max(0f, blockCornerMargin);
+
+        minBuildingModulesWidth = Mathf.Max(2, minBuildingModulesWidth);
+        maxBuildingModulesWidth = Mathf.Max(minBuildingModulesWidth, maxBuildingModulesWidth);
+        minBuildingModulesDepth = Mathf.Max(2, minBuildingModulesDepth);
+        maxBuildingModulesDepth = Mathf.Max(minBuildingModulesDepth, maxBuildingModulesDepth);
+        minBuildingFloors = Mathf.Max(1, minBuildingFloors);
+        maxBuildingFloors = Mathf.Max(minBuildingFloors, maxBuildingFloors);
 
         minStreetBranchLength = Mathf.Max(10f, minStreetBranchLength);
         maxStreetBranchLength = Mathf.Max(minStreetBranchLength, maxStreetBranchLength);

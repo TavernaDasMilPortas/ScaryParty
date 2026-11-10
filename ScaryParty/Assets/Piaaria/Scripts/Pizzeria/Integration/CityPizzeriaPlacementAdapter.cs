@@ -23,12 +23,11 @@ namespace ScaryParty.Pizzeria.Integration
         {
             PizzeriaFootprint footprint = pizzeriaPrefab != null ? pizzeriaPrefab.GetComponent<PizzeriaFootprint>() : null;
 
-            // Preserva a pose calculada pelo resolvedor. Se Y estiver na altura cega da calçada, corrige usando o nível real do piso
+            // Preserva a pose calculada pelo resolvedor e eleva o piso para nivelar perfeitamente sobre o novo chão (0.02f de offset da malha viária + 0.03f de soleira para evitar afundamento e z-fighting)
             float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : 0f;
-            if (Mathf.Abs(position.y - sidewalkHeight) < 0.001f && Mathf.Abs(floorLocalY) > 0.01f)
-            {
-                position.y = sidewalkHeight - floorLocalY;
-            }
+            float actualGroundLevel = 0.02f + sidewalkHeight;
+            float desiredFloorWorldY = actualGroundLevel + 0.03f;
+            position.y = desiredFloorWorldY - floorLocalY;
 
             if (cityData != null)
             {
@@ -65,7 +64,7 @@ namespace ScaryParty.Pizzeria.Integration
                     bancadaPos = position + streetDir * frontDistance;
                 }
 
-                bancadaPos.y = sidewalkHeight + 0.5f;
+                bancadaPos.y = actualGroundLevel + 0.5f;
                 cityData.bancadaPosition = bancadaPos;
             }
 
