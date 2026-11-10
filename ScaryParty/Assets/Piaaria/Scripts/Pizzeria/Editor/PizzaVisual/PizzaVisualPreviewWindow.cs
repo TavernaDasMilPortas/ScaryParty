@@ -114,7 +114,7 @@ namespace ScaryParty.Pizzeria.Editor.PizzaVisual
         public string InfoComparacao = "Selecione os modelos nas abas 'Modelo Original' e 'Modelo Processado' para comparar.";
 
         [TabGroup("Tabs", "Montagem")]
-        [ShowInInspector, ReadOnly, MultiLine(4)]
+        [ShowInInspector, ReadOnly, Multiline(4)]
         [LabelText("Diagnóstico do Layout")]
         public string LayoutDiagnostics = "Tudo OK.";
         #endregion
@@ -271,9 +271,9 @@ namespace ScaryParty.Pizzeria.Editor.PizzaVisual
             Repaint();
         }
 
-        protected override void OnGUI()
+        protected override void OnImGUI()
         {
-            base.OnGUI();
+            base.OnImGUI();
 
             // Desenhar viewport 3D na parte inferior da janela
             Rect previewRect = GUILayoutUtility.GetRect(200, 320, GUILayout.ExpandWidth(true));
