@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &10614830345523647
 GameObject:
@@ -22373,7 +22373,7 @@ Transform:
   m_GameObject: {fileID: 2192527623988402749}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.56625557, y: 0.9687513, z: -4.651964}
+  m_LocalPosition: {x: 0.56625557, y: 0.495, z: -4.651964}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -30275,7 +30275,7 @@ Transform:
   m_GameObject: {fileID: 3399214534293823358}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6994438, y: 0.9687513, z: 1.6703123}
+  m_LocalPosition: {x: 0.6994438, y: 0.495, z: 1.6703123}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -34643,7 +34643,7 @@ Transform:
   m_GameObject: {fileID: 4134941133313134082}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.5244484, y: 0.9687513, z: 5.226916}
+  m_LocalPosition: {x: 0.5244484, y: 0.495, z: 5.226916}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -45422,7 +45422,7 @@ Transform:
   m_GameObject: {fileID: 5864546015519513715}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.5860367, y: 0.9687513, z: -1.5506555}
+  m_LocalPosition: {x: 0.5860367, y: 0.495, z: -1.5506555}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
