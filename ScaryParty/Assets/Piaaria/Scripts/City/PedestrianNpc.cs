@@ -42,6 +42,9 @@ public class PedestrianNpc : MonoBehaviour
     private float _stateTimer;
     private float _dwellDuration = 8f;
     private float _walkSpeed = 2.2f;
+    private int _navFailRetries;
+
+    public int ColorIndex { get; private set; }
 
     public event Action<PedestrianNpc> OnReachedPizzeria;
     public event Action<PedestrianNpc, CityBuilding> OnEnteredBuilding;
@@ -68,6 +71,11 @@ public class PedestrianNpc : MonoBehaviour
     {
         PedestrianId = id;
         _walkSpeed = speed;
+        ColorIndex = colorIndex;
+        _navFailRetries = 0;
+
+        if (Motor == null) Motor = GetComponent<NpcNavigationMotor>() ?? gameObject.AddComponent<NpcNavigationMotor>();
+        if (Locomotion == null) Locomotion = GetComponent<NpcLocomotionAdapter>() ?? gameObject.AddComponent<NpcLocomotionAdapter>();
 
         if (visualInstance != null)
         {
@@ -93,9 +101,14 @@ public class PedestrianNpc : MonoBehaviour
             }
         }
 
-        Motor.Configure(_walkSpeed, 360f, 12f, 0.35f);
-        Motor.OnDestinationReached += HandleDestinationReached;
-        Motor.OnNavigationFailed += HandleNavigationFailed;
+        if (Motor != null)
+        {
+            Motor.OnDestinationReached -= HandleDestinationReached;
+            Motor.OnNavigationFailed -= HandleNavigationFailed;
+            Motor.Configure(_walkSpeed, 360f, 12f, 0.35f);
+            Motor.OnDestinationReached += HandleDestinationReached;
+            Motor.OnNavigationFailed += HandleNavigationFailed;
+        }
     }
 
     private void OnDestroy()
@@ -154,6 +167,7 @@ public class PedestrianNpc : MonoBehaviour
 
     private void HandleDestinationReached()
     {
+        _navFailRetries = 0;
         switch (State)
         {
             case PedestrianState.Travelling:
@@ -187,11 +201,24 @@ public class PedestrianNpc : MonoBehaviour
 
     private void HandleNavigationFailed()
     {
+        _navFailRetries++;
+        if (_navFailRetries > 3)
+        {
+            _navFailRetries = 0;
+            gameObject.SetActive(false);
+            return;
+        }
+
         // If path failed, attempt to find a nearby reachable building or recovery
         var nearest = CityBuildingRegistry.Instance?.GetRandomBuilding(null, pedestrianEligibleOnly: true);
         if (nearest != null)
         {
             AssignTravelToBuilding(nearest, 5f);
+        }
+        else
+        {
+            _navFailRetries = 0;
+            gameObject.SetActive(false);
         }
     }
 }

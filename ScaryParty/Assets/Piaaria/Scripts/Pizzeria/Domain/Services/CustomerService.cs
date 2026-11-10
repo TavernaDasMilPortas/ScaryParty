@@ -293,6 +293,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 return orderRes;
             }
 
+
             int prevQueue = customer.QueueIndex;
             freeTable.Reserve(customerId, orderRes.Value);
 
@@ -308,6 +309,26 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.IncrementRevision();
 
             return orderRes;
+        }
+
+        /// <summary>
+        /// Confirma que o cliente presencial concluiu a caminhada atÃ© a mesa e sentou-se na cadeira,
+        /// promovendo o estado do cliente de WalkingToTable para SeatedWaitingFood.
+        /// </summary>
+        public bool ConfirmCustomerSeated(PizzeriaState state, CustomerId customerId)
+        {
+            if (state == null || !state.Customers.TryGetValue(customerId, out var customer))
+                return false;
+
+            if (customer.Phase == CustomerPhase.WalkingToTable)
+            {
+                customer.Phase = CustomerPhase.SeatedWaitingFood;
+                customer.Revision++;
+                state.IncrementRevision();
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

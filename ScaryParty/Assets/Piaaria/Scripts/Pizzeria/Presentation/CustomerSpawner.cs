@@ -322,6 +322,27 @@ namespace ScaryParty.Pizzeria.Presentation
                 TrySubscribeNetworkState();
             }
 
+            // Checar se algum cliente presencial concluiu a caminhada e sentou-se na cadeira
+            if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.CustomerService != null && PizzeriaRoot.Instance.DomainState != null)
+            {
+                bool anyStateChanged = false;
+                foreach (var kvp in _activeViews)
+                {
+                    var view = kvp.Value;
+                    if (view != null && view.HasReachedSeat && view.CurrentState.Phase == (byte)CustomerPhase.WalkingToTable)
+                    {
+                        if (PizzeriaRoot.Instance.CustomerService.ConfirmCustomerSeated(PizzeriaRoot.Instance.DomainState, new ScaryParty.Pizzeria.Domain.Types.CustomerId(view.CustomerId)))
+                        {
+                            anyStateChanged = true;
+                        }
+                    }
+                }
+                if (anyStateChanged)
+                {
+                    ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                }
+            }
+
             _cacheTimer -= Time.deltaTime;
             if (_cacheTimer <= 0f)
             {

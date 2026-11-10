@@ -25,6 +25,25 @@ namespace ScaryParty.Pizzeria.Stations
         public Transform seatAnchor;
         public Transform plateAnchor;
 
+        private static readonly System.Collections.Generic.Dictionary<int, DiningTableStation> _instancesByTableId = new System.Collections.Generic.Dictionary<int, DiningTableStation>();
+        public static bool TryGetTable(int id, out DiningTableStation table) => _instancesByTableId.TryGetValue(id, out table);
+
+        private void OnEnable()
+        {
+            if (tableId > 0)
+            {
+                _instancesByTableId[tableId] = this;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (tableId > 0 && _instancesByTableId.TryGetValue(tableId, out var cur) && cur == this)
+            {
+                _instancesByTableId.Remove(tableId);
+            }
+        }
+
         private void Awake()
         {
             EnsureAnchors();
@@ -40,13 +59,28 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             obstacle.shape = NavMeshObstacleShape.Box;
-            var rend = GetComponentInChildren<Renderer>();
-            if (rend != null)
+            var mf = GetComponentInChildren<MeshFilter>();
+            if (mf != null && mf.sharedMesh != null)
             {
-                Vector3 localCenter = transform.InverseTransformPoint(rend.bounds.center);
-                Vector3 localSize = rend.bounds.size;
+                Bounds b = mf.sharedMesh.bounds;
+                Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+                for (int x = -1; x <= 1; x += 2)
+                {
+                    for (int y = -1; y <= 1; y += 2)
+                    {
+                        for (int z = -1; z <= 1; z += 2)
+                        {
+                            Vector3 cornerLocal = b.center + new Vector3(b.extents.x * x, b.extents.y * y, b.extents.z * z);
+                            Vector3 cornerThis = transform.InverseTransformPoint(mf.transform.TransformPoint(cornerLocal));
+                            min = Vector3.Min(min, cornerThis);
+                            max = Vector3.Max(max, cornerThis);
+                        }
+                    }
+                }
+                Vector3 localCenter = (min + max) * 0.5f;
+                Vector3 localSize = max - min;
                 obstacle.center = localCenter;
-                // Deixa folga de 10% nas bordas para o agente conseguir acessar a cadeira livremente
                 obstacle.size = new Vector3(Mathf.Max(0.6f, localSize.x * 0.9f),
                                             Mathf.Max(0.8f, localSize.y),
                                             Mathf.Max(0.6f, localSize.z * 0.9f));

@@ -230,7 +230,15 @@ namespace ScaryParty.Pizzeria.Composition
                 if (CityPopulationDirector.Instance != null)
                 {
                     Vector3 entrancePos = root.entranceAnchor != null ? root.entranceAnchor.position : root.transform.position;
-                    CityPopulationDirector.Instance.TryRecruitPedestrianForPizzeria(entrancePos, out _);
+                    if (CityPopulationDirector.Instance.TryRecruitPedestrianForPizzeria(entrancePos, out var recruitedPed))
+                    {
+                        if (recruitedPed != null)
+                        {
+                            cust.VisualColorIndex = recruitedPed.ColorIndex;
+                            cust.Revision++;
+                            root.DomainState.IncrementRevision();
+                        }
+                    }
                 }
                 string summary = PizzaOrderFormatter.FormatShortTitle(cust.RequestedPizza, root.Catalog, false);
                 Debug.Log($"[DemandDirector] 🚶 Cliente presencial #{cust.Id.Value} entrou na Fila {cust.QueueIndex + 1} (Slot {cust.QueueSlotIndex + 1}) desejando {summary}!");

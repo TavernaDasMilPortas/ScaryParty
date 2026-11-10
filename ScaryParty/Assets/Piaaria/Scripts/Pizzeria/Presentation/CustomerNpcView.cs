@@ -30,6 +30,8 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _hasReachedSeat;
         private bool _wasSeated;
 
+        public bool HasReachedSeat => _hasReachedSeat;
+
         private static readonly Color[] NpcPalette = new[]
         {
             new Color(0.85f, 0.32f, 0.28f),
@@ -124,6 +126,8 @@ namespace ScaryParty.Pizzeria.Presentation
                                       dto.Phase == (byte)CustomerPhase.Eating;
                 if (!shouldBeSeated)
                 {
+                    Agent.updatePosition = true;
+                    Agent.updateRotation = true;
                     _hasReachedSeat = false;
                     Agent.isStopped = false;
                     if (Vector3.Distance(Agent.destination, _targetPosition) > 0.15f)
@@ -151,9 +155,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (wantsSit)
                 {
                     // Chegada suave ao assento da cadeira sem atravessar mesas
-                    bool arrivedAtSeat = distToTarget <= 0.25f || (!Agent.pathPending && Agent.remainingDistance <= 0.25f);
+                    bool hasValidPath = !Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete;
+                    bool arrivedAtSeat = distToTarget <= 0.25f || (hasValidPath && Agent.remainingDistance <= 0.25f);
                     if (arrivedAtSeat)
                     {
+                        Agent.updatePosition = false;
+                        Agent.updateRotation = false;
                         Agent.isStopped = true;
                         _hasReachedSeat = true;
                         transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
@@ -161,6 +168,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                     else
                     {
+                        Agent.updatePosition = true;
+                        Agent.updateRotation = true;
                         Agent.isStopped = false;
                         _hasReachedSeat = false;
                         if (distToTarget <= 0.40f)
@@ -171,6 +180,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
                 else
                 {
+                    Agent.updatePosition = true;
+                    Agent.updateRotation = true;
+                    Agent.isStopped = false;
                     _hasReachedSeat = false;
                     if (distToTarget <= 0.25f)
                     {
@@ -217,7 +229,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
                 else
                 {
-                    float animSpeed = currentSpeed > 0.05f ? Mathf.Max(currentSpeed, 2.0f) : 0f;
+                    float animSpeed = currentSpeed > 0.05f ? Mathf.Clamp(currentSpeed, 0f, _walkSpeed) : 0f;
                     VisualController.SetLocomotion(animSpeed, 1f, true, false, false);
                 }
             }
@@ -269,6 +281,11 @@ namespace ScaryParty.Pizzeria.Presentation
             if (CurrentState.IsWaitingForFood && CurrentState.AssignedTableId > 0)
             {
                 // Se o jogador apertou [E] olhando diretamente para o NPC sentado na mesa, delegar para a DiningTableStation correspondente
+                if (DiningTableStation.TryGetTable(CurrentState.AssignedTableId, out var table))
+                {
+                    table.TryServeTableFromPlayer(interactor);
+                    return;
+                }
                 var tables = FindObjectsByType<DiningTableStation>(FindObjectsSortMode.None);
                 for (int i = 0; i < tables.Length; i++)
                 {

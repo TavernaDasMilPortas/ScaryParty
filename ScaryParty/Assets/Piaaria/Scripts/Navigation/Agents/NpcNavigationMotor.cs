@@ -66,7 +66,15 @@ namespace ScaryParty.Navigation.Agents
 
         public bool MoveTo(Vector3 destination)
         {
-            TargetTransform = null;
+            return MoveToInternal(destination, clearTarget: true);
+        }
+
+        private bool MoveToInternal(Vector3 destination, bool clearTarget)
+        {
+            if (clearTarget)
+            {
+                TargetTransform = null;
+            }
             Destination = destination;
 
             if (Agent == null) Agent = GetComponent<NavMeshAgent>();
@@ -109,7 +117,7 @@ namespace ScaryParty.Navigation.Agents
         {
             if (target == null) return false;
             TargetTransform = target;
-            return MoveTo(target.position);
+            return MoveToInternal(target.position, clearTarget: false);
         }
 
         public void Stop()
@@ -128,7 +136,7 @@ namespace ScaryParty.Navigation.Agents
             if (_state == NavigationMotorState.Arrived) return true;
             if (Agent == null || !Agent.enabled || !Agent.isOnNavMesh) return false;
 
-            if (!Agent.pathPending)
+            if (!Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete)
             {
                 if (Agent.remainingDistance <= _arrivalDistance)
                 {
@@ -163,7 +171,7 @@ namespace ScaryParty.Navigation.Agents
             }
 
             // Arrival check
-            if (!Agent.pathPending && Agent.remainingDistance <= _arrivalDistance)
+            if (!Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete && Agent.remainingDistance <= _arrivalDistance)
             {
                 _state = NavigationMotorState.Arrived;
                 Agent.isStopped = true;

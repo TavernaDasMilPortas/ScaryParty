@@ -282,6 +282,8 @@ public class CityPopulationDirector : MonoBehaviour
 
         if (recruitedNpc != null)
         {
+            recruitedNpc.OnReachedPizzeria -= HandlePedestrianReachedPizzeria;
+            recruitedNpc.OnReachedPizzeria += HandlePedestrianReachedPizzeria;
             recruitedNpc.AssignVisitPizzeria(pizzeriaEntrance);
             return true;
         }
@@ -289,20 +291,49 @@ public class CityPopulationDirector : MonoBehaviour
         return false;
     }
 
+    private void HandlePedestrianReachedPizzeria(PedestrianNpc npc)
+    {
+        if (npc == null) return;
+        npc.OnReachedPizzeria -= HandlePedestrianReachedPizzeria;
+        _activePedestrians.Remove(npc);
+        _activePedestriansCount = _activePedestrians.Count;
+        npc.gameObject.SetActive(false);
+        _pool.Enqueue(npc);
+    }
+
     /// <summary>
     /// Returns a satisfied or leaving customer back to the city pedestrian population.
-    /// The character continues walking away to a random building.
+    /// The character continues walking away to a random building, respecting population limits.
     /// </summary>
     public void ReturnCustomerToCityPopulation(CustomerNpcView customerView)
     {
         if (customerView == null) return;
 
-        Vector3 exitPos = customerView.transform.position;
+        int maxLimit = config != null ? config.maxActivePedestrians : 20;
+        if (_activePedestrians.Count >= maxLimit)
+        {
+            Destroy(customerView.gameObject);
+            return;
+        }
+
+        int colorIdx = customerView.Appearance != null ? customerView.CurrentState.VisualColorIndex : 0;
+        GameObject visualObj = customerView.VisualController != null ? customerView.VisualController.gameObject : null;
+
+        var agent = customerView.Agent;
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.updatePosition = true;
+            agent.updateRotation = true;
+            agent.isStopped = false;
+        }
+
         Destroy(customerView); // Remove customer view component, convert to PedestrianNpc
 
         string id = $"ped_{++_pedestrianIdCounter}";
         var npc = customerView.gameObject.AddComponent<PedestrianNpc>();
-        npc.Initialize(id, customerView.VisualController != null ? customerView.VisualController.gameObject : null, 2.2f);
+        npc.Initialize(id, visualObj, 2.2f, colorIdx);
+        npc.OnEnteredBuilding -= HandlePedestrianEnteredBuilding;
+        npc.OnEnteredBuilding += HandlePedestrianEnteredBuilding;
 
         _activePedestrians.Add(npc);
         _activePedestriansCount = _activePedestrians.Count;
@@ -311,6 +342,12 @@ public class CityPopulationDirector : MonoBehaviour
         if (targetBldg != null)
         {
             npc.AssignTravelToBuilding(targetBldg, 8f);
+        }
+        else
+        {
+            _activePedestrians.Remove(npc);
+            _activePedestriansCount = _activePedestrians.Count;
+            Destroy(npc.gameObject);
         }
     }
 
