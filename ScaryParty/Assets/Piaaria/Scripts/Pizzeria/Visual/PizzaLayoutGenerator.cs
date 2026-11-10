@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Network;
 
 namespace ScaryParty.Pizzeria.Visual
 {

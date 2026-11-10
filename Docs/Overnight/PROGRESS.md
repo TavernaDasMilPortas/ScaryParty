@@ -14,8 +14,8 @@
 | **F0** | Baseline, inventário, branch e logs | Done | Commit `9d20627`. Branch criada, tracking files inicializados. |
 | **F1** | IDs/bindings/slots/quadro reparados e auditor Odin | Done | Commit `f31f2e1`. 0 erros bloqueantes, 15/15 tipos de estações cobertos. A01-A06 corrigidos. |
 | **F2** | Motor NPC, cadeiras, estados, pooling e autoridade corrigidos | Done | Commit `b7fd4d9`. A07-A16 e A26 corrigidos: chegada ao assento sem concorrência de física, transição formal de sentado, pooling e caps urbanos. |
-| **F3** | Compositor + rede de ingredientes + wizard + preview Odin | InProgress | Próxima fase: Modos de posicionamento modular, expansão do NetItemDto para 8 ingredientes, janela Odin Live Preview. |
-| **F4** | Loading coordenado, cidade de produção limpa, navmesh pronta antes de spawn | Pending | |
+| **F3** | Compositor + rede de ingredientes + wizard + preview Odin | Done | Commit `88ac74a`. 7 modos de posicionamento, DTO 8 ingredientes, layout determinístico, catálogo visual, preview Odin 4 abas, 4 testes unitários. |
+| **F4** | Loading coordenado, cidade de produção limpa, navmesh pronta antes de spawn | InProgress | LoadingCoordinator criado com UI Toolkit e token lock. SceneCleaner para `GameScene.unity` criado. |
 | **F5** | Serviço de feedback corrigido e matriz de efeitos aplicada | Pending | |
 | **F6** | Perfil de desempenho, QoL e ajustes medidos | Pending | |
 | **F7** | Regressão, build, evidências, relatório e encerramento | Pending | |
@@ -47,3 +47,13 @@
 - [x] F2: Preservação de identidade visual (`VisualColorIndex`) na conversão de pedestre para cliente em `DemandDirector.cs`.
 - [x] F2: Correção de pooling e respeito estrito a `maxActivePedestrians` em `CityPopulationDirector.cs`.
 - [x] F2: Cálculo local exato de caixa do `NavMeshObstacle` em `DiningTableStation.cs` prevenindo distorção angular.
+- [x] F3: Criação de `NetIngredientDto` e expansão de `NetItemDto` para 8 ingredientes com retrocompatibilidade (`DistinctIngredientCount`, `Ing_0..7`).
+- [x] F3: Implementação dos 7 modos de posicionamento (`Sliced`, `Total`, `Central`, `Specific`, `Ring`, `Scatter`, `None`) e `SpecificPlacementPose`.
+- [x] F3: Criação de `PizzaIngredientVisualProfile` e `PizzaVisualCatalog` com fallbacks procedurais para todos os ingredientes do jogo.
+- [x] F3: Algoritmo de layout determinístico desacoplado (`PizzaLayoutGenerator.cs`) com limite de 30 tentativas por peça e sem colisões no scatter.
+- [x] F3: Compositor visual de pizza (`PizzaVisualComposer.cs`) com nós organizados `Coating_Root` (micro-offset Y anti-z-fighting) e `Toppings_Root`.
+- [x] F3: Integração do novo compositor no renderizador em jogo `PizzeriaItemVisualizer.cs`.
+- [x] F3: Criação da janela Odin `PizzaVisualPreviewWindow.cs` com 4 abas (*Modelo Original*, *Modelo Processado*, *Comparação*, *Montagem*), câmera orbital e sliders de cozimento.
+- [x] F3: Criação e aprovação de 4 testes unitários de regressão em `PizzaModularComposerTests.cs`.
+- [/] F4: Criação do coordenador de carregamento `PizzeriaSceneLoadingCoordinator.cs` com UI Toolkit overlay, token lock e verificação de NavMesh.
+- [/] F4: Utilitário de limpeza `PizzeriaCitySceneCleaner.cs` preparado para backup e remoção dos ~64k objetos da cidade estática em `GameScene.unity`.
