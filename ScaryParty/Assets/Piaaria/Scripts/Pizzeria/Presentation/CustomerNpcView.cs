@@ -141,9 +141,9 @@ namespace ScaryParty.Pizzeria.Presentation
         private void Update()
         {
             var phase = (CustomerPhase)CurrentState.Phase;
-            bool wantsSit = phase == CustomerPhase.WalkingToTable ||
-                            phase == CustomerPhase.SeatedWaitingFood ||
-                            phase == CustomerPhase.Eating;
+            bool isSeatedPhase = phase == CustomerPhase.SeatedWaitingFood ||
+                                phase == CustomerPhase.Eating;
+            bool isWalkingToSeat = phase == CustomerPhase.WalkingToTable;
 
             float distToTarget = Vector3.Distance(transform.position, _targetPosition);
             float currentSpeed = 0f;
@@ -152,9 +152,9 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 currentSpeed = Agent.velocity.magnitude;
 
-                if (wantsSit)
+                if (isWalkingToSeat)
                 {
-                    // Chegada suave ao assento da cadeira sem atravessar mesas
+                    // Navegando até a cadeira
                     bool hasValidPath = !Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete;
                     bool arrivedAtSeat = distToTarget <= 0.25f || (hasValidPath && Agent.remainingDistance <= 0.25f);
                     if (arrivedAtSeat)
@@ -178,8 +178,19 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     }
                 }
+                else if (isSeatedPhase)
+                {
+                    // Já na mesa/comendo
+                    Agent.updatePosition = false;
+                    Agent.updateRotation = false;
+                    Agent.isStopped = true;
+                    _hasReachedSeat = true;
+                    transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 8f);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                }
                 else
                 {
+                    // Em fila ou saindo
                     Agent.updatePosition = true;
                     Agent.updateRotation = true;
                     Agent.isStopped = false;
@@ -199,22 +210,21 @@ namespace ScaryParty.Pizzeria.Presentation
                     Agent.Warp(hit.position);
                     Agent.SetDestination(_targetPosition);
                 }
-                else if (wantsSit && distToTarget <= 0.35f)
+                else if (isSeatedPhase || (isWalkingToSeat && distToTarget <= 0.35f))
                 {
                     transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
                     transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
-                    _hasReachedSeat = true;
+                    if (distToTarget <= 0.25f) _hasReachedSeat = true;
                 }
                 else
                 {
-                    if (wantsSit) _hasReachedSeat = true;
                     transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
                 }
             }
 
             if (VisualController != null)
             {
-                bool seatedNow = wantsSit && (_hasReachedSeat || distToTarget <= 0.30f);
+                bool seatedNow = isSeatedPhase || (isWalkingToSeat && _hasReachedSeat && distToTarget <= 0.25f);
                 if (seatedNow != _wasSeated)
                 {
                     _wasSeated = seatedNow;
@@ -229,7 +239,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
                 else
                 {
-                    float animSpeed = currentSpeed > 0.05f ? Mathf.Clamp(currentSpeed, 0f, _walkSpeed) : 0f;
+                    // Remapear para a velocidade do BlendTree (Speed: 0 = Idle, 2.0 = Walk, 5.335 = Run)
+                    float animSpeed = 0f;
+                    if (currentSpeed > 0.08f)
+                    {
+                        // Escala velocidade real do NavMeshAgent (~2.0 - 2.5 m/s) para o patamar de Walk (2.0f)
+                        float speedRatio = Mathf.Clamp01(currentSpeed / Mathf.Max(0.1f, _walkSpeed));
+                        animSpeed = Mathf.Lerp(1.6f, 2.4f, speedRatio);
+                    }
                     VisualController.SetLocomotion(animSpeed, 1f, true, false, false);
                 }
             }

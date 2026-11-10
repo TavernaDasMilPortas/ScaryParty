@@ -1,9 +1,9 @@
-﻿using Unity.Netcode.Components;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 /// <summary>
-/// Permite que o dono (Owner) do objeto sincronize as animações,
-/// em vez de apenas o servidor. Necessário para animação do jogador no cliente.
+/// Permite que o dono (Owner) do objeto sincronize as animacoes,
+/// em vez de apenas o servidor. Necessario para animacao do jogador no cliente.
 /// Garante que o Animator do CharacterVisual filho esteja vinculado antes do spawn de rede.
 /// </summary>
 [DisallowMultipleComponent]
@@ -12,6 +12,12 @@ public class OwnerNetworkAnimator : NetworkAnimator
     private void Awake()
     {
         EnsureAnimatorBound();
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        EnsureAnimatorBound();
+        base.OnNetworkSpawn();
     }
 
     public void EnsureAnimatorBound()
@@ -23,6 +29,11 @@ public class OwnerNetworkAnimator : NetworkAnimator
         if (visualCtrl != null && visualCtrl.Animator != null)
         {
             Animator = visualCtrl.Animator;
+            if (Animator.runtimeAnimatorController == null)
+            {
+                var fallbackCtrl = Resources.Load<RuntimeAnimatorController>("CharacterAnimator");
+                if (fallbackCtrl != null) Animator.runtimeAnimatorController = fallbackCtrl;
+            }
             return;
         }
 
@@ -30,6 +41,11 @@ public class OwnerNetworkAnimator : NetworkAnimator
         if (childAnim != null)
         {
             Animator = childAnim;
+            if (Animator.runtimeAnimatorController == null)
+            {
+                var fallbackCtrl = Resources.Load<RuntimeAnimatorController>("CharacterAnimator");
+                if (fallbackCtrl != null) Animator.runtimeAnimatorController = fallbackCtrl;
+            }
         }
     }
 
@@ -54,4 +70,3 @@ public class OwnerNetworkAnimator : NetworkAnimator
     }
 #endif
 }
-
