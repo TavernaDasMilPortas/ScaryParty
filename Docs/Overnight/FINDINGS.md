@@ -2,14 +2,14 @@
 
 Registro detalhado dos achados auditados confrontados com o código e prefab locais.
 
-| ID | Status Local | Descrição / Detalhes Encontrados |
+| ID | Status Local | Descrição / Detalhes Encontrados & Resolução |
 |---|---|---|
-| A01 | Confirmado | StorageStation id 6 em Geladeira_04, Dispensa_02, Dispensa_01; id 10 em Stack e Staging. Dicionário por stationId sobrescreve entradas. |
-| A02 | Confirmado | AssemblyStation id 13 (mesa media.002): 5 slots, último slot é nulo. |
-| A03 | Confirmado | TicketBoardStation id 4 anexado a Comodo_02_Cozinha inteiro. |
-| A04 | Confirmado | Layout de tickets da cozinha fora do espaço local do Quadro de Comandas. |
-| A05 | Confirmado | Quadro cardapio.001 com slots não-coplanares (z diferentes). |
-| A06 | Confirmado | Builder de tickets usa bounds mundiais e não valida superfície. |
+| A01 | Resolvido | Colisões de stationId resolvidas: Dispensa_01 (6), Dispensa_02 (17), Geladeira_02 (5), Geladeira_04 (18), Staging (10), BoxStack (16), Receiving (14), SupplierTerminal (20), Counter (21). StationDefs criados e configurados no PizzeriaConfig com slots de armazenamento estruturados. |
+| A02 | Resolvido | mesa media.002 (AssemblyStation ID 13): 5º slot nulo removido do array `slotAnchors`, agora com exatamente 4 slots válidos (Slot_0 a Slot_3). |
+| A03 | Resolvido | TicketBoardStation removido de Comodo_02_Cozinha e vinculado exclusivamente ao GameObject físico `Quadro de Comandas` com ID 4. |
+| A04 | Resolvido | TicketSlots reparentado para `Quadro de Comandas/TicketSlots`, com rotação Euler(0, 0, 0) voltada para o interior do cômodo e slots perfeitamente coplanares. |
+| A05 | Resolvido | cardapio.001 (TicketBoardStation ID 15) corrigido: todos os 6 slots reorientados e posicionados no mesmo Z local (0.06f) na face do cardápio. |
+| A06 | Resolvido | `PizzeriaSelectionConverter.ConfigureTicketBoardComponentsOnTarget` atualizado: rejeita objetos de ambiente/cômodo (`Comodo_`, `Cenario`) e calcula posições e rotações coplanares no espaço local da face do quadro. |
 | A07 | Confirmado | CustomerNpcView.cs aceita remainingDistance sem validar hasPath/pathStatus. |
 | A08 | Confirmado | CustomerNpcView mistura NavMeshAgent com escrita direta no Transform ao sentar. |
 | A09 | Confirmado | Locomotion saltava para velocidade 2; Animator blend tree tem Idle 0, Walk 2, Run 5.335. |

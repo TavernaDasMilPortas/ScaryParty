@@ -2,10 +2,10 @@
 
 | Teste | Critério | Status | Evidência |
 |---|---|---|---|
-| F1.1 | IDs de estações únicos e consistentes | Pending | |
-| F1.2 | Slot nulo corrigido no prefab | Pending | |
-| F1.3 | Quadros de tickets coplanares e orientados | Pending | |
-| F1.4 | Ferramenta Odin de auditoria/reparo idempotente | Pending | |
+| F1.1 | IDs de estações únicos e consistentes | Pass | 0 duplicatas. IDs únicos atribuídos e verificados via `PizzeriaGameplayValidator` (IDs 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21). |
+| F1.2 | Slot nulo corrigido no prefab | Pass | `mesa media.002` (AssemblyStation ID 13) reduzida de 5 para 4 slots válidos, sem referências `{fileID: 0}`. |
+| F1.3 | Quadros de tickets coplanares e orientados | Pass | `Quadro de Comandas` físico (ID 4) vinculado à cozinha com 6 slots coplanares; `cardapio.001` (ID 15) normalizado com 6 slots coplanares (local Z = 0.06f). |
+| F1.4 | Ferramenta Odin de auditoria/reparo idempotente | Pass | `PizzeriaContentWizard.cs` expandido com abas Odin "Auditoria e Reparo" e "Estações e Slots"; `PizzeriaPhase1Repair.Repair` executado via batchmode com retorno code 0 e 0 erros bloqueantes. |
 | F2.1 | Navegação NPC sem falso sucesso / recursão | Pending | |
 | F2.2 | Máquina de estados sentar/levantar/sair completa | Pending | |
 | F2.3 | Preservação visual pedestre -> cliente -> pedestre | Pending | |

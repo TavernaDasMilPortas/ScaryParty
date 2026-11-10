@@ -1010,6 +1010,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         public static void ConfigureTicketBoardComponentsOnTarget(GameObject unitGo, TicketBoardStation board, int slotCount = 6)
         {
             if (unitGo == null || board == null) return;
+            if (unitGo.name.StartsWith("Comodo_", StringComparison.OrdinalIgnoreCase) ||
+                unitGo.name.Equals("Cenario", StringComparison.OrdinalIgnoreCase) ||
+                unitGo.name.Equals("PizzeriaModular_Manual", StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.LogError($"[PizzeriaSelectionConverter] NÃ£o Ã© permitido configurar TicketBoardStation diretamente no objeto de ambiente/cÃ´modo '{unitGo.name}'. Selecione o objeto do quadro fÃ­sico.");
+                return;
+            }
+
             slotCount = Mathf.Clamp(slotCount, 1, 12);
 
             Transform slotsRoot = unitGo.transform.Find("TicketSlots");
@@ -1024,9 +1032,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 slotsRoot.localScale = Vector3.one;
             }
 
-            Bounds b = PizzeriaHierarchyOrganizer.ComputeWorldBounds(unitGo.transform, out bool hasMesh);
             var ticketAnchors = new Transform[slotCount];
-
             int cols = Mathf.Min(3, slotCount);
             int rows = Mathf.CeilToInt(slotCount / (float)cols);
 
@@ -1040,14 +1046,15 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     Undo.RegisterCreatedObjectUndo(sGo, $"Criar {slotName}");
                     slotT = sGo.transform;
                     slotT.SetParent(slotsRoot, false);
-
-                    int col = i % cols;
-                    int row = i / cols;
-                    float xOffset = (col - (cols - 1) * 0.5f) * 0.28f;
-                    float yOffset = ((rows - 1) * 0.5f - row) * 0.28f;
-                    slotT.position = (hasMesh ? b.center : unitGo.transform.position) + unitGo.transform.right * xOffset + Vector3.up * yOffset + unitGo.transform.forward * 0.06f;
-                    slotT.rotation = unitGo.transform.rotation;
                 }
+
+                int col = i % cols;
+                int row = i / cols;
+                float xOffset = (col - (cols - 1) * 0.5f) * 0.28f;
+                float yOffset = ((rows - 1) * 0.5f - row) * 0.28f;
+                slotT.localPosition = new Vector3(xOffset, yOffset, 0.06f);
+                slotT.localRotation = Quaternion.identity;
+                slotT.localScale = Vector3.one;
 
                 var sheet = slotT.GetComponentInChildren<TicketSheetView>(true);
                 if (sheet == null)
@@ -1084,10 +1091,6 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             board.maxVisibleTickets = slotCount;
             EditorUtility.SetDirty(board);
         }
-
-        /// <summary>
-        /// Rotina reutilizável para configurar StackStation no objeto selecionado sem recriar primitivas.
-        /// </summary>
         public static void ConfigureStackStationComponentsOnTarget(GameObject unitGo, StackStation stack, ulong stackId, int maxCapacity)
         {
             if (unitGo == null || stack == null) return;

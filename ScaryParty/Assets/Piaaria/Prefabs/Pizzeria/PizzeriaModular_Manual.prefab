@@ -12972,8 +12972,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1350314299318414835}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 29.939795, y: -0.23640122, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.28, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13279,8 +13279,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 935cd4c283547e140b431b3c8e01c661, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StorageStation
-  stationId: 6
-  stationName: Geladeira (Estoque Frio)
+  stationId: 18
+  stationName: "Geladeira (Secund\xE1ria)"
   slotAnchors:
   - {fileID: 5566593013193032802}
   slotsBoundToObjects: 0
@@ -14124,8 +14124,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1543664707819753213}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 30.219795, y: -0.23640122, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15792,8 +15792,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 935cd4c283547e140b431b3c8e01c661, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StorageStation
-  stationId: 6
-  stationName: Dispensa (Estoque Seco)
+  stationId: 17
+  stationName: "Dispensa (Secund\xE1ria)"
   slotAnchors:
   - {fileID: 2063087449194150796}
   slotsBoundToObjects: 0
@@ -23557,8 +23557,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2324732962032557033}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.27332115, y: -0.1396092, z: 0.059999943}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.28, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -23635,6 +23635,8 @@ GameObject:
   - component: {fileID: 3519518984836844979}
   - component: {fileID: 7605415044429182877}
   - component: {fileID: 214968778662654222}
+  - component: {fileID: 7292184135953630091}
+  - component: {fileID: 4089423917012803457}
   m_Layer: 0
   m_Name: balcao.005
   m_TagString: Untagged
@@ -23654,7 +23656,8 @@ Transform:
   m_LocalPosition: {x: 11.750019, y: -1.4701076, z: -4.9785757}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 744336356752481253}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3519518984836844979
@@ -23737,6 +23740,48 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!114 &7292184135953630091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2367386597523725754}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b63e2482ccac2c140a85ce80f048250a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.CounterStation
+  stationId: 21
+  stationName: Bancada de Apoio / Espera
+  slotAnchors:
+  - {fileID: 3808615707637281347}
+  - {fileID: 7295852391437129369}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
+--- !u!65 &4089423917012803457
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2367386597523725754}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 0.9, z: 0.6}
+  m_Center: {x: 0, y: 0.45, z: 0}
 --- !u!1 &2391631742309006332
 GameObject:
   m_ObjectHideFlags: 0
@@ -23904,7 +23949,6 @@ MonoBehaviour:
   - {fileID: 8624845109770470500}
   - {fileID: 6311133405764903999}
   - {fileID: 1360310175096013251}
-  - {fileID: 0}
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -25275,6 +25319,8 @@ Transform:
   - {fileID: 2630590887468628844}
   - {fileID: 1750207975914986911}
   - {fileID: 4665973562990557337}
+  - {fileID: 7331382662800550254}
+  - {fileID: 6678536819102595923}
   m_Father: {fileID: 818478036838337399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &299064992622249097
@@ -28229,20 +28275,20 @@ MonoBehaviour:
   sourceModelAssetGuid: f41c1a5c11441dc458d5fb3728a59962
   sourceModelAssetPath: Assets/Art/Pizzeria/Source/pizzariamodular (2)2 (1) (1) (2).fbx
   appliedScaleFactor: 1
-  anchorsVerifiedByUser: 0
-  entranceAnchorProvisional: 1
-  receivingAnchorProvisional: 1
-  recoveryAnchorProvisional: 1
-  playerSpawnsProvisional: 1
+  anchorsVerifiedByUser: 1
+  entranceAnchorProvisional: 0
+  receivingAnchorProvisional: 0
+  recoveryAnchorProvisional: 0
+  playerSpawnsProvisional: 0
   primaryPantryStation: {fileID: 211333191437565109}
   primaryFridgeStation: {fileID: 6224278178943848532}
   primaryToolRackStation: {fileID: 3952921712924210122}
   primaryStagingStation: {fileID: 443902017405247680}
   primaryBoxStackStation: {fileID: 4674208282552311298}
   primaryPhoneStation: {fileID: 3419848690701814122}
-  primaryTicketBoardStation: {fileID: 2277645632494141116}
-  primarySupplierTerminal: {fileID: 0}
-  primaryReceivingStation: {fileID: 0}
+  primaryTicketBoardStation: {fileID: 4217981724176054402}
+  primarySupplierTerminal: {fileID: 3913904301102585018}
+  primaryReceivingStation: {fileID: 8452598427261629754}
   stationRecords:
   - bindingGuid: 3821b4984fea4c1d95e74161536b80ef
     nodeGuid: ae24c90bd4b84d54a0bbf8c2e82cb99e
@@ -28343,9 +28389,9 @@ MonoBehaviour:
   - bindingGuid: a0b73c3ce84945aeb7d30c2142747469
     nodeGuid: 7a348a65ab9846a7ae6038313a255bd1
     stationId: 10
-    stationKind: 15
+    stationKind: 6
     storagePreset: 0
-    stationComponent: {fileID: 4674208282552311298}
+    stationComponent: {fileID: 443902017405247680}
     stationDef: {fileID: 11400000, guid: 6fb2c2556f769374795c17e0eb786135, type: 2}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
@@ -28369,7 +28415,7 @@ MonoBehaviour:
     stationId: 6
     stationKind: 7
     storagePreset: 1
-    stationComponent: {fileID: 4216352780021860528}
+    stationComponent: {fileID: 211333191437565109}
     stationDef: {fileID: 11400000, guid: 5e04f84f7b3f81b4d8530da7728763a1, type: 2}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
@@ -28405,7 +28451,7 @@ MonoBehaviour:
     stationId: 4
     stationKind: 11
     storagePreset: 0
-    stationComponent: {fileID: 2277645632494141116}
+    stationComponent: {fileID: 4217981724176054402}
     stationDef: {fileID: 11400000, guid: 331a740e33a07344cb037e5f0eda3828, type: 2}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
@@ -28424,6 +28470,78 @@ MonoBehaviour:
     configuredIngredientIds: 
     configuredProcessIds: 
     configuredToolDefIds: 0100000002000000
+  - bindingGuid: 22b9c3d8f5084bac911b1dcf5653c765
+    nodeGuid: 
+    stationId: 18
+    stationKind: 8
+    storagePreset: 0
+    stationComponent: {fileID: 7949382206466533371}
+    stationDef: {fileID: 11400000, guid: be3814db497ded54590c829c2915c07c, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
+  - bindingGuid: c6079ae790d64515a05bf02f4c5c6899
+    nodeGuid: 
+    stationId: 17
+    stationKind: 7
+    storagePreset: 0
+    stationComponent: {fileID: 4216352780021860528}
+    stationDef: {fileID: 11400000, guid: e06e59c4560e9524d9214b06c6de4139, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
+  - bindingGuid: 5007bb2eb5214201a9a853ca019ac28e
+    nodeGuid: 
+    stationId: 16
+    stationKind: 15
+    storagePreset: 0
+    stationComponent: {fileID: 4674208282552311298}
+    stationDef: {fileID: 11400000, guid: 599c964a0e3397644a285e3701b15b39, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
+  - bindingGuid: e5babb5083d04eee8c8d28ab8f1e0d54
+    nodeGuid: 
+    stationId: 14
+    stationKind: 13
+    storagePreset: 0
+    stationComponent: {fileID: 8452598427261629754}
+    stationDef: {fileID: 11400000, guid: 1ca8a41c91f0c30478161b12cb3dd68d, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
+  - bindingGuid: d8d7c72727814340b5f0a5830a61c17f
+    nodeGuid: 
+    stationId: 20
+    stationKind: 12
+    storagePreset: 0
+    stationComponent: {fileID: 3913904301102585018}
+    stationDef: {fileID: 11400000, guid: 45898db6611f9e6488650f50be7b20ca, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
+  - bindingGuid: b7a26e7171e14eafa1498266f4f3459c
+    nodeGuid: 
+    stationId: 21
+    stationKind: 1
+    storagePreset: 0
+    stationComponent: {fileID: 7292184135953630091}
+    stationDef: {fileID: 11400000, guid: 744ba02e83c1cd3469143a65652364b9, type: 2}
+    operationalForwardLocal: {x: 0, y: 0, z: 1}
+    maxInteractionDistance: 3
+    configuredIngredientIds: 
+    configuredProcessIds: 
+    configuredToolDefIds: 
 --- !u!114 &4443353084072649559
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28858,8 +28976,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3170042835239414469}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 30.499796, y: -0.23640122, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.28, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -30812,6 +30930,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &3587522228640039467
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3808615707637281347}
+  m_Layer: 0
+  m_Name: Slot_0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3808615707637281347
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3587522228640039467}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.28, y: 0.45, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 744336356752481253}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3601728195792570073
 GameObject:
   m_ObjectHideFlags: 0
@@ -32533,8 +32682,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3840788242056782018}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.28667927, y: -0.1396092, z: 0.059999943}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.28, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -33806,6 +33955,39 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4075784449252608478
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 744336356752481253}
+  m_Layer: 0
+  m_Name: Slots
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &744336356752481253
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4075784449252608478}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3808615707637281347}
+  - {fileID: 7295852391437129369}
+  m_Father: {fileID: 1314372874077996248}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4079459121589443748
 GameObject:
   m_ObjectHideFlags: 0
@@ -34653,8 +34835,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4144537304538934377}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.006679535, y: -0.1396092, z: 0.059999943}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -36222,8 +36404,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4335826222140238414}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.006679535, y: 0.1403908, z: 0.728}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -38234,8 +38416,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4652150825648485245}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.28667927, y: 0.1403908, z: -0.719}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.28, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -39616,7 +39798,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2f8d0e193c54e2687b4213e9c823402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationWorkpostTarget
-  targetStation: {fileID: 2277645632494141116}
+  targetStation: {fileID: 0}
   slotIndex: 4
   slotAnchor: {fileID: 0}
   outlineTarget: {fileID: 0}
@@ -40051,7 +40233,6 @@ GameObject:
   - component: {fileID: 2196875344641827120}
   - component: {fileID: 2139167540309344561}
   - component: {fileID: 7707953704038934422}
-  - component: {fileID: 2277645632494141116}
   m_Layer: 0
   m_Name: Comodo_02_Cozinha
   m_TagString: Untagged
@@ -40079,7 +40260,6 @@ Transform:
   - {fileID: 3567286184108467835}
   - {fileID: 7528832686654198306}
   - {fileID: 7392485468602101806}
-  - {fileID: 8904685150387615655}
   m_Father: {fileID: 818478036838337399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2196875344641827120
@@ -40219,34 +40399,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &2277645632494141116
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4873058488013513541}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eb3c93ebbb44e0649bcf7e4dae227b51, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketBoardStation
-  stationId: 4
-  stationName: Quadro de Comandas
-  slotAnchors:
-  - {fileID: 6668047728385472161}
-  slotsBoundToObjects: 0
-  LastAimWorldPoint: {x: 0, y: 0, z: 0}
-  LastAimExplicitSlot: -1
-  _doorPresenter: {fileID: 0}
-  ticketSlots:
-  - {fileID: 3027419852511222370}
-  - {fileID: 3477067783309565542}
-  - {fileID: 1552729299363982416}
-  - {fileID: 6382458395996425741}
-  - {fileID: 8387160409511111555}
-  - {fileID: 2346585548743637902}
-  maxVisibleTickets: 6
 --- !u!1 &4881090185792851551
 GameObject:
   m_ObjectHideFlags: 0
@@ -42910,7 +43062,7 @@ Transform:
   m_GameObject: {fileID: 5359915798210805980}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.05}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -42920,7 +43072,7 @@ Transform:
   - {fileID: 6382458395996425741}
   - {fileID: 8387160409511111555}
   - {fileID: 2346585548743637902}
-  m_Father: {fileID: 9064623253904122052}
+  m_Father: {fileID: 8834499623025844802}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4813566816235133921
 MonoBehaviour:
@@ -43433,6 +43585,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8834499623025844802}
   - component: {fileID: 3688982845445870015}
+  - component: {fileID: 4217981724176054402}
   m_Layer: 0
   m_Name: Quadro de Comandas
   m_TagString: Untagged
@@ -43448,11 +43601,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5482184482525615842}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 16.6, y: -0.15031065, z: -4.77}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 8904685150387615655}
   m_Father: {fileID: 9064623253904122052}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3688982845445870015
@@ -43478,6 +43632,33 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!114 &4217981724176054402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5482184482525615842}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb3c93ebbb44e0649bcf7e4dae227b51, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketBoardStation
+  stationId: 4
+  stationName: Quadro de Comandas
+  slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
+  ticketSlots:
+  - {fileID: 3027419852511222370}
+  - {fileID: 3477067783309565542}
+  - {fileID: 1552729299363982416}
+  - {fileID: 6382458395996425741}
+  - {fileID: 8387160409511111555}
+  - {fileID: 2346585548743637902}
+  maxVisibleTickets: 6
 --- !u!1 &5550822631388380697
 GameObject:
   m_ObjectHideFlags: 0
@@ -45438,7 +45619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46da025781058ca4b950ab4533b2d28a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.StackStation
-  stationId: 10
+  stationId: 16
   stationName: Pilha de Caixas
   slotAnchors:
   - {fileID: 8990918292261896628}
@@ -45447,7 +45628,7 @@ MonoBehaviour:
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
   _doorPresenter: {fileID: 0}
-  stackId: 1
+  stackId: 16
   capacity: 6
   linkedAddressId: -1
 --- !u!1 &5892135606134275248
@@ -51879,8 +52060,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6253185534507382017}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 30.219795, y: 0.043598786, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -52083,8 +52264,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6281812842621066418}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 30.499796, y: 0.043598786, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.28, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -52807,6 +52988,80 @@ Transform:
   - {fileID: 2672617326361937021}
   m_Father: {fileID: 4173810898909124490}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6425967444867425196
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7331382662800550254}
+  - component: {fileID: 8452598427261629754}
+  - component: {fileID: 5345879382196868232}
+  m_Layer: 0
+  m_Name: Station_Receiving
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7331382662800550254
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6425967444867425196}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 18, y: -1.4, z: -24}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9078601330760841625}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8452598427261629754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6425967444867425196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f788b8b363036042980e95c0ff9219a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.ReceivingStation
+  stationId: 14
+  stationName: "\xC1rea de Recebimento"
+  slotAnchors:
+  - {fileID: 8137993284181914115}
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
+--- !u!65 &5345879382196868232
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6425967444867425196}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2, y: 2, z: 2}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &6430842727897739842
 GameObject:
   m_ObjectHideFlags: 0
@@ -53038,6 +53293,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &6449705075155078297
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7295852391437129369}
+  m_Layer: 0
+  m_Name: Slot_1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7295852391437129369
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6449705075155078297}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.28, y: 0.45, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 744336356752481253}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6469244054258503170
 GameObject:
   m_ObjectHideFlags: 0
@@ -56263,8 +56549,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6952559217424525608}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.27332115, y: 0.1403908, z: 0.059999943}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.28, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -60331,6 +60617,79 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7778725635770310689
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6678536819102595923}
+  - component: {fileID: 3913904301102585018}
+  - component: {fileID: 863632707237490640}
+  m_Layer: 0
+  m_Name: Station_SupplierTerminal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6678536819102595923
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778725635770310689}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 20, y: -1.4, z: -23}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9078601330760841625}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3913904301102585018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778725635770310689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50eff1e742d37fa4ab181c4b6c63e022, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.SupplierTerminal
+  stationId: 20
+  stationName: Terminal de Fornecedor
+  slotAnchors: []
+  slotsBoundToObjects: 0
+  LastAimWorldPoint: {x: 0, y: 0, z: 0}
+  LastAimExplicitSlot: -1
+  _doorPresenter: {fileID: 0}
+--- !u!65 &863632707237490640
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7778725635770310689}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1.5, z: 0.5}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &7779392801444372569
 GameObject:
   m_ObjectHideFlags: 0
@@ -66287,8 +66646,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9071418894268864248}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 29.939795, y: 0.043598786, z: 7.436688}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.28, y: 0.14, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
