@@ -11,10 +11,10 @@
 
 | Fase | Descrição | Status | Evidência / Notas |
 |---|---|---|---|
-| **F0** | Baseline, inventário, branch e logs | Done | Commit 9d20627. Branch criada, tracking files inicializados. |
-| **F1** | IDs/bindings/slots/quadro reparados e auditor Odin | Done | PizzeriaGameplayValidator: 0 erros bloqueantes, 15/15 tipos de estações cobertos. A01-A06 corrigidos. |
-| **F2** | Motor NPC, cadeiras, estados, pooling e autoridade corrigidos | InProgress | Próxima fase: CustomerNpcView, CustomerService, NpcNavigationMotor, PedestrianNpc, pooling e spawn. |
-| **F3** | Compositor + rede de ingredientes + wizard + preview Odin | Pending | |
+| **F0** | Baseline, inventário, branch e logs | Done | Commit `9d20627`. Branch criada, tracking files inicializados. |
+| **F1** | IDs/bindings/slots/quadro reparados e auditor Odin | Done | Commit `f31f2e1`. 0 erros bloqueantes, 15/15 tipos de estações cobertos. A01-A06 corrigidos. |
+| **F2** | Motor NPC, cadeiras, estados, pooling e autoridade corrigidos | Done | Commit `b7fd4d9`. A07-A16 e A26 corrigidos: chegada ao assento sem concorrência de física, transição formal de sentado, pooling e caps urbanos. |
+| **F3** | Compositor + rede de ingredientes + wizard + preview Odin | InProgress | Próxima fase: Modos de posicionamento modular, expansão do NetItemDto para 8 ingredientes, janela Odin Live Preview. |
 | **F4** | Loading coordenado, cidade de produção limpa, navmesh pronta antes de spawn | Pending | |
 | **F5** | Serviço de feedback corrigido e matriz de efeitos aplicada | Pending | |
 | **F6** | Perfil de desempenho, QoL e ajustes medidos | Pending | |
@@ -37,3 +37,13 @@
 - [x] F1: Atualização de `PizzeriaGameplayValidator.cs` para suportar validação de prefabs em disco (`IsActiveInHierarchyOrPrefab`).
 - [x] F1: Expansão do Odin Wizard `PizzeriaContentWizard.cs` com abas de Auditoria/Reparo e Estações/Slots.
 - [x] F1: Validação automatizada executada via batchmode: 0 erros bloqueantes.
+- [x] F2: Correção da chegada e sentar em `CustomerNpcView.cs` — validação estrita de caminho completo (`!Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete && Agent.remainingDistance <= tolerance`).
+- [x] F2: Desacoplamento de Transform e NavMeshAgent ao sentar (`Agent.updatePosition = false`, `Agent.updateRotation = false`, `Agent.isStopped = true`), restaurando na saída para evitar concorrência física.
+- [x] F2: Correção de animação de locomoção em `CustomerNpcView.cs` e `NpcLocomotionAdapter.cs`, eliminando velocidade forçada a 2.0f e foot sliding.
+- [x] F2: Transição formal de `WalkingToTable` para `SeatedWaitingFood` em `CustomerService.cs` (`ConfirmCustomerSeated`) e acionamento no `CustomerSpawner.cs`.
+- [x] F2: Resolução de recursão em `PedestrianNpc.HandleNavigationFailed` com contador de retry (máx 3) e fallback seguro.
+- [x] F2: Correção de perda de alvo em `NpcNavigationMotor.FollowTarget` mantendo `TargetTransform`.
+- [x] F2: Registro estático $O(1)$ de mesas em `DiningTableStation.cs`, eliminando `FindObjectsByType` a cada interação.
+- [x] F2: Preservação de identidade visual (`VisualColorIndex`) na conversão de pedestre para cliente em `DemandDirector.cs`.
+- [x] F2: Correção de pooling e respeito estrito a `maxActivePedestrians` em `CityPopulationDirector.cs`.
+- [x] F2: Cálculo local exato de caixa do `NavMeshObstacle` em `DiningTableStation.cs` prevenindo distorção angular.
