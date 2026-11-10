@@ -153,8 +153,32 @@ namespace ScaryParty.Pizzeria.Network
         public override int GetHashCode() => HashCode.Combine(BaseDoughId, SauceId, ToppingCount, ToppingId_0, ToppingId_1, QuotedPrice);
     }
 
+    [Serializable]
+    public struct NetIngredientDto : INetworkSerializable, IEquatable<NetIngredientDto>
+    {
+        public int DefinitionId;
+        public byte Stage;
+        public byte Count;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref DefinitionId);
+            serializer.SerializeValue(ref Stage);
+            serializer.SerializeValue(ref Count);
+        }
+
+        public bool Equals(NetIngredientDto other)
+            => DefinitionId == other.DefinitionId && Stage == other.Stage && Count == other.Count;
+
+        public override bool Equals(object obj) => obj is NetIngredientDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(DefinitionId, Stage, Count);
+        public override string ToString() => $"IngDef({DefinitionId}, Stage={Stage}, x{Count})";
+    }
+
     public struct NetItemDto : INetworkSerializable, IEquatable<NetItemDto>
     {
+        public const int MaxDistinctIngredients = 8;
+
         public ulong ItemId;
         public int DefinitionId;
         public int BaseDoughDefinitionId;
@@ -171,12 +195,56 @@ namespace ScaryParty.Pizzeria.Network
         public int LabelAddressId;
         public ulong ReservedByHold;
         public uint Revision;
+
+        // Structured ingredients (up to 8 distinct entries with defId, stage and count)
+        public byte DistinctIngredientCount;
+        public NetIngredientDto Ing_0;
+        public NetIngredientDto Ing_1;
+        public NetIngredientDto Ing_2;
+        public NetIngredientDto Ing_3;
+        public NetIngredientDto Ing_4;
+        public NetIngredientDto Ing_5;
+        public NetIngredientDto Ing_6;
+        public NetIngredientDto Ing_7;
+
+        // Legacy compatibility fields
         public byte IngredientMask;
         public byte IngredientCount;
         public int IngredientId_0;
         public int IngredientId_1;
         public int IngredientId_2;
         public int IngredientId_3;
+
+        public NetIngredientDto GetIngredient(int index)
+        {
+            switch (index)
+            {
+                case 0: return Ing_0;
+                case 1: return Ing_1;
+                case 2: return Ing_2;
+                case 3: return Ing_3;
+                case 4: return Ing_4;
+                case 5: return Ing_5;
+                case 6: return Ing_6;
+                case 7: return Ing_7;
+                default: return default;
+            }
+        }
+
+        public void SetIngredient(int index, NetIngredientDto value)
+        {
+            switch (index)
+            {
+                case 0: Ing_0 = value; IngredientId_0 = value.DefinitionId; break;
+                case 1: Ing_1 = value; IngredientId_1 = value.DefinitionId; break;
+                case 2: Ing_2 = value; IngredientId_2 = value.DefinitionId; break;
+                case 3: Ing_3 = value; IngredientId_3 = value.DefinitionId; break;
+                case 4: Ing_4 = value; break;
+                case 5: Ing_5 = value; break;
+                case 6: Ing_6 = value; break;
+                case 7: Ing_7 = value; break;
+            }
+        }
 
         public int LabelDestinationId
         {
@@ -202,6 +270,17 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref LabelAddressId);
             serializer.SerializeValue(ref ReservedByHold);
             serializer.SerializeValue(ref Revision);
+
+            serializer.SerializeValue(ref DistinctIngredientCount);
+            Ing_0.NetworkSerialize(serializer);
+            Ing_1.NetworkSerialize(serializer);
+            Ing_2.NetworkSerialize(serializer);
+            Ing_3.NetworkSerialize(serializer);
+            Ing_4.NetworkSerialize(serializer);
+            Ing_5.NetworkSerialize(serializer);
+            Ing_6.NetworkSerialize(serializer);
+            Ing_7.NetworkSerialize(serializer);
+
             serializer.SerializeValue(ref IngredientMask);
             serializer.SerializeValue(ref IngredientCount);
             serializer.SerializeValue(ref IngredientId_0);
@@ -221,6 +300,15 @@ namespace ScaryParty.Pizzeria.Network
                PackagingState == other.PackagingState &&
                LabelAddressId == other.LabelAddressId &&
                ReservedByHold == other.ReservedByHold &&
+               DistinctIngredientCount == other.DistinctIngredientCount &&
+               Ing_0.Equals(other.Ing_0) &&
+               Ing_1.Equals(other.Ing_1) &&
+               Ing_2.Equals(other.Ing_2) &&
+               Ing_3.Equals(other.Ing_3) &&
+               Ing_4.Equals(other.Ing_4) &&
+               Ing_5.Equals(other.Ing_5) &&
+               Ing_6.Equals(other.Ing_6) &&
+               Ing_7.Equals(other.Ing_7) &&
                IngredientMask == other.IngredientMask &&
                IngredientCount == other.IngredientCount &&
                IngredientId_0 == other.IngredientId_0 &&

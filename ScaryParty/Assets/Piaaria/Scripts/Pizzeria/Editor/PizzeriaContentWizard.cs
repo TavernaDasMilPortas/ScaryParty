@@ -31,6 +31,8 @@ namespace ScaryParty.Pizzeria.Editor
                 tree.Add("Pizzaria Modular/Visão Geral", modularConfig);
                 tree.Add("Pizzaria Modular/Auditoria e Reparo (Fase 1)", new ModularAuditAndRepairTab());
                 tree.Add("Pizzaria Modular/Estações e Slots (Fase 1)", new ModularStationsAndSlotsTab());
+                tree.Add("Pizzaria Modular/Montagem de Pizza (Fase 3)", new ModularPizzaPreviewTab());
+                tree.AddAllAssetsAtPath("Pizzaria Modular/Perfis Visuais", "Assets/Piaaria/ScriptableObjects/Pizzeria", typeof(ScaryParty.Pizzeria.Visual.PizzaIngredientVisualProfile), true);
             }
 
             var config = AssetDatabase.LoadAssetAtPath<PizzeriaConfig>("Assets/Piaaria/ScriptableObjects/Pizzeria/PizzeriaConfig.asset");
@@ -118,6 +120,18 @@ namespace ScaryParty.Pizzeria.Editor
             public string Titulo;
             public string Descricao;
             public string ObjetoAlvo;
+        }
+
+        public class ModularPizzaPreviewTab
+        {
+            [Title("ComposiÃ§Ã£o e PrÃ©via da Pizza Modular (Fase 3)", "Visualizador 3D em tempo real com suporte a todos os 7 modos de posicionamento", TitleAlignments.Centered)]
+            [InfoBox("Abra a janela independente de prÃ©via 3D para editar ingredientes, posicionamentos e assamento ao vivo com suporte a Undo/Redo sem Play Mode.")]
+
+            [Button(ButtonSizes.Large, Name = "Abrir Janela de PrÃ©via 3D da Pizza")]
+            public void OpenPreviewWindow()
+            {
+                ScaryParty.Pizzeria.Editor.PizzaVisual.PizzaVisualPreviewWindow.ShowWindow();
+            }
         }
 
         public class ModularStationsAndSlotsTab

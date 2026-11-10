@@ -471,38 +471,9 @@ namespace ScaryParty.Pizzeria.Network
         {
             byte mask = 0;
             byte count = 0;
-            int id0 = 0, id1 = 0, id2 = 0, id3 = 0;
+            byte distinctCount = 0;
 
-            if (item.Ingredients != null)
-            {
-                var catalog = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
-                    ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.Catalog
-                    : null;
-
-                for (int i = 0; i < item.Ingredients.Count; i++)
-                {
-                    var entry = item.Ingredients[i];
-                    count++;
-                    if (i == 0) id0 = entry.IngredientDefId;
-                    else if (i == 1) id1 = entry.IngredientDefId;
-                    else if (i == 2) id2 = entry.IngredientDefId;
-                    else if (i == 3) id3 = entry.IngredientDefId;
-
-                    if (entry.IngredientDefId == 3) mask |= 1; // Molho
-                    else if (entry.IngredientDefId == 4 || entry.IngredientDefId == 5) mask |= 2; // Queijo
-                    else if (entry.IngredientDefId == 6 || entry.IngredientDefId == 7) mask |= 4; // Calabresa
-                    else if (entry.IngredientDefId == 8 || entry.IngredientDefId == 9) mask |= 8; // Cogumelo
-                    else if (catalog != null && catalog.Ingredients.TryGetValue(entry.IngredientDefId, out var ingData))
-                    {
-                        var cat = ingData.Category;
-                        if (cat == ItemCategory.Sauce) mask |= 1;
-                        else if (cat == ItemCategory.Cheese) mask |= 2;
-                        else if (cat == ItemCategory.Topping) mask |= 4;
-                    }
-                }
-            }
-
-            return new NetItemDto
+            var dto = new NetItemDto
             {
                 ItemId = item.Id.Value,
                 DefinitionId = item.DefinitionId,
@@ -519,14 +490,50 @@ namespace ScaryParty.Pizzeria.Network
                 BurnProgress = item.BurnProgress,
                 LabelAddressId = item.LabelAddressId,
                 ReservedByHold = item.ReservedByHold,
-                Revision = item.Revision,
-                IngredientMask = mask,
-                IngredientCount = count,
-                IngredientId_0 = id0,
-                IngredientId_1 = id1,
-                IngredientId_2 = id2,
-                IngredientId_3 = id3
+                Revision = item.Revision
             };
+
+            if (item.Ingredients != null)
+            {
+                var catalog = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
+                    ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.Catalog
+                    : null;
+
+                distinctCount = (byte)Math.Min(item.Ingredients.Count, NetItemDto.MaxDistinctIngredients);
+                dto.DistinctIngredientCount = distinctCount;
+
+                for (int i = 0; i < item.Ingredients.Count; i++)
+                {
+                    var entry = item.Ingredients[i];
+                    count += (byte)Math.Max(1, entry.Count);
+
+                    if (i < NetItemDto.MaxDistinctIngredients)
+                    {
+                        dto.SetIngredient(i, new NetIngredientDto
+                        {
+                            DefinitionId = entry.IngredientDefId,
+                            Stage = (byte)entry.Stage,
+                            Count = (byte)Math.Clamp(entry.Count, 1, 255)
+                        });
+                    }
+
+                    if (entry.IngredientDefId == 3) mask |= 1; // Molho
+                    else if (entry.IngredientDefId == 4 || entry.IngredientDefId == 5) mask |= 2; // Queijo
+                    else if (entry.IngredientDefId == 6 || entry.IngredientDefId == 7) mask |= 4; // Calabresa
+                    else if (entry.IngredientDefId == 8 || entry.IngredientDefId == 9) mask |= 8; // Cogumelo
+                    else if (catalog != null && catalog.Ingredients.TryGetValue(entry.IngredientDefId, out var ingData))
+                    {
+                        var cat = ingData.Category;
+                        if (cat == ItemCategory.Sauce) mask |= 1;
+                        else if (cat == ItemCategory.Cheese) mask |= 2;
+                        else if (cat == ItemCategory.Topping) mask |= 4;
+                    }
+                }
+            }
+
+            dto.IngredientMask = mask;
+            dto.IngredientCount = count;
+            return dto;
         }
 
         private NetToolDto CreateToolDto(ToolItemState tool)

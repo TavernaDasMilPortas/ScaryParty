@@ -814,108 +814,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void UpdatePizzaIngredientLayers(GameObject pizzaGo, NetItemDto item)
         {
-            if (!_pizzaIngredientLayers.TryGetValue(item.ItemId, out var layers) || layers == null || layers.Length < 4)
-            {
-                var newLayers = new GameObject[4];
-                if (layers != null)
-                {
-                    for (int i = 0; i < layers.Length && i < 4; i++)
-                        newLayers[i] = layers[i];
-                }
-                layers = newLayers;
-                _pizzaIngredientLayers[item.ItemId] = layers;
-            }
+            if (pizzaGo == null) return;
 
-            Transform layerParent = ItemVisualWrapper.FindDeepChild(pizzaGo.transform, "IngredientLayerAnchor") ?? pizzaGo.transform;
-            Shader urpShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-
-            // Sauce: Bit 0 (1)
-            bool hasSauce = (item.IngredientMask & 1) != 0;
-            if (hasSauce && layers[0] == null)
-            {
-                var sauce = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                sauce.transform.SetParent(layerParent, false);
-                sauce.transform.localPosition = new Vector3(0, 0.02f, 0);
-                sauce.transform.localScale = new Vector3(0.38f, 0.005f, 0.38f);
-                sauce.transform.localRotation = Quaternion.identity;
-                var mat = new Material(urpShader) { color = new Color(0.80f, 0.15f, 0.10f) };
-                sauce.GetComponent<Renderer>().sharedMaterial = mat;
-                Destroy(sauce.GetComponent<Collider>());
-                layers[0] = sauce;
-            }
-            if (layers[0] != null) layers[0].SetActive(hasSauce);
-
-            // Cheese: Bit 1 (2)
-            bool hasCheese = (item.IngredientMask & 2) != 0;
-            if (hasCheese && layers[1] == null)
-            {
-                var cheese = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                cheese.transform.SetParent(layerParent, false);
-                cheese.transform.localPosition = new Vector3(0, 0.03f, 0);
-                cheese.transform.localScale = new Vector3(0.36f, 0.005f, 0.36f);
-                cheese.transform.localRotation = Quaternion.identity;
-                var mat = new Material(urpShader) { color = new Color(0.98f, 0.88f, 0.35f) };
-                cheese.GetComponent<Renderer>().sharedMaterial = mat;
-                Destroy(cheese.GetComponent<Collider>());
-                layers[1] = cheese;
-            }
-            if (layers[1] != null) layers[1].SetActive(hasCheese);
-
-            // Calabresa: Bit 2 (4)
-            bool hasCalabresa = (item.IngredientMask & 4) != 0;
-            if (hasCalabresa && layers[2] == null)
-            {
-                var toppingRoot = new GameObject("Toppings_Calabresa");
-                toppingRoot.transform.SetParent(layerParent, false);
-                toppingRoot.transform.localPosition = new Vector3(0, 0.04f, 0);
-                toppingRoot.transform.localRotation = Quaternion.identity;
-                toppingRoot.transform.localScale = Vector3.one;
-
-                var topMat = new Material(urpShader) { color = new Color(0.65f, 0.15f, 0.15f) };
-
-                for (int i = 0; i < 4; i++)
-                {
-                    var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    sphere.transform.SetParent(toppingRoot.transform, false);
-
-                    float angle = i * Mathf.PI / 2f + 0.15f;
-                    float radius = 0.09f;
-                    sphere.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
-                    sphere.transform.localScale = new Vector3(0.05f, 0.02f, 0.05f);
-                    sphere.GetComponent<Renderer>().sharedMaterial = topMat;
-                    Destroy(sphere.GetComponent<Collider>());
-                }
-                layers[2] = toppingRoot;
-            }
-            if (layers[2] != null) layers[2].SetActive(hasCalabresa);
-
-            // Cogumelo: Bit 3 (8)
-            bool hasMushroom = (item.IngredientMask & 8) != 0;
-            if (hasMushroom && layers[3] == null)
-            {
-                var mushRoot = new GameObject("Toppings_Mushroom");
-                mushRoot.transform.SetParent(layerParent, false);
-                mushRoot.transform.localPosition = new Vector3(0, 0.045f, 0);
-                mushRoot.transform.localRotation = Quaternion.identity;
-                mushRoot.transform.localScale = Vector3.one;
-
-                var mushMat = new Material(urpShader) { color = new Color(0.75f, 0.65f, 0.52f) };
-
-                for (int i = 0; i < 4; i++)
-                {
-                    var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    sphere.transform.SetParent(mushRoot.transform, false);
-
-                    float angle = i * Mathf.PI / 2f + 0.9f;
-                    float radius = 0.07f;
-                    sphere.transform.localPosition = new Vector3(Mathf.Cos(angle) * radius, 0, Mathf.Sin(angle) * radius);
-                    sphere.transform.localScale = new Vector3(0.045f, 0.022f, 0.045f);
-                    sphere.GetComponent<Renderer>().sharedMaterial = mushMat;
-                    Destroy(sphere.GetComponent<Collider>());
-                }
-                layers[3] = mushRoot;
-            }
-            if (layers[3] != null) layers[3].SetActive(hasMushroom);
+            var composition = ScaryParty.Pizzeria.Visual.PizzaVisualComposition.FromNetItemDto(item);
+            var layout = ScaryParty.Pizzeria.Visual.PizzaLayoutGenerator.Generate(composition, ScaryParty.Pizzeria.Visual.PizzaVisualCatalog.Instance);
+            ScaryParty.Pizzeria.Visual.PizzaVisualComposer.ApplyLayout(pizzaGo, layout, item);
         }
 
         private void Update()
