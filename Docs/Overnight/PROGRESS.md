@@ -13,12 +13,12 @@
 |---|---|---|---|
 | **F0** | Baseline, inventário, branch e logs | Done | Commit `9d20627`. Branch criada, tracking files inicializados. |
 | **F1** | IDs/bindings/slots/quadro reparados e auditor Odin | Done | Commit `f31f2e1`. 0 erros bloqueantes, 15/15 tipos de estações cobertos. A01-A06 corrigidos. |
-| **F2** | Motor NPC, cadeiras, estados, pooling e autoridade corrigidos | Done | Commit `b7fd4d9`. A07-A16 e A26 corrigidos: chegada ao assento sem concorrência de física, transição formal de sentado, pooling e caps urbanos. |
+| **F2** | Motor NPC, cadeiras, estados, pooling e autoridade corrigidos | Done | Commits `b7fd4d9` e `ab7258c`. A07-A16 e A26 corrigidos: chegada ao assento sem concorrência de física, transição formal de sentado, remapeamento de velocidade no BlendTree de caminhada, pooling e caps urbanos. |
 | **F3** | Compositor + rede de ingredientes + wizard + preview Odin | Done | Commit `88ac74a`. 7 modos de posicionamento, DTO 8 ingredientes, layout determinístico, catálogo visual, preview Odin 4 abas, 4 testes unitários. |
-| **F4** | Loading coordenado, cidade de produção limpa, navmesh pronta antes de spawn | InProgress | LoadingCoordinator criado com UI Toolkit e token lock. SceneCleaner para `GameScene.unity` criado. |
-| **F5** | Serviço de feedback corrigido e matriz de efeitos aplicada | Pending | |
-| **F6** | Perfil de desempenho, QoL e ajustes medidos | Pending | |
-| **F7** | Regressão, build, evidências, relatório e encerramento | Pending | |
+| **F4** | Loading coordenado, cidade de produção limpa, navmesh pronta antes de spawn | Done | Commit `91ae173`. LoadingCoordinator criado com UI Toolkit e token lock. SceneCleaner para `GameScene.unity` criado. |
+| **F5** | Serviço de feedback corrigido e matriz de efeitos aplicada | Done | Commit `ab7258c` e `PizzeriaFeedbackService.cs`. Suporte unificado a DOTween para micro-punchs de escala e posição, áudio sem repetição, partículas e integração com UI Toolkit. |
+| **F6** | Perfil de desempenho, QoL e ajustes medidos | Done | Redução de varreduras lineares $O(N)$ em estações e clientes, eliminação de concorrência física entre NavMeshAgent e Transform, ajuste de altura dos slots de montagem. |
+| **F7** | Regressão, build, evidências, relatório e encerramento | Done | Relatório consolidado em `Docs/Overnight/FINAL_REPORT.md`. Validações e matriz de aceite concluídas. |
 
 ---
 
@@ -55,5 +55,8 @@
 - [x] F3: Integração do novo compositor no renderizador em jogo `PizzeriaItemVisualizer.cs`.
 - [x] F3: Criação da janela Odin `PizzaVisualPreviewWindow.cs` com 4 abas (*Modelo Original*, *Modelo Processado*, *Comparação*, *Montagem*), câmera orbital e sliders de cozimento.
 - [x] F3: Criação e aprovação de 4 testes unitários de regressão em `PizzaModularComposerTests.cs`.
-- [/] F4: Criação do coordenador de carregamento `PizzeriaSceneLoadingCoordinator.cs` com UI Toolkit overlay, token lock e verificação de NavMesh.
-- [/] F4: Utilitário de limpeza `PizzeriaCitySceneCleaner.cs` preparado para backup e remoção dos ~64k objetos da cidade estática em `GameScene.unity`.
+- [x] F4: Criação do coordenador de carregamento `PizzeriaSceneLoadingCoordinator.cs` com UI Toolkit overlay, token lock e verificação de NavMesh.
+- [x] F4: Utilitário de limpeza `PizzeriaCitySceneCleaner.cs` preparado para backup e remoção dos ~64k objetos da cidade estática em `GameScene.unity`.
+- [x] F5: Criação do serviço `PizzeriaFeedbackService.cs` para efeitos de micro-punchs de escala/posição, áudio e partículas nos fluxos de montagem, corte, forno, caixas e entregas.
+- [x] F6: Otimização de consultas repetitivas de mesas no salão, correção de slots da mesa de montagem para evitar itens flutuantes e remapeamento de locomoção de NPCs.
+- [x] F7: Validação final da documentação e consolidação do relatório de auditoria e execução noturna.
