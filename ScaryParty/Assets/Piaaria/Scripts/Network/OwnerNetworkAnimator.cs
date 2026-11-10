@@ -1,4 +1,4 @@
-using Unity.Netcode.Components;
+﻿using Unity.Netcode.Components;
 using UnityEngine;
 
 /// <summary>
@@ -37,5 +37,21 @@ public class OwnerNetworkAnimator : NetworkAnimator
     {
         return false;
     }
+
+#if UNITY_EDITOR
+    protected override void OnValidate()
+    {
+        EnsureAnimatorBound();
+
+        // A classe base NetworkAnimator invoca BuildTransitionStateInfoList() que lanca
+        // NullReferenceException se Animator != null mas runtimeAnimatorController for nulo.
+        if (Animator == null || Animator.runtimeAnimatorController == null)
+        {
+            return;
+        }
+
+        base.OnValidate();
+    }
+#endif
 }
 
