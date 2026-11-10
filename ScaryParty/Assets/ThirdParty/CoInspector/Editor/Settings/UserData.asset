@@ -179,14 +179,9 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked:
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
+      mostClicked: []
       recentlyClicked:
-      - paths:
-        - 
+      - paths: []
         count: 1
         gameObjects: []
       - paths: []
@@ -220,7 +215,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 11:31 AM (November 10, 2026)
+    lastSaveTimePrint: 12:41 PM (November 10, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -238,20 +233,12 @@ MonoBehaviour:
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: 
-      paths:
-      - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-        media.002[0]/prato/forma.003[0]"}'
-      - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-        media.002[0]/prato/forma.004[0]"}'
-      - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-        media.002[0]/prato/forma.001[0]"}'
-      - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-        media.002[0]/prato/forma.002[0]"}'
+    - path: '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Utensilios[0]/caixa.005[0]"}'
+      paths: []
       tabWidth: 0
-      name: (4) Objects
+      name: caixa.005
       icon: {fileID: 2244882685325231567, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: (4) Objects
+      shortName: caixa.005
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -264,7 +251,7 @@ MonoBehaviour:
         m_Image: {fileID: 0}
         m_Tooltip: 
         m_TextWithWhitespace: 
-      multiEditMode: 1
+      multiEditMode: 0
       locked: 0
       hasPreview: 0
       previewHeight: 150
@@ -273,11 +260,7 @@ MonoBehaviour:
       prefab: 1
       multiFoldout: 1
       target: {fileID: 0}
-      targets:
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
-      - {fileID: 0}
+      targets: []
       linkedPrefabs: []
       trackMultiTarget: {fileID: 0}
       serializedTransform:
@@ -359,44 +342,10 @@ MonoBehaviour:
         niceComponentName: box collider
       historyPaths:
       - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.003[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.004[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.001[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.002[0]"}'
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Utensilios[0]/caixa.005[0]"}'
         prefab: 1
       - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.003[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.004[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.001[0]"}'
-        prefab: 1
-      - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.003[0]"}'
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.004[0]"}'
-        prefab: 1
-      - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.003[0]"}'
-        prefab: 1
-      - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]/prato/forma.004[0]"}'
-        prefab: 1
-      - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.002[0]"}'
-        prefab: 1
-      - paths:
-        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
-          media.001[0]/Slots[0]"}'
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Utensilios[0]/caixa.006[0]"}'
         prefab: 1
       - paths:
         - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
@@ -404,7 +353,23 @@ MonoBehaviour:
         prefab: 1
       - paths:
         - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
+          de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_3[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
           de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_2[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
+          de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_1[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
+          de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_0[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
+          de Comandas[0]/cardapio.001[0]/TicketSlots[0]"}'
         prefab: 1
       - paths:
         - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
@@ -412,8 +377,125 @@ MonoBehaviour:
         prefab: 1
       - paths:
         - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Quadro
-          de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_3[0]"}'
+          de Comandas[0]/cardapio.001[0]/TicketSlots[0]/TicketSlot_5[0]/SheetText[0]"}'
         prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_01_Salao[0]/Arquitetura[0]/Paredes[0]/Externas[0]/paredejaneladir.002[0]"}'
+        prefab: 1
+      owner: {fileID: 0}
+    closedTabs: []
+    playModeTransforms: []
+    historyAssets:
+    - assetGUIDs:
+      - 58419e8b75d34b8eba18fae7e904ad82
+    - assetGUIDs:
+      - b0067bd253bce9c44b4a327a114d4cfa
+    - assetGUIDs:
+      - fc7266d1e4dbc5a46aa1445238583bbe
+    - assetGUIDs:
+      - aea9048861f334040899df7719892c80
+    - assetGUIDs:
+      - 054a2469cdd147bbbd240ad3d27af854
+    - assetGUIDs:
+      - 6f00d9b5be2f47818c86b953a27da0d4
+    - assetGUIDs:
+      - 5d50dbc038eb4994a8e567f09ba47a7a
+    - assetGUIDs:
+      - 7743f135c45f481c911d313178a41eca
+    - assetGUIDs:
+      - 1f3b804c253ee974fa3b45efa0fd3ed0
+    - assetGUIDs:
+      - 75911d39ab9042b9b90366e89878b9c8
+    - assetGUIDs:
+      - 50330bb3be2c46468a973efbce8e1862
+    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObjects: []
+    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastClickedTab: -1
+    previousTab: 0
+  - tracker:
+      mostClicked: []
+      recentlyClicked: []
+      mostClickedContents: []
+      recentlyClickedContents: []
+    sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
+    sceneName: LobbyScene
+    lastSaveTimePrint: 11:33 AM (November 10, 2026)
+    gracePeriod: 3
+    activeIndex: 0
+    checkingToLoad: 0
+    assetsCollapsed: 0
+    lockedAsset: 0
+    maximizedAssetView: 0
+    showImportSettings: 0
+    suggestedHeight: 0
+    userAssetViewSize: -1
+    previewHeight: 0
+    scrollPosition: {x: 0, y: 0}
+    toolbarScrollPosition: {x: 0, y: 0}
+    rawUserHeight: 0
+    lastValidTabWidth: 0
+    alreadyCalculatedHeight: 0
+    lastKnownHeight: 0
+    tabs:
+    - path: 
+      paths: []
+      tabWidth: 0
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
+      filterString: 
+      newTab: 1
+      scrollPosition: 0
+      isSelected: 0
+      allCollapsed: 0
+      runtimeFoldouts: 
+      runtimeMultiComponents: []
+      tabTextContent:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+        m_TextWithWhitespace: 
+      multiEditMode: 0
+      locked: 0
+      hasPreview: 0
+      previewHeight: 150
+      debug: 0
+      filtering: 0
+      prefab: 0
+      multiFoldout: 1
+      target: {fileID: 0}
+      targets: []
+      linkedPrefabs: []
+      trackMultiTarget: {fileID: 0}
+      serializedTransform:
+        owner: {fileID: 0}
+        localPosition: {x: 0, y: 0, z: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localScale: {x: 0, y: 0, z: 0}
+        originalPosition: {x: 0, y: 0, z: 0}
+        originalRotation: {x: 0, y: 0, z: 0, w: 0}
+        originalLocalScale: {x: 0, y: 0, z: 0}
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 0, y: 0}
+        anchoredPosition: {x: 0, y: 0}
+        sizeDelta: {x: 0, y: 0}
+        pivot: {x: 0, y: 0}
+        originalAnchorMin: {x: 0, y: 0}
+        originalAnchorMax: {x: 0, y: 0}
+        originalAnchoredPosition: {x: 0, y: 0}
+        originalSizeDelta: {x: 0, y: 0}
+        originalPivot: {x: 0, y: 0}
+        isRectTransform: 0
+        appliedTransform: 0
+        undidTransform: 0
+        autoSave: 0
+      serializedTransforms: []
+      savePlayModeTransform: 0
+      index: 0
+      historyPosition: 0
+      componentMaps: []
+      historyPaths: []
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
@@ -450,123 +532,9 @@ MonoBehaviour:
       recentlyClicked: []
       mostClickedContents: []
       recentlyClickedContents: []
-    sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
-    sceneName: LobbyScene
-    lastSaveTimePrint: 11:03 AM (November 10, 2026)
-    gracePeriod: 3
-    activeIndex: 0
-    checkingToLoad: 0
-    assetsCollapsed: 0
-    lockedAsset: 0
-    maximizedAssetView: 0
-    showImportSettings: 0
-    suggestedHeight: 0
-    userAssetViewSize: -1
-    previewHeight: 0
-    scrollPosition: {x: 0, y: 0}
-    toolbarScrollPosition: {x: 0, y: 0}
-    rawUserHeight: 0
-    lastValidTabWidth: 0
-    alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
-    tabs:
-    - path: 
-      paths: []
-      tabWidth: 0
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
-      filterString: 
-      newTab: 1
-      scrollPosition: 0
-      isSelected: 0
-      allCollapsed: 0
-      runtimeFoldouts: 
-      runtimeMultiComponents: []
-      tabTextContent:
-        m_Text: 
-        m_Image: {fileID: 0}
-        m_Tooltip: 
-        m_TextWithWhitespace: 
-      multiEditMode: 0
-      locked: 0
-      hasPreview: 0
-      previewHeight: 150
-      debug: 0
-      filtering: 0
-      prefab: 0
-      multiFoldout: 1
-      target: {fileID: 0}
-      targets: []
-      linkedPrefabs: []
-      trackMultiTarget: {fileID: 0}
-      serializedTransform:
-        owner: {fileID: 0}
-        localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
-        localScale: {x: 0, y: 0, z: 0}
-        originalPosition: {x: 0, y: 0, z: 0}
-        originalRotation: {x: 0, y: 0, z: 0, w: 0}
-        originalLocalScale: {x: 0, y: 0, z: 0}
-        anchorMin: {x: 0, y: 0}
-        anchorMax: {x: 0, y: 0}
-        anchoredPosition: {x: 0, y: 0}
-        sizeDelta: {x: 0, y: 0}
-        pivot: {x: 0, y: 0}
-        originalAnchorMin: {x: 0, y: 0}
-        originalAnchorMax: {x: 0, y: 0}
-        originalAnchoredPosition: {x: 0, y: 0}
-        originalSizeDelta: {x: 0, y: 0}
-        originalPivot: {x: 0, y: 0}
-        isRectTransform: 0
-        appliedTransform: 0
-        undidTransform: 0
-        autoSave: 0
-      serializedTransforms: []
-      savePlayModeTransform: 0
-      index: 0
-      historyPosition: 0
-      componentMaps: []
-      historyPaths: []
-      owner: {fileID: 0}
-    closedTabs: []
-    playModeTransforms: []
-    historyAssets:
-    - assetGUIDs:
-      - ca14d084d9058bf4bb740f0939df13ff
-    - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
-    - assetGUIDs:
-      - aefe2171e12196c4c988d9e2428d90ab
-    - assetGUIDs:
-      - fd443a703d51ae0408ddfe7d9a12507f
-    - assetGUIDs:
-      - 3c781e3b27a36f14a9e8c5249ea393f2
-    - assetGUIDs:
-      - b587044e97dbec04cb381b939a2ffa22
-    - assetGUIDs:
-      - 9e65156b3bfc41b4ea7b6eba31051d8d
-    - assetGUIDs:
-      - 7125a3c8cb32ba54a92762e1b3f686a4
-    - assetGUIDs:
-      - bc41cc71786303b4ebe3b7b52e6cd2e0
-    - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
-    - assetGUIDs:
-      - 64dce48905ffd9b4293e595fa6941544
-    targetObject: {fileID: 11400000, guid: ca14d084d9058bf4bb740f0939df13ff, type: 2}
-    targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/DefaultCityConfig.asset
-    lastClickedTab: -1
-    previousTab: 0
-  - tracker:
-      mostClicked: []
-      recentlyClicked: []
-      mostClickedContents: []
-      recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 11:03 AM (November 10, 2026)
+    lastSaveTimePrint: 11:34 AM (November 10, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -647,30 +615,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - ca14d084d9058bf4bb740f0939df13ff
+      - aea9048861f334040899df7719892c80
     - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
+      - 054a2469cdd147bbbd240ad3d27af854
     - assetGUIDs:
-      - aefe2171e12196c4c988d9e2428d90ab
+      - 6f00d9b5be2f47818c86b953a27da0d4
     - assetGUIDs:
-      - fd443a703d51ae0408ddfe7d9a12507f
+      - 5d50dbc038eb4994a8e567f09ba47a7a
     - assetGUIDs:
-      - 3c781e3b27a36f14a9e8c5249ea393f2
+      - 7743f135c45f481c911d313178a41eca
     - assetGUIDs:
-      - b587044e97dbec04cb381b939a2ffa22
+      - 1f3b804c253ee974fa3b45efa0fd3ed0
     - assetGUIDs:
-      - 9e65156b3bfc41b4ea7b6eba31051d8d
+      - 75911d39ab9042b9b90366e89878b9c8
     - assetGUIDs:
-      - 7125a3c8cb32ba54a92762e1b3f686a4
+      - 50330bb3be2c46468a973efbce8e1862
     - assetGUIDs:
-      - bc41cc71786303b4ebe3b7b52e6cd2e0
+      - 406842cc83ea4b9aa2fc8ecaf099da4c
     - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
+      - 4e3a2888158d62c43892138fc7510423
     - assetGUIDs:
-      - 64dce48905ffd9b4293e595fa6941544
-    targetObject: {fileID: 11400000, guid: ca14d084d9058bf4bb740f0939df13ff, type: 2}
+      - ba16c5c9b9b1be54fba32bb0bef0c3aa
+    targetObject: {fileID: 100596665541720824, guid: aea9048861f334040899df7719892c80, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/DefaultCityConfig.asset
+    lastSelectedAsset: Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_SupplyCrate.prefab
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -887,6 +855,6 @@ MonoBehaviour:
     lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000010000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000000000000010000000100000000000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000000000001000000
+  tipsShown: 01000000010000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000000000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
   playModeStartScene: {}
   enteringPlayMode: 0

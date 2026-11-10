@@ -57,7 +57,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GlintTexture:
-        m_Texture: {fileID: 2800000, guid: 664a5e8d4cd1bfb4bae4275631603fad, type: 3}
+        m_Texture: {fileID: 2800000, guid: b94445855cf52494f9eb2b3e26ff3e1a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _GlowEffectTexture:
@@ -167,7 +167,7 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _ClipTriplanar: 1
-    - _ColorNumbers: 4.11
+    - _ColorNumbers: 20
     - _Cull: 2
     - _CullMode: 0
     - _Cutoff: 0.5
@@ -192,7 +192,7 @@ Material:
     - _FlutterSource: 3
     - _FlutterSpeed: 1
     - _Frequency: 47.3
-    - _GlintScale: 1.33
+    - _GlintScale: 0.1
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
@@ -202,9 +202,9 @@ Material:
     - _GradientOffset: 1
     - _GradientSensitivity: 1
     - _GradientSource: 0
-    - _HalftoneMultiplier: 0.675
+    - _HalftoneMultiplier: 2
     - _HalftoneOffset: 0
-    - _HalftoneScale: 1.57
+    - _HalftoneScale: 5
     - _HardSurfaceOutline: 0
     - _HardSurfaceOutline1: 0
     - _HueShift: 0
@@ -273,13 +273,13 @@ Material:
     - _SwaySensitivity: 1
     - _SwaySource: 0
     - _SwaySpeed: 1
-    - _SwirlAmount: 0
-    - _SwirlFramerate: 10
-    - _SwirlNoiseScale: 1
+    - _SwirlAmount: 12
+    - _SwirlFramerate: 37
+    - _SwirlNoiseScale: 7.85
     - _SwirlOffset: 0
     - _SwirlSensitivity: 1
     - _SwirlSource: 0
-    - _SwirlSpeed: 1
+    - _SwirlSpeed: 4.25
     - _TailHeadFalloff: 0.5
     - _TessValue: 16
     - _Threshold: 0.5
@@ -321,24 +321,24 @@ Material:
     m_Colors:
     - _AbstractTextureColor: {r: 0, g: 0, b: 0, a: 0}
     - _Albedo: {r: 0, g: 0, b: 0, a: 0}
-    - _BaseColor: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1.000000}
+    - _BaseColor: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1}
     - _BodyGlow: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1.000000}
+    - _Color: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1}
     - _CustomNormalDirection: {r: 0, g: 0, b: 0, a: 0}
     - _CustomNormalEllipseSize: {r: 1, g: 1, b: 1, a: 0}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 1, g: 0, b: 0, a: 1}
     - _EmissionScrolling1: {r: 1, g: 1, b: 0, a: 0}
     - _EmissionScrolling2: {r: 0.1, g: -0.5, b: 0, a: 0}
     - _FarColor: {r: 1, g: 1, b: 1, a: 0}
     - _FlutterDirection: {r: 1, g: 1, b: 0, a: 0}
     - _FlutterMask: {r: 0, g: 0, b: 0, a: 0}
-    - _GlintColor: {r: 1, g: 1, b: 1, a: 0}
+    - _GlintColor: {r: 0.6509804, g: 0.54509807, b: 0.3019608, a: 0}
     - _GlintFresnel: {r: 0, g: 0, b: 0, a: 0}
     - _GlowEffectColor: {r: 0, g: 1, b: 0.9616327, a: 0}
     - _GradientChannelMask: {r: 0, g: 1, b: 0, a: 0}
     - _GradientPositionalOffset: {r: 0, g: 0, b: 0, a: 0}
     - _LightColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MainColor: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1.000000}
+    - _MainColor: {r: 0.772549, g: 0.627451, b: 0.411765, a: 1}
     - _MainColor1: {r: 1, g: 1, b: 1, a: 0}
     - _MainGlowFresnel: {r: 0, g: 0, b: 0, a: 0}
     - _NearColor: {r: 1, g: 1, b: 1, a: 1}
@@ -356,7 +356,7 @@ Material:
     - _SwayMask: {r: 0, g: 0, b: 0, a: 0}
     - _SwirlDirection: {r: 0, g: 1, b: 0, a: 0}
     - _SwirlMask: {r: 0, g: 0, b: 0, a: 0}
-    - _TriplanarColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TriplanarColor: {r: 0.7056604, g: 0.56373316, b: 0.2969099, a: 0}
     - _TriplanarDirection: {r: 0, g: 1, b: 0, a: 0}
     - _WaveDirection1: {r: 0, g: 1, b: 0, a: 0}
     - _WaveDirection2: {r: 0, g: 1, b: 0, a: 0}
