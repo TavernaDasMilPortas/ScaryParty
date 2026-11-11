@@ -160,6 +160,13 @@ namespace ScaryParty.Pizzeria.Composition
             if (GetComponent<ScaryParty.Pizzeria.Presentation.CustomerPatienceHudPresenter>() == null)
                 gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.CustomerPatienceHudPresenter>();
 
+            // Aplica estilo cel-shading ativo no cliente e servidor preservando hash de NetworkObject
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                gameObject,
+                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                ScaryParty.VisualStyles.VisualCategoryIds.Architecture,
+                "pizzeria_modular");
+
             OnPizzeriaInitialized?.Invoke();
         }
 

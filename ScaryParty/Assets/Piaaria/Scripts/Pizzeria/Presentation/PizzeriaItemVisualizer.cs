@@ -26,6 +26,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private readonly Dictionary<ulong, ItemVisualWrapper> _visualWrappers = new Dictionary<ulong, ItemVisualWrapper>();
         private readonly HashSet<ulong> _processHiddenItems = new HashSet<ulong>();
+        private MaterialPropertyBlock _sharedItemColorBlock;
+        private MaterialPropertyBlock SharedItemColorBlock => _sharedItemColorBlock ??= new MaterialPropertyBlock();
 
         public ItemVisualWrapper GetItemVisual(ulong id)
             => _visualWrappers.TryGetValue(id, out var wrapper) ? wrapper : null;
@@ -82,6 +84,13 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void EnsureCatalog()
         {
+            var styledCatalog = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledItemCatalogAsset as ItemPresentationCatalog;
+            if (styledCatalog != null)
+            {
+                catalog = styledCatalog;
+                return;
+            }
+
             if (catalog == null)
             {
                 catalog = Resources.Load<ItemPresentationCatalog>("ItemPresentationCatalog");
@@ -257,13 +266,17 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (profile != null && profile.visualPrefab != null)
                 {
                     model = Instantiate(profile.visualPrefab);
+                    ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                        model,
+                        ScaryParty.VisualStyles.VisualSemanticRole.KitchenTool,
+                        ScaryParty.VisualStyles.VisualCategoryIds.Props,
+                        profile.presentationKey);
                 }
                 else
                 {
                     model = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     model.transform.localScale = new Vector3(0.08f, 0.28f, 0.08f);
-                    var rend = model.GetComponent<Renderer>();
-                    if (rend != null) rend.material.color = new Color(0.7f, 0.75f, 0.8f);
+                    ApplyFallbackPrimitiveStyle(model, ScaryParty.VisualStyles.VisualSemanticRole.KitchenTool, new Color(0.7f, 0.75f, 0.8f));
                     var col = model.GetComponent<Collider>();
                     if (col != null) Destroy(col);
                 }
@@ -451,7 +464,13 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (profile != null && profile.visualPrefab != null)
             {
-                return Instantiate(profile.visualPrefab);
+                var prefabInst = Instantiate(profile.visualPrefab);
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    prefabInst,
+                    profile.isTool ? ScaryParty.VisualStyles.VisualSemanticRole.KitchenTool : ScaryParty.VisualStyles.VisualSemanticRole.FoodGeneric,
+                    profile.isTool ? ScaryParty.VisualStyles.VisualCategoryIds.Props : ScaryParty.VisualStyles.VisualCategoryIds.Food,
+                    profile.presentationKey);
+                return prefabInst;
             }
 
             bool isBoxed = item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box;
@@ -459,8 +478,6 @@ namespace ScaryParty.Pizzeria.Presentation
                                 item.Category == (byte)ItemCategory.Sauce ||
                                 item.Category == (byte)ItemCategory.Cheese ||
                                 item.Category == (byte)ItemCategory.Topping;
-
-            Shader urpShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
 
             GameObject go;
             if (isBoxed)
@@ -470,9 +487,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     go.transform.localScale = new Vector3(0.4f, 0.1f, 0.4f);
-                    var rend = go.GetComponent<Renderer>();
-                    var mat = new Material(urpShader) { color = new Color(0.6f, 0.4f, 0.2f) };
-                    rend.sharedMaterial = mat;
+                    ApplyFallbackPrimitiveStyle(go, ScaryParty.VisualStyles.VisualSemanticRole.PizzaBox, new Color(0.6f, 0.4f, 0.2f));
                 }
             }
             else if (isIngredient)
@@ -483,20 +498,31 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                    var rend = go.GetComponent<Renderer>();
                     Color ingColor = Color.white;
-                    if (item.Category == (byte)ItemCategory.Dough) ingColor = new Color(0.92f, 0.85f, 0.70f);
-                    else if (item.Category == (byte)ItemCategory.Sauce) ingColor = new Color(0.80f, 0.15f, 0.10f);
-                    else if (item.Category == (byte)ItemCategory.Cheese) ingColor = new Color(0.98f, 0.88f, 0.35f);
+                    ScaryParty.VisualStyles.VisualSemanticRole ingRole = ScaryParty.VisualStyles.VisualSemanticRole.FoodGeneric;
+                    if (item.Category == (byte)ItemCategory.Dough)
+                    {
+                        ingColor = new Color(0.92f, 0.85f, 0.70f);
+                        ingRole = ScaryParty.VisualStyles.VisualSemanticRole.PizzaDough;
+                    }
+                    else if (item.Category == (byte)ItemCategory.Sauce)
+                    {
+                        ingColor = new Color(0.80f, 0.15f, 0.10f);
+                        ingRole = ScaryParty.VisualStyles.VisualSemanticRole.PizzaSauce;
+                    }
+                    else if (item.Category == (byte)ItemCategory.Cheese)
+                    {
+                        ingColor = new Color(0.98f, 0.88f, 0.35f);
+                        ingRole = ScaryParty.VisualStyles.VisualSemanticRole.PizzaCheese;
+                    }
                     else if (item.Category == (byte)ItemCategory.Topping)
                     {
-                        ingColor = (item.DefinitionId == 8 || item.DefinitionId == 9)
-                            ? new Color(0.75f, 0.65f, 0.52f)
-                            : new Color(0.65f, 0.15f, 0.15f);
+                        bool isMushroom = item.DefinitionId == 8 || item.DefinitionId == 9;
+                        ingColor = isMushroom ? new Color(0.75f, 0.65f, 0.52f) : new Color(0.65f, 0.15f, 0.15f);
+                        ingRole = isMushroom ? ScaryParty.VisualStyles.VisualSemanticRole.PizzaMushroom : ScaryParty.VisualStyles.VisualSemanticRole.PizzaPepperoni;
                     }
 
-                    var mat = new Material(urpShader) { color = ingColor };
-                    rend.sharedMaterial = mat;
+                    ApplyFallbackPrimitiveStyle(go, ingRole, ingColor);
                 }
             }
             else
@@ -507,16 +533,39 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                     go.transform.localScale = new Vector3(0.4f, 0.02f, 0.4f);
-                    var rend = go.GetComponent<Renderer>();
-                    var mat = new Material(urpShader) { color = new Color(0.92f, 0.85f, 0.70f) };
-                    rend.sharedMaterial = mat;
+                    ApplyFallbackPrimitiveStyle(go, ScaryParty.VisualStyles.VisualSemanticRole.PizzaDough, new Color(0.92f, 0.85f, 0.70f));
                 }
             }
+
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                go,
+                ScaryParty.VisualStyles.VisualSemanticRole.FoodGeneric,
+                ScaryParty.VisualStyles.VisualCategoryIds.Food,
+                profile != null ? profile.presentationKey : null);
 
             var col = go.GetComponent<Collider>();
             if (col != null) Destroy(col);
 
             return go;
+        }
+
+        private void ApplyFallbackPrimitiveStyle(GameObject go, ScaryParty.VisualStyles.VisualSemanticRole role, Color tint)
+        {
+            var rend = go != null ? go.GetComponent<Renderer>() : null;
+            if (rend == null) return;
+
+            Material mat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                rend.sharedMaterial,
+                role,
+                ScaryParty.VisualStyles.VisualCategoryIds.Food,
+                () =>
+                {
+                    Shader urpShader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                    return new Material(urpShader);
+                });
+
+            if (mat != null) rend.sharedMaterial = mat;
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, tint, SharedItemColorBlock);
         }
 
         private void AttachItemToLocation(ItemVisualWrapper wrapper, NetItemDto item, ItemPresentationProfile profile)
@@ -709,15 +758,17 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
-        private static void ApplyColorToRenderers(Renderer[] renderers, Color color)
+        private void ApplyColorToRenderers(Renderer[] renderers, Color color)
         {
             if (renderers == null) return;
             for (int i = 0; i < renderers.Length; i++)
             {
-                if (renderers[i] == null || renderers[i] is ParticleSystemRenderer) continue;
-                if (renderers[i].material != null)
+                var r = renderers[i];
+                if (r == null || r is ParticleSystemRenderer) continue;
+                int slotCount = r.sharedMaterials != null ? r.sharedMaterials.Length : 1;
+                for (int s = 0; s < slotCount; s++)
                 {
-                    renderers[i].material.color = color;
+                    ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(r, s, color, SharedItemColorBlock);
                 }
             }
         }

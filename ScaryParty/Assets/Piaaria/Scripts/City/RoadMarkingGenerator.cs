@@ -124,7 +124,11 @@ public static class RoadMarkingGenerator
             mf.sharedMesh = yellowMesh;
 
             MeshRenderer mr = yellowObj.AddComponent<MeshRenderer>();
-            Material yMat = (yellowMaterial != null) ? yellowMaterial : CreateMarkingMaterial(new Color(1f, 0.84f, 0.05f));
+            Material yMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                yellowMaterial,
+                ScaryParty.VisualStyles.VisualSemanticRole.RoadYellow,
+                ScaryParty.VisualStyles.VisualCategoryIds.Streets,
+                () => CreateMarkingMaterial(new Color(1f, 0.84f, 0.05f)));
             mr.sharedMaterial = yMat;
         }
 
@@ -146,7 +150,11 @@ public static class RoadMarkingGenerator
             mf.sharedMesh = whiteMesh;
 
             MeshRenderer mr = whiteObj.AddComponent<MeshRenderer>();
-            Material wMat = (whiteMaterial != null) ? whiteMaterial : CreateMarkingMaterial(new Color(0.96f, 0.96f, 0.96f));
+            Material wMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                whiteMaterial,
+                ScaryParty.VisualStyles.VisualSemanticRole.RoadWhite,
+                ScaryParty.VisualStyles.VisualCategoryIds.Streets,
+                () => CreateMarkingMaterial(new Color(0.96f, 0.96f, 0.96f)));
             mr.sharedMaterial = wMat;
         }
 

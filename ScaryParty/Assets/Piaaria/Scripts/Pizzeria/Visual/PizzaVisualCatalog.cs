@@ -75,7 +75,7 @@ namespace ScaryParty.Pizzeria.Visual
                 }
             }
 
-            // Fallback procedural configurado com as cores e modos padronizados
+            // Fallback procedural configurado com as cores e modos gastronômicos padronizados
             var fallback = CreateProceduralProfile(ingredientDefId, stage);
             _runtimeCache[ingredientDefId] = fallback;
             return fallback;
@@ -92,54 +92,80 @@ namespace ScaryParty.Pizzeria.Visual
                 case 3: // Molho de Tomate
                     p.displayName = "Molho de Tomate";
                     p.placementMode = PizzaPlacementMode.Total;
-                    p.tintColor = new Color(0.80f, 0.15f, 0.10f);
-                    p.layerHeight = 0.012f;
-                    p.coatingScale = 0.38f;
-                    p.thickness = 0.005f;
+                    p.tintColor = new Color(0.82f, 0.16f, 0.10f);
+                    p.bakedTintColor = new Color(0.58f, 0.10f, 0.06f);
+                    p.burnedTintColor = new Color(0.18f, 0.08f, 0.06f);
+                    p.layerHeight = 0.002f;
+                    p.coatingScale = 1.0f;
+                    p.thickness = 1.0f;
                     break;
 
                 case 4: // Queijo em Bloco
                 case 5: // Queijo Ralado
                     p.displayName = "Queijo Ralado";
                     p.placementMode = PizzaPlacementMode.Total;
-                    p.tintColor = new Color(0.98f, 0.88f, 0.35f);
-                    p.layerHeight = 0.022f;
-                    p.coatingScale = 0.36f;
-                    p.thickness = 0.005f;
+                    p.tintColor = new Color(0.98f, 0.92f, 0.65f);
+                    p.bakedTintColor = new Color(0.94f, 0.72f, 0.22f);
+                    p.burnedTintColor = new Color(0.24f, 0.16f, 0.10f);
+                    p.layerHeight = 0.003f;
+                    p.coatingScale = 0.96f; // 96% para deixar borda sutil de molho visível
+                    p.thickness = 1.0f;
                     break;
 
                 case 6: // Calabresa Inteira
                 case 7: // Calabresa Fatiada
                     p.displayName = "Calabresa Fatiada";
                     p.placementMode = PizzaPlacementMode.Sliced;
-                    p.tintColor = new Color(0.65f, 0.15f, 0.15f);
+                    p.tintColor = new Color(0.72f, 0.18f, 0.14f);
+                    p.bakedTintColor = new Color(0.54f, 0.12f, 0.10f);
+                    p.burnedTintColor = new Color(0.16f, 0.10f, 0.08f);
                     p.piecesPerPortion = 5;
-                    p.occupancyRadius = 0.045f;
-                    p.minDistanceBetweenPieces = 0.07f;
-                    p.yOffset = 0.035f;
-                    p.scaleRange = new Vector2(0.045f, 0.055f);
+                    p.minRadius = 0.035f;
+                    p.maxRadius = 0.115f;
+                    p.occupancyRadius = 0.028f;
+                    p.minDistanceBetweenPieces = 0.055f;
+                    p.yOffset = 0.015f;
+                    p.scaleRange = new Vector2(0.95f, 1.05f);
                     break;
 
                 case 8: // Cogumelo Inteiro
                 case 9: // Cogumelo Fatiado
                     p.displayName = "Cogumelo Fatiado";
                     p.placementMode = PizzaPlacementMode.Sliced;
-                    p.tintColor = new Color(0.75f, 0.65f, 0.52f);
+                    p.tintColor = new Color(0.85f, 0.78f, 0.68f);
+                    p.bakedTintColor = new Color(0.62f, 0.48f, 0.35f);
+                    p.burnedTintColor = new Color(0.18f, 0.14f, 0.12f);
                     p.piecesPerPortion = 4;
-                    p.occupancyRadius = 0.040f;
-                    p.minDistanceBetweenPieces = 0.065f;
-                    p.yOffset = 0.035f;
-                    p.scaleRange = new Vector2(0.04f, 0.05f);
+                    p.minRadius = 0.030f;
+                    p.maxRadius = 0.110f;
+                    p.occupancyRadius = 0.025f;
+                    p.minDistanceBetweenPieces = 0.050f;
+                    p.yOffset = 0.016f;
+                    p.scaleRange = new Vector2(0.95f, 1.05f);
+                    break;
+
+                case 11: // Manjericão
+                    p.displayName = "Manjericão Fresco";
+                    p.placementMode = PizzaPlacementMode.Central;
+                    p.tintColor = new Color(0.22f, 0.68f, 0.24f);
+                    p.bakedTintColor = new Color(0.18f, 0.42f, 0.16f);
+                    p.burnedTintColor = new Color(0.10f, 0.12f, 0.08f);
+                    p.centralYOffset = 0.016f;
+                    p.reservedCenterRadius = 0.035f;
                     break;
 
                 default:
                     p.displayName = $"Ingrediente #{ingredientDefId}";
                     p.placementMode = PizzaPlacementMode.Sliced;
                     p.tintColor = new Color(0.5f, 0.7f, 0.3f);
+                    p.bakedTintColor = new Color(0.4f, 0.5f, 0.2f);
+                    p.burnedTintColor = new Color(0.15f, 0.12f, 0.10f);
                     p.piecesPerPortion = 4;
-                    p.occupancyRadius = 0.040f;
-                    p.minDistanceBetweenPieces = 0.06f;
-                    p.yOffset = 0.035f;
+                    p.minRadius = 0.030f;
+                    p.maxRadius = 0.115f;
+                    p.occupancyRadius = 0.028f;
+                    p.minDistanceBetweenPieces = 0.055f;
+                    p.yOffset = 0.015f;
                     break;
             }
 

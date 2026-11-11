@@ -198,10 +198,15 @@ public class ReadySceneController : MonoBehaviour
             RoomDiscoveryService.Instance.StopHosting();
         }
 
-        // Carrega o GameScene para todos via NetworkSceneManager.
-        // O PlayerState detecta automaticamente que está no GameScene e libera os controles.
+        // Carrega a cena de gameplay ativa (original ou variante estilizada se ativada no VisualStyleRuntimeConfig).
+        // O PlayerState detecta automaticamente a cena de gameplay e libera os controles.
+        string targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.GetGameplaySceneName();
+        if (!Application.CanStreamedLevelBeLoaded(targetScene))
+        {
+            targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
+        }
         NetworkManager.Singleton.SceneManager.LoadScene(
-            "GameScene",
+            targetScene,
             UnityEngine.SceneManagement.LoadSceneMode.Single
         );
     }

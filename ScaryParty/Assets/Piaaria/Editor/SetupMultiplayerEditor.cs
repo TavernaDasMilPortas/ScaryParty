@@ -7,7 +7,7 @@ using Unity.Netcode.Transports.UTP;
 
 public class SetupMultiplayerEditor : EditorWindow
 {
-    [MenuItem("Tools/Setup Multiplayer (Passos 4 a 6)")]
+    [MenuItem("Tools/Scary Party/Legado/Multiplayer/Setup Multiplayer (Passos 4 a 6)", false, 330)]
     public static void SetupMultiplayer()
     {
         // 1. Open the GameScene scene

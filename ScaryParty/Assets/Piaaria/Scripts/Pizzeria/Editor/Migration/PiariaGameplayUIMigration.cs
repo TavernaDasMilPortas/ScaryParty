@@ -27,7 +27,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             "Assets/Piaaria/Prefabs/The_Pizzeria_Building.prefab"
         };
 
-        [MenuItem("Tools/Scary Party/UI/Migrate Gameplay to Piaria")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/UI (P.I.A.R.I.A)/Migrar Gameplay UI para Piaria", false, 285)]
         public static void MigrateGameSceneAndPrefabs()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)

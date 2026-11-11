@@ -5,7 +5,7 @@ namespace ScaryParty.EditorScripts
 {
     public class FpsSetupBuilder : EditorWindow
     {
-        [MenuItem("Tools/Scary Party/FPS Layer Setup")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Projeto & Multiplayer/FPS Layer Setup", false, 210)]
         public static void ShowWindow()
         {
             SetupLayers();

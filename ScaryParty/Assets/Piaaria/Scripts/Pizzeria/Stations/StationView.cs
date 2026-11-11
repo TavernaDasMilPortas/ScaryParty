@@ -12,6 +12,10 @@ namespace ScaryParty.Pizzeria.Stations
         public string stationName = "Estação";
         public Transform[] slotAnchors;
 
+        [Header("Layout de Slots Reutilizável")]
+        public ScaryParty.Pizzeria.Authoring.StationSlotLayoutAsset slotLayoutAsset;
+        public System.Collections.Generic.List<ScaryParty.Pizzeria.Authoring.StationSlotDefinition> occurrenceSlotOverrides;
+
         [Tooltip("Slots posicionados por objetos físicos (pratos etc.) via builder. Desativa a auto-calibração em runtime.")]
         public bool slotsBoundToObjects;
 

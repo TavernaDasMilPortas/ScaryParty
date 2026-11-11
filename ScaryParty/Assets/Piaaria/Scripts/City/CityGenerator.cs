@@ -466,9 +466,22 @@ public class CityGenerator : NetworkBehaviour
         }
 #endif
 
+        Material resolvedStreetMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            streetMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Street, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+        Material resolvedSidewalkMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            sidewalkMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Sidewalk, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+        Material resolvedIntersectionMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            intersectionMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Intersection, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+        Material resolvedYellowMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            roadMarkingYellowMaterial, ScaryParty.VisualStyles.VisualSemanticRole.RoadYellow, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+        Material resolvedWhiteMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            roadMarkingWhiteMaterial, ScaryParty.VisualStyles.VisualSemanticRole.RoadWhite, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+        Material resolvedCrosswalkMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            crosswalkMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Crosswalk, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+
         StreetGraph graph = _streetGridGen.Generate(
             config, rng, _streetsRoot.transform,
-            streetMaterial, sidewalkMaterial, buildingMaterials, out List<Vector3[]> blockPolygons
+            resolvedStreetMat, resolvedSidewalkMat, buildingMaterials, out List<Vector3[]> blockPolygons
         );
         CityData.streetGraph = graph;
 
@@ -489,15 +502,15 @@ public class CityGenerator : NetworkBehaviour
             GeneratePizzariaLegacy();
         }
 
-        _intersectionBuilder.BuildIntersections(graph, config, rng, _intersectionsRoot.transform, intersectionMaterial);
+        _intersectionBuilder.BuildIntersections(graph, config, rng, _intersectionsRoot.transform, resolvedIntersectionMat);
 
         if (_markingsRoot != null)
         {
-            RoadMarkingGenerator.GenerateMarkings(graph, config, _markingsRoot.transform, roadMarkingYellowMaterial, roadMarkingWhiteMaterial);
+            RoadMarkingGenerator.GenerateMarkings(graph, config, _markingsRoot.transform, resolvedYellowMat, resolvedWhiteMat);
         }
         if (_crosswalksRoot != null)
         {
-            CrosswalkGenerator.GenerateCrosswalks(graph, config, _crosswalksRoot.transform, crosswalkMaterial, out _);
+            CrosswalkGenerator.GenerateCrosswalks(graph, config, _crosswalksRoot.transform, resolvedCrosswalkMat, out _);
         }
 
         CityBuilding[] allBuildings = _blocksRoot.GetComponentsInChildren<CityBuilding>();

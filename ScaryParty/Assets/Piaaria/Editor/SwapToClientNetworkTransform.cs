@@ -4,7 +4,7 @@ using Unity.Netcode.Components;
 
 public class SwapToClientNetworkTransform : EditorWindow
 {
-    [MenuItem("Tools/Trocar NetworkTransform por ClientNetworkTransform")]
+    [MenuItem("Tools/Scary Party/Setup e Uso Único/Projeto & Multiplayer/Trocar NetworkTransform por ClientNetworkTransform", false, 211)]
     public static void Swap()
     {
         string prefabPath = "Assets/ThirdParty/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab";

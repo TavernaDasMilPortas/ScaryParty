@@ -52,18 +52,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerArmature_Preview
       objectReference: {fileID: 0}
-    - target: {fileID: 8182124140172555713, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
-      propertyPath: m_InScenePlaced
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8182124140172555713, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 3235386293
-      objectReference: {fileID: 0}
-    - target: {fileID: 8182124140172555713, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 471146044
-      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7761476708585225109, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
     - {fileID: 8261990279543270710, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}

@@ -83,7 +83,11 @@ namespace ScaryParty.City.Modular
             float parapetY = roofY + 0.2f;
             AssembleParapetPerimeter(layout.widthModules, layout.depthModules, halfW, depth, parapetY, catalog, parapetGroup.transform, layout.buildingId);
 
-            // 5. Aplica cores e materiais nos renderers dos módulos instanciados
+            // 5. Aplica estilo global (se ativo) e cores nos renderers dos módulos instanciados
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                rootObj,
+                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                ScaryParty.VisualStyles.VisualCategoryIds.City);
             ApplyBuildingPalette(rootObj, layout.buildingColor);
 
             // 6. Configura o componente CityBuilding na raiz
@@ -317,10 +321,6 @@ namespace ScaryParty.City.Modular
         private static void ApplyBuildingPalette(GameObject rootObj, Color buildingColor)
         {
             MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
-            propBlock.SetColor("_Color", buildingColor);
-            propBlock.SetColor("_BaseColor", buildingColor);
-            propBlock.SetColor("_MainColor", buildingColor);
-
             Renderer[] renderers = rootObj.GetComponentsInChildren<Renderer>();
             for (int i = 0; i < renderers.Length; i++)
             {
@@ -331,7 +331,7 @@ namespace ScaryParty.City.Modular
                 if (r.gameObject.name.Contains("Glass") || r.gameObject.name.Contains("Awning"))
                     continue;
 
-                r.SetPropertyBlock(propBlock);
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(r, 0, buildingColor, propBlock);
             }
         }
 

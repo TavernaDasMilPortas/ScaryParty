@@ -27,7 +27,7 @@ namespace ScaryParty.EditorScripts
         private int _selectedSocketIndex = 0; // 0=FP Left, 1=FP Right, 2=Remote Left, 3=Remote Right, 4=Station
         private readonly string[] _socketNames = new[] { "FP Left Hand", "FP Right Hand", "Remote Left Hand", "Remote Right Hand", "Station Slot" };
 
-        [MenuItem("Tools/Scary Party/First Person & Interaction Setup", false, 10)]
+        [MenuItem("Tools/Scary Party/Wizards/Personagem & Interação/First Person & Interaction Setup", false, 71)]
         public static void ShowWindow()
         {
             var win = GetWindow<FirstPersonInteractionSetupBuilder>("FP & Interaction Setup");

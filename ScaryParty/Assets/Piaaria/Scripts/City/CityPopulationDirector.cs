@@ -59,6 +59,12 @@ public class CityPopulationDirector : MonoBehaviour
 
     private void EnsureVisualPrefabLoaded()
     {
+        var styledChar = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
+        if (styledChar != null)
+        {
+            characterVisualPrefab = styledChar;
+            return;
+        }
         if (characterVisualPrefab != null) return;
         characterVisualPrefab = Resources.Load<GameObject>("CharacterVisual");
 #if UNITY_EDITOR
@@ -149,6 +155,11 @@ public class CityPopulationDirector : MonoBehaviour
         {
             npc = _pool.Dequeue();
             npc.gameObject.SetActive(true);
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                npc.gameObject,
+                ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                "character_visual");
         }
         else
         {
@@ -169,6 +180,11 @@ public class CityPopulationDirector : MonoBehaviour
                 visualInst = Instantiate(characterVisualPrefab);
                 visualInst.name = "CharacterVisual";
                 visualInst.SetActive(true);
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    visualInst,
+                    ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                    "character_visual");
             }
 
             npc = npcGo.AddComponent<PedestrianNpc>();

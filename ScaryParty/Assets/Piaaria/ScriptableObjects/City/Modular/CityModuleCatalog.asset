@@ -16,7 +16,7 @@ MonoBehaviour:
   - id: 0
     displayName: Parede Lisa
     category: 0
-    prefab: {fileID: 4366478956011853588, guid: ee71364d3c833a549a39b57ac758b7a6, type: 3}
+    prefab: {fileID: 919132149155446097, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -41,7 +41,7 @@ MonoBehaviour:
   - id: 1
     displayName: Parede com Janela
     category: 1
-    prefab: {fileID: 5511302225288433674, guid: b8197955ee9b1e348b2096405c698b11, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -66,7 +66,7 @@ MonoBehaviour:
   - id: 2
     displayName: Parede com Porta Simples
     category: 2
-    prefab: {fileID: 8387654975574742486, guid: a003b0da3b47c0940b3a7714470ed47e, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -91,7 +91,7 @@ MonoBehaviour:
   - id: 3
     displayName: Parede com Vitrine
     category: 3
-    prefab: {fileID: 6759133109739409904, guid: 09e0b8becc1720446be1caa9689f7411, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -116,7 +116,7 @@ MonoBehaviour:
   - id: 4
     displayName: Cobertura Plana
     category: 4
-    prefab: {fileID: 1597092491678066119, guid: 8e411fdad4fd4ff49983dbda72923fda, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
     width: 2
     height: 0.2
     depth: 2
@@ -141,7 +141,7 @@ MonoBehaviour:
   - id: 5
     displayName: Platibanda
     category: 5
-    prefab: {fileID: 7285081652679768517, guid: 603df5b5d7f138a49a2188891199edc2, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 6e04921e0f37f54458a582ea5c54f287, type: 3}
     width: 2
     height: 0.4
     depth: 0.2
@@ -166,7 +166,7 @@ MonoBehaviour:
   - id: 6
     displayName: Janela com Venezianas
     category: 6
-    prefab: {fileID: 2866219309076925188, guid: 2c3e49e875b2d914583afd8508b83e24, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -191,7 +191,7 @@ MonoBehaviour:
   - id: 7
     displayName: Janela com Floreira
     category: 7
-    prefab: {fileID: 4587813552406354318, guid: accc1367b02d08e4fb326936ce967c76, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 1c927cedb95ed7947987714271636d25, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -216,7 +216,7 @@ MonoBehaviour:
   - id: 8
     displayName: Parede com Garagem
     category: 8
-    prefab: {fileID: 1364659793227539558, guid: 557d9dc7242f51c44a4d1af160722563, type: 3}
+    prefab: {fileID: 919132149155446097, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
     width: 4
     height: 3
     depth: 0.2
@@ -241,7 +241,7 @@ MonoBehaviour:
   - id: 9
     displayName: Parede com Porta Dupla
     category: 9
-    prefab: {fileID: 2588348299701746347, guid: 1c0b53285abdd9c48925e9d10f34ee03, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
     width: 2
     height: 3
     depth: 0.2
@@ -291,7 +291,7 @@ MonoBehaviour:
   - id: 11
     displayName: Pilar de Canto
     category: 11
-    prefab: {fileID: 2301564689327035040, guid: 1dbf1d00b4dbbf44fa9fd24249a31f9e, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 87f2dbdfd5152a3458a7d766b332a90b, type: 3}
     width: 0.2
     height: 3
     depth: 0.2

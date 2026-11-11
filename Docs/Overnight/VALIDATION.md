@@ -20,3 +20,8 @@
 | F6.1 | Otimizações de CPU/GC e redução de overhead da cidade | Pass | Registro $O(1)$ de mesas em `DiningTableStation.cs`, eliminação de varreduras repetitivas `FindObjectsByType` e ferramenta de limpeza `PizzeriaCitySceneCleaner.cs`. |
 | F7.1 | Build Standalone sem dependências de Editor | Pass | Todas as classes editoriais encapsuladas em pastas Editor e blocos `#if UNITY_EDITOR`. |
 | F7.2 | Smoke test e validação de regressões | Pass | Suíte de testes unitários `PizzaModularComposerTests.cs` aprovada com 4/4 testes passando sem falhas. |
+| F8.1 | Critério de aceite das 2 bancadas com grade 2x2 e slot manual | Pass | `TestAuditor` Teste 1: bancada 2 preserva slot 3 (`isManualOverride`) ao alterar espaçamento do preset; bancada 1 atualiza todos os 4 slots. |
+| F8.2 | Presets geométricos de slots (Individual, Line, Grid, Shelves, VerticalStack) | Pass | `TestAuditor` Teste 2: todos os 5 tipos de presets geram contagens e coordenadas locais exatas. |
+| F8.3 | Validação de anomalias espaciais em slots | Pass | `TestAuditor` Teste 3: detecção de escalas nulas, nomes duplicados e sobreposição < 5 cm. |
+| F8.4 | Pinning da bancada no Estúdio 3D independente | Pass | `PizzeriaContentStudioSession`: bancada com tomate e faca permanece fixada enquanto outros assets são inspecionados. |
+| F8.5 | Simulação temporal de corte e contato da lâmina | Pass | `PizzeriaSharedViewport3D`: medição em tempo real de altura de corte (`EvaluatedCuttingHeightCm`) e detecção de contato na lâmina. |

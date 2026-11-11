@@ -2498,6 +2498,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1888632008876245828}
   - {fileID: 1721108179938074910}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -4874,6 +4876,8 @@ MonoBehaviour:
   stationId: 11
   stationName: Station_SupplierTerminal
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -4949,6 +4953,8 @@ MonoBehaviour:
   stationName: Station_Stack
   slotAnchors:
   - {fileID: 6590742140785400753}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -8489,6 +8495,8 @@ MonoBehaviour:
   stationId: 15
   stationName: Station_TicketBoard
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -9801,6 +9809,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 4450452295161059692}
   - {fileID: 8650420071948136365}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -13269,6 +13279,8 @@ MonoBehaviour:
   stationId: 14
   stationName: Station_Trash
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -13345,6 +13357,8 @@ MonoBehaviour:
   stationName: Station_Storage_Cupboard
   slotAnchors:
   - {fileID: 1879039473936040484}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -14687,6 +14701,9 @@ MonoBehaviour:
   tableId: 6
   tableName: Mesa 6
   seatAnchor: {fileID: 309989453834687741}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6003720415429448067}
 --- !u!65 &6418703253578440912
 BoxCollider:
@@ -14818,6 +14835,9 @@ MonoBehaviour:
   tableId: 5
   tableName: Mesa 5
   seatAnchor: {fileID: 4025818867281851691}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4134682602156565185}
 --- !u!65 &4527219661317800668
 BoxCollider:
@@ -15496,6 +15516,9 @@ MonoBehaviour:
   tableId: 3
   tableName: Mesa 3
   seatAnchor: {fileID: 382884667208195379}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1956891609559374366}
 --- !u!65 &2509065016171630116
 BoxCollider:
@@ -16079,6 +16102,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 4100784721986934019}
   - {fileID: 2286145996519346706}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -17836,6 +17861,8 @@ MonoBehaviour:
   stationId: 13
   stationName: Station_Receiving
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -18235,6 +18262,9 @@ MonoBehaviour:
   tableId: 4
   tableName: Mesa 4
   seatAnchor: {fileID: 6561077568740373293}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 7035114354810584313}
 --- !u!65 &2158259934793215539
 BoxCollider:
@@ -19634,6 +19664,9 @@ MonoBehaviour:
   tableId: 1
   tableName: Mesa 1
   seatAnchor: {fileID: 9065091803205971534}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8610961646076596382}
 --- !u!65 &2713371289012394634
 BoxCollider:
@@ -21242,6 +21275,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 6745906872918997508}
   - {fileID: 5556692217430632028}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -21913,6 +21948,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 7838377277371700086}
   - {fileID: 5940033805415937054}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -23751,6 +23788,9 @@ MonoBehaviour:
   tableId: 2
   tableName: Mesa 2
   seatAnchor: {fileID: 1949913733508442708}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 2168879368295403094}
 --- !u!65 &4411790206493640840
 BoxCollider:
@@ -25879,6 +25919,8 @@ MonoBehaviour:
   - {fileID: 2552062226320613427}
   - {fileID: 3067951487986825478}
   - {fileID: 3668009606978789854}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -28276,6 +28318,8 @@ MonoBehaviour:
   - {fileID: 1973416178014465761}
   - {fileID: 696506875348464162}
   - {fileID: 3980456617172671187}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -29922,6 +29966,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1577233899612656353}
   - {fileID: 591239511101067278}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -32623,6 +32669,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1959038398947078540}
   - {fileID: 5696623712605977129}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -33054,6 +33102,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 8089948546391835814}
   - {fileID: 2382478361717381442}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -33243,6 +33293,8 @@ MonoBehaviour:
   stationId: 12
   stationName: Station_Phone
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -36130,6 +36182,8 @@ MonoBehaviour:
   - {fileID: 7010255747990965632}
   - {fileID: 4150840324153617846}
   - {fileID: 1710809775423454641}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1

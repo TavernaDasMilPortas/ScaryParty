@@ -179,11 +179,18 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked: []
-      recentlyClicked:
-      - paths: []
+      mostClicked:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
         count: 1
-        gameObjects: []
+        gameObjects:
+        - {fileID: 0}
+      recentlyClicked:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
       - paths: []
         count: 1
         gameObjects: []
@@ -215,7 +222,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 01:06 PM (November 10, 2026)
+    lastSaveTimePrint: 09:05 AM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -233,14 +240,14 @@ MonoBehaviour:
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: 
+    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
       paths: []
       tabWidth: 0
-      name: New Tab
-      icon: {fileID: 0}
+      name: --- CITY ---
+      icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
       shortName: New Tab
       filterString: 
-      newTab: 1
+      newTab: 0
       scrollPosition: 0
       isSelected: 0
       allCollapsed: 0
@@ -290,7 +297,10 @@ MonoBehaviour:
       index: 0
       historyPosition: 0
       componentMaps: []
-      historyPaths: []
+      historyPaths:
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
@@ -329,7 +339,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 01:14 PM (November 10, 2026)
+    lastSaveTimePrint: 08:31 AM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -345,7 +355,7 @@ MonoBehaviour:
     rawUserHeight: 0
     lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
+    lastKnownHeight: 1
     tabs:
     - path: 
       paths: []
@@ -443,7 +453,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 12:43 PM (November 10, 2026)
+    lastSaveTimePrint: 08:31 AM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -459,7 +469,7 @@ MonoBehaviour:
     rawUserHeight: 0
     lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
+    lastKnownHeight: 1
     tabs:
     - path: 
       paths: []
@@ -765,37 +775,13 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked:
-      - paths:
-        - 
-        count: 3
-        gameObjects: []
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
-      recentlyClicked:
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
+      mostClicked: []
+      recentlyClicked: []
       mostClickedContents: []
       recentlyClickedContents: []
     sceneGUID: 154069c0ebd5daf44b0d95a3cf265cd0
     sceneName: PizzeriaCelShading_Showcase
-    lastSaveTimePrint: 01:20 PM (November 10, 2026)
+    lastSaveTimePrint: 12:19 AM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -813,15 +799,14 @@ MonoBehaviour:
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"154069c0ebd5daf44b0d95a3cf265cd0","path":"Directional
-        Light[0]"}'
+    - path: 
       paths: []
       tabWidth: 0
-      name: Directional Light
-      icon: {fileID: -2268488020772222307, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: Directional Light
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
       filterString: 
-      newTab: 0
+      newTab: 1
       scrollPosition: 0
       isSelected: 0
       allCollapsed: 0
@@ -870,47 +855,8 @@ MonoBehaviour:
       savePlayModeTransform: 0
       index: 0
       historyPosition: 0
-      componentMaps:
-      - index: 0
-        component: {fileID: 0}
-        missingComponentID:
-          m_Data: 0
-        foldout: 1
-        focusAfter: 0
-        awaitingScroll: 0
-        hidden: 0
-        componentName: transform
-        niceComponentName: transform
-      - index: 0
-        component: {fileID: 0}
-        missingComponentID:
-          m_Data: 0
-        foldout: 1
-        focusAfter: 0
-        awaitingScroll: 0
-        hidden: 0
-        componentName: light
-        niceComponentName: light
-      - index: 0
-        component: {fileID: 0}
-        missingComponentID:
-          m_Data: 0
-        foldout: 1
-        focusAfter: 0
-        awaitingScroll: 0
-        hidden: 0
-        componentName: universaladditionallightdata
-        niceComponentName: universal additional light data
-      historyPaths:
-      - paths:
-        - '{"sceneGUID":"154069c0ebd5daf44b0d95a3cf265cd0","path":"Directional Light[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"154069c0ebd5daf44b0d95a3cf265cd0","path":"Main Camera[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"154069c0ebd5daf44b0d95a3cf265cd0","path":"__City__[0]"}'
-        prefab: 0
+      componentMaps: []
+      historyPaths: []
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
@@ -942,6 +888,120 @@ MonoBehaviour:
     lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000
+  - tracker:
+      mostClicked: []
+      recentlyClicked: []
+      mostClickedContents: []
+      recentlyClickedContents: []
+    sceneGUID: bca06e45c99909c4babf383b55cdc4ba
+    sceneName: GameScene_CelShaded
+    lastSaveTimePrint: 12:19 AM (November 11, 2026)
+    gracePeriod: 3
+    activeIndex: 0
+    checkingToLoad: 0
+    assetsCollapsed: 0
+    lockedAsset: 0
+    maximizedAssetView: 0
+    showImportSettings: 0
+    suggestedHeight: 0
+    userAssetViewSize: -1
+    previewHeight: 0
+    scrollPosition: {x: 0, y: 0}
+    toolbarScrollPosition: {x: 0, y: 0}
+    rawUserHeight: 0
+    lastValidTabWidth: 0
+    alreadyCalculatedHeight: 0
+    lastKnownHeight: 0
+    tabs:
+    - path: 
+      paths: []
+      tabWidth: 0
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
+      filterString: 
+      newTab: 1
+      scrollPosition: 0
+      isSelected: 0
+      allCollapsed: 0
+      runtimeFoldouts: 
+      runtimeMultiComponents: []
+      tabTextContent:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+        m_TextWithWhitespace: 
+      multiEditMode: 0
+      locked: 0
+      hasPreview: 0
+      previewHeight: 150
+      debug: 0
+      filtering: 0
+      prefab: 0
+      multiFoldout: 1
+      target: {fileID: 0}
+      targets: []
+      linkedPrefabs: []
+      trackMultiTarget: {fileID: 0}
+      serializedTransform:
+        owner: {fileID: 0}
+        localPosition: {x: 0, y: 0, z: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localScale: {x: 0, y: 0, z: 0}
+        originalPosition: {x: 0, y: 0, z: 0}
+        originalRotation: {x: 0, y: 0, z: 0, w: 0}
+        originalLocalScale: {x: 0, y: 0, z: 0}
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 0, y: 0}
+        anchoredPosition: {x: 0, y: 0}
+        sizeDelta: {x: 0, y: 0}
+        pivot: {x: 0, y: 0}
+        originalAnchorMin: {x: 0, y: 0}
+        originalAnchorMax: {x: 0, y: 0}
+        originalAnchoredPosition: {x: 0, y: 0}
+        originalSizeDelta: {x: 0, y: 0}
+        originalPivot: {x: 0, y: 0}
+        isRectTransform: 0
+        appliedTransform: 0
+        undidTransform: 0
+        autoSave: 0
+      serializedTransforms: []
+      savePlayModeTransform: 0
+      index: 0
+      historyPosition: 0
+      componentMaps: []
+      historyPaths: []
+      owner: {fileID: 0}
+    closedTabs: []
+    playModeTransforms: []
+    historyAssets:
+    - assetGUIDs:
+      - 58419e8b75d34b8eba18fae7e904ad82
+    - assetGUIDs:
+      - b0067bd253bce9c44b4a327a114d4cfa
+    - assetGUIDs:
+      - fc7266d1e4dbc5a46aa1445238583bbe
+    - assetGUIDs:
+      - aea9048861f334040899df7719892c80
+    - assetGUIDs:
+      - 054a2469cdd147bbbd240ad3d27af854
+    - assetGUIDs:
+      - 6f00d9b5be2f47818c86b953a27da0d4
+    - assetGUIDs:
+      - 5d50dbc038eb4994a8e567f09ba47a7a
+    - assetGUIDs:
+      - 7743f135c45f481c911d313178a41eca
+    - assetGUIDs:
+      - 1f3b804c253ee974fa3b45efa0fd3ed0
+    - assetGUIDs:
+      - 75911d39ab9042b9b90366e89878b9c8
+    - assetGUIDs:
+      - 50330bb3be2c46468a973efbce8e1862
+    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObjects: []
+    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastClickedTab: -1
+    previousTab: 0
+  tipsShown: 01000000010000000000000001000000000000000000000000000000000000000100000000000000010000000000000000000000010000000100000000000000010000000100000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000001000000010000000100000000000000010000000000000001000000010000000100000000000000
   playModeStartScene: {}
   enteringPlayMode: 0

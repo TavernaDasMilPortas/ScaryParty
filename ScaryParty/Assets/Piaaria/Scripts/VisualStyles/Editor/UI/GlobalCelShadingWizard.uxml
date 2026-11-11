@@ -1,0 +1,140 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <Style src="GlobalCelShadingWizard.uss" />
+    <ui:VisualElement name="root-container" class="wizard-root">
+        <!-- HEADER -->
+        <ui:VisualElement name="header-bar" class="header-bar">
+            <ui:VisualElement class="header-left">
+                <ui:Label text="GLOBAL CEL SHADING WIZARD" class="header-title" />
+                <ui:Label name="lbl-status-badge" text="Nao validado" class="status-badge status-unvalidated" />
+                <ui:Label name="lbl-dirty-badge" text="" class="dirty-badge" />
+            </ui:VisualElement>
+            <ui:VisualElement class="header-right">
+                <ui:VisualElement class="segmented-group">
+                    <ui:Button name="btn-cmp-original" text="Original" class="seg-btn" />
+                    <ui:Button name="btn-cmp-side" text="A/B Lado a Lado" class="seg-btn" />
+                    <ui:Button name="btn-cmp-split" text="Split A/B" class="seg-btn" />
+                    <ui:Button name="btn-cmp-toon" text="Toon" class="seg-btn seg-btn-active" />
+                </ui:VisualElement>
+                <ui:VisualElement class="segmented-group">
+                    <ui:Button name="btn-light-interior" text="Interior" class="seg-btn" />
+                    <ui:Button name="btn-light-exterior" text="Exterior" class="seg-btn" />
+                    <ui:Button name="btn-light-neutral" text="Neutro" class="seg-btn seg-btn-active" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- MAIN BODY (3 COLUMNS) -->
+        <ui:VisualElement name="main-columns" class="main-columns">
+            <!-- LEFT SIDEBAR: PRESETS & PROFILES -->
+            <ui:VisualElement name="left-sidebar" class="left-sidebar">
+                <ui:Label text="ESTILOS" class="panel-header" />
+                <ui:ScrollView name="profile-list-scroll" class="profile-list-scroll" />
+                <ui:Label name="lbl-profile-desc" text="" class="profile-desc" />
+                <ui:VisualElement class="sidebar-btn-row">
+                    <ui:Button name="btn-profile-new" text="+ Novo" class="small-btn" />
+                    <ui:Button name="btn-profile-dup" text="Duplicar" class="small-btn" />
+                </ui:VisualElement>
+                <ui:VisualElement class="sidebar-btn-row">
+                    <ui:Button name="btn-profile-save" text="Salvar" class="small-btn" />
+                    <ui:Button name="btn-profile-revert" text="Reverter" class="small-btn" />
+                </ui:VisualElement>
+                <ui:Label text="ESCOPO &amp; PENDENCIAS" class="panel-header section-top-gap" />
+                <ui:Label name="lbl-pending-badge" text="Pendentes: 0" class="pending-badge" />
+                <ui:Button name="btn-open-ruleset" text="Abrir RuleSet no Inspector" class="small-btn" />
+            </ui:VisualElement>
+
+            <!-- CENTER WORKSPACE -->
+            <ui:VisualElement name="center-workspace" class="center-workspace">
+                <ui:VisualElement name="tab-strip" class="tab-strip">
+                    <ui:Button name="tab-preview" text="Preview Lab (2x2)" class="tab-btn tab-btn-active" />
+                    <ui:Button name="tab-discovery" text="Biblioteca &amp; Descoberta" class="tab-btn" />
+                    <ui:Button name="tab-coverage" text="Cobertura" class="tab-btn" />
+                    <ui:Button name="tab-exceptions" text="Exceptions" class="tab-btn" />
+                    <ui:Button name="tab-beforeafter" text="Before/After" class="tab-btn" />
+                    <ui:Button name="tab-performance" text="Performance" class="tab-btn" />
+                    <ui:Button name="tab-log" text="Log" class="tab-btn" />
+                </ui:VisualElement>
+
+                <!-- TAB 1: PREVIEW LAB -->
+                <ui:VisualElement name="view-preview" class="tab-view">
+                    <ui:VisualElement name="preview-toolbar" class="preview-toolbar">
+                        <ui:Button name="btn-cam-persp" text="Perspectiva" class="mini-btn mini-btn-active" />
+                        <ui:Button name="btn-cam-iso" text="Isometrica" class="mini-btn" />
+                        <ui:Button name="btn-cam-ortho" text="Ortografica" class="mini-btn" />
+                        <ui:Button name="btn-cam-reset-all" text="Reset Cameras" class="mini-btn" />
+                        <ui:Toggle name="tgl-preview-grid" label="Grid" value="true" class="compact-toggle" />
+                        <ui:Toggle name="tgl-preview-lights" label="Luzes" value="true" class="compact-toggle" />
+                        <ui:DropdownField name="pop-preview-res" label="Res" class="compact-popup" />
+                        <ui:Button name="btn-add-sample" text="+ Adicionar Amostra" class="mini-btn accent-mini-btn" />
+                    </ui:VisualElement>
+                    <ui:Label name="lbl-urp-fidelity-notice" text="Nota: Preview isolado usa PreviewScene URP. Contorno Screen-Space completo pode exigir validacao via Cena A/B." class="fidelity-notice" />
+                    <ui:ScrollView name="preview-grid-scroll" class="preview-grid-scroll">
+                        <ui:VisualElement name="preview-grid-container" class="preview-grid-container" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <!-- TAB 2: DISCOVERY & LIBRARY -->
+                <ui:VisualElement name="view-discovery" class="tab-view hidden">
+                    <ui:VisualElement name="discovery-controls" class="discovery-controls" />
+                    <ui:ScrollView name="discovery-list-scroll" class="table-scroll" />
+                </ui:VisualElement>
+
+                <!-- TAB 3: COVERAGE -->
+                <ui:VisualElement name="view-coverage" class="tab-view hidden">
+                    <ui:VisualElement name="coverage-filter-bar" class="filter-bar" />
+                    <ui:ScrollView name="coverage-list-scroll" class="table-scroll" />
+                </ui:VisualElement>
+
+                <!-- TAB 4: EXCEPTIONS -->
+                <ui:VisualElement name="view-exceptions" class="tab-view hidden">
+                    <ui:ScrollView name="exceptions-list-scroll" class="table-scroll" />
+                </ui:VisualElement>
+
+                <!-- TAB 5: BEFORE / AFTER -->
+                <ui:VisualElement name="view-beforeafter" class="tab-view hidden">
+                    <ui:VisualElement name="beforeafter-toolbar" class="filter-bar" />
+                    <ui:ScrollView name="beforeafter-scroll" class="table-scroll" />
+                </ui:VisualElement>
+
+                <!-- TAB 6: PERFORMANCE -->
+                <ui:VisualElement name="view-performance" class="tab-view hidden">
+                    <ui:ScrollView name="performance-scroll" class="table-scroll" />
+                </ui:VisualElement>
+
+                <!-- TAB 7: LOG -->
+                <ui:VisualElement name="view-log" class="tab-view hidden">
+                    <ui:VisualElement class="filter-bar">
+                        <ui:Button name="btn-clear-log" text="Limpar Log" class="mini-btn" />
+                    </ui:VisualElement>
+                    <ui:ScrollView name="log-scroll" class="table-scroll" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- RIGHT COLUMN: PROFILE SETTINGS -->
+            <ui:VisualElement name="right-inspector" class="right-inspector">
+                <ui:Label text="AJUSTES DO PERFIL" class="panel-header" />
+                <ui:ScrollView name="settings-scroll" class="settings-scroll" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- FOOTER BAR -->
+        <ui:VisualElement name="footer-bar" class="footer-bar">
+            <ui:Label name="lbl-audit-summary" text="Auditoria: aguardando analise" class="audit-summary-label" />
+            <ui:VisualElement class="footer-btn-row">
+                <ui:Button name="btn-audit" text="Auditar Gameplay" class="action-btn" />
+                <ui:Button name="btn-refresh-preview" text="Atualizar Preview" class="action-btn" />
+                <ui:Button name="btn-validate" text="Validar Estilo" class="action-btn" />
+                <ui:Button name="btn-sync-new" text="Sincronizar Novos Assets" class="action-btn" />
+                <ui:Button name="btn-generate" text="Gerar Materiais" class="action-btn" />
+            </ui:VisualElement>
+            <ui:VisualElement class="footer-btn-row">
+                <ui:Button name="btn-apply" text="Aplicar na Gameplay" class="action-btn" />
+                <ui:Button name="btn-generate-apply-all" text="Gerar e Aplicar Tudo" class="action-btn primary-action-btn" />
+                <ui:Button name="btn-open-showcase" text="Abrir Cena A/B" class="action-btn" />
+                <ui:Button name="btn-activate-gameplay" text="Ativar na Gameplay" class="action-btn" />
+                <ui:Button name="btn-restore-original" text="Restaurar Original" class="action-btn danger-action-btn" />
+                <ui:Button name="btn-export-report" text="Exportar Relatorio" class="action-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

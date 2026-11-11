@@ -149,26 +149,31 @@ def reset_pose_to_rest(arm_obj):
 
 def apply_sit_pose(arm_obj, t_factor):
     """
-    Applies a seated pose on the normalized canonical rig:
-    - central: lowered slightly (-0.32m in local Y = world Z)
-    - leg1.l / leg1.r (thighs): rotated forward ~82 deg
-    - leg2.l / leg2.r (shins): bent down ~85 deg
-    - arms slightly relaxed forward
+    Applies an anatomically correct seated pose on the normalized canonical rig:
+    - central (pelvis): rest head Z = 0.4677m. On a chair of ~0.45m seat height,
+      settling into the cushion lowers pelvis by at most ~0.025m (2.5 cm), NOT 0.32m!
+      Shifts back slightly by -0.04m into the chair backrest.
+    - leg1.l / leg1.r (thighs): rotated forward ~72 deg (flat along chair seat).
+    - leg2.l / leg2.r (shins): bent down ~68 deg (calves drop vertically in front of chair).
+    - chest: upright with slight natural lean (~6 deg) toward dining table.
+    - head: subtle forward/downward look toward table/plate.
+    - arms: bent naturally at elbows with hands resting forward on dining table / lap.
     """
     reset_pose_to_rest(arm_obj)
     if t_factor <= 0.0001:
         return
 
-    # Smoothstep
-    s = t_factor * t_factor * (3.0 - 2.0 * t_factor)
+    # Quintic smoothstep for ultra smooth ease-in / ease-out
+    t = max(0.0, min(1.0, t_factor))
+    s = t * t * t * (t * (t * 6.0 - 15.0) + 10.0)
 
     central = arm_obj.pose.bones.get("central")
     if central:
         central.rotation_mode = 'QUATERNION'
-        central.location = (0.0, -0.32 * s, -0.05 * s)
+        central.location = (0.0, -0.025 * s, -0.04 * s)
 
-    thigh_angle = math.radians(82.0) * s
-    knee_angle = math.radians(85.0) * s
+    thigh_angle = math.radians(72.0) * s
+    knee_angle = math.radians(68.0) * s
 
     leg1_l = arm_obj.pose.bones.get("leg1.l")
     if leg1_l:
@@ -190,26 +195,38 @@ def apply_sit_pose(arm_obj, t_factor):
         leg2_r.rotation_mode = 'QUATERNION'
         leg2_r.rotation_quaternion = mathutils.Euler((0.0, 0.0, -knee_angle), 'XYZ').to_quaternion()
 
-    # Arms relaxed forward
+    # Chest upright with subtle natural lean toward dining table
+    chest = arm_obj.pose.bones.get("chest")
+    if chest:
+        chest.rotation_mode = 'QUATERNION'
+        chest.rotation_quaternion = mathutils.Euler((math.radians(6.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
+
+    # Head looking subtly forward/down toward plate
+    head = arm_obj.pose.bones.get("head")
+    if head:
+        head.rotation_mode = 'QUATERNION'
+        head.rotation_quaternion = mathutils.Euler((math.radians(-4.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
+
+    # Arms bent at elbows, hands resting forward on dining table / lap
     arm1_l = arm_obj.pose.bones.get("arm1.l")
     if arm1_l:
         arm1_l.rotation_mode = 'QUATERNION'
-        arm1_l.rotation_quaternion = mathutils.Quaternion((1.0, -0.15 * s, 0.0, 0.0)).normalized()
+        arm1_l.rotation_quaternion = mathutils.Euler((math.radians(35.0) * s, 0.0, math.radians(15.0) * s), 'XYZ').to_quaternion()
 
     arm2_l = arm_obj.pose.bones.get("arm2.l")
     if arm2_l:
         arm2_l.rotation_mode = 'QUATERNION'
-        arm2_l.rotation_quaternion = mathutils.Quaternion((1.0, -0.35 * s, 0.0, 0.0)).normalized()
+        arm2_l.rotation_quaternion = mathutils.Euler((math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
 
     arm1_r = arm_obj.pose.bones.get("arm1.r")
     if arm1_r:
         arm1_r.rotation_mode = 'QUATERNION'
-        arm1_r.rotation_quaternion = mathutils.Quaternion((1.0, -0.15 * s, 0.0, 0.0)).normalized()
+        arm1_r.rotation_quaternion = mathutils.Euler((math.radians(35.0) * s, 0.0, -math.radians(15.0) * s), 'XYZ').to_quaternion()
 
     arm2_r = arm_obj.pose.bones.get("arm2.r")
     if arm2_r:
         arm2_r.rotation_mode = 'QUATERNION'
-        arm2_r.rotation_quaternion = mathutils.Quaternion((1.0, -0.35 * s, 0.0, 0.0)).normalized()
+        arm2_r.rotation_quaternion = mathutils.Euler((math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
 
 
 def keyframe_all_bones(arm_obj, frame):
@@ -264,15 +281,23 @@ def create_procedural_action(arm_obj, clip_name, mode, start_frame, end_frame):
                 arm1_r.rotation_quaternion = mathutils.Euler((0.0, 0.0, -breath * 0.3), 'XYZ').to_quaternion()
         elif mode == "SIT_IDLE":
             apply_sit_pose(arm_obj, 1.0)
-            breath = math.sin(u * math.pi * 2.0) * 0.03
+            breath = math.sin(u * math.pi * 2.0) * 0.02
             chest = arm_obj.pose.bones.get("chest")
             if chest:
                 chest.rotation_mode = 'QUATERNION'
-                chest.rotation_quaternion = mathutils.Euler((breath, 0.0, 0.0), 'XYZ').to_quaternion()
+                chest.rotation_quaternion = mathutils.Euler((math.radians(6.0) + breath, 0.0, 0.0), 'XYZ').to_quaternion()
             head = arm_obj.pose.bones.get("head")
             if head:
                 head.rotation_mode = 'QUATERNION'
-                head.rotation_quaternion = mathutils.Euler((-breath * 0.3, 0.0, 0.0), 'XYZ').to_quaternion()
+                head.rotation_quaternion = mathutils.Euler((math.radians(-4.0) - breath * 0.3, 0.0, 0.0), 'XYZ').to_quaternion()
+            arm1_l = arm_obj.pose.bones.get("arm1.l")
+            if arm1_l:
+                arm1_l.rotation_mode = 'QUATERNION'
+                arm1_l.rotation_quaternion = mathutils.Euler((math.radians(35.0) + breath * 0.15, 0.0, math.radians(15.0)), 'XYZ').to_quaternion()
+            arm1_r = arm_obj.pose.bones.get("arm1.r")
+            if arm1_r:
+                arm1_r.rotation_mode = 'QUATERNION'
+                arm1_r.rotation_quaternion = mathutils.Euler((math.radians(35.0) + breath * 0.15, 0.0, -math.radians(15.0)), 'XYZ').to_quaternion()
         elif mode == "SIT_DOWN":
             apply_sit_pose(arm_obj, u)
         elif mode == "STAND_UP":

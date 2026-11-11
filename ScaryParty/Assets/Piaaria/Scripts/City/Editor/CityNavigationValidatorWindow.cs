@@ -10,7 +10,7 @@ namespace ScaryParty.City.Editor
 {
     public class CityNavigationValidatorWindow : OdinEditorWindow
     {
-        [MenuItem("Tools/Scary Party/City/Navigation & Population Validator")]
+        [MenuItem("Tools/Scary Party/Wizards/Cidade/Validador de Navegação e População", false, 52)]
         public static void OpenWindow()
         {
             GetWindow<CityNavigationValidatorWindow>("City Nav Validator").Show();

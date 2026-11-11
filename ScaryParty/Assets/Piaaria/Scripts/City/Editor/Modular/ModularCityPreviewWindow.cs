@@ -14,7 +14,7 @@ namespace ScaryParty.City.Editor.Modular
     /// </summary>
     public class ModularCityPreviewWindow : OdinEditorWindow
     {
-        [MenuItem("Tools/Piaaria/Cidade Modular/Painel de Controle", false, 1)]
+        [MenuItem("Tools/Scary Party/Wizards/Cidade/Cidade Modular (Painel de Controle)", false, 50)]
         public static void OpenWindow()
         {
             var win = GetWindow<ModularCityPreviewWindow>("Cidade Modular");

@@ -27,8 +27,8 @@ namespace ScaryParty.Pizzeria.Stations
             var boardCol = GetComponent<Collider>();
             if (boardCol != null) boardCol.enabled = false;
 
-            // Assegurar inicialização dos slots visuais se não atribuídos
-            if (ticketSlots == null || ticketSlots.Length == 0)
+            // Assegurar inicialização dos slots visuais se não atribuídos (ou se todos estiverem nulos no Inspector)
+            if (!HasAnyAssignedSlot(ticketSlots))
             {
                 var slotsParent = transform.Find("TicketSlots");
                 if (slotsParent == null)
@@ -73,6 +73,7 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < ticketSlots.Length; i++)
             {
                 var slot = ticketSlots[i];
+                if (slot == null) continue;
                 var sheet = slot.GetComponentInChildren<TicketSheetView>();
                 if (sheet == null)
                 {
@@ -81,6 +82,16 @@ namespace ScaryParty.Pizzeria.Stations
                 sheet.Clear();
                 _sheets.Add(sheet);
             }
+        }
+
+        private static bool HasAnyAssignedSlot(Transform[] slots)
+        {
+            if (slots == null || slots.Length == 0) return false;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] != null) return true;
+            }
+            return false;
         }
 
         private TicketSheetView CreateDefaultTicketSheet(Transform parentSlot, int index)

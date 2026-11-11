@@ -21,13 +21,13 @@ namespace ScaryParty.City.Editor.Modular
         public const string PrefabsPath = "Assets/Piaaria/Prefabs/City/Modules";
         public const string CatalogPath = "Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset";
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Criar kit de teste (Placeholders)", false, 10)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Criar Kit de Teste (Placeholders)", false, 275)]
         public static void BuildKitMenuItem()
         {
             BuildCompleteKit(false);
         }
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Recriar kit completo (Sobrescrever Placeholders)", false, 11)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Recriar Kit Completo (Sobrescrever Placeholders)", false, 276)]
         public static void RecreateKitMenuItem()
         {
             if (EditorUtility.DisplayDialog("Recriar Kit Modular",
@@ -37,7 +37,7 @@ namespace ScaryParty.City.Editor.Modular
             }
         }
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Validar integridade do kit", false, 12)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Cidade/Validar Integridade do Kit Modular", false, 170)]
         public static void ValidateKitMenuItem()
         {
             CityModuleCatalog catalog = AssetDatabase.LoadAssetAtPath<CityModuleCatalog>(CatalogPath);

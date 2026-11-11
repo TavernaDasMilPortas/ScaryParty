@@ -12,7 +12,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
     {
         public const string ManualPrefabPath = "Assets/Piaaria/Prefabs/Pizzeria/PizzeriaModular_Manual.prefab";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Configurar Portas de Geladeiras e Fornos no Prefab Manual")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Configurar Portas de Geladeiras e Fornos (Prefab Manual)", false, 244)]
         public static void ConfigureManualPrefabMenu()
         {
             if (!EditorUtility.DisplayDialog("Configurar Portas",

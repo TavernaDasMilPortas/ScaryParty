@@ -125,8 +125,24 @@ public class IntersectionBuilder : MonoBehaviour
         sphere.transform.localPosition = new Vector3(0, 4.2f, 0);
         sphere.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
+        Renderer poleRend = pole.GetComponent<Renderer>();
+        if (poleRend != null)
+        {
+            Material poleMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                poleRend.sharedMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Metal, ScaryParty.VisualStyles.VisualCategoryIds.Props);
+            if (poleMat != null) poleRend.sharedMaterial = poleMat;
+        }
+
+        Renderer sphereRend = sphere.GetComponent<Renderer>();
+        if (sphereRend != null)
+        {
+            Material lensMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                sphereRend.sharedMaterial, ScaryParty.VisualStyles.VisualSemanticRole.TrafficLightLens, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+            if (lensMat != null) sphereRend.sharedMaterial = lensMat;
+        }
+
         TrafficLight tlComp = tlObj.AddComponent<TrafficLight>();
-        tlComp.Setup(sphere.GetComponent<Renderer>(), (float)rng.NextDouble() * 10f);
+        tlComp.Setup(sphereRend, (float)rng.NextDouble() * 10f);
 
         if (Application.isPlaying) { Destroy(pole.GetComponent<Collider>()); Destroy(sphere.GetComponent<Collider>()); }
         else { DestroyImmediate(pole.GetComponent<Collider>()); DestroyImmediate(sphere.GetComponent<Collider>()); }

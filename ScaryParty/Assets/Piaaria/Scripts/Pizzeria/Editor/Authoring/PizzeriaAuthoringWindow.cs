@@ -50,7 +50,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             "4. Validação"
         };
 
-        [MenuItem("Tools/Scary Party/Pizzaria Modular", priority = 10)]
+        [MenuItem("Tools/Scary Party/Wizards/Pizzaria/Pizzaria Modular (Autoria de Prefab)", false, 13)]
         public static void ShowWindow()
         {
             var win = GetWindow<PizzeriaAuthoringWindow>("Pizzaria Modular");

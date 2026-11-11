@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace ScaryParty.Player
 {
@@ -6,6 +6,7 @@ namespace ScaryParty.Player
     /// Controlador visual compartilhado para o personagem canônico (CharacterVisual.prefab).
     /// Mantém referências explícitas ao Animator, SkinnedMeshRenderer, CharacterAppearance e ossos/sockets,
     /// e centraliza a escrita de parâmetros de animação para Players, Previews e Clientes (NPCs).
+    /// Garante atribuição persistente e fallback robusto de AnimatorController em Play Mode e runtime.
     /// </summary>
     [DisallowMultipleComponent]
     public class CharacterVisualController : MonoBehaviour
@@ -22,6 +23,7 @@ namespace ScaryParty.Player
 
         [Header("Referências Principais")]
         [SerializeField] private Animator _animator;
+        [SerializeField] private RuntimeAnimatorController _defaultAnimatorController;
         [SerializeField] private SkinnedMeshRenderer _skinnedMeshRenderer;
         [SerializeField] private CharacterAppearance _appearance;
 
@@ -44,8 +46,21 @@ namespace ScaryParty.Player
         {
             get
             {
-                if (_animator == null) ResolveReferences();
+                if (_animator == null || _animator.runtimeAnimatorController == null) ResolveReferences();
                 return _animator;
+            }
+        }
+
+        public RuntimeAnimatorController DefaultAnimatorController
+        {
+            get => _defaultAnimatorController;
+            set
+            {
+                _defaultAnimatorController = value;
+                if (_animator != null && _animator.runtimeAnimatorController == null && value != null)
+                {
+                    _animator.runtimeAnimatorController = value;
+                }
             }
         }
 
@@ -83,6 +98,7 @@ namespace ScaryParty.Player
             if (_animator != null)
             {
                 _animator.applyRootMotion = false;
+                EnsureAnimatorControllerAssigned();
             }
         }
 
@@ -90,6 +106,8 @@ namespace ScaryParty.Player
         {
             if (_animator == null)
                 _animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+
+            EnsureAnimatorControllerAssigned();
 
             if (_skinnedMeshRenderer == null)
                 _skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>(true);
@@ -109,6 +127,41 @@ namespace ScaryParty.Player
             if (_rightHandBone == null) _rightHandBone = FindBone("arm2.r") ?? FindBone("RightHand");
         }
 
+        public void EnsureAnimatorControllerAssigned()
+        {
+            if (_animator == null) return;
+            if (_animator.runtimeAnimatorController != null)
+            {
+                if (_defaultAnimatorController == null)
+                    _defaultAnimatorController = _animator.runtimeAnimatorController;
+                return;
+            }
+
+            if (_defaultAnimatorController != null)
+            {
+                _animator.runtimeAnimatorController = _defaultAnimatorController;
+                return;
+            }
+
+            // Fallback runtime Resources
+            var resCtrl = Resources.Load<RuntimeAnimatorController>("CharacterAnimator");
+            if (resCtrl != null)
+            {
+                _animator.runtimeAnimatorController = resCtrl;
+                _defaultAnimatorController = resCtrl;
+                return;
+            }
+
+#if UNITY_EDITOR
+            var editorCtrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Piaaria/Animations/Characters/CharacterAnimator.controller");
+            if (editorCtrl != null)
+            {
+                _animator.runtimeAnimatorController = editorCtrl;
+                _defaultAnimatorController = editorCtrl;
+            }
+#endif
+        }
+
         public void BindReferences(
             Animator animator,
             SkinnedMeshRenderer smr,
@@ -118,7 +171,8 @@ namespace ScaryParty.Player
             Transform neckBone,
             Transform headBone,
             Transform leftHandBone,
-            Transform rightHandBone)
+            Transform rightHandBone,
+            RuntimeAnimatorController defaultController = null)
         {
             _animator = animator;
             _skinnedMeshRenderer = smr;
@@ -129,9 +183,18 @@ namespace ScaryParty.Player
             _headBone = headBone;
             _leftHandBone = leftHandBone;
             _rightHandBone = rightHandBone;
+            if (defaultController != null)
+            {
+                _defaultAnimatorController = defaultController;
+                if (_animator != null && _animator.runtimeAnimatorController == null)
+                    _animator.runtimeAnimatorController = defaultController;
+            }
 
             if (_animator != null)
+            {
                 _animator.applyRootMotion = false;
+                EnsureAnimatorControllerAssigned();
+            }
         }
 
         private Transform FindBone(string exactOrPartialName)

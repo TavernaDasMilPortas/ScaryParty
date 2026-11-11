@@ -73,6 +73,7 @@ namespace ScaryParty.Pizzeria.Authoring
         public PizzeriaStoragePreset storagePreset;
         public StationView stationComponent;
         public StationDef stationDef;
+        public StationSlotLayoutAsset slotLayoutAsset;
         public Vector3 operationalForwardLocal = Vector3.forward;
         public float maxInteractionDistance = 3.0f;
         public List<int> configuredIngredientIds = new List<int>();

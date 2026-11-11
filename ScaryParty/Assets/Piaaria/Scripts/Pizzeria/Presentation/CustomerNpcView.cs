@@ -12,8 +12,11 @@ namespace ScaryParty.Pizzeria.Presentation
     /// <summary>
     /// Controlador visual e de navegação de um cliente presencial (NPC).
     /// - Reutiliza o mesmo rig/ CharacterVisualController / CharacterAppearance do player (sem scripts de input ou câmera).
-    /// - Move-se até os slots da fila, caminha até a cadeira da mesa reservada, senta (SitIdle) e sai ao terminar.
-    /// - Ao mirar diretamente no NPC (ou no CustomerCounterStation) na frente da fila, segurar [F] por 0,6 s registra o pedido.
+    /// - Integração completa com as 4 âncoras da mesa (Approach, Seat, SeatSurface, Exit).
+    /// - Caminha até a âncora de aproximação fora da área esculpida pelo NavMeshObstacle da mesa.
+    /// - Desacopla suavemente o NavMeshAgent para sentar-se na cadeira com animação SitDown/SitIdle.
+    /// - Ao finalizar, executa animação StandUp, desloca-se até o ponto de saída e retoma o NavMeshAgent para sair do estabelecimento.
+    /// - Ao mirar diretamente no NPC na frente da fila, segurar [F] por 0,6 s registra o pedido.
     /// </summary>
     public class CustomerNpcView : MonoBehaviour, IInteractable
     {
@@ -27,8 +30,11 @@ namespace ScaryParty.Pizzeria.Presentation
         private Vector3 _targetPosition;
         private Quaternion _targetRotation = Quaternion.identity;
         private float _walkSpeed = 2.4f;
+        private bool _hasReachedApproach;
         private bool _hasReachedSeat;
         private bool _wasSeated;
+        private bool _isExitingSeat;
+        private float _exitTimer;
 
         public bool HasReachedSeat => _hasReachedSeat;
 
@@ -77,7 +83,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 Appearance.ApplyPrimaryColor(c);
             }
 
-            // Garantir Rigidbody cinemático para física consistente e prevenção de ghosting
+            // Rigidbody cinemático para física consistente e prevenção de ghosting
             var rb = GetComponent<Rigidbody>();
             if (rb == null)
             {
@@ -87,7 +93,7 @@ namespace ScaryParty.Pizzeria.Presentation
             rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-            // Garantir CapsuleCollider para raycast de interação (atender segurando F diretamente no NPC)
+            // CapsuleCollider para raycast de interação (atender segurando F diretamente no NPC)
             var col = GetComponent<CapsuleCollider>();
             if (col == null)
             {
@@ -119,16 +125,17 @@ namespace ScaryParty.Pizzeria.Presentation
             _targetRotation = Quaternion.Euler(0f, targetRot.eulerAngles.y, 0f);
             _walkSpeed = 2.4f * Mathf.Clamp(walkSpeedMultiplier, 0.7f, 1.5f);
 
+            var phase = (CustomerPhase)dto.Phase;
+            bool shouldBeSeated = phase == CustomerPhase.SeatedWaitingFood ||
+                                  phase == CustomerPhase.Eating;
+
             if (Agent != null && Agent.isOnNavMesh)
             {
                 Agent.speed = _walkSpeed;
-                bool shouldBeSeated = dto.Phase == (byte)CustomerPhase.SeatedWaitingFood ||
-                                      dto.Phase == (byte)CustomerPhase.Eating;
-                if (!shouldBeSeated)
+                if (!shouldBeSeated && !_isExitingSeat)
                 {
                     Agent.updatePosition = true;
                     Agent.updateRotation = true;
-                    _hasReachedSeat = false;
                     Agent.isStopped = false;
                     if (Vector3.Distance(Agent.destination, _targetPosition) > 0.15f)
                     {
@@ -142,90 +149,198 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             var phase = (CustomerPhase)CurrentState.Phase;
             bool isSeatedPhase = phase == CustomerPhase.SeatedWaitingFood ||
-                                phase == CustomerPhase.Eating;
+                                 phase == CustomerPhase.Eating;
             bool isWalkingToSeat = phase == CustomerPhase.WalkingToTable;
+            bool isLeaving = phase == CustomerPhase.LeavingSatisfied ||
+                             phase == CustomerPhase.LeavingAngry;
 
-            float distToTarget = Vector3.Distance(transform.position, _targetPosition);
+            DiningTableStation table = null;
+            if (CurrentState.AssignedTableId > 0)
+            {
+                if (!DiningTableStation.TryGetTable(CurrentState.AssignedTableId, out table))
+                {
+                    var allTables = FindObjectsByType<DiningTableStation>(FindObjectsSortMode.None);
+                    for (int i = 0; i < allTables.Length; i++)
+                    {
+                        if (allTables[i] != null && allTables[i].tableId == CurrentState.AssignedTableId)
+                        {
+                            table = allTables[i];
+                            break;
+                        }
+                    }
+                }
+            }
+
             float currentSpeed = 0f;
 
-            if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
+            if (isLeaving)
             {
-                currentSpeed = Agent.velocity.magnitude;
-
-                if (isWalkingToSeat)
+                if (_wasSeated)
                 {
-                    // Navegando até a cadeira
-                    bool hasValidPath = !Agent.pathPending && Agent.hasPath && Agent.pathStatus == NavMeshPathStatus.PathComplete;
-                    bool arrivedAtSeat = distToTarget <= 0.25f || (hasValidPath && Agent.remainingDistance <= 0.25f);
-                    if (arrivedAtSeat)
+                    if (!_isExitingSeat)
                     {
-                        Agent.updatePosition = false;
-                        Agent.updateRotation = false;
-                        Agent.isStopped = true;
-                        _hasReachedSeat = true;
-                        transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                        _isExitingSeat = true;
+                        _exitTimer = 0.8f; // Duração correspondente à animação StandUp reconstruída
+                        _hasReachedSeat = false;
+                        _hasReachedApproach = false;
+                        if (VisualController != null)
+                        {
+                            VisualController.SetSitting(false, triggerTransition: true);
+                        }
                     }
-                    else
+
+                    if (_isExitingSeat)
+                    {
+                        _exitTimer -= Time.deltaTime;
+                        Vector3 exitPos = table != null ? table.GetExitPosition() : _targetPosition;
+                        transform.position = Vector3.MoveTowards(transform.position, exitPos, Time.deltaTime * 1.3f);
+                        Vector3 exitDir = exitPos - transform.position;
+                        exitDir.y = 0f;
+                        if (exitDir.sqrMagnitude > 0.001f)
+                        {
+                            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(exitDir.normalized, Vector3.up), Time.deltaTime * 240f);
+                        }
+
+                        if (_exitTimer <= 0f || Vector3.Distance(transform.position, exitPos) <= 0.20f)
+                        {
+                            _isExitingSeat = false;
+                            _wasSeated = false;
+                            if (Agent != null && Agent.isOnNavMesh)
+                            {
+                                Agent.updatePosition = true;
+                                Agent.updateRotation = true;
+                                Agent.isStopped = false;
+                                Agent.SetDestination(_targetPosition);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
                     {
                         Agent.updatePosition = true;
                         Agent.updateRotation = true;
                         Agent.isStopped = false;
-                        _hasReachedSeat = false;
-                        if (distToTarget <= 0.40f)
+                        currentSpeed = Agent.velocity.magnitude;
+                    }
+                }
+            }
+            else if (isWalkingToSeat)
+            {
+                Vector3 approachPos = table != null ? table.GetApproachPosition() : _targetPosition;
+                Vector3 seatPos = table != null ? table.GetSeatPosition() : _targetPosition;
+                Quaternion seatRot = table != null ? table.GetSeatRotation() : _targetRotation;
+
+                if (!_hasReachedApproach)
+                {
+                    if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
+                    {
+                        Agent.updatePosition = true;
+                        Agent.updateRotation = true;
+                        Agent.isStopped = false;
+                        currentSpeed = Agent.velocity.magnitude;
+
+                        if (Vector3.Distance(Agent.destination, approachPos) > 0.2f)
                         {
-                            transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 6f);
+                            Agent.SetDestination(approachPos);
+                        }
+
+                        bool arrivedAtApproach = Vector3.Distance(transform.position, approachPos) <= 0.35f ||
+                                                (!Agent.pathPending && Agent.hasPath && Agent.remainingDistance <= 0.25f);
+
+                        if (arrivedAtApproach)
+                        {
+                            _hasReachedApproach = true;
+                        }
+                    }
+                    else
+                    {
+                        transform.position = Vector3.MoveTowards(transform.position, approachPos, Time.deltaTime * _walkSpeed);
+                        if (Vector3.Distance(transform.position, approachPos) <= 0.35f)
+                        {
+                            _hasReachedApproach = true;
                         }
                     }
                 }
-                else if (isSeatedPhase)
+
+                if (_hasReachedApproach)
                 {
-                    // Já na mesa/comendo
+                    if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
+                    {
+                        Agent.updatePosition = false;
+                        Agent.updateRotation = false;
+                        Agent.isStopped = true;
+                    }
+
+                    transform.position = Vector3.MoveTowards(transform.position, seatPos, Time.deltaTime * 1.4f);
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, seatRot, Time.deltaTime * 360f);
+
+                    float distToSeat = Vector3.Distance(transform.position, seatPos);
+                    float angleToSeat = Quaternion.Angle(transform.rotation, seatRot);
+
+                    if (distToSeat <= 0.05f && angleToSeat <= 6f)
+                    {
+                        _hasReachedSeat = true;
+                        transform.position = seatPos;
+                        transform.rotation = seatRot;
+                    }
+                }
+            }
+            else if (isSeatedPhase)
+            {
+                Vector3 seatPos = table != null ? table.GetSeatPosition() : _targetPosition;
+                Quaternion seatRot = table != null ? table.GetSeatRotation() : _targetRotation;
+
+                if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
+                {
                     Agent.updatePosition = false;
                     Agent.updateRotation = false;
                     Agent.isStopped = true;
-                    _hasReachedSeat = true;
-                    transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 8f);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
                 }
-                else
+
+                _hasReachedApproach = true;
+                _hasReachedSeat = true;
+                transform.position = Vector3.Lerp(transform.position, seatPos, Time.deltaTime * 8f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, seatRot, Time.deltaTime * 10f);
+            }
+            else
+            {
+                // Em fila no balcão ou entrando
+                _hasReachedSeat = false;
+                _hasReachedApproach = false;
+
+                if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
                 {
-                    // Em fila ou saindo
                     Agent.updatePosition = true;
                     Agent.updateRotation = true;
                     Agent.isStopped = false;
-                    _hasReachedSeat = false;
+                    currentSpeed = Agent.velocity.magnitude;
+
+                    float distToTarget = Vector3.Distance(transform.position, _targetPosition);
                     if (distToTarget <= 0.25f)
                     {
                         transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 8f);
                     }
                 }
-            }
-            else
-            {
-                // Tenta recuperar o NavMeshAgent se estiver desabilitado ou fora de malha
-                if (Agent != null && UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
-                {
-                    Agent.enabled = true;
-                    Agent.Warp(hit.position);
-                    Agent.SetDestination(_targetPosition);
-                }
-                else if (isSeatedPhase || (isWalkingToSeat && distToTarget <= 0.35f))
-                {
-                    transform.position = Vector3.Lerp(transform.position, _targetPosition, Time.deltaTime * 6f);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
-                    if (distToTarget <= 0.25f) _hasReachedSeat = true;
-                }
                 else
                 {
-                    transform.rotation = Quaternion.Slerp(transform.rotation, _targetRotation, Time.deltaTime * 10f);
+                    // Fallback para reinserção no NavMesh
+                    if (Agent != null && UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var hit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        Agent.enabled = true;
+                        Agent.Warp(hit.position);
+                        Agent.SetDestination(_targetPosition);
+                    }
                 }
             }
 
+            // Atualização do Animator e estados visuais
             if (VisualController != null)
             {
-                bool seatedNow = isSeatedPhase || (isWalkingToSeat && _hasReachedSeat && distToTarget <= 0.25f);
-                if (seatedNow != _wasSeated)
+                bool seatedNow = isSeatedPhase || (isWalkingToSeat && _hasReachedSeat);
+
+                if (seatedNow != _wasSeated && !_isExitingSeat)
                 {
                     _wasSeated = seatedNow;
                     VisualController.SetSitting(seatedNow, triggerTransition: true);
@@ -237,13 +352,15 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     VisualController.SetLocomotion(0f, 1f, true, false, false);
                 }
+                else if (_isExitingSeat)
+                {
+                    VisualController.SetLocomotion(0.5f, 1f, true, false, false);
+                }
                 else
                 {
-                    // Remapear para a velocidade do BlendTree (Speed: 0 = Idle, 2.0 = Walk, 5.335 = Run)
                     float animSpeed = 0f;
                     if (currentSpeed > 0.08f)
                     {
-                        // Escala velocidade real do NavMeshAgent (~2.0 - 2.5 m/s) para o patamar de Walk (2.0f)
                         float speedRatio = Mathf.Clamp01(currentSpeed / Mathf.Max(0.1f, _walkSpeed));
                         animSpeed = Mathf.Lerp(1.6f, 2.4f, speedRatio);
                     }

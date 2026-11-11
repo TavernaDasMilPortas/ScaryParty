@@ -20,7 +20,7 @@ namespace ScaryParty.UI.Piaria.Editor
             EditorApplication.delayCall += EnsurePreviewPrefabExists;
         }
 
-        [MenuItem("Tools/Scary Party/UI/Gerar Prefab de Preview 3D (PlayerArmature_Preview)", false, 20)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Personagens/Gerar Prefab de Preview 3D (PlayerArmature_Preview)", false, 226)]
         public static void GeneratePreviewPrefabMenu()
         {
             GeneratePreviewPrefab(true);

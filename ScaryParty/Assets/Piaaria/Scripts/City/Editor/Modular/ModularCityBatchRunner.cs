@@ -17,7 +17,7 @@ namespace ScaryParty.City.Editor.Modular
         public const string TestScenePath = "Assets/Piaaria/Scenes/Tests/ModularCityTestScene.unity";
         public const string DefaultConfigPath = "Assets/Piaaria/ScriptableObjects/City/City config.asset";
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Gerar Cena de Teste (12 Peças + 4 Prédios)", false, 20)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Gerar Cena de Teste (12 Peças + 4 Prédios)", false, 277)]
         public static void GenerateTestSceneMenuItem()
         {
             BuildAndGenerateTestScene();

@@ -1,0 +1,181 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6c11e13de81d24f48bc4c9fe97ae2712, type: 3}
+  m_Name: VS_ComicBold
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleProfile
+  styleId: comic_bold
+  displayName: Comic Bold
+  description: 2 faixas bem definidas, contornos marcados, alto contraste e posterizacao
+    seletiva.
+  profileVersion: 1
+  presetType: 3
+  thumbnail: {fileID: 0}
+  lighting:
+    lightingMode: 1
+    posterizeLight: 1
+    lightSteps: 2
+    lightRamp: 0.18
+    lightRampOffset: 0.52
+    lightColorTint: {r: 1, g: 1, b: 1, a: 1}
+    shadowTint: {r: 0.42, g: 0.4, b: 0.54, a: 1}
+    multiplyByLightColor: 1
+    useShadows: 1
+    receiveShadows: 1
+    mainLightInfluence: 1
+  specularRim:
+    useSpecular: 1
+    specularColor: {r: 1, g: 1, b: 1, a: 1}
+    specularRamp: 0.08
+    specularRampOffset: 0.9
+    useRimLighting: 1
+    rimLightColor: {r: 0.85, g: 0.9, b: 1, a: 1}
+    rimRamp: 1
+    rimLightRampOffset: 0.58
+    rimLightLitIntensity: 0.35
+    rimLightShadowIntensity: 0.12
+  colorPalette:
+    accentRed: {r: 0.937, g: 0.349, b: 0.294, a: 1}
+    accentYellow: {r: 1, g: 0.839, b: 0.365, a: 1}
+    accentTurquoise: {r: 0.286, g: 0.718, b: 0.667, a: 1}
+    accentBlue: {r: 0.322, g: 0.486, b: 0.914, a: 1}
+    neutralLight: {r: 0.95, g: 0.94, b: 0.9, a: 1}
+    neutralDark: {r: 0.24, g: 0.25, b: 0.28, a: 1}
+    saturationShift: 0.16
+    valueShift: 0.03
+    contrast: 1.18
+    clampAdjustments: 1
+    posterizeColors: 1
+    colorNumbers: 6
+  outlines:
+    outlineMode: 1
+    outlineColor: {r: 0.14, g: 0.12, b: 0.16, a: 1}
+    outlineWidth: 0.14
+    normalSurfaceOutline: 0
+    screenSpaceWidth: 1.85
+    useDepthTest: 1
+    depthThreshold: 0.25
+    useNormalsTest: 1
+    normalThreshold: 0.45
+    useColorTest: 0
+    colorThreshold: 0.2
+    characterOutlineMultiplier: 1.4
+    buildingOutlineMultiplier: 0.45
+    foodOutlineMultiplier: 0.35
+    maxOutlineDistanceArchitecture: 45
+    maxOutlineDistanceCharacters: 60
+    maxOutlineDistanceProps: 35
+    outlineQuality: 1
+    outlineLayerMask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    suppressOutlineOnInteractionFocus: 1
+  characters:
+    characterOutlineMultiplier: 1.25
+    rimLightEnabled: 1
+    rimColor: {r: 1, g: 0.96, b: 0.88, a: 1}
+    rimIntensity: 0.6
+    characterContrastBoost: 1.06
+    preserveDynamicBodyColor: 1
+    skinLightRampSoftness: 1.15
+    eyesUnlitCrisp: 1
+  materials:
+    preserveTextures: 1
+    preserveNormalMaps: 1
+    preserveUVTilingOffset: 1
+    preserveAlphaAndTransparency: 1
+    preserveEmission: 1
+    preferSimpleForStreets: 1
+    disableIllustratePerturbations: 1
+  sceneLighting:
+    overrideSceneLightingInVariant: 1
+    directionalLightIntensity: 1.35
+    directionalLightColor: {r: 1, g: 0.97, b: 0.92, a: 1}
+    ambientSkyColor: {r: 0.68, g: 0.76, b: 0.86, a: 1}
+    ambientEquatorColor: {r: 0.58, g: 0.56, b: 0.54, a: 1}
+    ambientGroundColor: {r: 0.32, g: 0.28, b: 0.26, a: 1}
+    ambientIntensity: 1.15
+    addInteriorFillLights: 1
+    interiorFillIntensity: 1.4
+    interiorFillRange: 10
+  categoryOverrides:
+  - categoryId: Characters
+    enabled: 1
+    preferredShaderFamily: 0
+    preserveTextures: 1
+    allowColorPosterize: 0
+    lightStepsOffset: 0
+    lightRampOverride: -1
+    saturationDelta: 0
+    outlineMultiplier: 1.4
+    overrideRim: 1
+    rimEnabled: 1
+    maxOutlineDistance: 60
+  - categoryId: Food
+    enabled: 1
+    preferredShaderFamily: 0
+    preserveTextures: 1
+    allowColorPosterize: 0
+    lightStepsOffset: 0
+    lightRampOverride: -1
+    saturationDelta: 0
+    outlineMultiplier: 0.35
+    overrideRim: 0
+    rimEnabled: 0
+    maxOutlineDistance: 35
+  - categoryId: Streets
+    enabled: 1
+    preferredShaderFamily: 1
+    preserveTextures: 1
+    allowColorPosterize: 0
+    lightStepsOffset: 0
+    lightRampOverride: -1
+    saturationDelta: 0
+    outlineMultiplier: 0
+    overrideRim: 1
+    rimEnabled: 0
+    maxOutlineDistance: 0
+  - categoryId: City
+    enabled: 1
+    preferredShaderFamily: 0
+    preserveTextures: 1
+    allowColorPosterize: 1
+    lightStepsOffset: 0
+    lightRampOverride: -1
+    saturationDelta: 0
+    outlineMultiplier: 0.45
+    overrideRim: 0
+    rimEnabled: 0
+    maxOutlineDistance: 45
+  - categoryId: Architecture
+    enabled: 1
+    preferredShaderFamily: 0
+    preserveTextures: 1
+    allowColorPosterize: 1
+    lightStepsOffset: 0
+    lightRampOverride: -1
+    saturationDelta: 0
+    outlineMultiplier: 0.45
+    overrideRim: 0
+    rimEnabled: 0
+    maxOutlineDistance: 45
+  discovery:
+    newUnknownMaterialPolicy: 0
+    autoApplyConfidenceThreshold: 0.85
+    autoSyncWatchedChangesToVariants: 0
+    defaultScope: 0
+    selectedFolders:
+    - Assets/Piaaria
+    excludedPathPrefixes:
+    - Assets/ThirdParty/Distant Lands/
+    - Assets/TextMesh Pro/
+    - Assets/Piaaria/Art/VisualStyles/
+    conversionRuleSet: {fileID: 11400000, guid: b6f4d93708197754488dbbbe0f17e42e, type: 2}

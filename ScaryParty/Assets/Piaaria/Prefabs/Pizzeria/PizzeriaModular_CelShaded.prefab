@@ -5782,6 +5782,8 @@ MonoBehaviour:
   - {fileID: 4126902965008750240}
   - {fileID: 982840549190748128}
   - {fileID: 6672180114299646255}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -9252,7 +9254,7 @@ Transform:
   m_GameObject: {fileID: 629778428615974974}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: -0.168, z: -0.8677001}
+  m_LocalPosition: {x: -0.023554802, y: -0.16799998, z: -0.8677001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10284,7 +10286,7 @@ Transform:
   m_GameObject: {fileID: 911172939111212954}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: -0.168, z: -0.8677001}
+  m_LocalPosition: {x: -0.023554802, y: -0.16799998, z: -0.8677001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -10535,6 +10537,7 @@ GameObject:
   - component: {fileID: 3284759179027253068}
   - component: {fileID: 5926445003002473590}
   - component: {fileID: 6279374042323225904}
+  - component: {fileID: 7953407105212791497}
   m_Layer: 0
   m_Name: mesa comum.002
   m_TagString: Untagged
@@ -10656,6 +10659,9 @@ MonoBehaviour:
   tableId: 2
   tableName: Mesa 2
   seatAnchor: {fileID: 2491529776454666555}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4566125213048090086}
 --- !u!65 &6279374042323225904
 BoxCollider:
@@ -10678,6 +10684,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &7953407105212791497
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 938369578187219395}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.48869225}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610991}
+  m_TimeToStationary: 0.5
 --- !u!1 &976538079087076017
 GameObject:
   m_ObjectHideFlags: 0
@@ -11573,6 +11595,8 @@ MonoBehaviour:
   stationName: Lixeira
   slotAnchors:
   - {fileID: 4280388928189595040}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -12427,6 +12451,8 @@ MonoBehaviour:
   - {fileID: 2819972952310367701}
   - {fileID: 6009505799140691420}
   - {fileID: 7716730086115326403}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 1
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -13705,6 +13731,8 @@ MonoBehaviour:
   stationName: "Geladeira (Secund\xE1ria)"
   slotAnchors:
   - {fileID: 5566593013193032802}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -15553,6 +15581,8 @@ MonoBehaviour:
   stationName: Forno
   slotAnchors:
   - {fileID: 2479541104460958729}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -15980,7 +16010,7 @@ Transform:
   m_GameObject: {fileID: 1749412464042426100}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: -0.168, z: 0.8676996}
+  m_LocalPosition: {x: -0.023555279, y: -0.16799998, z: 0.8676996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16255,6 +16285,8 @@ MonoBehaviour:
   stationName: "Dispensa (Secund\xE1ria)"
   slotAnchors:
   - {fileID: 2063087449194150796}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -24475,6 +24507,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 3808615707637281347}
   - {fileID: 7295852391437129369}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -24667,6 +24701,8 @@ MonoBehaviour:
   - {fileID: 8624845109770470500}
   - {fileID: 6311133405764903999}
   - {fileID: 1360310175096013251}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -25215,6 +25251,7 @@ GameObject:
   - component: {fileID: 8651517548431596446}
   - component: {fileID: 6668366756165185252}
   - component: {fileID: 2955600846492028128}
+  - component: {fileID: 741580835403924808}
   m_Layer: 0
   m_Name: mesa comum.006
   m_TagString: Untagged
@@ -25336,6 +25373,9 @@ MonoBehaviour:
   tableId: 6
   tableName: Mesa 6
   seatAnchor: {fileID: 3757115629894191469}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8329155572478459651}
 --- !u!65 &2955600846492028128
 BoxCollider:
@@ -25358,6 +25398,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &741580835403924808
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2511639022440513962}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886921}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029609203}
+  m_TimeToStationary: 0.5
 --- !u!1 &2567779813965799997
 GameObject:
   m_ObjectHideFlags: 0
@@ -27914,6 +27970,7 @@ GameObject:
   - component: {fileID: 1352606391105100631}
   - component: {fileID: 1137404529285654218}
   - component: {fileID: 5501608718594646437}
+  - component: {fileID: 1577466705177557383}
   m_Layer: 0
   m_Name: mesa comum.004
   m_TagString: Untagged
@@ -28035,6 +28092,9 @@ MonoBehaviour:
   tableId: 4
   tableName: Mesa 4
   seatAnchor: {fileID: 7194416090516532674}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1709721005663037161}
 --- !u!65 &5501608718594646437
 BoxCollider:
@@ -28057,6 +28117,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &1577466705177557383
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2948591022893124665}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886921}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029609203}
+  m_TimeToStationary: 0.5
 --- !u!1 &2965667495086635344
 GameObject:
   m_ObjectHideFlags: 0
@@ -29365,6 +29441,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 2062293210167718143}
     stationDef: {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29377,6 +29454,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 4421844071322604337}
     stationDef: {fileID: 11400000, guid: 534dfbf25e962684889c8f67bc2404b5, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29389,6 +29467,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 8216507907869709354}
     stationDef: {fileID: 11400000, guid: 2fb3bbc377870f34494d45962c21fad4, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29401,6 +29480,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 3079012132098214287}
     stationDef: {fileID: 11400000, guid: 493a48c87f2e7c94aa39c7afb8d9df5b, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29413,6 +29493,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 6613367701856128826}
     stationDef: {fileID: 11400000, guid: e27863efa6eab4544b9134ace3e45961, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29425,6 +29506,7 @@ MonoBehaviour:
     storagePreset: 2
     stationComponent: {fileID: 6224278178943848532}
     stationDef: {fileID: 11400000, guid: 969f023251d17894cab14f3820fd518d, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 03000000040000000600000008000000
@@ -29437,6 +29519,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 3419848690701814122}
     stationDef: {fileID: 11400000, guid: 83b17d71500b53b4891661016cd12aac, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29449,6 +29532,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 3952921712924210122}
     stationDef: {fileID: 11400000, guid: c74915cdffdfcc14585222ff7ae7b1c9, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29461,6 +29545,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 443902017405247680}
     stationDef: {fileID: 11400000, guid: 6fb2c2556f769374795c17e0eb786135, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29473,6 +29558,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 8217300519632342195}
     stationDef: {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29485,6 +29571,7 @@ MonoBehaviour:
     storagePreset: 1
     stationComponent: {fileID: 211333191437565109}
     stationDef: {fileID: 11400000, guid: 5e04f84f7b3f81b4d8530da7728763a1, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 01000000
@@ -29497,6 +29584,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 6115678377341899978}
     stationDef: {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29509,6 +29597,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 1495091486572530744}
     stationDef: {fileID: 11400000, guid: 8f25919c6df0b4e4f89d0a4b72a75ed3, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29521,6 +29610,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 4217981724176054402}
     stationDef: {fileID: 11400000, guid: 331a740e33a07344cb037e5f0eda3828, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29533,6 +29623,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 811710179974227926}
     stationDef: {fileID: 11400000, guid: 90b3b77ee62e49141980d609b2636a26, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29545,6 +29636,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 7949382206466533371}
     stationDef: {fileID: 11400000, guid: be3814db497ded54590c829c2915c07c, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29557,6 +29649,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 4216352780021860528}
     stationDef: {fileID: 11400000, guid: e06e59c4560e9524d9214b06c6de4139, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29569,6 +29662,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 4674208282552311298}
     stationDef: {fileID: 11400000, guid: 599c964a0e3397644a285e3701b15b39, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29581,6 +29675,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 8452598427261629754}
     stationDef: {fileID: 11400000, guid: 1ca8a41c91f0c30478161b12cb3dd68d, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29593,6 +29688,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 3913904301102585018}
     stationDef: {fileID: 11400000, guid: 45898db6611f9e6488650f50be7b20ca, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29605,6 +29701,7 @@ MonoBehaviour:
     storagePreset: 0
     stationComponent: {fileID: 7292184135953630091}
     stationDef: {fileID: 11400000, guid: 744ba02e83c1cd3469143a65652364b9, type: 2}
+    slotLayoutAsset: {fileID: 0}
     operationalForwardLocal: {x: 0, y: 0, z: 1}
     maxInteractionDistance: 3
     configuredIngredientIds: 
@@ -29622,7 +29719,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2023958570
+  GlobalObjectIdHash: 890602307
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -31683,6 +31780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
   _animator: {fileID: 2701240950863900414}
+  _defaultAnimatorController: {fileID: 0}
   _skinnedMeshRenderer: {fileID: 3161525056829057346}
   _appearance: {fileID: 3304476026450527947}
   _rootBone: {fileID: 78544029242499976}
@@ -33321,6 +33419,8 @@ MonoBehaviour:
   stationName: Geladeira (Estoque Frio)
   slotAnchors:
   - {fileID: 3647458790185300700}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -33961,6 +34061,8 @@ MonoBehaviour:
   stationName: Lixeira
   slotAnchors:
   - {fileID: 6746503109340238152}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -34063,6 +34165,8 @@ MonoBehaviour:
   stationName: Forno
   slotAnchors:
   - {fileID: 238231057218642821}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -34493,6 +34597,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
   _animator: {fileID: 5733316714667003253}
+  _defaultAnimatorController: {fileID: 0}
   _skinnedMeshRenderer: {fileID: 8607600017472436589}
   _appearance: {fileID: 6293195494874173519}
   _rootBone: {fileID: 3392067072095753583}
@@ -35757,6 +35862,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
   _animator: {fileID: 2060553400040110449}
+  _defaultAnimatorController: {fileID: 0}
   _skinnedMeshRenderer: {fileID: 6522378928295522554}
   _appearance: {fileID: 7088266899298841482}
   _rootBone: {fileID: 3907419386479792824}
@@ -42042,6 +42148,8 @@ MonoBehaviour:
   stationName: Quadro de Comandas
   slotAnchors:
   - {fileID: 7578767492574591121}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -42180,6 +42288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
   _animator: {fileID: 7563070099041046617}
+  _defaultAnimatorController: {fileID: 0}
   _skinnedMeshRenderer: {fileID: 3007690726763783494}
   _appearance: {fileID: 4898948553493528110}
   _rootBone: {fileID: 1016506605621656414}
@@ -42499,7 +42608,7 @@ Transform:
   m_GameObject: {fileID: 4933760997864230123}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: -0.168, z: 0.8676996}
+  m_LocalPosition: {x: -0.023555279, y: -0.16799998, z: 0.8676996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -43989,6 +44098,7 @@ GameObject:
   - component: {fileID: 2695177375040390589}
   - component: {fileID: 589477984128624899}
   - component: {fileID: 3506996081906353225}
+  - component: {fileID: -5214874446320745842}
   m_Layer: 0
   m_Name: mesa comum.005
   m_TagString: Untagged
@@ -44110,6 +44220,9 @@ MonoBehaviour:
   tableId: 5
   tableName: Mesa 5
   seatAnchor: {fileID: 58284518315903371}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6692367724796428901}
 --- !u!65 &3506996081906353225
 BoxCollider:
@@ -44132,6 +44245,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &-5214874446320745842
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5302683562253792010}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886922}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610693}
+  m_TimeToStationary: 0.5
 --- !u!1 &5310385015925093687
 GameObject:
   m_ObjectHideFlags: 0
@@ -44327,6 +44456,8 @@ MonoBehaviour:
   stationName: Forno
   slotAnchors:
   - {fileID: 2804802565594808893}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -45349,6 +45480,8 @@ MonoBehaviour:
   stationId: 4
   stationName: Quadro de Comandas
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -47284,6 +47417,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 8990918292261896628}
   - {fileID: 2811367725057753591}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -53189,6 +53324,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
   _animator: {fileID: 471723348546612715}
+  _defaultAnimatorController: {fileID: 0}
   _skinnedMeshRenderer: {fileID: 5424343625512971346}
   _appearance: {fileID: 1342951888040271341}
   _rootBone: {fileID: 5281631826256119416}
@@ -53817,6 +53953,8 @@ MonoBehaviour:
   stationName: Dispensa (Estoque Seco)
   slotAnchors:
   - {fileID: 8337537585565279610}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -54106,6 +54244,8 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 9218925819230618020}
   - {fileID: 6187884345442084889}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -54329,7 +54469,7 @@ Transform:
   m_GameObject: {fileID: 6306908216959270563}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: -0.168, z: -0.86770016}
+  m_LocalPosition: {x: -0.023555279, y: -0.16799998, z: -0.86770016}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -54862,6 +55002,8 @@ MonoBehaviour:
   stationName: "\xC1rea de Recebimento"
   slotAnchors:
   - {fileID: 8137993284181914115}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -60295,6 +60437,8 @@ MonoBehaviour:
   - {fileID: 8570948413747738845}
   - {fileID: 8866472913348131910}
   - {fileID: 6188098139684361759}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -62405,6 +62549,8 @@ MonoBehaviour:
   stationId: 20
   stationName: Terminal de Fornecedor
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -64354,6 +64500,8 @@ MonoBehaviour:
   stationName: Telefone
   slotAnchors:
   - {fileID: 8225478162499175066}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
@@ -66242,6 +66390,7 @@ GameObject:
   - component: {fileID: 785836908931448093}
   - component: {fileID: 6073369155437468520}
   - component: {fileID: 6174401072770688705}
+  - component: {fileID: 8738541894119481119}
   m_Layer: 0
   m_Name: mesa comum.003
   m_TagString: Untagged
@@ -66363,6 +66512,9 @@ MonoBehaviour:
   tableId: 3
   tableName: Mesa 3
   seatAnchor: {fileID: 4827160033017474931}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 120766039669398856}
 --- !u!65 &6174401072770688705
 BoxCollider:
@@ -66385,6 +66537,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &8738541894119481119
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8540846609978628142}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.48869228}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029611588}
+  m_TimeToStationary: 0.5
 --- !u!1 &8551714759409654641
 GameObject:
   m_ObjectHideFlags: 0
@@ -67354,6 +67522,7 @@ GameObject:
   - component: {fileID: 5642851355544270864}
   - component: {fileID: 7581180107115453096}
   - component: {fileID: 4574223333244762839}
+  - component: {fileID: -6506230445222063949}
   m_Layer: 0
   m_Name: mesa comum.001
   m_TagString: Untagged
@@ -67475,6 +67644,9 @@ MonoBehaviour:
   tableId: 1
   tableName: Mesa 1
   seatAnchor: {fileID: 3646669888437011331}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 5338933395741533685}
 --- !u!65 &4574223333244762839
 BoxCollider:
@@ -67497,6 +67669,22 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1.1, y: 0.9, z: 1.1}
   m_Center: {x: 0, y: 0.45, z: 0}
+--- !u!208 &-6506230445222063949
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8655306948948053646}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886922}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610395}
+  m_TimeToStationary: 0.5
 --- !u!1 &8712258310081036777
 GameObject:
   m_ObjectHideFlags: 0
@@ -68800,7 +68988,7 @@ Transform:
   m_GameObject: {fileID: 9062858351660890497}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: -0.168, z: 0.8677}
+  m_LocalPosition: {x: -0.023554802, y: -0.16799998, z: 0.8677}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

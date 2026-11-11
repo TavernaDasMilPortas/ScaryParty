@@ -117,8 +117,16 @@ public class DeliveryPointPlacer : MonoBehaviour
             boxCol.center = new Vector3(0, 50f, 0);
 
             Renderer renderer = markerObj.GetComponent<Renderer>();
+            Material markerMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                renderer != null ? renderer.sharedMaterial : null,
+                ScaryParty.VisualStyles.VisualSemanticRole.Emission,
+                ScaryParty.VisualStyles.VisualCategoryIds.Effects);
+            if (renderer != null && markerMat != null) renderer.sharedMaterial = markerMat;
+
             MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
             propBlock.SetColor("_BaseColor", new Color(1f, 0.4f, 0f, 0.8f));
+            propBlock.SetColor("_Color", new Color(1f, 0.4f, 0f, 0.8f));
+            propBlock.SetColor("_MainColor", new Color(1f, 0.4f, 0f, 0.8f));
             propBlock.SetColor("_EmissionColor", new Color(1f, 0.6f, 0f) * 3f);
             renderer.SetPropertyBlock(propBlock);
 

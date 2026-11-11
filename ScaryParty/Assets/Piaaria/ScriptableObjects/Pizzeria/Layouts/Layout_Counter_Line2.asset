@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3715d25cbd2877429577401f367b534, type: 3}
+  m_Name: Layout_Counter_Line2
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.StationSlotLayoutAsset
+  layoutName: Layout_Counter_Line2
+  targetStationKind: 1
+  presetType: 1
+  rows: 1
+  columns: 2
+  spacingX: 0.4
+  spacingZ: 0.4
+  spacingY: 0.3
+  margin: 0.05
+  originOffset: {x: 0, y: 0, z: 0}
+  surfaceNormal: {x: 0, y: 1, z: 0}
+  slots:
+  - slotIndex: 0
+    slotName: Slot_0
+    role: 1
+    localPosition: {x: -0.2, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+    isManualOverride: 0
+    notes: 
+  - slotIndex: 1
+    slotName: Slot_1
+    role: 1
+    localPosition: {x: 0.2, y: 0, z: 0}
+    localEulerAngles: {x: 0, y: 0, z: 0}
+    localScale: {x: 1, y: 1, z: 1}
+    isManualOverride: 0
+    notes: 

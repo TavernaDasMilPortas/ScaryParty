@@ -18,7 +18,7 @@ namespace ScaryParty.UI.Piaria.Editor
         private Vector2 _scrollPos;
         private string _reportLog = "";
 
-        [MenuItem("Tools/Scary Party/UI/Montar P.I.A.R.I.A", false, 10)]
+        [MenuItem("Tools/Scary Party/Wizards/UI/Montar P.I.A.R.I.A (UI Installer)", false, 90)]
         public static void ShowWindow()
         {
             var window = GetWindow<PiariaUIInstallerWindow>("Montar P.I.A.R.I.A");
@@ -128,7 +128,7 @@ namespace ScaryParty.UI.Piaria.Editor
             Debug.Log($"[PiariaInstaller] {msg}");
         }
 
-        [MenuItem("Tools/Scary Party/UI/Montar Tudo (Batch)", false, 11)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/UI (P.I.A.R.I.A)/Montar Tudo (Batch)", false, 286)]
         public static void RunInstallationBatch()
         {
             var window = CreateInstance<PiariaUIInstallerWindow>();
@@ -548,7 +548,7 @@ namespace ScaryParty.UI.Piaria.Editor
             Log($"Catálogo canônico e templates serializados com sucesso em '{catalogPath}'.");
         }
 
-        [MenuItem("Tools/Scary Party/UI/Configurar Cenas Automaticamente", false, 12)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/UI (P.I.A.R.I.A)/Configurar Cenas Automaticamente", false, 287)]
         public static void SetupScenesDirectly()
         {
             var window = CreateInstance<PiariaUIInstallerWindow>();

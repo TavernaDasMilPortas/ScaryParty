@@ -12,8 +12,16 @@ public class StreetGridGenerator : MonoBehaviour
     public StreetGraph Generate(CityConfig config, System.Random rng, Transform parent,
         Material streetMat, Material sidewalkMat, Material[] buildingMaterials, out List<Vector3[]> blockPolygons)
     {
-        if (streetMat == null) streetMat = CreateFallbackMaterial(Color.gray);
-        if (sidewalkMat == null) sidewalkMat = CreateFallbackMaterial(new Color(0.85f, 0.85f, 0.85f));
+        streetMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            streetMat,
+            ScaryParty.VisualStyles.VisualSemanticRole.Street,
+            ScaryParty.VisualStyles.VisualCategoryIds.Streets,
+            () => CreateFallbackMaterial(Color.gray));
+        sidewalkMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            sidewalkMat,
+            ScaryParty.VisualStyles.VisualSemanticRole.Sidewalk,
+            ScaryParty.VisualStyles.VisualCategoryIds.Streets,
+            () => CreateFallbackMaterial(new Color(0.85f, 0.85f, 0.85f)));
 
         StreetGraph graph = new StreetGraph();
         
@@ -319,8 +327,11 @@ public class StreetGridGenerator : MonoBehaviour
         {
             GameObject borderParent = new GameObject("CityBorders");
             borderParent.transform.SetParent(parent);
-            Material wallMat = new Material(Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"));
-            wallMat.color = new Color(0.15f, 0.15f, 0.15f);
+            Material wallMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                null,
+                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                ScaryParty.VisualStyles.VisualCategoryIds.City,
+                () => CreateFallbackMaterial(new Color(0.15f, 0.15f, 0.15f)));
 
             List<Vector3[]> cleanedVoidFaces = new List<Vector3[]>();
             foreach (var voidFace in voidFaces)
@@ -546,7 +557,11 @@ public class StreetGridGenerator : MonoBehaviour
                             {
                                 baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
                             }
-                            if (baseMat == null) baseMat = wallMat;
+                            baseMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                                baseMat,
+                                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                                ScaryParty.VisualStyles.VisualCategoryIds.City,
+                                () => wallMat);
                             
                             Renderer r = bObj.GetComponent<Renderer>();
                             r.sharedMaterial = baseMat;
@@ -557,10 +572,7 @@ public class StreetGridGenerator : MonoBehaviour
                             float val = 0.3f + (float)rng.NextDouble() * 0.4f;
                             Color buildingColor = Color.HSVToRGB(hue, sat, val);
                             
-                            propBlock.SetColor("_Color", buildingColor);
-                            propBlock.SetColor("_BaseColor", buildingColor);
-                            propBlock.SetColor("_MainColor", buildingColor);
-                            r.SetPropertyBlock(propBlock);
+                            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(r, 0, buildingColor, propBlock);
                         }
 
                         currentDist += bWidth;

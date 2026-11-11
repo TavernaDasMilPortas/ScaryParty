@@ -30,7 +30,7 @@ namespace ScaryParty.Pizzeria.Editor
             return phoneStation;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Telefone (Legado)", false, 121)]
+        [MenuItem("Tools/Scary Party/Legado/Pizzaria (Prefab Antigo)/Construir Telefone", false, 312)]
         public static void BuildPhone()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
@@ -43,11 +43,11 @@ namespace ScaryParty.Pizzeria.Editor
             var bindings = prefab.GetComponent<PizzeriaAuthoringBindings>();
             if (bindings != null && bindings.isManualAuthoring)
             {
-                Debug.LogWarning("[PhoneBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Pizzaria Modular' (Aba 3: Bancadas e Objetos) para atribuir o telefone ao objeto desejado sem recriar primitivas.");
+                Debug.LogWarning("[PhoneBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' (Aba 3: Bancadas e Objetos) para atribuir o telefone ao objeto desejado sem recriar primitivas.");
                 if (Application.isBatchMode) return;
                 EditorUtility.DisplayDialog(
                     "Autoria Manual Ativa",
-                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Pizzaria Modular' → Aba '3. Bancadas e Objetos', selecione o objeto do telefone e clique em 'Criar Telefone'.",
+                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' → Aba '3. Bancadas e Objetos', selecione o objeto do telefone e clique em 'Criar Telefone'.",
                     "OK");
                 return;
             }

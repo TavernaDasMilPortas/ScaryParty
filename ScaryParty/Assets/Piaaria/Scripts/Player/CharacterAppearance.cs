@@ -146,14 +146,14 @@ namespace ScaryParty.Player
             }
         }
 
+        public void ReapplyPrimaryColor()
+        {
+            ApplyPrimaryColor(_currentPrimaryColor);
+        }
+
         private void ApplyColorBlockToSlot(Renderer renderer, int slotIndex, Color color)
         {
-            if (renderer == null) return;
-            renderer.GetPropertyBlock(_propertyBlock, slotIndex);
-            _propertyBlock.SetColor(BaseColorId, color);
-            _propertyBlock.SetColor(ColorId, color);
-            _propertyBlock.SetColor(MainColorId, color);
-            renderer.SetPropertyBlock(_propertyBlock, slotIndex);
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(renderer, slotIndex, color, _propertyBlock);
         }
 
         /// <summary>

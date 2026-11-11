@@ -15,7 +15,8 @@ namespace ScaryParty.Pizzeria.Visual
         public CookingStage CookingStage { get; }
         public float CookProgress { get; }
         public float BurnProgress { get; }
-        public float UsableRadius { get; }
+        public float UsableRadius => SurfaceMetrics.UsableRadius;
+        public PizzaSurfaceMetrics SurfaceMetrics { get; }
         public IReadOnlyList<NetIngredientDto> Ingredients => _ingredients;
 
         private readonly List<NetIngredientDto> _ingredients;
@@ -27,14 +28,14 @@ namespace ScaryParty.Pizzeria.Visual
             float cookProgress,
             float burnProgress,
             IEnumerable<NetIngredientDto> ingredients,
-            float usableRadius = 0.36f)
+            PizzaSurfaceMetrics surfaceMetrics)
         {
             VisualSeed = visualSeed != 0 ? visualSeed : 1337UL;
             BaseDoughDefinitionId = baseDoughDefinitionId > 0 ? baseDoughDefinitionId : 2;
             CookingStage = cookingStage;
             CookProgress = cookProgress;
             BurnProgress = burnProgress;
-            UsableRadius = usableRadius > 0f ? usableRadius : 0.36f;
+            SurfaceMetrics = surfaceMetrics.UsableRadius > 0.02f ? surfaceMetrics : PizzaSurfaceMetrics.Default;
 
             _ingredients = new List<NetIngredientDto>();
             if (ingredients != null)
@@ -47,6 +48,29 @@ namespace ScaryParty.Pizzeria.Visual
                     }
                 }
             }
+        }
+
+        public PizzaVisualComposition(
+            ulong visualSeed,
+            int baseDoughDefinitionId,
+            CookingStage cookingStage,
+            float cookProgress,
+            float burnProgress,
+            IEnumerable<NetIngredientDto> ingredients,
+            float usableRadius = 0.145f)
+            : this(visualSeed, baseDoughDefinitionId, cookingStage, cookProgress, burnProgress, ingredients,
+                   BuildMetricsFromRadius(usableRadius))
+        {
+        }
+
+        private static PizzaSurfaceMetrics BuildMetricsFromRadius(float usableRadius)
+        {
+            if (usableRadius > 0.20f) usableRadius *= 0.5f;
+            float r = (usableRadius > 0.05f && usableRadius <= 0.25f) ? usableRadius : 0.145f;
+            var m = PizzaSurfaceMetrics.Default;
+            m.UsableRadius = r;
+            m.OuterRadius = r / 0.80f;
+            return m;
         }
 
         public static PizzaVisualComposition FromNetItemDto(NetItemDto dto, float usableRadius = 0.36f)

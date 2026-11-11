@@ -8,7 +8,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class PizzeriaLogicInjector
     {
-        [MenuItem("Tools/Scary Party/Pizzeria/Fix Scene Logic (Injeta LÃ³gica Nova)", false, 20)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Fix Scene Logic (Injetar Lógica Nova)", false, 246)]
         public static void InjectLogic()
         {
             string prefabPath = "Assets/Piaaria/Prefabs/Pizzeria/PizzeriaPrefab.prefab";

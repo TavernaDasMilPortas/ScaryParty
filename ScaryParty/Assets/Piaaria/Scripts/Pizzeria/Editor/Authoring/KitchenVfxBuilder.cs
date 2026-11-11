@@ -13,7 +13,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         private const string Output = "Assets/Resources/PizzeriaVFX/";
         private const string Export = "Assets/Piaaria/VFX/Models/Smoke01_Export.fbx";
 
-        [MenuItem("Tools/Pizzeria/Build Kitchen VFX")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/VFX & Visuals/Build Kitchen VFX", false, 260)]
         public static void Build()
         {
             if (!File.Exists(Export))
@@ -38,7 +38,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             Debug.Log("Kitchen VFX built. Source graphs preserved; smoke mesh uses FBX. Mess uses the available smoke shader for its spiral output.");
         }
 
-        [MenuItem("Tools/Pizzeria/Re-export Smoke FBX and Build Kitchen VFX")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/VFX & Visuals/Re-export Smoke FBX and Build Kitchen VFX", false, 261)]
         public static void Rebuild()
         {
             ExportSmoke();

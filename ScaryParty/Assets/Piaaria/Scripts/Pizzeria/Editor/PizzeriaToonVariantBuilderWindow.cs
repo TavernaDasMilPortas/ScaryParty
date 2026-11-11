@@ -11,7 +11,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     /// <summary>
     /// Janela de controle interativa para o processo completo de Cel Shading da Pizzeria.
-    /// Menu: Tools > Scary Party > Pizzeria > Cel Shading Showcase Builder
+    /// Menu: Tools > Scary Party > Wizards > Pizzaria > Cel Shading Showcase Builder
     /// </summary>
     public class PizzeriaToonVariantBuilderWindow : EditorWindow
     {
@@ -29,7 +29,7 @@ namespace ScaryParty.Pizzeria.Editor
         private string _statusMessage = "Pronto para iniciar auditoria ou operações.";
         private MessageType _statusType = MessageType.Info;
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Cel Shading Showcase Builder")]
+        [MenuItem("Tools/Scary Party/Wizards/Pizzaria/Cel Shading Showcase Builder", false, 31)]
         public static void ShowWindow()
         {
             var win = GetWindow<PizzeriaToonVariantBuilderWindow>("Cel Shading Builder");

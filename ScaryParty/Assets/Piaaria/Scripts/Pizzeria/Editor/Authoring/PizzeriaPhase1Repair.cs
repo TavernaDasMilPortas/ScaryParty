@@ -18,7 +18,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         public const string ManualConfigPath = "Assets/Piaaria/ScriptableObjects/Pizzeria/PizzeriaConfig_PizzeriaModular_Manual.asset";
         public const string StationsDir = "Assets/Piaaria/ScriptableObjects/Pizzeria/Stations";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Executar Reparo Completo Fase 1 (IDs, Slots, Comandas)", priority = 1)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Executar Reparo Completo Fase 1 (IDs, Slots, Comandas)", false, 240)]
         public static void Repair()
         {
             Debug.Log("[PizzeriaPhase1Repair] Iniciando Reparo Fase 1...");

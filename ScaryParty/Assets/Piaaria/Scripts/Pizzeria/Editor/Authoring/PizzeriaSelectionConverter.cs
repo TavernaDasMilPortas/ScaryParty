@@ -1602,10 +1602,10 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorUtility.SetDirty(cfg);
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Vincular Slots aos Objetos Selecionados (substituir)", false, 30)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Vincular Slots aos Objetos Selecionados (Substituir)", false, 130)]
         private static void MenuBindSlotsReplace() => MenuBindSlots(true);
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Vincular Slots aos Objetos Selecionados (adicionar)", false, 31)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Vincular Slots aos Objetos Selecionados (Adicionar)", false, 131)]
         private static void MenuBindSlotsAppend() => MenuBindSlots(false);
 
         private static void MenuBindSlots(bool replace)

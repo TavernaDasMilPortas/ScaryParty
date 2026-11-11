@@ -30,42 +30,42 @@ namespace ScaryParty.Pizzeria.Visual
 
         [Header("Parâmetros do Modo Sliced (Fatiado)")]
         [Min(1)] public int piecesPerPortion = 4;
-        [Range(0.01f, 0.45f)] public float minRadius = 0.06f;
-        [Range(0.05f, 0.45f)] public float maxRadius = 0.32f;
-        [Range(0.01f, 0.20f)] public float occupancyRadius = 0.045f;
-        [Range(0.01f, 0.20f)] public float minDistanceBetweenPieces = 0.08f;
-        public Vector2 scaleRange = new Vector2(0.9f, 1.1f);
-        public float yOffset = 0.035f;
+        [Range(0.01f, 0.20f)] public float minRadius = 0.035f;
+        [Range(0.05f, 0.20f)] public float maxRadius = 0.125f;
+        [Range(0.01f, 0.10f)] public float occupancyRadius = 0.028f;
+        [Range(0.01f, 0.15f)] public float minDistanceBetweenPieces = 0.055f;
+        public Vector2 scaleRange = new Vector2(0.95f, 1.05f);
+        public float yOffset = 0.015f;
 
         [Header("Parâmetros do Modo Total (Cobertura Contínua)")]
-        public float layerHeight = 0.015f;
-        public float coatingScale = 0.38f;
-        public float thickness = 0.005f;
+        public float layerHeight = 0.003f;
+        public float coatingScale = 1.0f;
+        public float thickness = 1.0f;
 
         [Header("Parâmetros do Modo Central")]
         public Vector3 centerOffset = Vector3.zero;
         public Vector3 centerScale = Vector3.one;
-        public float centralYOffset = 0.04f;
-        [Range(0.01f, 0.20f)] public float reservedCenterRadius = 0.06f;
+        public float centralYOffset = 0.016f;
+        [Range(0.01f, 0.10f)] public float reservedCenterRadius = 0.04f;
 
         [Header("Parâmetros do Modo Specific (Poses Manuais)")]
         public List<SpecificPlacementPose> specificPoses = new List<SpecificPlacementPose>();
         public bool allowManualOverlap = false;
 
         [Header("Parâmetros do Modo Ring (Anel)")]
-        [Range(0.05f, 0.45f)] public float ringRadius = 0.26f;
+        [Range(0.02f, 0.20f)] public float ringRadius = 0.095f;
         [Min(1)] public int piecesInRing = 8;
         [Range(0f, 360f)] public float startAngleDegrees = 0f;
         [Range(0f, 30f)] public float angleJitterDegrees = 5f;
-        [Range(0.01f, 0.20f)] public float ringOccupancyRadius = 0.035f;
-        public float ringYOffset = 0.035f;
+        [Range(0.01f, 0.10f)] public float ringOccupancyRadius = 0.025f;
+        public float ringYOffset = 0.015f;
 
         [Header("Parâmetros do Modo Scatter (Disperso)")]
         [Range(1, 50)] public int scatterDensity = 12;
         [Min(1)] public int maxPiecesBudget = 24;
         public float scatterScale = 0.025f;
-        public float minSpacing = 0.03f;
-        public float scatterYOffset = 0.03f;
+        public float minSpacing = 0.025f;
+        public float scatterYOffset = 0.015f;
 
         [Header("Parâmetros do Modo None (Sem Visual)")]
         public string omissionReason = "Ingrediente puramente lógico/sabor";

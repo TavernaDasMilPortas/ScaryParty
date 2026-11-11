@@ -141,7 +141,7 @@ public class WeaponAnimationGenerator
 
     // ─── Entry point ─────────────────────────────────────────────────────────
 
-    [MenuItem("Tools/Weapons/Generate Placeholder Animations")]
+    [MenuItem("Tools/Scary Party/Legado/Weapons (Desativado)/Generate Placeholder Animations", false, 351)]
     public static void GenerateAll()
     {
         Directory.CreateDirectory(

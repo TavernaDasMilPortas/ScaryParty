@@ -1,0 +1,29 @@
+{
+    "generatedUtc": "2026-11-11T03:57:33.8102753Z",
+    "unityVersion": "6000.3.6f1",
+    "gameSceneBaseline": {
+        "sceneName": "GameScene",
+        "framesSampled": 30,
+        "avgFrameTimeMs": 85.93900299072266,
+        "avgFps": 11.600000381469727,
+        "avgDrawCalls": 12993.0,
+        "avgSetPassCalls": 760.0,
+        "avgBatches": 12993.0,
+        "activeIllustrateRenderers": 321,
+        "totalRenderers": 11939
+    },
+    "gameSceneCelShaded": {
+        "sceneName": "GameScene_CelShaded",
+        "framesSampled": 30,
+        "avgFrameTimeMs": 60.47999954223633,
+        "avgFps": 16.5,
+        "avgDrawCalls": 1032.0,
+        "avgSetPassCalls": 441.0,
+        "avgBatches": 1032.0,
+        "activeIllustrateRenderers": 11930,
+        "totalRenderers": 11939
+    },
+    "fpsDeltaPercent": 42.2400016784668,
+    "drawCallsDeltaPercent": -92.05999755859375,
+    "setPassDeltaPercent": -41.970001220703128
+}

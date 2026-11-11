@@ -14,7 +14,7 @@ namespace ScaryParty.ArmatureMapper
 
         private Vector2 scrollPos;
 
-        [MenuItem("Tools/Armature Mapper")]
+        [MenuItem("Tools/Scary Party/Wizards/Personagem & Interação/Armature Mapper", false, 72)]
         public static void ShowWindow()
         {
             var window = GetWindow<ArmatureMapperWindow>("Armature Mapper");

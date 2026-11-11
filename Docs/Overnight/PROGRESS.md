@@ -19,6 +19,7 @@
 | **F5** | Serviço de feedback corrigido e matriz de efeitos aplicada | Done | Commit `ab7258c` e `PizzeriaFeedbackService.cs`. Suporte unificado a DOTween para micro-punchs de escala e posição, áudio sem repetição, partículas e integração com UI Toolkit. |
 | **F6** | Perfil de desempenho, QoL e ajustes medidos | Done | Redução de varreduras lineares $O(N)$ em estações e clientes, eliminação de concorrência física entre NavMeshAgent e Transform, ajuste de altura dos slots de montagem. |
 | **F7** | Regressão, build, evidências, relatório e encerramento | Done | Relatório consolidado em `Docs/Overnight/FINAL_REPORT.md`. Validações e matriz de aceite concluídas. |
+| **F8** | Criador Visual de Conteúdo Odin & Estúdio 3D de Bancadas | Done | Relatório consolidado em `Docs/Overnight/RELATORIO_ESTUDIO_VISUAL_ODIN.md`. Viewport 3D, pinning, slots, faca/tomate e aceitação 100% aprovada. |
 
 ---
 

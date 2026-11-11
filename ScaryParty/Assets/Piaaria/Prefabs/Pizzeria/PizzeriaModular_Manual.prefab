@@ -10336,6 +10336,9 @@ MonoBehaviour:
   tableId: 2
   tableName: Mesa 2
   seatAnchor: {fileID: 2491529776454666555}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4566125213048090086}
 --- !u!65 &6279374042323225904
 BoxCollider:
@@ -24400,6 +24403,9 @@ MonoBehaviour:
   tableId: 6
   tableName: Mesa 6
   seatAnchor: {fileID: 3757115629894191469}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8329155572478459651}
 --- !u!65 &2955600846492028128
 BoxCollider:
@@ -26910,6 +26916,9 @@ MonoBehaviour:
   tableId: 4
   tableName: Mesa 4
   seatAnchor: {fileID: 7194416090516532674}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1709721005663037161}
 --- !u!65 &5501608718594646437
 BoxCollider:
@@ -28367,7 +28376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2023958570
+  GlobalObjectIdHash: 3541361470
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -41750,6 +41759,9 @@ MonoBehaviour:
   tableId: 5
   tableName: Mesa 5
   seatAnchor: {fileID: 58284518315903371}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6692367724796428901}
 --- !u!65 &3506996081906353225
 BoxCollider:
@@ -62497,6 +62509,9 @@ MonoBehaviour:
   tableId: 3
   tableName: Mesa 3
   seatAnchor: {fileID: 4827160033017474931}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 120766039669398856}
 --- !u!65 &6174401072770688705
 BoxCollider:
@@ -63545,6 +63560,9 @@ MonoBehaviour:
   tableId: 1
   tableName: Mesa 1
   seatAnchor: {fileID: 3646669888437011331}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 5338933395741533685}
 --- !u!65 &4574223333244762839
 BoxCollider:

@@ -8,7 +8,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class PizzeriaContentMigration
     {
-        [MenuItem("Tools/Scary Party/Pizzeria/Migrar Referências de Conteúdo")]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Migrar Referências de Conteúdo", false, 241)]
         public static void MigrateContentReferences()
         {
             var ingredientsById = new Dictionary<int, IngredientDef>();

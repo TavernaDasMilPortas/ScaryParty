@@ -53,7 +53,7 @@
       "mode": "SIT_DOWN",
       "output_fbx": "Character_SitDown.fbx",
       "start_frame": 1,
-      "end_frame": 16,
+      "end_frame": 20,
       "loop": false
     },
     {
@@ -61,7 +61,7 @@
       "mode": "STAND_UP",
       "output_fbx": "Character_StandUp.fbx",
       "start_frame": 1,
-      "end_frame": 16,
+      "end_frame": 20,
       "loop": false
     }
   ]

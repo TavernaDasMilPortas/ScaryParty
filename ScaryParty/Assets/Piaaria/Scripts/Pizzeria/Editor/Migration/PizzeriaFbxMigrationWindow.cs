@@ -14,8 +14,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
         private MessageType _statusType = MessageType.Info;
         private ValidationReport _lastReport;
 
-        [MenuItem("Tools/Scary Party/Pizzeria/FBX Modular Migration Window", false, 5)]
-        [MenuItem("Tools/Scary Party/Pizzeria/Importar e Integrar Pizzaria FBX", false, 6)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Importar e Integrar Pizzaria FBX (Migração)", false, 242)]
         public static void OpenWindow()
         {
             var win = GetWindow<PizzeriaFbxMigrationWindow>("Migração Pizzaria FBX");

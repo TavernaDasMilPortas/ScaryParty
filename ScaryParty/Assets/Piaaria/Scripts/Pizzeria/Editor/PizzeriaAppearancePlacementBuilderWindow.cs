@@ -11,7 +11,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     /// <summary>
     /// Janela de auditoria, calibração geométrica e aplicação de paleta Distant Lands para a Pizzaria Modular.
-    /// Acesso via: Tools > Scary Party > Pizzeria Appearance & Placement Builder.
+    /// Acesso via: Tools > Scary Party > Wizards > Pizzaria > Aparência e Posicionamento.
     /// </summary>
     public class PizzeriaAppearancePlacementBuilderWindow : EditorWindow
     {
@@ -37,7 +37,7 @@ namespace ScaryParty.Pizzeria.Editor
         private bool _hasAuthoringBindings = false;
         private bool _anchorsVerifiedByUser = false;
 
-        [MenuItem("Tools/Scary Party/Pizzeria Appearance & Placement Builder")]
+        [MenuItem("Tools/Scary Party/Wizards/Pizzaria/Aparência e Posicionamento", false, 30)]
         public static void ShowWindow()
         {
             var window = GetWindow<PizzeriaAppearancePlacementBuilderWindow>("Pizzeria Builder");

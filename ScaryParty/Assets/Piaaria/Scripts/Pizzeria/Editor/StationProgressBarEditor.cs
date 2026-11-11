@@ -46,7 +46,7 @@ namespace ScaryParty.Pizzeria.Editor
             }
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Criar Prefab da Barra de Progresso", false, 60)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Criar Prefab da Barra de Progresso", false, 247)]
         public static void CreateOrUpdatePrefab()
         {
             const string resourcesDir = "Assets/Resources";

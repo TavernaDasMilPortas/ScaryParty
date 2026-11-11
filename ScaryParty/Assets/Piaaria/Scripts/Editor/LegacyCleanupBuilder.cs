@@ -15,7 +15,7 @@ namespace ScaryParty.EditorScripts
     /// 2. Desativa os controles de combate e troca de arma via scroll do mouse (WeaponInputHandler / WeaponController).
     /// 3. Limpa referências legadas de NetworkPrefabs (PizzaBoxPlaceholder).
     /// 
-    /// Acessível via: Tools > Scary Party > Legacy Cleanup Builder
+    /// Acessível via: Tools > Scary Party > Setup e Uso Único > Limpeza de Legados > Legacy Cleanup Builder (Janela)
     /// </summary>
     public class LegacyCleanupBuilder : EditorWindow
     {
@@ -27,7 +27,7 @@ namespace ScaryParty.EditorScripts
         private const string DefaultNetworkPrefabsPath = "Assets/Piaaria/DefaultNetworkPrefabs.asset";
         private const string LegacyPizzaBoxGuid = "4e439716a6912d04bba4581994280b23";
 
-        [MenuItem("Tools/Scary Party/Legacy Cleanup Builder", false, 15)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Limpeza de Legados/Legacy Cleanup Builder (Janela)", false, 295)]
         public static void ShowWindow()
         {
             var win = GetWindow<LegacyCleanupBuilder>("Legacy Cleanup Builder");
@@ -35,7 +35,7 @@ namespace ScaryParty.EditorScripts
             win.Show();
         }
 
-        [MenuItem("Tools/Scary Party/Clean Legacy Systems (1-Click)", false, 16)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Limpeza de Legados/Limpar Sistemas Legados (1-Click)", false, 296)]
         public static void RunQuickCleanup()
         {
             string summary = RunAllCleanup(msg => Debug.Log($"[LegacyCleanup] {msg}"));

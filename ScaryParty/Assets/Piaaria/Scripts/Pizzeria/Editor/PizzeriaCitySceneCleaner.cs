@@ -17,7 +17,7 @@ namespace ScaryParty.Pizzeria.Editor
         private const string BackupDirectory = "Assets/Piaaria/Scenes/Backup";
         private const string BackupScenePath = "Assets/Piaaria/Scenes/Backup/GameScene_PreCleanup_Backup.unity";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Limpar Cidade Estática da GameScene (Fase 4)", false, 20)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Limpar Cidade Estática da GameScene (Fase 4)", false, 245)]
         public static void CleanStaticCityFromGameScene()
         {
             if (!File.Exists(GameScenePath))

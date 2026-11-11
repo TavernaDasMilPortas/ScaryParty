@@ -146,6 +146,17 @@ public class TrafficManager : NetworkBehaviour
         vehicle.vehicleColor = new Color((float)_rng.NextDouble(), (float)_rng.NextDouble(), (float)_rng.NextDouble());
         vehicle.isActive = true;
 
+        Renderer vehRend = vehicleObj.GetComponent<Renderer>();
+        if (vehRend != null)
+        {
+            Material vehMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                vehRend.sharedMaterial,
+                ScaryParty.VisualStyles.VisualSemanticRole.GenericOpaque,
+                ScaryParty.VisualStyles.VisualCategoryIds.Props);
+            if (vehMat != null) vehRend.sharedMaterial = vehMat;
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(vehRend, 0, vehicle.vehicleColor);
+        }
+
         AssignRandomPath(vehicle);
 
         if (vehicle.waypoints != null && vehicle.waypoints.Count > 0)
@@ -243,9 +254,16 @@ public class TrafficManager : NetworkBehaviour
             
             // Apply color via MaterialPropertyBlock for optimization
             Renderer rend = visual.GetComponent<Renderer>();
-            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
-            mpb.SetColor("_BaseColor", _vehicleStates[_clientVisuals.Count].color);
-            rend.SetPropertyBlock(mpb);
+            if (rend != null)
+            {
+                Material vehMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                    rend.sharedMaterial,
+                    ScaryParty.VisualStyles.VisualSemanticRole.GenericOpaque,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Props);
+                if (vehMat != null) rend.sharedMaterial = vehMat;
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(
+                    rend, 0, _vehicleStates[_clientVisuals.Count].color);
+            }
 
             if (_vehicleRoot == null)
             {

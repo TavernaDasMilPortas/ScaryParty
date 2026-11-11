@@ -10,9 +10,12 @@ namespace ScaryParty.Pizzeria.Stations
 {
     /// <summary>
     /// Estação de Mesa do Salão para atendimento presencial (1 mesa inteira por NPC nesta versão).
-    /// - Possui âncora de assento (seatAnchor) para o NPC sentar e âncora de prato (plateAnchor) para exibir a pizza servida.
+    /// - Possui 4 âncoras completas para o assento:
+    ///   1) seatAnchor: Root no piso para alinhamento do transform do personagem.
+    ///   2) seatSurfaceAnchor: Superfície real do assento da cadeira (~0.45m de altura) para validação da pelve.
+    ///   3) approachAnchor: Ponto no NavMesh limpo para a caminhada do NPC sem concorrer com a física da mesa.
+    ///   4) exitAnchor: Ponto de saída desobstruído para o NPC levantar e retornar à navegação.
     /// - Esculpe automaticamente o NavMesh via NavMeshObstacle com carving para impedir atravessamento.
-    /// - Localiza a cadeira física real no salão para garantir orientação de frente para a mesa.
     /// - Interagir com [E] ou [F] segurando uma pizza assada SEM CAIXA serve a pizza diretamente na mesa.
     /// </summary>
     public class DiningTableStation : MonoBehaviour, IInteractable
@@ -21,9 +24,12 @@ namespace ScaryParty.Pizzeria.Stations
         public int tableId = 1;
         public string tableName = "Mesa 1";
 
-        [Header("Âncoras de Assento e Prato")]
-        public Transform seatAnchor;
-        public Transform plateAnchor;
+        [Header("Âncoras de Assento da Cadeira")]
+        public Transform seatAnchor;          // Root no piso para o Transform do personagem
+        public Transform seatSurfaceAnchor;   // Superfície real do assento (cushion ~0.45m)
+        public Transform approachAnchor;      // Ponto de aproximação no NavMesh (fora do carving)
+        public Transform exitAnchor;          // Ponto de saída segura após levantar
+        public Transform plateAnchor;         // Ponto de apoio da pizza na mesa
 
         private static readonly System.Collections.Generic.Dictionary<int, DiningTableStation> _instancesByTableId = new System.Collections.Generic.Dictionary<int, DiningTableStation>();
         public static bool TryGetTable(int id, out DiningTableStation table) => _instancesByTableId.TryGetValue(id, out table);
@@ -81,14 +87,14 @@ namespace ScaryParty.Pizzeria.Stations
                 Vector3 localCenter = (min + max) * 0.5f;
                 Vector3 localSize = max - min;
                 obstacle.center = localCenter;
-                obstacle.size = new Vector3(Mathf.Max(0.6f, localSize.x * 0.9f),
+                obstacle.size = new Vector3(Mathf.Max(0.6f, localSize.x * 0.85f),
                                             Mathf.Max(0.8f, localSize.y),
-                                            Mathf.Max(0.6f, localSize.z * 0.9f));
+                                            Mathf.Max(0.6f, localSize.z * 0.85f));
             }
             else
             {
                 obstacle.center = new Vector3(0f, 0.45f, 0f);
-                obstacle.size = new Vector3(1.1f, 0.9f, 1.1f);
+                obstacle.size = new Vector3(1.0f, 0.9f, 1.0f);
             }
 
             obstacle.carving = true;
@@ -97,6 +103,9 @@ namespace ScaryParty.Pizzeria.Stations
 
         public void EnsureAnchors()
         {
+            Transform nearestChair = null;
+            float chairSeatY = 0.45f;
+
             if (seatAnchor == null)
             {
                 seatAnchor = transform.Find("SeatAnchor");
@@ -104,96 +113,151 @@ namespace ScaryParty.Pizzeria.Stations
 
             if (seatAnchor == null)
             {
-                // 1. Tentar localizar cadeira próxima ou filha
+                // 1. Procurar cadeira filha
                 for (int i = 0; i < transform.childCount; i++)
                 {
                     var ch = transform.GetChild(i);
                     string n = ch.name.ToLowerInvariant();
                     if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
                     {
-                        seatAnchor = ch;
+                        nearestChair = ch;
                         break;
                     }
                 }
 
-                // 2. Se não encontrou em filhos, procurar a cadeira mais próxima entre irmãos ou na hierarquia do salão
-                if (seatAnchor == null)
+                // 2. Procurar em irmãos ou no salão
+                if (nearestChair == null && transform.parent != null)
                 {
-                    Transform nearestChair = null;
                     float minDist = 2.5f;
-
-                    // Procurar em irmãos (ex: sob Furniture)
-                    if (transform.parent != null)
+                    for (int i = 0; i < transform.parent.childCount; i++)
                     {
-                        for (int i = 0; i < transform.parent.childCount; i++)
+                        var sibling = transform.parent.GetChild(i);
+                        if (sibling == transform) continue;
+                        string n = sibling.name.ToLowerInvariant();
+                        if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
                         {
-                            var sibling = transform.parent.GetChild(i);
-                            if (sibling == transform) continue;
-                            string n = sibling.name.ToLowerInvariant();
-                            if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
+                            float dist = Vector3.Distance(new Vector3(sibling.position.x, 0f, sibling.position.z),
+                                                          new Vector3(transform.position.x, 0f, transform.position.z));
+                            if (dist < minDist)
                             {
-                                float dist = Vector3.Distance(new Vector3(sibling.position.x, 0f, sibling.position.z),
-                                                              new Vector3(transform.position.x, 0f, transform.position.z));
-                                if (dist < minDist)
-                                {
-                                    minDist = dist;
-                                    nearestChair = sibling;
-                                }
+                                minDist = dist;
+                                nearestChair = sibling;
                             }
                         }
                     }
+                }
 
-                    // Se ainda não encontrou, buscar na raiz da pizzaria
-                    if (nearestChair == null)
+                // 3. Procurar na raiz da pizzaria
+                if (nearestChair == null)
+                {
+                    var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
+                        ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.transform
+                        : transform.root;
+                    var all = root.GetComponentsInChildren<Transform>(true);
+                    float minDist = 2.5f;
+                    for (int i = 0; i < all.Length; i++)
                     {
-                        var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
-                            ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.transform
-                            : transform.root;
-                        var all = root.GetComponentsInChildren<Transform>(true);
-                        for (int i = 0; i < all.Length; i++)
+                        if (all[i] == transform) continue;
+                        string n = all[i].name.ToLowerInvariant();
+                        if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
                         {
-                            if (all[i] == transform) continue;
-                            string n = all[i].name.ToLowerInvariant();
-                            if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
+                            float dist = Vector3.Distance(new Vector3(all[i].position.x, 0f, all[i].position.z),
+                                                          new Vector3(transform.position.x, 0f, transform.position.z));
+                            if (dist < minDist)
                             {
-                                float dist = Vector3.Distance(new Vector3(all[i].position.x, 0f, all[i].position.z),
-                                                              new Vector3(transform.position.x, 0f, transform.position.z));
-                                if (dist < minDist)
-                                {
-                                    minDist = dist;
-                                    nearestChair = all[i];
-                                }
+                                minDist = dist;
+                                nearestChair = all[i];
                             }
                         }
                     }
+                }
 
-                    var go = new GameObject("SeatAnchor");
-                    go.transform.SetParent(transform, true);
+                var go = new GameObject("SeatAnchor");
+                go.transform.SetParent(transform, true);
 
-                    if (nearestChair != null)
+                if (nearestChair != null)
+                {
+                    Vector3 chairPos = nearestChair.position;
+                    Vector3 toTable = transform.position - chairPos;
+                    toTable.y = 0f;
+                    Quaternion faceTable = toTable.sqrMagnitude > 0.001f
+                        ? Quaternion.LookRotation(toTable.normalized, Vector3.up)
+                        : nearestChair.rotation;
+
+                    go.transform.position = chairPos;
+                    go.transform.rotation = faceTable;
+
+                    var rend = nearestChair.GetComponentInChildren<Renderer>();
+                    if (rend != null)
                     {
-                        // Posiciona a âncora exatamente na cadeira correspondente
-                        Vector3 chairPos = nearestChair.position;
-                        Vector3 toTable = transform.position - chairPos;
-                        toTable.y = 0f;
-                        Quaternion faceTable = toTable.sqrMagnitude > 0.001f
-                            ? Quaternion.LookRotation(toTable.normalized, Vector3.up)
-                            : nearestChair.rotation;
-
-                        go.transform.position = chairPos;
-                        go.transform.rotation = faceTable;
+                        float h = rend.bounds.size.y;
+                        chairSeatY = Mathf.Clamp(h * 0.48f, 0.40f, 0.52f);
                     }
-                    else
-                    {
-                        // Fallback relativo à frente da mesa
-                        go.transform.localPosition = new Vector3(0f, 0f, -0.75f);
-                        go.transform.localRotation = Quaternion.identity;
-                    }
+                }
+                else
+                {
+                    go.transform.localPosition = new Vector3(0f, 0f, -0.75f);
+                    go.transform.localRotation = Quaternion.identity;
+                }
 
-                    seatAnchor = go.transform;
+                seatAnchor = go.transform;
+            }
+
+            // Assegurar seatAnchor no piso
+            Vector3 groundSeatPos = Presentation.CustomerSpawner.SnapToFloor(seatAnchor.position);
+            seatAnchor.position = groundSeatPos;
+
+            // Âncora 2: seatSurfaceAnchor (superfície do assento ~0.45m acima do piso)
+            if (seatSurfaceAnchor == null)
+            {
+                seatSurfaceAnchor = seatAnchor.Find("SeatSurfaceAnchor");
+                if (seatSurfaceAnchor == null)
+                {
+                    var sGo = new GameObject("SeatSurfaceAnchor");
+                    sGo.transform.SetParent(seatAnchor, false);
+                    sGo.transform.localPosition = new Vector3(0f, chairSeatY, 0f);
+                    sGo.transform.localRotation = Quaternion.identity;
+                    seatSurfaceAnchor = sGo.transform;
                 }
             }
 
+            // Direção de saída / trás da cadeira (oposta à mesa)
+            Vector3 toTableDir = (transform.position - seatAnchor.position);
+            toTableDir.y = 0f;
+            Vector3 backDir = toTableDir.sqrMagnitude > 0.001f ? -toTableDir.normalized : -seatAnchor.forward;
+            Vector3 sideDir = Vector3.Cross(Vector3.up, backDir).normalized;
+
+            // Âncora 3: approachAnchor (~0.65m atrás da cadeira, no NavMesh)
+            if (approachAnchor == null)
+            {
+                approachAnchor = transform.Find("ApproachAnchor");
+                if (approachAnchor == null)
+                {
+                    var aGo = new GameObject("ApproachAnchor");
+                    aGo.transform.SetParent(transform, true);
+                    Vector3 approachPos = seatAnchor.position + backDir * 0.65f;
+                    aGo.transform.position = Presentation.CustomerSpawner.SnapToFloor(approachPos);
+                    aGo.transform.rotation = Quaternion.LookRotation(-backDir, Vector3.up);
+                    approachAnchor = aGo.transform;
+                }
+            }
+
+            // Âncora 4: exitAnchor (~0.60m atrás e 0.30m lateral)
+            if (exitAnchor == null)
+            {
+                exitAnchor = transform.Find("ExitAnchor");
+                if (exitAnchor == null)
+                {
+                    var eGo = new GameObject("ExitAnchor");
+                    eGo.transform.SetParent(transform, true);
+                    Vector3 exitPos = seatAnchor.position + backDir * 0.60f + sideDir * 0.30f;
+                    eGo.transform.position = Presentation.CustomerSpawner.SnapToFloor(exitPos);
+                    eGo.transform.rotation = Quaternion.LookRotation(backDir, Vector3.up);
+                    exitAnchor = eGo.transform;
+                }
+            }
+
+            // Âncora de prato
             if (plateAnchor == null)
             {
                 plateAnchor = transform.Find("PlateAnchor");
@@ -219,6 +283,27 @@ namespace ScaryParty.Pizzeria.Stations
             return Presentation.CustomerSpawner.SnapToFloor(rawPos);
         }
 
+        public Vector3 GetSeatSurfacePosition()
+        {
+            EnsureAnchors();
+            if (seatSurfaceAnchor != null) return seatSurfaceAnchor.position;
+            return GetSeatPosition() + Vector3.up * 0.45f;
+        }
+
+        public Vector3 GetApproachPosition()
+        {
+            EnsureAnchors();
+            if (approachAnchor != null) return Presentation.CustomerSpawner.SnapToFloor(approachAnchor.position);
+            return GetSeatPosition() - transform.forward * 0.65f;
+        }
+
+        public Vector3 GetExitPosition()
+        {
+            EnsureAnchors();
+            if (exitAnchor != null) return Presentation.CustomerSpawner.SnapToFloor(exitAnchor.position);
+            return GetApproachPosition();
+        }
+
         public Quaternion GetSeatRotation()
         {
             EnsureAnchors();
@@ -231,6 +316,13 @@ namespace ScaryParty.Pizzeria.Stations
                 return seatAnchor.rotation;
             }
             return transform.rotation;
+        }
+
+        public Quaternion GetApproachRotation()
+        {
+            EnsureAnchors();
+            if (approachAnchor != null) return approachAnchor.rotation;
+            return GetSeatRotation();
         }
 
         public Vector3 GetPlatePosition()
@@ -308,7 +400,6 @@ namespace ScaryParty.Pizzeria.Stations
             int otherHand = activeHand == 0 ? 1 : 0;
             ulong playerId = netObj.OwnerClientId;
 
-            // Procurar pizza na mão ativa (ou na outra mão como fallback)
             ulong foundPizzaId = 0;
             bool foundBoxed = false;
 
@@ -350,5 +441,44 @@ namespace ScaryParty.Pizzeria.Stations
 
         public void OnFocus() { }
         public void OnLoseFocus() { }
+
+#if UNITY_EDITOR
+        private void OnDrawGizmosSelected()
+        {
+            EnsureAnchors();
+            if (seatAnchor != null)
+            {
+                Gizmos.color = Color.cyan;
+                Gizmos.DrawWireSphere(seatAnchor.position, 0.22f);
+                Gizmos.DrawRay(seatAnchor.position, seatAnchor.forward * 0.4f);
+            }
+            if (seatSurfaceAnchor != null)
+            {
+                Gizmos.color = Color.yellow;
+                Gizmos.DrawWireCube(seatSurfaceAnchor.position, new Vector3(0.38f, 0.02f, 0.38f));
+                if (seatAnchor != null)
+                {
+                    Gizmos.DrawLine(seatAnchor.position, seatSurfaceAnchor.position);
+                }
+            }
+            if (approachAnchor != null)
+            {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere(approachAnchor.position, 0.20f);
+                Gizmos.DrawRay(approachAnchor.position, approachAnchor.forward * 0.4f);
+            }
+            if (exitAnchor != null)
+            {
+                Gizmos.color = Color.green;
+                Gizmos.DrawWireSphere(exitAnchor.position, 0.20f);
+                Gizmos.DrawRay(exitAnchor.position, exitAnchor.forward * 0.4f);
+            }
+            if (plateAnchor != null)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.DrawWireSphere(plateAnchor.position, 0.18f);
+            }
+        }
+#endif
     }
 }
