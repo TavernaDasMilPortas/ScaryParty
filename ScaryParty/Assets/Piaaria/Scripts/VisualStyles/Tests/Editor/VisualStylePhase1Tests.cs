@@ -175,6 +175,7 @@ namespace ScaryParty.VisualStyles.Editor.Tests
             var anime = VisualStylePresetSeeder.LoadPreset(VisualStylePresetType.AnimeSoft);
             var comic = VisualStylePresetSeeder.LoadPreset(VisualStylePresetType.ComicBold);
             var flat = VisualStylePresetSeeder.LoadPreset(VisualStylePresetType.FlatGraphic);
+            var dispatch = VisualStylePresetSeeder.LoadPreset(VisualStylePresetType.DispatchInspired);
             var ruleSet = AssetDatabase.LoadAssetAtPath<VisualConversionRuleSet>(VisualStylePresetSeeder.RuleSetPath);
             var runtimeCfg = AssetDatabase.LoadAssetAtPath<VisualStyleRuntimeConfig>(VisualStylePresetSeeder.RuntimeConfigAssetPath);
 
@@ -182,12 +183,14 @@ namespace ScaryParty.VisualStyles.Editor.Tests
             Assert.IsNotNull(anime);
             Assert.IsNotNull(comic);
             Assert.IsNotNull(flat);
+            Assert.IsNotNull(dispatch);
             Assert.IsNotNull(ruleSet);
             Assert.IsNotNull(runtimeCfg);
             Assert.AreEqual("soft_toon_vibrant", soft.styleId);
             Assert.AreEqual("anime_soft", anime.styleId);
             Assert.AreEqual("comic_bold", comic.styleId);
             Assert.AreEqual("flat_graphic", flat.styleId);
+            Assert.AreEqual("dispatch_inspired", dispatch.styleId);
             Assert.AreEqual(VisualStyleRuntimeConfig.CanonicalGameplaySceneName, VisualStyleRuntimeConfig.GetGameplaySceneName());
         }
     }

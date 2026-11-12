@@ -211,22 +211,22 @@ def apply_sit_pose(arm_obj, t_factor):
     arm1_l = arm_obj.pose.bones.get("arm1.l")
     if arm1_l:
         arm1_l.rotation_mode = 'QUATERNION'
-        arm1_l.rotation_quaternion = mathutils.Euler((math.radians(35.0) * s, 0.0, math.radians(15.0) * s), 'XYZ').to_quaternion()
+        arm1_l.rotation_quaternion = mathutils.Euler((-math.radians(35.0) * s, 0.0, math.radians(15.0) * s), 'XYZ').to_quaternion()
 
     arm2_l = arm_obj.pose.bones.get("arm2.l")
     if arm2_l:
         arm2_l.rotation_mode = 'QUATERNION'
-        arm2_l.rotation_quaternion = mathutils.Euler((math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
+        arm2_l.rotation_quaternion = mathutils.Euler((-math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
 
     arm1_r = arm_obj.pose.bones.get("arm1.r")
     if arm1_r:
         arm1_r.rotation_mode = 'QUATERNION'
-        arm1_r.rotation_quaternion = mathutils.Euler((math.radians(35.0) * s, 0.0, -math.radians(15.0) * s), 'XYZ').to_quaternion()
+        arm1_r.rotation_quaternion = mathutils.Euler((-math.radians(35.0) * s, 0.0, -math.radians(15.0) * s), 'XYZ').to_quaternion()
 
     arm2_r = arm_obj.pose.bones.get("arm2.r")
     if arm2_r:
         arm2_r.rotation_mode = 'QUATERNION'
-        arm2_r.rotation_quaternion = mathutils.Euler((math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
+        arm2_r.rotation_quaternion = mathutils.Euler((-math.radians(45.0) * s, 0.0, 0.0), 'XYZ').to_quaternion()
 
 
 def keyframe_all_bones(arm_obj, frame):
@@ -293,11 +293,11 @@ def create_procedural_action(arm_obj, clip_name, mode, start_frame, end_frame):
             arm1_l = arm_obj.pose.bones.get("arm1.l")
             if arm1_l:
                 arm1_l.rotation_mode = 'QUATERNION'
-                arm1_l.rotation_quaternion = mathutils.Euler((math.radians(35.0) + breath * 0.15, 0.0, math.radians(15.0)), 'XYZ').to_quaternion()
+                arm1_l.rotation_quaternion = mathutils.Euler((-math.radians(35.0) - breath * 0.15, 0.0, math.radians(15.0)), 'XYZ').to_quaternion()
             arm1_r = arm_obj.pose.bones.get("arm1.r")
             if arm1_r:
                 arm1_r.rotation_mode = 'QUATERNION'
-                arm1_r.rotation_quaternion = mathutils.Euler((math.radians(35.0) + breath * 0.15, 0.0, -math.radians(15.0)), 'XYZ').to_quaternion()
+                arm1_r.rotation_quaternion = mathutils.Euler((-math.radians(35.0) - breath * 0.15, 0.0, -math.radians(15.0)), 'XYZ').to_quaternion()
         elif mode == "SIT_DOWN":
             apply_sit_pose(arm_obj, u)
         elif mode == "STAND_UP":

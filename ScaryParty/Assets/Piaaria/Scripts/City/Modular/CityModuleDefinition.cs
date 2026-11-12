@@ -59,6 +59,13 @@ namespace ScaryParty.City.Modular
         [Header("Slots de Materiais")]
         public CityModuleMaterialRole[] materialRoles = new CityModuleMaterialRole[0];
 
+        [Header("Compensação Visual (Blender / Importação)")]
+        [Tooltip("Ajuste de posição visual para compensar o pivot de modelos importados do Blender.")]
+        public Vector3 visualPositionOffset = Vector3.zero;
+
+        [Tooltip("Ajuste de rotação visual para alinhar modelos importados do Blender sem afetar colisores, âncoras ou rotação estrutural.")]
+        public Vector3 visualRotationOffset = Vector3.zero;
+
         /// <summary>
         /// Bounds estruturais no espaço local da peça.
         /// Convenção:
@@ -117,6 +124,8 @@ namespace ScaryParty.City.Modular
                     def.category = CityModuleCategory.WallSolid;
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim };
                     break;
 
@@ -125,6 +134,8 @@ namespace ScaryParty.City.Modular
                     def.category = CityModuleCategory.WallWindow;
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.awningAnchorLocal = new Vector3(0f, 2.7f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Glass };
                     break;
@@ -135,6 +146,8 @@ namespace ScaryParty.City.Modular
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
                     def.isEntrance = true;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     // Vão de 1.0m x 2.2m centralizado
                     def.entranceAnchorLocal = new Vector3(0f, 0f, 0f);
                     def.approachAnchorLocal = new Vector3(0f, 0f, 1.0f);
@@ -150,6 +163,8 @@ namespace ScaryParty.City.Modular
                     def.category = CityModuleCategory.WallShopfront;
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.awningAnchorLocal = new Vector3(0f, 2.7f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Glass };
                     break;
@@ -160,7 +175,9 @@ namespace ScaryParty.City.Modular
                     def.width = 2.0f; def.height = 0.2f; def.depth = 2.0f;
                     def.occupiedSlots = 1;
                     def.isRoof = true;
-                    def.materialRoles = new[] { CityModuleMaterialRole.Trim, CityModuleMaterialRole.Wall };
+                    def.visualPositionOffset = new Vector3(0f, 0.1f, 0f);
+                    def.visualRotationOffset = Vector3.zero;
+                    def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim };
                     break;
 
                 case CityModuleId.F:
@@ -169,6 +186,8 @@ namespace ScaryParty.City.Modular
                     def.width = 2.0f; def.height = 0.4f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
                     def.isParapet = true;
+                    def.visualPositionOffset = new Vector3(0f, 0.2f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Trim, CityModuleMaterialRole.Wall };
                     break;
 
@@ -177,6 +196,8 @@ namespace ScaryParty.City.Modular
                     def.category = CityModuleCategory.WallShutters;
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.awningAnchorLocal = new Vector3(0f, 2.7f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Glass, CityModuleMaterialRole.Wood };
                     break;
@@ -187,6 +208,8 @@ namespace ScaryParty.City.Modular
                     def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 1;
                     def.exteriorProtrusion = 0.30f; // Floreira avança 30cm para fora
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.awningAnchorLocal = new Vector3(0f, 2.7f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Glass, CityModuleMaterialRole.Wood };
                     break;
@@ -197,6 +220,8 @@ namespace ScaryParty.City.Modular
                     def.width = 4.0f; def.height = 3.0f; def.depth = 0.2f;
                     def.occupiedSlots = 2; // Ocupa 2 módulos consecutivos (4m)
                     def.isGarage = true;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.approachAnchorLocal = new Vector3(0f, 0f, 2.0f);
                     def.interiorAnchorLocal = new Vector3(0f, 0f, -2.0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Metal };
@@ -209,6 +234,8 @@ namespace ScaryParty.City.Modular
                     def.occupiedSlots = 1;
                     def.isEntrance = true;
                     def.isDoubleDoor = true;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     // Vão de 1.6m x 2.2m centralizado
                     def.entranceAnchorLocal = new Vector3(0f, 0f, 0f);
                     def.approachAnchorLocal = new Vector3(0f, 0f, 1.0f);
@@ -227,6 +254,8 @@ namespace ScaryParty.City.Modular
                     def.isAwning = true;
                     def.exteriorProtrusion = 0.80f; // Avanço de 80cm para fora
                     def.minClearanceHeight = 2.2f; // Altura livre do pedestre
+                    def.visualPositionOffset = new Vector3(0f, 0.2f, 0.4f);
+                    def.visualRotationOffset = new Vector3(0f, -90f, 0f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Fabric, CityModuleMaterialRole.Metal };
                     break;
 
@@ -236,6 +265,8 @@ namespace ScaryParty.City.Modular
                     def.width = 0.20f; def.height = 3.0f; def.depth = 0.20f;
                     def.occupiedSlots = 0; // Acabamento de canto, não consome espaço no passo de 2m
                     def.isCornerPillar = true;
+                    def.visualPositionOffset = new Vector3(0f, 1.5f, 0f);
+                    def.visualRotationOffset = Vector3.zero;
                     def.materialRoles = new[] { CityModuleMaterialRole.Trim, CityModuleMaterialRole.Wall };
                     break;
             }

@@ -11,7 +11,8 @@ namespace ScaryParty.VisualStyles
         SoftToonVibrant = 1,
         AnimeSoft = 2,
         ComicBold = 3,
-        FlatGraphic = 4
+        FlatGraphic = 4,
+        DispatchInspired = 5
     }
 
     /// <summary>

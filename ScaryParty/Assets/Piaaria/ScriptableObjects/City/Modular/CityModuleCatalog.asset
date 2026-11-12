@@ -38,6 +38,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0000000001000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 1
     displayName: Parede com Janela
     category: 1
@@ -63,6 +65,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000002000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 2
     displayName: Parede com Porta Simples
     category: 2
@@ -88,6 +92,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.6, z: 0}
     movingPartHingeLocal: {x: -0.5, y: 1.1, z: -0.1}
     materialRoles: 000000000100000003000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 3
     displayName: Parede com Vitrine
     category: 3
@@ -113,6 +119,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000002000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 4
     displayName: Cobertura Plana
     category: 4
@@ -138,6 +146,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
+    visualPositionOffset: {x: 0, y: -1.5, z: 0}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 5
     displayName: Platibanda
     category: 5
@@ -163,6 +173,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
+    visualPositionOffset: {x: 0, y: -1.5, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 6
     displayName: Janela com Venezianas
     category: 6
@@ -188,6 +200,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 00000000010000000200000003000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 7
     displayName: Janela com Floreira
     category: 7
@@ -213,6 +227,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 00000000010000000200000003000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 8
     displayName: Parede com Garagem
     category: 8
@@ -238,6 +254,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000004000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 9
     displayName: Parede com Porta Dupla
     category: 9
@@ -263,6 +281,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.6, z: 0}
     movingPartHingeLocal: {x: -0.8, y: 1.1, z: -0.1}
     materialRoles: 000000000100000003000000
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 10
     displayName: Toldo Separado
     category: 10
@@ -288,6 +308,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0500000004000000
+    visualPositionOffset: {x: 0, y: 0.2, z: 0}
+    visualRotationOffset: {x: 0, y: 0, z: 0}
   - id: 11
     displayName: Pilar de Canto
     category: 11
@@ -313,3 +335,5 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
+    visualPositionOffset: {x: 0, y: 0, z: 0}
+    visualRotationOffset: {x: 0, y: 0, z: 0}

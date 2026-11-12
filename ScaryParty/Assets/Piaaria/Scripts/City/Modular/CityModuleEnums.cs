@@ -87,6 +87,7 @@ namespace ScaryParty.City.Modular
         HouseWithGarage, // Casa com garagem: 8m larg x 6m prof x 1 pav (I=4m + C=2m + G=2m)
         TwoStoryHouse,   // Sobrado: 6m larg x 6m prof x 2 pav (A + J + B)
         Shop,            // Loja: 6m larg x 8m prof x 1 pav (D + D + J, K acima das vitrines)
-        MixedBuilding    // Prédio misto: 8m larg x 8m prof x 4 pav (D + D + J + D; janelas nos andares superiores)
+        MixedBuilding,   // Prédio misto: 8m larg x 8m prof x 4 pav (D + D + J + D; janelas nos andares superiores)
+        ShowcaseAll12Modules // Prédio mostruário especial que reúne todos os 12 módulos canônicos (A a L)
     }
 }

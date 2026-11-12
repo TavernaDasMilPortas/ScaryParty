@@ -27,6 +27,7 @@ namespace ScaryParty.VisualStyles.Editor
             EnsurePresetAsset(VisualStylePresetType.AnimeSoft, "VS_AnimeSoft.asset", ruleSet);
             EnsurePresetAsset(VisualStylePresetType.ComicBold, "VS_ComicBold.asset", ruleSet);
             EnsurePresetAsset(VisualStylePresetType.FlatGraphic, "VS_FlatGraphic.asset", ruleSet);
+            EnsurePresetAsset(VisualStylePresetType.DispatchInspired, "VS_DispatchInspired.asset", ruleSet);
 
             EnsureRuntimeConfig(LoadPreset(VisualStylePresetType.SoftToonVibrant));
 
@@ -83,6 +84,7 @@ namespace ScaryParty.VisualStyles.Editor
                 VisualStylePresetType.AnimeSoft => "VS_AnimeSoft.asset",
                 VisualStylePresetType.ComicBold => "VS_ComicBold.asset",
                 VisualStylePresetType.FlatGraphic => "VS_FlatGraphic.asset",
+                VisualStylePresetType.DispatchInspired => "VS_DispatchInspired.asset",
                 _ => "VS_SoftToonVibrant.asset"
             };
             return AssetDatabase.LoadAssetAtPath<VisualStyleProfile>($"{ProfilesFolder}/{fileName}");

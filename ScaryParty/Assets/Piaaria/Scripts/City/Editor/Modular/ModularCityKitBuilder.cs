@@ -27,7 +27,58 @@ namespace ScaryParty.City.Editor.Modular
             BuildCompleteKit(false);
         }
 
-        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Recriar Kit Completo (Sobrescrever Placeholders)", false, 276)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Sincronizar e Salvar Catálogo Modular", false, 276)]
+        public static void SyncCatalogMenuItem()
+        {
+            CityModuleCatalog catalog = AssetDatabase.LoadAssetAtPath<CityModuleCatalog>(CatalogPath);
+            if (catalog == null)
+            {
+                EditorUtility.DisplayDialog("Aviso", "Catálogo não encontrado em " + CatalogPath, "OK");
+                return;
+            }
+
+            // Garante que todas as definições canônicas possuam os offsets visuais adequados
+            catalog.EnsureAllCanonicalDefinitions();
+
+            // Mapeamento direto para os FBXs autorais caso estejam presentes na pasta de módulos
+            var fbxMap = new Dictionary<CityModuleId, string>()
+            {
+                { CityModuleId.A, "parede_lisa.fbx" },
+                { CityModuleId.B, "parede_janela.fbx" },
+                { CityModuleId.C, "parede_porta.fbx" },
+                { CityModuleId.D, "parede_vitrine.fbx" },
+                { CityModuleId.E, "cobertura_plana.fbx" },
+                { CityModuleId.F, "platibanda.fbx" },
+                { CityModuleId.G, "parede_veneziana_aberta.fbx" },
+                { CityModuleId.H, "parede_caneiro.fbx" },
+                { CityModuleId.I, "parede_garagem.fbx" },
+                { CityModuleId.J, "parede_porta_dupla.fbx" },
+                { CityModuleId.K, "toldo.fbx" },
+                { CityModuleId.L, "pilar_de_canto.fbx" }
+            };
+
+            foreach (var kvp in fbxMap)
+            {
+                var def = catalog.GetDefinition(kvp.Key);
+                if (def == null) continue;
+
+                string fbxPath = $"{PrefabsPath}/{kvp.Value}";
+                GameObject fbxObj = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+                if (fbxObj != null)
+                {
+                    def.prefab = fbxObj;
+                }
+            }
+
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            EditorUtility.DisplayDialog("Sucesso", "Catálogo sincronizado e salvo com sucesso em disco e memória!\nAgora clique em 'Quick Rebuild City' para atualizar os prédios na cena.", "OK");
+            Debug.Log("[ModularCityKitBuilder] Catálogo modular sincronizado e salvo com sucesso.");
+        }
+
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Recriar Kit Completo (Sobrescrever Placeholders)", false, 277)]
         public static void RecreateKitMenuItem()
         {
             if (EditorUtility.DisplayDialog("Recriar Kit Modular",
@@ -310,20 +361,48 @@ namespace ScaryParty.City.Editor.Modular
         private static void AddBoxGeometry(List<Vector3> verts, List<Vector3> norms, List<Vector2> uvs, List<int> tris, Vector3 center, Vector3 size)
         {
             Vector3 ext = size * 0.5f;
-            int startIdx = verts.Count;
 
-            // 6 faces do paralelepípedo
+            // 6 faces do paralelepípedo com normais externas estritas
+            // Definindo explicitamente os 4 vértices de cada face em sentido anti-horário olhando de fora (CCW)
+            // de modo que o enrolamento dos triângulos (0, 1, 2) e (0, 2, 3) aponte perfeitamente na direção da normal
+            // e nenhuma face fique invertida ou invisível por culling.
             Vector3[] faceNormals = new[]
             {
-                Vector3.forward, Vector3.back, Vector3.up, Vector3.down, Vector3.right, Vector3.left
+                Vector3.forward, // +Z (Frontal)
+                Vector3.back,    // -Z (Traseira)
+                Vector3.up,      // +Y (Superior / Topo)
+                Vector3.down,    // -Y (Inferior / Base)
+                Vector3.right,   // +X (Direita)
+                Vector3.left     // -X (Esquerda)
             };
 
             for (int f = 0; f < 6; f++)
             {
                 Vector3 n = faceNormals[f];
-                Vector3 u = (f == 2 || f == 3) ? Vector3.right : Vector3.Cross(n, Vector3.up);
-                Vector3 v = Vector3.Cross(u, n);
+                Vector3 u; // Tangente horizontal da face
+                Vector3 v; // Tangente vertical da face
 
+                if (f == 2) // +Y (Cima)
+                {
+                    u = Vector3.right;
+                    v = Vector3.forward;
+                }
+                else if (f == 3) // -Y (Baixo)
+                {
+                    u = Vector3.right;
+                    v = Vector3.back;
+                }
+                else
+                {
+                    // Faces laterais e frontais/traseiras (+Z, -Z, +X, -X):
+                    // v aponta para cima (+Y), u é perpendicular tal que u x v = n
+                    v = Vector3.up;
+                    u = Vector3.Cross(v, n);
+                }
+
+                // Vértices do quad dispostos em ordem anti-horária a partir de p0:
+                // p0 = (-u, -v), p1 = (+u, -v), p2 = (+u, +v), p3 = (-u, +v)
+                // Cross(p1 - p0, p2 - p0) = Cross(2u, 2v) = 4 (u x v) = 4 n -> normal correta voltada para fora!
                 Vector3 p0 = center + n * Vector3.Dot(ext, n) - u * Vector3.Dot(ext, u) - v * Vector3.Dot(ext, v);
                 Vector3 p1 = center + n * Vector3.Dot(ext, n) + u * Vector3.Dot(ext, u) - v * Vector3.Dot(ext, v);
                 Vector3 p2 = center + n * Vector3.Dot(ext, n) + u * Vector3.Dot(ext, u) + v * Vector3.Dot(ext, v);
@@ -472,6 +551,8 @@ namespace ScaryParty.City.Editor.Modular
                 switch (id)
                 {
                     case CityModuleId.E:
+                        mr.sharedMaterial = matWall;
+                        break;
                     case CityModuleId.F:
                     case CityModuleId.L:
                         mr.sharedMaterial = matTrim;

@@ -41,6 +41,28 @@ namespace ScaryParty.City.Modular
             if (anchorsRoot == null) anchorsRoot = transform.Find("Anchors");
             if (movingPartsRoot == null) movingPartsRoot = transform.Find("MovingParts");
 
+            // Se for um modelo/FBX instanciado diretamente sem nó "Visual" prévio,
+            // procura o primeiro filho que contenha MeshRenderer ou a própria raiz
+            if (visualRoot == null)
+            {
+                MeshRenderer[] renderers = GetComponentsInChildren<MeshRenderer>(true);
+                if (renderers != null && renderers.Length > 0)
+                {
+                    // Se o renderer estiver num Transform filho direto ou no primeiro renderer
+                    Transform firstRendT = renderers[0].transform;
+                    if (firstRendT != transform)
+                    {
+                        // Encontra o ancestral imediato filho deste transform
+                        Transform curr = firstRendT;
+                        while (curr.parent != null && curr.parent != transform)
+                        {
+                            curr = curr.parent;
+                        }
+                        visualRoot = curr;
+                    }
+                }
+            }
+
             if (anchorsRoot != null)
             {
                 if (doorAnchor == null) doorAnchor = anchorsRoot.Find("DoorAnchor");

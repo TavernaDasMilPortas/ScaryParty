@@ -85,9 +85,54 @@ namespace ScaryParty.City.Modular
                         res.passes.Add("Módulo de garagem I configurado com 4m e 2 slots.");
                     }
                 }
+
+                // 6. Valida materiais e normais da malha procedural/visual
+                ValidateMeshNormalsAndMaterials(def, ref res);
             }
 
             return res;
+        }
+
+        private static void ValidateMeshNormalsAndMaterials(CityModuleDefinition def, ref ValidationResult res)
+        {
+            if (def.materialRoles == null || def.materialRoles.Length == 0)
+            {
+                res.warnings.Add($"Módulo {def.id} não possui papéis funcionais de material (materialRoles) configurados.");
+            }
+            else
+            {
+                res.passes.Add($"Módulo {def.id} possui {def.materialRoles.Length} papéis de material configurados.");
+            }
+
+            if (def.prefab != null)
+            {
+                MeshFilter mf = def.prefab.GetComponentInChildren<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    Mesh mesh = mf.sharedMesh;
+                    Vector3[] normals = mesh.normals;
+                    if (normals != null && normals.Length > 0)
+                    {
+                        bool hasZeroNormal = false;
+                        for (int i = 0; i < normals.Length; i++)
+                        {
+                            if (normals[i].sqrMagnitude < 0.001f)
+                            {
+                                hasZeroNormal = true;
+                                break;
+                            }
+                        }
+                        if (hasZeroNormal)
+                        {
+                            res.warnings.Add($"Módulo {def.id} possui vértices com vetor normal nulo/degenerado.");
+                        }
+                        else
+                        {
+                            res.passes.Add($"Normais da malha do módulo {def.id} validadas.");
+                        }
+                    }
+                }
+            }
         }
 
         private static void ValidateDimensionsContract(CityModuleDefinition def, ref ValidationResult res)

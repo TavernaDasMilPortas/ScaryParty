@@ -403,6 +403,49 @@ namespace ScaryParty.VisualStyles
                     materials.preserveTextures = false; // Essential markings/food retain via category overrides
                     break;
 
+                case VisualStylePresetType.DispatchInspired:
+                    styleId = "dispatch_inspired";
+                    displayName = "Dispatch Inspired";
+                    description = "Linguagem grafica de animacao 2D/3D: 3 faixas toon com sombras graficas cinza-azulado/roxo, rim light sutil nos personagens e silhuetas bem desenhadas.";
+                    lighting.lightingMode = 1;
+                    lighting.posterizeLight = true;
+                    lighting.lightSteps = 3;
+                    lighting.lightRamp = 0.95f;
+                    lighting.lightRampOffset = 0.50f;
+                    lighting.useShadows = true;
+                    lighting.receiveShadows = true;
+                    // Sombra cinza-azulado/roxo dessaturada (#5A5873)
+                    lighting.shadowTint = new Color(0.35f, 0.34f, 0.45f, 1f);
+                    specularRim.useSpecular = false;
+                    specularRim.useRimLighting = true;
+                    specularRim.rimLightColor = new Color(0.85f, 0.90f, 1f, 1f);
+                    specularRim.rimRamp = 1.0f;
+                    specularRim.rimLightRampOffset = 0.58f;
+                    specularRim.rimLightLitIntensity = 0.35f;
+                    specularRim.rimLightShadowIntensity = 0.12f;
+                    colorPalette.saturationShift = 0.08f;
+                    colorPalette.valueShift = 0.02f;
+                    colorPalette.contrast = 1.10f;
+                    colorPalette.posterizeColors = false;
+                    outlines.outlineMode = VisualStyleOutlineMode.ScreenSpace;
+                    // Contorno #222831
+                    outlines.outlineColor = new Color(0.133f, 0.157f, 0.192f, 1f);
+                    outlines.outlineWidth = 0.10f;
+                    outlines.screenSpaceWidth = 1.25f;
+                    outlines.characterOutlineMultiplier = 1.35f;
+                    outlines.buildingOutlineMultiplier = 0.22f;
+                    outlines.foodOutlineMultiplier = 0.10f;
+                    characters.characterOutlineMultiplier = 1.35f;
+                    characters.rimLightEnabled = true;
+                    characters.rimIntensity = 0.45f;
+                    characters.characterContrastBoost = 1.12f;
+                    characters.preserveDynamicBodyColor = true;
+                    materials.preserveTextures = true;
+                    materials.preserveNormalMaps = true;
+                    materials.preserveEmission = true;
+                    materials.disableIllustratePerturbations = true;
+                    break;
+
                 case VisualStylePresetType.SoftToonVibrant:
                 default:
                     styleId = "soft_toon_vibrant";

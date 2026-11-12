@@ -222,7 +222,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 09:05 AM (November 11, 2026)
+    lastSaveTimePrint: 11:59 PM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -245,7 +245,7 @@ MonoBehaviour:
       tabWidth: 0
       name: --- CITY ---
       icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: New Tab
+      shortName: --- CITY ---
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -296,15 +296,64 @@ MonoBehaviour:
       savePlayModeTransform: 0
       index: 0
       historyPosition: 0
-      componentMaps: []
+      componentMaps:
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: transform
+        niceComponentName: transform
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: networkobject
+        niceComponentName: network object
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: citygenerator
+        niceComponentName: city generator
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: citygizmos
+        niceComponentName: city gizmos
       historyPaths:
       - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
         prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
     - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
     - assetGUIDs:
@@ -321,15 +370,9 @@ MonoBehaviour:
       - 5d50dbc038eb4994a8e567f09ba47a7a
     - assetGUIDs:
       - 7743f135c45f481c911d313178a41eca
-    - assetGUIDs:
-      - 1f3b804c253ee974fa3b45efa0fd3ed0
-    - assetGUIDs:
-      - 75911d39ab9042b9b90366e89878b9c8
-    - assetGUIDs:
-      - 50330bb3be2c46468a973efbce8e1862
-    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -339,7 +382,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 08:31 AM (November 11, 2026)
+    lastSaveTimePrint: 11:56 PM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -355,7 +398,7 @@ MonoBehaviour:
     rawUserHeight: 0
     lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
-    lastKnownHeight: 1
+    lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
@@ -420,6 +463,12 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
     - assetGUIDs:
       - b0067bd253bce9c44b4a327a114d4cfa
@@ -435,15 +484,9 @@ MonoBehaviour:
       - 5d50dbc038eb4994a8e567f09ba47a7a
     - assetGUIDs:
       - 7743f135c45f481c911d313178a41eca
-    - assetGUIDs:
-      - 1f3b804c253ee974fa3b45efa0fd3ed0
-    - assetGUIDs:
-      - 75911d39ab9042b9b90366e89878b9c8
-    - assetGUIDs:
-      - 50330bb3be2c46468a973efbce8e1862
-    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -453,7 +496,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 08:31 AM (November 11, 2026)
+    lastSaveTimePrint: 11:56 PM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -469,7 +512,7 @@ MonoBehaviour:
     rawUserHeight: 0
     lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
-    lastKnownHeight: 1
+    lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
@@ -534,6 +577,12 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
     - assetGUIDs:
       - b0067bd253bce9c44b4a327a114d4cfa
@@ -549,15 +598,9 @@ MonoBehaviour:
       - 5d50dbc038eb4994a8e567f09ba47a7a
     - assetGUIDs:
       - 7743f135c45f481c911d313178a41eca
-    - assetGUIDs:
-      - 1f3b804c253ee974fa3b45efa0fd3ed0
-    - assetGUIDs:
-      - 75911d39ab9042b9b90366e89878b9c8
-    - assetGUIDs:
-      - 50330bb3be2c46468a973efbce8e1862
-    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -895,7 +938,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: bca06e45c99909c4babf383b55cdc4ba
     sceneName: GameScene_CelShaded
-    lastSaveTimePrint: 12:19 AM (November 11, 2026)
+    lastSaveTimePrint: 09:16 AM (November 11, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -976,6 +1019,10 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
     - assetGUIDs:
       - b0067bd253bce9c44b4a327a114d4cfa
@@ -993,15 +1040,11 @@ MonoBehaviour:
       - 7743f135c45f481c911d313178a41eca
     - assetGUIDs:
       - 1f3b804c253ee974fa3b45efa0fd3ed0
-    - assetGUIDs:
-      - 75911d39ab9042b9b90366e89878b9c8
-    - assetGUIDs:
-      - 50330bb3be2c46468a973efbce8e1862
-    targetObject: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Art/Pizzeria/Materials/Generated/Mat_Gen_CaixaPizza.mat
+    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000010000000000000001000000000000000000000000000000000000000100000000000000010000000000000000000000010000000100000000000000010000000100000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000001000000010000000100000000000000010000000000000001000000010000000100000000000000
+  tipsShown: 01000000010000000100000001000000000000000100000000000000000000000100000000000000010000000100000000000000010000000100000000000000010000000100000000000000010000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000010000000100000000000000010000000000000001000000010000000100000001000000010000000000000001000000010000000100000001000000
   playModeStartScene: {}
   enteringPlayMode: 0

@@ -13,85 +13,18 @@ MonoBehaviour:
   m_Name: GeneratedCityData
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   streetGraph:
-    nodes:
-    - id: 0
-      worldPosition: {x: 0, y: 0, z: 0}
-      connectedEdges: 0000000002000000
-    - id: 1
-      worldPosition: {x: 119.9519, y: 0, z: -3.3972657}
-      connectedEdges: 0000000001000000
-    - id: 2
-      worldPosition: {x: 115.53434, y: 0, z: 116.5214}
-      connectedEdges: 0100000005000000
-    - id: 3
-      worldPosition: {x: -24.508162, y: 0, z: 117.470634}
-      connectedEdges: 0200000003000000
-    - id: 4
-      worldPosition: {x: 7.874937, y: 0, z: 114.71751}
-      connectedEdges: 0300000004000000
-    - id: 5
-      worldPosition: {x: 54.89952, y: 0, z: 111.21547}
-      connectedEdges: 0400000005000000
-    edges:
-    - id: 0
-      nodeA: 0
-      nodeB: 1
-      length: 119.99999
-      isBlocked: 0
-      streetType: 0
-    - id: 1
-      nodeA: 1
-      nodeB: 2
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 2
-      nodeA: 0
-      nodeB: 3
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 3
-      nodeA: 3
-      nodeB: 4
-      length: 32.49992
-      isBlocked: 0
-      streetType: 1
-    - id: 4
-      nodeA: 4
-      nodeB: 5
-      length: 47.154804
-      isBlocked: 0
-      streetType: 1
-    - id: 5
-      nodeA: 5
-      nodeB: 2
-      length: 60.866528
-      isBlocked: 0
-      streetType: 1
-  blocks:
-  - worldCenter: {x: 45.623882, y: 0, z: 73.896904}
-    size: {x: 130.70952, y: 0, z: 108.028114}
-    zoneType: 0
-    deliveryPointIndices: 
-    polygon:
-    - {x: 4.9058843, y: 0, z: 5.863462}
-    - {x: 113.72022, y: 0, z: 2.781634}
-    - {x: 109.77073, y: 0, z: 109.99412}
-    - {x: 54.93849, y: 0, z: 105.19595}
-    - {x: 7.397238, y: 0, z: 108.73647}
-    - {x: -16.989298, y: 0, z: 110.809746}
-    area: 12137.028
-    hasPizzaria: 1
-  pizzariaPosition: {x: 28.386957, y: 2.15, z: 5.698634}
-  pizzariaRotation: {x: 0, y: 0.6970257, z: 0, w: -0.71704626}
-  bancadaPosition: {x: 30.329361, y: 1.02, z: 4.3431005}
-  pizzariaBlockIndex: 0
-  hasPizzariaReserved: 1
+    nodes: []
+    edges: []
+  blocks: []
+  pizzariaPosition: {x: 0, y: 0, z: 0}
+  pizzariaRotation: {x: 0, y: 0, z: 0, w: 1}
+  bancadaPosition: {x: 0, y: 0, z: 0}
+  pizzariaBlockIndex: -1
+  hasPizzariaReserved: 0
   enemySpawnPoints: []
   _gridWidth: 3
   _gridHeight: 3
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 6
-  _deliveryPointCount: 6
+  _deliveryPointCount: 0

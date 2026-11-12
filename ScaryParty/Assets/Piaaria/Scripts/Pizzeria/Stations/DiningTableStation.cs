@@ -31,6 +31,10 @@ namespace ScaryParty.Pizzeria.Stations
         public Transform exitAnchor;          // Ponto de saída segura após levantar
         public Transform plateAnchor;         // Ponto de apoio da pizza na mesa
 
+        [Header("Condimentos da Mesa")]
+        [Tooltip("Objetos de molhos/condimentos que ficam sobre a mesa e devem ser recolhidos quando a pizza for servida.")]
+        public GameObject[] sauceObjects;
+
         private static readonly System.Collections.Generic.Dictionary<int, DiningTableStation> _instancesByTableId = new System.Collections.Generic.Dictionary<int, DiningTableStation>();
         public static bool TryGetTable(int id, out DiningTableStation table) => _instancesByTableId.TryGetValue(id, out table);
 
@@ -53,7 +57,54 @@ namespace ScaryParty.Pizzeria.Stations
         private void Awake()
         {
             EnsureAnchors();
+            EnsureSauceObjects();
             EnsureNavMeshObstacle();
+        }
+
+        public void EnsureSauceObjects()
+        {
+            if (sauceObjects != null && sauceObjects.Length > 0) return;
+
+            var found = new System.Collections.Generic.List<GameObject>();
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var ch = transform.GetChild(i);
+                string n = ch.name.ToLowerInvariant();
+                if (n.Contains("molho") || n.Contains("sauce") || n.Contains("condiment") || n.Contains("ketchup"))
+                {
+                    found.Add(ch.gameObject);
+                }
+            }
+            if (found.Count > 0)
+            {
+                sauceObjects = found.ToArray();
+            }
+        }
+
+        private void Update()
+        {
+            UpdateSauceVisibility();
+        }
+
+        public void UpdateSauceVisibility()
+        {
+            EnsureSauceObjects();
+            if (sauceObjects == null || sauceObjects.Length == 0) return;
+
+            bool hasPizzaServed = false;
+            if (TryGetTableState(out var tbl, out _))
+            {
+                hasPizzaServed = tbl.ServedPizzaItemId != 0;
+            }
+
+            bool shouldShowSauces = !hasPizzaServed;
+            for (int i = 0; i < sauceObjects.Length; i++)
+            {
+                if (sauceObjects[i] != null && sauceObjects[i].activeSelf != shouldShowSauces)
+                {
+                    sauceObjects[i].SetActive(shouldShowSauces);
+                }
+            }
         }
 
         public void EnsureNavMeshObstacle()
@@ -266,7 +317,7 @@ namespace ScaryParty.Pizzeria.Stations
                     var go = new GameObject("PlateAnchor");
                     go.transform.SetParent(transform, false);
                     var rend = GetComponentInChildren<Renderer>();
-                    float topY = rend != null ? rend.bounds.max.y - transform.position.y + 0.02f : 0.20f;
+                    float topY = rend != null ? rend.bounds.max.y - transform.position.y + 0.02f : 0.28f;
                     go.transform.localPosition = new Vector3(0f, topY, 0f);
                     go.transform.localRotation = Quaternion.identity;
                     plateAnchor = go.transform;
@@ -328,7 +379,7 @@ namespace ScaryParty.Pizzeria.Stations
         public Vector3 GetPlatePosition()
         {
             EnsureAnchors();
-            return plateAnchor != null ? plateAnchor.position : transform.position + Vector3.up * 0.78f;
+            return plateAnchor != null ? plateAnchor.position : transform.position + Vector3.up * 0.28f;
         }
 
         public bool TryGetTableState(out NetTableDto tableDto, out NetCustomerDto customerDto)

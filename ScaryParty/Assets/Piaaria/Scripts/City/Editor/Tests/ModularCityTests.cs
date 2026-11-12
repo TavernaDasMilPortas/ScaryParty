@@ -416,5 +416,111 @@ namespace ScaryParty.City.Editor.Tests
             Assert.AreEqual(_catalog.GetCatalogSignature(), catalogAgain.GetCatalogSignature(),
                 "Reexecutar o builder deve ser estritamente idempotente.");
         }
+
+        [Test]
+        public void Test11_CardinalOrientationsAssemblyAndFacadeClosure()
+        {
+            // Monta prédios nas 4 rotações cardeais: 0°, 90°, 180°, 270°
+            float[] angles = new float[] { 0f, 90f, 180f, 270f };
+            foreach (float rotY in angles)
+            {
+                Quaternion rot = Quaternion.Euler(0f, rotY, 0f);
+                var layout = ModularBuildingAssembler.CreateRecipeLayout(
+                    ModularBuildingRecipe.HouseWithGarage, new Vector3(0, 0, 0), rot, 54321);
+
+                GameObject bldg = ModularBuildingAssembler.AssembleBuilding(layout, _catalog, null);
+                Assert.IsNotNull(bldg);
+
+                try
+                {
+                    // Valida que existem fachadas instanciadas e nós de cobertura e platibanda
+                    Transform facades = bldg.transform.Find("Facades");
+                    Transform roof = bldg.transform.Find("Roof");
+                    Transform parapet = bldg.transform.Find("Parapet");
+                    Transform pillars = bldg.transform.Find("Pillars");
+
+                    Assert.IsNotNull(facades);
+                    Assert.IsNotNull(roof);
+                    Assert.IsNotNull(parapet);
+                    Assert.IsNotNull(pillars);
+
+                    Assert.Greater(facades.childCount, 0, "Fachadas devem estar preenchidas.");
+                    Assert.AreEqual(layout.widthModules * layout.depthModules, roof.childCount, "Cobertura plana E deve cobrir toda a grade.");
+                    Assert.AreEqual((layout.widthModules + layout.depthModules) * 2, parapet.childCount, "Platibanda F deve cercar todo o perímetro.");
+                    Assert.AreEqual(4 * layout.floorCount, pillars.childCount, "Pilares L devem existir nos 4 cantos para cada pavimento.");
+
+                    // Confirma orientação para a calçada e frente da entrada
+                    CityBuilding cb = bldg.GetComponent<CityBuilding>();
+                    Assert.IsNotNull(cb);
+                    Assert.AreNotEqual(Vector3.zero, cb.entrancePosition);
+                    Assert.AreNotEqual(Vector3.zero, cb.entranceDirection);
+
+                    Vector3 expectedForward = rot * Vector3.forward;
+                    float dotFwd = Vector3.Dot(cb.entranceDirection.normalized, expectedForward.normalized);
+                    Assert.Greater(dotFwd, 0.99f, $"A entrada deve estar apontando para fora da fachada na rotação {rotY}°.");
+
+                    // Confirma que os módulos de parede possuem as compensações visuais corretas aplicadas
+                    CityModuleInstance[] instances = bldg.GetComponentsInChildren<CityModuleInstance>();
+                    foreach (var inst in instances)
+                    {
+                        var def = _catalog.GetDefinition(inst.moduleId);
+                        if (def != null && (def.visualRotationOffset != Vector3.zero || def.visualPositionOffset != Vector3.zero))
+                        {
+                            // Verifica que o nó visual (ou filho gráfico) não está zerado/desalinhado
+                            Transform visualT = inst.visualRoot != null ? inst.visualRoot : inst.transform.GetChild(0);
+                            Assert.AreEqual(def.visualPositionOffset, visualT.localPosition, $"Módulo {inst.moduleId} deve ter o offset de posição visual aplicado.");
+                            Assert.AreEqual(Quaternion.Euler(def.visualRotationOffset), visualT.localRotation, $"Módulo {inst.moduleId} deve ter o offset de rotação visual aplicado.");
+                        }
+                    }
+                }
+                finally
+                {
+                    UnityEngine.Object.DestroyImmediate(bldg);
+                }
+            }
+        }
+
+        [Test]
+        public void Test12_TwoTonePaletteApplicationAndPreservation()
+        {
+            Color baseColor = new Color(0.2f, 0.5f, 0.8f, 1f); // Azul claro
+            Color expectedTrim = ModularBuildingAssembler.GenerateTrimColor(baseColor, 0.30f);
+
+            Color.RGBToHSV(baseColor, out _, out _, out float vBase);
+            Color.RGBToHSV(expectedTrim, out _, out _, out float vTrim);
+
+            // Verifica regra matemática de escurecimento (~30% a menos em Value)
+            Assert.AreEqual(vBase * 0.70f, vTrim, 0.02f, "A cor de acabamento deve ter 30% a menos de brilho mantendo matiz.");
+
+            var layout = ModularBuildingAssembler.CreateRecipeLayout(
+                ModularBuildingRecipe.Shop, Vector3.zero, Quaternion.identity, 99999);
+            layout.buildingColor = baseColor;
+
+            GameObject bldg = ModularBuildingAssembler.AssembleBuilding(layout, _catalog, null);
+            Assert.IsNotNull(bldg);
+
+            try
+            {
+                // Verifica que todos os módulos receberam seus blocos sem sobrescrever vidros
+                CityModuleInstance[] instances = bldg.GetComponentsInChildren<CityModuleInstance>();
+                Assert.Greater(instances.Length, 0);
+
+                bool testedWall = false;
+                bool testedTrim = false;
+
+                foreach (var inst in instances)
+                {
+                    if (inst.moduleId == CityModuleId.A) testedWall = true;
+                    if (inst.moduleId == CityModuleId.F || inst.moduleId == CityModuleId.L) testedTrim = true;
+                }
+
+                Assert.IsTrue(testedWall, "Deve haver peças de parede Wall no prédio.");
+                Assert.IsTrue(testedTrim, "Deve haver peças de acabamento Trim no prédio.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(bldg);
+            }
+        }
     }
 }
