@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d0232b54bd75c545888794afe3b2c2c, type: 3}
   m_Name: VisualStyleRuntimeConfig
   m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleRuntimeConfig
-  useStyledGameplay: 0
-  activeStyleId: 
-  activeGameplaySceneName: GameScene
-  activeProfile: {fileID: 11400000, guid: 1f07cf04111e48b4b828c0c14b243105, type: 2}
-  activeLibrary: {fileID: 0}
+  useStyledGameplay: 1
+  activeStyleId: dispatch_inspired
+  activeGameplaySceneName: GameScene_CelShaded
+  activeProfile: {fileID: 11400000, guid: 2acf500dfb605f04ca33442ec7a85953, type: 2}
+  activeLibrary: {fileID: 11400000, guid: 86163759cf51a314080bdd860340712d, type: 2}
   replicateStyleIdInMultiplayer: 0

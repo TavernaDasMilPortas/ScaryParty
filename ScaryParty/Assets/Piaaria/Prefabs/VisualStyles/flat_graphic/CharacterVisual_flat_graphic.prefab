@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6340059615569841316
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 452243275446179792, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_Name
+      value: CharacterVisual_flat_graphic
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7275213926716628085, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
+    - target: {fileID: 7275213926716628085, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 208ecd82f1910424290c7247c2eb4826, type: 2}
+    - target: {fileID: 7275213926716628085, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: 'm_Materials.Array.data[2]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
+    - target: {fileID: 7275213926716628085, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      propertyPath: 'm_Materials.Array.data[3]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 452243275446179792, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9086423487879870198}
+  m_SourcePrefab: {fileID: 100100000, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+--- !u!1 &5889259697203075956 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 452243275446179792, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+  m_PrefabInstance: {fileID: 6340059615569841316}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9086423487879870198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5889259697203075956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20d6bcfa0a293949961900c87c09c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleBinder
+  contextKey: character_visual
+  defaultRole: 80
+  defaultCategoryId: Characters
+  includeInactiveChildren: 1
+  applyOnAwake: 1
+  listenForStyleChanges: 1

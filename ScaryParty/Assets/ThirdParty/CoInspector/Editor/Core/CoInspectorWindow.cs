@@ -2079,7 +2079,7 @@ EditorUtils.GetObjectId(c.containingInstanceGameObject) ==
                         }
                         else
                         {
-                            if (!EditorUtils.HasProblematicScrollComponent(components[0].gameObject))
+                            if (components != null && components.Length > 0 && components[0] != null && !EditorUtils.HasProblematicScrollComponent(components[0].gameObject))
                             {
                                 assetScrollView.ScrollToElement("Component" + addedIndex, true, true);
                             }
@@ -2101,7 +2101,7 @@ EditorUtils.GetObjectId(c.containingInstanceGameObject) ==
                         {
                             rootVisualElement.schedule.Execute(() =>
                             {
-                                if (!EditorUtils.HasProblematicScrollComponent(components[0].gameObject))
+                                if (components != null && components.Length > 0 && components[0] != null && !EditorUtils.HasProblematicScrollComponent(components[0].gameObject))
                                 {
                                     componentScrollView.ScrollToElement("Component" + addedIndex, true, true);
                                 }
@@ -13963,7 +13963,7 @@ EditorUtils.GetObjectId(c.containingInstanceGameObject) ==
                 {
                     if (componentMap.awaitingScroll)
                     {
-                        if (!EditorUtils.HasProblematicScrollComponent(componentMap.component.gameObject))
+                        if (componentMap.component != null && !EditorUtils.HasProblematicScrollComponent(componentMap.component.gameObject))
                         {
                             componentScrollView.ScrollToElement(component, true, isCopy);
                         }

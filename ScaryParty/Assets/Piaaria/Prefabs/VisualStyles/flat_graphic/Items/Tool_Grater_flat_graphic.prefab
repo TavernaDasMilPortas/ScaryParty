@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &2665823092284550010
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1238555388952255651, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2387075759675718046, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_Name
+      value: Tool_Grater_flat_graphic
+      objectReference: {fileID: 0}
+    - target: {fileID: 2619973962748719887, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 3c41e7474252c2f4b9a7ef9c7f805358, type: 2}
+    - target: {fileID: 6224329085680178161, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: m_InScenePlaced
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6224329085680178161, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: GlobalObjectIdHash
+      value: 4065045073
+      objectReference: {fileID: 0}
+    - target: {fileID: 6224329085680178161, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      propertyPath: InScenePlacedSourceGlobalObjectIdHash
+      value: 639389217
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2387075759675718046, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4909155394294121075}
+  m_SourcePrefab: {fileID: 100100000, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+--- !u!1 &422915310204343012 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2387075759675718046, guid: 6cfdcd2d9edf0d14b87fc1cd2d292c1f, type: 3}
+  m_PrefabInstance: {fileID: 2665823092284550010}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4909155394294121075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 422915310204343012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20d6bcfa0a293949961900c87c09c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleBinder
+  contextKey: Tool_Grater
+  defaultRole: 109
+  defaultCategoryId: Props
+  includeInactiveChildren: 1
+  applyOnAwake: 1
+  listenForStyleChanges: 1

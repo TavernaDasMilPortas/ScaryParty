@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6857c977197f0a4c87e13a63d47c5cc, type: 3}
+  m_Name: ItemPresentationCatalog_flat_graphic
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Presentation.ItemPresentationCatalog
+  profiles:
+  - {fileID: 11400000, guid: 14702158362649e4b846c6e1a63e18c3, type: 2}
+  - {fileID: 11400000, guid: 02caf5317ee9a8b48b160e7067bab2c5, type: 2}
+  - {fileID: 11400000, guid: 96ed3a8d29ab8d646a6df0fb5055beeb, type: 2}
+  - {fileID: 11400000, guid: 4d312f24b2ad2b64c87bbdd2b75c8a04, type: 2}
+  - {fileID: 11400000, guid: 11d5d315a93ee36498c4f99c25f66cbf, type: 2}
+  - {fileID: 11400000, guid: facba90c464ebba4fa6bd444fdeb8731, type: 2}
+  - {fileID: 11400000, guid: c614da9506765a6449e948a6ff574703, type: 2}
+  - {fileID: 11400000, guid: ca8ddff8ef15ae840b161bf2bb0b8bc0, type: 2}
+  - {fileID: 11400000, guid: 4bd1d6c68033b4b46bf31e40cab15996, type: 2}
+  - {fileID: 11400000, guid: c044801a081905f45a3563b491a7482b, type: 2}
+  - {fileID: 11400000, guid: 9f8be596050dcd44ca52a9d19e74a6b6, type: 2}
+  - {fileID: 11400000, guid: 594ee9eea6b598d4e839a14d8aea1f66, type: 2}
+  - {fileID: 11400000, guid: d7d53e311e56c1045b81099f7060a4db, type: 2}
+  - {fileID: 11400000, guid: c4201472d17276948ba93709d1f01ddd, type: 2}

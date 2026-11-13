@@ -38,7 +38,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0000000001000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 1
     displayName: Parede com Janela
@@ -65,7 +65,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000002000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 2
     displayName: Parede com Porta Simples
@@ -92,7 +92,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.6, z: 0}
     movingPartHingeLocal: {x: -0.5, y: 1.1, z: -0.1}
     materialRoles: 000000000100000003000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 3
     displayName: Parede com Vitrine
@@ -119,7 +119,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000002000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 4
     displayName: Cobertura Plana
@@ -146,7 +146,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
-    visualPositionOffset: {x: 0, y: -1.5, z: 0}
+    visualPositionOffset: {x: 0, y: 0, z: 0}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 5
     displayName: Platibanda
@@ -173,7 +173,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
-    visualPositionOffset: {x: 0, y: -1.5, z: -0.1}
+    visualPositionOffset: {x: 0, y: 0, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 6
     displayName: Janela com Venezianas
@@ -200,7 +200,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 00000000010000000200000003000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 7
     displayName: Janela com Floreira
@@ -227,7 +227,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.7, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 00000000010000000200000003000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 8
     displayName: Parede com Garagem
@@ -254,7 +254,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 000000000100000004000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 9
     displayName: Parede com Porta Dupla
@@ -281,7 +281,7 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 2.6, z: 0}
     movingPartHingeLocal: {x: -0.8, y: 1.1, z: -0.1}
     materialRoles: 000000000100000003000000
-    visualPositionOffset: {x: 0, y: 0, z: -0.1}
+    visualPositionOffset: {x: 0, y: 1.5, z: -0.1}
     visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 10
     displayName: Toldo Separado
@@ -335,5 +335,5 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0100000000000000
-    visualPositionOffset: {x: 0, y: 0, z: 0}
+    visualPositionOffset: {x: 0, y: 1.5, z: 0}
     visualRotationOffset: {x: 0, y: 0, z: 0}

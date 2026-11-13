@@ -13,18 +13,65 @@ MonoBehaviour:
   m_Name: GeneratedCityData
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   streetGraph:
-    nodes: []
-    edges: []
-  blocks: []
-  pizzariaPosition: {x: 0, y: 0, z: 0}
-  pizzariaRotation: {x: 0, y: 0, z: 0, w: 1}
-  bancadaPosition: {x: 0, y: 0, z: 0}
-  pizzariaBlockIndex: -1
-  hasPizzariaReserved: 0
+    nodes:
+    - id: 0
+      worldPosition: {x: 0, y: 0, z: 0}
+      connectedEdges: 0000000001000000
+    - id: 1
+      worldPosition: {x: 7.4251533, y: 0, z: 119.77006}
+      connectedEdges: 0000000003000000
+    - id: 2
+      worldPosition: {x: 109.79065, y: 0, z: 48.43567}
+      connectedEdges: 0100000002000000
+    - id: 3
+      worldPosition: {x: 87.873, y: 0, z: 94.04781}
+      connectedEdges: 0200000003000000
+    edges:
+    - id: 0
+      nodeA: 0
+      nodeB: 1
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 1
+      nodeA: 0
+      nodeB: 2
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 2
+      nodeA: 2
+      nodeB: 3
+      length: 50.60485
+      isBlocked: 0
+      streetType: 1
+    - id: 3
+      nodeA: 1
+      nodeB: 3
+      length: 84.45999
+      isBlocked: 0
+      streetType: 1
+  blocks:
+  - worldCenter: {x: 51.20446, y: 0, z: 65.43021}
+    size: {x: 95.09963, y: 0, z: 102.239525}
+    zoneType: 0
+    deliveryPointIndices: 
+    polygon:
+    - {x: 6.598549, y: 0, z: 9.468977}
+    - {x: 101.69818, y: 0, z: 51.4235}
+    - {x: 83.58423, y: 0, z: 89.11985}
+    - {x: 12.936895, y: 0, z: 111.7085}
+    area: 5855.4976
+    hasPizzaria: 1
+  pizzariaPosition: {x: 40.536404, y: 2.15, z: 24.987627}
+  pizzariaRotation: {x: 0, y: 0.83774424, z: 0, w: -0.54606295}
+  bancadaPosition: {x: 42.87267, y: 1.02, z: 24.597418}
+  pizzariaBlockIndex: 0
+  hasPizzariaReserved: 1
   enemySpawnPoints: []
   _gridWidth: 3
   _gridHeight: 3
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 6
-  _deliveryPointCount: 0
+  _deliveryPointCount: 5

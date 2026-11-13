@@ -585,13 +585,19 @@ namespace ScaryParty.UI.Piaria.Presenters
                 myState.SetReady(true);
             }
 
+            string targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.GetGameplaySceneName();
+            if (!Application.CanStreamedLevelBeLoaded(targetScene))
+            {
+                targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
+            }
+
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
             {
-                NetworkManager.Singleton.SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+                NetworkManager.Singleton.SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
             }
             else
             {
-                SceneManager.LoadScene("GameScene");
+                SceneManager.LoadScene(targetScene);
             }
         }
 

@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &140406775274198254
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1000000085, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_Name
+      value: Visual_Ingredient_Mushroom_flat_graphic
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000086, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000094, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e4003cf459f21244bc0c08aaa250fc3, type: 2}
+    - target: {fileID: 1000000098, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 7e4003cf459f21244bc0c08aaa250fc3, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1000000085, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6817450005406682787}
+  m_SourcePrefab: {fileID: 100100000, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+--- !u!1 &140406775468531387 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1000000085, guid: 406842cc83ea4b9aa2fc8ecaf099da4c, type: 3}
+  m_PrefabInstance: {fileID: 140406775274198254}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &6817450005406682787
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 140406775468531387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20d6bcfa0a293949961900c87c09c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleBinder
+  contextKey: Ingredient_Mushroom
+  defaultRole: 105
+  defaultCategoryId: Food
+  includeInactiveChildren: 1
+  applyOnAwake: 1
+  listenForStyleChanges: 1

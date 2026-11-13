@@ -16,7 +16,7 @@ MonoBehaviour:
   generateBorderWalls: 1
   generateSolidCore: 0
   fillBlockGroundInRoadMesh: 1
-  seed: 1225223092
+  seed: 79199117
   gridWidth: 3
   gridHeight: 3
   minStreetBranchLength: 30

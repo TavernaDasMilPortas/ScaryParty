@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualMaterialLibrary
   styleId: soft_toon_vibrant
   profileVersion: 1
-  profileContentHash: eeb1be7a
-  generationTimestampUtc: 2026-11-11T03:54:17.4382371Z
+  profileContentHash: d710865b
+  generationTimestampUtc: 2026-11-12T21:57:01.1061969Z
   profile: {fileID: 11400000, guid: 1f07cf04111e48b4b828c0c14b243105, type: 2}
   ruleSet: {fileID: 11400000, guid: b6f4d93708197754488dbbbe0f17e42e, type: 2}
   renderPipelineRendererData: {fileID: 11400000, guid: f10fbfdcd58efc84ab96ce03d50156f0, type: 2}
@@ -998,8 +998,9 @@ MonoBehaviour:
     semanticRole: 60
     shaderFamily: 0
     action: 0
-    confidence: 0.96
-    classificationReason: ModularKit:I
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
     targetMaterial: {fileID: 2100000, guid: 31756a710e9f54d48b41a6db7e858ab3, type: 2}
     targetMaterialGuid: 31756a710e9f54d48b41a6db7e858ab3
     allowsDynamicTint: 1
@@ -1067,8 +1068,9 @@ MonoBehaviour:
     semanticRole: 60
     shaderFamily: 0
     action: 0
-    confidence: 0.96
-    classificationReason: ModularKit:A
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
     targetMaterial: {fileID: 2100000, guid: d46f5790aaad0a040b1a054af027e66c, type: 2}
     targetMaterialGuid: d46f5790aaad0a040b1a054af027e66c
     allowsDynamicTint: 1
@@ -1084,8 +1086,9 @@ MonoBehaviour:
     semanticRole: 60
     shaderFamily: 0
     action: 0
-    confidence: 0.96
-    classificationReason: ModularKit:C
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
     targetMaterial: {fileID: 2100000, guid: 6736b1afff1f24443bbfbfb718a7533a, type: 2}
     targetMaterialGuid: 6736b1afff1f24443bbfbfb718a7533a
     allowsDynamicTint: 1
@@ -3066,6 +3069,966 @@ MonoBehaviour:
       without outline clutter.
     targetMaterial: {fileID: 2100000, guid: 415d404ae377ccf498d0a6139a2862a3, type: 2}
     targetMaterialGuid: 415d404ae377ccf498d0a6139a2862a3
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-3597792400778177293_226f86b7
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3597792400778177293
+    sourceMaterialName: azul
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3597792400778177293, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: 3ddf80540d4a94a44b5f6e14513a34f3, type: 2}
+    targetMaterialGuid: 3ddf80540d4a94a44b5f6e14513a34f3
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_223439a7a6a64a14c8e969d65d86406c_6348700787944258619_373c4266
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 6348700787944258619
+    sourceMaterialName: azul.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6348700787944258619, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: a721c0bee5f01794c943f044315651f6, type: 2}
+    targetMaterialGuid: a721c0bee5f01794c943f044315651f6
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_2271395179750055381_322c8bde
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 2271395179750055381
+    sourceMaterialName: azul.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2271395179750055381, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: d6a3c991896650a43898613273f27f55, type: 2}
+    targetMaterialGuid: d6a3c991896650a43898613273f27f55
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_-3462910140692651440_3108bd27
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -3462910140692651440
+    sourceMaterialName: azul.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3462910140692651440, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: a4b44eb2bea76c24698f0f2d875f5b96, type: 2}
+    targetMaterialGuid: a4b44eb2bea76c24698f0f2d875f5b96
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_-3683562391071026594_1cdf76bc
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 2dad83844853253458e63669af18beb1, type: 2}
+    targetMaterialGuid: 2dad83844853253458e63669af18beb1
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_-3683562391071026594_0a202b78
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: a2a9410f73dcf584a9563aa0b8896c42, type: 2}
+    targetMaterialGuid: a2a9410f73dcf584a9563aa0b8896c42
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-3683562391071026594_e395c5d2
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: be08b66b6fb2f434fbf412b506d55353, type: 2}
+    targetMaterialGuid: be08b66b6fb2f434fbf412b506d55353
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_223439a7a6a64a14c8e969d65d86406c_3983968161480374387_458e34f2
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 3983968161480374387
+    sourceMaterialName: bege.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 3983968161480374387, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: 3e72ed1305576a64ab9551489d9ab079, type: 2}
+    targetMaterialGuid: 3e72ed1305576a64ab9551489d9ab079
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_6968173241973646166_ab7df90d
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 6968173241973646166
+    sourceMaterialName: bege.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6968173241973646166, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: 09050491b743a4248a73f92c817fbe8f, type: 2}
+    targetMaterialGuid: 09050491b743a4248a73f92c817fbe8f
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_-1774104622936938773_c9f19d22
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: 71a2673ee8358174c988ba433059ec65, type: 2}
+    targetMaterialGuid: 71a2673ee8358174c988ba433059ec65
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_-1774104622936938773_be495765
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: b3b2d175a1713c448a926bb80c85b0a1, type: 2}
+    targetMaterialGuid: b3b2d175a1713c448a926bb80c85b0a1
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_ca262d56cfb48de41a2cb77750cc9f21_-2578545630467802785_c29e09d4
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: -2578545630467802785
+    sourceMaterialName: bege.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2578545630467802785, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:A
+    targetMaterial: {fileID: 2100000, guid: 31a16615b4b53d24e8cca92e5aac463d, type: 2}
+    targetMaterialGuid: 31a16615b4b53d24e8cca92e5aac463d
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_1270278648817234664_e32ceff7
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: da83e47690fc3664693089673c8f230a, type: 2}
+    targetMaterialGuid: da83e47690fc3664693089673c8f230a
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_1270278648817234664_e7a29b13
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: 8ecd5837efd2ebe4685f9d3596f01d2a, type: 2}
+    targetMaterialGuid: 8ecd5837efd2ebe4685f9d3596f01d2a
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_111375601970594265_405e3836
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: 111375601970594265
+    sourceMaterialName: cinza.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 111375601970594265, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: 7ec7fe4c1b611f3459f8013eb75a9c91, type: 2}
+    targetMaterialGuid: 7ec7fe4c1b611f3459f8013eb75a9c91
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-2146721882451417453_17fc71a3
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: 57b8b8a0244d26345a19fed912361dcb, type: 2}
+    targetMaterialGuid: 57b8b8a0244d26345a19fed912361dcb
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_-2146721882451417453_6e40f8c5
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 065c6e9c4e5886047b2c1f0ceae757ce, type: 2}
+    targetMaterialGuid: 065c6e9c4e5886047b2c1f0ceae757ce
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_-2146721882451417453_720ab6b1
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: 86bea24780cd49d4790b435932153839, type: 2}
+    targetMaterialGuid: 86bea24780cd49d4790b435932153839
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_223439a7a6a64a14c8e969d65d86406c_2410651013035637318_2d4ee6d5
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 2410651013035637318
+    sourceMaterialName: laranja.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2410651013035637318, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: 334f712b1f5636e448004ec38beef7a7, type: 2}
+    targetMaterialGuid: 334f712b1f5636e448004ec38beef7a7
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_4536141816489451356_dbe4952c
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 4536141816489451356
+    sourceMaterialName: laranja.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 4536141816489451356, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: e97d19e8998642345a73c98a7029a464, type: 2}
+    targetMaterialGuid: e97d19e8998642345a73c98a7029a464
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_-6905709241459354713_630bef23
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -6905709241459354713
+    sourceMaterialName: laranja.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -6905709241459354713, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: 994db767546fc9942b67324ac0b57df7, type: 2}
+    targetMaterialGuid: 994db767546fc9942b67324ac0b57df7
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_2167878221825250780_3fc32aba
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 2167878221825250780
+    sourceMaterialName: laranja.005
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2167878221825250780, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: 6f190c39cdc576d4fb6b070846aeea89, type: 2}
+    targetMaterialGuid: 6f190c39cdc576d4fb6b070846aeea89
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_ca262d56cfb48de41a2cb77750cc9f21_5169299505124366342_9a964f01
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: 5169299505124366342
+    sourceMaterialName: laranja.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 5169299505124366342, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:A
+    targetMaterial: {fileID: 2100000, guid: f9c22a4ed68fb4745859a2b822c281bc, type: 2}
+    targetMaterialGuid: f9c22a4ed68fb4745859a2b822c281bc
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_31321ba15b8f8eb4c954353edc038b1d_2100000_fab75122
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: City
+    semanticRole: 64
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:F
+    targetMaterial: {fileID: 2100000, guid: cc30160bdf7690446ba3b26d0af99878, type: 2}
+    targetMaterialGuid: cc30160bdf7690446ba3b26d0af99878
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_1615203465152138258_6795a3af
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: 7b9964b2f058fc647a4c9a15f5aff9e3, type: 2}
+    targetMaterialGuid: 7b9964b2f058fc647a4c9a15f5aff9e3
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_1615203465152138258_ba91bd6f
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: c8af71d35e333ca4f8596bed0f50462f, type: 2}
+    targetMaterialGuid: c8af71d35e333ca4f8596bed0f50462f
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_1615203465152138258_69019a5b
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: 88f9359891082d348ad35e50ebbd8665, type: 2}
+    targetMaterialGuid: 88f9359891082d348ad35e50ebbd8665
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_223439a7a6a64a14c8e969d65d86406c_70618695489460038_74c268dc
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: eea436f998500c44eabcdef41410e330, type: 2}
+    targetMaterialGuid: eea436f998500c44eabcdef41410e330
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_70618695489460038_bc7ca8f0
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: 9c5902ae605ed0c4e80c01a933e380f1, type: 2}
+    targetMaterialGuid: 9c5902ae605ed0c4e80c01a933e380f1
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_2516e6df1a16f814e99195892fb440e7_-876546973899608171_6029b82d
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: City
+    semanticRole: 61
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:E
+    targetMaterial: {fileID: 2100000, guid: 4225a82e408954b468c8ca94cd8f48eb, type: 2}
+    targetMaterialGuid: 4225a82e408954b468c8ca94cd8f48eb
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-3597792400778177293_41a3a7b7
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3597792400778177293
+    sourceMaterialName: azul
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3597792400778177293, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 3a25687ad6f68f348a00c297411daa4b, type: 2}
+    targetMaterialGuid: 3a25687ad6f68f348a00c297411daa4b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_2271395179750055381_4b91c774
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 2271395179750055381
+    sourceMaterialName: azul.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2271395179750055381, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: e030f976379c7d94988a704dcbd78cf4, type: 2}
+    targetMaterialGuid: e030f976379c7d94988a704dcbd78cf4
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_-3462910140692651440_ac810d67
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -3462910140692651440
+    sourceMaterialName: azul.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3462910140692651440, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 3458b8b4d31939340bcfbc1edc9328be, type: 2}
+    targetMaterialGuid: 3458b8b4d31939340bcfbc1edc9328be
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_-3683562391071026594_85a6b052
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 1025022e2e5e27b44b75a670e13cb1e5, type: 2}
+    targetMaterialGuid: 1025022e2e5e27b44b75a670e13cb1e5
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-3683562391071026594_a0ca6828
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 91f0f5b94efe1e849a360e17cc8a40fc, type: 2}
+    targetMaterialGuid: 91f0f5b94efe1e849a360e17cc8a40fc
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_-3683562391071026594_12e63ed6
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: c2a475f2cf00c5e44a31c0eb23c522eb, type: 2}
+    targetMaterialGuid: c2a475f2cf00c5e44a31c0eb23c522eb
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_6968173241973646166_94a94381
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 6968173241973646166
+    sourceMaterialName: bege.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6968173241973646166, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: f489314a73f72e74da03f558b0dd7a46, type: 2}
+    targetMaterialGuid: f489314a73f72e74da03f558b0dd7a46
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_-1774104622936938773_584b9e49
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 4073ee4c14589de46810bf8b33f5fc1f, type: 2}
+    targetMaterialGuid: 4073ee4c14589de46810bf8b33f5fc1f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_-1774104622936938773_b3f48db8
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 92702f60279e4d14cb79c738a7d9a676, type: 2}
+    targetMaterialGuid: 92702f60279e4d14cb79c738a7d9a676
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_ca262d56cfb48de41a2cb77750cc9f21_-2578545630467802785_93a236fe
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: -2578545630467802785
+    sourceMaterialName: bege.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2578545630467802785, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: cf55fafd31f1d94448ad0f4074e72f33, type: 2}
+    targetMaterialGuid: cf55fafd31f1d94448ad0f4074e72f33
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_1270278648817234664_b3c2b977
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: bc51be6e9bfd442489ef17738c2b1077, type: 2}
+    targetMaterialGuid: bc51be6e9bfd442489ef17738c2b1077
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_1270278648817234664_76641a53
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: acce0c7280938ff4bb1488dc431c0587, type: 2}
+    targetMaterialGuid: acce0c7280938ff4bb1488dc431c0587
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_111375601970594265_486ecddc
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: 111375601970594265
+    sourceMaterialName: cinza.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 111375601970594265, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: b7f4fa5db8013de41b2ffdff0bd71f6f, type: 2}
+    targetMaterialGuid: b7f4fa5db8013de41b2ffdff0bd71f6f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_-2146721882451417453_90ba5529
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 27e29a240c5765c47bb65ca32670c38c, type: 2}
+    targetMaterialGuid: 27e29a240c5765c47bb65ca32670c38c
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_-2146721882451417453_642a6df5
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: d375d8df29bd13447bfeb820c8c8caa3, type: 2}
+    targetMaterialGuid: d375d8df29bd13447bfeb820c8c8caa3
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_8369d6bcbd3560d4db4f819cd5973888_-2146721882451417453_c1c70b23
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 4238f0bc0c0ed0e48a51c339ec2e6752, type: 2}
+    targetMaterialGuid: 4238f0bc0c0ed0e48a51c339ec2e6752
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_4536141816489451356_29341206
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 4536141816489451356
+    sourceMaterialName: laranja.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 4536141816489451356, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 1bbf688b7b729484b8241f487f6fa27c, type: 2}
+    targetMaterialGuid: 1bbf688b7b729484b8241f487f6fa27c
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_b3dbc9e268c65f547a0f38f9f6452733_-6905709241459354713_6b299ba3
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -6905709241459354713
+    sourceMaterialName: laranja.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -6905709241459354713, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 322adc9232163b54ca355f5cabaab3d1, type: 2}
+    targetMaterialGuid: 322adc9232163b54ca355f5cabaab3d1
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_2167878221825250780_b2839820
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 2167878221825250780
+    sourceMaterialName: laranja.005
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2167878221825250780, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: b27653a4ca62e8b43b7b7c37cbff7a41, type: 2}
+    targetMaterialGuid: b27653a4ca62e8b43b7b7c37cbff7a41
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_ca262d56cfb48de41a2cb77750cc9f21_5169299505124366342_24cb7905
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: 5169299505124366342
+    sourceMaterialName: laranja.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 5169299505124366342, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: e44af08ec0293ba4d86155cda8accb01, type: 2}
+    targetMaterialGuid: e44af08ec0293ba4d86155cda8accb01
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_83c8f8700f87a0441b26f4730e1c3608_1615203465152138258_8bea4f2b
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: fb3727cfe80de6b4cbee0a7ddfa24be0, type: 2}
+    targetMaterialGuid: fb3727cfe80de6b4cbee0a7ddfa24be0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_1c927cedb95ed7947987714271636d25_1615203465152138258_f6c3151f
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 9fc6743eea44c3d47af2a9db80463f57, type: 2}
+    targetMaterialGuid: 9fc6743eea44c3d47af2a9db80463f57
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_07c425133fd577e489b94798f1f2e6f4_1615203465152138258_196bc55f
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: e0bef83e2ec5d5e4093e3e6fb70481df, type: 2}
+    targetMaterialGuid: e0bef83e2ec5d5e4093e3e6fb70481df
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_008574761ae35b444b805f56e4538fc7_70618695489460038_b2e0c29a
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: d79bae34bada3d242a78253d5511757e, type: 2}
+    targetMaterialGuid: d79bae34bada3d242a78253d5511757e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_2516e6df1a16f814e99195892fb440e7_-876546973899608171_e3babf0e
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 220dd71a7537bc649bd6ce51ec45bd62, type: 2}
+    targetMaterialGuid: 220dd71a7537bc649bd6ce51ec45bd62
     allowsDynamicTint: 0
     preservedOriginal: 0
   contextSlotBindings: []

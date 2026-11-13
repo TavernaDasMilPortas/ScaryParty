@@ -1,0 +1,3983 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7089e55c13c15f40994e3be275f65ee, type: 3}
+  m_Name: Library
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualMaterialLibrary
+  styleId: dispatch_inspired
+  profileVersion: 1
+  profileContentHash: 6b256ace
+  generationTimestampUtc: 2026-11-12T21:49:42.4528351Z
+  profile: {fileID: 11400000, guid: 2acf500dfb605f04ca33442ec7a85953, type: 2}
+  ruleSet: {fileID: 11400000, guid: b6f4d93708197754488dbbbe0f17e42e, type: 2}
+  renderPipelineRendererData: {fileID: 11400000, guid: 4fbeea3ecda780d49b567c7ba0e24485, type: 2}
+  styledPizzeriaVariantPrefab: {fileID: 4855671475823426035, guid: f7be7ef107918ab47b2ad5f3ff66a3f5, type: 3}
+  styledCharacterVariantPrefab: {fileID: 483731705757324919, guid: 00232bc9907a40d478b855d9c625a0fc, type: 3}
+  styledItemCatalogAsset: {fileID: 11400000, guid: c39630531a3d6ba438d0f26ebd1b8bec, type: 2}
+  roleDefaults:
+  - role: 130
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 0a35734b77477a242b0bbfb9ae9f38e2, type: 2}
+    defaultColor: {r: 0.95, g: 0.94, b: 0.9, a: 1}
+    supportsDynamicTint: 1
+  - role: 131
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: c28c1004b0a24e54481210c75359d6e6, type: 2}
+    defaultColor: {r: 0.95, g: 0.94, b: 0.9, a: 1}
+    supportsDynamicTint: 1
+  - role: 132
+    shaderFamily: 2
+    material: {fileID: 2100000, guid: f0f8bbf968076ff4bbf777530387741e, type: 2}
+    defaultColor: {r: 0.65, g: 0.85, b: 0.96, a: 0.5}
+    supportsDynamicTint: 0
+  - role: 133
+    shaderFamily: 3
+    material: {fileID: 2100000, guid: b7b61bc6ce02a844dac49805fbf5a157, type: 2}
+    defaultColor: {r: 1, g: 1, b: 1, a: 1}
+    supportsDynamicTint: 0
+  - role: 40
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: 28f2f37c27f43d9489c59eb2b98c910f, type: 2}
+    defaultColor: {r: 0.26, g: 0.28, b: 0.32, a: 1}
+    supportsDynamicTint: 0
+  - role: 41
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: 3b21fb0653be0174ebdde2d081ee82db, type: 2}
+    defaultColor: {r: 0.7, g: 0.69, b: 0.65, a: 1}
+    supportsDynamicTint: 0
+  - role: 42
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: 44942f6a781d00a4ea2165bc8dafa653, type: 2}
+    defaultColor: {r: 0.24, g: 0.26, b: 0.3, a: 1}
+    supportsDynamicTint: 0
+  - role: 43
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: cc27e7922d8cd7d4eb59e4a5325e94e6, type: 2}
+    defaultColor: {r: 1, g: 0.839, b: 0.365, a: 1}
+    supportsDynamicTint: 0
+  - role: 44
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: 48fbf71fb2b688341876d4607e24bc03, type: 2}
+    defaultColor: {r: 0.96, g: 0.96, b: 0.96, a: 1}
+    supportsDynamicTint: 0
+  - role: 45
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: dfe16d585a269e94e8c5d4fdbc423814, type: 2}
+    defaultColor: {r: 0.96, g: 0.96, b: 0.96, a: 1}
+    supportsDynamicTint: 0
+  - role: 49
+    shaderFamily: 1
+    material: {fileID: 2100000, guid: 8ba98ca9e00090b42809afa06b87a5d4, type: 2}
+    defaultColor: {r: 1, g: 1, b: 1, a: 1}
+    supportsDynamicTint: 1
+  - role: 60
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 8369c501882cdb14ebe62d1881720674, type: 2}
+    defaultColor: {r: 0.86, g: 0.83, b: 0.77, a: 1}
+    supportsDynamicTint: 1
+  - role: 61
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 54161983382699a41a2784185ad690f8, type: 2}
+    defaultColor: {r: 0.45, g: 0.42, b: 0.44, a: 1}
+    supportsDynamicTint: 0
+  - role: 64
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 96e5bfc4cd400734ca92fcabe00f23fe, type: 2}
+    defaultColor: {r: 0.62, g: 0.6, b: 0.56, a: 1}
+    supportsDynamicTint: 0
+  - role: 63
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: fcac1369ba5c12d4198dde84b8231ab1, type: 2}
+    defaultColor: {r: 0.55, g: 0.35, b: 0.2, a: 1}
+    supportsDynamicTint: 0
+  - role: 62
+    shaderFamily: 2
+    material: {fileID: 2100000, guid: eefedea3dcf02e843b8a179f56386361, type: 2}
+    defaultColor: {r: 0.62, g: 0.82, b: 0.94, a: 0.65}
+    supportsDynamicTint: 0
+  - role: 65
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 690b75244196deb4db8424cab32ceade, type: 2}
+    defaultColor: {r: 0.937, g: 0.349, b: 0.294, a: 1}
+    supportsDynamicTint: 0
+  - role: 100
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 60d09bd1159f2594388cdaac1644c79e, type: 2}
+    defaultColor: {r: 0.95, g: 0.86, b: 0.64, a: 1}
+    supportsDynamicTint: 1
+  - role: 101
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 6a8660becf3e0e14c80a7780a6cf1bf7, type: 2}
+    defaultColor: {r: 0.85, g: 0.19, b: 0.13, a: 1}
+    supportsDynamicTint: 1
+  - role: 102
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 9a876942d36ebd440837ace6c4ed03a3, type: 2}
+    defaultColor: {r: 0.99, g: 0.84, b: 0.32, a: 1}
+    supportsDynamicTint: 1
+  - role: 104
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 38b12b26e46aff042951303a7866742a, type: 2}
+    defaultColor: {r: 0.76, g: 0.16, b: 0.14, a: 1}
+    supportsDynamicTint: 1
+  - role: 105
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 7c4080163fe7799478c06e4205aabf40, type: 2}
+    defaultColor: {r: 0.76, g: 0.68, b: 0.58, a: 1}
+    supportsDynamicTint: 1
+  - role: 107
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: e61009da3fc222c4aba1e57ba89c0d20, type: 2}
+    defaultColor: {r: 0.93, g: 0.87, b: 0.78, a: 1}
+    supportsDynamicTint: 1
+  - role: 110
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 456857df3d8a5e94d99eb7b89e9ef73c, type: 2}
+    defaultColor: {r: 1, g: 1, b: 1, a: 1}
+    supportsDynamicTint: 1
+  - role: 109
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 1ad4bf2f4f4b8f844bd05f381057d172, type: 2}
+    defaultColor: {r: 0.78, g: 0.8, b: 0.84, a: 1}
+    supportsDynamicTint: 1
+  - role: 80
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 9cca28e8b8ea40b43bf683a1eeddb189, type: 2}
+    defaultColor: {r: 0.322, g: 0.486, b: 0.914, a: 1}
+    supportsDynamicTint: 1
+  - role: 85
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 51f271054bf97274e95de66ef4486c9e, type: 2}
+    defaultColor: {r: 0.286, g: 0.718, b: 0.667, a: 1}
+    supportsDynamicTint: 1
+  - role: 139
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: 5249dd85616b4a042bc6f6280191dab2, type: 2}
+    defaultColor: {r: 1, g: 0.55, b: 0.15, a: 1}
+    supportsDynamicTint: 1
+  - role: 134
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: ee787d85da97fe9488eef4042b0656be, type: 2}
+    defaultColor: {r: 0.55, g: 0.58, b: 0.64, a: 1}
+    supportsDynamicTint: 1
+  - role: 135
+    shaderFamily: 0
+    material: {fileID: 2100000, guid: ca5af8264beaec14aaca84d0e2b0bcd6, type: 2}
+    defaultColor: {r: 0.58, g: 0.38, b: 0.22, a: 1}
+    supportsDynamicTint: 1
+  - role: 137
+    shaderFamily: 2
+    material: {fileID: 2100000, guid: b525a9a0c4b0c4342a98765125ce702e, type: 2}
+    defaultColor: {r: 0.62, g: 0.82, b: 0.94, a: 0.55}
+    supportsDynamicTint: 0
+  mappedMaterials:
+  - conversionKey: dispatch_inspired_8f586378b4e144a9851e7b34d9b748ee_2180264_d9463500
+    sourceMaterialGuid: 8f586378b4e144a9851e7b34d9b748ee
+    sourceLocalFileId: 2180264
+    sourceMaterialName: LiberationSans SDF Material
+    sourceShaderName: TextMeshPro/Mobile/Distance Field
+    sourceTextureGuid: 8f586378b4e144a9851e7b34d9b748ee
+    sourceMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    categoryId: Preserve
+    semanticRole: 1
+    shaderFamily: 5
+    action: 1
+    confidence: 1
+    classificationReason: TMP fonts/SDF materials preserved.
+    targetMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    targetMaterialGuid: 8f586378b4e144a9851e7b34d9b748ee
+    allowsDynamicTint: 0
+    preservedOriginal: 1
+  - conversionKey: dispatch_inspired_3cfed68239cf4e1586c3da0e37d8f4a8_2100000_4c7db3bc
+    sourceMaterialGuid: 3cfed68239cf4e1586c3da0e37d8f4a8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Armario
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3cfed68239cf4e1586c3da0e37d8f4a8, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 1f5053d133ea0a44b86fa88efc0af7d2, type: 2}
+    targetMaterialGuid: 1f5053d133ea0a44b86fa88efc0af7d2
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_cfcb2cb531a34da195396d620d5a9b92_2100000_ef4f49d4
+    sourceMaterialGuid: cfcb2cb531a34da195396d620d5a9b92
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Balcao
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: cfcb2cb531a34da195396d620d5a9b92, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 7be43446095c0be4ea20fdfd3e2f0ba7, type: 2}
+    targetMaterialGuid: 7be43446095c0be4ea20fdfd3e2f0ba7
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_71f7e090834d41d0a9fbb7f89da201e7_2100000_e0b54da1
+    sourceMaterialGuid: 71f7e090834d41d0a9fbb7f89da201e7
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Cadeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 71f7e090834d41d0a9fbb7f89da201e7, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: dffcd0b1961966e44b50c473557aa967, type: 2}
+    targetMaterialGuid: dffcd0b1961966e44b50c473557aa967
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_58419e8b75d34b8eba18fae7e904ad82_2100000_fa798d18
+    sourceMaterialGuid: 58419e8b75d34b8eba18fae7e904ad82
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CaixaPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 329056e50005eb446843d1da210c7901, type: 2}
+    targetMaterialGuid: 329056e50005eb446843d1da210c7901
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_66ba56bc78e44a24b68aafdef34c8fb1_2100000_9e0ff6d6
+    sourceMaterialGuid: 66ba56bc78e44a24b68aafdef34c8fb1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CaixaRegistradora
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 66ba56bc78e44a24b68aafdef34c8fb1, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 36ac6f65f24af424fa7abb31a6ff2eb2, type: 2}
+    targetMaterialGuid: 36ac6f65f24af424fa7abb31a6ff2eb2
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0c9e96ca722a4f6dac274edeb32a83c1_2100000_e01ded52
+    sourceMaterialGuid: 0c9e96ca722a4f6dac274edeb32a83c1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CardapioPrancheta
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0c9e96ca722a4f6dac274edeb32a83c1, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: fb2f3418c18af2a4b816eb7f1c8d9632, type: 2}
+    targetMaterialGuid: fb2f3418c18af2a4b816eb7f1c8d9632
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b81d1cca19274359921deed1598dcca7_2100000_900b8324
+    sourceMaterialGuid: b81d1cca19274359921deed1598dcca7
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CortadorPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b81d1cca19274359921deed1598dcca7, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: b164e29d4bbf42943a7eaf71559e109e, type: 2}
+    targetMaterialGuid: b164e29d4bbf42943a7eaf71559e109e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b30c48b5e61d4f2f918b8fd338518df6_2100000_574ad34f
+    sourceMaterialGuid: b30c48b5e61d4f2f918b8fd338518df6
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_DeliveryBag
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b30c48b5e61d4f2f918b8fd338518df6, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 28e4aaa0b7c49e44bab162cc28873271, type: 2}
+    targetMaterialGuid: 28e4aaa0b7c49e44bab162cc28873271
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_539c71edfa024f0b8a54e74716db5103_2100000_fe4d6701
+    sourceMaterialGuid: 539c71edfa024f0b8a54e74716db5103
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Espatula
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 539c71edfa024f0b8a54e74716db5103, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 8097de38254040749b5e017e90f5a372, type: 2}
+    targetMaterialGuid: 8097de38254040749b5e017e90f5a372
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_636a6f35d11d4d399d49ec34af0ca350_2100000_a2eae774
+    sourceMaterialGuid: 636a6f35d11d4d399d49ec34af0ca350
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Faca
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 636a6f35d11d4d399d49ec34af0ca350, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: e5b4fa6cd7c800b4788d5802d5527d65, type: 2}
+    targetMaterialGuid: e5b4fa6cd7c800b4788d5802d5527d65
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_202ff4e7fe2e4561958c4f2d450de3b9_2100000_9ef10f6d
+    sourceMaterialGuid: 202ff4e7fe2e4561958c4f2d450de3b9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FachadaDestaque
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 202ff4e7fe2e4561958c4f2d450de3b9, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 1cb0198cb8237f442acd9516629dda9f, type: 2}
+    targetMaterialGuid: 1cb0198cb8237f442acd9516629dda9f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_17270414896c41aaa79d98adfb082d3f_2100000_859c5d47
+    sourceMaterialGuid: 17270414896c41aaa79d98adfb082d3f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Faqueiro
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 17270414896c41aaa79d98adfb082d3f, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 9874a3d647bc8304b98d1d05a76f41fb, type: 2}
+    targetMaterialGuid: 9874a3d647bc8304b98d1d05a76f41fb
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_81e2f0ff952d49d8b140699bf4a1c801_2100000_576b0154
+    sourceMaterialGuid: 81e2f0ff952d49d8b140699bf4a1c801
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FormaPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 81e2f0ff952d49d8b140699bf4a1c801, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 6cbd05dd6e7edf34dab56daccdbc36ce, type: 2}
+    targetMaterialGuid: 6cbd05dd6e7edf34dab56daccdbc36ce
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_4f68221a1ded4accad01ff79efe2256a_2100000_33d4e88b
+    sourceMaterialGuid: 4f68221a1ded4accad01ff79efe2256a
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FornoLenha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 4f68221a1ded4accad01ff79efe2256a, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: df7ecc5886b2b1745a7227d42b7b0904, type: 2}
+    targetMaterialGuid: df7ecc5886b2b1745a7227d42b7b0904
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7f98cb7c7a2f441893abf1a496f459a4_2100000_30733499
+    sourceMaterialGuid: 7f98cb7c7a2f441893abf1a496f459a4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Geladeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7f98cb7c7a2f441893abf1a496f459a4, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: c0bf22c7aeae38646bc74bb7eb3dc255, type: 2}
+    targetMaterialGuid: c0bf22c7aeae38646bc74bb7eb3dc255
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_70332d45234f49ce8bce4ab000349499_2100000_ac0069af
+    sourceMaterialGuid: 70332d45234f49ce8bce4ab000349499
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Lixeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 70332d45234f49ce8bce4ab000349499, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: b2e37a4c4ab831c469eda03c28606686, type: 2}
+    targetMaterialGuid: b2e37a4c4ab831c469eda03c28606686
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c023fea519d84de1b75a9695995b33c8_2100000_20d7b969
+    sourceMaterialGuid: c023fea519d84de1b75a9695995b33c8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Madeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c023fea519d84de1b75a9695995b33c8, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 66705b34623b137459e5f51a8a5bf73b, type: 2}
+    targetMaterialGuid: 66705b34623b137459e5f51a8a5bf73b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f2c1576d5c1b49539d553c57385524e6_2100000_b17e5bb9
+    sourceMaterialGuid: f2c1576d5c1b49539d553c57385524e6
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Mesa
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f2c1576d5c1b49539d553c57385524e6, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 19db26345c3f1214f8eb9ee20cde1853, type: 2}
+    targetMaterialGuid: 19db26345c3f1214f8eb9ee20cde1853
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e87f6c286a154a8683a22e9610765806_2100000_2d645552
+    sourceMaterialGuid: e87f6c286a154a8683a22e9610765806
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PanelaConcha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e87f6c286a154a8683a22e9610765806, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 0d1b7b2c26dcfb146bd837249c27dac6, type: 2}
+    targetMaterialGuid: 0d1b7b2c26dcfb146bd837249c27dac6
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_cd1644fcd0e24608ae7074d89ba55dbc_2100000_1d80f9c1
+    sourceMaterialGuid: cd1644fcd0e24608ae7074d89ba55dbc
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_ParedeClara
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: cd1644fcd0e24608ae7074d89ba55dbc, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 5a1bd57cd14d2834a91a2c02f718aab6, type: 2}
+    targetMaterialGuid: 5a1bd57cd14d2834a91a2c02f718aab6
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_4a93047f834c41469ec1f3fb7b87168a_2100000_9a868b90
+    sourceMaterialGuid: 4a93047f834c41469ec1f3fb7b87168a
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PisoCozinha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 4a93047f834c41469ec1f3fb7b87168a, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 447a42774625ac44b868961378b987c0, type: 2}
+    targetMaterialGuid: 447a42774625ac44b868961378b987c0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1a3a6359e16947eeb0ffd207a12afd85_2100000_00f6add2
+    sourceMaterialGuid: 1a3a6359e16947eeb0ffd207a12afd85
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PisoSalao
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1a3a6359e16947eeb0ffd207a12afd85, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: fbe1d962e8481d8478c48a56ab6f4b99, type: 2}
+    targetMaterialGuid: fbe1d962e8481d8478c48a56ab6f4b99
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_9cfd9f736247493cb644329f6eb2c068_2100000_94f829b7
+    sourceMaterialGuid: 9cfd9f736247493cb644329f6eb2c068
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PizzaPronta
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 9cfd9f736247493cb644329f6eb2c068, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: ce04a90f51bbd9e4c971ffecb2790add, type: 2}
+    targetMaterialGuid: ce04a90f51bbd9e4c971ffecb2790add
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_a8d7e32690f949acb52a2eb62f00cc1f_2100000_3558b53d
+    sourceMaterialGuid: a8d7e32690f949acb52a2eb62f00cc1f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PortaForno
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: a8d7e32690f949acb52a2eb62f00cc1f, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 9e3ecb2c237638a4bad9853731128e68, type: 2}
+    targetMaterialGuid: 9e3ecb2c237638a4bad9853731128e68
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3d314725bcdd403db2283c0c0cad8f4b_2100000_01698154
+    sourceMaterialGuid: 3d314725bcdd403db2283c0c0cad8f4b
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_RecipienteMolho
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3d314725bcdd403db2283c0c0cad8f4b, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: e116e79337b718a4988cc907ff0e904b, type: 2}
+    targetMaterialGuid: e116e79337b718a4988cc907ff0e904b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f85fbef250014b16b35475e7fc9a2a15_2100000_f4123ce9
+    sourceMaterialGuid: f85fbef250014b16b35475e7fc9a2a15
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_TabuaCorte
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f85fbef250014b16b35475e7fc9a2a15, type: 2}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 3bdc5a54a556fcf49985cb58505de530, type: 2}
+    targetMaterialGuid: 3bdc5a54a556fcf49985cb58505de530
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_31321ba15b8f8eb4c954353edc038b1d_2100000_513f6002
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: Characters
+    semanticRole: 85
+    shaderFamily: 0
+    action: 0
+    confidence: 0.78
+    classificationReason: SkinnedMeshRenderer with convertible URP/Standard shader
+      -> Characters Opaque.
+    targetMaterial: {fileID: 2100000, guid: d4f19cc5c464bd3439ae75c86d66f409, type: 2}
+    targetMaterialGuid: d4f19cc5c464bd3439ae75c86d66f409
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_faaee3acbfbc4beab5c15dd3a14327ec_2100000_48df04d1
+    sourceMaterialGuid: faaee3acbfbc4beab5c15dd3a14327ec
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_Apron
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: faaee3acbfbc4beab5c15dd3a14327ec, type: 2}
+    categoryId: Characters
+    semanticRole: 85
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Resources:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: 343573c136838ca42adc75aff7a9c5fd, type: 2}
+    targetMaterialGuid: 343573c136838ca42adc75aff7a9c5fd
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_faaee3acbfbc4beab5c15dd3a14327ec_2100000_7c0371ac
+    sourceMaterialGuid: faaee3acbfbc4beab5c15dd3a14327ec
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_Apron
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: faaee3acbfbc4beab5c15dd3a14327ec, type: 2}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: 489304b32ebf04c4e869f55a160e65c1, type: 2}
+    targetMaterialGuid: 489304b32ebf04c4e869f55a160e65c1
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_807c531bc0c0f4449b7d142e7926c020_2100000_34e03a7b
+    sourceMaterialGuid: 807c531bc0c0f4449b7d142e7926c020
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_BodyPrimary
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 807c531bc0c0f4449b7d142e7926c020, type: 2}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: daeb9f29dcdff9840b01e2b593e4f539, type: 2}
+    targetMaterialGuid: daeb9f29dcdff9840b01e2b593e4f539
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_807c531bc0c0f4449b7d142e7926c020_2100000_523fd0ae
+    sourceMaterialGuid: 807c531bc0c0f4449b7d142e7926c020
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_BodyPrimary
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 807c531bc0c0f4449b7d142e7926c020, type: 2}
+    categoryId: Characters
+    semanticRole: 85
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Resources:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: f2999e447f816cb4bb930bdd8ff8dc1c, type: 2}
+    targetMaterialGuid: f2999e447f816cb4bb930bdd8ff8dc1c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1a83f5bd112fd5e4bb90b6079f0ed5c9_2100000_32a0a0aa
+    sourceMaterialGuid: 1a83f5bd112fd5e4bb90b6079f0ed5c9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_EyesWhite
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1a83f5bd112fd5e4bb90b6079f0ed5c9, type: 2}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: 4274c6efd2061254ba899df46182634a, type: 2}
+    targetMaterialGuid: 4274c6efd2061254ba899df46182634a
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1a83f5bd112fd5e4bb90b6079f0ed5c9_2100000_5dc23e3f
+    sourceMaterialGuid: 1a83f5bd112fd5e4bb90b6079f0ed5c9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_EyesWhite
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1a83f5bd112fd5e4bb90b6079f0ed5c9, type: 2}
+    categoryId: Characters
+    semanticRole: 85
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Resources:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: fa8d564d21749b842b5f6173fb67f5c6, type: 2}
+    targetMaterialGuid: fa8d564d21749b842b5f6173fb67f5c6
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_24e98ba104aab054291c11a16cabd72c_2100000_641340df
+    sourceMaterialGuid: 24e98ba104aab054291c11a16cabd72c
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_Pupils
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 24e98ba104aab054291c11a16cabd72c, type: 2}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: df701dd31e6ad684e851089b2c9f5ee5, type: 2}
+    targetMaterialGuid: df701dd31e6ad684e851089b2c9f5ee5
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_24e98ba104aab054291c11a16cabd72c_2100000_0d925cca
+    sourceMaterialGuid: 24e98ba104aab054291c11a16cabd72c
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_Pupils
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 24e98ba104aab054291c11a16cabd72c, type: 2}
+    categoryId: Characters
+    semanticRole: 85
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Resources:CharacterVisual
+    targetMaterial: {fileID: 2100000, guid: 1e0f622e4c063a943ba959d5c91faabf, type: 2}
+    targetMaterialGuid: 1e0f622e4c063a943ba959d5c91faabf
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_531ca21964f612c4b8099ef0a9849331_2100000_353fa485
+    sourceMaterialGuid: 531ca21964f612c4b8099ef0a9849331
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Character_Skin
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 531ca21964f612c4b8099ef0a9849331, type: 2}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.92
+    classificationReason: Character folder materials retain skin/body slots and MPB
+      compatibility.
+    targetMaterial: {fileID: 2100000, guid: 4a0e67899db99444b97e3ba985a0d52a, type: 2}
+    targetMaterialGuid: 4a0e67899db99444b97e3ba985a0d52a
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_df206fed7fba6224e8b8cf254a210a56_3728947335908433679_ee9b7896
+    sourceMaterialGuid: df206fed7fba6224e8b8cf254a210a56
+    sourceLocalFileId: 3728947335908433679
+    sourceMaterialName: M_Apron
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 3728947335908433679, guid: df206fed7fba6224e8b8cf254a210a56, type: 3}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.92
+    classificationReason: Character folder materials retain skin/body slots and MPB
+      compatibility.
+    targetMaterial: {fileID: 2100000, guid: 6118fe8e185c3e74fbd457ee0d404bde, type: 2}
+    targetMaterialGuid: 6118fe8e185c3e74fbd457ee0d404bde
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_df206fed7fba6224e8b8cf254a210a56_7042702965971049074_7e17f05f
+    sourceMaterialGuid: df206fed7fba6224e8b8cf254a210a56
+    sourceLocalFileId: 7042702965971049074
+    sourceMaterialName: M_Body
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 7042702965971049074, guid: df206fed7fba6224e8b8cf254a210a56, type: 3}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.92
+    classificationReason: Character folder materials retain skin/body slots and MPB
+      compatibility.
+    targetMaterial: {fileID: 2100000, guid: 440d749b10014dd439de3bef25cce127, type: 2}
+    targetMaterialGuid: 440d749b10014dd439de3bef25cce127
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_df206fed7fba6224e8b8cf254a210a56_-8034710385265920167_f0dc2a2e
+    sourceMaterialGuid: df206fed7fba6224e8b8cf254a210a56
+    sourceLocalFileId: -8034710385265920167
+    sourceMaterialName: M_EyePupil
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -8034710385265920167, guid: df206fed7fba6224e8b8cf254a210a56, type: 3}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.92
+    classificationReason: Character folder materials retain skin/body slots and MPB
+      compatibility.
+    targetMaterial: {fileID: 2100000, guid: adf7d0468a4e8bb45a301cadd0e59eaa, type: 2}
+    targetMaterialGuid: adf7d0468a4e8bb45a301cadd0e59eaa
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_df206fed7fba6224e8b8cf254a210a56_-8508532661601735023_b2374e82
+    sourceMaterialGuid: df206fed7fba6224e8b8cf254a210a56
+    sourceLocalFileId: -8508532661601735023
+    sourceMaterialName: M_EyeWhite
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -8508532661601735023, guid: df206fed7fba6224e8b8cf254a210a56, type: 3}
+    categoryId: Characters
+    semanticRole: 80
+    shaderFamily: 0
+    action: 0
+    confidence: 0.92
+    classificationReason: Character folder materials retain skin/body slots and MPB
+      compatibility.
+    targetMaterial: {fileID: 2100000, guid: dc85d89b6bf4d66429def6bc0ceef460, type: 2}
+    targetMaterialGuid: dc85d89b6bf4d66429def6bc0ceef460
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-3597792400778177293_7bd58602
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3597792400778177293
+    sourceMaterialName: azul
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3597792400778177293, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: 9601d4d630e63bf458dab275bba50fba, type: 2}
+    targetMaterialGuid: 9601d4d630e63bf458dab275bba50fba
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_223439a7a6a64a14c8e969d65d86406c_6348700787944258619_40a24a09
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 6348700787944258619
+    sourceMaterialName: azul.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6348700787944258619, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: cbb6736d61f19854ea1f99dc5d87d25f, type: 2}
+    targetMaterialGuid: cbb6736d61f19854ea1f99dc5d87d25f
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_2271395179750055381_f21b62ad
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 2271395179750055381
+    sourceMaterialName: azul.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2271395179750055381, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: 4fcb67e7c6dc7a844ab9bf8a85a5cb06, type: 2}
+    targetMaterialGuid: 4fcb67e7c6dc7a844ab9bf8a85a5cb06
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_-3462910140692651440_0be030d6
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -3462910140692651440
+    sourceMaterialName: azul.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3462910140692651440, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: e01a737791f54654c9170a95990eb0f0, type: 2}
+    targetMaterialGuid: e01a737791f54654c9170a95990eb0f0
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_-3683562391071026594_6d07cb09
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 9dff8c59f7e13c4419b403247af7e624, type: 2}
+    targetMaterialGuid: 9dff8c59f7e13c4419b403247af7e624
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_-3683562391071026594_8520fa21
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: 0ac135e7f2f11084f89ab32359d41e11, type: 2}
+    targetMaterialGuid: 0ac135e7f2f11084f89ab32359d41e11
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-3683562391071026594_d1567223
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: 73b679696f9e1634095fead8d8e5fe67, type: 2}
+    targetMaterialGuid: 73b679696f9e1634095fead8d8e5fe67
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_223439a7a6a64a14c8e969d65d86406c_3983968161480374387_56c78a35
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 3983968161480374387
+    sourceMaterialName: bege.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 3983968161480374387, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: 1379c4aebd98d3749ac0a56dedea7b9f, type: 2}
+    targetMaterialGuid: 1379c4aebd98d3749ac0a56dedea7b9f
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_6968173241973646166_a91bbdea
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 6968173241973646166
+    sourceMaterialName: bege.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6968173241973646166, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: f56b505230fc0254f8a5e7a202dbcc0c, type: 2}
+    targetMaterialGuid: f56b505230fc0254f8a5e7a202dbcc0c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_-1774104622936938773_98245877
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: 71942cc97ae3a2e40b57889f25f8ed29, type: 2}
+    targetMaterialGuid: 71942cc97ae3a2e40b57889f25f8ed29
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_-1774104622936938773_c90db88c
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: 9597928dea2ba3d458f7d8bb15ea81de, type: 2}
+    targetMaterialGuid: 9597928dea2ba3d458f7d8bb15ea81de
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ca262d56cfb48de41a2cb77750cc9f21_-2578545630467802785_94527659
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: -2578545630467802785
+    sourceMaterialName: bege.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2578545630467802785, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:A
+    targetMaterial: {fileID: 2100000, guid: b0229d9d1edb7724c9b7decc7aaf8183, type: 2}
+    targetMaterialGuid: b0229d9d1edb7724c9b7decc7aaf8183
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_aefe2171e12196c4c988d9e2428d90ab_2100000_065dd63a
+    sourceMaterialGuid: aefe2171e12196c4c988d9e2428d90ab
+    sourceLocalFileId: 2100000
+    sourceMaterialName: "Cal\xE7ada"
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: aefe2171e12196c4c988d9e2428d90ab, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: f74e94e090cfac74e92dc6cc1d641066, type: 2}
+    targetMaterialGuid: f74e94e090cfac74e92dc6cc1d641066
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_1270278648817234664_3505dc30
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 4f2d649e3e0dfc045917998db4848b45, type: 2}
+    targetMaterialGuid: 4f2d649e3e0dfc045917998db4848b45
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_1270278648817234664_e8d16768
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: 89d7cb833278e3346974bc5a758fc637, type: 2}
+    targetMaterialGuid: 89d7cb833278e3346974bc5a758fc637
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_111375601970594265_b1c659a7
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: 111375601970594265
+    sourceMaterialName: cinza.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 111375601970594265, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: 2eb6161560cc9c64e831bfe9e3937ada, type: 2}
+    targetMaterialGuid: 2eb6161560cc9c64e831bfe9e3937ada
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7125a3c8cb32ba54a92762e1b3f686a4_2100000_23ab2162
+    sourceMaterialGuid: 7125a3c8cb32ba54a92762e1b3f686a4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: grama
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7125a3c8cb32ba54a92762e1b3f686a4, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: fdce4cc0a6cfafc49b11eafae7c86e7c, type: 2}
+    targetMaterialGuid: fdce4cc0a6cfafc49b11eafae7c86e7c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-2146721882451417453_34ee8ed2
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:B
+    targetMaterial: {fileID: 2100000, guid: fa7768998acab434a9464ba687998a66, type: 2}
+    targetMaterialGuid: fa7768998acab434a9464ba687998a66
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_-2146721882451417453_9dd75608
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 64cd3098a9ded0f41a310430c06d7f96, type: 2}
+    targetMaterialGuid: 64cd3098a9ded0f41a310430c06d7f96
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_-2146721882451417453_e4f597d0
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: f43055d0a8acf31468e6a66caf1d80ca, type: 2}
+    targetMaterialGuid: f43055d0a8acf31468e6a66caf1d80ca
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_223439a7a6a64a14c8e969d65d86406c_2410651013035637318_1c6cb466
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 2410651013035637318
+    sourceMaterialName: laranja.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2410651013035637318, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: eb78266625bda2d45908d13631923121, type: 2}
+    targetMaterialGuid: eb78266625bda2d45908d13631923121
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_4536141816489451356_07809c4b
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 4536141816489451356
+    sourceMaterialName: laranja.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 4536141816489451356, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: 63dce58f0216af84ca05c8bd97ed4b06, type: 2}
+    targetMaterialGuid: 63dce58f0216af84ca05c8bd97ed4b06
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_-6905709241459354713_20454c72
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -6905709241459354713
+    sourceMaterialName: laranja.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -6905709241459354713, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:I
+    targetMaterial: {fileID: 2100000, guid: c0486d674a1728a48a38220b9bc3a01c, type: 2}
+    targetMaterialGuid: c0486d674a1728a48a38220b9bc3a01c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_2167878221825250780_f97f5939
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 2167878221825250780
+    sourceMaterialName: laranja.005
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2167878221825250780, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: 6a31c05eff770914d82649556ebb18be, type: 2}
+    targetMaterialGuid: 6a31c05eff770914d82649556ebb18be
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ca262d56cfb48de41a2cb77750cc9f21_5169299505124366342_ca0b92ca
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: 5169299505124366342
+    sourceMaterialName: laranja.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 5169299505124366342, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:A
+    targetMaterial: {fileID: 2100000, guid: 51f199c916840f3428b31bbebe0851c0, type: 2}
+    targetMaterialGuid: 51f199c916840f3428b31bbebe0851c0
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_31321ba15b8f8eb4c954353edc038b1d_2100000_eb9dcd3d
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: City
+    semanticRole: 64
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:F
+    targetMaterial: {fileID: 2100000, guid: f4c054744f044f84db4f040c029fcc0b, type: 2}
+    targetMaterialGuid: f4c054744f044f84db4f040c029fcc0b
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_1615203465152138258_a850fd3c
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:H
+    targetMaterial: {fileID: 2100000, guid: 1ebd43a3f658f7240bfcfe9b3e5d4a05, type: 2}
+    targetMaterialGuid: 1ebd43a3f658f7240bfcfe9b3e5d4a05
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_1615203465152138258_4a1b8acc
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:J
+    targetMaterial: {fileID: 2100000, guid: 77a180310b55f174aa04a80696aed05b, type: 2}
+    targetMaterialGuid: 77a180310b55f174aa04a80696aed05b
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_1615203465152138258_65414bb4
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:C
+    targetMaterial: {fileID: 2100000, guid: d670db0c76a164442979b0f858289d3a, type: 2}
+    targetMaterialGuid: d670db0c76a164442979b0f858289d3a
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_223439a7a6a64a14c8e969d65d86406c_70618695489460038_05b44dd3
+    sourceMaterialGuid: 223439a7a6a64a14c8e969d65d86406c
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:D
+    targetMaterial: {fileID: 2100000, guid: dcc591676b2b0d6499562ba8a40bf2d5, type: 2}
+    targetMaterialGuid: dcc591676b2b0d6499562ba8a40bf2d5
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_70618695489460038_d543d70f
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:G
+    targetMaterial: {fileID: 2100000, guid: 3638b885420ba3f4ebad77497b5fc226, type: 2}
+    targetMaterialGuid: 3638b885420ba3f4ebad77497b5fc226
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_2516e6df1a16f814e99195892fb440e7_-876546973899608171_2daec60e
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: City
+    semanticRole: 61
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:E
+    targetMaterial: {fileID: 2100000, guid: e94338aaf63377a4c96c611a8ca27629, type: 2}
+    targetMaterialGuid: e94338aaf63377a4c96c611a8ca27629
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_bd560cefb73647caa96db6ac2fccb4a2_2100000_0639ab54
+    sourceMaterialGuid: bd560cefb73647caa96db6ac2fccb4a2
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Vidro
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: bd560cefb73647caa96db6ac2fccb4a2, type: 2}
+    categoryId: City
+    semanticRole: 62
+    shaderFamily: 2
+    action: 0
+    confidence: 0.9
+    classificationReason: Windows/glass preserve transparency via Illustrate Transparent.
+    targetMaterial: {fileID: 2100000, guid: 0d4900abd5f344145a9d3802070a7753, type: 2}
+    targetMaterialGuid: 0d4900abd5f344145a9d3802070a7753
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ef1b75cb92971b742a0902f8e1e76f67_2100000_349a9016
+    sourceMaterialGuid: ef1b75cb92971b742a0902f8e1e76f67
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Fabric
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: ef1b75cb92971b742a0902f8e1e76f67, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 3e0bc4b0c2fdc5345978b67216a4f227, type: 2}
+    targetMaterialGuid: 3e0bc4b0c2fdc5345978b67216a4f227
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ef1b75cb92971b742a0902f8e1e76f67_2100000_d4869263
+    sourceMaterialGuid: ef1b75cb92971b742a0902f8e1e76f67
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Fabric
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: ef1b75cb92971b742a0902f8e1e76f67, type: 2}
+    categoryId: City
+    semanticRole: 65
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ModularKit:K
+    targetMaterial: {fileID: 2100000, guid: 6377801581b006a4995c19edec4fcf00, type: 2}
+    targetMaterialGuid: 6377801581b006a4995c19edec4fcf00
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_62e3d6c73683bb6458ee3337cea658e1_2100000_d07e2605
+    sourceMaterialGuid: 62e3d6c73683bb6458ee3337cea658e1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Glass
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 62e3d6c73683bb6458ee3337cea658e1, type: 2}
+    categoryId: City
+    semanticRole: 62
+    shaderFamily: 2
+    action: 0
+    confidence: 0.9
+    classificationReason: Windows/glass preserve transparency via Illustrate Transparent.
+    targetMaterial: {fileID: 2100000, guid: e526f2c09e72eac4fa45f03c5507e0d7, type: 2}
+    targetMaterialGuid: e526f2c09e72eac4fa45f03c5507e0d7
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0a183b3c18a633d4b9ea69b04b49c6de_2100000_a3cb82d9
+    sourceMaterialGuid: 0a183b3c18a633d4b9ea69b04b49c6de
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Metal
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0a183b3c18a633d4b9ea69b04b49c6de, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 6abf858186755c7489ff81453566c9cd, type: 2}
+    targetMaterialGuid: 6abf858186755c7489ff81453566c9cd
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7737eed090689404cbedf67934e468ca_2100000_62ab1113
+    sourceMaterialGuid: 7737eed090689404cbedf67934e468ca
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Trim
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7737eed090689404cbedf67934e468ca, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: e414317811500f341b4eeed8b94183bb, type: 2}
+    targetMaterialGuid: e414317811500f341b4eeed8b94183bb
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7f4bd1f6aa4c1a04abbdccea38a1fba1_2100000_36fcecd8
+    sourceMaterialGuid: 7f4bd1f6aa4c1a04abbdccea38a1fba1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Wall
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7f4bd1f6aa4c1a04abbdccea38a1fba1, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 05ccc60c9c7ceaf4b86e90d075947c41, type: 2}
+    targetMaterialGuid: 05ccc60c9c7ceaf4b86e90d075947c41
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_57fbfa97e9ae066408a0cade48f5f481_2100000_91a0d158
+    sourceMaterialGuid: 57fbfa97e9ae066408a0cade48f5f481
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Modular_Wood
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 57fbfa97e9ae066408a0cade48f5f481, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 1a6e9d90ea9511e49857c3c2c68779c1, type: 2}
+    targetMaterialGuid: 1a6e9d90ea9511e49857c3c2c68779c1
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_fd443a703d51ae0408ddfe7d9a12507f_2100000_7d5cf912
+    sourceMaterialGuid: fd443a703d51ae0408ddfe7d9a12507f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Rua
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: fd443a703d51ae0408ddfe7d9a12507f, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 91fdccb46f7c2214891cfb65d49d0504, type: 2}
+    targetMaterialGuid: 91fdccb46f7c2214891cfb65d49d0504
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_9e65156b3bfc41b4ea7b6eba31051d8d_2100000_9f90d58d
+    sourceMaterialGuid: 9e65156b3bfc41b4ea7b6eba31051d8d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Wave Example 1
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 9e65156b3bfc41b4ea7b6eba31051d8d, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 27a2d48b06cf18349b1316fa675b5078, type: 2}
+    targetMaterialGuid: 27a2d48b06cf18349b1316fa675b5078
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_516c62acce8e4e44097e0b5c43af2832_2100000_ba6a3f3b
+    sourceMaterialGuid: 516c62acce8e4e44097e0b5c43af2832
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Wave Example 2
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 516c62acce8e4e44097e0b5c43af2832, type: 2}
+    categoryId: City
+    semanticRole: 60
+    shaderFamily: 0
+    action: 0
+    confidence: 0.9
+    classificationReason: Modular city materials mapped to City Opaque supporting
+      MPB facade tints.
+    targetMaterial: {fileID: 2100000, guid: 0641d8da3e5fb2b48ab689b417146c00, type: 2}
+    targetMaterialGuid: 0641d8da3e5fb2b48ab689b417146c00
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_31321ba15b8f8eb4c954353edc038b1d_2100000_bebbcae7
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ItemCatalog:Pizza
+    targetMaterial: {fileID: 2100000, guid: 98e3167d1947d3c4d9961e6f1e1be53e, type: 2}
+    targetMaterialGuid: 98e3167d1947d3c4d9961e6f1e1be53e
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1b19510320d73b04d9a127f20b4c7a91_2100000_6328f4c0
+    sourceMaterialGuid: 1b19510320d73b04d9a127f20b4c7a91
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Calabresa
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1b19510320d73b04d9a127f20b4c7a91, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 2a449399b2b617742861e540204d6dc7, type: 2}
+    targetMaterialGuid: 2a449399b2b617742861e540204d6dc7
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_d894b96d59de8874fb62f39671fb084b_2100000_f0596433
+    sourceMaterialGuid: d894b96d59de8874fb62f39671fb084b
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Cheese
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: d894b96d59de8874fb62f39671fb084b, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: fb227b652fa388c45bac59e1ae600a45, type: 2}
+    targetMaterialGuid: fb227b652fa388c45bac59e1ae600a45
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_022cda3f92304c241a81a440ee69e820_2100000_c7e03491
+    sourceMaterialGuid: 022cda3f92304c241a81a440ee69e820
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_CheeseRalado 1
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 022cda3f92304c241a81a440ee69e820, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 6cedf5fbc950a3c43a399da0c0f9e91e, type: 2}
+    targetMaterialGuid: 6cedf5fbc950a3c43a399da0c0f9e91e
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_2bbfa83874c78c647923da3168831094_2100000_3f2fff08
+    sourceMaterialGuid: 2bbfa83874c78c647923da3168831094
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Dough
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 2bbfa83874c78c647923da3168831094, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: b4ccf31ed1b960349b4d21b5dccbd952, type: 2}
+    targetMaterialGuid: b4ccf31ed1b960349b4d21b5dccbd952
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_58419e8b75d34b8eba18fae7e904ad82_2100000_2ff3c603
+    sourceMaterialGuid: 58419e8b75d34b8eba18fae7e904ad82
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CaixaPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 58419e8b75d34b8eba18fae7e904ad82, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 90e71410f66eb2c4a942c6405581f3fd, type: 2}
+    targetMaterialGuid: 90e71410f66eb2c4a942c6405581f3fd
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b81d1cca19274359921deed1598dcca7_2100000_a7e0fe47
+    sourceMaterialGuid: b81d1cca19274359921deed1598dcca7
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CortadorPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b81d1cca19274359921deed1598dcca7, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 155da2d702dcb6c4db57e5e869b323cb, type: 2}
+    targetMaterialGuid: 155da2d702dcb6c4db57e5e869b323cb
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_81e2f0ff952d49d8b140699bf4a1c801_2100000_2700c3b7
+    sourceMaterialGuid: 81e2f0ff952d49d8b140699bf4a1c801
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FormaPizza
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 81e2f0ff952d49d8b140699bf4a1c801, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 847efe6f219eedd429bc9e20ffc2bb7c, type: 2}
+    targetMaterialGuid: 847efe6f219eedd429bc9e20ffc2bb7c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_9cfd9f736247493cb644329f6eb2c068_2100000_06ad4b62
+    sourceMaterialGuid: 9cfd9f736247493cb644329f6eb2c068
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PizzaPronta
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 9cfd9f736247493cb644329f6eb2c068, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 1442520769eee664aa5762c2d8826c69, type: 2}
+    targetMaterialGuid: 1442520769eee664aa5762c2d8826c69
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3d314725bcdd403db2283c0c0cad8f4b_2100000_c2a443b7
+    sourceMaterialGuid: 3d314725bcdd403db2283c0c0cad8f4b
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_RecipienteMolho
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3d314725bcdd403db2283c0c0cad8f4b, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 0400ba99b53b04c4d90ff5252bc73e78, type: 2}
+    targetMaterialGuid: 0400ba99b53b04c4d90ff5252bc73e78
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8f7e5d4204584c7b80b6097038c93fd4_2100000_fa70e977
+    sourceMaterialGuid: 8f7e5d4204584c7b80b6097038c93fd4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_IngredientContainer
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 8f7e5d4204584c7b80b6097038c93fd4, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: b094620246283e6429470c8f4bab8366, type: 2}
+    targetMaterialGuid: b094620246283e6429470c8f4bab8366
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b8295d950f534549b41ccd7d5f0332fd_2100000_1ed2633e
+    sourceMaterialGuid: b8295d950f534549b41ccd7d5f0332fd
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Mushroom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b8295d950f534549b41ccd7d5f0332fd, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 14dd9b267268bcc46b65784a461c79d2, type: 2}
+    targetMaterialGuid: 14dd9b267268bcc46b65784a461c79d2
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_35979d97eb7b61a41a93be28f0280d82_2100000_37c41911
+    sourceMaterialGuid: 35979d97eb7b61a41a93be28f0280d82
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_PizzaBox
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 35979d97eb7b61a41a93be28f0280d82, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: ae7ab043de098294fa038c42192614d4, type: 2}
+    targetMaterialGuid: ae7ab043de098294fa038c42192614d4
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0c390cbcdd569d245adc4f2fff8664b9_2100000_6ac295c0
+    sourceMaterialGuid: 0c390cbcdd569d245adc4f2fff8664b9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Sauce
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0c390cbcdd569d245adc4f2fff8664b9, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 23bbbce63387ca7418c1f25d00f9fe6b, type: 2}
+    targetMaterialGuid: 23bbbce63387ca7418c1f25d00f9fe6b
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ccb8218e917eceb4da1a55f5abf39331_2100000_087f4055
+    sourceMaterialGuid: ccb8218e917eceb4da1a55f5abf39331
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_CaixaPizza_Mat_Gen_CaixaPizzaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: ccb8218e917eceb4da1a55f5abf39331, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: a9ba1544b7b149d45960f567bb0c23b6, type: 2}
+    targetMaterialGuid: a9ba1544b7b149d45960f567bb0c23b6
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f9fa69363b0e1984099b22b0fb83466f_2100000_e4b8e34e
+    sourceMaterialGuid: f9fa69363b0e1984099b22b0fb83466f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_CortadorPizza_Mat_Gen_CortadorPizzaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f9fa69363b0e1984099b22b0fb83466f, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 2ac24c34d02e94141adc9f7d4978cb35, type: 2}
+    targetMaterialGuid: 2ac24c34d02e94141adc9f7d4978cb35
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_39c748648bc255a438ba0d46cd1987af_2100000_fbca8ce0
+    sourceMaterialGuid: 39c748648bc255a438ba0d46cd1987af
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_FormaPizza_Mat_Gen_FormaPizzaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 39c748648bc255a438ba0d46cd1987af, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: e7ef9f391f648b94cb19d35d99e0d62c, type: 2}
+    targetMaterialGuid: e7ef9f391f648b94cb19d35d99e0d62c
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_05526f058d54879419a6bf8c912fd51f_2100000_73e42ebd
+    sourceMaterialGuid: 05526f058d54879419a6bf8c912fd51f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_PizzaPronta_Mat_Gen_PizzaProntaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 05526f058d54879419a6bf8c912fd51f, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 40c4bec92bc30c14aa7bace9598527f5, type: 2}
+    targetMaterialGuid: 40c4bec92bc30c14aa7bace9598527f5
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_28cb478ccc7df614099ff112a3d92550_2100000_15e36d4b
+    sourceMaterialGuid: 28cb478ccc7df614099ff112a3d92550
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_RecipienteMolho_Mat_Gen_RecipienteMolhoUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 28cb478ccc7df614099ff112a3d92550, type: 2}
+    categoryId: Food
+    semanticRole: 110
+    shaderFamily: 0
+    action: 0
+    confidence: 0.88
+    classificationReason: Food/ingredient asset converted with full texture preservation.
+    targetMaterial: {fileID: 2100000, guid: 1a301a0522da86d4f917863566907fe9, type: 2}
+    targetMaterialGuid: 1a301a0522da86d4f917863566907fe9
+    allowsDynamicTint: 1
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-3597792400778177293_9d4f9b18
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3597792400778177293
+    sourceMaterialName: azul
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3597792400778177293, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: d42870070d456a547b4ee48d3ef4ce57, type: 2}
+    targetMaterialGuid: d42870070d456a547b4ee48d3ef4ce57
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_2271395179750055381_0ddf29a1
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 2271395179750055381
+    sourceMaterialName: azul.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2271395179750055381, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 0c4db9d129529574ca4e48358cdae4f6, type: 2}
+    targetMaterialGuid: 0c4db9d129529574ca4e48358cdae4f6
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_-3462910140692651440_a889257c
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -3462910140692651440
+    sourceMaterialName: azul.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3462910140692651440, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 0bf7f3d00f4f21746bf7260cd88e5419, type: 2}
+    targetMaterialGuid: 0bf7f3d00f4f21746bf7260cd88e5419
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_-3683562391071026594_14174325
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 027aeadd9f7dcfb498a21046625efc6f, type: 2}
+    targetMaterialGuid: 027aeadd9f7dcfb498a21046625efc6f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-3683562391071026594_0a75d4a3
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 2cfc5a0d25d1ade4682dd0574013dbc3, type: 2}
+    targetMaterialGuid: 2cfc5a0d25d1ade4682dd0574013dbc3
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_-3683562391071026594_7474429d
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -3683562391071026594
+    sourceMaterialName: bege
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -3683562391071026594, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 01665f81edbb3714bb021ff3c4a0e419, type: 2}
+    targetMaterialGuid: 01665f81edbb3714bb021ff3c4a0e419
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_6968173241973646166_4cf96c90
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 6968173241973646166
+    sourceMaterialName: bege.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 6968173241973646166, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: e5dfe06afd673b04697f0e2c3d6478b4, type: 2}
+    targetMaterialGuid: e5dfe06afd673b04697f0e2c3d6478b4
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_-1774104622936938773_a887bfe6
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: d9264a17839c9cb40b7888f3ad6eba53, type: 2}
+    targetMaterialGuid: d9264a17839c9cb40b7888f3ad6eba53
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_-1774104622936938773_153c3af7
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -1774104622936938773
+    sourceMaterialName: bege.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -1774104622936938773, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 0291137cd9bbe6c4091cf967f1655797, type: 2}
+    targetMaterialGuid: 0291137cd9bbe6c4091cf967f1655797
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ca262d56cfb48de41a2cb77750cc9f21_-2578545630467802785_9bc3c3ad
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: -2578545630467802785
+    sourceMaterialName: bege.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2578545630467802785, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: db87dfb7928a1ba4f9ad6f587028cb30, type: 2}
+    targetMaterialGuid: db87dfb7928a1ba4f9ad6f587028cb30
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_1270278648817234664_b106055a
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 926f77c6754e32e42b65e2c6c91f45e1, type: 2}
+    targetMaterialGuid: 926f77c6754e32e42b65e2c6c91f45e1
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_1270278648817234664_455b0302
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1270278648817234664
+    sourceMaterialName: cinza
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1270278648817234664, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: c38bac127b852874eaa6a1379c2c307a, type: 2}
+    targetMaterialGuid: c38bac127b852874eaa6a1379c2c307a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_111375601970594265_d6fe6ae7
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: 111375601970594265
+    sourceMaterialName: cinza.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 111375601970594265, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 766f4f2f735d67e419d77f0929953fd8, type: 2}
+    targetMaterialGuid: 766f4f2f735d67e419d77f0929953fd8
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_6b911390c5825014e8377183a7837d3f_2100000_d85ec3ab
+    sourceMaterialGuid: 6b911390c5825014e8377183a7837d3f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: GreyBlue_Mat
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 6b911390c5825014e8377183a7837d3f, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: ca3251f52bc9ed247b82815652611bf0, type: 2}
+    targetMaterialGuid: ca3251f52bc9ed247b82815652611bf0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_-2146721882451417453_f10ccc22
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: f8fa9c7ad8b0d654e8e30a7b2c6aed74, type: 2}
+    targetMaterialGuid: f8fa9c7ad8b0d654e8e30a7b2c6aed74
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_-2146721882451417453_127bdffa
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 1e68ef946b4cd4a47b86a1f0ae100e15, type: 2}
+    targetMaterialGuid: 1e68ef946b4cd4a47b86a1f0ae100e15
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8369d6bcbd3560d4db4f819cd5973888_-2146721882451417453_af8ed328
+    sourceMaterialGuid: 8369d6bcbd3560d4db4f819cd5973888
+    sourceLocalFileId: -2146721882451417453
+    sourceMaterialName: laranja
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2146721882451417453, guid: 8369d6bcbd3560d4db4f819cd5973888, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 90e5d06f69289cb46bf861073001181e, type: 2}
+    targetMaterialGuid: 90e5d06f69289cb46bf861073001181e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_4536141816489451356_92778b5b
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 4536141816489451356
+    sourceMaterialName: laranja.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 4536141816489451356, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 3386d247c732efb4aa0a6a16bda6201c, type: 2}
+    targetMaterialGuid: 3386d247c732efb4aa0a6a16bda6201c
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b3dbc9e268c65f547a0f38f9f6452733_-6905709241459354713_bb3b5048
+    sourceMaterialGuid: b3dbc9e268c65f547a0f38f9f6452733
+    sourceLocalFileId: -6905709241459354713
+    sourceMaterialName: laranja.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -6905709241459354713, guid: b3dbc9e268c65f547a0f38f9f6452733, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 7e36f3952f52a2541aba09f312215a5e, type: 2}
+    targetMaterialGuid: 7e36f3952f52a2541aba09f312215a5e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_2167878221825250780_9b08048d
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 2167878221825250780
+    sourceMaterialName: laranja.005
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2167878221825250780, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 4fe02b71fc89cf04699e1122f3b23866, type: 2}
+    targetMaterialGuid: 4fe02b71fc89cf04699e1122f3b23866
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ca262d56cfb48de41a2cb77750cc9f21_5169299505124366342_db73faf0
+    sourceMaterialGuid: ca262d56cfb48de41a2cb77750cc9f21
+    sourceLocalFileId: 5169299505124366342
+    sourceMaterialName: laranja.010
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 5169299505124366342, guid: ca262d56cfb48de41a2cb77750cc9f21, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 3f081da57b304a2448d3718ec7fbf4b8, type: 2}
+    targetMaterialGuid: 3f081da57b304a2448d3718ec7fbf4b8
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_31321ba15b8f8eb4c954353edc038b1d_2100000_2f49b96d
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 68f16a6b045a41043a7f2ae1441565e7, type: 2}
+    targetMaterialGuid: 68f16a6b045a41043a7f2ae1441565e7
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_31321ba15b8f8eb4c954353edc038b1d_2100000_185ea13d
+    sourceMaterialGuid: 31321ba15b8f8eb4c954353edc038b1d
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Lit
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+    categoryId: Props
+    semanticRole: 109
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ItemCatalog:Tool_Knife
+    targetMaterial: {fileID: 2100000, guid: eb8a9be39ec6b8641bc0189ea292a8c2, type: 2}
+    targetMaterialGuid: eb8a9be39ec6b8641bc0189ea292a8c2
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_83c8f8700f87a0441b26f4730e1c3608_1615203465152138258_540f885e
+    sourceMaterialGuid: 83c8f8700f87a0441b26f4730e1c3608
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 83c8f8700f87a0441b26f4730e1c3608, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: d9a4694ee70da3b4dae1eb204a42fafd, type: 2}
+    targetMaterialGuid: d9a4694ee70da3b4dae1eb204a42fafd
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1c927cedb95ed7947987714271636d25_1615203465152138258_169cfa56
+    sourceMaterialGuid: 1c927cedb95ed7947987714271636d25
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 1c927cedb95ed7947987714271636d25, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 061cb5bfac7509740ae95ecf211bfa21, type: 2}
+    targetMaterialGuid: 061cb5bfac7509740ae95ecf211bfa21
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_07c425133fd577e489b94798f1f2e6f4_1615203465152138258_7dbca4a6
+    sourceMaterialGuid: 07c425133fd577e489b94798f1f2e6f4
+    sourceLocalFileId: 1615203465152138258
+    sourceMaterialName: marrom
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1615203465152138258, guid: 07c425133fd577e489b94798f1f2e6f4, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 18397aab5930d544198c5ad9c6ecdd21, type: 2}
+    targetMaterialGuid: 18397aab5930d544198c5ad9c6ecdd21
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_008574761ae35b444b805f56e4538fc7_70618695489460038_fbbb907f
+    sourceMaterialGuid: 008574761ae35b444b805f56e4538fc7
+    sourceLocalFileId: 70618695489460038
+    sourceMaterialName: marrom.001
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 70618695489460038, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 9163ee399c7bb1646b93666a075c50ee, type: 2}
+    targetMaterialGuid: 9163ee399c7bb1646b93666a075c50ee
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_2516e6df1a16f814e99195892fb440e7_-876546973899608171_2516122f
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: b21215727a201164ab509727b087c3db, type: 2}
+    targetMaterialGuid: b21215727a201164ab509727b087c3db
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_4874126678125670354_db2b3f47
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 4874126678125670354
+    sourceMaterialName: Material.003
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 4874126678125670354, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 5596f30ea8e6f2442bcd47c007f2678a, type: 2}
+    targetMaterialGuid: 5596f30ea8e6f2442bcd47c007f2678a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-6922793697723135513_728280c6
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -6922793697723135513
+    sourceMaterialName: Material.004
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -6922793697723135513, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 7400ff4f37aac2c4aa512c22dabfac4a, type: 2}
+    targetMaterialGuid: 7400ff4f37aac2c4aa512c22dabfac4a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-2813467912831258332_613c7336
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -2813467912831258332
+    sourceMaterialName: Material.006
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2813467912831258332, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3a3fcb92c736eb541a40e76fc9a5a082, type: 2}
+    targetMaterialGuid: 3a3fcb92c736eb541a40e76fc9a5a082
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_880774007180850119_f21859a7
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 880774007180850119
+    sourceMaterialName: Material.012
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 880774007180850119, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 0feec65710f12d14f8503ba8bc9613cb, type: 2}
+    targetMaterialGuid: 0feec65710f12d14f8503ba8bc9613cb
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_1886820026795636259_fa15739a
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 1886820026795636259
+    sourceMaterialName: Material.013
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1886820026795636259, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: b6d26cd5750e728409cbf5d0fcdc6e5e, type: 2}
+    targetMaterialGuid: b6d26cd5750e728409cbf5d0fcdc6e5e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_3780671244086486322_352c48f4
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 3780671244086486322
+    sourceMaterialName: Material.014
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 3780671244086486322, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: d2d1b335a61d6bf4f895d1503fe25607, type: 2}
+    targetMaterialGuid: d2d1b335a61d6bf4f895d1503fe25607
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-8693172909504858975_4f7aa015
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -8693172909504858975
+    sourceMaterialName: Material.021
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -8693172909504858975, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: de129020221c29d40bc2a7e9b3b7353b, type: 2}
+    targetMaterialGuid: de129020221c29d40bc2a7e9b3b7353b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_725804396391725484_a6a77ebe
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 725804396391725484
+    sourceMaterialName: Material.022
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 725804396391725484, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 1c57a5abdffa3f544bc11a279987d55b, type: 2}
+    targetMaterialGuid: 1c57a5abdffa3f544bc11a279987d55b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-2813337366143557646_0c5d0d97
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -2813337366143557646
+    sourceMaterialName: Material.023
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -2813337366143557646, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3cc4665396238334199ec381bb23b397, type: 2}
+    targetMaterialGuid: 3cc4665396238334199ec381bb23b397
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-5998004595915773402_fbea2172
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -5998004595915773402
+    sourceMaterialName: Material.024
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -5998004595915773402, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 28a22da86ef7a254a816a9716b239232, type: 2}
+    targetMaterialGuid: 28a22da86ef7a254a816a9716b239232
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-541708846208547136_f89d8219
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -541708846208547136
+    sourceMaterialName: Material.025
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -541708846208547136, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: b5048bc7eea5304458d500d4a7800266, type: 2}
+    targetMaterialGuid: b5048bc7eea5304458d500d4a7800266
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_7498461928983958705_aa4f6889
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 7498461928983958705
+    sourceMaterialName: Material.026
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 7498461928983958705, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: daee2bcbbc4138d419cf740687e53823, type: 2}
+    targetMaterialGuid: daee2bcbbc4138d419cf740687e53823
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_7993982598810627253_afb21434
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 7993982598810627253
+    sourceMaterialName: Material.027
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 7993982598810627253, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 5035630b81ec8e641846b1276a1feed2, type: 2}
+    targetMaterialGuid: 5035630b81ec8e641846b1276a1feed2
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_1110233775959259594_d5a0caf6
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 1110233775959259594
+    sourceMaterialName: Material.028
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 1110233775959259594, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 55c93aaa5901a2941ae58bab854edbef, type: 2}
+    targetMaterialGuid: 55c93aaa5901a2941ae58bab854edbef
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_-8583780622465393609_34633374
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: -8583780622465393609
+    sourceMaterialName: Material.029
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -8583780622465393609, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3018a6d072ccd174e8958323217495d4, type: 2}
+    targetMaterialGuid: 3018a6d072ccd174e8958323217495d4
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f41c1a5c11441dc458d5fb3728a59962_8975480819012031255_c3808f17
+    sourceMaterialGuid: f41c1a5c11441dc458d5fb3728a59962
+    sourceLocalFileId: 8975480819012031255
+    sourceMaterialName: Material.031
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 8975480819012031255, guid: f41c1a5c11441dc458d5fb3728a59962, type: 3}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: d3cdbce7c7039094093dcbbf11d5ce64, type: 2}
+    targetMaterialGuid: d3cdbce7c7039094093dcbbf11d5ce64
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3cfed68239cf4e1586c3da0e37d8f4a8_2100000_37fccff4
+    sourceMaterialGuid: 3cfed68239cf4e1586c3da0e37d8f4a8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Armario
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3cfed68239cf4e1586c3da0e37d8f4a8, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: c2e222ea7790e464ba319de7c3e32e4e, type: 2}
+    targetMaterialGuid: c2e222ea7790e464ba319de7c3e32e4e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_cfcb2cb531a34da195396d620d5a9b92_2100000_e436310c
+    sourceMaterialGuid: cfcb2cb531a34da195396d620d5a9b92
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Balcao
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: cfcb2cb531a34da195396d620d5a9b92, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 8f7aa5a21632b914997ab8f323a7f3aa, type: 2}
+    targetMaterialGuid: 8f7aa5a21632b914997ab8f323a7f3aa
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_71f7e090834d41d0a9fbb7f89da201e7_2100000_70f48029
+    sourceMaterialGuid: 71f7e090834d41d0a9fbb7f89da201e7
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Cadeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 71f7e090834d41d0a9fbb7f89da201e7, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 125554b98ed1f7a4aa52ae7f1b4ab078, type: 2}
+    targetMaterialGuid: 125554b98ed1f7a4aa52ae7f1b4ab078
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_66ba56bc78e44a24b68aafdef34c8fb1_2100000_d4234b22
+    sourceMaterialGuid: 66ba56bc78e44a24b68aafdef34c8fb1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CaixaRegistradora
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 66ba56bc78e44a24b68aafdef34c8fb1, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: f3cb7e79e7f801445af07bfe690c28cc, type: 2}
+    targetMaterialGuid: f3cb7e79e7f801445af07bfe690c28cc
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0c9e96ca722a4f6dac274edeb32a83c1_2100000_0597181e
+    sourceMaterialGuid: 0c9e96ca722a4f6dac274edeb32a83c1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_CardapioPrancheta
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0c9e96ca722a4f6dac274edeb32a83c1, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 94e4c52543416fa4f9ca5e1063c013a9, type: 2}
+    targetMaterialGuid: 94e4c52543416fa4f9ca5e1063c013a9
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b30c48b5e61d4f2f918b8fd338518df6_2100000_4f335503
+    sourceMaterialGuid: b30c48b5e61d4f2f918b8fd338518df6
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_DeliveryBag
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b30c48b5e61d4f2f918b8fd338518df6, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 63cddb67f28321e40bb45977d8194511, type: 2}
+    targetMaterialGuid: 63cddb67f28321e40bb45977d8194511
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b01700070b5c4e5294d5a50c2b8d2d34_2100000_541ef0a3
+    sourceMaterialGuid: b01700070b5c4e5294d5a50c2b8d2d34
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_DestaqueSecundario
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b01700070b5c4e5294d5a50c2b8d2d34, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 0faa12514be550c4eae1d20193211bfe, type: 2}
+    targetMaterialGuid: 0faa12514be550c4eae1d20193211bfe
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3296f4819ba54b838652e1bd2adc6b23_2100000_7cf7e471
+    sourceMaterialGuid: 3296f4819ba54b838652e1bd2adc6b23
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Escuro
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3296f4819ba54b838652e1bd2adc6b23, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3fe44d08b5c15f5428bfd2a1415b13a5, type: 2}
+    targetMaterialGuid: 3fe44d08b5c15f5428bfd2a1415b13a5
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_539c71edfa024f0b8a54e74716db5103_2100000_81e70889
+    sourceMaterialGuid: 539c71edfa024f0b8a54e74716db5103
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Espatula
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 539c71edfa024f0b8a54e74716db5103, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 7a7f52bf6c1d16a4ca03b9fdee43eb52, type: 2}
+    targetMaterialGuid: 7a7f52bf6c1d16a4ca03b9fdee43eb52
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_636a6f35d11d4d399d49ec34af0ca350_2100000_394afeac
+    sourceMaterialGuid: 636a6f35d11d4d399d49ec34af0ca350
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Faca
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 636a6f35d11d4d399d49ec34af0ca350, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3bf89a0b80c999f47b7ba270dbf586b6, type: 2}
+    targetMaterialGuid: 3bf89a0b80c999f47b7ba270dbf586b6
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_202ff4e7fe2e4561958c4f2d450de3b9_2100000_9335f575
+    sourceMaterialGuid: 202ff4e7fe2e4561958c4f2d450de3b9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FachadaDestaque
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 202ff4e7fe2e4561958c4f2d450de3b9, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: b124a629825c682449d2eb359d55a092, type: 2}
+    targetMaterialGuid: b124a629825c682449d2eb359d55a092
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_17270414896c41aaa79d98adfb082d3f_2100000_8042ebfb
+    sourceMaterialGuid: 17270414896c41aaa79d98adfb082d3f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Faqueiro
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 17270414896c41aaa79d98adfb082d3f, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 2c11a65661a04f9469903324691f347e, type: 2}
+    targetMaterialGuid: 2c11a65661a04f9469903324691f347e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_4f68221a1ded4accad01ff79efe2256a_2100000_dab035bf
+    sourceMaterialGuid: 4f68221a1ded4accad01ff79efe2256a
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_FornoLenha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 4f68221a1ded4accad01ff79efe2256a, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: a2080bbc2d65498498f53ee5badc63fa, type: 2}
+    targetMaterialGuid: a2080bbc2d65498498f53ee5badc63fa
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7f98cb7c7a2f441893abf1a496f459a4_2100000_6f9cb621
+    sourceMaterialGuid: 7f98cb7c7a2f441893abf1a496f459a4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Geladeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7f98cb7c7a2f441893abf1a496f459a4, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: afaafa91462e76247b4bb5f620dfb462, type: 2}
+    targetMaterialGuid: afaafa91462e76247b4bb5f620dfb462
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_70332d45234f49ce8bce4ab000349499_2100000_f9e70763
+    sourceMaterialGuid: 70332d45234f49ce8bce4ab000349499
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Lixeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 70332d45234f49ce8bce4ab000349499, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 54043b095b55625458e72f12450595e4, type: 2}
+    targetMaterialGuid: 54043b095b55625458e72f12450595e4
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c023fea519d84de1b75a9695995b33c8_2100000_17a832f1
+    sourceMaterialGuid: c023fea519d84de1b75a9695995b33c8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Madeira
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c023fea519d84de1b75a9695995b33c8, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 4bc2e347f60882d46a80089dfabe3f06, type: 2}
+    targetMaterialGuid: 4bc2e347f60882d46a80089dfabe3f06
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f2c1576d5c1b49539d553c57385524e6_2100000_a84ed541
+    sourceMaterialGuid: f2c1576d5c1b49539d553c57385524e6
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Mesa
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f2c1576d5c1b49539d553c57385524e6, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 27b9c57973fbb324e8f745cc7efca017, type: 2}
+    targetMaterialGuid: 27b9c57973fbb324e8f745cc7efca017
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_21b0f6c9c179427595fff40e7c931936_2100000_6497197d
+    sourceMaterialGuid: 21b0f6c9c179427595fff40e7c931936
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_Metal
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 21b0f6c9c179427595fff40e7c931936, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 84b54aa97a86cbd4aae3c0999c96ec90, type: 2}
+    targetMaterialGuid: 84b54aa97a86cbd4aae3c0999c96ec90
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e87f6c286a154a8683a22e9610765806_2100000_52dd801e
+    sourceMaterialGuid: e87f6c286a154a8683a22e9610765806
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PanelaConcha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e87f6c286a154a8683a22e9610765806, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: ec3049bcad72bbf418566142d015d3ae, type: 2}
+    targetMaterialGuid: ec3049bcad72bbf418566142d015d3ae
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_cd1644fcd0e24608ae7074d89ba55dbc_2100000_0261af49
+    sourceMaterialGuid: cd1644fcd0e24608ae7074d89ba55dbc
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_ParedeClara
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: cd1644fcd0e24608ae7074d89ba55dbc, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 2c601803dd8917c44818c72478e94037, type: 2}
+    targetMaterialGuid: 2c601803dd8917c44818c72478e94037
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_4a93047f834c41469ec1f3fb7b87168a_2100000_7964b408
+    sourceMaterialGuid: 4a93047f834c41469ec1f3fb7b87168a
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PisoCozinha
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 4a93047f834c41469ec1f3fb7b87168a, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 78490d3b590cc194091abd476f51d103, type: 2}
+    targetMaterialGuid: 78490d3b590cc194091abd476f51d103
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1a3a6359e16947eeb0ffd207a12afd85_2100000_266fd89e
+    sourceMaterialGuid: 1a3a6359e16947eeb0ffd207a12afd85
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PisoSalao
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1a3a6359e16947eeb0ffd207a12afd85, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 018352739ff903d49abafd1b788f06bc, type: 2}
+    targetMaterialGuid: 018352739ff903d49abafd1b788f06bc
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_a8d7e32690f949acb52a2eb62f00cc1f_2100000_1784e6c5
+    sourceMaterialGuid: a8d7e32690f949acb52a2eb62f00cc1f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_PortaForno
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: a8d7e32690f949acb52a2eb62f00cc1f, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: db0407bf729e5854db7907c22f9b034c, type: 2}
+    targetMaterialGuid: db0407bf729e5854db7907c22f9b034c
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f85fbef250014b16b35475e7fc9a2a15_2100000_eae2b671
+    sourceMaterialGuid: f85fbef250014b16b35475e7fc9a2a15
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Gen_TabuaCorte
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f85fbef250014b16b35475e7fc9a2a15, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 0cd723f3805f0cb4097c4760cf21244f, type: 2}
+    targetMaterialGuid: 0cd723f3805f0cb4097c4760cf21244f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c3ff7c9db2359f341933a4eb5bacf739_2100000_4e84433a
+    sourceMaterialGuid: c3ff7c9db2359f341933a4eb5bacf739
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_PizzeriaCounter
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c3ff7c9db2359f341933a4eb5bacf739, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 303760221a3ffa647af2c867538e3658, type: 2}
+    targetMaterialGuid: 303760221a3ffa647af2c867538e3658
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_edb8e800fb897304ca5e951f647c219b_2100000_753fe459
+    sourceMaterialGuid: edb8e800fb897304ca5e951f647c219b
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_PizzeriaFloor
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: edb8e800fb897304ca5e951f647c219b, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 4f40d0ce10434d84eaf4566e888cf679, type: 2}
+    targetMaterialGuid: 4f40d0ce10434d84eaf4566e888cf679
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e6e560b778d08834380e0669ee8a44c8_2100000_da144860
+    sourceMaterialGuid: e6e560b778d08834380e0669ee8a44c8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_PizzeriaWall
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e6e560b778d08834380e0669ee8a44c8, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: af32ac5cd808b134190d862fcaf09dca, type: 2}
+    targetMaterialGuid: af32ac5cd808b134190d862fcaf09dca
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_79ca18763fa66874ab5099fdabfdadb8_2100000_9b9657be
+    sourceMaterialGuid: 79ca18763fa66874ab5099fdabfdadb8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Assembly
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 79ca18763fa66874ab5099fdabfdadb8, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 392aac7182ad6ae4baa2091745c56afa, type: 2}
+    targetMaterialGuid: 392aac7182ad6ae4baa2091745c56afa
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8ec027e285fad3f4ea548f6597f66eb4_2100000_7bd2c081
+    sourceMaterialGuid: 8ec027e285fad3f4ea548f6597f66eb4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Counter
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 8ec027e285fad3f4ea548f6597f66eb4, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: ecf6ab185af9bff45b661730bc93f413, type: 2}
+    targetMaterialGuid: ecf6ab185af9bff45b661730bc93f413
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8d217e2f3fd75a245916a0da1df19af0_2100000_d9b10d01
+    sourceMaterialGuid: 8d217e2f3fd75a245916a0da1df19af0
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Fridge
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 8d217e2f3fd75a245916a0da1df19af0, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 451356ede416ab8458aa5146d1cdd88e, type: 2}
+    targetMaterialGuid: 451356ede416ab8458aa5146d1cdd88e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_4b173428fc3c95c48874e9223dd10582_2100000_bc4e383a
+    sourceMaterialGuid: 4b173428fc3c95c48874e9223dd10582
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Oven
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 4b173428fc3c95c48874e9223dd10582, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 7eb2e0e1039b75045beac238431d6da6, type: 2}
+    targetMaterialGuid: 7eb2e0e1039b75045beac238431d6da6
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c2379fbd356c30545af148e5863222e4_2100000_13c8416f
+    sourceMaterialGuid: c2379fbd356c30545af148e5863222e4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Packaging
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c2379fbd356c30545af148e5863222e4, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 539fc121c129562418d6dd85d6505db1, type: 2}
+    targetMaterialGuid: 539fc121c129562418d6dd85d6505db1
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_8389a7ae3eab46b469ef59624b56c079_2100000_4a269550
+    sourceMaterialGuid: 8389a7ae3eab46b469ef59624b56c079
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Phone
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 8389a7ae3eab46b469ef59624b56c079, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: ae2bf87ddbcbbac409f61348f9b5f734, type: 2}
+    targetMaterialGuid: ae2bf87ddbcbbac409f61348f9b5f734
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c3b0d5ba8dab7254282eb89466f46710_2100000_f3a98ae4
+    sourceMaterialGuid: c3b0d5ba8dab7254282eb89466f46710
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Prep
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c3b0d5ba8dab7254282eb89466f46710, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 249abd46f52ca8f46b9d9f8ea78cc067, type: 2}
+    targetMaterialGuid: 249abd46f52ca8f46b9d9f8ea78cc067
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e69a6f50e95ec5444bda598457229993_2100000_0d81d9f8
+    sourceMaterialGuid: e69a6f50e95ec5444bda598457229993
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Staging
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e69a6f50e95ec5444bda598457229993, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 447af2a7eee7f234e9adb603bdc9a120, type: 2}
+    targetMaterialGuid: 447af2a7eee7f234e9adb603bdc9a120
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f6539748323d25647a318e0705d140f7_2100000_321d3a1b
+    sourceMaterialGuid: f6539748323d25647a318e0705d140f7
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Supplier
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f6539748323d25647a318e0705d140f7, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 49f0a6706117d8748894cf45b9da5763, type: 2}
+    targetMaterialGuid: 49f0a6706117d8748894cf45b9da5763
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3f1d22524ea35c546b2d5c309bf1da13_2100000_78717ce0
+    sourceMaterialGuid: 3f1d22524ea35c546b2d5c309bf1da13
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_ToolRack
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3f1d22524ea35c546b2d5c309bf1da13, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: f94b298cb924f81469fd7c9a17123938, type: 2}
+    targetMaterialGuid: f94b298cb924f81469fd7c9a17123938
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3b3d330fdcb2229409f1d538f042d807_2100000_e22f97a4
+    sourceMaterialGuid: 3b3d330fdcb2229409f1d538f042d807
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Station_Trash
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3b3d330fdcb2229409f1d538f042d807, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: 61bde8ed7f67a5e46ba7196a1573297a, type: 2}
+    targetMaterialGuid: 61bde8ed7f67a5e46ba7196a1573297a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_893f322558dd4264483e66a22bc75444_2100000_7482c016
+    sourceMaterialGuid: 893f322558dd4264483e66a22bc75444
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Tool
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 893f322558dd4264483e66a22bc75444, type: 2}
+    categoryId: Props
+    semanticRole: 109
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: ItemCatalog:Tool_Grater
+    targetMaterial: {fileID: 2100000, guid: 87979191f5f7c104483ec19b2f24ac69, type: 2}
+    targetMaterialGuid: 87979191f5f7c104483ec19b2f24ac69
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_893f322558dd4264483e66a22bc75444_2100000_9a165c92
+    sourceMaterialGuid: 893f322558dd4264483e66a22bc75444
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Tool
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 893f322558dd4264483e66a22bc75444, type: 2}
+    categoryId: Props
+    semanticRole: 130
+    shaderFamily: 0
+    action: 0
+    confidence: 0.62
+    classificationReason: Convertible URP/Lit or Standard opaque material -> Illustrate
+      Opaque (review recommended).
+    targetMaterial: {fileID: 2100000, guid: f4597a6d1e2fadc4bb3bd78d8ec1eec0, type: 2}
+    targetMaterialGuid: f4597a6d1e2fadc4bb3bd78d8ec1eec0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_1bab016fad52dd84092d01e31080eca8_2100000_2da50e51
+    sourceMaterialGuid: 1bab016fad52dd84092d01e31080eca8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Apron_Branco
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 1bab016fad52dd84092d01e31080eca8, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: c298f0f852d85f3439cd934ab0c35fdf, type: 2}
+    targetMaterialGuid: c298f0f852d85f3439cd934ab0c35fdf
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5d06412adfccf3e4dab9f59c1f6aba53_2100000_5ea8f3d9
+    sourceMaterialGuid: 5d06412adfccf3e4dab9f59c1f6aba53
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Body_Amarelo
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5d06412adfccf3e4dab9f59c1f6aba53, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 05a7148e1dfcb674c87e6784ac09470b, type: 2}
+    targetMaterialGuid: 05a7148e1dfcb674c87e6784ac09470b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e34005634e156fd44aeaf1d73309947e_2100000_ab7bde16
+    sourceMaterialGuid: e34005634e156fd44aeaf1d73309947e
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Body_Turquesa
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e34005634e156fd44aeaf1d73309947e, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: fa41a8de0e9886a4291ee9585a19a4d7, type: 2}
+    targetMaterialGuid: fa41a8de0e9886a4291ee9585a19a4d7
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_6d8b734298174e847b2c7b6819fa64a5_2100000_b53d6ef2
+    sourceMaterialGuid: 6d8b734298174e847b2c7b6819fa64a5
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Body_Vermelho
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 6d8b734298174e847b2c7b6819fa64a5, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: ed43a9f48459ebd43b83a6d25df4069f, type: 2}
+    targetMaterialGuid: ed43a9f48459ebd43b83a6d25df4069f
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_7342fde0082b872498de9dee32eb2415_2100000_25882f75
+    sourceMaterialGuid: 7342fde0082b872498de9dee32eb2415
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_EyesWhite
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 7342fde0082b872498de9dee32eb2415, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 7be29fee88ec8bf4083ef87dbeaf42bb, type: 2}
+    targetMaterialGuid: 7be29fee88ec8bf4083ef87dbeaf42bb
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_6a506319e80625c4ea85e1e85a8e0256_2100000_428c8000
+    sourceMaterialGuid: 6a506319e80625c4ea85e1e85a8e0256
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Pupils
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 6a506319e80625c4ea85e1e85a8e0256, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: ddb183f7b554ff243b86fae69005ebe0, type: 2}
+    targetMaterialGuid: ddb183f7b554ff243b86fae69005ebe0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b778cc6484b0ebe499db4e708195b53c_2100000_1de97a84
+    sourceMaterialGuid: b778cc6484b0ebe499db4e708195b53c
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_ToonChar_Skin_Suave
+    sourceShaderName: Distant Lands/Illustrate/Outline
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b778cc6484b0ebe499db4e708195b53c, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: b943f0b4b9a76cf419df4cb21260595a, type: 2}
+    targetMaterialGuid: b943f0b4b9a76cf419df4cb21260595a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3511b237678af1e43b686c5b15037fd3_2100000_452f0ab2
+    sourceMaterialGuid: 3511b237678af1e43b686c5b15037fd3
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Armario_Mat_Gen_ArmarioUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3511b237678af1e43b686c5b15037fd3, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: bda0b1898aa7d9749a6d75859f8430f8, type: 2}
+    targetMaterialGuid: bda0b1898aa7d9749a6d75859f8430f8
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5ea9ceb1bb61a91449c378ac2c23f575_2100000_ce18d682
+    sourceMaterialGuid: 5ea9ceb1bb61a91449c378ac2c23f575
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Balcao_Mat_Gen_BalcaoUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5ea9ceb1bb61a91449c378ac2c23f575, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: e57744e996e5d7948ad027337e6cf838, type: 2}
+    targetMaterialGuid: e57744e996e5d7948ad027337e6cf838
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_d1adf44e537c36645b04fd144e2c6d7c_2100000_dcf6c748
+    sourceMaterialGuid: d1adf44e537c36645b04fd144e2c6d7c
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Cadeira_Mat_Gen_CadeiraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: d1adf44e537c36645b04fd144e2c6d7c, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 8bdd3fff149a6c04b810ed6a5d0c65d5, type: 2}
+    targetMaterialGuid: 8bdd3fff149a6c04b810ed6a5d0c65d5
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_82a21b15fb0ce4f489f058394ede97a5_2100000_d7ff7a7e
+    sourceMaterialGuid: 82a21b15fb0ce4f489f058394ede97a5
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_CaixaRegistradora_Mat_Gen_CaixaRegistradoraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 82a21b15fb0ce4f489f058394ede97a5, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: b0d6202e247f8f945804edad12f7a590, type: 2}
+    targetMaterialGuid: b0d6202e247f8f945804edad12f7a590
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_bb6e19695eb7bc84bb2cef88afe38269_2100000_5076be0a
+    sourceMaterialGuid: bb6e19695eb7bc84bb2cef88afe38269
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_CardapioPrancheta_Mat_Gen_CardapioPranchetaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: bb6e19695eb7bc84bb2cef88afe38269, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 2368bc93768a70d4c967710fb09e3a83, type: 2}
+    targetMaterialGuid: 2368bc93768a70d4c967710fb09e3a83
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e5ec04a3b885927419ea48c5ce74d2b9_2100000_d8686289
+    sourceMaterialGuid: e5ec04a3b885927419ea48c5ce74d2b9
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_DeliveryBag_Mat_Gen_DeliveryBagUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e5ec04a3b885927419ea48c5ce74d2b9, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 5aee3897c53d8f04e96ff524049fda6d, type: 2}
+    targetMaterialGuid: 5aee3897c53d8f04e96ff524049fda6d
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5e008d8bbd788e7438424f26b0c07bbf_2100000_d475e61c
+    sourceMaterialGuid: 5e008d8bbd788e7438424f26b0c07bbf
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Espatula_Mat_Gen_EspatulaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5e008d8bbd788e7438424f26b0c07bbf, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 6b6ad6250aae18f41bb78af5a1950795, type: 2}
+    targetMaterialGuid: 6b6ad6250aae18f41bb78af5a1950795
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_2c8578504483a0344a4b8b99490fbac0_2100000_e7991f05
+    sourceMaterialGuid: 2c8578504483a0344a4b8b99490fbac0
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Faca_Mat_Gen_FacaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 2c8578504483a0344a4b8b99490fbac0, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: ad3f542750c8c5e4896ef69777ef7cf0, type: 2}
+    targetMaterialGuid: ad3f542750c8c5e4896ef69777ef7cf0
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0d2848268f8128842a907939358e585e_2100000_c1dfd5bb
+    sourceMaterialGuid: 0d2848268f8128842a907939358e585e
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_FachadaDestaque_Mat_Gen_FachadaDestaqueUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0d2848268f8128842a907939358e585e, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 819ecedfcad501e498a11af7f35c7e2d, type: 2}
+    targetMaterialGuid: 819ecedfcad501e498a11af7f35c7e2d
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5cb62abe446bfb741b0ad9d8d0b627a4_2100000_f6019d04
+    sourceMaterialGuid: 5cb62abe446bfb741b0ad9d8d0b627a4
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Faqueiro_Mat_Gen_FaqueiroUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5cb62abe446bfb741b0ad9d8d0b627a4, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: fd45aa2b7755c2c48b58cf840b9943d1, type: 2}
+    targetMaterialGuid: fd45aa2b7755c2c48b58cf840b9943d1
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b1b785ee98edfae4498545c8a3c201dd_2100000_d9270147
+    sourceMaterialGuid: b1b785ee98edfae4498545c8a3c201dd
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_FornoLenha_Mat_Gen_FornoLenhaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b1b785ee98edfae4498545c8a3c201dd, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: bb89db987b8918f498de8ea6d72c79c4, type: 2}
+    targetMaterialGuid: bb89db987b8918f498de8ea6d72c79c4
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5ca759cc74f4b31469e2e525ff605335_2100000_a1d91cd2
+    sourceMaterialGuid: 5ca759cc74f4b31469e2e525ff605335
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Geladeira_Mat_Gen_GeladeiraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5ca759cc74f4b31469e2e525ff605335, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 825d5c32a41d9e1469095cb1272dabd8, type: 2}
+    targetMaterialGuid: 825d5c32a41d9e1469095cb1272dabd8
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_e32b07a2e4da6a741b00ce47069c94f6_2100000_db101b55
+    sourceMaterialGuid: e32b07a2e4da6a741b00ce47069c94f6
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Lixeira_Mat_Gen_LixeiraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: e32b07a2e4da6a741b00ce47069c94f6, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 1bde510cd03ea924e999cc1e7d314ac3, type: 2}
+    targetMaterialGuid: 1bde510cd03ea924e999cc1e7d314ac3
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_f0ada64b52b0a00478b76c6c47c9152b_2100000_08e4543b
+    sourceMaterialGuid: f0ada64b52b0a00478b76c6c47c9152b
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Madeira_Mat_Gen_MadeiraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: f0ada64b52b0a00478b76c6c47c9152b, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 68ad2e809e2ce7e40b0a9bcaec93425e, type: 2}
+    targetMaterialGuid: 68ad2e809e2ce7e40b0a9bcaec93425e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_084b910181b6d294c81a9bddb192aed1_2100000_93f929d8
+    sourceMaterialGuid: 084b910181b6d294c81a9bddb192aed1
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_Mesa_Mat_Gen_MesaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 084b910181b6d294c81a9bddb192aed1, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 3d5a61bd29d90664fb1ae963f947e6fa, type: 2}
+    targetMaterialGuid: 3d5a61bd29d90664fb1ae963f947e6fa
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_0e1de50de7b90e9438519b26ef043a68_2100000_6949369a
+    sourceMaterialGuid: 0e1de50de7b90e9438519b26ef043a68
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_PanelaConcha_Mat_Gen_PanelaConchaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 0e1de50de7b90e9438519b26ef043a68, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 944aa118b94b0b04984cd28c68eb1f1e, type: 2}
+    targetMaterialGuid: 944aa118b94b0b04984cd28c68eb1f1e
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5e0fc5edf955a8a49a2cefc8795668ba_2100000_1c90dfbd
+    sourceMaterialGuid: 5e0fc5edf955a8a49a2cefc8795668ba
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_ParedeClara_DefaultUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5e0fc5edf955a8a49a2cefc8795668ba, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 753df065025ea844ca28f52b87f298ba, type: 2}
+    targetMaterialGuid: 753df065025ea844ca28f52b87f298ba
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ec58f7a11fd335746ba2dc2e3dbe8f6e_2100000_826bda81
+    sourceMaterialGuid: ec58f7a11fd335746ba2dc2e3dbe8f6e
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_ParedeClara_Mat_Gen_MadeiraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: ec58f7a11fd335746ba2dc2e3dbe8f6e, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 48dc9b4885a56f648a6544d11c638d2c, type: 2}
+    targetMaterialGuid: 48dc9b4885a56f648a6544d11c638d2c
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_ab72e988189dabb45a02f001fd4842bb_2100000_72dddfc6
+    sourceMaterialGuid: ab72e988189dabb45a02f001fd4842bb
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_ParedeClara_Mat_Gen_ParedeClaraUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: ab72e988189dabb45a02f001fd4842bb, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 49c2663103273a642b339ac0552f317b, type: 2}
+    targetMaterialGuid: 49c2663103273a642b339ac0552f317b
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_878a159685a907b44bfabf936770202e_2100000_9e36501f
+    sourceMaterialGuid: 878a159685a907b44bfabf936770202e
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_PisoCozinha_Mat_Gen_PisoCozinhaUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 878a159685a907b44bfabf936770202e, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 0e628d0440eabdd4e9376c5d351478bf, type: 2}
+    targetMaterialGuid: 0e628d0440eabdd4e9376c5d351478bf
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_c3170e272f5b46c4ea3e1700ef0c6727_2100000_5c19347a
+    sourceMaterialGuid: c3170e272f5b46c4ea3e1700ef0c6727
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_PisoSalao_Mat_Gen_PisoSalaoUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: c3170e272f5b46c4ea3e1700ef0c6727, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 62d6f5aac06516e47a7f1ae0983cb5e9, type: 2}
+    targetMaterialGuid: 62d6f5aac06516e47a7f1ae0983cb5e9
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_6322a4227fd998b4e9418b8191197de8_2100000_aa78b82f
+    sourceMaterialGuid: 6322a4227fd998b4e9418b8191197de8
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_PortaForno_Mat_Gen_PortaFornoUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 6322a4227fd998b4e9418b8191197de8, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: c9b84725ba1699d42a583e6e5b8477a7, type: 2}
+    targetMaterialGuid: c9b84725ba1699d42a583e6e5b8477a7
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_5147ad499fcb8fb4b8644d874409754f_2100000_c2329985
+    sourceMaterialGuid: 5147ad499fcb8fb4b8644d874409754f
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Mat_Toon_TabuaCorte_Mat_Gen_TabuaCorteUnnamed
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 5147ad499fcb8fb4b8644d874409754f, type: 2}
+    categoryId: Props
+    semanticRole: 21
+    shaderFamily: 0
+    action: 0
+    confidence: 0.85
+    classificationReason: Pizzeria props converted with Opaque shader.
+    targetMaterial: {fileID: 2100000, guid: 8b97aebd620049a41a2c5812ffd5f9b5, type: 2}
+    targetMaterialGuid: 8b97aebd620049a41a2c5812ffd5f9b5
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_bc41cc71786303b4ebe3b7b52e6cd2e0_2100000_89bdaaa8
+    sourceMaterialGuid: bc41cc71786303b4ebe3b7b52e6cd2e0
+    sourceLocalFileId: 2100000
+    sourceMaterialName: Faixa Amarela
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: bc41cc71786303b4ebe3b7b52e6cd2e0, type: 2}
+    categoryId: Streets
+    semanticRole: 45
+    shaderFamily: 1
+    action: 0
+    confidence: 0.92
+    classificationReason: Traffic markings and road signs use clean Illustrate Simple
+      without outline clutter.
+    targetMaterial: {fileID: 2100000, guid: 99b89ef0bd2ed0748ab8443c0977c038, type: 2}
+    targetMaterialGuid: 99b89ef0bd2ed0748ab8443c0977c038
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_3c781e3b27a36f14a9e8c5249ea393f2_2100000_0d0cccde
+    sourceMaterialGuid: 3c781e3b27a36f14a9e8c5249ea393f2
+    sourceLocalFileId: 2100000
+    sourceMaterialName: faixa branca
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: 3c781e3b27a36f14a9e8c5249ea393f2, type: 2}
+    categoryId: Streets
+    semanticRole: 45
+    shaderFamily: 1
+    action: 0
+    confidence: 0.92
+    classificationReason: Traffic markings and road signs use clean Illustrate Simple
+      without outline clutter.
+    targetMaterial: {fileID: 2100000, guid: 0e7e13eed3ad6b441bbd864f4927c1df, type: 2}
+    targetMaterialGuid: 0e7e13eed3ad6b441bbd864f4927c1df
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: dispatch_inspired_b587044e97dbec04cb381b939a2ffa22_2100000_9722f436
+    sourceMaterialGuid: b587044e97dbec04cb381b939a2ffa22
+    sourceLocalFileId: 2100000
+    sourceMaterialName: faixa de pedestre
+    sourceShaderName: Distant Lands/Illustrate/Opaque
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: 2100000, guid: b587044e97dbec04cb381b939a2ffa22, type: 2}
+    categoryId: Streets
+    semanticRole: 45
+    shaderFamily: 1
+    action: 0
+    confidence: 0.92
+    classificationReason: Traffic markings and road signs use clean Illustrate Simple
+      without outline clutter.
+    targetMaterial: {fileID: 2100000, guid: 65d7af66f6605964d8580fde1b1ceb57, type: 2}
+    targetMaterialGuid: 65d7af66f6605964d8580fde1b1ceb57
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  contextSlotBindings: []

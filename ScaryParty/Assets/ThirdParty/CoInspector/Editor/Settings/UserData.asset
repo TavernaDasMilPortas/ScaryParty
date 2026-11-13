@@ -181,16 +181,14 @@ MonoBehaviour:
   - tracker:
       mostClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        - 
         count: 1
-        gameObjects:
-        - {fileID: 0}
+        gameObjects: []
       recentlyClicked:
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+        - 
         count: 1
-        gameObjects:
-        - {fileID: 0}
+        gameObjects: []
       - paths: []
         count: 1
         gameObjects: []
@@ -222,7 +220,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 11:59 PM (November 11, 2026)
+    lastSaveTimePrint: 11:46 PM (November 12, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -236,7 +234,7 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
@@ -261,7 +259,7 @@ MonoBehaviour:
       multiEditMode: 0
       locked: 0
       hasPreview: 0
-      previewHeight: 150
+      previewHeight: 13
       debug: 0
       filtering: 0
       prefab: 0
@@ -342,37 +340,57 @@ MonoBehaviour:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
         prefab: 0
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"GroundPlane[0]"}'
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]/Directional
+          Light[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]/Reflection
+          Probe[1]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]/Reflection
+          Probe[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]/Reflection
+          Probe (1)[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]/Light
+          Probe Group (1)[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"Lighting[0]"}'
         prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - f9d163b1b949dc740a3e48fe85fe7ce1
+      - bca06e45c99909c4babf383b55cdc4ba
     - assetGUIDs:
       - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
+      - 1e0f622e4c063a943ba959d5c91faabf
+    - assetGUIDs:
+      - 343573c136838ca42adc75aff7a9c5fd
+    - assetGUIDs:
+      - f025078871d2e504da82f7ef302a3e75
+    - assetGUIDs:
+      - 4ea5e49be64b36548adc67d18bc3d2a7
+    - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
     - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
-    - assetGUIDs:
-      - b0067bd253bce9c44b4a327a114d4cfa
-    - assetGUIDs:
-      - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - aea9048861f334040899df7719892c80
-    - assetGUIDs:
-      - 054a2469cdd147bbbd240ad3d27af854
-    - assetGUIDs:
-      - 6f00d9b5be2f47818c86b953a27da0d4
-    - assetGUIDs:
-      - 5d50dbc038eb4994a8e567f09ba47a7a
-    - assetGUIDs:
-      - 7743f135c45f481c911d313178a41eca
-    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -382,7 +400,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 11:56 PM (November 11, 2026)
+    lastSaveTimePrint: 11:45 PM (November 12, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -396,7 +414,7 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
@@ -463,30 +481,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - f9d163b1b949dc740a3e48fe85fe7ce1
+      - bca06e45c99909c4babf383b55cdc4ba
     - assetGUIDs:
       - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
+      - 1e0f622e4c063a943ba959d5c91faabf
+    - assetGUIDs:
+      - 343573c136838ca42adc75aff7a9c5fd
+    - assetGUIDs:
+      - f025078871d2e504da82f7ef302a3e75
+    - assetGUIDs:
+      - 4ea5e49be64b36548adc67d18bc3d2a7
+    - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
     - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
-    - assetGUIDs:
-      - b0067bd253bce9c44b4a327a114d4cfa
-    - assetGUIDs:
-      - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - aea9048861f334040899df7719892c80
-    - assetGUIDs:
-      - 054a2469cdd147bbbd240ad3d27af854
-    - assetGUIDs:
-      - 6f00d9b5be2f47818c86b953a27da0d4
-    - assetGUIDs:
-      - 5d50dbc038eb4994a8e567f09ba47a7a
-    - assetGUIDs:
-      - 7743f135c45f481c911d313178a41eca
-    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -496,7 +514,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 11:56 PM (November 11, 2026)
+    lastSaveTimePrint: 10:56 PM (November 12, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -510,7 +528,7 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
@@ -577,30 +595,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - f9d163b1b949dc740a3e48fe85fe7ce1
+      - c06a3bc951e685f43806fb4592c4bc4c
     - assetGUIDs:
       - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
+      - 1e0f622e4c063a943ba959d5c91faabf
+    - assetGUIDs:
+      - 343573c136838ca42adc75aff7a9c5fd
+    - assetGUIDs:
+      - f025078871d2e504da82f7ef302a3e75
+    - assetGUIDs:
+      - 4ea5e49be64b36548adc67d18bc3d2a7
+    - assetGUIDs:
       - bca06e45c99909c4babf383b55cdc4ba
     - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
-    - assetGUIDs:
-      - b0067bd253bce9c44b4a327a114d4cfa
-    - assetGUIDs:
-      - fc7266d1e4dbc5a46aa1445238583bbe
-    - assetGUIDs:
-      - aea9048861f334040899df7719892c80
-    - assetGUIDs:
-      - 054a2469cdd147bbbd240ad3d27af854
-    - assetGUIDs:
-      - 6f00d9b5be2f47818c86b953a27da0d4
-    - assetGUIDs:
-      - 5d50dbc038eb4994a8e567f09ba47a7a
-    - assetGUIDs:
-      - 7743f135c45f481c911d313178a41eca
-    targetObject: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
+    targetObject: {fileID: 102900000, guid: c06a3bc951e685f43806fb4592c4bc4c, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset
+    lastSelectedAsset: Assets/Piaaria/Scenes/LobbyScene.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -932,13 +950,61 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked: []
-      recentlyClicked: []
+      mostClicked:
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"--- CITY ---[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"__City__[0]/Streets[0]/CityRoadNetwork[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
+          Light[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      recentlyClicked:
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
+          Light[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"__City__[0]/Streets[0]/CityRoadNetwork[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"--- CITY ---[0]"}'
+        count: 1
+        gameObjects:
+        - {fileID: 0}
+      - paths: []
+        count: 1
+        gameObjects: []
+      - paths: []
+        count: 1
+        gameObjects: []
       mostClickedContents: []
       recentlyClickedContents: []
     sceneGUID: bca06e45c99909c4babf383b55cdc4ba
     sceneName: GameScene_CelShaded
-    lastSaveTimePrint: 09:16 AM (November 11, 2026)
+    lastSaveTimePrint: 11:49 PM (November 12, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -952,18 +1018,19 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 0
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: 
+    - path: '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
+        Light[0]"}'
       paths: []
       tabWidth: 0
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
+      name: Directional Light
+      icon: {fileID: -2268488020772222307, guid: 0000000000000000d000000000000000, type: 0}
+      shortName: Directional Light
       filterString: 
-      newTab: 1
+      newTab: 0
       scrollPosition: 0
       isSelected: 0
       allCollapsed: 0
@@ -1012,16 +1079,259 @@ MonoBehaviour:
       savePlayModeTransform: 0
       index: 0
       historyPosition: 0
-      componentMaps: []
-      historyPaths: []
+      componentMaps:
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: transform
+        niceComponentName: transform
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: light
+        niceComponentName: light
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: universaladditionallightdata
+        niceComponentName: universal additional light data
+      historyPaths:
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
+          Light[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"__City__[0]/Streets[0]/CityRoadNetwork[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"--- CITY ---[0]"}'
+        prefab: 0
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
       - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
+      - 1e0f622e4c063a943ba959d5c91faabf
+    - assetGUIDs:
+      - 343573c136838ca42adc75aff7a9c5fd
+    - assetGUIDs:
+      - f025078871d2e504da82f7ef302a3e75
+    - assetGUIDs:
+      - 4ea5e49be64b36548adc67d18bc3d2a7
+    - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - 58419e8b75d34b8eba18fae7e904ad82
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
+    targetObjects: []
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
+    lastClickedTab: -1
+    previousTab: 0
+  - tracker:
+      mostClicked:
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        count: 1
+        gameObjects: []
+      recentlyClicked:
+      - paths:
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      - paths:
+        - 
+        count: 1
+        gameObjects: []
+      mostClickedContents: []
+      recentlyClickedContents: []
+    sceneGUID: 7cf0923fb366e794caa058560ce9464a
+    sceneName: GlobalCelShading_Showcase
+    lastSaveTimePrint: 06:54 PM (November 12, 2026)
+    gracePeriod: 3
+    activeIndex: 0
+    checkingToLoad: 0
+    assetsCollapsed: 0
+    lockedAsset: 0
+    maximizedAssetView: 0
+    showImportSettings: 0
+    suggestedHeight: 0
+    userAssetViewSize: -1
+    previewHeight: 0
+    scrollPosition: {x: 0, y: 0}
+    toolbarScrollPosition: {x: 0, y: 0}
+    rawUserHeight: 0
+    lastValidTabWidth: 0
+    alreadyCalculatedHeight: 0
+    lastKnownHeight: 0
+    tabs:
+    - path: 
+      paths:
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Directional Light[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Coating_Root[0]/Piece_5_Total_1[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_2[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_4[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_7[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_6[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Dough_Root[0]/BaseDough[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_9_Sliced_3[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Coating_Root[0]/Piece_3_Total_0[0]"}'
+      - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_9_Sliced_5[0]"}'
+      tabWidth: 0
+      name: (10) Objects
+      icon: {fileID: -2268488020772222307, guid: 0000000000000000d000000000000000, type: 0}
+      shortName: (10) Objects
+      filterString: 
+      newTab: 0
+      scrollPosition: 0
+      isSelected: 0
+      allCollapsed: 0
+      runtimeFoldouts: 
+      runtimeMultiComponents: []
+      tabTextContent:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+        m_TextWithWhitespace: 
+      multiEditMode: 1
+      locked: 0
+      hasPreview: 0
+      previewHeight: 150
+      debug: 0
+      filtering: 0
+      prefab: 0
+      multiFoldout: 1
+      target: {fileID: 0}
+      targets:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      linkedPrefabs: []
+      trackMultiTarget: {fileID: 0}
+      serializedTransform:
+        owner: {fileID: 0}
+        localPosition: {x: 0, y: 0, z: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localScale: {x: 0, y: 0, z: 0}
+        originalPosition: {x: 0, y: 0, z: 0}
+        originalRotation: {x: 0, y: 0, z: 0, w: 0}
+        originalLocalScale: {x: 0, y: 0, z: 0}
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 0, y: 0}
+        anchoredPosition: {x: 0, y: 0}
+        sizeDelta: {x: 0, y: 0}
+        pivot: {x: 0, y: 0}
+        originalAnchorMin: {x: 0, y: 0}
+        originalAnchorMax: {x: 0, y: 0}
+        originalAnchoredPosition: {x: 0, y: 0}
+        originalSizeDelta: {x: 0, y: 0}
+        originalPivot: {x: 0, y: 0}
+        isRectTransform: 0
+        appliedTransform: 0
+        undidTransform: 0
+        autoSave: 0
+      serializedTransforms: []
+      savePlayModeTransform: 0
+      index: 0
+      historyPosition: 0
+      componentMaps: []
+      historyPaths:
+      - paths:
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Directional Light[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Coating_Root[0]/Piece_5_Total_1[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_2[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_4[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_7[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_7_Sliced_6[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Dough_Root[0]/BaseDough[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_9_Sliced_3[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Coating_Root[0]/Piece_3_Total_0[0]"}'
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]/ModularPizzaVisual[0]/Toppings_Root[0]/Piece_9_Sliced_5[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Directional Light[0]"}'
+        prefab: 0
+      - paths:
+        - '{"sceneGUID":"7cf0923fb366e794caa058560ce9464a","path":"Column_Original[0]/PizzaSample[0]"}'
+        prefab: 0
+      owner: {fileID: 0}
+    closedTabs: []
+    playModeTransforms: []
+    historyAssets:
+    - assetGUIDs:
       - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
       - 58419e8b75d34b8eba18fae7e904ad82
     - assetGUIDs:
@@ -1034,17 +1344,11 @@ MonoBehaviour:
       - 054a2469cdd147bbbd240ad3d27af854
     - assetGUIDs:
       - 6f00d9b5be2f47818c86b953a27da0d4
-    - assetGUIDs:
-      - 5d50dbc038eb4994a8e567f09ba47a7a
-    - assetGUIDs:
-      - 7743f135c45f481c911d313178a41eca
-    - assetGUIDs:
-      - 1f3b804c253ee974fa3b45efa0fd3ed0
-    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000010000000100000001000000000000000100000000000000000000000100000000000000010000000100000000000000010000000100000000000000010000000100000000000000010000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000010000000100000000000000010000000000000001000000010000000100000001000000010000000000000001000000010000000100000001000000
+  tipsShown: 01000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010000000000000001000000000000000000000000000000000000000100000000000000010000000000000000000000000000000100000000000000000000000100000000000000
   playModeStartScene: {}
   enteringPlayMode: 0

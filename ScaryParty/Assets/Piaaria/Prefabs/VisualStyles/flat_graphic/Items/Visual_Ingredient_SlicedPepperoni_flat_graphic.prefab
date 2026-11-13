@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4569134622533975828
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1000000071, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_Name
+      value: Visual_Ingredient_SlicedPepperoni_flat_graphic
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000072, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1000000080, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 9a0ed85db6a2bbe40bbab91db0270ca7, type: 2}
+    - target: {fileID: 935429413909965234, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: beee6c2d64a79704186afa75f7904590, type: 2}
+    - target: {fileID: 1686083160080171495, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: beee6c2d64a79704186afa75f7904590, type: 2}
+    - target: {fileID: 1806273635217737648, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: beee6c2d64a79704186afa75f7904590, type: 2}
+    - target: {fileID: 5067159355802229687, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: beee6c2d64a79704186afa75f7904590, type: 2}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1000000071, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 329345350603698969}
+  m_SourcePrefab: {fileID: 100100000, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+--- !u!1 &4569134622625609043 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1000000071, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+  m_PrefabInstance: {fileID: 4569134622533975828}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &329345350603698969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4569134622625609043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20d6bcfa0a293949961900c87c09c11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualStyleBinder
+  contextKey: Ingredient_SlicedPepperoni
+  defaultRole: 104
+  defaultCategoryId: Food
+  includeInactiveChildren: 1
+  applyOnAwake: 1
+  listenForStyleChanges: 1

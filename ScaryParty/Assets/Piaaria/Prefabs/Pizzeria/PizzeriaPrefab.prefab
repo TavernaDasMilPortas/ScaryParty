@@ -14705,6 +14705,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6003720415429448067}
+  sauceObjects: []
 --- !u!65 &6418703253578440912
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14839,6 +14840,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4134682602156565185}
+  sauceObjects: []
 --- !u!65 &4527219661317800668
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15520,6 +15522,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1956891609559374366}
+  sauceObjects: []
 --- !u!65 &2509065016171630116
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -18266,6 +18269,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 7035114354810584313}
+  sauceObjects: []
 --- !u!65 &2158259934793215539
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19668,6 +19672,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8610961646076596382}
+  sauceObjects: []
 --- !u!65 &2713371289012394634
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -23792,6 +23797,7 @@ MonoBehaviour:
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 2168879368295403094}
+  sauceObjects: []
 --- !u!65 &4411790206493640840
 BoxCollider:
   m_ObjectHideFlags: 0

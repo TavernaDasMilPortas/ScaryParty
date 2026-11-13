@@ -48,7 +48,7 @@ Transform:
   - {fileID: 8338988566280778637}
   - {fileID: 7993187827951182671}
   - {fileID: 548000194950942801}
-  - {fileID: 7807157095460143369}
+  - {fileID: 8184459214805274993}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &4416926081852918491
@@ -150,8 +150,8 @@ MonoBehaviour:
   BottomClamp: -30
   CameraAngleOverride: 0
   LockCameraPosition: 0
-  _explicitAnimator: {fileID: 4450445403175479788}
-  _visualController: {fileID: 8912920343462107515}
+  _explicitAnimator: {fileID: 2309989038070561172}
+  _visualController: {fileID: 7384952986492979459}
 --- !u!114 &5885216827943657505
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -350,7 +350,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkAnimatorExpanded: 0
   AuthorityMode: 0
-  m_Animator: {fileID: 4450445403175479788}
+  m_Animator: {fileID: 2309989038070561172}
   TransitionStateInfoList: []
   AnimatorParameterEntries:
     ParameterEntries:
@@ -550,8 +550,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponController
   pistolPrefab: {fileID: 3311485812756139665, guid: 2187096be82611f469ed612c9f9e7d31, type: 3}
   shotgunPrefab: {fileID: 94254705452596145, guid: 1d4179f13d2014444873b391da997482, type: 3}
-  rightHandAttachment: {fileID: 4802056369945735840}
-  animator: {fileID: 4450445403175479788}
+  rightHandAttachment: {fileID: 6875244671685288664}
+  animator: {fileID: 2309989038070561172}
   tpc: {fileID: 0}
 --- !u!114 &7761476708585225109
 MonoBehaviour:
@@ -858,7 +858,7 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!1001 &8078402311375713994
+--- !u!1001 &7913337263714002610
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -915,25 +915,20 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
---- !u!95 &4450445403175479788 stripped
+--- !u!95 &2309989038070561172 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 5611318671876366118, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
-  m_PrefabInstance: {fileID: 8078402311375713994}
+  m_PrefabInstance: {fileID: 7913337263714002610}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &4802056369945735840 stripped
+--- !u!4 &6875244671685288664 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3654693958115263594, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
-  m_PrefabInstance: {fileID: 8078402311375713994}
+  m_PrefabInstance: {fileID: 7913337263714002610}
   m_PrefabAsset: {fileID: 0}
---- !u!4 &7807157095460143369 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
-  m_PrefabInstance: {fileID: 8078402311375713994}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &8912920343462107515 stripped
+--- !u!114 &7384952986492979459 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 841414251428392881, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
-  m_PrefabInstance: {fileID: 8078402311375713994}
+  m_PrefabInstance: {fileID: 7913337263714002610}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
@@ -941,6 +936,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56dae77005a1cc44eb51f57fe9852d67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Player.CharacterVisualController
+--- !u!4 &8184459214805274993 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2036990539784320963, guid: 528f737e27619ac4eb009ca5679ff67f, type: 3}
+  m_PrefabInstance: {fileID: 7913337263714002610}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8237336938384206903
 PrefabInstance:
   m_ObjectHideFlags: 0
