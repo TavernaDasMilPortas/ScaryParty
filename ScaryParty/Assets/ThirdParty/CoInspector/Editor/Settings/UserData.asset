@@ -71,7 +71,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: 99c9720ab356a0642a771bea13969a05
     sceneName: SampleScene
-    lastSaveTimePrint: 09:31 AM (October 27, 2026)
+    lastSaveTimePrint: 04:30 PM (November 15, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -85,13 +85,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 64
+    lastValidTabWidth: 93
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 61
+      tabWidth: 0
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -103,10 +103,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: 
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: 
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -152,30 +152,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - 64dce48905ffd9b4293e595fa6941544
+      - bca06e45c99909c4babf383b55cdc4ba
     - assetGUIDs:
-      - c708a3b79cd542b42bbfedb17e213bc1
+      - e9017d5f96b9f09489b4b37e1d6eb914
     - assetGUIDs:
-      - bda0d9dfe361ae94198c9de79e561cd9
+      - c06a3bc951e685f43806fb4592c4bc4c
     - assetGUIDs:
-      - c13e4e6357835224b980d7fe639d0b83
+      - 1e0f622e4c063a943ba959d5c91faabf
     - assetGUIDs:
-      - f41c1a5c11441dc458d5fb3728a59962
+      - 343573c136838ca42adc75aff7a9c5fd
     - assetGUIDs:
-      - f6746612ddd468247bf52f5ee76948a3
+      - f025078871d2e504da82f7ef302a3e75
     - assetGUIDs:
-      - 7f38f2b5aaa2ee647b851896d774669f
+      - 4ea5e49be64b36548adc67d18bc3d2a7
     - assetGUIDs:
-      - f07f1056d8ff47042b26f2cf585ffc80
+      - 7cf0923fb366e794caa058560ce9464a
     - assetGUIDs:
-      - 7125a3c8cb32ba54a92762e1b3f686a4
+      - 154069c0ebd5daf44b0d95a3cf265cd0
     - assetGUIDs:
-      - fd443a703d51ae0408ddfe7d9a12507f
+      - f9d163b1b949dc740a3e48fe85fe7ce1
     - assetGUIDs:
-      - ca14d084d9058bf4bb740f0939df13ff
-    targetObject: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
+      - 58419e8b75d34b8eba18fae7e904ad82
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -220,7 +220,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 09:19 PM (November 14, 2026)
+    lastSaveTimePrint: 04:12 PM (November 15, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -400,7 +400,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 09:13 PM (November 14, 2026)
+    lastSaveTimePrint: 04:30 PM (November 15, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -514,7 +514,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 09:18 PM (November 14, 2026)
+    lastSaveTimePrint: 04:30 PM (November 15, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -950,59 +950,13 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked:
-      - paths:
-        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
-          Light[0]"}'
-        count: 4
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"GameFeelCoordinator[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      recentlyClicked:
-      - paths:
-        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"GameFeelCoordinator[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"Lighting[0]/Directional
-          Light[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
-      - paths: []
-        count: 1
-        gameObjects: []
+      mostClicked: []
+      recentlyClicked: []
       mostClickedContents: []
       recentlyClickedContents: []
     sceneGUID: bca06e45c99909c4babf383b55cdc4ba
     sceneName: GameScene_CelShaded
-    lastSaveTimePrint: 12:51 AM (November 15, 2026)
+    lastSaveTimePrint: 06:07 PM (November 15, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -1020,14 +974,14 @@ MonoBehaviour:
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"GameFeelCoordinator[0]"}'
+    - path: 
       paths: []
       tabWidth: 0
-      name: GameFeelCoordinator
-      icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: GameFeelCoordinator
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
       filterString: 
-      newTab: 0
+      newTab: 1
       scrollPosition: 0
       isSelected: 0
       allCollapsed: 0
@@ -1077,10 +1031,7 @@ MonoBehaviour:
       index: 0
       historyPosition: 0
       componentMaps: []
-      historyPaths:
-      - paths:
-        - '{"sceneGUID":"bca06e45c99909c4babf383b55cdc4ba","path":"GameFeelCoordinator[0]"}'
-        prefab: 0
+      historyPaths: []
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
@@ -1306,6 +1257,120 @@ MonoBehaviour:
     lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000000000000100000000000000010000000000000000000000000000000000000001000000000000000000000001000000010000000100000000000000000000000000000001000000000000000100000000000000000000000100000000000000000000000100000001000000010000000100000001000000000000000000000000000000010000000100000001000000010000000000000001000000000000000100000000000000000000000100000001000000
+  - tracker:
+      mostClicked: []
+      recentlyClicked: []
+      mostClickedContents: []
+      recentlyClickedContents: []
+    sceneGUID: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d
+    sceneName: PiariaUIDemoScene
+    lastSaveTimePrint: 04:30 PM (November 15, 2026)
+    gracePeriod: 3
+    activeIndex: 0
+    checkingToLoad: 0
+    assetsCollapsed: 0
+    lockedAsset: 0
+    maximizedAssetView: 0
+    showImportSettings: 0
+    suggestedHeight: 0
+    userAssetViewSize: -1
+    previewHeight: 0
+    scrollPosition: {x: 0, y: 0}
+    toolbarScrollPosition: {x: 0, y: 0}
+    rawUserHeight: 0
+    lastValidTabWidth: 93
+    alreadyCalculatedHeight: 0
+    lastKnownHeight: 0
+    tabs:
+    - path: 
+      paths: []
+      tabWidth: 0
+      name: 
+      icon: {fileID: 0}
+      shortName: New Tab
+      filterString: 
+      newTab: 1
+      scrollPosition: 0
+      isSelected: 0
+      allCollapsed: 0
+      runtimeFoldouts: 
+      runtimeMultiComponents: []
+      tabTextContent:
+        m_Text: 
+        m_Image: {fileID: 0}
+        m_Tooltip: 
+        m_TextWithWhitespace: 
+      multiEditMode: 0
+      locked: 0
+      hasPreview: 0
+      previewHeight: 150
+      debug: 0
+      filtering: 0
+      prefab: 0
+      multiFoldout: 1
+      target: {fileID: 0}
+      targets: []
+      linkedPrefabs: []
+      trackMultiTarget: {fileID: 0}
+      serializedTransform:
+        owner: {fileID: 0}
+        localPosition: {x: 0, y: 0, z: 0}
+        localRotation: {x: 0, y: 0, z: 0, w: 0}
+        localScale: {x: 0, y: 0, z: 0}
+        originalPosition: {x: 0, y: 0, z: 0}
+        originalRotation: {x: 0, y: 0, z: 0, w: 0}
+        originalLocalScale: {x: 0, y: 0, z: 0}
+        anchorMin: {x: 0, y: 0}
+        anchorMax: {x: 0, y: 0}
+        anchoredPosition: {x: 0, y: 0}
+        sizeDelta: {x: 0, y: 0}
+        pivot: {x: 0, y: 0}
+        originalAnchorMin: {x: 0, y: 0}
+        originalAnchorMax: {x: 0, y: 0}
+        originalAnchoredPosition: {x: 0, y: 0}
+        originalSizeDelta: {x: 0, y: 0}
+        originalPivot: {x: 0, y: 0}
+        isRectTransform: 0
+        appliedTransform: 0
+        undidTransform: 0
+        autoSave: 0
+      serializedTransforms: []
+      savePlayModeTransform: 0
+      index: 0
+      historyPosition: 0
+      componentMaps: []
+      historyPaths: []
+      owner: {fileID: 0}
+    closedTabs: []
+    playModeTransforms: []
+    historyAssets:
+    - assetGUIDs:
+      - bca06e45c99909c4babf383b55cdc4ba
+    - assetGUIDs:
+      - e9017d5f96b9f09489b4b37e1d6eb914
+    - assetGUIDs:
+      - c06a3bc951e685f43806fb4592c4bc4c
+    - assetGUIDs:
+      - 1e0f622e4c063a943ba959d5c91faabf
+    - assetGUIDs:
+      - 343573c136838ca42adc75aff7a9c5fd
+    - assetGUIDs:
+      - f025078871d2e504da82f7ef302a3e75
+    - assetGUIDs:
+      - 4ea5e49be64b36548adc67d18bc3d2a7
+    - assetGUIDs:
+      - 7cf0923fb366e794caa058560ce9464a
+    - assetGUIDs:
+      - 154069c0ebd5daf44b0d95a3cf265cd0
+    - assetGUIDs:
+      - f9d163b1b949dc740a3e48fe85fe7ce1
+    - assetGUIDs:
+      - 58419e8b75d34b8eba18fae7e904ad82
+    targetObject: {fileID: 102900000, guid: bca06e45c99909c4babf383b55cdc4ba, type: 3}
+    targetObjects: []
+    lastSelectedAsset: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
+    lastClickedTab: -1
+    previousTab: 0
+  tipsShown: 01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000010000000000000000000000010000000000000000000000000000000000000000000000000000000100000001000000000000000100000001000000000000000000000000000000010000000000000000000000010000000100000001000000000000000000000000000000000000000000000000000000
   playModeStartScene: {}
-  enteringPlayMode: 1
+  enteringPlayMode: 0

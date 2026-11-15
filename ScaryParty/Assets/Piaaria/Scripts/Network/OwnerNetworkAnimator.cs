@@ -1,3 +1,7 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 using Unity.Netcode.Components;
 using UnityEngine;
 
@@ -10,9 +14,23 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class OwnerNetworkAnimator : NetworkAnimator
 {
+    private static readonly HashSet<string> s_ExcludedParameters = new HashSet<string>(StringComparer.Ordinal)
+    {
+        "Speed",
+        "MotionSpeed",
+        "Grounded",
+        "Jump",
+        "FreeFall",
+        "IsPreparing",
+        "IsSitting",
+        "IsMoving",
+        "IsSprinting"
+    };
+
     protected override void Awake()
     {
         EnsureAnimatorBound();
+        ConfigureParameterSyncFiltering();
         base.Awake();
     }
 
@@ -22,24 +40,56 @@ public class OwnerNetworkAnimator : NetworkAnimator
         base.OnNetworkSpawn();
     }
 
+    private void ConfigureParameterSyncFiltering()
+    {
+        var entriesField = typeof(NetworkAnimator).GetField("AnimatorParameterEntries", BindingFlags.Instance | BindingFlags.NonPublic);
+        if (entriesField == null) return;
+
+        var container = entriesField.GetValue(this);
+        if (container == null) return;
+
+        var listField = container.GetType().GetField("ParameterEntries", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (listField?.GetValue(container) is not IList entries) return;
+
+        for (int i = 0; i < entries.Count; i++)
+        {
+            var entry = entries[i];
+            if (entry == null) continue;
+
+            var entryType = entry.GetType();
+            var nameField = entryType.GetField("name", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            var syncField = entryType.GetField("Synchronize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (nameField == null || syncField == null) continue;
+
+            if (nameField.GetValue(entry) is string paramName && s_ExcludedParameters.Contains(paramName))
+            {
+                syncField.SetValue(entry, false);
+            }
+        }
+    }
+
     public void EnsureAnimatorBound()
     {
-        if (Animator != null && Animator.gameObject.activeInHierarchy && Animator.runtimeAnimatorController != null)
-            return;
-
         var visualCtrl = GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
         if (visualCtrl != null)
         {
             visualCtrl.ResolveReferences();
-            if (visualCtrl.Animator != null)
+            if (visualCtrl.Animator != null && visualCtrl.Animator.gameObject.activeInHierarchy)
             {
                 Animator = visualCtrl.Animator;
                 if (Animator.runtimeAnimatorController == null)
                 {
                     Animator.runtimeAnimatorController = ResolveFallbackController(visualCtrl);
                 }
+                Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 return;
             }
+        }
+
+        if (Animator != null && Animator.gameObject.activeInHierarchy && Animator.runtimeAnimatorController != null)
+        {
+            Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            return;
         }
 
         var childAnim = GetComponentInChildren<Animator>(true);
@@ -50,6 +100,7 @@ public class OwnerNetworkAnimator : NetworkAnimator
             {
                 Animator.runtimeAnimatorController = ResolveFallbackController(null);
             }
+            Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         }
     }
 

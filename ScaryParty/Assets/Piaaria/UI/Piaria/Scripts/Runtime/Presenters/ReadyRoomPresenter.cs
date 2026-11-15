@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using ScaryParty.Pizzeria.Presentation;
 using ScaryParty.UI.Piaria.Core;
 
 namespace ScaryParty.UI.Piaria.Presenters
@@ -567,19 +568,64 @@ namespace ScaryParty.UI.Piaria.Presenters
             RefreshPlayers();
         }
 
-                private void OnStartGameClicked()
+        private void OnStartGameClicked()
         {
+            var nm = NetworkManager.Singleton;
+            bool isNetworkingActive = nm != null && (nm.IsListening || nm.IsClient || nm.IsServer);
+
+            // A01: Cliente conectado NUNCA inicia carga local nem fallback de SceneManager.
+            if (isNetworkingActive && !nm.IsServer)
+            {
+                Debug.LogWarning("[ReadyRoomPresenter] Cliente conectado não pode iniciar a partida manualmente.");
+                if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
+                ModalPresenter.Instance?.ShowAlert("Aguarde o Líder", "Apenas o líder da sala (Host) pode iniciar o turno.");
+                return;
+            }
+
+            var myState = GetLocalPlayerState();
+            if (isNetworkingActive)
+            {
+                // Valida prontidão real no servidor antes de iniciar transição em rede
+                var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+                bool anyNotReady = false;
+                for (int i = 0; i < allPlayers.Length; i++)
+                {
+                    var ps = allPlayers[i];
+                    if (ps == null) continue;
+                    bool isMe = (myState != null && ps == myState) || ps.IsOwner;
+                    bool ready = isMe ? (_optimisticReadyState ?? ps.IsReady.Value) : ps.IsReady.Value;
+                    if (!ready)
+                    {
+                        anyNotReady = true;
+                        break;
+                    }
+                }
+
+                if (anyNotReady || allPlayers.Length == 0)
+                {
+                    ModalPresenter.Instance?.ShowAlert("Equipe Não Pronta", "Todos os jogadores conectados precisam confirmar que estão prontos.");
+                    if (_btnStartGame != null) _btnStartGame.SetEnabled(true);
+                    return;
+                }
+            }
+            else if (!_offlineReady && (myState == null || !myState.IsReady.Value))
+            {
+                ModalPresenter.Instance?.ShowAlert("Não Pronto", "Marque 'ESTOU PRONTO' antes de iniciar o turno offline.");
+                if (_btnStartGame != null) _btnStartGame.SetEnabled(true);
+                return;
+            }
+
+            if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
+
             if (CharacterPreviewRig.Instance != null)
             {
                 Destroy(CharacterPreviewRig.Instance.gameObject);
             }
 
-            if (_btnStartGame != null) _btnStartGame.SetEnabled(false);
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
 
             UIFeedbackService.Instance?.PlaySuccess();
 
-            var myState = GetLocalPlayerState();
             if (myState != null && !myState.IsReady.Value)
             {
                 myState.SetReady(true);
@@ -591,13 +637,32 @@ namespace ScaryParty.UI.Piaria.Presenters
                 targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
             }
 
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && NetworkManager.Singleton.SceneManager != null)
+            var coordinator = PizzeriaSceneLoadingCoordinator.EnsureInstance();
+
+            if (isNetworkingActive)
             {
-                NetworkManager.Singleton.SceneManager.LoadScene(targetScene, LoadSceneMode.Single);
+                if (nm.SceneManager == null)
+                {
+                    Debug.LogError("[ReadyRoomPresenter] NetworkSceneManager indisponível no servidor.");
+                    if (_btnStartGame != null) _btnStartGame.SetEnabled(true);
+                    ModalPresenter.Instance?.ShowAlert("Erro de Rede", "Gerenciador de cena de rede indisponível.");
+                    return;
+                }
+
+                var night1 = ScaryParty.Pizzeria.Domain.Services.NightCycleService.GetDefaultParameters(1);
+                var status = coordinator.BeginNetworkedTransition(targetScene, night1.NightNumber, night1.RevenueGoal);
+                if (status != SceneEventProgressStatus.Started)
+                {
+                    Debug.LogError($"[ReadyRoomPresenter] LoadScene em rede falhou com status: {status}");
+                    if (_btnStartGame != null) _btnStartGame.SetEnabled(true);
+                    ModalPresenter.Instance?.ShowAlert("Erro ao Iniciar", $"Não foi possível carregar a cena em rede ({status}).");
+                }
             }
             else
             {
-                SceneManager.LoadScene(targetScene);
+                var night1 = ScaryParty.Pizzeria.Domain.Services.NightCycleService.GetDefaultParameters(1);
+                coordinator.SetNightContext(night1.NightNumber, night1.RevenueGoal);
+                coordinator.TransitionToScene(targetScene);
             }
         }
 
@@ -683,6 +748,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void Open(Action onComplete = null)
         {
+            PizzeriaSceneLoadingCoordinator.EnsureInstance();
             EnsureInitialized();
             if (RootElement == null)
             {

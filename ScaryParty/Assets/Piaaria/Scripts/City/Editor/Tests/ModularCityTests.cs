@@ -65,6 +65,15 @@ namespace ScaryParty.City.Editor.Tests
             Assert.AreEqual(2, defI.occupiedSlots, "Garagem I DEVE ocupar exatamente 2 slots de 2m (4m).");
             Assert.IsTrue(defI.isGarage);
 
+            // J: 4 x 3 x 0.2, 2 slots (A03)
+            var defJ = _catalog.GetDefinition(CityModuleId.J);
+            Assert.AreEqual(4.0f, defJ.width, 0.01f);
+            Assert.AreEqual(3.0f, defJ.height, 0.01f);
+            Assert.AreEqual(0.2f, defJ.depth, 0.01f);
+            Assert.AreEqual(2, defJ.occupiedSlots, "Porta dupla J DEVE ocupar exatamente 2 slots de 2m (4m).");
+            Assert.IsTrue(defJ.isEntrance);
+            Assert.IsTrue(defJ.isDoubleDoor);
+
             // K: 2 x 0.4 x 0.8
             var defK = _catalog.GetDefinition(CityModuleId.K);
             Assert.AreEqual(2.0f, defK.width, 0.01f);

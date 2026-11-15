@@ -413,4 +413,32 @@ namespace ScaryParty.Pizzeria.Domain.Types
         ArchiveTicket = 2,
         AttendCustomer = 3
     }
+
+    public enum NightPhase : byte
+    {
+        Preparing = 0,
+        Active = 1,
+        Closing = 2,
+        Results = 3,
+        PreparingNextNight = 4,
+        Defeat = 5
+    }
+
+    public enum NightDefeatReason : byte
+    {
+        None = 0,
+        RevenueBelowGoal = 1,
+        CriticalOperationalFailure = 2,
+        AllPlayersIncapacitated = 3
+    }
+
+    public enum OrderTaskBoardStage : byte
+    {
+        New = 0,
+        InPrep = 1,
+        Ready = 2,
+        OutForDelivery = 3,
+        Completed = 4,
+        Failed = 5
+    }
 }

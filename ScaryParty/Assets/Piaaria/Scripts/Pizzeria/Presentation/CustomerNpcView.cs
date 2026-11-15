@@ -29,6 +29,8 @@ namespace ScaryParty.Pizzeria.Presentation
         public NavMeshAgent Agent { get; private set; }
 
         private Vector3 _targetPosition;
+        private Vector3 _lastFramePosition;
+        private bool _hasLastFramePosition;
         private Quaternion _targetRotation = Quaternion.identity;
         private float _walkSpeed = 2.4f;
         private bool _hasReachedApproach;
@@ -40,6 +42,42 @@ namespace ScaryParty.Pizzeria.Presentation
         private CustomerPhase _lastFeelPhase;
         private bool _impatienceTriggered;
         private float _nextMicroFidgetTime;
+        private DiningTableStation _chairOccupantTable;
+
+        private void OnDestroy()
+        {
+            ReleaseClaimedChair();
+        }
+
+        private void UpdateChairOccupancyVisual(DiningTableStation table, bool occupied)
+        {
+            if (occupied)
+            {
+                if (_chairOccupantTable != null && _chairOccupantTable != table)
+                {
+                    _chairOccupantTable.SetChairOccupiedVisual(0, false);
+                }
+                _chairOccupantTable = table;
+                if (_chairOccupantTable != null)
+                {
+                    _chairOccupantTable.SetChairOccupiedVisual(0, true);
+                }
+            }
+            else if (_chairOccupantTable != null)
+            {
+                _chairOccupantTable.SetChairOccupiedVisual(0, false);
+                _chairOccupantTable = null;
+            }
+        }
+
+        private void ReleaseClaimedChair()
+        {
+            if (_chairOccupantTable != null)
+            {
+                _chairOccupantTable.SetChairOccupiedVisual(0, false);
+                _chairOccupantTable = null;
+            }
+        }
 
         public bool HasReachedSeat => _hasReachedSeat;
 
@@ -60,6 +98,7 @@ namespace ScaryParty.Pizzeria.Presentation
             CustomerId = dto.CustomerId;
             CurrentState = dto;
             _walkSpeed = 2.4f * Mathf.Clamp(walkSpeedMultiplier, 0.7f, 1.5f);
+            _hasLastFramePosition = false;
 
             if (visualInstance != null)
             {
@@ -227,6 +266,7 @@ namespace ScaryParty.Pizzeria.Presentation
                         {
                             _isExitingSeat = false;
                             _wasSeated = false;
+                            ReleaseClaimedChair();
                             if (Agent != null && Agent.isOnNavMesh)
                             {
                                 Agent.updatePosition = true;
@@ -288,6 +328,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 if (_hasReachedApproach)
                 {
+                    UpdateChairOccupancyVisual(table, true);
                     if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
                     {
                         Agent.updatePosition = false;
@@ -311,6 +352,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (isSeatedPhase)
             {
+                UpdateChairOccupancyVisual(table, true);
                 Vector3 seatPos = table != null ? table.GetSeatPosition() : _targetPosition;
                 Quaternion seatRot = table != null ? table.GetSeatRotation() : _targetRotation;
 
@@ -358,6 +400,21 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             // Atualização do Animator e estados visuais
+            Vector3 currentFramePos = transform.position;
+            if (_hasLastFramePosition && Time.deltaTime > 0.0001f)
+            {
+                float horizontalDisplacement = Vector2.Distance(
+                    new Vector2(currentFramePos.x, currentFramePos.z),
+                    new Vector2(_lastFramePosition.x, _lastFramePosition.z));
+                float frameSpeed = horizontalDisplacement / Time.deltaTime;
+                if (frameSpeed < 12f)
+                {
+                    currentSpeed = Mathf.Max(currentSpeed, frameSpeed);
+                }
+            }
+            _lastFramePosition = currentFramePos;
+            _hasLastFramePosition = true;
+
             if (VisualController != null)
             {
                 bool seatedNow = isSeatedPhase || (isWalkingToSeat && _hasReachedSeat);

@@ -21,7 +21,10 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _hasSampledInitial;
         private bool _wasEquipped;
         private int _lastItemCount;
+        private int _lastIntegrity = -1;
         private uint _lastRevision;
+        private Renderer[] _bagRenderers;
+        private MaterialPropertyBlock _damageMpb;
         private Vector3 _lastPlayerPos;
         private float _smoothedSpeed;
         private float _swayPhase;
@@ -186,10 +189,44 @@ namespace ScaryParty.Pizzeria.Presentation
                 _lastRevision = bag.Revision;
             }
 
-            UpdateCargoSway(bag.ItemCount);
+            UpdateCargoSway(bag.ItemCount, bag.IsTorn);
+            UpdateBagDamageFeedback(bag, isLocalOwner);
         }
 
-        private void UpdateCargoSway(int itemCount)
+        private void UpdateBagDamageFeedback(NetBackpackDto bag, bool isLocalOwner)
+        {
+            if (bag.MaxIntegrity <= 0) return;
+
+            if (_lastIntegrity >= 0 && bag.Integrity < _lastIntegrity && isLocalOwner)
+            {
+                ContextualTutorialPresenter.NotifyContextualTip(
+                    "bag_damaged",
+                    "Mochila Danificada",
+                    "Dano recebido desgasta a mochila. Se chegar a 0%, ela rasga e derruba 1 caixa! Segure [F] (3s) para reparar.");
+            }
+            _lastIntegrity = bag.Integrity;
+
+            if (_visual == null) return;
+            if (_bagRenderers == null) _bagRenderers = _visual.GetComponentsInChildren<Renderer>(true);
+            if (_damageMpb == null) _damageMpb = new MaterialPropertyBlock();
+
+            float ratio = Mathf.Clamp01((float)bag.Integrity / bag.MaxIntegrity);
+            Color tint = bag.IsTorn
+                ? new Color(0.45f, 0.16f, 0.16f, 1f)
+                : Color.Lerp(new Color(0.85f, 0.38f, 0.25f, 1f), Color.white, ratio);
+
+            for (int i = 0; i < _bagRenderers.Length; i++)
+            {
+                var r = _bagRenderers[i];
+                if (r == null) continue;
+                r.GetPropertyBlock(_damageMpb);
+                _damageMpb.SetColor("_BaseColor", tint);
+                _damageMpb.SetColor("_Color", tint);
+                r.SetPropertyBlock(_damageMpb);
+            }
+        }
+
+        private void UpdateCargoSway(int itemCount, bool isTorn)
         {
             Vector3 currentPos = transform.position;
             Vector3 delta = currentPos - _lastPlayerPos;
@@ -226,7 +263,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _cosmeticPivot.SetContinuousOffset(
                 new Vector3(0f, bobY, 0f),
                 new Vector3(pitch, 0f, roll),
-                new Vector3(1f + squash * 0.5f, 1f - squash, 1f + squash * 0.5f));
+                new Vector3(1f + squash * 0.5f, (isTorn ? 0.85f : 1f) - squash, 1f + squash * 0.5f));
         }
 
         private void OnDisable()

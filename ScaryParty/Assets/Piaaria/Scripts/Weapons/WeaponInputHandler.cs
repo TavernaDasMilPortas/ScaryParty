@@ -16,15 +16,18 @@ public class WeaponInputHandler : MonoBehaviour
 
     private WeaponController weaponController;
     private StarterAssetsInputs starterAssetsInputs;
+    private Unity.Netcode.NetworkObject netObj;
 
     private void Start()
     {
         weaponController = GetComponent<WeaponController>();
         starterAssetsInputs = GetComponent<StarterAssetsInputs>();
+        netObj = GetComponent<Unity.Netcode.NetworkObject>();
     }
 
     private void Update()
     {
+        if (netObj != null && !netObj.IsOwner) return;
         if (starterAssetsInputs == null) return;
 
         // Se os controles de armas estiverem desativados por hora:

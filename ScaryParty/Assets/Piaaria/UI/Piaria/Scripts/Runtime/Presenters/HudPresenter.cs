@@ -2,7 +2,12 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Unity.Netcode;
 using ScaryParty.UI.Piaria.Core;
+using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Presentation;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -52,6 +57,17 @@ namespace ScaryParty.UI.Piaria.Presenters
         private bool _isDraggingMap = false;
         private Vector2 _lastMousePos;
         private bool _isMinimapFullscreen = false;
+
+        // Noite / Combate / Mochila (O5, O8, C1-C4)
+        private VisualElement _nightBannerBox;
+        private Label _nightBannerLabel;
+        private VisualElement _combatStatusBox;
+        private Label _healthStatusLabel;
+        private Label _bagIntegrityLabel;
+        private Label _weaponAmmoLabel;
+        private VisualElement _crosshairContainer;
+        private float _hudMonitorTimer = 0f;
+        private readonly Dictionary<int, float> _lowStockAlertCooldowns = new Dictionary<int, float>();
 
         private void Awake()
         {
@@ -165,6 +181,156 @@ namespace ScaryParty.UI.Piaria.Presenters
             SetBackpackCount(0);
             SetHandState(false, true, "Vazio");
             SetHandState(true, false, "Vazio");
+
+            EnsureExperienceHudWidgets();
+            NightResultsPresenter.EnsureInstance();
+            ContextualTutorialPresenter.EnsureInstance();
+            PauseEscapeMenuPresenter.EnsureInstance();
+        }
+
+        private void EnsureExperienceHudWidgets()
+        {
+            if (_root == null || _nightBannerBox != null) return;
+
+            _nightBannerBox = new VisualElement();
+            _nightBannerBox.name = "NightStatusBanner";
+            _nightBannerBox.pickingMode = PickingMode.Ignore;
+            _nightBannerBox.style.position = Position.Absolute;
+            _nightBannerBox.style.top = 14;
+            _nightBannerBox.style.left = Length.Percent(28);
+            _nightBannerBox.style.width = Length.Percent(44);
+            _nightBannerBox.style.backgroundColor = new Color(0.08f, 0.08f, 0.11f, 0.82f);
+            _nightBannerBox.style.borderTopLeftRadius = 8;
+            _nightBannerBox.style.borderTopRightRadius = 8;
+            _nightBannerBox.style.borderBottomLeftRadius = 8;
+            _nightBannerBox.style.borderBottomRightRadius = 8;
+            _nightBannerBox.style.borderBottomWidth = 2;
+            _nightBannerBox.style.borderBottomColor = new Color(0.95f, 0.72f, 0.25f);
+            _nightBannerBox.style.paddingTop = 6;
+            _nightBannerBox.style.paddingBottom = 6;
+            _nightBannerBox.style.paddingLeft = 14;
+            _nightBannerBox.style.paddingRight = 14;
+
+            _nightBannerLabel = new Label("NOITE 1 — PREPARANDO...");
+            _nightBannerLabel.pickingMode = PickingMode.Ignore;
+            _nightBannerLabel.style.fontSize = 15;
+            _nightBannerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _nightBannerLabel.style.color = new Color(0.98f, 0.94f, 0.84f);
+            _nightBannerLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+            _nightBannerBox.Add(_nightBannerLabel);
+            _root.Add(_nightBannerBox);
+
+            _combatStatusBox = new VisualElement();
+            _combatStatusBox.name = "CombatBagStatusBox";
+            _combatStatusBox.pickingMode = PickingMode.Ignore;
+            _combatStatusBox.style.position = Position.Absolute;
+            _combatStatusBox.style.left = 20;
+            _combatStatusBox.style.bottom = 175;
+            _combatStatusBox.style.backgroundColor = new Color(0.08f, 0.09f, 0.12f, 0.80f);
+            _combatStatusBox.style.borderTopLeftRadius = 8;
+            _combatStatusBox.style.borderTopRightRadius = 8;
+            _combatStatusBox.style.borderBottomLeftRadius = 8;
+            _combatStatusBox.style.borderBottomRightRadius = 8;
+            _combatStatusBox.style.paddingLeft = 12;
+            _combatStatusBox.style.paddingRight = 12;
+            _combatStatusBox.style.paddingTop = 8;
+            _combatStatusBox.style.paddingBottom = 8;
+
+            _healthStatusLabel = new Label("HP: 100 / 100");
+            _healthStatusLabel.pickingMode = PickingMode.Ignore;
+            _healthStatusLabel.style.fontSize = 14;
+            _healthStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _healthStatusLabel.style.color = new Color(0.45f, 0.92f, 0.55f);
+            _combatStatusBox.Add(_healthStatusLabel);
+
+            _bagIntegrityLabel = new Label("Mochila: Sem mochila");
+            _bagIntegrityLabel.pickingMode = PickingMode.Ignore;
+            _bagIntegrityLabel.style.fontSize = 13;
+            _bagIntegrityLabel.style.color = new Color(0.88f, 0.88f, 0.92f);
+            _combatStatusBox.Add(_bagIntegrityLabel);
+
+            _weaponAmmoLabel = new Label("");
+            _weaponAmmoLabel.pickingMode = PickingMode.Ignore;
+            _weaponAmmoLabel.style.fontSize = 14;
+            _weaponAmmoLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _weaponAmmoLabel.style.color = new Color(0.98f, 0.82f, 0.42f);
+            _weaponAmmoLabel.style.display = DisplayStyle.None;
+            _combatStatusBox.Add(_weaponAmmoLabel);
+            _root.Add(_combatStatusBox);
+
+            _crosshairContainer = new VisualElement();
+            _crosshairContainer.name = "CombatCrosshair";
+            _crosshairContainer.pickingMode = PickingMode.Ignore;
+            _crosshairContainer.style.position = Position.Absolute;
+            _crosshairContainer.style.left = Length.Percent(50);
+            _crosshairContainer.style.top = Length.Percent(50);
+            _crosshairContainer.style.width = 16;
+            _crosshairContainer.style.height = 16;
+            _crosshairContainer.style.marginLeft = -8;
+            _crosshairContainer.style.marginTop = -8;
+            _crosshairContainer.style.borderTopWidth = 2;
+            _crosshairContainer.style.borderBottomWidth = 2;
+            _crosshairContainer.style.borderLeftWidth = 2;
+            _crosshairContainer.style.borderRightWidth = 2;
+            _crosshairContainer.style.borderTopColor = Color.white;
+            _crosshairContainer.style.borderBottomColor = Color.white;
+            _crosshairContainer.style.borderLeftColor = Color.white;
+            _crosshairContainer.style.borderRightColor = Color.white;
+            _crosshairContainer.style.borderTopLeftRadius = 8;
+            _crosshairContainer.style.borderTopRightRadius = 8;
+            _crosshairContainer.style.borderBottomLeftRadius = 8;
+            _crosshairContainer.style.borderBottomRightRadius = 8;
+            _crosshairContainer.style.display = DisplayStyle.None;
+            _root.Add(_crosshairContainer);
+        }
+
+        public void SetCombatHealthHud(int currentHp, int maxHp, bool incapacitated, float rescueSeconds = 0f)
+        {
+            EnsureInitialized();
+            if (_healthStatusLabel == null) return;
+
+            if (incapacitated)
+            {
+                _healthStatusLabel.text = $"INCAPACITADO ({Mathf.CeilToInt(rescueSeconds)}s resgate)";
+                _healthStatusLabel.style.color = new Color(0.95f, 0.28f, 0.28f);
+            }
+            else
+            {
+                _healthStatusLabel.text = $"HP: {currentHp} / {maxHp}";
+                float ratio = maxHp > 0 ? (float)currentHp / maxHp : 1f;
+                _healthStatusLabel.style.color = ratio <= 0.3f
+                    ? new Color(0.95f, 0.35f, 0.30f)
+                    : (ratio <= 0.6f ? new Color(0.95f, 0.78f, 0.25f) : new Color(0.45f, 0.92f, 0.55f));
+            }
+        }
+
+        public void SetWeaponAmmoHud(bool equipped, string weaponLabel, int currentAmmo, int reserveAmmo, bool isReloading, bool isAiming)
+        {
+            EnsureInitialized();
+            if (_weaponAmmoLabel != null)
+            {
+                if (!equipped)
+                {
+                    _weaponAmmoLabel.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    _weaponAmmoLabel.style.display = DisplayStyle.Flex;
+                    _weaponAmmoLabel.text = isReloading
+                        ? $"{weaponLabel}: Recarregando..."
+                        : $"{weaponLabel}: {currentAmmo} / {reserveAmmo}";
+                }
+            }
+
+            if (_crosshairContainer != null)
+            {
+                _crosshairContainer.style.display = equipped ? DisplayStyle.Flex : DisplayStyle.None;
+                float size = isAiming ? 12f : 20f;
+                _crosshairContainer.style.width = size;
+                _crosshairContainer.style.height = size;
+                _crosshairContainer.style.marginLeft = -size * 0.5f;
+                _crosshairContainer.style.marginTop = -size * 0.5f;
+            }
         }
 
         private void ApplyCatalogAssets()
@@ -398,6 +564,107 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _minimapImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(worldImage.RenderTexture));
                 }
             }
+
+            _hudMonitorTimer += Time.deltaTime;
+            if (_hudMonitorTimer >= 0.4f)
+            {
+                _hudMonitorTimer = 0f;
+                RefreshExperienceHud();
+            }
+        }
+
+        private void RefreshExperienceHud()
+        {
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null) return;
+
+            var n = netState.NightState.Value;
+            if (_nightBannerLabel != null && n.NightNumber > 0)
+            {
+                var phase = (NightPhase)n.Phase;
+                string phaseLabel = phase switch
+                {
+                    NightPhase.Preparing => $"PREPARAÇÃO ({Mathf.CeilToInt(n.PrepRemainingSeconds)}s)",
+                    NightPhase.Active => FormatMmSs(n.RemainingSeconds),
+                    NightPhase.Closing => $"FECHANDO ({Mathf.CeilToInt(n.GraceRemainingSeconds)}s)",
+                    NightPhase.Results => "VITÓRIA!",
+                    NightPhase.Defeat => "DERROTA",
+                    _ => ""
+                };
+
+                _nightBannerLabel.text = $"NOITE {n.NightNumber} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue} / R$ {n.RevenueGoal}";
+            }
+
+            if (_bagIntegrityLabel != null && netState.Backpacks != null)
+            {
+                ulong localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
+                bool found = false;
+                for (int i = 0; i < netState.Backpacks.Count; i++)
+                {
+                    var bp = netState.Backpacks[i];
+                    if (bp.EquippedBy == localId)
+                    {
+                        found = true;
+                        int pct = bp.MaxIntegrity > 0 ? Mathf.RoundToInt(100f * bp.Integrity / bp.MaxIntegrity) : 100;
+                        if (bp.IsTorn)
+                        {
+                            _bagIntegrityLabel.text = "Mochila: RASGADA (0%) — Segure [F] 3s";
+                            _bagIntegrityLabel.style.color = new Color(0.95f, 0.25f, 0.25f);
+                        }
+                        else if (pct <= 40)
+                        {
+                            _bagIntegrityLabel.text = $"Mochila: {pct}% (Danificada - [F] 3s)";
+                            _bagIntegrityLabel.style.color = new Color(0.95f, 0.72f, 0.20f);
+                        }
+                        else
+                        {
+                            _bagIntegrityLabel.text = $"Mochila: {pct}% ({bp.ItemCount}/{bp.Capacity})";
+                            _bagIntegrityLabel.style.color = new Color(0.85f, 0.90f, 0.95f);
+                        }
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    _bagIntegrityLabel.text = "Mochila: Nenhuma equipada";
+                    _bagIntegrityLabel.style.color = new Color(0.75f, 0.75f, 0.80f);
+                }
+            }
+
+            // Alerta de estoque baixo (O8 / N6) com cooldown de 45s por ingrediente
+            if (n.Phase == (byte)NightPhase.Active && netState.StorageSlots != null)
+            {
+                float now = Time.unscaledTime;
+                var catalog = PizzeriaRoot.Instance?.Catalog;
+                for (int i = 0; i < netState.StorageSlots.Count; i++)
+                {
+                    var slot = netState.StorageSlots[i];
+                    if (slot.IngredientDefId != 1 && slot.IngredientDefId != 3 && slot.IngredientDefId != 4)
+                        continue;
+
+                    if (slot.Quantity <= 3)
+                    {
+                        if (!_lowStockAlertCooldowns.TryGetValue(slot.IngredientDefId, out float nextAllowed) || now >= nextAllowed)
+                        {
+                            _lowStockAlertCooldowns[slot.IngredientDefId] = now + 45f;
+                            string ingName = catalog != null && catalog.Ingredients.TryGetValue(slot.IngredientDefId, out var def)
+                                ? def.Name
+                                : $"Ingrediente #{slot.IngredientDefId}";
+                            NotificationManager.Show(
+                                slot.Quantity <= 0
+                                    ? $"Estoque ESGOTADO de {ingName}! Encomende suprimentos."
+                                    : $"Estoque baixo de {ingName} ({slot.Quantity}/{slot.MaxCapacity})!",
+                                NotificationType.Warning);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static string FormatMmSs(float seconds)
+        {
+            int total = Mathf.Max(0, Mathf.CeilToInt(seconds));
+            return $"{total / 60:00}:{total % 60:00}";
         }
     }
 }

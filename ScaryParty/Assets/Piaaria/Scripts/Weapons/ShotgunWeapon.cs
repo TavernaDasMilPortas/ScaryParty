@@ -7,7 +7,7 @@ public class ShotgunWeapon : WeaponBase
     private void Awake()
     {
         fireRate = 0.8f;
-        damage = 80;
+        damage = 10; // 8 pellets x 10 = 80 dano máximo
     }
 
     public override void Shoot()

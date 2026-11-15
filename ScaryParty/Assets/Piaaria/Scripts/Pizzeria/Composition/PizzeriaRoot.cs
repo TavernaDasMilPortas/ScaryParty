@@ -166,6 +166,8 @@ namespace ScaryParty.Pizzeria.Composition
                 gameObject.AddComponent<ScaryParty.Lighting.PizzeriaLightingController>();
             }
 
+            EnsureExperiencePresenters();
+
             // Aplica estilo cel-shading ativo no cliente e servidor preservando hash de NetworkObject
             ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
                 gameObject,
@@ -408,7 +410,28 @@ namespace ScaryParty.Pizzeria.Composition
                 if (!result.Success) Debug.LogError($"[PizzeriaRoot] {bag.name}: {result.Message}");
             }
 
-            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas, {DomainState.Tables.Count} mesas.");
+            NightCycleService.StartNight(DomainState, 1, _config.ResolveNightParameters(1));
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
+                DomainState.CurrentNightNumber,
+                DomainState.NightRevenueGoal);
+
+            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas, {DomainState.Tables.Count} mesas.");
+        }
+
+        private float _nightSyncAccumulator = 0f;
+
+        private void EnsureExperiencePresenters()
+        {
+            if (ScaryParty.Pizzeria.Presentation.NightResultsPresenter.Instance == null)
+                ScaryParty.Pizzeria.Presentation.NightResultsPresenter.EnsureInstance();
+
+            if (ScaryParty.Pizzeria.Presentation.ContextualTutorialPresenter.Instance == null)
+                ScaryParty.Pizzeria.Presentation.ContextualTutorialPresenter.EnsureInstance();
+
+            if (ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.Instance == null)
+                ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.EnsureInstance();
+
+            PizzeriaParkingLotBuilder.EnsureBuilt(this);
         }
 
         private void InitStorageSlot(int storageId, int ingredientId, int initialStock, int maxCap)
@@ -471,8 +494,8 @@ namespace ScaryParty.Pizzeria.Composition
                             
                             if (DomainState.Items.TryGetValue(op.InputItemId, out var updatedPizza))
                             {
-                                if (Mathf.Abs(updatedPizza.CookProgress - oldCookProgress) > 0.005f ||
-                                    Mathf.Abs(updatedPizza.BurnProgress - oldBurnProgress) > 0.005f)
+                                if (Mathf.Abs(updatedPizza.CookProgress - oldCookProgress) > 0.04f ||
+                                    Mathf.Abs(updatedPizza.BurnProgress - oldBurnProgress) > 0.04f)
                                 {
                                     dirty = true;
                                 }
@@ -529,6 +552,23 @@ namespace ScaryParty.Pizzeria.Composition
                         _config != null ? _config.queueStagnationThresholdSeconds : 35f,
                         _config != null ? _config.queueStagnationDecayMultiplier : 1.35f);
                     dirty |= custDirty;
+                }
+
+                var nightParams = _config != null ? _config.ResolveNightParameters(DomainState.CurrentNightNumber) : (NightGoalParameters?)null;
+                if (NightCycleService.TickNight(DomainState, Time.deltaTime, nightParams))
+                {
+                    dirty = true;
+                }
+
+                _nightSyncAccumulator += Time.deltaTime;
+                if (_nightSyncAccumulator >= 1.0f)
+                {
+                    _nightSyncAccumulator = 0f;
+                    var phase = DomainState.CurrentNightPhase;
+                    if (phase == NightPhase.Preparing || phase == NightPhase.Active || phase == NightPhase.Closing)
+                    {
+                        dirty = true;
+                    }
                 }
 
                 if (dirty)

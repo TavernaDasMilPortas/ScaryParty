@@ -41,6 +41,18 @@ public class PlayerState : NetworkBehaviour
         _visualController = GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
         _appearance = GetComponentInChildren<ScaryParty.Player.CharacterAppearance>(true);
         _meshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+
+        var netTransform = GetComponent<NetworkTransform>();
+        if (netTransform != null)
+        {
+            netTransform.UseUnreliableDeltas = true;
+            netTransform.PositionThreshold = 0.015f;
+            netTransform.RotAngleThreshold = 1.5f;
+            netTransform.ScaleThreshold = 0.05f;
+            netTransform.UseQuaternionSynchronization = true;
+            netTransform.UseQuaternionCompression = true;
+            netTransform.UseHalfFloatPrecision = true;
+        }
     }
 
     private void Start()

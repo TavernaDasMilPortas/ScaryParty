@@ -130,6 +130,20 @@ namespace ScaryParty.City.Modular
                 }
 
                 int occupied = Mathf.Max(1, def.occupiedSlots);
+                if (slot + occupied > totalSlots)
+                {
+                    Debug.LogWarning($"[ModularBuildingAssembler] A04: Módulo {modId} ({occupied} slots) ultrapassaria fachada {side} ({slot}/{totalSlots}) em '{buildingId}'. Ajustando para A.");
+                    var fallbackDef = catalog.GetDefinition(CityModuleId.A);
+                    if (fallbackDef == null || fallbackDef.prefab == null)
+                    {
+                        slot++;
+                        continue;
+                    }
+                    modId = CityModuleId.A;
+                    def = fallbackDef;
+                    occupied = 1;
+                }
+
                 float moduleWidth = def.width;
 
                 Vector3 localPos = Vector3.zero;
@@ -623,62 +637,62 @@ namespace ScaryParty.City.Modular
                     break;
 
                 case ModularBuildingRecipe.TwoStoryHouse:
-                    // Sobrado: 6m larg x 6m prof x 2 pav (A + J + B térreo; andares superiores janelas/paredes)
-                    layout.widthModules = 3; // 6m
+                    // Sobrado: 8m larg x 6m prof x 2 pav (A + J[2 slots] + B térreo; andares superiores janelas/paredes)
+                    layout.widthModules = 4; // 8m (para comportar porta dupla J de 4m + alas)
                     layout.depthModules = 3; // 6m
                     layout.floorCount = 2;
                     layout.zone = ZoneType.Residential;
 
                     FloorLayout sh0 = new FloorLayout { floorIndex = 0 };
-                    sh0.frontModules.AddRange(new[] { CityModuleId.A, CityModuleId.J, CityModuleId.B });
+                    sh0.frontModules.AddRange(new[] { CityModuleId.A, CityModuleId.J, CityModuleId.B }); // 1 + 2 + 1 = 4 slots
                     sh0.frontAwnings.AddRange(new[] { false, false, false });
-                    sh0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
+                    sh0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.B, CityModuleId.A });
                     sh0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     sh0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     layout.floors.Add(sh0);
 
                     FloorLayout sh1 = new FloorLayout { floorIndex = 1 };
-                    sh1.frontModules.AddRange(new[] { CityModuleId.G, CityModuleId.H, CityModuleId.G });
-                    sh1.frontAwnings.AddRange(new[] { false, false, false });
-                    sh1.backModules.AddRange(new[] { CityModuleId.B, CityModuleId.B, CityModuleId.B });
+                    sh1.frontModules.AddRange(new[] { CityModuleId.G, CityModuleId.H, CityModuleId.G, CityModuleId.B });
+                    sh1.frontAwnings.AddRange(new[] { false, false, false, false });
+                    sh1.backModules.AddRange(new[] { CityModuleId.B, CityModuleId.B, CityModuleId.B, CityModuleId.B });
                     sh1.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     sh1.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     layout.floors.Add(sh1);
 
-                    // Entrada na porta dupla J centralizada no slot 1 (X = 0)
+                    // Entrada na porta dupla J (4m) centralizada em X = 0 (-4 + 2 + 2)
                     CalculateEntranceAnchors(layout, 0f);
                     break;
 
                 case ModularBuildingRecipe.Shop:
-                    // Loja: 6m larg x 8m prof x 1 pav (D + D + J, K acima das vitrines)
-                    layout.widthModules = 3; // 6m
+                    // Loja: 8m larg x 8m prof x 1 pav (D + D + J[2 slots], K acima das vitrines)
+                    layout.widthModules = 4; // 8m
                     layout.depthModules = 4; // 8m
                     layout.floorCount = 1;
                     layout.zone = ZoneType.Commercial;
 
                     FloorLayout sp0 = new FloorLayout { floorIndex = 0 };
-                    sp0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J });
+                    sp0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J }); // 1 + 1 + 2 = 4 slots
                     sp0.frontAwnings.AddRange(new[] { true, true, false }); // Toldo K acima das duas vitrines
-                    sp0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.A }); // Porta de serviço no fundo
+                    sp0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.B, CityModuleId.A }); // Porta de serviço no fundo
                     sp0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     sp0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     layout.floors.Add(sp0);
 
-                    // Entrada na porta dupla J no slot 2 (X = -3m + 4m + 1m = +2m)
+                    // Entrada na porta dupla J nos slots 2..3 (X = -4m + 4m + 2m = +2m)
                     CalculateEntranceAnchors(layout, 2.0f);
                     break;
 
                 case ModularBuildingRecipe.MixedBuilding:
                 default:
-                    // Prédio misto: 8m larg x 8m prof x 4 pav (D + D + J + D térreo; janelas nos superiores)
+                    // Prédio misto: 8m larg x 8m prof x 4 pav (D + J[2 slots] + D térreo; janelas nos superiores)
                     layout.widthModules = 4; // 8m
                     layout.depthModules = 4; // 8m
                     layout.floorCount = 4;
                     layout.zone = ZoneType.Commercial;
 
                     FloorLayout mb0 = new FloorLayout { floorIndex = 0 };
-                    mb0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J, CityModuleId.D });
-                    mb0.frontAwnings.AddRange(new[] { true, true, false, true });
+                    mb0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.J, CityModuleId.D }); // 1 + 2 + 1 = 4 slots
+                    mb0.frontAwnings.AddRange(new[] { true, false, true });
                     mb0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.B, CityModuleId.A });
                     mb0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     mb0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
@@ -695,16 +709,12 @@ namespace ScaryParty.City.Modular
                         layout.floors.Add(upper);
                     }
 
-                    // Entrada na porta J no slot 2 (X = -4m + 4m + 1m = +1m)
-                    CalculateEntranceAnchors(layout, 1.0f);
+                    // Entrada na porta dupla J nos slots 1..2 (X = -4m + 2m + 2m = 0m)
+                    CalculateEntranceAnchors(layout, 0f);
                     break;
 
                 case ModularBuildingRecipe.ShowcaseAll12Modules:
                     // Prédio Showcase: 8m larg x 8m prof x 2 pavimentos (4 x 4 módulos).
-                    // Reúne explicitamente todos os 12 módulos canônicos:
-                    // A (Parede Lisa), B (Janela), C (Porta), D (Vitrine), E (Cobertura Plana),
-                    // F (Platibanda), G (Veneziana), H (Floreira), I (Garagem 4m), J (Porta Dupla),
-                    // K (Toldo), L (Pilar de Canto)
                     layout.widthModules = 4; // 8m
                     layout.depthModules = 4; // 8m
                     layout.floorCount = 2;
@@ -716,8 +726,8 @@ namespace ScaryParty.City.Modular
                     sc0.frontModules.AddRange(new[] { CityModuleId.I, CityModuleId.D, CityModuleId.C });
                     sc0.frontAwnings.AddRange(new[] { false, true, false }); // Toldo K acima da vitrine D!
 
-                    // Traseira (4 slots): J (Porta Dupla = 1 slot) + A (Parede Lisa = 1 slot) + B (Janela = 1 slot) + A (Parede Lisa = 1 slot)
-                    sc0.backModules.AddRange(new[] { CityModuleId.J, CityModuleId.A, CityModuleId.B, CityModuleId.A });
+                    // Traseira (4 slots): J (Porta Dupla = 2 slots) + A (1 slot) + B (1 slot) = 4 slots
+                    sc0.backModules.AddRange(new[] { CityModuleId.J, CityModuleId.A, CityModuleId.B });
 
                     // Lateral Esquerda (4 slots): A, B, A, B
                     sc0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A, CityModuleId.B });
@@ -787,19 +797,23 @@ namespace ScaryParty.City.Modular
             // Pavimento Térreo (Floor 0)
             FloorLayout f0 = new FloorLayout { floorIndex = 0 };
 
-            // 1. Reserva slot de entrada (C ou J)
-            int doorSlot = rng.Next(0, widthModules);
-            CityModuleId doorPiece = (profile != null && rng.NextDouble() < profile.doubleDoorRatio) ? CityModuleId.J : CityModuleId.C;
+            // 1. Política única de ocupação por intervalo [slot .. slot + span)
+            bool[] occupiedSlots = new bool[widthModules];
+            CityModuleId doorPiece = (widthModules >= 2 && profile != null && rng.NextDouble() < profile.doubleDoorRatio)
+                ? CityModuleId.J
+                : CityModuleId.C;
+            int doorSpan = doorPiece == CityModuleId.J ? 2 : 1;
+            int doorSlot = rng.Next(0, Mathf.Max(1, widthModules - doorSpan + 1));
+            for (int k = 0; k < doorSpan; k++) occupiedSlots[doorSlot + k] = true;
 
-            // 2. Decide se haverá garagem (I) no térreo: precisa de 2 slots consecutivos e largura >= 4 módulos
+            // 2. Decide garagem (I = 2 slots) sem colidir com o intervalo da porta (C=1 ou J=2)
             int garageSlot = -1;
             if (profile != null && widthModules >= 4 && rng.NextDouble() < profile.garageWeight)
             {
-                // Escolhe um slot para a garagem que não colida com a porta
                 List<int> validGarageSlots = new List<int>();
                 for (int s = 0; s <= widthModules - 2; s++)
                 {
-                    if (s != doorSlot && (s + 1) != doorSlot)
+                    if (!occupiedSlots[s] && !occupiedSlots[s + 1])
                     {
                         validGarageSlots.Add(s);
                     }
@@ -807,10 +821,12 @@ namespace ScaryParty.City.Modular
                 if (validGarageSlots.Count > 0)
                 {
                     garageSlot = validGarageSlots[rng.Next(validGarageSlots.Count)];
+                    occupiedSlots[garageSlot] = true;
+                    occupiedSlots[garageSlot + 1] = true;
                 }
             }
 
-            // Preenche fachada térrea
+            // Preenche fachada térrea usando o intervalo real de cada peça
             int currentSlot = 0;
             float entranceDoorLocalX = 0f;
             while (currentSlot < widthModules)
@@ -819,19 +835,20 @@ namespace ScaryParty.City.Modular
                 {
                     f0.frontModules.Add(CityModuleId.I);
                     f0.frontAwnings.Add(false);
-                    currentSlot += 2; // Garagem ocupa 2 slots
+                    currentSlot += 2;
                 }
                 else if (currentSlot == doorSlot)
                 {
                     f0.frontModules.Add(doorPiece);
                     f0.frontAwnings.Add(false);
                     float halfW = layout.WidthMeters * 0.5f;
-                    entranceDoorLocalX = -halfW + (currentSlot * 2.0f) + 1.0f;
-                    currentSlot += 1;
+                    float doorWidthMeters = doorSpan * 2.0f;
+                    entranceDoorLocalX = -halfW + (currentSlot * 2.0f) + (doorWidthMeters * 0.5f);
+                    currentSlot += doorSpan;
                 }
                 else
                 {
-                    // Slot decorativo térreo
+                    // Slot decorativo térreo (1 slot)
                     CityModuleId piece;
                     bool hasAwning = false;
                     double roll = rng.NextDouble();

@@ -409,9 +409,10 @@ public class StreetGridGenerator : MonoBehaviour
                     Vector3 normal = edgeNormals[i];
                     float length = Vector3.Distance(p1, p2);
 
-                    if (length < 10f) continue;
-
                     bool useModularBorder = (config.buildingGenerationMode == ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit && config.modularCatalog != null);
+                    float minEdgeLength = useModularBorder ? 4.2f : Mathf.Max(2.2f, config.minBuildingWidth + 0.2f);
+                    if (length < minEdgeLength) continue;
+
                     float minWidth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesWidth) * 2f) : config.minBuildingWidth;
                     float maxWidth = useModularBorder ? (Mathf.Max(minWidth, config.maxBuildingModulesWidth * 2f)) : config.maxBuildingWidth;
                     float minDepth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesDepth) * 2f) : config.minBuildingDepth;
@@ -421,10 +422,91 @@ public class StreetGridGenerator : MonoBehaviour
                     // The SAT check against streetOBBs will naturally prevent overlapping concave corners.
                     float currentDist = -maxWidth;
                     float maxDist = length + maxWidth;
-                    
                     float buildingOffset = streetHalfWidth;
                     MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 
+                    bool TryPlaceAt(float startDist, int widthMods, int depthMods, int floorCount, float bWidth, float bDepth, float bHeight, string idSuffix)
+                    {
+                        Vector3 bCenter = p1 + dir * (startDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
+                        Vector2 cCenter = new Vector2(bCenter.x, bCenter.z);
+                        Vector2 cExtents = new Vector2(bWidth * 0.5f - 0.1f, bDepth * 0.5f - 0.1f);
+                        Vector3 fwd = -normal;
+                        Vector3 rightDir = Vector3.Cross(Vector3.up, fwd);
+                        Vector2 axisX = new Vector2(rightDir.x, rightDir.z);
+                        Vector2 axisZ = new Vector2(fwd.x, fwd.z);
+                        BlockFiller.OBB2D candidateOBB = new BlockFiller.OBB2D(cCenter, cExtents, axisX, axisZ);
+
+                        float candidateRadius = bWidth + bDepth;
+                        float buildingDistThresh = candidateRadius + maxWidth + maxDepth;
+                        float buildingDistThreshSqr = buildingDistThresh * buildingDistThresh;
+
+                        foreach (var otherOBB in placedBorderBuildings)
+                        {
+                            if ((cCenter - otherOBB.center).sqrMagnitude > buildingDistThreshSqr) continue;
+                            if (BlockFiller.OBBOverlap(candidateOBB, otherOBB, out _, out _)) return false;
+                        }
+
+                        foreach (var stOBB in streetOBBs)
+                        {
+                            float stRadius = stOBB.halfExtents.x + stOBB.halfExtents.y;
+                            float stThresh = candidateRadius + stRadius;
+                            if ((cCenter - stOBB.center).sqrMagnitude > stThresh * stThresh) continue;
+                            if (BlockFiller.OBBOverlap(candidateOBB, stOBB, out _, out _)) return false;
+                        }
+
+                        placedBorderBuildings.Add(candidateOBB);
+
+                        float groundY = 0.02f + (config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
+                        Quaternion buildingRot = Quaternion.LookRotation(-normal, Vector3.up);
+
+                        if (useModularBorder)
+                        {
+                            Vector3 modularFrontCenter = p1 + dir * (startDist + bWidth * 0.5f) + normal * buildingOffset;
+                            modularFrontCenter.y = groundY;
+                            int borderSeed = (config.seed ^ (i * 9973) ^ (int)(startDist * 101f)) + rng.Next(1, 10000);
+                            string bId = $"BorderBuilding_{i}_{idSuffix}";
+
+                            var layout = ScaryParty.City.Modular.ModularBuildingAssembler.CreateProceduralLayout(
+                                widthMods, depthMods, floorCount, config.modularBuildingProfile,
+                                modularFrontCenter, buildingRot, borderSeed, bId, 9999);
+
+                            ScaryParty.City.Modular.ModularBuildingAssembler.AssembleBuilding(
+                                layout, config.modularCatalog, borderParent.transform);
+                        }
+                        else
+                        {
+                            GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                            bObj.name = $"BorderBuilding_{i}_{idSuffix}";
+                            bObj.transform.SetParent(borderParent.transform);
+                            bObj.transform.position = bCenter + new Vector3(0, groundY + bHeight * 0.5f, 0);
+                            bObj.transform.rotation = buildingRot;
+                            bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
+
+                            Material baseMat = null;
+                            if (buildingMaterials != null && buildingMaterials.Length > 0)
+                            {
+                                baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
+                            }
+                            baseMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                                baseMat,
+                                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                                ScaryParty.VisualStyles.VisualCategoryIds.City,
+                                () => wallMat);
+
+                            Renderer r = bObj.GetComponent<Renderer>();
+                            r.sharedMaterial = baseMat;
+
+                            float hue = (float)rng.NextDouble();
+                            float sat = 0.5f + (float)rng.NextDouble() * 0.5f;
+                            float val = 0.3f + (float)rng.NextDouble() * 0.4f;
+                            Color buildingColor = Color.HSVToRGB(hue, sat, val);
+                            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(r, 0, buildingColor, propBlock);
+                        }
+
+                        return true;
+                    }
+
+                    // Passada 1: Preenchimento principal com fallback compacto de 4m quando OBB bloquear peça grande
                     while (currentDist < maxDist)
                     {
                         float bWidth = 0f;
@@ -445,7 +527,7 @@ public class StreetGridGenerator : MonoBehaviour
                             {
                                 float remaining = maxDist - currentDist;
                                 widthMods = Mathf.FloorToInt(remaining / 2f);
-                                if (widthMods < minWMods) break;
+                                if (widthMods < 2) break;
                                 bWidth = widthMods * 2f;
                             }
 
@@ -457,7 +539,7 @@ public class StreetGridGenerator : MonoBehaviour
                             int minFl = Mathf.Max(1, config.minBuildingFloors);
                             int maxFl = Mathf.Max(minFl, config.maxBuildingFloors);
                             floorCount = rng.Next(minFl, maxFl + 1);
-                            bHeight = floorCount * 3.5f; // Altura aproximada para colisores / bound
+                            bHeight = floorCount * 3.5f;
                         }
                         else
                         {
@@ -472,110 +554,41 @@ public class StreetGridGenerator : MonoBehaviour
                             bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
                         }
 
-                        // Casas apontam para a rua (-normal)
-                        Vector3 bCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * (buildingOffset + bDepth * 0.5f);
-                        
-                        // Create candidate OBB
-                        Vector2 cCenter = new Vector2(bCenter.x, bCenter.z);
-                        Vector2 cExtents = new Vector2(bWidth * 0.5f - 0.1f, bDepth * 0.5f - 0.1f);
-                        Vector3 fwd = -normal;
-                        Vector3 rightDir = Vector3.Cross(Vector3.up, fwd);
-                        Vector2 axisX = new Vector2(rightDir.x, rightDir.z);
-                        Vector2 axisZ = new Vector2(fwd.x, fwd.z);
-                        BlockFiller.OBB2D candidateOBB = new BlockFiller.OBB2D(cCenter, cExtents, axisX, axisZ);
-
-                        bool overlap = false;
-                        float candidateRadius = bWidth + bDepth; // Safe upper bound
-                        
-                        // Fast rejection for buildings
-                        float buildingDistThresh = (candidateRadius + maxWidth + maxDepth);
-                        float buildingDistThreshSqr = buildingDistThresh * buildingDistThresh;
-                        
-                        foreach (var otherOBB in placedBorderBuildings)
+                        if (TryPlaceAt(currentDist, widthMods, depthMods, floorCount, bWidth, bDepth, bHeight, Mathf.RoundToInt(currentDist).ToString()))
                         {
-                            if ((cCenter - otherOBB.center).sqrMagnitude > buildingDistThreshSqr) continue;
-                            if (BlockFiller.OBBOverlap(candidateOBB, otherOBB, out _, out _))
-                            {
-                                overlap = true;
-                                break;
-                            }
-                        }
-
-                        if (!overlap)
-                        {
-                            foreach (var stOBB in streetOBBs)
-                            {
-                                float stRadius = stOBB.halfExtents.x + stOBB.halfExtents.y;
-                                float stThresh = candidateRadius + stRadius;
-                                if ((cCenter - stOBB.center).sqrMagnitude > stThresh * stThresh) continue;
-
-                                if (BlockFiller.OBBOverlap(candidateOBB, stOBB, out _, out _))
-                                {
-                                    overlap = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (overlap)
-                        {
-                            currentDist += useModularBorder ? 2f : 1f; // Step and try again
+                            currentDist += bWidth;
                             continue;
                         }
-                        
-                        placedBorderBuildings.Add(candidateOBB);
 
-                        float groundY = 0.02f + (config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
-                        Quaternion buildingRot = Quaternion.LookRotation(-normal, Vector3.up);
-
-                        if (useModularBorder)
+                        // A09: Antes de avançar sobre possível lacuna, tenta peça compacta válida (4m / largura mínima)
+                        int compactWMods = 2;
+                        int compactDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                        float compactW = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
+                        float compactD = useModularBorder ? compactDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
+                        if (compactW < bWidth && currentDist + compactW <= maxDist &&
+                            TryPlaceAt(currentDist, compactWMods, compactDMods, Mathf.Max(1, config.minBuildingFloors), compactW, compactD, bHeight, $"{Mathf.RoundToInt(currentDist)}_compact"))
                         {
-                            Vector3 modularFrontCenter = p1 + dir * (currentDist + bWidth * 0.5f) + normal * buildingOffset;
-                            modularFrontCenter.y = groundY;
-
-                            int borderSeed = (config.seed ^ (i * 9973) ^ (int)(currentDist * 101f)) + rng.Next(1, 10000);
-                            string bId = $"BorderBuilding_{i}_{Mathf.RoundToInt(currentDist)}";
-
-                            var layout = ScaryParty.City.Modular.ModularBuildingAssembler.CreateProceduralLayout(
-                                widthMods, depthMods, floorCount, config.modularBuildingProfile,
-                                modularFrontCenter, buildingRot, borderSeed, bId, 9999);
-
-                            ScaryParty.City.Modular.ModularBuildingAssembler.AssembleBuilding(
-                                layout, config.modularCatalog, borderParent.transform);
-                        }
-                        else
-                        {
-                            GameObject bObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                            bObj.name = $"BorderBuilding_{i}_{currentDist}";
-                            bObj.transform.SetParent(borderParent.transform);
-                            bObj.transform.position = bCenter + new Vector3(0, groundY + bHeight * 0.5f, 0);
-                            bObj.transform.rotation = buildingRot;
-                            bObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
-
-                            Material baseMat = null;
-                            if (buildingMaterials != null && buildingMaterials.Length > 0)
-                            {
-                                baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
-                            }
-                            baseMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
-                                baseMat,
-                                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
-                                ScaryParty.VisualStyles.VisualCategoryIds.City,
-                                () => wallMat);
-                            
-                            Renderer r = bObj.GetComponent<Renderer>();
-                            r.sharedMaterial = baseMat;
-                            
-                            // Zone-like colors for border (sombrias mas coloridas)
-                            float hue = (float)rng.NextDouble();
-                            float sat = 0.5f + (float)rng.NextDouble() * 0.5f; 
-                            float val = 0.3f + (float)rng.NextDouble() * 0.4f;
-                            Color buildingColor = Color.HSVToRGB(hue, sat, val);
-                            
-                            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(r, 0, buildingColor, propBlock);
+                            currentDist += compactW;
+                            continue;
                         }
 
-                        currentDist += bWidth;
+                        currentDist += useModularBorder ? 2f : 1f;
+                    }
+
+                    // Passada 2 (A09): Preenchimento determinístico de lacunas remanescentes no perímetro mantendo validação de OBB
+                    float gapWidth = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
+                    int gapWMods = 2;
+                    int gapDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                    float gapDepth = useModularBorder ? gapDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
+                    float gapHeight = useModularBorder ? Mathf.Max(1, config.minBuildingFloors) * 3.5f : Mathf.Max(3f, config.minBuildingHeight);
+                    float step = useModularBorder ? 2f : 1f;
+
+                    for (float pos = 0f; pos <= length - gapWidth; pos += step)
+                    {
+                        if (TryPlaceAt(pos, gapWMods, gapDMods, Mathf.Max(1, config.minBuildingFloors), gapWidth, gapDepth, gapHeight, $"gap_{Mathf.RoundToInt(pos)}"))
+                        {
+                            pos += gapWidth - step;
+                        }
                     }
                 }
             }

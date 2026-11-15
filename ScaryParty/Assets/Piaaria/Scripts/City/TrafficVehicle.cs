@@ -7,13 +7,17 @@ using System.Collections.Generic;
 /// </summary>
 public class TrafficVehicle : MonoBehaviour
 {
+    public int VehicleId;
+    public int CurrentStartNode = -1;
+    public int CurrentEndNode = -1;
+    public int CurrentEdgeId = -1;
     public List<Vector3> waypoints;
     public int currentWaypointIndex;
     public float speed;
     public bool isWaitingAtLight;
     public bool isActive;
     public Color vehicleColor;
-    
+
     private float _waypointTolerance = 1.0f;
     private float _raycastDist = 8f;
     private float _currentSpeed;
@@ -24,21 +28,22 @@ public class TrafficVehicle : MonoBehaviour
     }
 
     /// <summary>
-    /// Move along path: interpolate towards current waypoint, advance when close.
+    /// Move along path: MoveTowards limitado ao waypoint para evitar overshoot em queda de FPS.
     /// Returns true when path is complete.
     /// </summary>
     public bool UpdateMovement(float deltaTime)
     {
         if (waypoints == null || currentWaypointIndex >= waypoints.Count)
         {
-            return true; // Reached end
+            return true;
         }
 
         Vector3 target = waypoints[currentWaypointIndex];
-        Vector3 dir = (target - transform.position);
-        dir.y = 0; // Keep on flat ground for simple movement
+        target.y = transform.position.y;
+        Vector3 toTarget = target - transform.position;
+        toTarget.y = 0f;
 
-        if (dir.magnitude < _waypointTolerance)
+        while (toTarget.magnitude < _waypointTolerance)
         {
             currentWaypointIndex++;
             if (currentWaypointIndex >= waypoints.Count)
@@ -46,30 +51,33 @@ public class TrafficVehicle : MonoBehaviour
                 return true;
             }
             target = waypoints[currentWaypointIndex];
-            dir = (target - transform.position);
-            dir.y = 0;
+            target.y = transform.position.y;
+            toTarget = target - transform.position;
+            toTarget.y = 0f;
         }
 
-        if (dir.sqrMagnitude > 0.01f)
+        if (toTarget.sqrMagnitude > 0.0025f)
         {
-            dir.Normalize();
-            
-            // Check traffic light and vehicles ahead
-            bool shouldStop = CheckTrafficLight() || CheckVehicleAhead();
-            
+            Vector3 dir = toTarget.normalized;
+            bool stoppedByLight = CheckTrafficLight();
+            isWaitingAtLight = stoppedByLight;
+            bool shouldStop = stoppedByLight || CheckVehicleAhead();
+
             if (shouldStop)
             {
-                _currentSpeed = Mathf.Max(0, _currentSpeed - (speed * 2f * deltaTime)); // Brake
+                _currentSpeed = Mathf.Max(0f, _currentSpeed - (speed * 2.5f * deltaTime));
             }
             else
             {
-                _currentSpeed = Mathf.Min(speed, _currentSpeed + (speed * deltaTime)); // Accelerate
+                _currentSpeed = Mathf.Min(speed, _currentSpeed + (speed * deltaTime));
             }
 
             if (_currentSpeed > 0.01f)
             {
-                transform.position += dir * _currentSpeed * deltaTime;
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), deltaTime * 5f);
+                float maxStep = _currentSpeed * deltaTime;
+                Vector3 nextPos = Vector3.MoveTowards(transform.position, target, maxStep);
+                transform.position = nextPos;
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), deltaTime * 6f);
             }
         }
 
@@ -78,13 +86,44 @@ public class TrafficVehicle : MonoBehaviour
 
     private bool CheckTrafficLight()
     {
-        // Raycast forward to detect a TrafficLight component at intersections
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, transform.forward, out hit, _raycastDist))
+        Vector3 forward = transform.forward;
+        forward.y = 0f;
+        if (forward.sqrMagnitude < 0.01f) return false;
+        forward.Normalize();
+
+        int approachGroup = Mathf.Abs(forward.z) >= Mathf.Abs(forward.x) ? 0 : 1;
+        float brakingBuffer = Mathf.Max(3.5f, _currentSpeed * 0.9f);
+
+        for (int i = 0; i < TrafficLight.ActiveLights.Count; i++)
         {
-            TrafficLight light = hit.collider.GetComponentInParent<TrafficLight>();
-            if (light != null && light.IsRed) return true;
+            var light = TrafficLight.ActiveLights[i];
+            if (light == null || light.IsGreen) continue;
+
+            if (CurrentEdgeId >= 0 && light.controlledEdgeIds != null && light.controlledEdgeIds.Length > 0)
+            {
+                if (!light.ControlsEdge(CurrentEdgeId)) continue;
+            }
+            else if (light.signalGroupIndex != approachGroup)
+            {
+                continue;
+            }
+
+            Vector3 center = light.intersectionCenter != default
+                ? light.intersectionCenter
+                : (light.controller != null ? light.controller.transform.position : light.transform.position);
+            Vector3 toIntersection = center - transform.position;
+            toIntersection.y = 0f;
+
+            float dist = toIntersection.magnitude;
+            if (dist < light.stopLineRadius * 0.65f || dist > light.stopLineRadius + brakingBuffer)
+                continue;
+
+            if (Vector3.Dot(toIntersection / Mathf.Max(0.01f, dist), forward) > 0.45f)
+            {
+                return light.IsRed || light.IsYellow;
+            }
         }
+
         return false;
     }
 

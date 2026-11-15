@@ -18,37 +18,55 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (_netState == null || domainState == null) return;
 
+            bool anyChanged = false;
+
             if (_netState.RestaurantBudget.Value != domainState.RestaurantBudget)
             {
                 _netState.RestaurantBudget.Value = domainState.RestaurantBudget;
+                anyChanged = true;
             }
 
-            ProjectItemsDelta(domainState);
-            ProjectToolsDelta(domainState);
-            ProjectStorageSlotsDelta(domainState);
-            ProjectStationSlotsDelta(domainState);
-            ProjectOrdersDelta(domainState);
-            ProjectOrderLinesDelta(domainState);
-            ProjectCallsDelta(domainState);
-            ProjectStacksDelta(domainState);
-            ProjectBackpacksDelta(domainState);
-            ProjectSupplyOrdersDelta(domainState);
-            ProjectUpgradesDelta(domainState);
-            ProjectCustomersDelta(domainState);
-            ProjectTablesDelta(domainState);
+            var nightDto = CreateNightStateDto(domainState);
+            if (!_netState.NightState.Value.Equals(nightDto))
+            {
+                _netState.NightState.Value = nightDto;
+                anyChanged = true;
+            }
 
-            _netState.PublishedRevision.Value = domainState.Revision;
+            anyChanged |= ProjectItemsDelta(domainState);
+            anyChanged |= ProjectToolsDelta(domainState);
+            anyChanged |= ProjectStorageSlotsDelta(domainState);
+            anyChanged |= ProjectStationSlotsDelta(domainState);
+            anyChanged |= ProjectOrdersDelta(domainState);
+            anyChanged |= ProjectOrderLinesDelta(domainState);
+            anyChanged |= ProjectCallsDelta(domainState);
+            anyChanged |= ProjectStacksDelta(domainState);
+            anyChanged |= ProjectBackpacksDelta(domainState);
+            anyChanged |= ProjectSupplyOrdersDelta(domainState);
+            anyChanged |= ProjectUpgradesDelta(domainState);
+            anyChanged |= ProjectCustomersDelta(domainState);
+            anyChanged |= ProjectTablesDelta(domainState);
+
+            if (anyChanged || _netState.PublishedRevision.Value == 0)
+            {
+                _netState.PublishedRevision.Value = domainState.Revision;
+            }
         }
 
-        private void ProjectItemsDelta(PizzeriaState domainState)
+        private bool ProjectItemsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Items;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Items) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].ItemId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].ItemId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Items)
@@ -62,24 +80,31 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectToolsDelta(PizzeriaState domainState)
+        private bool ProjectToolsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Tools;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Tools) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].ToolId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].ToolId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Tools)
@@ -93,25 +118,32 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectStorageSlotsDelta(PizzeriaState domainState)
+        private bool ProjectStorageSlotsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.StorageSlots;
             var domainKeys = new HashSet<(int, int)>();
             foreach (var kvp in domainState.StorageSlots) domainKeys.Add((kvp.Value.StorageId, kvp.Value.IngredientDefId));
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
                 var key = (networkList[i].StorageId, networkList[i].IngredientDefId);
-                if (!domainKeys.Contains(key)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(key))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.StorageSlots)
@@ -125,16 +157,18 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectStationSlotsDelta(PizzeriaState domainState)
+        private bool ProjectStationSlotsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.StationSlots;
             var domainKeys = new HashSet<(int, int)>();
@@ -144,10 +178,15 @@ namespace ScaryParty.Pizzeria.Network
                 domainKeys.Add((op.SlotId.StationId, op.SlotId.SlotIndex));
             }
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
                 var key = (networkList[i].StationId, networkList[i].SlotIndex);
-                if (!domainKeys.Contains(key)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(key))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.ActiveOperations)
@@ -164,24 +203,31 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectOrdersDelta(PizzeriaState domainState)
+        private bool ProjectOrdersDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Orders;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Orders) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].OrderId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].OrderId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Orders)
@@ -195,16 +241,18 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectOrderLinesDelta(PizzeriaState domainState)
+        private bool ProjectOrderLinesDelta(PizzeriaState domainState)
         {
             var networkList = _netState.OrderLines;
             var domainKeys = new HashSet<ulong>();
@@ -216,9 +264,14 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].OrderLineId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].OrderLineId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var order in domainState.Orders.Values)
@@ -244,25 +297,32 @@ namespace ScaryParty.Pizzeria.Network
 
                     if (existingIdx >= 0)
                     {
-                        if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                        if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                     }
                     else
                     {
                         networkList.Add(dto);
+                        changed = true;
                     }
                 }
             }
+            return changed;
         }
 
-        private void ProjectCallsDelta(PizzeriaState domainState)
+        private bool ProjectCallsDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Calls;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Calls) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].CallId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].CallId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Calls)
@@ -276,7 +336,7 @@ namespace ScaryParty.Pizzeria.Network
                     ExpiresAt = call.ExpiresAt,
                     PrimarySpec = NetPizzaSpecDto.FromDomain(primaryLine?.Specification),
                     PrimaryQty = primaryLine != null ? primaryLine.RequestedQuantity : 1,
-                    Revision = domainState.Revision
+                    Revision = 0
                 };
 
                 int existingIdx = -1;
@@ -287,24 +347,31 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectStacksDelta(PizzeriaState domainState)
+        private bool ProjectStacksDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Stacks;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Stacks) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].StackId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].StackId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Stacks)
@@ -328,24 +395,31 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectBackpacksDelta(PizzeriaState domainState)
+        private bool ProjectBackpacksDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Backpacks;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Backpacks) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].BackpackId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].BackpackId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Backpacks)
@@ -364,6 +438,9 @@ namespace ScaryParty.Pizzeria.Network
                     RotW = bp.WorldRot.W,
                     Capacity = bp.Capacity,
                     ItemCount = bp.Items.Count,
+                    Integrity = bp.Integrity,
+                    MaxIntegrity = bp.MaxIntegrity,
+                    IsTorn = bp.IsTorn,
                     Revision = bp.Revision
                 };
 
@@ -375,24 +452,31 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectSupplyOrdersDelta(PizzeriaState domainState)
+        private bool ProjectSupplyOrdersDelta(PizzeriaState domainState)
         {
             var networkList = _netState.SupplyOrders;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.SupplyOrders) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].SupplyOrderId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].SupplyOrderId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.SupplyOrders)
@@ -406,16 +490,18 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectUpgradesDelta(PizzeriaState domainState)
+        private bool ProjectUpgradesDelta(PizzeriaState domainState)
         {
             var networkList = _netState.Upgrades;
             var domainKeysList = new List<object>();
@@ -424,6 +510,7 @@ namespace ScaryParty.Pizzeria.Network
                 domainKeysList.Add(kvp.Key);
             }
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
                 bool found = false;
@@ -435,7 +522,11 @@ namespace ScaryParty.Pizzeria.Network
                         break;
                     }
                 }
-                if (!found) networkList.RemoveAt(i);
+                if (!found)
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.UpgradeLevels)
@@ -445,7 +536,7 @@ namespace ScaryParty.Pizzeria.Network
                     UpgradeId = kvp.Key,
                     Level = kvp.Value
                 };
-                
+
                 int existingIdx = -1;
                 for (int i = 0; i < networkList.Count; i++)
                 {
@@ -458,13 +549,15 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
         private NetItemDto CreateItemDto(ItemState item)
@@ -485,6 +578,9 @@ namespace ScaryParty.Pizzeria.Network
                 LocationType = (byte)item.Location.Type,
                 HolderId = item.Location.HolderId,
                 SlotId = item.Location.SlotIndex,
+                WorldX = item.Location.WorldX,
+                WorldY = item.Location.WorldY,
+                WorldZ = item.Location.WorldZ,
                 Quality = 1.0f,
                 CookProgress = item.CookProgress,
                 BurnProgress = item.BurnProgress,
@@ -599,6 +695,8 @@ namespace ScaryParty.Pizzeria.Network
                 QuotedReward = order.QuotedPotentialReward,
                 FinalEarnedReward = order.FinalEarnedReward,
                 TicketArchived = order.TicketArchived,
+                ClaimedByClientId = order.ClaimedByClientId,
+                TaskStage = (byte)order.TaskStage,
                 LineCount = order.Lines.Count,
                 Revision = order.Revision
             };
@@ -638,16 +736,21 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
-        private void ProjectCustomersDelta(PizzeriaState domainState)
+        private bool ProjectCustomersDelta(PizzeriaState domainState)
         {
-            if (_netState.Customers == null) return;
+            if (_netState.Customers == null) return false;
             var networkList = _netState.Customers;
             var domainKeys = new HashSet<ulong>();
             foreach (var kvp in domainState.Customers) domainKeys.Add(kvp.Key.Value);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].CustomerId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].CustomerId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Customers)
@@ -689,25 +792,32 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
         }
 
-        private void ProjectTablesDelta(PizzeriaState domainState)
+        private bool ProjectTablesDelta(PizzeriaState domainState)
         {
-            if (_netState.Tables == null) return;
+            if (_netState.Tables == null) return false;
             var networkList = _netState.Tables;
             var domainKeys = new HashSet<int>();
             foreach (var kvp in domainState.Tables) domainKeys.Add(kvp.Key);
 
+            bool changed = false;
             for (int i = networkList.Count - 1; i >= 0; i--)
             {
-                if (!domainKeys.Contains(networkList[i].TableId)) networkList.RemoveAt(i);
+                if (!domainKeys.Contains(networkList[i].TableId))
+                {
+                    networkList.RemoveAt(i);
+                    changed = true;
+                }
             }
 
             foreach (var kvp in domainState.Tables)
@@ -730,13 +840,34 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (existingIdx >= 0)
                 {
-                    if (!networkList[existingIdx].Equals(dto)) networkList[existingIdx] = dto;
+                    if (!networkList[existingIdx].Equals(dto)) { networkList[existingIdx] = dto; changed = true; }
                 }
                 else
                 {
                     networkList.Add(dto);
+                    changed = true;
                 }
             }
+            return changed;
+        }
+
+        private NetNightStateDto CreateNightStateDto(PizzeriaState domainState)
+        {
+            return new NetNightStateDto
+            {
+                NightNumber = domainState.CurrentNightNumber,
+                Phase = (byte)domainState.CurrentNightPhase,
+                DefeatReason = (byte)domainState.NightDefeatReason,
+                RemainingSeconds = domainState.NightRemainingSeconds,
+                PrepRemainingSeconds = domainState.NightPrepRemainingSeconds,
+                GraceRemainingSeconds = domainState.NightGraceRemainingSeconds,
+                EarnedRevenue = domainState.NightEarnedRevenue,
+                RevenueGoal = domainState.NightRevenueGoal,
+                OrdersCompleted = domainState.NightOrdersCompleted,
+                OrdersFailed = domainState.NightOrdersFailed,
+                LostCustomers = domainState.NightLostCustomers,
+                Revision = domainState.Revision
+            };
         }
     }
 }

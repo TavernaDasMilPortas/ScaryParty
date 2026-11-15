@@ -181,7 +181,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
             ulong attemptId,
             ulong requesterId,
             DefinitionCatalog catalog,
-            OrderService orderService)
+            OrderService orderService,
+            float burnedFactor = 0.25f,
+            float unbakedFactor = 0f,
+            int baseRestaurantBonus = 20)
         {
             if (itemIds == null || itemIds.Count == 0)
                 return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.InvalidOperation, "Nenhum item selecionado.");
@@ -216,7 +219,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             var order = orderService.GetActiveOrderForDestination(destinationId, state);
 
-            var result = _evaluator.EvaluateDelivery(order, deliveredItems, catalog);
+            var result = _evaluator.EvaluateDelivery(
+                order,
+                deliveredItems,
+                catalog,
+                burnedFactor,
+                unbakedFactor,
+                baseRestaurantBonus);
 
             foreach (var item in deliveredItems)
             {
@@ -228,14 +237,25 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 }
             }
 
+            bool deliverySucceeded = result.CorrectBakedCount > 0;
             if (order != null)
             {
                 order.Lifecycle = OrderLifecycle.Completed;
+                order.TaskStage = deliverySucceeded ? OrderTaskBoardStage.Completed : OrderTaskBoardStage.Failed;
                 order.FinalEarnedReward = result.PersonalEarned;
                 order.Revision++;
             }
 
             state.RestaurantBudget += result.RestaurantEarned;
+            state.NightEarnedRevenue += result.RestaurantEarned;
+            if (deliverySucceeded)
+            {
+                state.NightOrdersCompleted++;
+            }
+            else
+            {
+                state.NightOrdersFailed++;
+            }
             state.DeliveryAttempts.Record(attemptId);
             state.IncrementRevision();
 

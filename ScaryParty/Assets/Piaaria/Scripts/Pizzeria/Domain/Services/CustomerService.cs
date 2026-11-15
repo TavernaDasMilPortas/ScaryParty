@@ -408,6 +408,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
             customer.Revision++;
 
             state.RestaurantBudget += eval.RestaurantEarned;
+            state.NightEarnedRevenue += eval.RestaurantEarned;
+            if (eval.RestaurantEarned > 0)
+            {
+                state.NightOrdersCompleted++;
+            }
+            else
+            {
+                state.NightOrdersFailed++;
+            }
 
             // Concluir e arquivar o pedido correspondente no quadro
             if (customer.OrderId.IsValid && state.Orders.TryGetValue(customer.OrderId, out var order))
@@ -417,6 +426,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     order.Lines[i].DeliveredQuantity = order.Lines[i].Quantity;
                 }
                 order.Lifecycle = OrderLifecycle.Delivered;
+                order.TaskStage = eval.RestaurantEarned > 0 ? OrderTaskBoardStage.Completed : OrderTaskBoardStage.Failed;
                 order.IsArchivedFromBoard = true;
                 order.Revision++;
             }
@@ -478,6 +488,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         cust.Phase = CustomerPhase.LeavingAngry;
                         cust.LeavingRemainingSeconds = 5f;
                         cust.Revision++;
+                        state.NightLostCustomers++;
                         _queueService.CompactAndAdvanceQueue(state, qIdx, now);
                         dirty = true;
                     }
@@ -504,8 +515,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
                             if (activeOrder.Lifecycle == OrderLifecycle.Active)
                             {
                                 activeOrder.Lifecycle = OrderLifecycle.Expired;
+                                activeOrder.TaskStage = OrderTaskBoardStage.Failed;
                                 activeOrder.IsArchivedFromBoard = true;
                                 activeOrder.Revision++;
+                                state.NightOrdersFailed++;
                             }
                         }
 
@@ -518,6 +531,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         cust.Phase = CustomerPhase.LeavingAngry;
                         cust.LeavingRemainingSeconds = 6f;
                         cust.Revision++;
+                        state.NightLostCustomers++;
                         dirty = true;
                     }
                 }

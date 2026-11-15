@@ -73,6 +73,27 @@ namespace ScaryParty.Pizzeria.Stations
             return AddressFormat.Format(new AddressId(order.DestinationId));
         }
 
+        public static string FormatTaskStageBadge(byte taskStage)
+        {
+            return (OrderTaskBoardStage)taskStage switch
+            {
+                OrderTaskBoardStage.New => "NOVO",
+                OrderTaskBoardStage.InPrep => "EM PREPARO",
+                OrderTaskBoardStage.Ready => "PRONTO",
+                OrderTaskBoardStage.OutForDelivery => "EM ROTA",
+                OrderTaskBoardStage.Completed => "CONCLUÍDO",
+                OrderTaskBoardStage.Failed => "FALHOU",
+                _ => "NOVO"
+            };
+        }
+
+        public static string FormatClaimedOwner(ulong claimedByClientId)
+        {
+            if (claimedByClientId == ScaryParty.Pizzeria.Domain.Models.OrderState.UnclaimedClientId)
+                return "Livre";
+            return $"Equipe #{claimedByClientId + 1}";
+        }
+
         public static string FormatOrderLineCompact(NetPizzaSpecDto specDto, int recipeIdFallback, int qty, DefinitionCatalog catalog)
         {
             var spec = specDto.BaseDoughId > 0 || specDto.ToppingCount > 0
@@ -150,9 +171,13 @@ namespace ScaryParty.Pizzeria.Stations
             if (textMesh == null) return;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"<size=120%><b>#{order.OrderId}</b></size>");
+            sb.AppendLine($"<size=120%><b>#{order.OrderId}</b></size> <size=75%>[{FormatTaskStageBadge(order.TaskStage)}]</size>");
             string destColor = order.IsDineIn ? "#005599" : "#990000";
             sb.AppendLine($"<color={destColor}><b>{FormatOrderDestinationHeader(order)}</b></color>");
+            if (order.ClaimedByClientId != ScaryParty.Pizzeria.Domain.Models.OrderState.UnclaimedClientId)
+            {
+                sb.AppendLine($"<size=75%><color=#553300>Resp: {FormatClaimedOwner(order.ClaimedByClientId)}</color></size>");
+            }
             sb.AppendLine("<size=70%>------------------</size>");
 
             if (order.LineCount > 0 && order.Qty_0 > 0)

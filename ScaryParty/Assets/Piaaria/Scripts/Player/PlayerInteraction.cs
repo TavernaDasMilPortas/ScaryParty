@@ -85,16 +85,16 @@ public class PlayerInteraction : NetworkBehaviour
                         }
                     }
 
-                    // Regra 1: se todos os slots desta estação estão vinculados a objetos 3D e o raycast acertou apenas
-                    // o corpo da mesa (ou adereços não-interagíveis), bloquear interação com a mesa!
-                    if (!station.HasUnboundSlots)
+                    // Regra 1: se todos os slots desta estação estão vinculados a objetos 3D e o raycast acertou
+                    // o corpo da mesa, verificar se o ponto mirado está dentro do alcance de algum slot da estação
+                    int resolvedSlot = station.ResolveTargetSlotIndex(hit.point);
+                    if (resolvedSlot < 0)
                     {
                         blockedByBoundStationBody = true;
                         return;
                     }
 
-                    // Regra 2: estação possui slots sem objeto 3D -> interage com a malha da mesa no slot mais próximo
-                    station.SetAimContext(hit.point, -1);
+                    station.SetAimContext(hit.point, resolvedSlot);
                 }
 
                 if (!string.IsNullOrEmpty(candidate.InteractPrompt))
@@ -110,9 +110,18 @@ public class PlayerInteraction : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        // Replicated bag views are needed on remote player avatars too.
+        // Replicated bag views and health interfaces are needed on remote player avatars too.
         if (GetComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>() == null)
             gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.BackpackVisualizer>();
+
+        if (GetComponent<ScaryParty.Combat.PlayerHealth>() == null)
+            gameObject.AddComponent<ScaryParty.Combat.PlayerHealth>();
+
+        if (GetComponent<WeaponController>() == null)
+            gameObject.AddComponent<WeaponController>();
+
+        if (GetComponent<WeaponInputHandler>() == null)
+            gameObject.AddComponent<WeaponInputHandler>();
 
         // Only the owning client runs interaction logic
         if (!IsOwner)
@@ -269,7 +278,11 @@ public class PlayerInteraction : NetworkBehaviour
     private ScaryParty.Player.CameraLookLockToken _workCameraLock;
     private int _workAttemptGeneration = 0;
     private bool _workCompletedAwaitingFRelease = false;
+    private float _workStartTime = 0f;
+    private bool _workSawRunning = false;
     private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
+
+    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _currentInteractable != null;
 
     private bool IsWorkFKeyHeld()
     {
@@ -358,7 +371,7 @@ public class PlayerInteraction : NetworkBehaviour
 
             if (Time.unscaledTime >= _nextWorkHeartbeat)
             {
-                _nextWorkHeartbeat = Time.unscaledTime + 0.15f;
+                _nextWorkHeartbeat = Time.unscaledTime + 0.30f;
                 ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.HeartbeatAttendCustomerHoldServerRpc();
             }
             return;
@@ -387,12 +400,28 @@ public class PlayerInteraction : NetworkBehaviour
         if (netState != null && NetworkManager.Singleton != null)
         {
             ulong myId = NetworkManager.Singleton.LocalClientId;
+            bool foundSlotInNetState = false;
             for (int i = 0; i < netState.StationSlots.Count; i++)
             {
                 var slot = netState.StationSlots[i];
                 if (slot.StationId == _workStation && slot.SlotIndex == _workSlot)
                 {
-                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Completed)
+                    foundSlotInNetState = true;
+                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Running)
+                    {
+                        if (slot.WorkerId == myId)
+                        {
+                            _workSawRunning = true;
+                        }
+                        else
+                        {
+                            // Tomado por outro jogador
+                            ReleaseWorkLockOnly();
+                            _workStation = -1;
+                            return;
+                        }
+                    }
+                    else if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Completed)
                     {
                         // Conclusão: liberar câmera mesmo que F continue pressionado; exigir nova pressão
                         _workCompletedAwaitingFRelease = true;
@@ -400,10 +429,8 @@ public class PlayerInteraction : NetworkBehaviour
                         _workStation = -1;
                         return;
                     }
-                    if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Cancelled ||
-                        (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Running && slot.WorkerId != myId))
+                    else if (slot.Phase == (byte)ScaryParty.Pizzeria.Domain.Types.OperationPhase.Cancelled)
                     {
-                        // Cancelamento ou tomado por outro jogador
                         ReleaseWorkLockOnly();
                         _workStation = -1;
                         return;
@@ -411,10 +438,23 @@ public class PlayerInteraction : NetworkBehaviour
                     break;
                 }
             }
+
+            if (!foundSlotInNetState)
+            {
+                // Se a operação estava rodando e sumiu de StationSlots (ProcessingService remove ao completar e converte o item),
+                // ou se passou tempo suficiente desde o início da operação (graça de 0.4s) e ela não existe mais em StationSlots:
+                if (_workSawRunning || Time.unscaledTime > _workStartTime + 0.4f)
+                {
+                    _workCompletedAwaitingFRelease = true;
+                    ReleaseWorkLockOnly();
+                    _workStation = -1;
+                    return;
+                }
+            }
         }
 
         if (Time.unscaledTime < _nextWorkHeartbeat) return;
-        _nextWorkHeartbeat = Time.unscaledTime + 0.2f;
+        _nextWorkHeartbeat = Time.unscaledTime + 0.30f;
         ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.HeartbeatWorkServerRpc(_workStation, _workSlot);
     }
 
@@ -515,7 +555,13 @@ public class PlayerInteraction : NetworkBehaviour
         {
             if (obsHit.collider != null && !obsHit.collider.transform.IsChildOf(this.transform))
             {
-                maxReach = obsHit.distance;
+                // Só limita maxReach se o obstáculo NÃO for um interagível ou posto de trabalho
+                bool isInteractableOrWorkpost = obsHit.collider.GetComponentInParent<IInteractable>() != null ||
+                                               obsHit.collider.GetComponentInParent<ScaryParty.Pizzeria.Authoring.StationWorkpostTarget>() != null;
+                if (!isInteractableOrWorkpost)
+                {
+                    maxReach = obsHit.distance + 0.05f;
+                }
             }
         }
 
@@ -689,6 +735,11 @@ public class PlayerInteraction : NetworkBehaviour
 
         if (_currentInteractable == null)
         {
+            var bagCtrl = GetComponent<ScaryParty.Pizzeria.Player.BackpackController>();
+            if (bagCtrl != null && bagCtrl.TryGetEquippedBag(out var equippedBag) && equippedBag.Integrity < equippedBag.MaxIntegrity)
+            {
+                return;
+            }
             Debug.LogWarning("[PlayerInteraction] [F] Tecla pressionada, mas nenhum objeto/bancada estÃ¡ em foco na mira!");
             ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Nenhum objeto na mira!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
             return;
@@ -844,6 +895,27 @@ public class PlayerInteraction : NetworkBehaviour
                 }
             }
 
+            if (!hasItemOnStation)
+            {
+                int maxSlots = station.slotAnchors != null && station.slotAnchors.Length > 0 ? station.slotAnchors.Length : 2;
+                for (int s = 0; s < maxSlots; s++)
+                {
+                    if (s == slotIndex) continue;
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var it = netState.Items[i];
+                        if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.StationSlot && it.HolderId == (ulong)station.stationId && it.SlotId == s)
+                        {
+                            slotIndex = s;
+                            itemOnStation = it;
+                            hasItemOnStation = true;
+                            break;
+                        }
+                    }
+                    if (hasItemOnStation) break;
+                }
+            }
+
             Debug.Log($"[PlayerInteraction] [F] Itens detectados -> Bancada: {(hasItemOnStation ? $"ItemId={itemOnStation.ItemId}, Def={itemOnStation.DefinitionId}, Cat={(ScaryParty.Pizzeria.Domain.Types.ItemCategory)itemOnStation.Category}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemOnStation.PrepStage}" : "Vazia")} | MÃ£o Ativa ({hand}): {(hasItemInHand ? $"ItemId={itemInHand.ItemId}, Def={itemInHand.DefinitionId}, Cat={(ScaryParty.Pizzeria.Domain.Types.ItemCategory)itemInHand.Category}, Stage={(ScaryParty.Pizzeria.Domain.Types.ProcessingStage)itemInHand.PrepStage}" : "Vazia")} | Outra MÃ£o ({otherHand}): {(hasItemInOtherHand ? $"ItemId={itemInOtherHand.ItemId}, Def={itemInOtherHand.DefinitionId}" : "Vazia")}");
 
             bool isPreparedIngredient = hasItemInHand && (itemInHand.Category == (byte)ScaryParty.Pizzeria.Domain.Types.ItemCategory.Sauce ||
@@ -883,6 +955,8 @@ public class PlayerInteraction : NetworkBehaviour
                 cmd.StartWorkAtomicServerRpc(prep.stationId, slotIndex, 0, hand);
                 _workStation = prep.stationId;
                 _workSlot = slotIndex;
+                _workStartTime = Time.unscaledTime;
+                _workSawRunning = false;
                 _nextWorkHeartbeat = Time.unscaledTime + 0.2f;
                 return;
             }

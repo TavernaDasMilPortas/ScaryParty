@@ -93,6 +93,9 @@ namespace ScaryParty.Pizzeria.Domain.Models
             get => TicketArchived;
             set => TicketArchived = value;
         }
+        public const ulong UnclaimedClientId = ulong.MaxValue;
+        public ulong ClaimedByClientId { get; set; } = UnclaimedClientId;
+        public OrderTaskBoardStage TaskStage { get; set; } = OrderTaskBoardStage.New;
         public uint Revision { get; set; } = 1;
 
         public bool IsDineIn => SourceType == OrderSourceType.WalkIn || TableId >= 0 || CustomerId.IsValid;

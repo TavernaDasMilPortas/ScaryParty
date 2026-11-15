@@ -320,10 +320,10 @@ namespace ScaryParty.City.Editor.Modular
                     break;
 
                 case CityModuleId.J:
-                    // Porta dupla: vão livre de 1.6m x 2.2m (X in [-0.8, 0.8], Y in [0, 2.2])
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(-0.9f, 1.5f, -0.1f), new Vector3(0.2f, 3.0f, 0.2f));
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0.9f, 1.5f, -0.1f), new Vector3(0.2f, 3.0f, 0.2f));
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0f, 2.6f, -0.1f), new Vector3(1.6f, 0.8f, 0.2f));
+                    // Porta dupla (4m / 2 slots): vão livre centralizado (X in [-1.6, 1.6], Y in [0, 2.2])
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(-1.8f, 1.5f, -0.1f), new Vector3(0.4f, 3.0f, 0.2f));
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(1.8f, 1.5f, -0.1f), new Vector3(0.4f, 3.0f, 0.2f));
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0f, 2.6f, -0.1f), new Vector3(3.2f, 0.8f, 0.2f));
                     break;
 
                 case CityModuleId.K:
@@ -633,21 +633,21 @@ namespace ScaryParty.City.Editor.Modular
                     break;
 
                 case CityModuleId.J:
-                    // Porta dupla: NÃO BLOQUEAR O VÃO!
-                    // Batente esquerdo (X in [-1.0, -0.8])
+                    // Porta dupla (4m / 2 slots): NÃO BLOQUEAR O VÃO!
+                    // Batente esquerdo (X in [-2.0, -1.6])
                     BoxCollider colJL = colGo.AddComponent<BoxCollider>();
-                    colJL.center = new Vector3(-0.9f, 1.5f, -0.1f);
-                    colJL.size = new Vector3(0.2f, 3.0f, 0.2f);
+                    colJL.center = new Vector3(-1.8f, 1.5f, -0.1f);
+                    colJL.size = new Vector3(0.4f, 3.0f, 0.2f);
 
-                    // Batente direito (X in [0.8, 1.0])
+                    // Batente direito (X in [1.6, 2.0])
                     BoxCollider colJR = colGo.AddComponent<BoxCollider>();
-                    colJR.center = new Vector3(0.9f, 1.5f, -0.1f);
-                    colJR.size = new Vector3(0.2f, 3.0f, 0.2f);
+                    colJR.center = new Vector3(1.8f, 1.5f, -0.1f);
+                    colJR.size = new Vector3(0.4f, 3.0f, 0.2f);
 
                     // Dintel superior (Y in [2.2, 3.0])
                     BoxCollider colJT = colGo.AddComponent<BoxCollider>();
                     colJT.center = new Vector3(0f, 2.6f, -0.1f);
-                    colJT.size = new Vector3(1.6f, 0.8f, 0.2f);
+                    colJT.size = new Vector3(3.2f, 0.8f, 0.2f);
                     break;
 
                 case CityModuleId.K:
@@ -711,11 +711,11 @@ namespace ScaryParty.City.Editor.Modular
             }
             else if (id == CityModuleId.J)
             {
-                // Porta dupla: duas folhas
-                // Folha esquerda (dobradiça em X = -0.8)
+                // Porta dupla (4m / 2 slots): duas folhas largas
+                // Folha esquerda (dobradiça em X = -1.6)
                 GameObject hingeL = new GameObject("DoorLeaf_Left");
                 hingeL.transform.SetParent(movGo.transform, false);
-                hingeL.transform.localPosition = new Vector3(-0.8f, 0f, -0.1f);
+                hingeL.transform.localPosition = new Vector3(-1.6f, 0f, -0.1f);
 
                 GameObject visL = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 visL.name = "LeafVisual";
@@ -723,14 +723,14 @@ namespace ScaryParty.City.Editor.Modular
                 if (colL != null) UnityEngine.Object.DestroyImmediate(colL);
 
                 visL.transform.SetParent(hingeL.transform, false);
-                visL.transform.localPosition = new Vector3(0.39f, 1.1f, 0f);
-                visL.transform.localScale = new Vector3(0.78f, 2.18f, 0.05f);
+                visL.transform.localPosition = new Vector3(0.78f, 1.1f, 0f);
+                visL.transform.localScale = new Vector3(1.56f, 2.18f, 0.05f);
                 visL.GetComponent<Renderer>().sharedMaterial = materials[CityModuleMaterialRole.Wood];
 
-                // Folha direita (dobradiça em X = +0.8)
+                // Folha direita (dobradiça em X = +1.6)
                 GameObject hingeR = new GameObject("DoorLeaf_Right");
                 hingeR.transform.SetParent(movGo.transform, false);
-                hingeR.transform.localPosition = new Vector3(0.8f, 0f, -0.1f);
+                hingeR.transform.localPosition = new Vector3(1.6f, 0f, -0.1f);
 
                 GameObject visR = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 visR.name = "LeafVisual";
@@ -738,8 +738,8 @@ namespace ScaryParty.City.Editor.Modular
                 if (colR != null) UnityEngine.Object.DestroyImmediate(colR);
 
                 visR.transform.SetParent(hingeR.transform, false);
-                visR.transform.localPosition = new Vector3(-0.39f, 1.1f, 0f);
-                visR.transform.localScale = new Vector3(0.78f, 2.18f, 0.05f);
+                visR.transform.localPosition = new Vector3(-0.78f, 1.1f, 0f);
+                visR.transform.localScale = new Vector3(1.56f, 2.18f, 0.05f);
                 visR.GetComponent<Renderer>().sharedMaterial = materials[CityModuleMaterialRole.Wood];
             }
         }

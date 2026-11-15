@@ -53,7 +53,8 @@ namespace ScaryParty.UI.Piaria.Core
             if (Instance == null)
             {
                 Instance = this;
-                if (audioSource == null) audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+                if (audioSource == null) audioSource = GetComponent<AudioSource>();
+                if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
                 audioSource.spatialBlend = 0f;
 
                 if (clickClip == null)

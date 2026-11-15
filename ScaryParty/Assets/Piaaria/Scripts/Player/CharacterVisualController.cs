@@ -133,6 +133,8 @@ namespace ScaryParty.Player
         public void EnsureAnimatorControllerAssigned()
         {
             if (_animator == null) return;
+            _animator.applyRootMotion = false;
+            _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             if (_animator.runtimeAnimatorController != null)
             {
                 if (_defaultAnimatorController == null)

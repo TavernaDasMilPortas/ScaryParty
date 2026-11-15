@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
+using ScaryParty.Pizzeria.Domain.Services;
 
 namespace ScaryParty.Pizzeria.Authoring
 {
@@ -45,6 +46,16 @@ namespace ScaryParty.Pizzeria.Authoring
     {
         [Header("Regras de Composição de Pizzas por Ingredientes")]
         public PizzaCompositionRules compositionRules;
+
+        [Header("Ciclo de Noites e Metas")]
+        public NightConfig nightConfig;
+
+        public NightGoalParameters ResolveNightParameters(int nightNumber)
+        {
+            return nightConfig != null
+                ? nightConfig.ResolveParameters(nightNumber)
+                : NightCycleService.GetDefaultParameters(nightNumber);
+        }
 
         [Header("Traços de Clientes Presenciais (10 padrão se vazio)")]
         public List<CustomerTraitDef> customerTraits = new List<CustomerTraitDef>();

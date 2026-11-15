@@ -21,6 +21,14 @@ namespace ScaryParty.Pizzeria.Network
         public NetworkList<NetUpgradeDto> Upgrades;
         public NetworkList<NetCustomerDto> Customers;
         public NetworkList<NetTableDto> Tables;
+        public NetworkList<NetWeaponStateDto> Weapons;
+        public NetworkList<NetPlayerCombatDto> PlayerCombatStates;
+
+        public NetworkVariable<NetNightStateDto> NightState = new NetworkVariable<NetNightStateDto>(
+            default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+        public NetworkVariable<NetMotorcycleDto> MotorcycleState = new NetworkVariable<NetMotorcycleDto>(
+            default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         public NetworkVariable<int> RestaurantBudget = new NetworkVariable<int>(
             500, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -50,10 +58,62 @@ namespace ScaryParty.Pizzeria.Network
             Upgrades = new NetworkList<NetUpgradeDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Customers = new NetworkList<NetCustomerDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Tables = new NetworkList<NetTableDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            Weapons = new NetworkList<NetWeaponStateDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            PlayerCombatStates = new NetworkList<NetPlayerCombatDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        }
+
+        public bool IsHandOccupiedByWeapon(ulong playerId, int slotId)
+        {
+            if (Weapons == null) return false;
+            for (int i = 0; i < Weapons.Count; i++)
+            {
+                var w = Weapons[i];
+                if (w.IsAvailableOnRack || w.OwnerClientId != playerId) continue;
+                if (w.WeaponType == 2) return true; // Shotgun (2 maos)
+                if (w.WeaponType == 1 && slotId == (int)ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Right) return true; // Pistola na mao direita
+            }
+            return false;
+        }
+
+        public bool TryGetEquippedWeapon(ulong playerId, out NetWeaponStateDto weapon)
+        {
+            if (Weapons != null)
+            {
+                for (int i = 0; i < Weapons.Count; i++)
+                {
+                    if (!Weapons[i].IsAvailableOnRack && Weapons[i].OwnerClientId == playerId)
+                    {
+                        weapon = Weapons[i];
+                        return true;
+                    }
+                }
+            }
+            weapon = default;
+            return false;
+        }
+
+        public bool TryGetPlayerCombatState(ulong playerId, out NetPlayerCombatDto combatState)
+        {
+            if (PlayerCombatStates != null)
+            {
+                for (int i = 0; i < PlayerCombatStates.Count; i++)
+                {
+                    if (PlayerCombatStates[i].ClientId == playerId)
+                    {
+                        combatState = PlayerCombatStates[i];
+                        return true;
+                    }
+                }
+            }
+            combatState = default;
+            return false;
         }
 
         public bool IsHandOccupied(ulong playerId, int slotId)
         {
+            if (IsHandOccupiedByWeapon(playerId, slotId))
+                return true;
+
             if (Items != null)
             {
                 for (int i = 0; i < Items.Count; i++)

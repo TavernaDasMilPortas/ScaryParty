@@ -1598,6 +1598,22 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
+  Weapons:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  PlayerCombatStates:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  NightState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  MotorcycleState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
   RestaurantBudget:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -2503,6 +2519,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &714908700748984002
 GameObject:
@@ -4881,6 +4899,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &1223801303890125023
 GameObject:
@@ -4958,6 +4978,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   stackId: 1
   capacity: 6
@@ -8500,6 +8522,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots: []
   maxVisibleTickets: 4
@@ -9814,6 +9838,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -13284,6 +13310,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &3666199127112860975
 GameObject:
@@ -13362,6 +13390,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &3673186286059960109
@@ -14706,6 +14736,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6003720415429448067}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6418703253578440912
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14841,6 +14874,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4134682602156565185}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4527219661317800668
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15523,6 +15559,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1956891609559374366}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2509065016171630116
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16110,6 +16149,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -17869,6 +17910,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &4950396977891507755
 GameObject:
@@ -18270,6 +18313,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 7035114354810584313}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2158259934793215539
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19438,6 +19484,8 @@ MonoBehaviour:
   - {fileID: 2385516635036999525}
   - {fileID: 1726340740669478189}
   - {fileID: 7307850701960120323}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &5374306338536377720
 GameObject:
   m_ObjectHideFlags: 0
@@ -19673,6 +19721,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8610961646076596382}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2713371289012394634
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21285,6 +21336,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &5858492313775747193
@@ -21958,6 +22011,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -23798,6 +23853,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 2168879368295403094}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4411790206493640840
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -23894,6 +23952,8 @@ MonoBehaviour:
   - {fileID: 7877262833172317054}
   - {fileID: 5053726988543958562}
   - {fileID: 5917996810253463638}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &6449839076095685583
 GameObject:
   m_ObjectHideFlags: 0
@@ -25930,6 +25990,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &6954834434812605529
 GameObject:
@@ -28329,6 +28391,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &7370468080764018766
 GameObject:
@@ -29977,6 +30041,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &7676138283859140152
 GameObject:
@@ -32680,6 +32746,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &8495434487474355892
 GameObject:
@@ -33113,6 +33181,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &8568972427860215919
@@ -33304,6 +33374,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ringer: {fileID: 0}
   isRinging: 0
@@ -33420,6 +33492,7 @@ MonoBehaviour:
   customRingClip: {fileID: 0}
   beaconLight: {fileID: 0}
   beaconRenderer: {fileID: 0}
+  phoneVisualPivot: {fileID: 0}
   ringingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8614344853231986265
@@ -36193,6 +36266,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &9073107017787463271

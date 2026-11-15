@@ -24,10 +24,18 @@ namespace ScaryParty.Pizzeria.Stations
         [Tooltip("Âncoras de posição na fila (índice 0 = frente do balcão, 1 = segundo da fila, etc.)")]
         public Transform[] queueSlotAnchors;
 
+        [Header("Indicador de Progresso (UI Mundo)")]
+        [SerializeField] private Transform progressAnchor;
+        [SerializeField] private float progressBarMarginMeters = 0.28f;
+
         private StationProgressBar _progressBar;
 
         private void Awake()
         {
+            if (progressAnchor == null)
+            {
+                progressAnchor = transform.Find("ProgressAnchor");
+            }
             EnsureNavMeshObstacle();
         }
 
@@ -36,7 +44,7 @@ namespace ScaryParty.Pizzeria.Stations
             EnsureQueueSlotAnchors();
             EnsureNavMeshObstacle();
             _progressBar = StationProgressBar.Create(transform);
-            _progressBar.transform.position = GetQueueSlotPosition(0) + Vector3.up * 2.0f;
+            _progressBar.PositionAboveBounds(transform, progressAnchor, progressBarMarginMeters);
             _progressBar.Hide();
         }
 
@@ -165,7 +173,14 @@ namespace ScaryParty.Pizzeria.Stations
             if (_progressBar == null) return;
             if (TryGetFrontCustomer(out var front) && front.AttendProgressNormalized > 0.01f && front.AttendProgressNormalized < 1f)
             {
-                _progressBar.transform.position = GetQueueSlotPosition(0) + Vector3.up * 2.05f;
+                if (progressAnchor != null)
+                {
+                    _progressBar.transform.position = progressAnchor.position;
+                }
+                else
+                {
+                    _progressBar.transform.position = GetQueueSlotPosition(0) + Vector3.up * 2.05f;
+                }
                 _progressBar.SetProgress(front.AttendProgressNormalized, new Color(0.25f, 0.85f, 0.4f));
             }
             else

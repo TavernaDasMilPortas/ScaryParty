@@ -1,12 +1,22 @@
 using UnityEngine;
+using Unity.Netcode;
 using StarterAssets;
+using ScaryParty.Combat;
+using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Presentation;
+using ScaryParty.UI.Piaria.Presenters;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class WeaponController : MonoBehaviour
 {
+    public static bool LocalDrivingMotorcycle { get; set; }
+
     [Header("Weapons")]
     public WeaponBase pistolPrefab;
     public WeaponBase shotgunPrefab;
-    
+
     [Header("References")]
     public Transform rightHandAttachment;
     public Animator animator;
@@ -16,9 +26,15 @@ public class WeaponController : MonoBehaviour
     private WeaponBase currentWeaponInstance;
     private PistolWeapon pistolInstance;
     private ShotgunWeapon shotgunInstance;
-    
+    private NetworkObject _netObj;
+    private WeaponInputHandler _inputHandler;
+    private PlayerHealth _health;
+
     private bool isAiming = false;
+    private bool _isReloading = false;
+    private float _reloadRemaining = 0f;
     private float lastFireTime = 0f;
+    private CharacterController _cc;
 
     private readonly int AnimWeaponMode = Animator.StringToHash("WeaponMode");
     private readonly int AnimIsAiming = Animator.StringToHash("IsAiming");
@@ -28,6 +44,11 @@ public class WeaponController : MonoBehaviour
 
     private void Start()
     {
+        _netObj = GetComponent<NetworkObject>();
+        _inputHandler = GetComponent<WeaponInputHandler>();
+        _health = GetComponent<PlayerHealth>();
+        _cc = GetComponent<CharacterController>();
+
         var visualCtrl = GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
         if (animator == null)
         {
@@ -37,7 +58,7 @@ public class WeaponController : MonoBehaviour
                 animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
         }
         if (tpc == null) tpc = GetComponent<ThirdPersonController>();
-        
+
         if (rightHandAttachment == null)
         {
             if (visualCtrl != null && visualCtrl.RightHandBone != null)
@@ -48,8 +69,7 @@ public class WeaponController : MonoBehaviour
             {
                 if (animator.isHuman)
                     rightHandAttachment = animator.GetBoneTransform(HumanBodyBones.RightHand);
-                
-                // Fallback if not a humanoid (Generic rig: arm2.r)
+
                 if (rightHandAttachment == null)
                 {
                     Transform[] allTransforms = GetComponentsInChildren<Transform>();
@@ -67,65 +87,154 @@ public class WeaponController : MonoBehaviour
         }
 
         Transform targetAttachment = rightHandAttachment;
-        bool isLocal = tpc != null && tpc.IsOwner;
+        bool isLocal = _netObj != null ? _netObj.IsOwner : (tpc != null && tpc.IsOwner);
 
         if (isLocal && ScaryParty.Player.FirstPersonCameraController.LocalInstance != null)
         {
             targetAttachment = ScaryParty.Player.FirstPersonCameraController.LocalInstance.RightHandAnchor;
         }
+        if (targetAttachment == null) targetAttachment = transform;
 
-        if (pistolPrefab != null && targetAttachment != null)
+        if (pistolPrefab != null)
         {
             pistolInstance = Instantiate(pistolPrefab, targetAttachment) as PistolWeapon;
-            if (pistolInstance != null)
-            {
-                pistolInstance.transform.localPosition = Vector3.zero;
-                pistolInstance.transform.localRotation = Quaternion.identity;
-                if (isLocal) SetLayerRecursively(pistolInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
-                pistolInstance.OnUnequip();
-            }
+        }
+        else
+        {
+            pistolInstance = CreatePlaceholderWeapon<PistolWeapon>(targetAttachment, "PlaceholderPistol", false);
         }
 
-        if (shotgunPrefab != null && targetAttachment != null)
+        if (pistolInstance != null)
+        {
+            pistolInstance.transform.localPosition = Vector3.zero;
+            pistolInstance.transform.localRotation = Quaternion.identity;
+            if (isLocal)
+            {
+                int fpLayer = LayerMask.NameToLayer("FirstPersonOnly");
+                if (fpLayer >= 0) SetLayerRecursively(pistolInstance.gameObject, fpLayer);
+            }
+            pistolInstance.OnUnequip();
+        }
+
+        if (shotgunPrefab != null)
         {
             shotgunInstance = Instantiate(shotgunPrefab, targetAttachment) as ShotgunWeapon;
-            if (shotgunInstance != null)
-            {
-                shotgunInstance.transform.localPosition = Vector3.zero;
-                shotgunInstance.transform.localRotation = Quaternion.identity;
-                if (isLocal) SetLayerRecursively(shotgunInstance.gameObject, LayerMask.NameToLayer("FirstPersonOnly"));
-                shotgunInstance.OnUnequip();
-            }
+        }
+        else
+        {
+            shotgunInstance = CreatePlaceholderWeapon<ShotgunWeapon>(targetAttachment, "PlaceholderShotgun", true);
         }
 
-        SetWeaponMode(WeaponMode.Unarmed);
+        if (shotgunInstance != null)
+        {
+            shotgunInstance.transform.localPosition = Vector3.zero;
+            shotgunInstance.transform.localRotation = Quaternion.identity;
+            if (isLocal)
+            {
+                int fpLayer = LayerMask.NameToLayer("FirstPersonOnly");
+                if (fpLayer >= 0) SetLayerRecursively(shotgunInstance.gameObject, fpLayer);
+            }
+            shotgunInstance.OnUnequip();
+        }
+
+        SetWeaponMode(WeaponMode.Unarmed, forceFromReplication: true);
     }
 
     private void Update()
     {
         UpdateAnimatorLocomotionBools();
+
+        ulong ownerId = _netObj != null ? _netObj.OwnerClientId : 0;
+        var netState = PizzeriaNetworkState.Instance;
+        NetWeaponStateDto repWeapon = default;
+        bool hasRepWeapon = netState != null && netState.TryGetEquippedWeapon(ownerId, out repWeapon);
+        WeaponMode repMode = hasRepWeapon ? (WeaponMode)repWeapon.WeaponType : WeaponMode.Unarmed;
+
+        if (repMode != currentMode)
+        {
+            _isReloading = false;
+            _reloadRemaining = 0f;
+            SetWeaponMode(repMode, forceFromReplication: true);
+        }
+
+        bool isLocalOwner = _netObj != null ? _netObj.IsOwner : (tpc != null && tpc.IsOwner);
+        if (!isLocalOwner) return;
+
+        bool incapacitated = _health != null && _health.IsIncapacitated;
+        bool controlsAllowed = currentMode != WeaponMode.Unarmed && !incapacitated && !LocalDrivingMotorcycle;
+        if (_inputHandler != null && _inputHandler.enableWeaponControls != controlsAllowed)
+        {
+            _inputHandler.enableWeaponControls = controlsAllowed;
+            if (!controlsAllowed) StopAim();
+        }
+
+        if (_isReloading)
+        {
+            _reloadRemaining -= Time.deltaTime;
+            if (_reloadRemaining <= 0f)
+            {
+                _isReloading = false;
+                PizzeriaCommandHandler.Instance?.ReloadWeaponServerRpc();
+            }
+        }
+        else if (controlsAllowed && !GameplayInputGate.IsLocked && IsReloadPressed())
+        {
+            if (hasRepWeapon && repWeapon.CurrentMagAmmo < repWeapon.MaxMagAmmo && repWeapon.RackReserveAmmo > 0)
+            {
+                StartLocalReload(repMode);
+            }
+            else if (hasRepWeapon && repWeapon.RackReserveAmmo <= 0)
+            {
+                NotificationManager.Show("Sem reserva de munição! Aproxime-se do rack e pressione [R].", NotificationType.Warning);
+            }
+        }
+
+        string weaponLabel = currentMode switch
+        {
+            WeaponMode.Pistol => "Pistola",
+            WeaponMode.Shotgun => "Escopeta",
+            _ => string.Empty
+        };
+
+        HudPresenter.Instance?.SetWeaponAmmoHud(
+            currentMode != WeaponMode.Unarmed && !incapacitated && !LocalDrivingMotorcycle,
+            weaponLabel,
+            hasRepWeapon ? repWeapon.CurrentMagAmmo : 0,
+            hasRepWeapon ? repWeapon.RackReserveAmmo : 0,
+            _isReloading,
+            isAiming);
+    }
+
+    private void StartLocalReload(WeaponMode mode)
+    {
+        _isReloading = true;
+        _reloadRemaining = mode == WeaponMode.Shotgun ? 2.0f : 1.4f;
+        StopAim();
+    }
+
+    private static bool IsReloadPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
+            return true;
+#endif
+        return Input.GetKeyDown(KeyCode.R);
     }
 
     public void CycleWeapon(int direction)
     {
-        var inputHandler = GetComponent<WeaponInputHandler>();
-        if (inputHandler != null && (!inputHandler.enableWeaponControls || !inputHandler.enableWeaponScroll))
-        {
+        if (_inputHandler != null && (!_inputHandler.enableWeaponControls || !_inputHandler.enableWeaponScroll))
             return;
-        }
 
-        int mode = (int)currentMode;
-        mode += direction;
+        int mode = (int)currentMode + direction;
         if (mode > 2) mode = 0;
         if (mode < 0) mode = 2;
-        
         SetWeaponMode((WeaponMode)mode);
     }
 
-    public void SetWeaponMode(WeaponMode mode)
+    public void SetWeaponMode(WeaponMode mode, bool forceFromReplication = false)
     {
-        var inputHandler = GetComponent<WeaponInputHandler>();
-        if (inputHandler != null && !inputHandler.enableWeaponControls && mode != WeaponMode.Unarmed)
+        if (!forceFromReplication && _inputHandler != null && !_inputHandler.enableWeaponControls && mode != WeaponMode.Unarmed)
         {
             mode = WeaponMode.Unarmed;
         }
@@ -138,8 +247,11 @@ public class WeaponController : MonoBehaviour
         }
 
         currentMode = mode;
-        animator.SetInteger(AnimWeaponMode, (int)currentMode);
-        animator.ResetTrigger(AnimFire); // Reset any pending fire triggers when switching weapons
+        if (animator != null)
+        {
+            animator.SetInteger(AnimWeaponMode, (int)currentMode);
+            animator.ResetTrigger(AnimFire);
+        }
 
         switch (currentMode)
         {
@@ -162,49 +274,100 @@ public class WeaponController : MonoBehaviour
 
     public void StartAim()
     {
-        var inputHandler = GetComponent<WeaponInputHandler>();
-        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
-        if (currentMode == WeaponMode.Unarmed) return;
+        if (_inputHandler != null && !_inputHandler.enableWeaponControls) return;
+        if (currentMode == WeaponMode.Unarmed || _isReloading) return;
         isAiming = true;
-        animator.SetBool(AnimIsAiming, true);
-        // Implementar zoom de câmera ou movimento de ombro aqui futuramente
+        if (animator != null) animator.SetBool(AnimIsAiming, true);
     }
 
     public void StopAim()
     {
         isAiming = false;
-        animator.SetBool(AnimIsAiming, false);
+        if (animator != null) animator.SetBool(AnimIsAiming, false);
     }
 
     public void TriggerFire()
     {
-        var inputHandler = GetComponent<WeaponInputHandler>();
-        if (inputHandler != null && !inputHandler.enableWeaponControls) return;
+        if (_inputHandler != null && !_inputHandler.enableWeaponControls) return;
+        if (_isReloading || LocalDrivingMotorcycle) return;
         if (currentMode == WeaponMode.Unarmed || currentWeaponInstance == null) return;
+        if (_health != null && _health.IsIncapacitated) return;
 
-        if (Time.time >= lastFireTime + currentWeaponInstance.fireRate)
+        if (Time.time < lastFireTime + currentWeaponInstance.fireRate) return;
+
+        ulong ownerId = _netObj != null ? _netObj.OwnerClientId : 0;
+        if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.TryGetEquippedWeapon(ownerId, out var repWeapon))
         {
-            lastFireTime = Time.time;
-            animator.SetTrigger(AnimFire);
-            currentWeaponInstance.Shoot();
+            if (repWeapon.CurrentMagAmmo <= 0)
+            {
+                lastFireTime = Time.time;
+                if (repWeapon.RackReserveAmmo > 0) StartLocalReload(currentMode);
+                else NotificationManager.Show("Pente vazio! Aproxime-se do rack e pressione [R].", NotificationType.Warning);
+                return;
+            }
         }
+
+        lastFireTime = Time.time;
+        if (animator != null) animator.SetTrigger(AnimFire);
+
+        Camera cam = Camera.main;
+        Vector3 origin = cam != null ? cam.transform.position : transform.position + Vector3.up * 1.55f;
+        Vector3 dir = cam != null ? cam.transform.forward : transform.forward;
+        PizzeriaCommandHandler.Instance?.FireWeaponServerRpc(origin, dir);
+    }
+
+    public void PlayRemoteOrLocalFireVisual(Vector3 origin, Vector3 hitPoint, bool didHit)
+    {
+        currentWeaponInstance?.Shoot();
+        SpawnShotTracer(currentWeaponInstance != null ? currentWeaponInstance.transform.position : origin, hitPoint);
+    }
+
+    private void SpawnShotTracer(Vector3 start, Vector3 end)
+    {
+        var tracerGo = new GameObject("ShotTracer");
+        var lr = tracerGo.AddComponent<LineRenderer>();
+        lr.positionCount = 2;
+        lr.SetPosition(0, start);
+        lr.SetPosition(1, end);
+        lr.startWidth = 0.018f;
+        lr.endWidth = 0.008f;
+        lr.useWorldSpace = true;
+        Shader shader = Shader.Find("Sprites/Default") ?? Shader.Find("Universal Render Pipeline/Unlit");
+        if (shader != null) lr.material = new Material(shader);
+        lr.startColor = new Color(1f, 0.88f, 0.45f, 0.9f);
+        lr.endColor = new Color(1f, 0.65f, 0.2f, 0.1f);
+        Destroy(tracerGo, 0.06f);
+    }
+
+    private static T CreatePlaceholderWeapon<T>(Transform parent, string goName, bool isShotgun) where T : WeaponBase
+    {
+        var root = new GameObject(goName);
+        root.transform.SetParent(parent, false);
+        root.transform.localPosition = new Vector3(0.02f, -0.02f, 0.14f);
+        root.transform.localRotation = Quaternion.identity;
+
+        var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        body.name = "Mesh";
+        Destroy(body.GetComponent<Collider>());
+        body.transform.SetParent(root.transform, false);
+        body.transform.localPosition = new Vector3(0f, 0.02f, isShotgun ? 0.18f : 0.08f);
+        body.transform.localScale = isShotgun ? new Vector3(0.06f, 0.08f, 0.56f) : new Vector3(0.04f, 0.06f, 0.24f);
+
+        var renderer = body.GetComponent<Renderer>();
+        if (renderer != null && renderer.material != null)
+        {
+            renderer.material.color = isShotgun ? new Color(0.28f, 0.22f, 0.18f) : new Color(0.18f, 0.2f, 0.24f);
+        }
+
+        return root.AddComponent<T>();
     }
 
     private void UpdateAnimatorLocomotionBools()
     {
-        if (tpc != null)
-        {
-            // Acessando as velocidades privadas do ThirdPersonController usando reflexão seria o ideal, 
-            // mas como é só leitura para animação, podemos basear no input ou em propriedades conhecidas.
-            // Aqui vamos assumir uma simplificação baseada nos campos públicos do ThirdPersonController.
-            float speed = new Vector3(tpc.GetComponent<CharacterController>().velocity.x, 0, tpc.GetComponent<CharacterController>().velocity.z).magnitude;
-            
-            bool isMoving = speed > 0.1f;
-            bool isSprinting = speed > tpc.MoveSpeed; // Se maior que moveSpeed base, tá correndo
-
-            animator.SetBool(AnimIsMoving, isMoving);
-            animator.SetBool(AnimIsSprinting, isSprinting);
-        }
+        if (tpc == null || animator == null || _cc == null) return;
+        float speed = new Vector3(_cc.velocity.x, 0f, _cc.velocity.z).magnitude;
+        animator.SetBool(AnimIsMoving, speed > 0.1f);
+        animator.SetBool(AnimIsSprinting, speed > tpc.MoveSpeed);
     }
 
     private void SetLayerRecursively(GameObject obj, int newLayer)
@@ -214,26 +377,6 @@ public class WeaponController : MonoBehaviour
         foreach (Transform child in obj.transform)
         {
             SetLayerRecursively(child.gameObject, newLayer);
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (currentMode != WeaponMode.Unarmed)
-        {
-            float size = 10f;
-            float thickness = 2f;
-            float x = Screen.width / 2f;
-            float y = Screen.height / 2f;
-
-            GUI.color = new Color(1, 1, 1, 0.8f);
-            
-            // Draw horizontal line
-            GUI.DrawTexture(new Rect(x - size, y - thickness / 2f, size * 2f, thickness), Texture2D.whiteTexture);
-            // Draw vertical line
-            GUI.DrawTexture(new Rect(x - thickness / 2f, y - size, thickness, size * 2f), Texture2D.whiteTexture);
-
-            GUI.color = Color.white; // Reset color
         }
     }
 }

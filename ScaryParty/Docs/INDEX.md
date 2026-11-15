@@ -50,4 +50,9 @@ Este índice reúne a documentação técnica do projeto com links relativos e d
   - [ADR-0001](Decisions/ADR-0001-politica-execucao-manual-e-agentes.md) — Política de execução manual da Unity e regras de contexto.
 - [Changes/](Changes/) — Modelos e relatórios de mudanças arquiteturais profundas.
 - [Architecture/](Architecture/) — Visão sistêmica dos domínios do jogo.
+- [Experience/](Experience/) — Documentação do Plano Noturno Revisão 2:
+  - [Audit.md](Experience/Audit.md) — Mapeamento de achados A01–A16 e correções aplicadas (Entrada, Bancadas, Cidade Modular e Trânsito).
+  - [NightsAndCombat.md](Experience/NightsAndCombat.md) — Ciclo de noites (O5), quadro/HUD/pausa/tutorial (O1–O3/O7/O8/O20), combate base, mochila danificável e moto + buzina (O13).
+  - [Validation.md](Experience/Validation.md) — Compilações estáticas executadas e roteiro manual L2 no Unity Editor aberto.
+  - [NightReport.md](Experience/NightReport.md) — Relatório de entrega por fases (Fases 0–7) e exclusões preservadas.
 - [Overnight/](Overnight/) — Relatórios históricos de auditorias e planos noturnos anteriores.

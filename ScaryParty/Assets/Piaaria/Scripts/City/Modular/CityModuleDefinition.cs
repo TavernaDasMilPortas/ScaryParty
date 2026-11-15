@@ -237,19 +237,19 @@ namespace ScaryParty.City.Modular
                 case CityModuleId.J:
                     def.displayName = "Parede com Porta Dupla";
                     def.category = CityModuleCategory.WallDoubleDoor;
-                    def.width = 2.0f; def.height = 3.0f; def.depth = 0.2f;
-                    def.occupiedSlots = 1;
+                    def.width = 4.0f; def.height = 3.0f; def.depth = 0.2f;
+                    def.occupiedSlots = 2; // A03: Ocupa 2 módulos consecutivos (4m)
                     def.isEntrance = true;
                     def.isDoubleDoor = true;
                     def.visualPositionOffset = new Vector3(0f, 1.5f, -0.1f);
                     def.visualRotationOffset = new Vector3(0f, -90f, 0f);
-                    // Vão de 1.6m x 2.2m centralizado
+                    // Vão centralizado em 4m de largura
                     def.entranceAnchorLocal = new Vector3(0f, 0f, 0f);
-                    def.approachAnchorLocal = new Vector3(0f, 0f, 1.0f);
-                    def.interiorAnchorLocal = new Vector3(0f, 0f, -1.0f);
-                    def.deliveryAnchorLocal = new Vector3(0f, 0f, 0.4f);
+                    def.approachAnchorLocal = new Vector3(0f, 0f, 1.2f);
+                    def.interiorAnchorLocal = new Vector3(0f, 0f, -1.2f);
+                    def.deliveryAnchorLocal = new Vector3(0f, 0f, 0.5f);
                     def.awningAnchorLocal = new Vector3(0f, 2.6f, 0f);
-                    def.movingPartHingeLocal = new Vector3(-0.8f, 1.1f, -0.1f);
+                    def.movingPartHingeLocal = new Vector3(-1.6f, 1.1f, -0.1f);
                     def.materialRoles = new[] { CityModuleMaterialRole.Wall, CityModuleMaterialRole.Trim, CityModuleMaterialRole.Wood };
                     break;
 

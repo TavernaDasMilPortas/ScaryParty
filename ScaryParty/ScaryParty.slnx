@@ -96,6 +96,7 @@
   <Project Path="Unity.Services.Core.Analytics.csproj" />
   <Project Path="MPUIKit.Editor.csproj" />
   <Project Path="Unity.Netcode.Editor.csproj" />
+  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="Unity.AI.Navigation.csproj" />
   <Project Path="Unity.Mathematics.Editor.csproj" />
   <Project Path="Unity.Services.Core.csproj" />
@@ -118,7 +119,6 @@
   <Project Path="Sirenix.OdinInspector.Modules.UnityMathematics.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetVis.Editor.Visualization.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1.csproj" />
-  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetStatsReporting.csproj" />
   <Project Path="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
   <Project Path="Unity.Services.Core.Scheduler.csproj" />

@@ -22,10 +22,12 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private Label _titleLabel;
         private Label _addressLabel;
+        private Label _teamStatusLabel;
         private Label _timerLabel;
         private VisualElement _linesContainer;
         private VisualElement _archiveBar;
         private Label _archiveHintLabel;
+        private Button _claimToggleBtn;
 
         private NetOrderDto _currentOrder;
         private bool _isOpen = false;
@@ -144,8 +146,15 @@ namespace ScaryParty.Pizzeria.Presentation
             _addressLabel.style.fontSize = 24;
             _addressLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
             _addressLabel.style.color = new Color(0.7f, 0.1f, 0.1f);
-            _addressLabel.style.marginBottom = 10;
+            _addressLabel.style.marginBottom = 6;
             _sheetBox.Add(_addressLabel);
+
+            _teamStatusLabel = new Label("ETAPA: NOVO | Responsável: Livre");
+            _teamStatusLabel.style.fontSize = 16;
+            _teamStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _teamStatusLabel.style.color = new Color(0.25f, 0.25f, 0.3f);
+            _teamStatusLabel.style.marginBottom = 10;
+            _sheetBox.Add(_teamStatusLabel);
 
             var divider1 = new VisualElement();
             divider1.style.height = 2;
@@ -205,7 +214,19 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var footer = new VisualElement();
             footer.style.flexDirection = FlexDirection.Row;
-            footer.style.justifyContent = Justify.FlexEnd;
+            footer.style.justifyContent = Justify.SpaceBetween;
+
+            _claimToggleBtn = new Button(ToggleClaimOrder);
+            _claimToggleBtn.text = "Assumir Pedido [C]";
+            _claimToggleBtn.style.fontSize = 17;
+            _claimToggleBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _claimToggleBtn.style.backgroundColor = new Color(0.18f, 0.45f, 0.72f);
+            _claimToggleBtn.style.color = Color.white;
+            _claimToggleBtn.style.paddingLeft = 18;
+            _claimToggleBtn.style.paddingRight = 18;
+            _claimToggleBtn.style.paddingTop = 10;
+            _claimToggleBtn.style.paddingBottom = 10;
+            footer.Add(_claimToggleBtn);
 
             var closeButtonFooter = new Button(Close);
             closeButtonFooter.text = "Fechar [E / Esc]";
@@ -266,6 +287,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     ? new Color(0.1f, 0.35f, 0.65f)
                     : new Color(0.7f, 0.1f, 0.1f);
             }
+
+            RefreshTeamClaimUi();
 
             if (_linesContainer != null)
             {
@@ -388,6 +411,11 @@ namespace ScaryParty.Pizzeria.Presentation
                     return;
                 }
 
+                if (kb.cKey.wasPressedThisFrame && _currentOrder.Lifecycle == (byte)OrderLifecycle.Accepted)
+                {
+                    ToggleClaimOrder();
+                }
+
                 bool isDeliveredOrDone = _currentOrder.Lifecycle == (byte)OrderLifecycle.Delivered ||
                                          _currentOrder.Lifecycle == (byte)OrderLifecycle.Cancelled ||
                                          _currentOrder.Lifecycle == (byte)OrderLifecycle.Expired;
@@ -416,7 +444,56 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
+            SyncCurrentOrderFromNetwork();
             UpdateTimerDisplay();
+        }
+
+        private void SyncCurrentOrderFromNetwork()
+        {
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null || netState.Orders == null) return;
+
+            for (int i = 0; i < netState.Orders.Count; i++)
+            {
+                var candidate = netState.Orders[i];
+                if (candidate.OrderId == _currentOrder.OrderId)
+                {
+                    if (!candidate.Equals(_currentOrder))
+                    {
+                        _currentOrder = candidate;
+                        RefreshTeamClaimUi();
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void RefreshTeamClaimUi()
+        {
+            string stageText = TicketSheetView.FormatTaskStageBadge(_currentOrder.TaskStage);
+            string ownerText = TicketSheetView.FormatClaimedOwner(_currentOrder.ClaimedByClientId);
+            if (_teamStatusLabel != null)
+            {
+                _teamStatusLabel.text = $"ETAPA: {stageText}  |  Responsável: {ownerText}";
+            }
+
+            if (_claimToggleBtn != null)
+            {
+                bool isActive = _currentOrder.Lifecycle == (byte)OrderLifecycle.Accepted;
+                _claimToggleBtn.style.display = isActive ? DisplayStyle.Flex : DisplayStyle.None;
+                ulong localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
+                bool claimedByMe = _currentOrder.ClaimedByClientId == localId;
+                _claimToggleBtn.text = claimedByMe ? "Liberar Pedido [C]" : "Assumir Pedido [C]";
+                _claimToggleBtn.style.backgroundColor = claimedByMe
+                    ? new Color(0.65f, 0.42f, 0.16f)
+                    : new Color(0.18f, 0.45f, 0.72f);
+            }
+        }
+
+        private void ToggleClaimOrder()
+        {
+            if (_currentOrder.Lifecycle != (byte)OrderLifecycle.Accepted) return;
+            PizzeriaCommandHandler.Instance?.ToggleClaimOrderServerRpc(_currentOrder.OrderId);
         }
 
         private void TriggerArchive()

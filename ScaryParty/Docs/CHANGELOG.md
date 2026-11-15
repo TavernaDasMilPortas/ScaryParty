@@ -5,6 +5,43 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-15] — Correção do Ciclo de Interação e Bancadas (Colocação, Coleta e Trabalho)
+- **Escopo:** `PizzeriaCommandHandler.cs`, `PlayerInteraction.cs`, `StationView.cs`, `PrepStation.cs`, `Docs/CURRENT_STATE.md`, `Docs/CHANGELOG.md`.
+- **Causa Raiz:** Quatro fatores combinados travavam o ciclo de bancadas: 1) `IsStationWithinReach` no servidor media distância apenas até o pivô central do GameObject da mesa, rejeitando jogadores em slots periféricos de bancadas longas (> 6.5m); 2) `HandleRaycast` limitava `maxReach` na malha da própria mesa, impedindo detecção de postos 3D (`StationWorkpostTarget`) e acionando `blockedByBoundStationBody`; 3) resolução rígida de slots não encontrava itens ao mirar ligeiramente fora do centro do slot; 4) `UpdateTrackedWork` aguardava fase `Completed` que nunca era vista porque o servidor remove o slot de `StationSlots` no frame de término, prendendo o look lock de câmera.
+- **Alterações:**
+  - `PizzeriaCommandHandler.cs`: `IsStationWithinReach` atualizado para aceitar `slotId` e testar posição do slot alvo, todos os slot anchors e colliders via `ClosestPoint`, eliminando falsos positivos de distância em estações modulares.
+  - `PlayerInteraction.cs`: Raycast de obstáculos não trunca `maxReach` para interagíveis ou postos de trabalho; `ResolveInteractableFromHits` permite interação com a bancada se o ponto de impacto estiver a até 2m de um slot; `UpdateTrackedWork` detecta término do processo quando o slot é removido de `StationSlots` após ter rodado, liberando o bloqueio de câmera imediatamente; redirecionamento de slot em `ExecuteWorkInteraction` caso o slot mirado esteja vazio mas outro slot da mesma bancada contenha o item/pizza.
+  - `StationView.cs`: `ResolveTargetSlotIndex` permite resolver o slot mais próximo (até 2m) mesmo em estações vinculadas a 3D; `TryPickOrPlace` redireciona coleta `[E]` ou montagem `[F]` para slots ocupados da mesma bancada caso o jogador mire em slot vazio adjacente; `InteractPrompt` atualizado para exibir `[E] Pegar` mesmo quando o slot sob o retículo estiver vazio mas outro contiver item.
+  - `PrepStation.cs`: `InteractPrompt` atualizado com detecção de itens/ingredientes presentes em qualquer slot da bancada de preparo.
+- **Validação:** L0/L1 estáticos concluídos (`git diff --check` limpo, `dotnet build` sem erros). Validação L2 manual detalhada para execução no Unity Editor aberto.
+
+---
+
+## [2026-11-15] — Correções de Sessão Relay/WSS, Animações Remotas, Menu ESC & Otimização de Rede NGO
+- **Escopo:** `UIFeedbackService.cs`, `LobbyManager.cs`, `NetworkAutoStart.cs`, `LobbyScene.unity`, `UIModalStack.cs`, `PauseEscapeMenuPresenter.cs`, `CharacterVisualController.cs`, `OwnerNetworkAnimator.cs`, `PlayerArmature.prefab`, `ThirdPersonController.cs`, `CustomerNpcView.cs`, `PlayerState.cs`, `ReplicationProjector.cs`, `ProcessingService.cs`, `PizzeriaRoot.cs`, `NetDtos.cs`, `PlayerInteraction.cs`, `TrafficManager.cs`, `DeliveryMotorcycleController.cs`, `PizzeriaCommandHandler.cs`, `DemandDirector.cs`, `Docs/{CURRENT_STATE,CHANGELOG}.md`.
+- **Alterações:**
+  - **Áudio UI (`MainGameUI`):** substituição de `??` sobre `UnityEngine.Object` por checagem explícita (`== null`) em `UIFeedbackService.Awake()` antes de `AddComponent<AudioSource>()`.
+  - **Fila de pacotes / Relay WSS:** elevação de `MaxPacketQueueSize` (>= `2048`) e `MaxPayloadSize` (>= `32768`) em `LobbyScene.unity`, `LobbyManager.cs` e `NetworkAutoStart.cs`.
+  - **Fluxo do ESC / Menu de Pausa:** guarda de mesmo frame em `UIModalStack.PushModal`, subpainel de confirmação com guarda de `0.15s` para `"Sair da Partida"`, volta ao menu principal via ESC nos subpainéis (`CanCloseWithEscape` computado) e fallback quando `!_pushedToStack` em `PauseEscapeMenuPresenter.cs`.
+  - **Animações remotas e NPCs:** `AnimatorCullingMode.AlwaysAnimate` em `CharacterVisualController`/`OwnerNetworkAnimator`/`ThirdPersonController`; filtragem via prefab e reflexão em `OwnerNetworkAnimator` desativando sincronização de parâmetros contínuos; estimativa local de velocidade/estado em clientes (`ThirdPersonController.UpdateRemoteVisuals`) e `MotionSpeed = 1f` quando bloqueado; medição real de deslocamento horizontal por frame em `CustomerNpcView.Update()`.
+  - **Redução de tráfego NGO:** `UseUnreliableDeltas`, compressão quaternion/half-float e thresholds maiores em `PlayerArmature.prefab`/`PlayerState`; remoção da comparação incondicional de `Revision` em `NetItemDto.Equals`/`ProjectCallsDelta`, `PublishedRevision` atualizado apenas sob mudança real e tolerâncias maiores em `NetDtos`/`ProcessingService`/`PizzeriaRoot`; heartbeats de trabalho/atendimento a `0.30s`; `TrafficManager` (`0.25s`, RPC `Unreliable` só com clientes remotos, yaw `short` + `RGBA byte`) e `DeliveryMotorcycleController`/`PizzeriaCommandHandler` (`0.08s`, envio `Unreliable` por delta de movimento/rotação); conversão de `DemandDirector` para `MonoBehaviour`.
+- **Validação:** `git diff --check` limpo nos arquivos editados (preservando `.meta` e alterações prévias) e `dotnet build --no-restore -m:1` sequencial nos 4 `.csproj` com 0 erros (`Domain=0`, `Runtime=0`, `Editor=0`, `Tests=0`). Validação manual PlayMode/ParrelSync no Unity Editor pendente (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
+## [2026-11-15] — Plano Noturno de Experiência Completa (Revisão 2 — Fases 0–7)
+- **Escopo:** `Pizzeria/Domain/*`, `Pizzeria/Network/*`, `Pizzeria/Stations/*`, `Pizzeria/Presentation/*`, `Pizzeria/Player/*`, `Pizzeria/Composition/*`, `Pizzeria/Authoring/*`, `City/*`, `City/Modular/*`, `Player/*`, `Weapons/*`, `UI/Piaria/Scripts/Runtime/Presenters/*`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Experience/*`.
+- **Alterações:**
+  - **Base (`A01–A16` + cadeira):** separação estrita servidor/cliente na entrada do lobby + `PizzeriaSceneLoadingCoordinator`; validação autoritativa de posse nos RPCs e `TransferService` preservando Host `clientId == 0`; âncora dedicada para `StationProgressBar`; associação mesa/cadeira com separação de `PlateAnchor`/`NavMeshObstacle` em espaço local vs mundo e animação discreta de sentar em `CustomerNpcView`; porta dupla modular `J = 4m / 2 slots` + ocupação contínua por intervalo e segunda passagem de perímetro; trânsito e cruzamentos por grupos A/B determinísticos, stop-lines e IDs estáveis.
+  - **Experiência aprovada (`O1/O2/O3/O5/O7/O8/O20`):** ciclo de noites (`NightCycleService`, `NightConfig`, `NightResultsPresenter`, derrota operacional exclusivamente por receita da noite vs meta + retry via `NightStartSnapshot`), quadro de comandas (`ToggleClaimOrderServerRpc`), HUD de turno/vida/munição, dicas contextuais (`ContextualTutorialPresenter`) e menu ESC com recuperação segura.
+  - **Combate base & mochila danificável (`12B`):** rack de armas (Pistola 1 mão, Escopeta 2 mãos `10x8`), `PlayerHealth` (`100 HP`, auto-resgate `10s`), `PracticeTargetDummy`, ruptura única da mochila derrubando no máximo 1 última caixa em `LocationType.World` e reparo `[F]` de `3s`.
+  - **Pátio, Moto & Buzina (`MOTO` + `O13`):** `PizzeriaParkingLotBuilder`, `DeliveryMotorcycleController` restrito às vias/pátio com hands-free check no servidor e buzina `[H]` com pulso visual e recuo em `PedestrianNpc`.
+  - **Testes & Docs:** criação de `OvernightExperienceTests.cs` e documentação em `Docs/Experience/*`.
+- **Validação:** `dotnet build` sequencial nos 4 `.csproj` (`Domain` 0/0, `Assembly-CSharp` 0 erros, `Assembly-CSharp-Editor` 0 erros, `Tests` 0/0) e `git diff --check` limpo. Testes Unity Test Runner, foco do Editor para gerar `.meta` dos novos scripts, conferência visual em `GameScene.unity` e ParrelSync pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+- **Risco:** Cena binária `GameScene.unity` não foi editada diretamente; ajustes finos de prefab/override visuais no PlayMode e validação física do lote lateral devem ser confirmados no Editor aberto ([Docs/Experience/Validation.md](Experience/Validation.md)).
+
+---
+
 ## [2026-11-14] — Sistema Completo de Game Feel Cartoon, Animações Táteis, Audio 3D e Studio Wizard (Fases 0–6)
 - **Escopo:** `Presentation/Feedback/*`, `Pizzeria/Presentation/*`, `Pizzeria/Visual/PizzaVisualComposer.cs`, `Pizzeria/Stations/{OvenStation,PhoneRinger,TicketSheetView,StationView}.cs`, `Player/{PlayerInteraction,FirstPersonCameraController,CharacterVisualController}.cs`, `UI/Piaria/Scripts/Runtime/Core/{UIToolkitTweenService,UIFeedbackService}.cs`, `Editor/GameFeel/GameFeelStudioWindow.cs`, `Pizzeria/Editor/Tests/GameFeelSystemTests.cs`, `Docs/GameFeel/*`, `Docs/{CURRENT_STATE,PizzeriaSetup,INDEX}.md`.
 - **Alterações:**

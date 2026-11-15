@@ -115,7 +115,21 @@ namespace StarterAssets
         private StarterAssetsInputs _input;
         private GameObject _mainCamera;
 
+        // remote visual animation estimation + owner parameter deadband cache
+        private Vector3 _lastRemotePosition;
+        private bool _remotePositionInitialized;
+        private float _remoteAnimSpeed;
+        private float _cachedAnimSpeed = float.NaN;
+        private float _cachedAnimMotionSpeed = float.NaN;
+        private bool _hasCachedGrounded;
+        private bool _cachedGrounded;
+        private bool _hasCachedJump;
+        private bool _cachedJump;
+        private bool _hasCachedFreeFall;
+        private bool _cachedFreeFall;
+
         private const float _threshold = 0.01f;
+        private const float AnimFloatDeadband = 0.05f;
 
         private bool _hasAnimator;
 
@@ -204,6 +218,16 @@ namespace StarterAssets
         {
             base.OnNetworkSpawn();
 
+            ResolveCharacterAnimator();
+            if (_animator != null)
+            {
+                _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            }
+
+            _lastRemotePosition = transform.position;
+            _remotePositionInitialized = true;
+            _remoteAnimSpeed = 0f;
+
             if (IsOwner)
             {
                 // Ativar input e controle no jogador local
@@ -235,7 +259,17 @@ namespace StarterAssets
         private void Update()
         {
             if (this == null || !gameObject) return;
-            if (!IsOwner) return;
+
+            if (!_hasAnimator || _animator == null)
+            {
+                ResolveCharacterAnimator();
+            }
+
+            if (!IsOwner)
+            {
+                UpdateRemoteVisuals();
+                return;
+            }
 
             // Se a câmera foi destruída (ex: transição de cena), busca a nova câmera principal
             if (_mainCamera == null)
@@ -243,14 +277,79 @@ namespace StarterAssets
                 _mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
             }
 
-            if (!_hasAnimator || _animator == null)
-            {
-                ResolveCharacterAnimator();
-            }
-
             JumpAndGravity();
             GroundedCheck();
             Move();
+        }
+
+        private void UpdateRemoteVisuals()
+        {
+            Vector3 currentPos = transform.position;
+            if (!_remotePositionInitialized)
+            {
+                _lastRemotePosition = currentPos;
+                _remotePositionInitialized = true;
+                return;
+            }
+
+            float dt = Time.deltaTime;
+            if (dt <= 0.0001f) return;
+
+            Vector3 delta = currentPos - _lastRemotePosition;
+            _lastRemotePosition = currentPos;
+
+            float horizontalDist = new Vector2(delta.x, delta.z).magnitude;
+            float rawSpeed = horizontalDist / dt;
+
+            if (rawSpeed > SprintSpeed * 2.5f)
+            {
+                _remoteAnimSpeed = 0f;
+            }
+            else
+            {
+                if (rawSpeed < 0.12f) rawSpeed = 0f;
+                _remoteAnimSpeed = Mathf.Lerp(_remoteAnimSpeed, rawSpeed, dt * SpeedChangeRate);
+                if (_remoteAnimSpeed < 0.01f) _remoteAnimSpeed = 0f;
+            }
+
+            Vector3 spherePosition = new Vector3(currentPos.x, currentPos.y - GroundedOffset, currentPos.z);
+            Grounded = Physics.CheckSphere(spherePosition, GroundedRadius, GroundLayers, QueryTriggerInteraction.Ignore);
+
+            float vertVel = delta.y / dt;
+            bool isJumping = !Grounded && vertVel > 0.6f;
+            bool isFreeFall = !Grounded && vertVel < -0.6f;
+
+            ApplyLocomotionAnimator(_remoteAnimSpeed, 1f, Grounded, isJumping, isFreeFall);
+        }
+
+        private void ApplyLocomotionAnimator(float speed, float motionSpeed, bool grounded, bool jump, bool freeFall)
+        {
+            if (!_hasAnimator || _animator == null) return;
+            SetAnimFloatCached(_animIDSpeed, ref _cachedAnimSpeed, speed);
+            SetAnimFloatCached(_animIDMotionSpeed, ref _cachedAnimMotionSpeed, motionSpeed);
+            SetAnimBoolCached(_animIDGrounded, ref _hasCachedGrounded, ref _cachedGrounded, grounded);
+            SetAnimBoolCached(_animIDJump, ref _hasCachedJump, ref _cachedJump, jump);
+            SetAnimBoolCached(_animIDFreeFall, ref _hasCachedFreeFall, ref _cachedFreeFall, freeFall);
+        }
+
+        private void SetAnimFloatCached(int paramId, ref float cachedValue, float value)
+        {
+            bool settleZero = value == 0f && !float.IsNaN(cachedValue) && cachedValue != 0f;
+            if (float.IsNaN(cachedValue) || settleZero || Mathf.Abs(value - cachedValue) > AnimFloatDeadband)
+            {
+                _animator.SetFloat(paramId, value);
+                cachedValue = value;
+            }
+        }
+
+        private void SetAnimBoolCached(int paramId, ref bool hasCached, ref bool cachedValue, bool value)
+        {
+            if (!hasCached || cachedValue != value)
+            {
+                _animator.SetBool(paramId, value);
+                cachedValue = value;
+                hasCached = true;
+            }
         }
 
         private void LateUpdate()
@@ -287,7 +386,7 @@ namespace StarterAssets
             // update animator if using character
             if (_hasAnimator)
             {
-                _animator.SetBool(_animIDGrounded, Grounded);
+                SetAnimBoolCached(_animIDGrounded, ref _hasCachedGrounded, ref _cachedGrounded, Grounded);
             }
         }
 
@@ -320,8 +419,8 @@ namespace StarterAssets
                 _animationBlend = 0f;
                 if (_hasAnimator)
                 {
-                    _animator.SetFloat(_animIDSpeed, 0f);
-                    _animator.SetFloat(_animIDMotionSpeed, 0f);
+                    SetAnimFloatCached(_animIDSpeed, ref _cachedAnimSpeed, 0f);
+                    SetAnimFloatCached(_animIDMotionSpeed, ref _cachedAnimMotionSpeed, 1f);
                 }
                 _controller.Move(new Vector3(0.0f, _verticalVelocity, 0.0f) * Time.deltaTime);
                 return;
@@ -392,8 +491,8 @@ namespace StarterAssets
             // update animator if using character
             if (_hasAnimator)
             {
-                _animator.SetFloat(_animIDSpeed, _animationBlend);
-                _animator.SetFloat(_animIDMotionSpeed, inputMagnitude);
+                SetAnimFloatCached(_animIDSpeed, ref _cachedAnimSpeed, _animationBlend);
+                SetAnimFloatCached(_animIDMotionSpeed, ref _cachedAnimMotionSpeed, inputMagnitude);
             }
         }
 
@@ -407,8 +506,8 @@ namespace StarterAssets
                 // update animator if using character
                 if (_hasAnimator)
                 {
-                    _animator.SetBool(_animIDJump, false);
-                    _animator.SetBool(_animIDFreeFall, false);
+                    SetAnimBoolCached(_animIDJump, ref _hasCachedJump, ref _cachedJump, false);
+                    SetAnimBoolCached(_animIDFreeFall, ref _hasCachedFreeFall, ref _cachedFreeFall, false);
                 }
 
                 // stop our velocity dropping infinitely when grounded
@@ -426,7 +525,7 @@ namespace StarterAssets
                     // update animator if using character
                     if (_hasAnimator)
                     {
-                        _animator.SetBool(_animIDJump, true);
+                        SetAnimBoolCached(_animIDJump, ref _hasCachedJump, ref _cachedJump, true);
                     }
                 }
 
@@ -451,7 +550,7 @@ namespace StarterAssets
                     // update animator if using character
                     if (_hasAnimator)
                     {
-                        _animator.SetBool(_animIDFreeFall, true);
+                        SetAnimBoolCached(_animIDFreeFall, ref _hasCachedFreeFall, ref _cachedFreeFall, true);
                     }
                 }
 

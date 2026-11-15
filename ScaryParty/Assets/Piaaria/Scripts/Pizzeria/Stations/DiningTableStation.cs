@@ -35,6 +35,19 @@ namespace ScaryParty.Pizzeria.Stations
         [Tooltip("Objetos de molhos/condimentos que ficam sobre a mesa e devem ser recolhidos quando a pizza for servida.")]
         public GameObject[] sauceObjects;
 
+        [Header("Cadeira Associada e Animação Discreta")]
+        [Tooltip("Cadeira associada explicitamente a esta mesa. Resolvida automaticamente se vazia.")]
+        public Transform associatedChair;
+        [SerializeField] private float chairPullOutDistance = 0.18f;
+        [SerializeField] private float chairAnimSpeed = 6.0f;
+
+        private bool _chairPoseCaptured;
+        private Vector3 _chairRestWorldPos;
+        private Quaternion _chairRestWorldRot;
+        private Vector3 _chairPullDirectionWorld;
+        private bool _chairTargetOccupied;
+        private float _chairOccupiedT;
+
         private static readonly System.Collections.Generic.Dictionary<int, DiningTableStation> _instancesByTableId = new System.Collections.Generic.Dictionary<int, DiningTableStation>();
         public static bool TryGetTable(int id, out DiningTableStation table) => _instancesByTableId.TryGetValue(id, out table);
 
@@ -52,6 +65,7 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 _instancesByTableId.Remove(tableId);
             }
+            SetChairOccupiedVisual(0, false);
         }
 
         private void Awake()
@@ -59,6 +73,14 @@ namespace ScaryParty.Pizzeria.Stations
             EnsureAnchors();
             EnsureSauceObjects();
             EnsureNavMeshObstacle();
+        }
+
+        public void SetChairOccupiedVisual(bool occupied) => SetChairOccupiedVisual(0, occupied);
+
+        public void SetChairOccupiedVisual(int seatIndex, bool occupied)
+        {
+            if (seatIndex != 0) return;
+            _chairTargetOccupied = occupied;
         }
 
         public void EnsureSauceObjects()
@@ -84,6 +106,19 @@ namespace ScaryParty.Pizzeria.Stations
         private void Update()
         {
             UpdateSauceVisibility();
+            UpdateChairAnimation();
+        }
+
+        private void UpdateChairAnimation()
+        {
+            if (!_chairPoseCaptured || associatedChair == null) return;
+
+            float target = _chairTargetOccupied ? 1f : 0f;
+            if (Mathf.Approximately(_chairOccupiedT, target)) return;
+
+            _chairOccupiedT = Mathf.MoveTowards(_chairOccupiedT, target, Time.deltaTime * chairAnimSpeed);
+            associatedChair.position = _chairRestWorldPos + _chairPullDirectionWorld * (chairPullOutDistance * _chairOccupiedT);
+            associatedChair.rotation = _chairRestWorldRot;
         }
 
         public void UpdateSauceVisibility()
@@ -116,31 +151,34 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             obstacle.shape = NavMeshObstacleShape.Box;
-            var mf = GetComponentInChildren<MeshFilter>();
-            if (mf != null && mf.sharedMesh != null)
+            if (TryCalculateTableBodyWorldBounds(out Bounds worldBounds))
             {
-                Bounds b = mf.sharedMesh.bounds;
+                Vector3 c = worldBounds.center;
+                Vector3 e = worldBounds.extents;
                 Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
                 Vector3 max = new Vector3(float.MinValue, float.MinValue, float.MinValue);
+
                 for (int x = -1; x <= 1; x += 2)
                 {
                     for (int y = -1; y <= 1; y += 2)
                     {
                         for (int z = -1; z <= 1; z += 2)
                         {
-                            Vector3 cornerLocal = b.center + new Vector3(b.extents.x * x, b.extents.y * y, b.extents.z * z);
-                            Vector3 cornerThis = transform.InverseTransformPoint(mf.transform.TransformPoint(cornerLocal));
-                            min = Vector3.Min(min, cornerThis);
-                            max = Vector3.Max(max, cornerThis);
+                            Vector3 worldCorner = new Vector3(c.x + e.x * x, c.y + e.y * y, c.z + e.z * z);
+                            Vector3 localCorner = transform.InverseTransformPoint(worldCorner);
+                            min = Vector3.Min(min, localCorner);
+                            max = Vector3.Max(max, localCorner);
                         }
                     }
                 }
+
                 Vector3 localCenter = (min + max) * 0.5f;
                 Vector3 localSize = max - min;
                 obstacle.center = localCenter;
-                obstacle.size = new Vector3(Mathf.Max(0.6f, localSize.x * 0.85f),
-                                            Mathf.Max(0.8f, localSize.y),
-                                            Mathf.Max(0.6f, localSize.z * 0.85f));
+                obstacle.size = new Vector3(
+                    Mathf.Max(0.55f, localSize.x * 0.88f),
+                    Mathf.Max(0.75f, localSize.y),
+                    Mathf.Max(0.55f, localSize.z * 0.88f));
             }
             else
             {
@@ -152,111 +190,209 @@ namespace ScaryParty.Pizzeria.Stations
             obstacle.carveOnlyStationary = true;
         }
 
+        private bool TryCalculateTableBodyWorldBounds(out Bounds worldBounds)
+        {
+            worldBounds = default;
+            bool hasBounds = false;
+
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var r = renderers[i];
+                if (r == null || !r.enabled) continue;
+                if (r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) continue;
+                if (r.GetComponentInParent<Canvas>() != null) continue;
+                if (associatedChair != null && (r.transform == associatedChair || r.transform.IsChildOf(associatedChair))) continue;
+
+                string lower = r.gameObject.name.ToLowerInvariant();
+                if (lower.Contains("cadeira") || lower.Contains("chair") || lower.Contains("seat") ||
+                    lower.Contains("molho") || lower.Contains("sauce") || lower.Contains("condiment") ||
+                    lower.Contains("ketchup") || lower.Contains("plate") || lower.Contains("pizza") ||
+                    lower.Contains("box") || lower.Contains("progress") || lower.Contains("ui") ||
+                    lower.Contains("highlight") || lower.Contains("indicator"))
+                    continue;
+
+                if (r.bounds.size.sqrMagnitude < 0.0001f) continue;
+
+                if (!hasBounds)
+                {
+                    worldBounds = r.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    worldBounds.Encapsulate(r.bounds);
+                }
+            }
+
+            return hasBounds;
+        }
+
+        private Transform ResolveAssociatedChair()
+        {
+            if (associatedChair != null) return associatedChair;
+
+            Transform nearestChair = null;
+
+            // 1. Procurar cadeira filha explícita
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                var ch = transform.GetChild(i);
+                string n = ch.name.ToLowerInvariant();
+                if ((n.Contains("cadeira") || n.Contains("chair")) && !n.Contains("anchor"))
+                {
+                    nearestChair = ch;
+                    break;
+                }
+            }
+
+            // 2. Procurar em irmãos próximos
+            if (nearestChair == null && transform.parent != null)
+            {
+                float minDist = 2.2f;
+                for (int i = 0; i < transform.parent.childCount; i++)
+                {
+                    var sibling = transform.parent.GetChild(i);
+                    if (sibling == transform) continue;
+                    string n = sibling.name.ToLowerInvariant();
+                    if ((n.Contains("cadeira") || n.Contains("chair")) && !n.Contains("anchor"))
+                    {
+                        float dist = Vector2.Distance(
+                            new Vector2(sibling.position.x, sibling.position.z),
+                            new Vector2(transform.position.x, transform.position.z));
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                            nearestChair = sibling;
+                        }
+                    }
+                }
+            }
+
+            // 3. Procurar na raiz da pizzaria
+            if (nearestChair == null)
+            {
+                var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
+                    ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.transform
+                    : transform.root;
+                var all = root.GetComponentsInChildren<Transform>(true);
+                float minDist = 2.2f;
+                for (int i = 0; i < all.Length; i++)
+                {
+                    if (all[i] == transform) continue;
+                    string n = all[i].name.ToLowerInvariant();
+                    if ((n.Contains("cadeira") || n.Contains("chair")) && !n.Contains("anchor"))
+                    {
+                        float dist = Vector2.Distance(
+                            new Vector2(all[i].position.x, all[i].position.z),
+                            new Vector2(transform.position.x, transform.position.z));
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                            nearestChair = all[i];
+                        }
+                    }
+                }
+            }
+
+            associatedChair = nearestChair;
+            return associatedChair;
+        }
+
+        private void SnapChairToFloorIfNeeded(Transform chair)
+        {
+            if (chair == null || _chairPoseCaptured) return;
+
+            var renderers = chair.GetComponentsInChildren<Renderer>(true);
+            bool hasBounds = false;
+            Bounds cb = default;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var r = renderers[i];
+                if (r == null || !r.enabled) continue;
+                if (!hasBounds)
+                {
+                    cb = r.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    cb.Encapsulate(r.bounds);
+                }
+            }
+
+            if (hasBounds)
+            {
+                float floorY = Presentation.CustomerSpawner.SnapToFloor(chair.position).y;
+                float sinkDelta = floorY - cb.min.y;
+                // A08: Corrige cadeira afundada (ex: pivô centralizado no mesh) ou levemente solta sem tocar a raiz do NPC
+                if (Mathf.Abs(sinkDelta) > 0.015f && Mathf.Abs(sinkDelta) < 0.75f)
+                {
+                    chair.position += Vector3.up * sinkDelta;
+                }
+            }
+
+            _chairRestWorldPos = chair.position;
+            _chairRestWorldRot = chair.rotation;
+            Vector3 away = chair.position - transform.position;
+            away.y = 0f;
+            _chairPullDirectionWorld = away.sqrMagnitude > 0.001f ? away.normalized : -transform.forward;
+            _chairPoseCaptured = true;
+        }
+
         public void EnsureAnchors()
         {
-            Transform nearestChair = null;
+            Transform chair = ResolveAssociatedChair();
+            SnapChairToFloorIfNeeded(chair);
+
             float chairSeatY = 0.45f;
+            if (chair != null)
+            {
+                var rend = chair.GetComponentInChildren<Renderer>();
+                if (rend != null)
+                {
+                    chairSeatY = Mathf.Clamp(rend.bounds.size.y * 0.48f, 0.40f, 0.52f);
+                }
+            }
 
             if (seatAnchor == null)
             {
                 seatAnchor = transform.Find("SeatAnchor");
             }
 
-            if (seatAnchor == null)
+            // A06: Nunca reutilizar o Transform da cadeira como seatAnchor
+            if (seatAnchor == null || (chair != null && seatAnchor == chair))
             {
-                // 1. Procurar cadeira filha
-                for (int i = 0; i < transform.childCount; i++)
-                {
-                    var ch = transform.GetChild(i);
-                    string n = ch.name.ToLowerInvariant();
-                    if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
-                    {
-                        nearestChair = ch;
-                        break;
-                    }
-                }
-
-                // 2. Procurar em irmãos ou no salão
-                if (nearestChair == null && transform.parent != null)
-                {
-                    float minDist = 2.5f;
-                    for (int i = 0; i < transform.parent.childCount; i++)
-                    {
-                        var sibling = transform.parent.GetChild(i);
-                        if (sibling == transform) continue;
-                        string n = sibling.name.ToLowerInvariant();
-                        if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
-                        {
-                            float dist = Vector3.Distance(new Vector3(sibling.position.x, 0f, sibling.position.z),
-                                                          new Vector3(transform.position.x, 0f, transform.position.z));
-                            if (dist < minDist)
-                            {
-                                minDist = dist;
-                                nearestChair = sibling;
-                            }
-                        }
-                    }
-                }
-
-                // 3. Procurar na raiz da pizzaria
-                if (nearestChair == null)
-                {
-                    var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null
-                        ? ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.transform
-                        : transform.root;
-                    var all = root.GetComponentsInChildren<Transform>(true);
-                    float minDist = 2.5f;
-                    for (int i = 0; i < all.Length; i++)
-                    {
-                        if (all[i] == transform) continue;
-                        string n = all[i].name.ToLowerInvariant();
-                        if (n.Contains("cadeira") || n.Contains("chair") || n.Contains("seat"))
-                        {
-                            float dist = Vector3.Distance(new Vector3(all[i].position.x, 0f, all[i].position.z),
-                                                          new Vector3(transform.position.x, 0f, transform.position.z));
-                            if (dist < minDist)
-                            {
-                                minDist = dist;
-                                nearestChair = all[i];
-                            }
-                        }
-                    }
-                }
-
                 var go = new GameObject("SeatAnchor");
                 go.transform.SetParent(transform, true);
 
-                if (nearestChair != null)
+                if (chair != null)
                 {
-                    Vector3 chairPos = nearestChair.position;
+                    Vector3 chairPos = _chairPoseCaptured ? _chairRestWorldPos : chair.position;
                     Vector3 toTable = transform.position - chairPos;
                     toTable.y = 0f;
                     Quaternion faceTable = toTable.sqrMagnitude > 0.001f
                         ? Quaternion.LookRotation(toTable.normalized, Vector3.up)
-                        : nearestChair.rotation;
+                        : chair.rotation;
 
-                    go.transform.position = chairPos;
+                    go.transform.position = Presentation.CustomerSpawner.SnapToFloor(chairPos);
                     go.transform.rotation = faceTable;
-
-                    var rend = nearestChair.GetComponentInChildren<Renderer>();
-                    if (rend != null)
-                    {
-                        float h = rend.bounds.size.y;
-                        chairSeatY = Mathf.Clamp(h * 0.48f, 0.40f, 0.52f);
-                    }
                 }
                 else
                 {
                     go.transform.localPosition = new Vector3(0f, 0f, -0.75f);
                     go.transform.localRotation = Quaternion.identity;
+                    Vector3 groundFallback = Presentation.CustomerSpawner.SnapToFloor(go.transform.position);
+                    go.transform.position = groundFallback;
                 }
 
                 seatAnchor = go.transform;
             }
-
-            // Assegurar seatAnchor no piso
-            Vector3 groundSeatPos = Presentation.CustomerSpawner.SnapToFloor(seatAnchor.position);
-            seatAnchor.position = groundSeatPos;
+            else
+            {
+                // Garante que a âncora permaneça no piso
+                seatAnchor.position = Presentation.CustomerSpawner.SnapToFloor(seatAnchor.position);
+            }
 
             // Âncora 2: seatSurfaceAnchor (superfície do assento ~0.45m acima do piso)
             if (seatSurfaceAnchor == null)
@@ -273,52 +409,58 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             // Direção de saída / trás da cadeira (oposta à mesa)
-            Vector3 toTableDir = (transform.position - seatAnchor.position);
+            Vector3 toTableDir = transform.position - seatAnchor.position;
             toTableDir.y = 0f;
             Vector3 backDir = toTableDir.sqrMagnitude > 0.001f ? -toTableDir.normalized : -seatAnchor.forward;
             Vector3 sideDir = Vector3.Cross(Vector3.up, backDir).normalized;
 
-            // Âncora 3: approachAnchor (~0.65m atrás da cadeira, no NavMesh)
-            if (approachAnchor == null)
+            if (_chairPullDirectionWorld.sqrMagnitude < 0.001f)
+            {
+                _chairPullDirectionWorld = backDir;
+            }
+
+            // Âncora 3: approachAnchor (~0.70m atrás da cadeira, no NavMesh fora do carving)
+            if (approachAnchor == null || approachAnchor == seatAnchor)
             {
                 approachAnchor = transform.Find("ApproachAnchor");
                 if (approachAnchor == null)
                 {
                     var aGo = new GameObject("ApproachAnchor");
                     aGo.transform.SetParent(transform, true);
-                    Vector3 approachPos = seatAnchor.position + backDir * 0.65f;
+                    Vector3 approachPos = seatAnchor.position + backDir * 0.70f;
                     aGo.transform.position = Presentation.CustomerSpawner.SnapToFloor(approachPos);
                     aGo.transform.rotation = Quaternion.LookRotation(-backDir, Vector3.up);
                     approachAnchor = aGo.transform;
                 }
             }
 
-            // Âncora 4: exitAnchor (~0.60m atrás e 0.30m lateral)
-            if (exitAnchor == null)
+            // Âncora 4: exitAnchor (~0.65m atrás e 0.35m lateral)
+            if (exitAnchor == null || exitAnchor == seatAnchor)
             {
                 exitAnchor = transform.Find("ExitAnchor");
                 if (exitAnchor == null)
                 {
                     var eGo = new GameObject("ExitAnchor");
                     eGo.transform.SetParent(transform, true);
-                    Vector3 exitPos = seatAnchor.position + backDir * 0.60f + sideDir * 0.30f;
+                    Vector3 exitPos = seatAnchor.position + backDir * 0.65f + sideDir * 0.35f;
                     eGo.transform.position = Presentation.CustomerSpawner.SnapToFloor(exitPos);
                     eGo.transform.rotation = Quaternion.LookRotation(backDir, Vector3.up);
                     exitAnchor = eGo.transform;
                 }
             }
 
-            // Âncora de prato
+            // A07: Âncora de prato calculada via bounds do corpo da mesa e convertida por Transform
             if (plateAnchor == null)
             {
                 plateAnchor = transform.Find("PlateAnchor");
                 if (plateAnchor == null)
                 {
                     var go = new GameObject("PlateAnchor");
-                    go.transform.SetParent(transform, false);
-                    var rend = GetComponentInChildren<Renderer>();
-                    float topY = rend != null ? rend.bounds.max.y - transform.position.y + 0.02f : 0.28f;
-                    go.transform.localPosition = new Vector3(0f, topY, 0f);
+                    go.transform.SetParent(transform, true);
+                    Vector3 worldPlatePos = TryCalculateTableBodyWorldBounds(out Bounds tableBounds)
+                        ? new Vector3(tableBounds.center.x, tableBounds.max.y + 0.02f, tableBounds.center.z)
+                        : transform.position + Vector3.up * 0.78f;
+                    go.transform.position = worldPlatePos;
                     go.transform.localRotation = Quaternion.identity;
                     plateAnchor = go.transform;
                 }
@@ -331,6 +473,13 @@ namespace ScaryParty.Pizzeria.Stations
             Vector3 rawPos = seatAnchor != null
                 ? seatAnchor.position
                 : transform.position - transform.forward * 0.75f;
+
+            if (_chairPoseCaptured && associatedChair != null && _chairOccupiedT > 0.001f)
+            {
+                rawPos += _chairPullDirectionWorld * (chairPullOutDistance * _chairOccupiedT);
+            }
+
+            // Mantém o root do NPC sempre nivelado ao piso
             return Presentation.CustomerSpawner.SnapToFloor(rawPos);
         }
 

@@ -89,11 +89,6 @@ namespace ScaryParty.Pizzeria.Stations
             if (explicitSlot >= 0) return explicitSlot;
             if (LastAimExplicitSlot >= 0) return LastAimExplicitSlot;
 
-            // Regra 1: se todos os slots estão vinculados a objetos 3D e nenhum objeto 3D de slot foi mirado no raycast,
-            // não permite resolver slot pela malha da mesa.
-            if (!HasUnboundSlots)
-                return -1;
-
             if (slotAnchors == null || slotAnchors.Length == 0)
                 return 0;
 
@@ -104,7 +99,6 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < slotAnchors.Length; i++)
             {
                 if (slotAnchors[i] == null) continue;
-                if (_boundSlotIndices.Contains(i)) continue; // Slots com objeto 3D só podem ser mirados diretamente no objeto 3D
 
                 if (refPoint != Vector3.zero)
                 {
@@ -119,6 +113,15 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     bestIdx = i;
                 }
+            }
+
+            // Se todos os slots estão vinculados a objetos 3D e nenhum objeto 3D foi mirado diretamente:
+            // Permite resolver o slot mais próximo se o jogador estiver apontando perto dele (até 2.0m)
+            if (!HasUnboundSlots)
+            {
+                if (refPoint != Vector3.zero && bestDistSq > 4.0f)
+                    return -1;
+                return bestIdx >= 0 ? bestIdx : 0;
             }
 
             return bestIdx >= 0 ? bestIdx : 0;
@@ -177,6 +180,28 @@ namespace ScaryParty.Pizzeria.Stations
                 if (!stationHasItem && !stationHasTool && (playerHasItem || playerHasTool)) return "[E] Colocar";
                 if (stationHasItem && playerHasItem) return "[F] ou [E] Adicionar ingrediente";
 
+                // Se o slot atual está vazio e as mãos estão vazias, mas outro slot nesta bancada tem item ou ferramenta:
+                if (!stationHasItem && !stationHasTool && !playerHasItem && !playerHasTool)
+                {
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var it = netState.Items[i];
+                        if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId)
+                        {
+                            return $"[E] Pegar {itemName}";
+                        }
+                    }
+                    for (int i = 0; i < netState.Tools.Count; i++)
+                    {
+                        var t = netState.Tools[i];
+                        if (t.LocationType == (byte)LocationType.StationSlot && t.HolderId == (ulong)stationId)
+                        {
+                            string tName = t.DefinitionId == 1 ? "Ralador" : "Faca";
+                            return $"[E] Pegar {tName}";
+                        }
+                    }
+                }
+
                 return "[E] Interagir com " + stationName;
             }
         }
@@ -234,6 +259,9 @@ namespace ScaryParty.Pizzeria.Stations
         }
 
         protected ScaryParty.Pizzeria.Presentation.StationProgressBar _progressBar;
+        [Header("Indicador de Progresso (UI Mundo)")]
+        [SerializeField] protected Transform progressAnchor;
+        [SerializeField] protected float progressBarMarginMeters = 0.25f;
         [Header("Apresentação de Portas")]
         [SerializeField] protected ScaryParty.Pizzeria.Presentation.StationDoorPresenter _doorPresenter;
         public ScaryParty.Pizzeria.Presentation.StationDoorPresenter DoorPresenter => _doorPresenter;
@@ -243,6 +271,10 @@ namespace ScaryParty.Pizzeria.Stations
             if (_doorPresenter == null)
             {
                 _doorPresenter = GetComponent<ScaryParty.Pizzeria.Presentation.StationDoorPresenter>();
+            }
+            if (progressAnchor == null)
+            {
+                progressAnchor = transform.Find("ProgressAnchor");
             }
             ValidateAndCalibrateSlotAnchors();
             ScaryParty.Pizzeria.Network.StationRegistry.Register(stationId, transform);
@@ -257,9 +289,7 @@ namespace ScaryParty.Pizzeria.Stations
         {
             ValidateAndCalibrateSlotAnchors();
             _progressBar = ScaryParty.Pizzeria.Presentation.StationProgressBar.Create(transform);
-            // Default offset for the bar above the station
-            var pos = GetSlotPosition(0);
-            _progressBar.transform.position = pos + Vector3.up * 0.4f;
+            _progressBar.PositionAboveBounds(transform, progressAnchor, progressBarMarginMeters);
         }
 
         private void ValidateAndCalibrateSlotAnchors()
@@ -456,6 +486,114 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             int pickHand = handEmpty ? activeHand : (otherHandEmpty ? otherHand : -1);
+
+            // Redirecionamento inteligente: se a bancada está vazia no slot resolvido, mas o jogador tem mão livre e outro slot tem item/ferramenta
+            if (stationEmpty && pickHand != -1)
+            {
+                int bestOccupiedSlot = -1;
+                float bestOccupiedDistSq = float.MaxValue;
+                Vector3 refPoint = LastAimWorldPoint;
+
+                int maxSlots = slotAnchors != null && slotAnchors.Length > 0 ? slotAnchors.Length : 2;
+                for (int s = 0; s < maxSlots; s++)
+                {
+                    if (s == slotIndex) continue;
+                    bool slotHasContent = false;
+                    for (int i = 0; i < state.Items.Count; i++)
+                    {
+                        var it = state.Items[i];
+                        if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId && it.SlotId == s)
+                        {
+                            slotHasContent = true;
+                            break;
+                        }
+                    }
+                    if (!slotHasContent)
+                    {
+                        for (int i = 0; i < state.Tools.Count; i++)
+                        {
+                            var t = state.Tools[i];
+                            if (t.LocationType == (byte)LocationType.StationSlot && t.HolderId == (ulong)stationId && t.SlotId == s)
+                            {
+                                slotHasContent = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (slotHasContent)
+                    {
+                        float dSq = slotAnchors != null && s < slotAnchors.Length && slotAnchors[s] != null && refPoint != Vector3.zero
+                            ? (slotAnchors[s].position - refPoint).sqrMagnitude
+                            : 0f;
+                        if (dSq < bestOccupiedDistSq)
+                        {
+                            bestOccupiedDistSq = dSq;
+                            bestOccupiedSlot = s;
+                        }
+                    }
+                }
+
+                if (bestOccupiedSlot >= 0 && (bestOccupiedDistSq <= 4.0f || refPoint == Vector3.zero))
+                {
+                    slotIndex = bestOccupiedSlot;
+                    for (int i = 0; i < state.Items.Count; i++)
+                    {
+                        var item = state.Items[i];
+                        if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId && item.SlotId == slotIndex)
+                        {
+                            itemOnStation = item;
+                            hasItemOnStation = true;
+                            break;
+                        }
+                    }
+                    for (int i = 0; i < state.Tools.Count; i++)
+                    {
+                        var tool = state.Tools[i];
+                        if (tool.LocationType == (byte)LocationType.StationSlot && tool.HolderId == (ulong)stationId && tool.SlotId == slotIndex)
+                        {
+                            toolOnStation = tool;
+                            hasToolOnStation = true;
+                            break;
+                        }
+                    }
+                    stationEmpty = !hasItemOnStation && !hasToolOnStation;
+                }
+            }
+            // Redirecionamento para montagem: se o jogador tem ingrediente preparado na mão, o slot atual está vazio, mas outro slot tem pizza/massa aberta
+            else if (stationEmpty && hasItemInHand)
+            {
+                bool isPreparedIngredient = itemInHand.Category == (byte)ItemCategory.Sauce ||
+                                            ((itemInHand.Category == (byte)ItemCategory.Cheese || itemInHand.Category == (byte)ItemCategory.Topping) &&
+                                             itemInHand.PrepStage == (byte)ProcessingStage.Prepared);
+                if (isPreparedIngredient)
+                {
+                    int maxSlots = slotAnchors != null && slotAnchors.Length > 0 ? slotAnchors.Length : 2;
+                    for (int s = 0; s < maxSlots; s++)
+                    {
+                        if (s == slotIndex) continue;
+                        for (int i = 0; i < state.Items.Count; i++)
+                        {
+                            var it = state.Items[i];
+                            if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId && it.SlotId == s)
+                            {
+                                bool isPreparedPizzaOrBase = it.Category == (byte)ItemCategory.Pizza ||
+                                                             it.Category == (byte)ItemCategory.PizzaBase ||
+                                                             (it.Category == (byte)ItemCategory.Dough && it.PrepStage == (byte)ProcessingStage.Prepared);
+                                if (isPreparedPizzaOrBase)
+                                {
+                                    slotIndex = s;
+                                    itemOnStation = it;
+                                    hasItemOnStation = true;
+                                    stationEmpty = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasItemOnStation) break;
+                    }
+                }
+            }
 
             if (hasToolOnStation && pickHand != -1)
             {

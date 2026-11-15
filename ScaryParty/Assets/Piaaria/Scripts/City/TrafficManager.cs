@@ -12,7 +12,7 @@ public class TrafficManager : NetworkBehaviour
     [SerializeField] private int _maxVehicles = 10;
     [SerializeField] private float _baseSpeed = 8f;
     [SerializeField] private float _spawnDelay = 2f; // seconds between spawning vehicles
-    [SerializeField] private float _syncInterval = 0.2f;
+    [SerializeField] private float _syncInterval = 0.25f;
     
     private CityGraphPathfinder _pathfinder;
     private StreetGraph _graph;
@@ -23,8 +23,11 @@ public class TrafficManager : NetworkBehaviour
     private System.Random _rng;
     private bool _initialized;
 
+    private int _nextVehicleId = 1;
+
     public struct VehicleState : INetworkSerializable
     {
+        public int vehicleId;
         public Vector3 position;
         public Quaternion rotation;
         public Color color;
@@ -32,15 +35,38 @@ public class TrafficManager : NetworkBehaviour
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
+            serializer.SerializeValue(ref vehicleId);
             serializer.SerializeValue(ref position);
-            serializer.SerializeValue(ref rotation);
-            serializer.SerializeValue(ref color);
+
+            short yawCentidegrees = serializer.IsWriter
+                ? (short)Mathf.Clamp(Mathf.RoundToInt(Mathf.DeltaAngle(0f, rotation.eulerAngles.y) * 100f), -18000, 18000)
+                : (short)0;
+            serializer.SerializeValue(ref yawCentidegrees);
+            if (serializer.IsReader)
+            {
+                rotation = Quaternion.Euler(0f, yawCentidegrees * 0.01f, 0f);
+            }
+
+            Color32 c32 = serializer.IsWriter ? (Color32)color : default;
+            byte r = c32.r;
+            byte g = c32.g;
+            byte b = c32.b;
+            byte a = c32.a;
+            serializer.SerializeValue(ref r);
+            serializer.SerializeValue(ref g);
+            serializer.SerializeValue(ref b);
+            serializer.SerializeValue(ref a);
+            if (serializer.IsReader)
+            {
+                color = new Color32(r, g, b, a);
+            }
+
             serializer.SerializeValue(ref active);
         }
     }
 
     private List<VehicleState> _vehicleStates = new List<VehicleState>();
-    private List<GameObject> _clientVisuals = new List<GameObject>();
+    private readonly Dictionary<int, GameObject> _clientVisuals = new Dictionary<int, GameObject>();
 
     /// <summary>
     /// Initialize with the city's pathfinder and graph
@@ -59,15 +85,34 @@ public class TrafficManager : NetworkBehaviour
         _initialized = true;
     }
 
+    private bool IsActiveServerOrLocal
+    {
+        get
+        {
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+                return true; // Rodando em modo local / offline / sem NGO ativo
+
+            return NetworkManager.Singleton.IsServer;
+        }
+    }
+
+    private bool IsActiveClient
+    {
+        get
+        {
+            return NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening && NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer;
+        }
+    }
+
     private void Update()
     {
         if (!_initialized) return;
 
-        if (IsServer)
+        if (IsActiveServerOrLocal)
         {
             ServerUpdate();
         }
-        else if (IsClient)
+        else if (IsActiveClient)
         {
             ClientUpdate();
         }
@@ -111,20 +156,28 @@ public class TrafficManager : NetworkBehaviour
 
     private void ClientUpdate()
     {
-        // Lerp visuals
-        for (int i = 0; i < _clientVisuals.Count && i < _vehicleStates.Count; i++)
+        for (int i = 0; i < _vehicleStates.Count; i++)
         {
-            if (_vehicleStates[i].active)
+            var st = _vehicleStates[i];
+            if (!_clientVisuals.TryGetValue(st.vehicleId, out var visual) || visual == null)
+                continue;
+
+            if (st.active)
             {
-                if (!_clientVisuals[i].activeSelf) _clientVisuals[i].SetActive(true);
-                
-                // Interpolate
-                _clientVisuals[i].transform.position = Vector3.Lerp(_clientVisuals[i].transform.position, _vehicleStates[i].position, Time.deltaTime * 10f);
-                _clientVisuals[i].transform.rotation = Quaternion.Slerp(_clientVisuals[i].transform.rotation, _vehicleStates[i].rotation, Time.deltaTime * 10f);
+                if (!visual.activeSelf)
+                {
+                    visual.transform.SetPositionAndRotation(st.position, st.rotation);
+                    visual.SetActive(true);
+                }
+                else
+                {
+                    visual.transform.position = Vector3.Lerp(visual.transform.position, st.position, Time.deltaTime * 10f);
+                    visual.transform.rotation = Quaternion.Slerp(visual.transform.rotation, st.rotation, Time.deltaTime * 10f);
+                }
             }
-            else
+            else if (visual.activeSelf)
             {
-                if (_clientVisuals[i].activeSelf) _clientVisuals[i].SetActive(false);
+                visual.SetActive(false);
             }
         }
     }
@@ -134,17 +187,17 @@ public class TrafficManager : NetworkBehaviour
         if (_graph == null || _graph.nodes == null || _graph.nodes.Count < 2) return;
 
         GameObject vehicleObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        vehicleObj.SetActive(false);
         vehicleObj.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
         vehicleObj.transform.SetParent(_vehicleRoot.transform);
-        
-        // Keep collider as trigger so TrafficVehicle.CheckVehicleAhead() raycasts still detect other vehicles
+
         Collider col = vehicleObj.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
-        
+
         TrafficVehicle vehicle = vehicleObj.AddComponent<TrafficVehicle>();
+        vehicle.VehicleId = _nextVehicleId++;
         vehicle.speed = _baseSpeed * (0.8f + (float)_rng.NextDouble() * 0.4f);
         vehicle.vehicleColor = new Color((float)_rng.NextDouble(), (float)_rng.NextDouble(), (float)_rng.NextDouble());
-        vehicle.isActive = true;
 
         Renderer vehRend = vehicleObj.GetComponent<Renderer>();
         if (vehRend != null)
@@ -157,50 +210,89 @@ public class TrafficManager : NetworkBehaviour
             ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(vehRend, 0, vehicle.vehicleColor);
         }
 
-        AssignRandomPath(vehicle);
-
-        if (vehicle.waypoints != null && vehicle.waypoints.Count > 0)
+        if (!AssignRandomPath(vehicle, isInitialSpawn: true) || vehicle.waypoints == null || vehicle.waypoints.Count < 2)
         {
-            vehicle.transform.position = vehicle.waypoints[0];
-            if (vehicle.waypoints.Count > 1)
-            {
-                vehicle.transform.rotation = Quaternion.LookRotation(vehicle.waypoints[1] - vehicle.waypoints[0]);
-            }
+            Destroy(vehicleObj);
+            return;
         }
 
+        vehicleObj.transform.position = vehicle.waypoints[0];
+        Vector3 initialFwd = vehicle.waypoints[1] - vehicle.waypoints[0];
+        if (initialFwd.sqrMagnitude > 0.001f)
+            vehicleObj.transform.rotation = Quaternion.LookRotation(initialFwd.normalized);
+
+        vehicle.isActive = true;
+        vehicleObj.SetActive(true);
         _vehicles.Add(vehicle);
     }
 
-    private void AssignRandomPath(TrafficVehicle vehicle)
+    private bool AssignRandomPath(TrafficVehicle vehicle, bool isInitialSpawn = false)
     {
-        int startIndex = _rng.Next(0, _graph.nodes.Count);
-        int endIndex = _rng.Next(0, _graph.nodes.Count);
-        
-        while (startIndex == endIndex && _graph.nodes.Count > 1)
-        {
-            endIndex = _rng.Next(0, _graph.nodes.Count);
-        }
+        if (_graph == null || _graph.nodes == null || _graph.nodes.Count < 2) return false;
 
-        // Use the pathfinder for actual A* routing along streets
-        Vector3 startPos = _graph.nodes[startIndex].worldPosition;
-        Vector3 endPos = _graph.nodes[endIndex].worldPosition;
+        int startIndex = (!isInitialSpawn && vehicle.CurrentEndNode >= 0 && vehicle.CurrentEndNode < _graph.nodes.Count)
+            ? vehicle.CurrentEndNode
+            : _rng.Next(0, _graph.nodes.Count);
+
+        Vector3 startPos = (!isInitialSpawn && vehicle.CurrentEndNode >= 0)
+            ? _graph.nodes[startIndex].worldPosition
+            : _graph.nodes[startIndex].worldPosition;
 
         List<Vector3> path = null;
-        if (_pathfinder != null)
+        int chosenEndIndex = -1;
+
+        for (int attempt = 0; attempt < 5; attempt++)
         {
-            path = _pathfinder.FindPath(startPos, endPos);
+            int endIndex = _rng.Next(0, _graph.nodes.Count);
+            if (endIndex == startIndex) continue;
+
+            if (_pathfinder != null)
+            {
+                var candidate = _pathfinder.FindPath(startPos, _graph.nodes[endIndex].worldPosition);
+                if (candidate != null && candidate.Count >= 2)
+                {
+                    path = candidate;
+                    chosenEndIndex = endIndex;
+                    break;
+                }
+            }
         }
 
-        // Fallback if pathfinder fails or returns empty
+        // A10: nunca liga em linha reta cruzando quarteirões — fallback apenas para vizinho conectado no grafo viário
+        if ((path == null || path.Count < 2) && startIndex >= 0 && startIndex < _graph.nodes.Count)
+        {
+            var edges = _graph.nodes[startIndex].connectedEdges;
+            if (edges != null && edges.Count > 0)
+            {
+                for (int e = 0; e < edges.Count; e++)
+                {
+                    int edgeId = edges[e];
+                    if (edgeId < 0 || edgeId >= _graph.edges.Count) continue;
+                    var edge = _graph.edges[edgeId];
+                    if (edge.isBlocked) continue;
+
+                    int neighborId = edge.nodeA == startIndex ? edge.nodeB : edge.nodeA;
+                    if (neighborId < 0 || neighborId >= _graph.nodes.Count) continue;
+
+                    path = new List<Vector3> { _graph.nodes[startIndex].worldPosition, _graph.nodes[neighborId].worldPosition };
+                    chosenEndIndex = neighborId;
+                    vehicle.CurrentEdgeId = edgeId;
+                    break;
+                }
+            }
+        }
+
         if (path == null || path.Count < 2)
         {
-            path = new List<Vector3>();
-            path.Add(startPos);
-            path.Add(endPos);
+            vehicle.isActive = false;
+            return false;
         }
 
+        vehicle.CurrentStartNode = startIndex;
+        vehicle.CurrentEndNode = chosenEndIndex;
         vehicle.waypoints = path;
         vehicle.currentWaypointIndex = 0;
+        return true;
     }
 
     public void DespawnAllVehicles()
@@ -210,12 +302,13 @@ public class TrafficManager : NetworkBehaviour
             if (v != null) Destroy(v.gameObject);
         }
         _vehicles.Clear();
-        
-        foreach (var v in _clientVisuals)
+
+        foreach (var kvp in _clientVisuals)
         {
-            if (v != null) Destroy(v);
+            if (kvp.Value != null) Destroy(kvp.Value);
         }
         _clientVisuals.Clear();
+        _vehicleStates.Clear();
     }
 
     private void SyncVehicles()
@@ -225,8 +318,9 @@ public class TrafficManager : NetworkBehaviour
         {
             if (v != null)
             {
-                _vehicleStates.Add(new VehicleState 
+                _vehicleStates.Add(new VehicleState
                 {
+                    vehicleId = v.VehicleId,
                     position = v.transform.position,
                     rotation = v.transform.rotation,
                     color = v.vehicleColor,
@@ -235,48 +329,73 @@ public class TrafficManager : NetworkBehaviour
             }
         }
 
-        VehicleState[] statesArray = _vehicleStates.ToArray();
-        SyncVehiclesClientRpc(statesArray);
+        if (IsSpawned && NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening && NetworkManager.Singleton.IsServer)
+        {
+            if (NetworkManager.Singleton.ConnectedClientsIds.Count <= 1) return;
+            VehicleState[] statesArray = _vehicleStates.ToArray();
+            SyncVehiclesClientRpc(statesArray);
+        }
     }
 
-    [ClientRpc]
+    [ClientRpc(Delivery = RpcDelivery.Unreliable)]
     private void SyncVehiclesClientRpc(VehicleState[] states)
     {
-        if (IsServer) return; // Server already knows the real positions
+        if (IsServer) return;
 
-        _vehicleStates = new List<VehicleState>(states);
+        _vehicleStates = new List<VehicleState>(states ?? System.Array.Empty<VehicleState>());
+        var activeIds = new HashSet<int>();
 
-        // Ensure we have enough visual objects
-        while (_clientVisuals.Count < _vehicleStates.Count)
+        for (int i = 0; i < _vehicleStates.Count; i++)
         {
-            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visual.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
-            
-            // Apply color via MaterialPropertyBlock for optimization
-            Renderer rend = visual.GetComponent<Renderer>();
-            if (rend != null)
-            {
-                Material vehMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
-                    rend.sharedMaterial,
-                    ScaryParty.VisualStyles.VisualSemanticRole.GenericOpaque,
-                    ScaryParty.VisualStyles.VisualCategoryIds.Props);
-                if (vehMat != null) rend.sharedMaterial = vehMat;
-                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(
-                    rend, 0, _vehicleStates[_clientVisuals.Count].color);
-            }
+            var st = _vehicleStates[i];
+            activeIds.Add(st.vehicleId);
 
-            if (_vehicleRoot == null)
+            if (!_clientVisuals.TryGetValue(st.vehicleId, out var visual) || visual == null)
             {
-                _vehicleRoot = new GameObject("__TrafficVisuals__");
-                _vehicleRoot.transform.SetParent(transform);
-            }
-            visual.transform.SetParent(_vehicleRoot.transform);
-            
-            // Disable collider on client
-            Collider col = visual.GetComponent<Collider>();
-            if (col != null) Destroy(col);
+                visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                visual.SetActive(false);
+                visual.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
 
-            _clientVisuals.Add(visual);
+                Renderer rend = visual.GetComponent<Renderer>();
+                if (rend != null)
+                {
+                    Material vehMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                        rend.sharedMaterial,
+                        ScaryParty.VisualStyles.VisualSemanticRole.GenericOpaque,
+                        ScaryParty.VisualStyles.VisualCategoryIds.Props);
+                    if (vehMat != null) rend.sharedMaterial = vehMat;
+                    ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, st.color);
+                }
+
+                if (_vehicleRoot == null)
+                {
+                    _vehicleRoot = new GameObject("__TrafficVisuals__");
+                    _vehicleRoot.transform.SetParent(transform);
+                }
+                visual.transform.SetParent(_vehicleRoot.transform);
+
+                Collider col = visual.GetComponent<Collider>();
+                if (col != null) Destroy(col);
+
+                // A13: definir pose inicial ANTES de ativar o objeto no cliente
+                visual.transform.SetPositionAndRotation(st.position, st.rotation);
+                visual.SetActive(st.active);
+                _clientVisuals[st.vehicleId] = visual;
+            }
+        }
+
+        // A13: remover visuais excedentes / removidos no servidor
+        var toRemove = new List<int>();
+        foreach (var kvp in _clientVisuals)
+        {
+            if (!activeIds.Contains(kvp.Key))
+                toRemove.Add(kvp.Key);
+        }
+        for (int i = 0; i < toRemove.Count; i++)
+        {
+            if (_clientVisuals.TryGetValue(toRemove[i], out var dead) && dead != null)
+                Destroy(dead);
+            _clientVisuals.Remove(toRemove[i]);
         }
     }
 
@@ -285,7 +404,7 @@ public class TrafficManager : NetworkBehaviour
     /// </summary>
     public void OnEdgeBlocked(int edgeId)
     {
-        if (!IsServer) return;
+        if (!IsActiveServerOrLocal) return;
         // Reroute logic - for simplicity, give all vehicles a new path
         foreach (var v in _vehicles)
         {

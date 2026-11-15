@@ -22,11 +22,11 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public CommandResult<ItemId> DispenseFromStorage(int storageId, int ingredientDefId, ulong playerId, HandSlotIndex hand)
             => DispenseFromStorage(_state, _catalog, storageId, ingredientDefId, playerId, hand);
 
-        public CommandResult TransferItem(ItemId itemId, LocationRef targetLocation, ulong requesterId = 0, bool bypassReservation = false)
-            => TransferItem(_state, itemId, targetLocation, requesterId, bypassReservation);
+        public CommandResult TransferItem(ItemId itemId, LocationRef targetLocation, ulong requesterId = 0, bool bypassReservation = false, bool enforceRequesterOwnership = false)
+            => TransferItem(_state, itemId, targetLocation, requesterId, bypassReservation, enforceRequesterOwnership);
 
-        public CommandResult TransferTool(ToolItemId toolId, LocationRef targetLocation, double now, ulong requesterId = 0)
-            => TransferTool(_state, toolId, targetLocation, requesterId, now);
+        public CommandResult TransferTool(ToolItemId toolId, LocationRef targetLocation, double now, ulong requesterId = 0, bool enforceRequesterOwnership = false)
+            => TransferTool(_state, toolId, targetLocation, requesterId, now, enforceRequesterOwnership);
 
         public CommandResult DestroyItem(ItemId itemId)
             => DestroyItem(_state, itemId);
@@ -98,7 +98,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             ItemId itemId, 
             LocationRef newLocation,
             ulong requesterId = 0,
-            bool bypassReservation = false)
+            bool bypassReservation = false,
+            bool enforceRequesterOwnership = false)
         {
             if (!state.Items.TryGetValue(itemId, out var itemState))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
@@ -106,6 +107,34 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!bypassReservation && itemState.ReservedByHold != 0 &&
                 (itemState.ReservedByHold == OperationState.ServerWorker || itemState.ReservedByHold != requesterId))
                 return CommandResult.Fail(CommandError.Blocked, "Item reservado por outro processo.");
+
+            // A14: Validação de posse quando acionado por RPC do jogador (clientId 0 é o Host válido!)
+            if (enforceRequesterOwnership)
+            {
+                if (itemState.Location.Type == LocationType.Hand && itemState.Location.HolderId != requesterId)
+                    return CommandResult.Fail(CommandError.NotOwner, "Você não pode mover um item que está na mão de outro jogador.");
+
+                if (newLocation.Type == LocationType.Hand && newLocation.HolderId != requesterId)
+                    return CommandResult.Fail(CommandError.NotOwner, "Você só pode mover itens para as suas próprias mãos.");
+
+                if (itemState.Location.Type == LocationType.Backpack)
+                {
+                    var srcBpId = new BackpackId(itemState.Location.HolderId);
+                    if (!state.Backpacks.TryGetValue(srcBpId, out var srcBp))
+                        return CommandResult.Fail(CommandError.InvalidOperation, "Mochila de origem não encontrada.");
+                    if (srcBp.IsEquipped && srcBp.EquippedBy != requesterId)
+                        return CommandResult.Fail(CommandError.NotOwner, "Você não pode retirar itens da mochila de outro jogador.");
+                }
+
+                if (newLocation.Type == LocationType.Backpack)
+                {
+                    var dstBpId = new BackpackId(newLocation.HolderId);
+                    if (!state.Backpacks.TryGetValue(dstBpId, out var dstBp))
+                        return CommandResult.Fail(CommandError.InvalidOperation, "Mochila de destino não encontrada.");
+                    if (dstBp.IsEquipped && dstBp.EquippedBy != requesterId)
+                        return CommandResult.Fail(CommandError.NotOwner, "Você não pode guardar itens na mochila de outro jogador.");
+                }
+            }
 
             // Se o item está em um StationSlot com operação ativa
             if (itemState.Location.Type == LocationType.StationSlot)
@@ -168,10 +197,23 @@ namespace ScaryParty.Pizzeria.Domain.Services
             ToolItemId toolId, 
             LocationRef newLocation,
             ulong requesterId,
-            double now)
+            double now,
+            bool enforceRequesterOwnership = false)
         {
             if (!state.Tools.TryGetValue(toolId, out var toolState))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Utensílio não encontrado.");
+
+            if (enforceRequesterOwnership)
+            {
+                if (toolState.Location.Type == LocationType.Hand && toolState.Location.HolderId != requesterId)
+                    return CommandResult.Fail(CommandError.NotOwner, "Você não pode mover um utensílio da mão de outro jogador.");
+
+                if (newLocation.Type == LocationType.Hand && newLocation.HolderId != requesterId)
+                    return CommandResult.Fail(CommandError.NotOwner, "Você só pode equipar utensílios nas suas próprias mãos.");
+
+                if (newLocation.Type == LocationType.Backpack)
+                    return CommandResult.Fail(CommandError.Incompatible, "Utensílios não podem ser armazenados na mochila de entregas.");
+            }
 
             if (toolState.IsReserved(now) && toolState.ReservedByWorkerId != requesterId)
                 return CommandResult.Fail(CommandError.ToolBusy, "Utensílio em uso.");

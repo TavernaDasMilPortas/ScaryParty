@@ -63,7 +63,8 @@ namespace ScaryParty.Pizzeria.Network
             var expectedTop = new ItemId(expectedTopItemIdVal);
             var handLoc = LocationRef.InHand(sender, hand);
 
-            if (TransferService.IsLocationOccupied(root.DomainState, handLoc))
+            if (TransferService.IsLocationOccupied(root.DomainState, handLoc) ||
+                (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, (int)hand)))
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, "A sua mão está ocupada.", true);
                 return;
@@ -211,7 +212,8 @@ namespace ScaryParty.Pizzeria.Network
             if (hand != HandSlotIndex.Left && hand != HandSlotIndex.Right) return;
             var handLoc = LocationRef.InHand(sender, hand);
 
-            if (TransferService.IsLocationOccupied(root.DomainState, handLoc))
+            if (TransferService.IsLocationOccupied(root.DomainState, handLoc) ||
+                (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, (int)hand)))
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, "A sua mão está ocupada.", true);
                 return;
@@ -227,6 +229,27 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void RepairBackpackServerRpc(ulong backpackIdVal, ServerRpcParams rpcParams = default)
+        {
+            ulong sender = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            var bpId = new BackpackId(backpackIdVal);
+            if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
+
+            var res = BackpackService.RepairBackpack(root.DomainState, bpId);
+            if (!res.Success)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);
+                return;
+            }
+
+            PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+            PizzeriaSession.Notifier?.NotifyClient(sender, "Mochila reparada (100%).");
         }
 
         private static bool CanAccessBackpack(PizzeriaState state, BackpackId id, ulong sender, bool allowEquipped)
@@ -255,6 +278,33 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
+            var res = ExecuteServerDeliveryCore(root, sender, addressIdVal, itemIds, attemptId);
+            if (!res.Success)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);
+                return;
+            }
+
+            var eval = res.Value;
+            string feedbackMsg = eval.WrongOrIncompleteCount > 0 || eval.BurnedCount > 0
+                ? $"Entrega no {AddressFormat.Display(addressIdVal)} com observações (corretas: {eval.CorrectBakedCount}, queimadas: {eval.BurnedCount}, incorretas: {eval.WrongOrIncompleteCount}). Ganho pessoal: R${eval.PersonalEarned}."
+                : $"Entrega realizada no {AddressFormat.Display(addressIdVal)}! Ganho pessoal: R${eval.PersonalEarned}. Bônus da pizzaria: R${eval.RestaurantEarned}.";
+
+            PizzeriaSession.Notifier?.NotifyClient(sender, feedbackMsg);
+            PizzeriaSession.Notifier?.BroadcastFeedback($"Entrega concluída no {AddressFormat.Display(addressIdVal)}.");
+            DispatchDeliveryClientFeedback(sender, addressIdVal, eval);
+        }
+
+        public static CommandResult<DeliveryEvaluationResult> ExecuteServerDeliveryCore(
+            PizzeriaRoot root,
+            ulong sender,
+            int addressIdVal,
+            ulong[] itemIds,
+            ulong attemptId)
+        {
+            if (root == null || root.DomainState == null || root.OrderService == null)
+                return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.InvalidOperation, "Servidor de pedidos indisponível.");
+
             var destination = new AddressId(addressIdVal);
             var deliveryService = new DeliveryService();
 
@@ -264,14 +314,16 @@ namespace ScaryParty.Pizzeria.Network
                 for (int i = 0; i < itemIds.Length; i++) list.Add(new ItemId(itemIds[i]));
             }
 
+            float burnedFactor = root.Config != null ? root.Config.burnedPayoutFactor : 0.25f;
+            float unbakedFactor = root.Config != null ? root.Config.unbakedPayoutFactor : 0f;
+            int baseBonus = root.Config != null ? root.Config.restaurantBaseBonus : 20;
+
             var res = deliveryService.SubmitDelivery(
-                root.DomainState, destination, list, attemptId, sender, root.Catalog, root.OrderService);
+                root.DomainState, destination, list, attemptId, sender, root.Catalog, root.OrderService,
+                burnedFactor, unbakedFactor, baseBonus);
 
             if (!res.Success)
-            {
-                PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);
-                return;
-            }
+                return res;
 
             var eval = res.Value;
 
@@ -289,12 +341,13 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+            return res;
+        }
 
-            string feedbackMsg = $"Entrega realizada no {AddressFormat.Display(addressIdVal)}! Ganho pessoal: R${eval.PersonalEarned}. Bônus da pizzaria: R${eval.RestaurantEarned}.";
-            PizzeriaSession.Notifier?.NotifyClient(sender, feedbackMsg);
-            PizzeriaSession.Notifier?.BroadcastFeedback($"Entrega concluída no {AddressFormat.Display(addressIdVal)}.");
+        public void DispatchDeliveryClientFeedback(ulong sender, int addressIdVal, DeliveryEvaluationResult eval)
+        {
+            if (!IsServer) return;
 
-            // Exibe painel detalhado de resultado para o cliente solicitante
             var clientParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { sender } } };
             DeliveryResultClientRpc(
                 addressIdVal,
@@ -307,7 +360,6 @@ namespace ScaryParty.Pizzeria.Network
                 eval.OrderId != Domain.Types.OrderId.None,
                 clientParams);
 
-            // Dispara feedback visual e sonoro no endereço
             DeliveryFeedbackClientRpc(addressIdVal);
         }
 

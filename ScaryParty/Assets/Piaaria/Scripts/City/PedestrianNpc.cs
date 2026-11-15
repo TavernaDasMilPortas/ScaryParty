@@ -43,6 +43,22 @@ public class PedestrianNpc : MonoBehaviour
     private float _dwellDuration = 8f;
     private float _walkSpeed = 2.2f;
     private int _navFailRetries;
+    private float _hornYieldTimer;
+
+    public void ReactToHorn(Vector3 hornOrigin)
+    {
+        if (!gameObject.activeInHierarchy || Motor == null) return;
+        if (_hornYieldTimer > 0f) return;
+        _hornYieldTimer = 2.5f;
+
+        Vector3 away = transform.position - hornOrigin;
+        away.y = 0f;
+        if (away.sqrMagnitude < 0.05f) away = transform.right;
+        away.Normalize();
+
+        Vector3 sideStep = transform.position + away * 2.2f;
+        Motor.MoveTo(sideStep);
+    }
 
     public int ColorIndex { get; private set; }
 
@@ -151,6 +167,15 @@ public class PedestrianNpc : MonoBehaviour
 
     private void Update()
     {
+        if (_hornYieldTimer > 0f)
+        {
+            _hornYieldTimer -= Time.deltaTime;
+            if (_hornYieldTimer <= 0f && TargetPosition != Vector3.zero && Motor != null)
+            {
+                Motor.MoveTo(TargetPosition);
+            }
+        }
+
         if (State == PedestrianState.WaitingAtCrosswalk)
         {
             _stateTimer += Time.deltaTime;

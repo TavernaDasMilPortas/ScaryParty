@@ -497,8 +497,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 item.LocationType == (byte)LocationType.Backpack ||
                 item.LocationType == (byte)LocationType.StorageSlot)
             {
+                DisableWorldPickupInteractable(wrapper);
                 if (wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(false);
                 return;
+            }
+
+            if (item.LocationType != (byte)LocationType.World)
+            {
+                DisableWorldPickupInteractable(wrapper);
             }
 
             if (!wrapper.gameObject.activeSelf) wrapper.gameObject.SetActive(true);
@@ -749,6 +755,57 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                 }
             }
+            else if (item.LocationType == (byte)LocationType.World)
+            {
+                wrapper.transform.SetParent(null, false);
+                wrapper.transform.SetPositionAndRotation(
+                    new Vector3(item.WorldX, item.WorldY, item.WorldZ),
+                    Quaternion.identity);
+                wrapper.transform.localScale = Vector3.one;
+
+                if (wrapper.VisualInstance != null)
+                {
+                    wrapper.VisualInstance.transform.SetParent(wrapper.transform, false);
+                    var pose = profile != null ? profile.stationSlotPose : ItemPoseOffset.Identity;
+                    wrapper.VisualInstance.transform.localPosition = pose.position;
+                    wrapper.VisualInstance.transform.localRotation = Quaternion.Euler(pose.rotationEuler);
+                    wrapper.VisualInstance.transform.localScale = pose.scale;
+                    ItemVisualWrapper.SetLayerRecursively(wrapper.VisualInstance, 0);
+                }
+
+                EnsureWorldPickupInteractable(wrapper, item);
+            }
+        }
+
+        private static void EnsureWorldPickupInteractable(ItemVisualWrapper wrapper, NetItemDto item)
+        {
+            if (wrapper == null) return;
+            var col = wrapper.GetComponent<BoxCollider>();
+            if (col == null)
+            {
+                col = wrapper.gameObject.AddComponent<BoxCollider>();
+                col.center = new Vector3(0f, 0.1f, 0f);
+                col.size = new Vector3(0.45f, 0.24f, 0.45f);
+            }
+            col.isTrigger = false;
+            col.enabled = true;
+
+            var pickup = wrapper.GetComponent<WorldDroppedItemInteractable>();
+            if (pickup == null)
+            {
+                pickup = wrapper.gameObject.AddComponent<WorldDroppedItemInteractable>();
+            }
+            pickup.enabled = true;
+            pickup.Configure(item.ItemId, item.LabelAddressId, item.PackagingState == (byte)PackagingState.Boxed);
+        }
+
+        private static void DisableWorldPickupInteractable(ItemVisualWrapper wrapper)
+        {
+            if (wrapper == null) return;
+            var col = wrapper.GetComponent<BoxCollider>();
+            if (col != null) col.enabled = false;
+            var pickup = wrapper.GetComponent<WorldDroppedItemInteractable>();
+            if (pickup != null) pickup.enabled = false;
         }
 
         private static Transform toolOrItemHandSocket((Transform left, Transform right) hands, int slotId)
@@ -933,5 +990,67 @@ namespace ScaryParty.Pizzeria.Presentation
                 _cacheUpdateTimer = CacheUpdateInterval;
             }
         }
+    }
+
+    /// <summary>
+    /// Interagível criado para itens no mundo (ex: caixa derrubada por mochila rasgada).
+    /// </summary>
+    public class WorldDroppedItemInteractable : MonoBehaviour, IInteractable
+    {
+        private ulong _itemId;
+        private int _labelAddressId = -1;
+        private bool _isBoxed;
+
+        public void Configure(ulong itemId, int labelAddressId, bool isBoxed)
+        {
+            _itemId = itemId;
+            _labelAddressId = labelAddressId;
+            _isBoxed = isBoxed;
+        }
+
+        public string InteractPrompt
+        {
+            get
+            {
+                if (!enabled || _itemId == 0) return string.Empty;
+                if (_isBoxed)
+                {
+                    return _labelAddressId >= 0
+                        ? $"[E] Pegar Caixa (#{_labelAddressId + 1})"
+                        : "[E] Pegar Caixa caída";
+                }
+                return "[E] Pegar Item";
+            }
+        }
+
+        public void OnInteract(GameObject interactor)
+        {
+            if (!enabled || _itemId == 0 || interactor == null) return;
+            var cmd = PizzeriaCommandHandler.Instance;
+            if (cmd == null || NetworkManager.Singleton == null) return;
+
+            ulong myClientId = NetworkManager.Singleton.LocalClientId;
+            byte handSlot = 0;
+            var invAdapter = interactor.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>();
+            var netState = PizzeriaNetworkState.Instance;
+            if (invAdapter != null)
+            {
+                handSlot = (byte)invAdapter.ActiveHand;
+                if (netState != null && netState.IsHandOccupied(myClientId, handSlot))
+                {
+                    byte otherHand = handSlot == 0 ? (byte)1 : (byte)0;
+                    if (!netState.IsHandOccupied(myClientId, otherHand))
+                    {
+                        handSlot = otherHand;
+                        invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                    }
+                }
+            }
+
+            cmd.TransferItemServerRpc(_itemId, (byte)LocationType.Hand, myClientId, handSlot);
+        }
+
+        public void OnFocus() { }
+        public void OnLoseFocus() { }
     }
 }

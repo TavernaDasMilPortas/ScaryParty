@@ -27,6 +27,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private Label _capacityLabel;
         private ScrollView _slotsContainer;
         private Button _storeHandBtn;
+        private Button _repairBtn;
         private Button _dropBackpackBtn;
         private Button _closeBtn;
 
@@ -152,6 +153,16 @@ namespace ScaryParty.Pizzeria.Presentation
             _storeHandBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
             _card.Add(_storeHandBtn);
 
+            _repairBtn = new Button(RepairBackpack);
+            _repairBtn.text = "Reparar Mochila (ou segure [F] 3s)";
+            _repairBtn.style.fontSize = 17;
+            _repairBtn.style.height = 42;
+            _repairBtn.style.marginBottom = 10;
+            _repairBtn.style.backgroundColor = new Color(0.7f, 0.48f, 0.16f);
+            _repairBtn.style.color = Color.white;
+            _repairBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _card.Add(_repairBtn);
+
             // Container de Ações Inferiores
             var bottomRow = new VisualElement();
             bottomRow.style.flexDirection = FlexDirection.Row;
@@ -247,6 +258,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _dropBackpackBtn.SetEnabled(false);
                 _storeHandBtn.SetEnabled(false);
+                _repairBtn?.SetEnabled(false);
                 var lbl = new Label("Sem mochila equipada.");
                 lbl.style.color = new Color(0.9f, 0.4f, 0.4f);
                 lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -257,7 +269,13 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             _dropBackpackBtn.SetEnabled(_inspectedBagId == 0);
-            _storeHandBtn.SetEnabled(bag.ItemCount < bag.Capacity);
+            _storeHandBtn.SetEnabled(!bag.IsTorn && bag.ItemCount < bag.Capacity);
+            if (_repairBtn != null)
+            {
+                bool needsRepair = bag.Integrity < bag.MaxIntegrity;
+                _repairBtn.SetEnabled(needsRepair);
+                _repairBtn.style.display = needsRepair ? DisplayStyle.Flex : DisplayStyle.None;
+            }
             var boxes = new List<NetItemDto>();
             if (state != null)
                 for (int i = 0; i < state.Backpacks.Count && i < 1; i++)
@@ -270,7 +288,13 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                 }
             int cap = bag.Capacity;
-            _capacityLabel.text = $"Capacidade: {boxes.Count} / {cap} caixas";
+            int integrityPct = bag.MaxIntegrity > 0 ? Mathf.RoundToInt(100f * bag.Integrity / bag.MaxIntegrity) : 100;
+            _capacityLabel.text = bag.IsTorn
+                ? $"Capacidade: {boxes.Count} / {cap} caixas | MOCHILA RASGADA (0%) — Repare antes de guardar!"
+                : $"Capacidade: {boxes.Count} / {cap} caixas | Integridade: {integrityPct}%";
+            _capacityLabel.style.color = bag.IsTorn
+                ? new Color(0.95f, 0.35f, 0.3f)
+                : (integrityPct < 100 ? new Color(0.95f, 0.78f, 0.25f) : new Color(0.85f, 0.9f, 0.95f));
 
             for (int i = 0; i < cap; i++)
             {
@@ -354,6 +378,21 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 RefreshSlots();
             }
+        }
+
+        private void RepairBackpack()
+        {
+            ulong bagId = _inspectedBagId;
+            if (bagId == 0)
+            {
+                var ctrl = GetLocalBackpackController();
+                if (ctrl != null && ctrl.TryGetEquippedBag(out var bag))
+                    bagId = bag.BackpackId;
+            }
+            if (bagId == 0) return;
+
+            LogisticsCommands.Instance?.RepairBackpackServerRpc(bagId);
+            RefreshSlots();
         }
 
         private void DropBackpack()

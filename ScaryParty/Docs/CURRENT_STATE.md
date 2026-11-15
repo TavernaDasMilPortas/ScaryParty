@@ -1,9 +1,9 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 14/11/2026  
-**Versão Unity:** Unity 6000.3.6f1  
-**Branch Atual:** `feature/global-cel-shading-wizard`  
-**Commit Base:** `466c067`  
+**Última Revisão:** 15/11/2026
+**Versão Unity:** Unity 6000.3.6f1
+**Branch Atual:** `feature/global-cel-shading-wizard`
+**Commit Base:** `466c067` (com evolução sobre plano noturno Revisão 2)
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
@@ -12,19 +12,32 @@
 
 | Módulo | Caminho Principal | Status | Descrição Sumária |
 |---|---|---|---|
-| **Pizzeria** | `Assets/Piaaria/Scripts/Pizzeria/` | Funcional / Refinamento | Bancadas de preparo, montagem de massas/ingredientes, forno e entrega de pedidos. |
-| **City** | `Assets/Piaaria/Scripts/City/` | Funcional / Ajustes | Geração procedural determinística por seed, blocos de rua, posicionamento de prédios e calçadas. |
-| **Navigation** | `Assets/Piaaria/Scripts/Navigation/` | Funcional | Geração dinâmica de NavMesh para NPCs e clientes em rotas urbanas. |
-| **Network (NGO)** | `Assets/Piaaria/Scripts/Network/` | Parcial | Sincronização via Netcode for GameObjects. Suporte a sincronização de seed para late-joiners. |
-| **Player** | `Assets/Piaaria/Scripts/Player/` | Funcional | Controle em terceira/primeira pessoa, inventário e interação com bancadas. |
-| **UI / Minimap** | `Assets/Piaaria/Scripts/UI/` | Funcional | Rastreamento do jogador via `MinimapRouteManager`, interface de pedidos e HUD. |
+| **Pizzeria** | `Assets/Piaaria/Scripts/Pizzeria/` | Implementado (L2 pendente) | Bancadas de preparo, mesas/cadeiras com animação de sentar, ciclo de noites (`NightCycleService`), quadro de comandas, mochilas danificáveis e posse autoritativa (`TransferService`). |
+| **City** | `Assets/Piaaria/Scripts/City/` | Implementado (L2 pendente) | Cidade procedural, módulos com porta dupla `J = 4m / 2 slots`, preenchimento seguro de perímetro, trânsito com ID estável + semáforos A/B determinísticos e moto de entregas (`MOTO` + `O13`). |
+| **Combat / Player** | `Assets/Piaaria/Scripts/Weapons/`, `Scripts/Player/` | Implementado (L2 pendente) | Rack de armas (Pistola 1 mão / Escopeta 2 mãos), `PlayerHealth` (100 HP + auto-resgate 10s), `PracticeTargetDummy`, interação e reparo da mochila (`[F]` 3s). |
+| **Navigation** | `Assets/Piaaria/Scripts/Navigation/` | Funcional | Geração dinâmica de NavMesh para NPCs, clientes e pedestres (incluindo recuo à buzina). |
+| **Network (NGO)** | `Assets/Piaaria/Scripts/Network/`, `Pizzeria/Network/` | Implementado (L2 pendente) | RPCs autoritativos em `PizzeriaCommandHandler` (armas, combate, dano à mochila, noites, recuperação e moto/buzina) e replicação em `PizzeriaNetworkState`/`NetDtos`. |
+| **UI / Minimap** | `Assets/Piaaria/Scripts/UI/`, `UI/Piaria/` | Implementado (L2 pendente) | Loading unificado, HUD da noite/vida/munição/mochila, menu de pausa (`PauseEscapeMenuPresenter`), resultados da noite (`NightResultsPresenter`) e dicas contextuais. |
 | **VisualStyles / Lighting** | `Assets/Piaaria/Scripts/VisualStyles/`, `Scripts/Lighting/`, `Shaders/` | Implementado (validação manual pendente) | Modos A/B/C na `GameScene` original, shaders próprios `ScaryParty/Illustrate Stylized/*`, ciclo Dia/Noite, zonas da pizzaria, iluminação da cidade e contratos B0–B3. |
-| **Editor / Tools** | `Assets/Piaaria/Scripts/Editor/` | Funcional | Wizards Odin/Editor organizados sob `Tools/Scary Party/` (wizards, setup, auditoria). |
+| **Editor / Tools** | `Assets/Piaaria/Scripts/Editor/`, `Tests/Editor/` | Funcional / L2 pendente | Wizards Odin/Editor organizados sob `Tools/Scary Party/`, testes `OvernightExperienceTests.cs` e `ModularCityTests.cs`. |
 
 ---
 
 ## 2. O que Está Funcional
-- **Ciclo da Pizzaria:** Interação do jogador com estações de corte, molho, queijo e forno.
+- **Plano Noturno Revisão 2 (Fases 0–7 — código e estática compilados):**
+  - Correções base `A01–A16` (separação servidor/cliente no lobby + `PizzeriaSceneLoadingCoordinator`, validação de posse do Host `clientId==0` no `TransferService`, barras de estação sem offset fixo, mesa/cadeira + animação discreta de sentar, fachada `J=4m/2 slots` + ocupação por intervalo, trânsito e cruzamentos sincronizados por `ServerTime`).
+  - Ciclo de noites (`O5`, metas N1/N2/N3, derrota operacional por `NightEarnedRevenue < NightRevenueGoal` e retry por snapshot), quadro de comandas (`O7`), HUD e dicas contextuais (`O1/O2/O8`), menu de pausa + recuperação de personagem/moto (`O3/O20`), combate base + mochila danificável (`12B`) e moto lateral com buzina (`MOTO` + `O13`).
+- **Correções de Sessão Relay/WSS, Animações Remotas, ESC & Otimização de Rede (NGO):**
+  - `UIFeedbackService.Awake()` corrigido para verificar `audioSource == null` antes de `AddComponent<AudioSource>()` (evitando `MissingComponentException` em `MainGameUI`).
+  - `UnityTransport` em `LobbyScene.unity`, `LobbyManager.cs` e `NetworkAutoStart.cs` configurado com `MaxPacketQueueSize >= 2048` e `MaxPayloadSize >= 32768`, eliminando desconexões `Receive queue is full (128)` sob Relay WSS.
+  - `UIModalStack.cs` e `PauseEscapeMenuPresenter.cs` blindados contra fechamento no mesmo frame, perda de foco sem pilha, navegação ESC de subpainéis de volta ao menu principal e clique acidental em `"Sair da Partida"` (agora exige subpainel de confirmação e guarda de `0.15s`).
+  - Animações remotas restauradas e filtradas (`ThirdPersonController` estimando locomoção remota + `MotionSpeed = 1f` em Idle + cache local, `OwnerNetworkAnimator` vinculando `CharacterVisualController.Animator` com `AlwaysAnimate` e desativando sync de parâmetros contínuos, `CustomerNpcView` medindo deslocamento em aproximação/fallback).
+  - Redução de tráfego NGO: `PlayerArmature.prefab`/`PlayerState` com `UseUnreliableDeltas` + compressão half-float/quaternion e thresholds maiores; `ReplicationProjector`/`NetDtos`/`ProcessingService`/`PizzeriaRoot` com tolerâncias maiores e `PublishedRevision` condicionado a mudanças reais; `PlayerInteraction` heartbeats a `0.30s`; `TrafficManager` e `DeliveryMotorcycleController`/`PizzeriaCommandHandler` em RPCs `Unreliable` quantizados/sob delta; `DemandDirector` convertido para `MonoBehaviour`.
+- **Ciclo da Pizzaria e Bancadas (Interação, Preparo e Montagem):**
+  - **Validação de Alcance Multislot:** `PizzeriaCommandHandler.IsStationWithinReach` expandido para verificar a posição exata do slot alvo, todos os slot anchors e os colliders da bancada (via ponto mais próximo), eliminando rejeições indevidas de distância (`> 6.5m`) em mesas e balcões modulares longos.
+  - **Desobstrução de Raycast e Mira de Bancada:** `PlayerInteraction.HandleRaycast` ajustado para não truncar `maxReach` quando o colisor atingido pertencer a um interagível ou posto de trabalho (`StationWorkpostTarget`), permitindo que tábuas e ingredientes sem colisor sejam detectados; `ResolveInteractableFromHits` flexibilizado para resolver o slot mais próximo (até 2m) em estações vinculadas a 3D em vez de bloquear com `blockedByBoundStationBody`.
+  - **Redirecionamento Inteligente de Slots e Prompts:** `StationView.TryPickOrPlace`, `StationView.InteractPrompt` e `PrepStation.InteractPrompt` agora redirecionam ações de coleta `[E]` ou montagem `[F]` para slots ocupados da mesma bancada caso o cursor esteja ligeiramente deslocado sobre um slot vazio.
+  - **Liberação Confiável do Bloqueio de Câmera [F]:** `PlayerInteraction.UpdateTrackedWork` detecta a remoção do slot de `StationSlots` no término do processo no servidor, liberando imediatamente o look lock e o estado de trabalho sem prender o jogador.
 - **Geração da Cidade:** Construção procedural determinística através de `DefaultCityConfig.asset` e seed compartilhada em rede.
 - **Minimapa:** Rastreamento dinâmico da câmera do jogador com culling mask apropriada.
 - **Ferramentas de Menu:** Organização de itens de menu conforme padrão `unity-tools-menu-organization` (incluindo `Game Feel Studio` em `Wizards/Visuals`).
