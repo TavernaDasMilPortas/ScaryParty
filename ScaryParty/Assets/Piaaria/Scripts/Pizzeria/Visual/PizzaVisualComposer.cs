@@ -178,6 +178,9 @@ namespace ScaryParty.Pizzeria.Visual
                     }
 
                     ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, p.TintColor, SharedColorBlock);
+                    ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                        piece, role, ScaryParty.VisualStyles.VisualCategoryIds.Food);
+                    ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(piece);
                 }
             }
         }
@@ -252,6 +255,11 @@ namespace ScaryParty.Pizzeria.Visual
                 mr.sharedMaterial = doughMat;
             }
             ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(mr, 0, currentDough, SharedColorBlock);
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                baseDough.gameObject,
+                ScaryParty.VisualStyles.VisualSemanticRole.PizzaDough,
+                ScaryParty.VisualStyles.VisualCategoryIds.Food);
+            ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(baseDough.gameObject);
 
             return baseDough.gameObject;
         }

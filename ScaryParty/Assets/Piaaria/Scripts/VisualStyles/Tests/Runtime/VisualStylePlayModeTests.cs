@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using ScaryParty.Lighting;
 using Unity.Profiling;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -89,6 +90,9 @@ namespace ScaryParty.VisualStyles.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            VisualStyleRuntimeConfig.ClearSessionOverride();
+            LightingFeatureRegistry.ResetToDefaultRealtimeOnly();
+            LightingShaderGlobals.ResetGlobals();
             yield return CleanupNetworkSessionIfNeeded();
         }
 
@@ -217,6 +221,148 @@ namespace ScaryParty.VisualStyles.Tests
             int toonIllustrate = colToon.GetComponentsInChildren<Renderer>(true)
                 .Count(r => r != null && r.sharedMaterials.Any(m => m != null && VisualStyleShaderUtility.IsIllustrateShader(m.shader)));
             Assert.Greater(toonIllustrate, 5);
+        }
+
+        [UnityTest]
+        public IEnumerator TimeOfDayLightingDirector_TransitionsAnchors_SingleDirectionalLightAndShaderGlobals()
+        {
+            var sunGo = new GameObject("PlayTestSun");
+            Light sun = sunGo.AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.shadows = LightShadows.Soft;
+
+            var todGo = new GameObject("PlayTestTodDirector");
+            TimeOfDayLightingDirector tod = todGo.AddComponent<TimeOfDayLightingDirector>();
+            TimeOfDayProfile todProfile = ScriptableObject.CreateInstance<TimeOfDayProfile>();
+            todProfile.ApplyCartoonDefaults();
+            tod.profile = todProfile;
+
+            try
+            {
+                float[] anchors = { 17f, 19f, 22f, 2f };
+                foreach (float hour in anchors)
+                {
+                    tod.SetClockHours(hour, evaluateNow: true);
+                    yield return null;
+
+                    int directionalCount = UnityEngine.Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
+                        .Count(l => l != null && l.type == LightType.Directional);
+                    Assert.AreEqual(1, directionalCount, $"Only 1 Directional Light allowed at {hour}h.");
+                    Assert.Greater(Shader.GetGlobalFloat(LightingShaderGlobals.GlobalShadowFloorId), 0.1f);
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.Destroy(todGo);
+                UnityEngine.Object.Destroy(sunGo);
+                UnityEngine.Object.Destroy(todProfile);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator StylizedLightPool_EnforcesPoolBudgetAndShadowlessLights()
+        {
+            var camGo = new GameObject("PlayTestPoolCamera");
+            camGo.transform.position = Vector3.zero;
+            camGo.transform.rotation = Quaternion.identity;
+            Camera cam = camGo.AddComponent<Camera>();
+
+            var poolGo = new GameObject("PlayTestLightPool");
+            StylizedLightPool pool = poolGo.AddComponent<StylizedLightPool>();
+            pool.maxPoolSize = 10;
+            pool.activateDistance = 40f;
+            pool.deactivateDistance = 46f;
+            pool.toggleHysteresisSeconds = 0f;
+
+            var anchors = new List<LocalLightingAnchor>();
+            var anchorGos = new List<GameObject>();
+            for (int i = 0; i < 6; i++)
+            {
+                var aGo = new GameObject($"Anchor_{i}");
+                aGo.transform.position = new Vector3((i - 2.5f) * 2f, 1f, 10f);
+                LocalLightingAnchor anchor = aGo.AddComponent<LocalLightingAnchor>();
+                anchor.allowRealtimePooledLight = true;
+                anchor.baseIntensity = 1.4f;
+                anchor.range = 8f;
+                anchors.Add(anchor);
+                anchorGos.Add(aGo);
+            }
+
+            try
+            {
+                const int budgetLimit = 3;
+                pool.UpdatePool(anchors, cam, emissionWeight: 1f, budgetLimit: budgetLimit, enableLights: true);
+                yield return null;
+
+                Assert.LessOrEqual(pool.ActivePooledLightsCount, budgetLimit, "Pool must never exceed configured budgetLimit.");
+                Assert.Greater(pool.ActivePooledLightsCount, 0, "Visible anchors within distance must allocate pooled lights.");
+
+                Light[] childLights = poolGo.GetComponentsInChildren<Light>(true);
+                foreach (Light l in childLights)
+                {
+                    Assert.AreEqual(LightShadows.None, l.shadows, "All pooled city lights must be shadowless.");
+                }
+            }
+            finally
+            {
+                for (int i = 0; i < anchorGos.Count; i++) UnityEngine.Object.Destroy(anchorGos[i]);
+                UnityEngine.Object.Destroy(poolGo);
+                UnityEngine.Object.Destroy(camGo);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator VisualStyleGameplayBootstrap_LivePreviewAndRestore_RevertsMaterialsAndRenderSettings()
+        {
+            Shader urpLit = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            Shader styledOpaque = Shader.Find(VisualStyleShaderUtility.ShaderOpaque) ?? urpLit;
+
+            var canonicalMat = new Material(urpLit) { name = "PlayTestCanonicalMat" };
+            var styledMat = new Material(styledOpaque) { name = "PlayTestStyledMat" };
+
+            var profile = ScriptableObject.CreateInstance<VisualStyleProfile>();
+            profile.ApplyPresetDefaults(VisualStylePresetType.DispatchInspired);
+
+            var lib = ScriptableObject.CreateInstance<VisualMaterialLibrary>();
+            lib.styleId = profile.styleId;
+            lib.mappedMaterials.Add(new MappedMaterialEntry
+            {
+                sourceMaterial = canonicalMat,
+                sourceMaterialName = canonicalMat.name,
+                action = VisualConversionAction.Convert,
+                targetMaterial = styledMat
+            });
+
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Renderer r = cube.GetComponent<Renderer>();
+            r.sharedMaterial = canonicalMat;
+
+            bool prevFog = RenderSettings.fog;
+            float prevAmbient = RenderSettings.ambientIntensity;
+
+            try
+            {
+                VisualStyleGameplayBootstrap.ApplyStyleLiveInCurrentScene(profile, lib, asSessionPreview: true);
+                yield return null;
+
+                Assert.AreSame(styledMat, r.sharedMaterial, "Live preview must swap canonical renderer to styled material.");
+
+                VisualStyleGameplayBootstrap.RestoreOriginalInCurrentScene(clearSessionOverride: true);
+                yield return null;
+
+                Assert.AreSame(canonicalMat, r.sharedMaterial, "Restore original must revert renderer back to canonical material.");
+                Assert.AreEqual(prevFog, RenderSettings.fog);
+                Assert.AreEqual(prevAmbient, RenderSettings.ambientIntensity, 0.001f);
+            }
+            finally
+            {
+                VisualStyleGameplayBootstrap.RestoreOriginalInCurrentScene(clearSessionOverride: true);
+                UnityEngine.Object.Destroy(cube);
+                UnityEngine.Object.Destroy(lib);
+                UnityEngine.Object.Destroy(profile);
+                UnityEngine.Object.Destroy(canonicalMat);
+                UnityEngine.Object.Destroy(styledMat);
+            }
         }
     }
 }

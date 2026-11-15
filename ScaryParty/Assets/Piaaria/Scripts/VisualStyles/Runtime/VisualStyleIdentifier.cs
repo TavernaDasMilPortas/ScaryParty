@@ -29,6 +29,15 @@ namespace ScaryParty.VisualStyles
         public bool preserveHierarchyMaterials = false;
         public List<VisualSlotMetadata> slotOverrides = new List<VisualSlotMetadata>();
 
+        [Header("B1 Lighting & AO Extension Hooks (Futuro B1)")]
+        public ScaryParty.Lighting.LightingSpaceType lightingSpaceType = ScaryParty.Lighting.LightingSpaceType.ExteriorCity;
+        public Texture2D bakedAoTexture;
+        [Range(0f, 1f)] public float aoStrength = 0.25f;
+        public bool useVertexColorAo = false;
+        public Texture2D emissionMask;
+        [Range(0f, 8f)] public float emissionMaskStrength = 0f;
+        public Color emissionMaskColor = new Color(1f, 0.86f, 0.58f, 1f);
+
         public VisualSlotMetadata GetMetadataForSlot(int slotIndex)
         {
             if (slotOverrides != null)

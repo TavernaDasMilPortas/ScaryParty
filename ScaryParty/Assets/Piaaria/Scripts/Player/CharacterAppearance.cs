@@ -122,6 +122,14 @@ namespace ScaryParty.Player
             _currentPrimaryColor = color;
             EnsureRenderersCached();
 
+            if (Application.isPlaying)
+            {
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    gameObject,
+                    ScaryParty.VisualStyles.VisualSemanticRole.PlayerBody,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Characters);
+            }
+
             if (_allSkinnedRenderers == null || _allSkinnedRenderers.Length == 0)
                 return;
 
@@ -154,6 +162,7 @@ namespace ScaryParty.Player
         private void ApplyColorBlockToSlot(Renderer renderer, int slotIndex, Color color)
         {
             ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(renderer, slotIndex, color, _propertyBlock);
+            ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(renderer.gameObject);
         }
 
         /// <summary>

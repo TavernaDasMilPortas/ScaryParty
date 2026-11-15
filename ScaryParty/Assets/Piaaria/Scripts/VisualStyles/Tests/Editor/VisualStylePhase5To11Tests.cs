@@ -82,7 +82,7 @@ namespace ScaryParty.VisualStyles.Editor.Tests
             Assert.IsNotNull(res.outlineFeature);
             Assert.IsTrue(res.outlineFeature.isActive);
             Assert.AreEqual(FullScreenPassRendererFeature.InjectionPoint.AfterRenderingPostProcessing, res.outlineFeature.injectionPoint);
-            Assert.AreEqual("Shader Graphs/Outline Effect", res.screenSpaceOutlineMaterial.shader.name);
+            Assert.IsTrue(VisualStyleShaderUtility.IsScreenSpaceOutlineShader(res.screenSpaceOutlineMaterial.shader));
             Assert.Greater(res.screenSpaceOutlineMaterial.GetFloat("_Width"), 0f);
 
             // Running twice stays idempotent (same asset paths, single feature)

@@ -30,6 +30,11 @@ MonoBehaviour:
     useShadows: 1
     receiveShadows: 1
     mainLightInfluence: 1
+    minShadowBrightness: 0.36
+    shadowLift: 0.12
+    indirectDiffuseWeight: 1
+    additionalLightsWeight: 1
+    maxAdditionalLightContribution: 1.65
   specularRim:
     useSpecular: 0
     specularColor: {r: 1, g: 1, b: 1, a: 1}
@@ -59,13 +64,13 @@ MonoBehaviour:
     outlineColor: {r: 0.14, g: 0.12, b: 0.16, a: 1}
     outlineWidth: 0.08
     normalSurfaceOutline: 0
-    screenSpaceWidth: 1.1
+    screenSpaceWidth: 1.85
     useDepthTest: 1
-    depthThreshold: 0.25
+    depthThreshold: 5.4
     useNormalsTest: 1
-    normalThreshold: 0.45
-    useColorTest: 0
-    colorThreshold: 0.2
+    normalThreshold: 0.42
+    useColorTest: 1
+    colorThreshold: 0.3
     characterOutlineMultiplier: 1.25
     buildingOutlineMultiplier: 0.18
     foodOutlineMultiplier: 0.15
@@ -76,7 +81,7 @@ MonoBehaviour:
     outlineLayerMask:
       serializedVersion: 2
       m_Bits: 4294967295
-    suppressOutlineOnInteractionFocus: 1
+    suppressOutlineOnInteractionFocus: 0
   characters:
     characterOutlineMultiplier: 1.25
     rimLightEnabled: 1
@@ -105,6 +110,7 @@ MonoBehaviour:
     addInteriorFillLights: 1
     interiorFillIntensity: 1.4
     interiorFillRange: 10
+    interiorAmbientBoost: 0.22
   categoryOverrides:
   - categoryId: Characters
     enabled: 1

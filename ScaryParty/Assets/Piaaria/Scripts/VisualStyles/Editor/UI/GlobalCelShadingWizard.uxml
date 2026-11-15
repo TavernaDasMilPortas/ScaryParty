@@ -128,10 +128,13 @@
                 <ui:Button name="btn-generate" text="Gerar Materiais" class="action-btn" />
             </ui:VisualElement>
             <ui:VisualElement class="footer-btn-row">
-                <ui:Button name="btn-apply" text="Aplicar na Gameplay" class="action-btn" />
-                <ui:Button name="btn-generate-apply-all" text="Gerar e Aplicar Tudo" class="action-btn primary-action-btn" />
+                <ui:Button name="btn-preview-original-scene" text="Modo A: Pré-visualizar na GameScene" class="action-btn primary-action-btn" />
+                <ui:Button name="btn-save-default-original-scene" text="Modo B: Salvar Padrão na GameScene" class="action-btn" />
+                <ui:Button name="btn-apply" text="Modo C: Gerar Variante Cel Shaded" class="action-btn" />
+                <ui:Button name="btn-generate-apply-all" text="Gerar e Aplicar Tudo" class="action-btn" />
                 <ui:Button name="btn-open-showcase" text="Abrir Cena A/B" class="action-btn" />
-                <ui:Button name="btn-activate-gameplay" text="Ativar na Gameplay" class="action-btn" />
+                <ui:Button name="btn-activate-gameplay" text="Ativar Variante no Boot" class="action-btn" />
+                <ui:Button name="btn-audit-lighting" text="Auditar Luz &amp; Atlas (M0)" class="action-btn" />
                 <ui:Button name="btn-restore-original" text="Restaurar Original" class="action-btn danger-action-btn" />
                 <ui:Button name="btn-export-report" text="Exportar Relatorio" class="action-btn" />
             </ui:VisualElement>

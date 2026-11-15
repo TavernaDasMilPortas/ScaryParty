@@ -542,6 +542,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 ScaryParty.VisualStyles.VisualSemanticRole.FoodGeneric,
                 ScaryParty.VisualStyles.VisualCategoryIds.Food,
                 profile != null ? profile.presentationKey : null);
+            ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(go);
 
             var col = go.GetComponent<Collider>();
             if (col != null) Destroy(col);

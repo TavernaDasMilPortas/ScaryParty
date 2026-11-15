@@ -1,0 +1,461 @@
+﻿{
+    "timestampUtc": "2026-11-14 19:51:21 UTC",
+    "unityVersion": "6000.3.6f1",
+    "activeRenderPipelineName": "PC_RPAsset",
+    "activeRenderPipelinePath": "Assets/Settings/PC_RPAsset.asset",
+    "mainLightShadowResolution": 2048,
+    "additionalLightsShadowAtlasSize": 2048,
+    "tierLow": 256,
+    "tierMedium": 512,
+    "tierHigh": 1024,
+    "shadowCascadeCount": 4,
+    "shadowDistance": 50.0,
+    "renderingMode": "ForwardPlus",
+    "ssaoPresent": true,
+    "ssaoIntensity": 0.4000000059604645,
+    "ssaoDirectLightingStrength": 0.25,
+    "totalLightsCount": 43,
+    "shadowedLocalLightsCount": 18,
+    "worstCaseLocalShadowSlices": 88,
+    "atlasDowngradeRisk": true,
+    "currentStyleId": "dispatch_inspired",
+    "currentGameplayRoute": "CelShadedVariant",
+    "currentVisualMode": "PersistentDefault",
+    "findings": [
+        "CityModuleCatalog carregado com 12 modulos.",
+        "RISCO CRITICO ATLAS URP: Tier High=1024 com 18 luzes locais com sombra (88 slices) excede atlas de 2048.",
+        "SSAO DirectLightingStrength=0,25 pode escurecer cavidades iluminadas em estilo cartoon (recomendado <= 0.15)."
+    ],
+    "lights": [
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Directional Light",
+            "lightType": "Directional",
+            "shadowType": "Soft",
+            "range": 10.0,
+            "intensity": 1.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/Comodo_02_Cozinha/Equipamentos/Forno_01/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/Comodo_02_Cozinha/Equipamentos/Forno_02/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/Comodo_02_Cozinha/Equipamentos/Forno_03/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/Comodo_02_Cozinha/PhoneBeaconLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 2.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/Comodo_01_Salao/Mobiliario/balcao.014/CaixaRegistradora_01/PhoneBeaconLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 2.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Salao_Centro_01",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 1.7999999523162842,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Salao_Centro_02",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 1.7999999523162842,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Salao_Janelas",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 1.600000023841858,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Mesas_Norte",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 9.0,
+            "intensity": 1.7000000476837159,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Mesas_Sul",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 9.0,
+            "intensity": 1.7000000476837159,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Balcao_Atendimento",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 9.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Caixa_Registradora",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 8.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Spot_Balcao_Destaque",
+            "lightType": "Spot",
+            "shadowType": "Soft",
+            "range": 8.0,
+            "intensity": 2.5,
+            "estimatedShadowSlices": 1,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Cozinha_Principal",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 14.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Bancada_Preparo_Massa",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Bancada_Montagem",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Forno_Realce_Fogo",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 8.5,
+            "intensity": 2.799999952316284,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Spot_Forno_Boca",
+            "lightType": "Spot",
+            "shadowType": "Soft",
+            "range": 9.0,
+            "intensity": 3.0,
+            "estimatedShadowSlices": 1,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Logistica_Embalagem",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Estoque_Ingredientes",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 11.0,
+            "intensity": 1.899999976158142,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Canonical:GameScene",
+            "objectPath": "Blocks/Block_0/The_Pizzeria_Building/LightingRig/Light_Saida_Entrega_Delivery",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 10.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 6,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "Comodo_02_Cozinha/Equipamentos/Forno_01/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "Comodo_02_Cozinha/Equipamentos/Forno_02/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "Comodo_02_Cozinha/Equipamentos/Forno_03/OvenFireLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 3.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "Comodo_02_Cozinha/PhoneBeaconLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 2.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "Comodo_01_Salao/Mobiliario/balcao.014/CaixaRegistradora_01/PhoneBeaconLight",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 2.5,
+            "intensity": 0.0,
+            "estimatedShadowSlices": 0,
+            "enabled": false
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Salao_Centro_01",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 1.7999999523162842,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Salao_Centro_02",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 1.7999999523162842,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Salao_Janelas",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 1.600000023841858,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Mesas_Norte",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 9.0,
+            "intensity": 1.7000000476837159,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Mesas_Sul",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 9.0,
+            "intensity": 1.7000000476837159,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Balcao_Atendimento",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 9.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Caixa_Registradora",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 8.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Spot_Balcao_Destaque",
+            "lightType": "Spot",
+            "shadowType": "Soft",
+            "range": 8.0,
+            "intensity": 2.5,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Cozinha_Principal",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 14.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Bancada_Preparo_Massa",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Bancada_Montagem",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 10.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Forno_Realce_Fogo",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 8.5,
+            "intensity": 2.799999952316284,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Spot_Forno_Boca",
+            "lightType": "Spot",
+            "shadowType": "Soft",
+            "range": 9.0,
+            "intensity": 3.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Logistica_Embalagem",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 12.0,
+            "intensity": 2.0,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Estoque_Ingredientes",
+            "lightType": "Point",
+            "shadowType": "None",
+            "range": 11.0,
+            "intensity": 1.899999976158142,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        },
+        {
+            "sourceContext": "Prefab:PizzeriaModular_Manual",
+            "objectPath": "LightingRig/Light_Saida_Entrega_Delivery",
+            "lightType": "Point",
+            "shadowType": "Soft",
+            "range": 10.0,
+            "intensity": 2.200000047683716,
+            "estimatedShadowSlices": 0,
+            "enabled": true
+        }
+    ]
+}

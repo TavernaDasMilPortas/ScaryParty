@@ -18,6 +18,13 @@ namespace ScaryParty.VisualStyles
         public bool useShadows = true;
         public bool receiveShadows = true;
         [Range(0f, 2f)] public float mainLightInfluence = 1f;
+
+        [Header("Stylized Lighting Floor & Additional Lights (A2)")]
+        [Range(0f, 1f)] public float minShadowBrightness = 0.28f;
+        [Range(0f, 1f)] public float shadowLift = 0.08f;
+        [Range(0f, 2f)] public float indirectDiffuseWeight = 1.0f;
+        [Range(0f, 3f)] public float additionalLightsWeight = 1.0f;
+        [Range(0.1f, 4f)] public float maxAdditionalLightContribution = 1.65f;
     }
 
     [Serializable]
@@ -64,13 +71,13 @@ namespace ScaryParty.VisualStyles
         public bool normalSurfaceOutline = false;
 
         [Header("Screen Space Outline Feature Settings")]
-        [Range(0f, 5f)] public float screenSpaceWidth = 1.1f;
+        [Range(0f, 5f)] public float screenSpaceWidth = 1.75f;
         public bool useDepthTest = true;
-        [Range(0f, 2f)] public float depthThreshold = 0.25f;
+        [Range(0.5f, 12f)] public float depthThreshold = 5.4f;
         public bool useNormalsTest = true;
-        [Range(0f, 2f)] public float normalThreshold = 0.45f;
-        public bool useColorTest = false;
-        [Range(0f, 2f)] public float colorThreshold = 0.2f;
+        [Range(0.05f, 2f)] public float normalThreshold = 0.45f;
+        public bool useColorTest = true;
+        [Range(0.05f, 2f)] public float colorThreshold = 0.32f;
 
         [Header("Category Multipliers & Distance")]
         [Range(0f, 2f)] public float characterOutlineMultiplier = 1.25f;
@@ -82,7 +89,7 @@ namespace ScaryParty.VisualStyles
 
         public VisualStyleOutlineQuality outlineQuality = VisualStyleOutlineQuality.Medium;
         public LayerMask outlineLayerMask = ~0;
-        public bool suppressOutlineOnInteractionFocus = true;
+        public bool suppressOutlineOnInteractionFocus = false;
     }
 
     [Serializable]
@@ -123,6 +130,7 @@ namespace ScaryParty.VisualStyles
         public bool addInteriorFillLights = true;
         [Range(0f, 5f)] public float interiorFillIntensity = 1.4f;
         [Range(2f, 25f)] public float interiorFillRange = 10f;
+        [Range(0f, 1f)] public float interiorAmbientBoost = 0.22f;
     }
 
     [Serializable]
@@ -349,7 +357,12 @@ namespace ScaryParty.VisualStyles
                     colorPalette.posterizeColors = false;
                     outlines.outlineMode = VisualStyleOutlineMode.ScreenSpace;
                     outlines.outlineWidth = 0.045f;
-                    outlines.screenSpaceWidth = 0.75f;
+                    outlines.screenSpaceWidth = 1.45f;
+                    outlines.depthThreshold = 5.4f;
+                    outlines.normalThreshold = 0.48f;
+                    outlines.colorThreshold = 0.36f;
+                    outlines.useColorTest = false;
+                    outlines.suppressOutlineOnInteractionFocus = false;
                     outlines.characterOutlineMultiplier = 1.2f;
                     outlines.buildingOutlineMultiplier = 0.1f;
                     characters.rimLightEnabled = true;
@@ -372,7 +385,12 @@ namespace ScaryParty.VisualStyles
                     colorPalette.colorNumbers = 6;
                     outlines.outlineMode = VisualStyleOutlineMode.ScreenSpace;
                     outlines.outlineWidth = 0.14f;
-                    outlines.screenSpaceWidth = 1.85f;
+                    outlines.screenSpaceWidth = 2.2f;
+                    outlines.depthThreshold = 5.0f;
+                    outlines.normalThreshold = 0.38f;
+                    outlines.colorThreshold = 0.28f;
+                    outlines.useColorTest = true;
+                    outlines.suppressOutlineOnInteractionFocus = false;
                     outlines.characterOutlineMultiplier = 1.4f;
                     outlines.buildingOutlineMultiplier = 0.45f;
                     outlines.foodOutlineMultiplier = 0.35f;
@@ -399,6 +417,11 @@ namespace ScaryParty.VisualStyles
                     outlines.outlineMode = VisualStyleOutlineMode.Disabled;
                     outlines.outlineWidth = 0f;
                     outlines.screenSpaceWidth = 0f;
+                    outlines.depthThreshold = 5.4f;
+                    outlines.normalThreshold = 0.50f;
+                    outlines.colorThreshold = 0.35f;
+                    outlines.useColorTest = false;
+                    outlines.suppressOutlineOnInteractionFocus = false;
                     characters.rimLightEnabled = false;
                     materials.preserveTextures = false; // Essential markings/food retain via category overrides
                     break;
@@ -414,8 +437,13 @@ namespace ScaryParty.VisualStyles
                     lighting.lightRampOffset = 0.50f;
                     lighting.useShadows = true;
                     lighting.receiveShadows = true;
-                    // Sombra cinza-azulado/roxo dessaturada (#5A5873)
-                    lighting.shadowTint = new Color(0.35f, 0.34f, 0.45f, 1f);
+                    // Sombra cinza-azulado/roxo iluminada com piso de legibilidade para nao esmagar interiores
+                    lighting.shadowTint = new Color(0.46f, 0.45f, 0.56f, 1f);
+                    lighting.minShadowBrightness = 0.38f;
+                    lighting.shadowLift = 0.14f;
+                    lighting.indirectDiffuseWeight = 1.12f;
+                    lighting.additionalLightsWeight = 1.0f;
+                    lighting.maxAdditionalLightContribution = 1.65f;
                     specularRim.useSpecular = false;
                     specularRim.useRimLighting = true;
                     specularRim.rimLightColor = new Color(0.85f, 0.90f, 1f, 1f);
@@ -431,7 +459,12 @@ namespace ScaryParty.VisualStyles
                     // Contorno #222831
                     outlines.outlineColor = new Color(0.133f, 0.157f, 0.192f, 1f);
                     outlines.outlineWidth = 0.10f;
-                    outlines.screenSpaceWidth = 1.25f;
+                    outlines.screenSpaceWidth = 1.85f;
+                    outlines.depthThreshold = 5.4f;
+                    outlines.normalThreshold = 0.42f;
+                    outlines.colorThreshold = 0.30f;
+                    outlines.useColorTest = true;
+                    outlines.suppressOutlineOnInteractionFocus = false;
                     outlines.characterOutlineMultiplier = 1.35f;
                     outlines.buildingOutlineMultiplier = 0.22f;
                     outlines.foodOutlineMultiplier = 0.10f;
@@ -455,13 +488,20 @@ namespace ScaryParty.VisualStyles
                     lighting.lightRamp = 0.85f;
                     lighting.lightRampOffset = 0.50f;
                     lighting.shadowTint = new Color(0.60f, 0.58f, 0.70f, 1f);
+                    lighting.minShadowBrightness = 0.36f;
+                    lighting.shadowLift = 0.12f;
                     colorPalette.saturationShift = 0.10f;
                     colorPalette.valueShift = 0.03f;
                     colorPalette.contrast = 1.03f;
                     colorPalette.posterizeColors = false;
                     outlines.outlineMode = VisualStyleOutlineMode.ScreenSpace;
                     outlines.outlineWidth = 0.08f;
-                    outlines.screenSpaceWidth = 1.1f;
+                    outlines.screenSpaceWidth = 1.65f;
+                    outlines.depthThreshold = 5.4f;
+                    outlines.normalThreshold = 0.45f;
+                    outlines.colorThreshold = 0.34f;
+                    outlines.useColorTest = true;
+                    outlines.suppressOutlineOnInteractionFocus = false;
                     outlines.characterOutlineMultiplier = 1.25f;
                     outlines.buildingOutlineMultiplier = 0.18f;
                     outlines.foodOutlineMultiplier = 0.15f;

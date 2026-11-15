@@ -29,6 +29,72 @@ namespace ScaryParty.VisualStyles.Editor
             GlobalCelShadingWizard.OnBuildOrOpenShowcaseRequested = BuildOrUpdateShowcase;
         }
 
+        public static VisualMaterialLibrary EnsureStyleLibraryAndRenderPipeline(VisualStyleProfile profile, VisualConversionRuleSet ruleSet)
+        {
+            if (profile == null) return null;
+            if (ruleSet == null) ruleSet = VisualStylePresetSeeder.EnsureDefaultRuleSet();
+
+            VisualMaterialLibrary library = VisualStyleMaterialFactory.LoadLibrary(profile.styleId);
+            VisualStyleConversionManifest manifest = VisualStyleMaterialFactory.LoadManifest(profile.styleId);
+            if (library == null || manifest == null ||
+                !string.Equals(manifest.profileContentHash, profile.ComputeContentHash(), StringComparison.Ordinal))
+            {
+                var scan = VisualStyleAssetDiscoveryService.Scan(profile, ruleSet, manifest, VisualDiscoveryScope.GameplayReachable);
+                var report = VisualStyleMaterialFactory.GenerateOrUpdateLibrary(profile, ruleSet, scan);
+                if (report.errorCount > 0) return null;
+                library = VisualStyleMaterialFactory.LoadLibrary(profile.styleId);
+            }
+
+            if (library == null) return null;
+            var rpResult = VisualStyleUrpOutlineConfigurator.CreateOrUpdateVariantRenderPipeline(profile, library);
+            if (rpResult != null)
+            {
+                library.renderPipelineAsset = rpResult.rpAsset;
+                library.renderPipelineRendererData = rpResult.rendererData;
+                EditorUtility.SetDirty(library);
+            }
+            return library;
+        }
+
+        /// <summary>
+        /// Modo A (Reversivel): configura preview em tempo de execucao na GameScene original sem tocar GameScene.unity.
+        /// </summary>
+        public static bool ApplyRuntimePreviewInOriginalGameScene(VisualStyleProfile profile, VisualConversionRuleSet ruleSet)
+        {
+            if (profile == null) return false;
+            VisualMaterialLibrary library = EnsureStyleLibraryAndRenderPipeline(profile, ruleSet);
+            if (library == null) return false;
+
+            if (Application.isPlaying)
+            {
+                VisualStyleGameplayBootstrap.ApplyStyleLiveInCurrentScene(profile, library, asSessionPreview: true);
+                return true;
+            }
+
+            VisualStyleRuntimeConfig cfg = VisualStylePresetSeeder.EnsureRuntimeConfig(profile);
+            Undo.RecordObject(cfg, "Enable Runtime Preview Style");
+            cfg.gameplayRoute = GameplaySceneRoute.Original;
+            cfg.visualMode = VisualApplicationMode.RuntimePreview;
+            cfg.useStyledGameplay = false;
+            cfg.activeStyleId = profile.styleId;
+            cfg.activeGameplaySceneName = VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
+            cfg.activeProfile = profile;
+            cfg.activeLibrary = library;
+            EditorUtility.SetDirty(cfg);
+            AssetDatabase.SaveAssets();
+            VisualStyleRuntimeConfig.ClearCache();
+            return true;
+        }
+
+        /// <summary>
+        /// Modo B (Explicito): grava bootstrap minimo reversivel na GameScene original com backup + manifest.
+        /// </summary>
+        public static bool SaveAsDefaultInOriginalGameScene(VisualStyleProfile profile, VisualConversionRuleSet ruleSet, out string report)
+        {
+            return OriginalGameSceneStylePersistence.SaveStyleAsDefaultInOriginalGameScene(
+                profile, ruleSet, interactiveDialogs: !Application.isBatchMode, out report);
+        }
+
         public static string BuildOrUpdateShowcase(VisualStyleProfile profile, VisualConversionRuleSet ruleSet)
         {
             return VisualStyleShowcaseBuilder.BuildOrUpdateShowcaseScene(profile, ruleSet, restorePreviousActiveScene: true);
@@ -69,6 +135,12 @@ namespace ScaryParty.VisualStyles.Editor
 
             // 2. Ensure duplicated URP renderer & screen-space outline feature
             var rpResult = VisualStyleUrpOutlineConfigurator.CreateOrUpdateVariantRenderPipeline(profile, library);
+            if (rpResult != null)
+            {
+                library.renderPipelineAsset = rpResult.rpAsset;
+                library.renderPipelineRendererData = rpResult.rendererData;
+                EditorUtility.SetDirty(library);
+            }
 
             // 3. Build cosmetic variant prefabs / item catalog (preserving NGO prefab hashes on canonical prefabs)
             VisualStylePrefabVariantBuilder.BuildVariants(profile, library, manifest);
@@ -100,6 +172,19 @@ namespace ScaryParty.VisualStyles.Editor
             {
                 Debug.LogError($"[VisualStyleGameplayIntegrator] Canonical scene not found: {VisualStyleAuditService.CanonicalGameScenePath}");
                 return false;
+            }
+
+            Scene openVariant = SceneManager.GetSceneByPath(VisualStyleAuditService.VariantGameScenePath);
+            if (openVariant.IsValid() && openVariant.isLoaded && openVariant.isDirty && !Application.isBatchMode)
+            {
+                if (!EditorUtility.DisplayDialog(
+                    "Recriar GameScene_CelShaded?",
+                    "A cena variante GameScene_CelShaded possui alteracoes nao salvas abertas no Editor.\nDeseja sobrescreve-la a partir da GameScene canonica?",
+                    "Sobrescrever Variante",
+                    "Cancelar"))
+                {
+                    return false;
+                }
             }
 
             VisualStylePresetSeeder.EnsureFolder("Assets/Piaaria/Scenes/GameplayVariants");
@@ -287,6 +372,8 @@ namespace ScaryParty.VisualStyles.Editor
             VisualMaterialLibrary library = VisualStyleMaterialFactory.LoadLibrary(profile.styleId);
             VisualStyleRuntimeConfig cfg = VisualStylePresetSeeder.EnsureRuntimeConfig(profile);
 
+            cfg.gameplayRoute = GameplaySceneRoute.CelShadedVariant;
+            cfg.visualMode = VisualApplicationMode.PersistentDefault;
             cfg.useStyledGameplay = true;
             cfg.activeStyleId = profile.styleId;
             cfg.activeGameplaySceneName = VariantGameplaySceneName;
@@ -303,6 +390,22 @@ namespace ScaryParty.VisualStyles.Editor
 
         public static bool RestoreOriginalGameplay(VisualStyleProfile profile)
         {
+            if (Application.isPlaying)
+            {
+                VisualStyleGameplayBootstrap.RestoreOriginalInCurrentScene(clearSessionOverride: true);
+            }
+
+            if (OriginalGameSceneStylePersistence.HasActiveManifest())
+            {
+                OriginalGameSceneStylePersistence.RestoreOriginalGameSceneFromManifest(
+                    allowInteractiveDialog: !Application.isBatchMode,
+                    out string rollbackReport);
+                if (!string.IsNullOrEmpty(rollbackReport))
+                {
+                    Debug.Log($"[VisualStyleGameplayIntegrator] Rollback Modo B: {rollbackReport}");
+                }
+            }
+
             VisualStyleRuntimeConfig cfg = VisualStylePresetSeeder.EnsureRuntimeConfig(null);
             VisualStyleConversionManifest manifest = profile != null ? VisualStyleMaterialFactory.LoadManifest(profile.styleId) : null;
 
@@ -313,6 +416,8 @@ namespace ScaryParty.VisualStyles.Editor
                 targetBootScene = VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
             }
 
+            cfg.gameplayRoute = GameplaySceneRoute.Original;
+            cfg.visualMode = VisualApplicationMode.Disabled;
             cfg.useStyledGameplay = false;
             cfg.activeStyleId = string.Empty;
             cfg.activeGameplaySceneName = targetBootScene;

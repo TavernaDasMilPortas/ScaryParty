@@ -255,11 +255,11 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // --- 1. SALÃO DE MESAS (Luzes quentes acolhedoras) ---
             CreateLight(lightingRig, "Light_Salao_Centro_01", new Vector3(8.0f, lightHeight, -2.0f),
-                LightType.Point, new Color(1.0f, 0.94f, 0.85f), 1.8f, 12f, LightShadows.Soft);
+                LightType.Point, new Color(1.0f, 0.94f, 0.85f), 1.8f, 12f, LightShadows.None);
             lightCount++;
 
             CreateLight(lightingRig, "Light_Salao_Centro_02", new Vector3(8.0f, lightHeight, 4.0f),
-                LightType.Point, new Color(1.0f, 0.94f, 0.85f), 1.8f, 12f, LightShadows.Soft);
+                LightType.Point, new Color(1.0f, 0.94f, 0.85f), 1.8f, 12f, LightShadows.None);
             lightCount++;
 
             CreateLight(lightingRig, "Light_Salao_Janelas", new Vector3(2.5f, lightHeight, -6.5f),
@@ -276,7 +276,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // --- 2. BALCÃO DE ATENDIMENTO E CAIXA ---
             CreateLight(lightingRig, "Light_Balcao_Atendimento", new Vector3(12.5f, lightHeight, -3.5f),
-                LightType.Point, new Color(1.0f, 0.98f, 0.92f), 2.2f, 9f, LightShadows.Soft);
+                LightType.Point, new Color(1.0f, 0.98f, 0.92f), 2.2f, 9f, LightShadows.None);
             lightCount++;
 
             CreateLight(lightingRig, "Light_Caixa_Registradora", new Vector3(12.5f, lightHeight, 1.5f),
@@ -290,7 +290,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // --- 3. COZINHA E BANCADAS OPERACIONAIS (Luz branca/neutra limpa) ---
             CreateLight(lightingRig, "Light_Cozinha_Principal", new Vector3(20.5f, lightHeight, -5.0f),
-                LightType.Point, new Color(0.95f, 0.98f, 1.0f), 2.2f, 14f, LightShadows.Soft);
+                LightType.Point, new Color(0.95f, 0.98f, 1.0f), 2.2f, 14f, LightShadows.None);
             lightCount++;
 
             CreateLight(lightingRig, "Light_Bancada_Preparo_Massa", new Vector3(17.5f, lightHeight, 2.0f),
@@ -303,16 +303,16 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // --- 4. FORNO A LENHA (Destaque alaranjado/fogo) ---
             CreateLight(lightingRig, "Light_Forno_Realce_Fogo", new Vector3(28.0f, 1.8f, -13.5f),
-                LightType.Point, new Color(1.0f, 0.55f, 0.15f), 2.8f, 8.5f, LightShadows.Soft);
+                LightType.Point, new Color(1.0f, 0.55f, 0.15f), 2.8f, 8.5f, LightShadows.None);
             lightCount++;
 
             CreateSpotLight(lightingRig, "Spot_Forno_Boca", new Vector3(28.0f, lightHeight, -11.5f),
-                new Vector3(60f, 180f, 0f), new Color(1.0f, 0.65f, 0.25f), 3.0f, 9f, 60f, LightShadows.Soft);
+                new Vector3(60f, 180f, 0f), new Color(1.0f, 0.65f, 0.25f), 3.0f, 9f, 60f, LightShadows.None);
             lightCount++;
 
             // --- 5. LOGÍSTICA, ESTOQUE E DESPENSA (Ala Sul da planta em L) ---
             CreateLight(lightingRig, "Light_Logistica_Embalagem", new Vector3(20.5f, lightHeight, -18.5f),
-                LightType.Point, new Color(0.95f, 0.97f, 1.0f), 2.0f, 12f, LightShadows.Soft);
+                LightType.Point, new Color(0.95f, 0.97f, 1.0f), 2.0f, 12f, LightShadows.None);
             lightCount++;
 
             CreateLight(lightingRig, "Light_Estoque_Ingredientes", new Vector3(26.5f, lightHeight, -20.5f),
@@ -320,7 +320,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             lightCount++;
 
             CreateLight(lightingRig, "Light_Saida_Entrega_Delivery", new Vector3(20.5f, lightHeight, -25.5f),
-                LightType.Point, new Color(1.0f, 0.95f, 0.88f), 2.2f, 10f, LightShadows.Soft);
+                LightType.Point, new Color(1.0f, 0.95f, 0.88f), 2.2f, 10f, LightShadows.None);
             lightCount++;
 
             return lightCount;

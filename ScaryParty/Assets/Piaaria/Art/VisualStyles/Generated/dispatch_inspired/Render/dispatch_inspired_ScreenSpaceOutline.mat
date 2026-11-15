@@ -8,12 +8,10 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: dispatch_inspired_ScreenSpaceOutline
-  m_Shader: {fileID: -6465566751694194690, guid: 2f3488b9857eb214b965a7d38c9e5c4a, type: 3}
+  m_Shader: {fileID: 4800000, guid: e8b4c91274603c54a91b712dadd94590, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords:
-  - _USEDEPTHTEST
-  - _USENORMALSTEST
+  m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -133,11 +131,11 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ColorThreshold: 0.2
+    - _ColorThreshold: 0.3
     - _Colorspace_Steps: 255
     - _Cull: 2
     - _Cutoff: 0.5
-    - _Depth_Threshold: 0.25
+    - _Depth_Threshold: 5.4
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -149,7 +147,7 @@ Material:
     - _GlossyReflections: 0
     - _METALNESS: 0
     - _Metallic: 0
-    - _NormalThreshold: 0.45
+    - _NormalThreshold: 0.42
     - _OVERLAY: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -166,10 +164,10 @@ Material:
     - _SrcBlendAlpha: 1
     - _Surface: 0
     - _TRANSPARENCY: 0
-    - _USECOLORTEST: 0
+    - _USECOLORTEST: 1
     - _USEDEPTHTEST: 1
     - _USENORMALSTEST: 1
-    - _Width: 1.25
+    - _Width: 1.85
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

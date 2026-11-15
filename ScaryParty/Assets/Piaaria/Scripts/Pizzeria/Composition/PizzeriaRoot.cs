@@ -160,6 +160,12 @@ namespace ScaryParty.Pizzeria.Composition
             if (GetComponent<ScaryParty.Pizzeria.Presentation.CustomerPatienceHudPresenter>() == null)
                 gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.CustomerPatienceHudPresenter>();
 
+            // Garante controlador de iluminacao interna por zonas (A6) e elimina Point shadows no atlas URP
+            if (GetComponent<ScaryParty.Lighting.PizzeriaLightingController>() == null)
+            {
+                gameObject.AddComponent<ScaryParty.Lighting.PizzeriaLightingController>();
+            }
+
             // Aplica estilo cel-shading ativo no cliente e servidor preservando hash de NetworkObject
             ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
                 gameObject,

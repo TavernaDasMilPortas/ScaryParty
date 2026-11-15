@@ -1,3 +1,22 @@
 {
-    "dotnet.defaultSolution": "ScaryParty/ScaryParty.sln"
+    "dotnet.defaultSolution": "ScaryParty/ScaryParty.sln",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/Library/**": true,
+        "**/Temp/**": true,
+        "**/Logs/**": true,
+        "**/Obj/**": true,
+        "**/Build/**": true,
+        "**/Builds/**": true
+    },
+    "search.exclude": {
+        "**/Library": true,
+        "**/Temp": true,
+        "**/Logs": true,
+        "**/Obj": true,
+        "**/Build": true,
+        "**/Builds": true
+    }
 }

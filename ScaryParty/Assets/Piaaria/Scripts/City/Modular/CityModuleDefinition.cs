@@ -29,6 +29,13 @@ namespace ScaryParty.City.Modular
         [Tooltip("Número de slots horizontais de 2 metros ocupados na fachada. Garagem = 2, painéis normais = 1, acabamentos/pilares = 0.")]
         public int occupiedSlots = 1;
 
+        [Header("Iluminacao Noturna & Ganchos B1 (Futuro AO Modular)")]
+        public bool supportsNightWindowEmission = true;
+        public Texture2D windowEmissionMask;
+        public Texture2D prebakedModuleAoTexture;
+        [Range(0f, 1f)] public float moduleAoStrength = 0.25f;
+        public Vector3 defaultLocalAnchorOffset = new Vector3(0f, 1.8f, 0.65f);
+
         [Header("Saliências e Clearance")]
         [Tooltip("Avanço além da face externa em direção a +Z (fora da fachada). Ex: H floreira = 0.3m, K toldo = 0.8m.")]
         public float exteriorProtrusion = 0f;

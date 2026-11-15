@@ -8,12 +8,22 @@ namespace ScaryParty.VisualStyles
     /// </summary>
     public static class VisualStyleShaderUtility
     {
-        public const string ShaderOpaque = "Distant Lands/Illustrate/Opaque";
-        public const string ShaderSimple = "Distant Lands/Illustrate/Simple";
-        public const string ShaderTransparent = "Distant Lands/Illustrate/Transparent";
-        public const string ShaderAlphaClipped = "Distant Lands/Illustrate/Alpha Clipped";
+        public const string StylizedShaderPrefix = "ScaryParty/Illustrate Stylized/";
+        public const string LegacyShaderPrefix = "Distant Lands/Illustrate/";
+
+        public const string ShaderOpaque = "ScaryParty/Illustrate Stylized/Opaque";
+        public const string ShaderSimple = "ScaryParty/Illustrate Stylized/Simple";
+        public const string ShaderTransparent = "ScaryParty/Illustrate Stylized/Transparent";
+        public const string ShaderAlphaClipped = "ScaryParty/Illustrate Stylized/Alpha Clipped";
         public const string ShaderOutline = "Distant Lands/Illustrate/Outline";
-        public const string ScreenSpaceOutlineShader = "Shader Graphs/Outline Effect";
+
+        public const string LegacyShaderOpaque = "Distant Lands/Illustrate/Opaque";
+        public const string LegacyShaderSimple = "Distant Lands/Illustrate/Simple";
+        public const string LegacyShaderTransparent = "Distant Lands/Illustrate/Transparent";
+        public const string LegacyShaderAlphaClipped = "Distant Lands/Illustrate/Alpha Clipped";
+
+        public const string ScreenSpaceOutlineShader = "ScaryParty/Illustrate Stylized/ScreenSpaceOutline";
+        public const string LegacyScreenSpaceOutlineShader = "Shader Graphs/Outline Effect";
 
         public static readonly int BaseColorId = Shader.PropertyToID("_BaseColor");
         public static readonly int ColorId = Shader.PropertyToID("_Color");
@@ -58,11 +68,17 @@ namespace ScaryParty.VisualStyles
         }
 
         /// <summary>
-        /// Checks whether a shader belongs to the Distant Lands Illustrate family.
+        /// Checks whether a shader belongs to the project Stylized Illustrate or legacy Distant Lands Illustrate family.
         /// </summary>
         public static bool IsIllustrateShader(Shader shader)
         {
-            return shader != null && shader.name.StartsWith("Distant Lands/Illustrate/");
+            return shader != null &&
+                   (shader.name.StartsWith(StylizedShaderPrefix) || shader.name.StartsWith(LegacyShaderPrefix));
+        }
+
+        public static bool IsProjectStylizedShader(Shader shader)
+        {
+            return shader != null && shader.name.StartsWith(StylizedShaderPrefix);
         }
 
         /// <summary>
@@ -72,11 +88,56 @@ namespace ScaryParty.VisualStyles
         {
             if (shader == null) return IllustrateShaderFamily.Opaque;
             string name = shader.name;
-            if (name == ShaderSimple) return IllustrateShaderFamily.Simple;
-            if (name == ShaderTransparent) return IllustrateShaderFamily.Transparent;
-            if (name == ShaderAlphaClipped) return IllustrateShaderFamily.AlphaClipped;
+            if (name == ShaderSimple || name == LegacyShaderSimple) return IllustrateShaderFamily.Simple;
+            if (name == ShaderTransparent || name == LegacyShaderTransparent) return IllustrateShaderFamily.Transparent;
+            if (name == ShaderAlphaClipped || name == LegacyShaderAlphaClipped) return IllustrateShaderFamily.AlphaClipped;
             if (name == ShaderOutline) return IllustrateShaderFamily.Outline;
             return IllustrateShaderFamily.Opaque;
+        }
+
+        public static Shader ResolveScreenSpaceOutlineShader()
+        {
+            return Shader.Find(ScreenSpaceOutlineShader) ?? Shader.Find(LegacyScreenSpaceOutlineShader);
+        }
+
+        public static bool IsScreenSpaceOutlineShader(Shader shader)
+        {
+            if (shader == null) return false;
+            return shader.name == ScreenSpaceOutlineShader || shader.name == LegacyScreenSpaceOutlineShader;
+        }
+
+        /// <summary>
+        /// Updates the screen-space outline fullscreen pass material with sanitized thresholds
+        /// and synchronized ShaderGraph/HLSL keywords so grazing planes never flood dark.
+        /// </summary>
+        public static void ApplyOutlineSettingsToPassMaterial(Material mat, ToonOutlineSettings outlines)
+        {
+            if (mat == null) return;
+
+            Shader resolved = ResolveScreenSpaceOutlineShader();
+            if (resolved != null && mat.shader != resolved)
+            {
+                mat.shader = resolved;
+            }
+
+            if (outlines == null) return;
+
+            float safeDepthThresh = outlines.depthThreshold < 1.5f ? 5.4f : outlines.depthThreshold;
+            float safeNormalThresh = Mathf.Clamp(outlines.normalThreshold, 0.25f, 2.0f);
+
+            SetFloatSafe(mat, "_Width", Mathf.Max(0f, outlines.screenSpaceWidth));
+            SetColorSafe(mat, "_OutlineColor", outlines.outlineColor);
+            SetFloatSafe(mat, "_USEDEPTHTEST", outlines.useDepthTest ? 1f : 0f);
+            SetFloatSafe(mat, "_Depth_Threshold", safeDepthThresh);
+            SetFloatSafe(mat, "_USENORMALSTEST", outlines.useNormalsTest ? 1f : 0f);
+            SetFloatSafe(mat, "_NormalThreshold", safeNormalThresh);
+            SetFloatSafe(mat, "_USECOLORTEST", outlines.useColorTest ? 1f : 0f);
+            SetFloatSafe(mat, "_ColorThreshold", Mathf.Max(0.05f, outlines.colorThreshold));
+
+            // Keep keyword toggles disabled so float properties never collide with HLSL #define macros.
+            mat.DisableKeyword("_USEDEPTHTEST");
+            mat.DisableKeyword("_USENORMALSTEST");
+            mat.DisableKeyword("_USECOLORTEST");
         }
 
         /// <summary>
@@ -129,6 +190,11 @@ namespace ScaryParty.VisualStyles
             if (normalMap != null && profile.materials.preserveNormalMaps)
             {
                 SetTextureSafe(mat, "_NormalMap", normalMap);
+                SyncKeyword(mat, "_NORMALMAP", true);
+            }
+            else
+            {
+                SyncKeyword(mat, "_NORMALMAP", false);
             }
 
             if (cullMode.HasValue)
@@ -175,6 +241,14 @@ namespace ScaryParty.VisualStyles
             SetFloatSafe(mat, "_UseShadows", profile.lighting.useShadows ? 1f : 0f);
             SetFloatSafe(mat, "_ReceiveShadows", profile.lighting.receiveShadows ? 1f : 0f);
             SyncKeyword(mat, "_RECEIVE_SHADOWS_OFF", !profile.lighting.receiveShadows);
+
+            // Parametros de legibilidade e resposta multi-luz dos shaders estilizados (A2)
+            SetFloatSafe(mat, "_MinShadowBrightness", Mathf.Clamp01(profile.lighting.minShadowBrightness));
+            SetFloatSafe(mat, "_ShadowLift", Mathf.Clamp01(profile.lighting.shadowLift));
+            SetFloatSafe(mat, "_IndirectDiffuseWeight", Mathf.Clamp(profile.lighting.indirectDiffuseWeight, 0f, 2f));
+            SetFloatSafe(mat, "_AdditionalLightsWeight", Mathf.Clamp(profile.lighting.additionalLightsWeight, 0f, 3f));
+            SetFloatSafe(mat, "_MaxAdditionalLightContribution", Mathf.Clamp(profile.lighting.maxAdditionalLightContribution, 0.1f, 4f));
+            SetFloatSafe(mat, "_Contrast", Mathf.Clamp(profile.colorPalette.contrast, 0.2f, 2f));
 
             // Specular & Rim
             SetFloatSafe(mat, "_UseSpecular", profile.specularRim.useSpecular ? 1f : 0f);

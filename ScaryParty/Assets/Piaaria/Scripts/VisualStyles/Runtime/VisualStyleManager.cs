@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -14,6 +15,7 @@ namespace ScaryParty.VisualStyles
     public class VisualStyleManager : MonoBehaviour
     {
         public static VisualStyleManager Active { get; private set; }
+        public static event Action<VisualStyleManager> OnActiveManagerChanged;
         private static bool _interactionHighlightActive;
 
         [Header("Style Assets (Serialized References)")]
@@ -27,6 +29,17 @@ namespace ScaryParty.VisualStyles
         public bool applyToPreplacedRenderersOnAwake = false;
 
         public event Action<VisualStyleManager> OnStyleChanged;
+
+        private readonly Dictionary<Renderer, Material[]> _baselineOriginals = new Dictionary<Renderer, Material[]>();
+        private bool _hasBaselineSceneLighting;
+        private UnityEngine.Rendering.AmbientMode _baselineAmbientMode;
+        private Color _baselineSkyColor;
+        private Color _baselineEquatorColor;
+        private Color _baselineGroundColor;
+        private float _baselineAmbientIntensity;
+        private Light _baselineSun;
+        private Color _baselineSunColor;
+        private float _baselineSunIntensity;
 
         private VisualMaterialResolver _resolver;
         private RenderPipelineAsset _previousQualityRenderPipeline;
@@ -93,12 +106,12 @@ namespace ScaryParty.VisualStyles
 
         private void OnDestroy()
         {
-            RestoreScreenSpaceOutlineFeature();
-            RestoreRuntimeRenderPipelineIfNeeded();
+            RestoreAllSessionVisualState();
             if (Active == this)
             {
                 Active = null;
                 _interactionHighlightActive = false;
+                OnActiveManagerChanged?.Invoke(null);
             }
         }
 
@@ -110,6 +123,31 @@ namespace ScaryParty.VisualStyles
         public void RegisterAsActive()
         {
             Active = this;
+            OnActiveManagerChanged?.Invoke(this);
+        }
+
+        public void RestoreAllSessionVisualState()
+        {
+            if (_resolver != null)
+            {
+                _resolver.RestoreRecordedOriginals(clearEntries: true);
+            }
+            else if (_baselineOriginals.Count > 0)
+            {
+                foreach (var kvp in _baselineOriginals)
+                {
+                    if (kvp.Key != null && kvp.Value != null)
+                    {
+                        kvp.Key.sharedMaterials = kvp.Value;
+                    }
+                }
+                _baselineOriginals.Clear();
+            }
+
+            RestoreSceneLightingBaseline();
+            RestoreScreenSpaceOutlineFeature();
+            RestoreRuntimeRenderPipelineIfNeeded();
+            ScaryParty.Lighting.LightingShaderGlobals.ResetGlobals();
         }
 
         private void ApplyRuntimeRenderPipelineIfNeeded()
@@ -157,6 +195,13 @@ namespace ScaryParty.VisualStyles
         {
             if (_cachedScreenSpaceOutlineFeature == null) return;
 
+            if (activeProfile != null && _cachedScreenSpaceOutlineFeature.passMaterial != null)
+            {
+                VisualStyleShaderUtility.ApplyOutlineSettingsToPassMaterial(
+                    _cachedScreenSpaceOutlineFeature.passMaterial,
+                    activeProfile.outlines);
+            }
+
             bool desired = activeProfile != null &&
                            activeProfile.outlines.outlineMode == VisualStyleOutlineMode.ScreenSpace &&
                            !(activeProfile.outlines.suppressOutlineOnInteractionFocus && _interactionHighlightActive);
@@ -181,7 +226,7 @@ namespace ScaryParty.VisualStyles
             if (activeLibrary != null)
             {
                 activeLibrary.EnsureLookupInitialized();
-                _resolver = new VisualMaterialResolver(activeProfile, activeLibrary);
+                _resolver = new VisualMaterialResolver(activeProfile, activeLibrary, _baselineOriginals);
             }
             else
             {
@@ -191,26 +236,176 @@ namespace ScaryParty.VisualStyles
 
         public void SetStyle(VisualStyleProfile profile, VisualMaterialLibrary library, bool applySceneLighting = true)
         {
-            if (_resolver != null)
+            SetStyle(profile, library, applySceneLighting, applyToLoadedSceneRenderers: false);
+        }
+
+        public void SetStyle(VisualStyleProfile profile, VisualMaterialLibrary library, bool applySceneLighting, bool applyToLoadedSceneRenderers)
+        {
+            if (profile == null || library == null)
             {
-                _resolver.RestoreRecordedOriginals();
+                if (_resolver != null)
+                {
+                    _resolver.RestoreRecordedOriginals(clearEntries: false);
+                }
+                else
+                {
+                    foreach (var kvp in _baselineOriginals)
+                    {
+                        if (kvp.Key != null && kvp.Value != null)
+                        {
+                            kvp.Key.sharedMaterials = kvp.Value;
+                        }
+                    }
+                }
+
+                activeProfile = null;
+                activeLibrary = null;
+                _resolver = null;
+                RestoreSceneLightingBaseline();
+                RestoreScreenSpaceOutlineFeature();
+                RestoreRuntimeRenderPipelineIfNeeded();
+                ScaryParty.Lighting.LightingShaderGlobals.ResetGlobals();
+                OnStyleChanged?.Invoke(this);
+                return;
             }
 
             activeProfile = profile;
             activeLibrary = library;
+
+            if (library.renderPipelineAsset != null)
+            {
+                variantRenderPipelineAsset = library.renderPipelineAsset;
+            }
+            if (library.renderPipelineRendererData is ScriptableRendererData libSrd)
+            {
+                variantRendererData = libSrd;
+            }
+
+            ApplyRuntimeRenderPipelineIfNeeded();
+            CacheScreenSpaceOutlineFeature();
+            SyncScreenSpaceOutlineFeature(force: true);
+
             RebuildResolver();
+            EvaluateLightingContract();
 
             if (applySceneLighting && activeProfile != null)
             {
                 ApplySceneLighting();
             }
 
+            _resolver?.ReapplyAllRecorded();
+
+            if (applyToLoadedSceneRenderers)
+            {
+                ScanAndApplyToActiveScene();
+            }
+
             OnStyleChanged?.Invoke(this);
+        }
+
+        public void ScanAndApplyToActiveScene()
+        {
+            if (_resolver == null) return;
+            var activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+            if (!activeScene.IsValid() || !activeScene.isLoaded) return;
+
+            GameObject[] roots = activeScene.GetRootGameObjects();
+            for (int i = 0; i < roots.Length; i++)
+            {
+                GameObject root = roots[i];
+                if (root == null || root == gameObject) continue;
+                _resolver.ApplyToHierarchy(root, null, VisualSemanticRole.Unclassified, VisualCategoryIds.Props, includeInactive: true, recordOriginal: true);
+            }
+        }
+
+        public void CaptureSceneLightingBaselineIfNeeded()
+        {
+            if (_hasBaselineSceneLighting) return;
+            _baselineAmbientMode = RenderSettings.ambientMode;
+            _baselineSkyColor = RenderSettings.ambientSkyColor;
+            _baselineEquatorColor = RenderSettings.ambientEquatorColor;
+            _baselineGroundColor = RenderSettings.ambientGroundColor;
+            _baselineAmbientIntensity = RenderSettings.ambientIntensity;
+            _baselineSun = FindDirectionalSunLight();
+            if (_baselineSun != null)
+            {
+                _baselineSunColor = _baselineSun.color;
+                _baselineSunIntensity = _baselineSun.intensity;
+            }
+            _hasBaselineSceneLighting = true;
+        }
+
+        public void RestoreSceneLightingBaseline()
+        {
+            if (!_hasBaselineSceneLighting) return;
+            RenderSettings.ambientMode = _baselineAmbientMode;
+            RenderSettings.ambientSkyColor = _baselineSkyColor;
+            RenderSettings.ambientEquatorColor = _baselineEquatorColor;
+            RenderSettings.ambientGroundColor = _baselineGroundColor;
+            RenderSettings.ambientIntensity = _baselineAmbientIntensity;
+            if (_baselineSun != null)
+            {
+                _baselineSun.color = _baselineSunColor;
+                _baselineSun.intensity = _baselineSunIntensity;
+            }
+        }
+
+        private void EvaluateLightingContract()
+        {
+            if (activeProfile == null) return;
+            var cfg = VisualStyleRuntimeConfig.LoadCached();
+            var ctx = new ScaryParty.Lighting.LightingContext
+            {
+                sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name,
+                activeStyleId = activeProfile.styleId,
+                requestedBackend = cfg != null ? cfg.lightingBackendMode : ScaryParty.Lighting.LightingBackendMode.RealtimeStylized,
+                debugView = ScaryParty.Lighting.LightingFeatureRegistry.ActiveDebugView,
+                environment = new ScaryParty.Lighting.LightingEnvironmentState
+                {
+                    minShadowBrightness = activeProfile.lighting.minShadowBrightness,
+                    shadowLift = activeProfile.lighting.shadowLift,
+                    indirectDiffuseWeight = activeProfile.lighting.indirectDiffuseWeight,
+                    ambientSkyColor = activeProfile.sceneLighting.ambientSkyColor,
+                    ambientEquatorColor = activeProfile.sceneLighting.ambientEquatorColor,
+                    ambientGroundColor = activeProfile.sceneLighting.ambientGroundColor,
+                    ambientIntensity = activeProfile.sceneLighting.ambientIntensity,
+                    sunColor = activeProfile.sceneLighting.directionalLightColor,
+                    sunIntensity = activeProfile.sceneLighting.directionalLightIntensity,
+                    stylizedProfileActive = true
+                }
+            };
+            ScaryParty.Lighting.LightingFeatureRegistry.Evaluate(ctx);
+        }
+
+        private static Light FindDirectionalSunLight()
+        {
+            Light sun = RenderSettings.sun;
+            if (sun != null) return sun;
+            var lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
+            for (int i = 0; i < lights.Length; i++)
+            {
+                if (lights[i] != null && lights[i].type == LightType.Directional)
+                {
+                    return lights[i];
+                }
+            }
+            return null;
         }
 
         public void ApplySceneLighting()
         {
             if (activeProfile == null || !activeProfile.sceneLighting.overrideSceneLightingInVariant) return;
+
+            CaptureSceneLightingBaselineIfNeeded();
+            EvaluateLightingContract();
+
+            // Se o TimeOfDayLightingDirector estiver gerenciando o ciclo dia/noite ativo, ele compoe a luz direcional e o ambiente.
+            var tod = ScaryParty.Lighting.TimeOfDayLightingDirector.Active;
+            if (tod != null && tod.IsActivelyControllingScene)
+            {
+                tod.ApplyStyleModulation(activeProfile);
+                return;
+            }
 
             var s = activeProfile.sceneLighting;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
@@ -219,20 +414,7 @@ namespace ScaryParty.VisualStyles
             RenderSettings.ambientGroundColor = s.ambientGroundColor;
             RenderSettings.ambientIntensity = s.ambientIntensity;
 
-            Light sun = RenderSettings.sun;
-            if (sun == null)
-            {
-                var lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-                for (int i = 0; i < lights.Length; i++)
-                {
-                    if (lights[i] != null && lights[i].type == LightType.Directional)
-                    {
-                        sun = lights[i];
-                        break;
-                    }
-                }
-            }
-
+            Light sun = FindDirectionalSunLight();
             if (sun != null)
             {
                 sun.color = s.directionalLightColor;
@@ -277,11 +459,36 @@ namespace ScaryParty.VisualStyles
             string categoryId,
             string contextKey = null)
         {
+            if (root == null) return;
+            if (Application.isPlaying)
+            {
+                EnsureRuntimeBinder(root, defaultRole, categoryId, contextKey);
+            }
+
             var mgr = Active;
-            if (mgr != null && mgr.Resolver != null && root != null)
+            if (mgr != null && mgr.Resolver != null)
             {
                 mgr.Resolver.ApplyToHierarchy(root, contextKey, defaultRole, categoryId, includeInactive: true, recordOriginal: true);
             }
+        }
+
+        public static VisualStyleBinder EnsureRuntimeBinder(
+            GameObject root,
+            VisualSemanticRole defaultRole,
+            string categoryId,
+            string contextKey = null)
+        {
+            if (root == null) return null;
+            VisualStyleBinder binder = root.GetComponent<VisualStyleBinder>();
+            if (binder == null)
+            {
+                binder = root.AddComponent<VisualStyleBinder>();
+                binder.defaultRole = defaultRole;
+                binder.defaultCategoryId = categoryId;
+                binder.contextKey = contextKey;
+                binder.applyOnAwake = true;
+            }
+            return binder;
         }
     }
 }

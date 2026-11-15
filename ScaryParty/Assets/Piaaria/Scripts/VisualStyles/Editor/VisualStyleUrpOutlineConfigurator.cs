@@ -60,11 +60,13 @@ namespace ScaryParty.VisualStyles.Editor
             UniversalRenderPipelineAsset rpAsset = EnsureClonedAsset<UniversalRenderPipelineAsset>(
                 CanonicalRpAssetPath, rpPath, "UniversalRenderPipelineAsset");
             BindRendererDataToPipelineAsset(rpAsset, rendererData);
+            ConfigureLightingBudgetAndSsao(rpAsset, rendererData);
 
             // 5. Link onto library if supplied
-            if (library != null && library.renderPipelineRendererData != rendererData)
+            if (library != null && (library.renderPipelineRendererData != rendererData || library.renderPipelineAsset != rpAsset))
             {
                 library.renderPipelineRendererData = rendererData;
+                library.renderPipelineAsset = rpAsset;
                 EditorUtility.SetDirty(library);
             }
 
@@ -98,7 +100,7 @@ namespace ScaryParty.VisualStyles.Editor
 
                 if (mat == null)
                 {
-                    Shader shader = Shader.Find(VisualStyleShaderUtility.ScreenSpaceOutlineShader);
+                    Shader shader = VisualStyleShaderUtility.ResolveScreenSpaceOutlineShader();
                     if (shader == null)
                     {
                         throw new InvalidOperationException($"Missing required shader '{VisualStyleShaderUtility.ScreenSpaceOutlineShader}'.");
@@ -110,7 +112,7 @@ namespace ScaryParty.VisualStyles.Editor
             }
 
             string before = EditorJsonUtility.ToJson(mat);
-            Shader outlineShader = Shader.Find(VisualStyleShaderUtility.ScreenSpaceOutlineShader);
+            Shader outlineShader = VisualStyleShaderUtility.ResolveScreenSpaceOutlineShader();
             if (outlineShader != null && mat.shader != outlineShader)
             {
                 mat.shader = outlineShader;
@@ -130,16 +132,7 @@ namespace ScaryParty.VisualStyles.Editor
         public static void ApplyOutlineProfileToMaterial(Material mat, VisualStyleProfile profile)
         {
             if (mat == null || profile == null) return;
-            var o = profile.outlines;
-
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_Width", Mathf.Max(0f, o.screenSpaceWidth));
-            VisualStyleShaderUtility.SetColorSafe(mat, "_OutlineColor", o.outlineColor);
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_USEDEPTHTEST", o.useDepthTest ? 1f : 0f);
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_Depth_Threshold", Mathf.Max(0.001f, o.depthThreshold));
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_USENORMALSTEST", o.useNormalsTest ? 1f : 0f);
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_NormalThreshold", Mathf.Max(0.001f, o.normalThreshold));
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_USECOLORTEST", o.useColorTest ? 1f : 0f);
-            VisualStyleShaderUtility.SetFloatSafe(mat, "_ColorThreshold", Mathf.Max(0.001f, o.colorThreshold));
+            VisualStyleShaderUtility.ApplyOutlineSettingsToPassMaterial(mat, profile.outlines);
         }
 
         private static T EnsureClonedAsset<T>(string sourcePath, string targetPath, string label) where T : ScriptableObject
@@ -181,8 +174,8 @@ namespace ScaryParty.VisualStyles.Editor
                     if (rendererData.rendererFeatures[i] is FullScreenPassRendererFeature existing &&
                         (existing.name == OutlineFeatureAssetName ||
                          existing.passMaterial == outlineMat ||
-                         (existing.passMaterial != null && existing.passMaterial.shader != null &&
-                          existing.passMaterial.shader.name == VisualStyleShaderUtility.ScreenSpaceOutlineShader)))
+                         (existing.passMaterial != null &&
+                          VisualStyleShaderUtility.IsScreenSpaceOutlineShader(existing.passMaterial.shader))))
                     {
                         feature = existing;
                         break;
@@ -265,6 +258,81 @@ namespace ScaryParty.VisualStyles.Editor
             }
             so.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(rpAsset);
+        }
+
+        /// <summary>
+        /// Ajusta orcamento de sombras URP (atlas 2048, tiers 128/256/512, 2 cascades, 35m) e SSAO
+        /// apenas nos assets clonados do estilo, preservando PC_RPAsset e PC_Renderer canonicos.
+        /// </summary>
+        public static void ConfigureLightingBudgetAndSsao(
+            UniversalRenderPipelineAsset rpAsset,
+            ScriptableRendererData rendererData,
+            ScaryParty.Lighting.LightingTierSpec tierSpec = null)
+        {
+            if (rpAsset != null)
+            {
+                string rpAssetPath = AssetDatabase.GetAssetPath(rpAsset);
+                if (string.Equals(rpAssetPath, CanonicalRpAssetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.LogError("[VisualStyleUrpOutlineConfigurator] Recusado modificar PC_RPAsset canonico!");
+                    return;
+                }
+
+                var spec = tierSpec ?? new ScaryParty.Lighting.LightingTierSpec();
+                var rpSo = new SerializedObject(rpAsset);
+                SetIntProp(rpSo, "m_MainLightShadowmapResolution", spec.mainShadowResolution);
+                SetIntProp(rpSo, "m_AdditionalLightsShadowmapResolution", spec.additionalShadowAtlasSize);
+                SetIntProp(rpSo, "m_ShadowCascadeCount", spec.shadowCascadeCount);
+                SetFloatProp(rpSo, "m_ShadowDistance", spec.shadowDistance);
+                SetIntProp(rpSo, "m_AdditionalLightsShadowResolutionTierLow", spec.tierLowResolution);
+                SetIntProp(rpSo, "m_AdditionalLightsShadowResolutionTierMedium", spec.tierMediumResolution);
+                SetIntProp(rpSo, "m_AdditionalLightsShadowResolutionTierHigh", spec.tierHighResolution);
+                rpSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(rpAsset);
+            }
+
+            if (rendererData != null && rendererData.rendererFeatures != null)
+            {
+                string rPath = AssetDatabase.GetAssetPath(rendererData);
+                if (string.Equals(rPath, CanonicalRendererDataPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    Debug.LogError("[VisualStyleUrpOutlineConfigurator] Recusado modificar PC_Renderer canonico!");
+                    return;
+                }
+
+                var spec = tierSpec ?? new ScaryParty.Lighting.LightingTierSpec();
+                for (int i = 0; i < rendererData.rendererFeatures.Count; i++)
+                {
+                    var feat = rendererData.rendererFeatures[i];
+                    if (feat == null) continue;
+                    if (feat.GetType().Name.IndexOf("ScreenSpaceAmbientOcclusion", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        var fSo = new SerializedObject(feat);
+                        var settingsProp = fSo.FindProperty("m_Settings");
+                        if (settingsProp != null)
+                        {
+                            var intProp = settingsProp.FindPropertyRelative("Intensity");
+                            if (intProp != null) intProp.floatValue = spec.ssaoIntensity;
+                            var dirProp = settingsProp.FindPropertyRelative("DirectLightingStrength");
+                            if (dirProp != null) dirProp.floatValue = spec.ssaoDirectLightingStrength;
+                            fSo.ApplyModifiedPropertiesWithoutUndo();
+                            EditorUtility.SetDirty(feat);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void SetIntProp(SerializedObject so, string propName, int value)
+        {
+            var p = so.FindProperty(propName);
+            if (p != null && p.intValue != value) p.intValue = value;
+        }
+
+        private static void SetFloatProp(SerializedObject so, string propName, float value)
+        {
+            var p = so.FindProperty(propName);
+            if (p != null && !Mathf.Approximately(p.floatValue, value)) p.floatValue = value;
         }
     }
 }

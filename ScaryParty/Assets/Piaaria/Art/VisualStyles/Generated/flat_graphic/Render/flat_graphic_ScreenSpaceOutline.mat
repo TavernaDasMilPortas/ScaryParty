@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: flat_graphic_ScreenSpaceOutline
-  m_Shader: {fileID: -6465566751694194690, guid: 2f3488b9857eb214b965a7d38c9e5c4a, type: 3}
+  m_Shader: {fileID: 4800000, guid: e8b4c91274603c54a91b712dadd94590, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -131,11 +131,11 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ColorThreshold: 0.2
+    - _ColorThreshold: 0.35
     - _Colorspace_Steps: 255
     - _Cull: 2
     - _Cutoff: 0.5
-    - _Depth_Threshold: 0.25
+    - _Depth_Threshold: 5.4
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -147,7 +147,7 @@ Material:
     - _GlossyReflections: 0
     - _METALNESS: 0
     - _Metallic: 0
-    - _NormalThreshold: 0.45
+    - _NormalThreshold: 0.5
     - _OVERLAY: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005

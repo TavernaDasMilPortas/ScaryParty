@@ -45,7 +45,7 @@ namespace ScaryParty.VisualStyles.Editor
     /// </summary>
     public sealed class GlobalCelShadingWizard : EditorWindow
     {
-        public const string MenuPath = "Tools/Scary Party/Visuals/Global Cel Shading Wizard";
+        public const string MenuPath = "Tools/Scary Party/Wizards/Visuals/Global Cel Shading Wizard";
         private const string UxmlPath = "Assets/Piaaria/Scripts/VisualStyles/Editor/UI/GlobalCelShadingWizard.uxml";
         private const string UssPath = "Assets/Piaaria/Scripts/VisualStyles/Editor/UI/GlobalCelShadingWizard.uss";
         private const string PerformanceBenchmarkJsonPath = "Assets/Piaaria/Art/VisualStyles/Reports/PlayMode_Benchmark_Latest.json";
@@ -108,7 +108,7 @@ namespace ScaryParty.VisualStyles.Editor
         private readonly Dictionary<string, VisualElement> _tabViews = new Dictionary<string, VisualElement>();
         private readonly Dictionary<string, Button> _tabButtons = new Dictionary<string, Button>();
 
-        [MenuItem(MenuPath, false, 10)]
+        [MenuItem(MenuPath, false, 40)]
         public static void ShowWindow()
         {
             var wnd = GetWindow<GlobalCelShadingWizard>();
@@ -402,6 +402,9 @@ namespace ScaryParty.VisualStyles.Editor
             BindButton("btn-sync-new", SyncNewAssetsAction);
             BindButton("btn-generate", GenerateMaterialsAction);
             BindButton("btn-apply", ApplyToGameplayAction);
+            BindButton("btn-preview-original-scene", PreviewInOriginalGameSceneAction);
+            BindButton("btn-save-default-original-scene", SaveDefaultInOriginalGameSceneAction);
+            BindButton("btn-audit-lighting", RunLightingAuditM0Action);
             BindButton("btn-generate-apply-all", GenerateAndApplyAllAction);
             BindButton("btn-open-showcase", OpenShowcaseAction);
             BindButton("btn-activate-gameplay", ActivateGameplayAction);
@@ -1121,14 +1124,49 @@ namespace ScaryParty.VisualStyles.Editor
             if (_settingsScroll == null || _workingProfile == null) return;
             _settingsScroll.Clear();
 
+            BuildApplicationModeSection();
             BuildLightingSettingsSection();
             BuildSpecularRimSettingsSection();
             BuildPaletteSettingsSection();
             BuildOutlineSettingsSection();
             BuildCharacterAndMaterialSettingsSection();
             BuildSceneLightingSettingsSection();
+            BuildTimeOfDayAndCityLightingSection();
+            BuildLightingGuideAndDiagnosticsSection();
             BuildCategoryOverridesSection();
             BuildDiscoverySettingsSection();
+        }
+
+        private void BuildApplicationModeSection()
+        {
+            var fold = AddFoldoutSection("Modos de Aplicacao na GameScene (A / B / C)", true);
+            var cfg = VisualStyleRuntimeConfig.LoadCached();
+            string routeLabel = cfg != null ? cfg.gameplayRoute.ToString() : "Original";
+            string modeLabel = cfg != null ? cfg.visualMode.ToString() : "Disabled";
+
+            var info = new HelpBox(
+                $"Estado atual do Runtime Config: Rota='{routeLabel}', Modo='{modeLabel}'.\n" +
+                "- Modo A (Padrao): pre-visualiza na GameScene original sem editar o arquivo .unity.\n" +
+                "- Modo B (Explicito): grava bootstrap minimo reversivel na GameScene com backup e manifest.\n" +
+                "- Modo C (Variante): recria GameScene_CelShaded para comparacao paralela.",
+                HelpBoxMessageType.Info);
+            fold.Add(info);
+
+            var row = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, marginTop = 4 } };
+            var liveBtn = new Button(PreviewInOriginalGameSceneAction)
+            {
+                text = Application.isPlaying ? "Aplicar Preset na GameScene (Live)" : "Ativar Modo A (Preview ao dar Play)"
+            };
+            liveBtn.tooltip = "Gera materiais se necessario e aplica na GameScene original sem alterar o arquivo GameScene.unity.";
+            row.Add(liveBtn);
+
+            var origBtn = new Button(RestoreOriginalAction)
+            {
+                text = Application.isPlaying ? "Voltar ao Original (Live)" : "Restaurar Visual Original"
+            };
+            origBtn.tooltip = "Restaura materiais originais, luzes, URP base e desativa estilos no boot.";
+            row.Add(origBtn);
+            fold.Add(row);
         }
 
         private void BuildLightingSettingsSection()
@@ -1145,7 +1183,7 @@ namespace ScaryParty.VisualStyles.Editor
             fold.Add(modeDd);
 
             AddToggle(fold, "Posterize Light", l.posterizeLight, v => l.posterizeLight = v);
-            AddIntSlider(fold, "Light Steps", l.lightSteps, 1, 6, v => l.lightSteps = v);
+            AddIntSlider(fold, "Light Steps (Degraus Toon)", l.lightSteps, 1, 6, v => l.lightSteps = v);
             AddSlider(fold, "Light Ramp Softness", l.lightRamp, 0f, 2f, v => l.lightRamp = v);
             AddSlider(fold, "Light Ramp Offset", l.lightRampOffset, 0f, 1f, v => l.lightRampOffset = v);
             AddColorField(fold, "Light Color Tint", l.lightColorTint, v => l.lightColorTint = v);
@@ -1154,6 +1192,31 @@ namespace ScaryParty.VisualStyles.Editor
             AddToggle(fold, "Use Shadows", l.useShadows, v => l.useShadows = v);
             AddToggle(fold, "Receive Shadows", l.receiveShadows, v => l.receiveShadows = v);
             AddSlider(fold, "Main Light Influence", l.mainLightInfluence, 0f, 1f, v => l.mainLightInfluence = v);
+
+            var floorSlider = new Slider("Piso Minimo Sombra (A2)", 0f, 1f) { value = l.minShadowBrightness, showInputField = true };
+            floorSlider.tooltip = "Resolve areas pretas em sombra. Aumentar clareia sombras profundas sem apagar o contorno; diminuir aumenta contraste. Recomendado: 0.28 - 0.36.";
+            floorSlider.RegisterValueChangedCallback(evt => { l.minShadowBrightness = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(floorSlider);
+
+            var liftSlider = new Slider("Elevacao de Sombra (Shadow Lift)", 0f, 1f) { value = l.shadowLift, showInputField = true };
+            liftSlider.tooltip = "Adiciona tinta colorida sutil (roxo/azul) na area sombreada (estilo Dispatch). Recomendado: 0.08 - 0.16.";
+            liftSlider.RegisterValueChangedCallback(evt => { l.shadowLift = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(liftSlider);
+
+            var indSlider = new Slider("Peso Luz Indireta (Trilight)", 0f, 2f) { value = l.indirectDiffuseWeight, showInputField = true };
+            indSlider.tooltip = "Controla quanto o ambiente (ceu/horizonte/chao) ilumina lados sombreados. Aumentar melhora leitura noturna e interna. Recomendado: 1.0 - 1.25.";
+            indSlider.RegisterValueChangedCallback(evt => { l.indirectDiffuseWeight = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(indSlider);
+
+            var addWSlider = new Slider("Peso Luzes Adicionais (Forward+)", 0f, 3f) { value = l.additionalLightsWeight, showInputField = true };
+            addWSlider.tooltip = "Define a forca das lampadas locais (Point/Spot) da pizzaria e vitrines nos shaders estilizados. Recomendado: 0.85 - 1.25.";
+            addWSlider.RegisterValueChangedCallback(evt => { l.additionalLightsWeight = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(addWSlider);
+
+            var maxAddSlider = new Slider("Teto Luzes Adicionais (Clamp)", 0.1f, 4f) { value = l.maxAdditionalLightContribution, showInputField = true };
+            maxAddSlider.tooltip = "Impede estouro branco (burn) quando varias luzes se somam sobre pisos e pizzas. Recomendado: 1.4 - 1.8.";
+            maxAddSlider.RegisterValueChangedCallback(evt => { l.maxAdditionalLightContribution = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(maxAddSlider);
         }
 
         private void BuildSpecularRimSettingsSection()
@@ -1255,6 +1318,168 @@ namespace ScaryParty.VisualStyles.Editor
             AddToggle(fold, "Add Interior Fill Lights", s.addInteriorFillLights, v => s.addInteriorFillLights = v);
             AddSlider(fold, "Interior Fill Intensity", s.interiorFillIntensity, 0f, 5f, v => s.interiorFillIntensity = v);
             AddSlider(fold, "Interior Fill Range", s.interiorFillRange, 2f, 25f, v => s.interiorFillRange = v);
+
+            var boostSlider = new Slider("Preenchimento Zonas Pizzaria (A6)", 0f, 1f) { value = s.interiorAmbientBoost, showInputField = true };
+            boostSlider.tooltip = "Forca do preenchimento ambiente por zona (Cozinha/Balcao/Salao) via MPB preservando cores das pizzas. Recomendado: 0.20 - 0.32.";
+            boostSlider.RegisterValueChangedCallback(evt => { s.interiorAmbientBoost = evt.newValue; MarkWorkingProfileEdited(); });
+            fold.Add(boostSlider);
+        }
+
+        private void BuildTimeOfDayAndCityLightingSection()
+        {
+            var fold = AddFoldoutSection("Cidade, Ciclo Dia/Noite & Orcamento URP (A3-A8)", Application.isPlaying);
+            var cfg = VisualStyleRuntimeConfig.LoadCached();
+            float initialHours = cfg != null ? cfg.initialTimeOfDayHours : 17f;
+            if (Application.isPlaying && ScaryParty.Lighting.TimeOfDayLightingDirector.Active != null)
+            {
+                initialHours = ScaryParty.Lighting.TimeOfDayLightingDirector.Active.currentClockHours;
+            }
+
+            bool cycleEnabled = cfg == null || cfg.enableDayNightCycle;
+            var cycleToggle = new Toggle("Habilitar Ciclo Dia/Noite") { value = cycleEnabled };
+            cycleToggle.tooltip = "Ativa transicao suave Tarde (17h) -> Crepusculo (19h) -> Noite (22h) -> Madrugada (02h) sem DynamicGI por frame.";
+            cycleToggle.RegisterValueChangedCallback(evt =>
+            {
+                if (cfg != null)
+                {
+                    cfg.enableDayNightCycle = evt.newValue;
+                    EditorUtility.SetDirty(cfg);
+                }
+                if (ScaryParty.Lighting.TimeOfDayLightingDirector.Active != null)
+                {
+                    ScaryParty.Lighting.TimeOfDayLightingDirector.Active.autoAdvance = evt.newValue;
+                }
+            });
+            fold.Add(cycleToggle);
+
+            var hourSlider = new Slider("Hora Atual (0-24h)", 0f, 24f) { value = initialHours, showInputField = true };
+            hourSlider.tooltip = "Ajusta o horario da partida. Em Play, atualiza Sol/Lua, Trilight e vitrines imediatamente.";
+            hourSlider.RegisterValueChangedCallback(evt => SetWizardTimeOfDay(evt.newValue));
+            fold.Add(hourSlider);
+
+            var anchorsRow = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, marginTop = 2 } };
+            AddQuickAnchorButton(anchorsRow, "17:00 Tarde", 17f, hourSlider);
+            AddQuickAnchorButton(anchorsRow, "19:00 Crepusculo", 19f, hourSlider);
+            AddQuickAnchorButton(anchorsRow, "22:00 Noite", 22f, hourSlider);
+            AddQuickAnchorButton(anchorsRow, "02:00 Madrugada", 2f, hourSlider);
+            fold.Add(anchorsRow);
+
+            var tierChoices = new List<string> { "Low", "Medium", "High" };
+            var budget = Resources.Load<ScaryParty.Lighting.LightingQualityBudget>("LightingQualityBudget_Default");
+            int tierIdx = budget != null ? (int)budget.activeTier : 1;
+            var tierDd = new DropdownField("Orcamento de Sombras URP", tierChoices, Mathf.Clamp(tierIdx, 0, 2));
+            tierDd.tooltip = "Medium mantem atlas 2048, tiers 128/256/512, 2 cascades (35m) e SSAO 0.20/0.15 apenas nos assets clonados.";
+            tierDd.RegisterValueChangedCallback(evt =>
+            {
+                var chosen = (ScaryParty.Lighting.LightingQualityTier)Mathf.Max(0, tierChoices.IndexOf(evt.newValue));
+                ApplyLightingBudgetTier(chosen);
+            });
+            fold.Add(tierDd);
+
+            var backendChoices = new List<string> { "RealtimeStylized (A)", "HybridPrepared (B3->A)", "BakedPrecomputedFuture (B3->A)" };
+            int bIdx = cfg != null ? (int)cfg.lightingBackendMode : 0;
+            var backendDd = new DropdownField("Backend B0/B3", backendChoices, Mathf.Clamp(bIdx, 0, 2));
+            backendDd.tooltip = "Prepara troca futura A -> B mantendo fallback seguro automatico em A quando nao ha bake valido.";
+            backendDd.RegisterValueChangedCallback(evt =>
+            {
+                if (cfg != null)
+                {
+                    cfg.lightingBackendMode = (ScaryParty.Lighting.LightingBackendMode)Mathf.Max(0, backendChoices.IndexOf(evt.newValue));
+                    EditorUtility.SetDirty(cfg);
+                    AssetDatabase.SaveAssets();
+                }
+            });
+            fold.Add(backendDd);
+        }
+
+        private void AddQuickAnchorButton(VisualElement parent, string label, float hour, Slider linkedSlider)
+        {
+            var btn = new Button(() =>
+            {
+                linkedSlider.SetValueWithoutNotify(hour);
+                SetWizardTimeOfDay(hour);
+            }) { text = label };
+            parent.Add(btn);
+        }
+
+        private void SetWizardTimeOfDay(float hours)
+        {
+            var cfg = VisualStyleRuntimeConfig.LoadCached();
+            if (cfg != null)
+            {
+                cfg.initialTimeOfDayHours = hours;
+                EditorUtility.SetDirty(cfg);
+            }
+            if (Application.isPlaying && ScaryParty.Lighting.TimeOfDayLightingDirector.Active != null)
+            {
+                ScaryParty.Lighting.TimeOfDayLightingDirector.Active.JumpToPresetAnchor(hours);
+            }
+            AppendLog($"Hora definida para {hours:00.0}h.");
+        }
+
+        private void ApplyLightingBudgetTier(ScaryParty.Lighting.LightingQualityTier tier)
+        {
+            var budget = ScaryParty.Lighting.Editor.LightingPresetSeeder.EnsureQualityBudgetDefault();
+            budget.activeTier = tier;
+            EditorUtility.SetDirty(budget);
+
+            if (_sourceProfile != null)
+            {
+                var library = VisualStyleMaterialFactory.LoadLibrary(_sourceProfile.styleId);
+                if (library != null && library.renderPipelineAsset is UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset rp &&
+                    library.renderPipelineRendererData is UnityEngine.Rendering.Universal.ScriptableRendererData srd)
+                {
+                    VisualStyleUrpOutlineConfigurator.ConfigureLightingBudgetAndSsao(rp, srd, budget.GetSpec(tier));
+                }
+            }
+            AssetDatabase.SaveAssets();
+            AppendLog($"Orcamento URP atualizado para tier '{tier}' nos assets clonados.");
+        }
+
+        private void BuildLightingGuideAndDiagnosticsSection()
+        {
+            var fold = AddFoldoutSection("Guia Didatico & Diagnostico Tecnico", false);
+
+            fold.Add(new HelpBox(
+                "Guia rapido de ajuste artistico:\n" +
+                "- Interior escuro? Aumente 'Piso Minimo Sombra' (0.30-0.36) e 'Preenchimento Zonas Pizzaria' (0.24-0.32).\n" +
+                "- Sombras muito duras? Suba 'Light Ramp Softness' (0.85+) e reduza 'DirectLightingStrength' da SSAO (0.15).\n" +
+                "- Aviso de Shadow Atlas 2048? Confirme que Point Lights internas estao em Shadows=None e tiers URP clonados em 128/256/512.\n" +
+                "- Use os botoes de isolamento abaixo em Play Mode para diagnosticar Albedo, Luz Principal, Luzes Locais e Indireta separadamente.",
+                HelpBoxMessageType.Info));
+
+            var dbgRow = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, marginTop = 4 } };
+            foreach (ScaryParty.Lighting.LightingDebugViewMode mode in Enum.GetValues(typeof(ScaryParty.Lighting.LightingDebugViewMode)))
+            {
+                var capturedMode = mode;
+                var b = new Button(() =>
+                {
+                    ScaryParty.Lighting.LightingFeatureRegistry.ActiveDebugView = capturedMode;
+                    AppendLog($"Modo tecnico de debug visual: {capturedMode}");
+                }) { text = mode.ToString() };
+                dbgRow.Add(b);
+            }
+            fold.Add(dbgRow);
+
+            var toolsRow = new VisualElement { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, marginTop = 4 } };
+            toolsRow.Add(new Button(RunLightingAuditM0Action) { text = "Auditar Atlas & Luz (M0)" });
+            toolsRow.Add(new Button(() =>
+            {
+                ScaryParty.Lighting.Editor.LightingPresetSeeder.SeedDefaultLightingAssetsMenu();
+                AppendLog("Perfis padrao Dia/Noite, Orcamento e stub B2 semeados.");
+            }) { text = "Seed Perfis Dia/Noite" });
+            fold.Add(toolsRow);
+
+            string mgrStatus = VisualStyleManager.Active != null
+                ? $"Manager ativo: {(VisualStyleManager.Active.activeProfile != null ? VisualStyleManager.Active.activeProfile.displayName : "Original")}"
+                : "Manager ativo: nenhum em cena (Edit Mode / aguardando Play)";
+            string cityStatus = ScaryParty.Lighting.CityLightingDirector.Active != null
+                ? $"Cidade: {ScaryParty.Lighting.CityLightingDirector.Active.TrackedWindowTargetsCount} janelas, {ScaryParty.Lighting.CityLightingDirector.Active.ActivePooledLightsCount} luzes no pool"
+                : "Cidade: aguardando CityGenerator em runtime";
+            string pizStatus = ScaryParty.Lighting.PizzeriaLightingController.Active != null
+                ? $"Pizzaria: B2={ScaryParty.Lighting.PizzeriaLightingController.Active.IsUsingPrecomputedB2} ({ScaryParty.Lighting.PizzeriaLightingController.Active.ActiveFallbackReason})"
+                : "Pizzaria: aguardando PizzeriaRoot em runtime";
+            fold.Add(new Label($"{mgrStatus}\n{cityStatus}\n{pizStatus}") { style = { marginTop = 4, fontSize = 11 } });
         }
 
         private void BuildCategoryOverridesSection()
@@ -2167,6 +2392,48 @@ namespace ScaryParty.VisualStyles.Editor
                 UpdateDirtyAndStatusBadges();
                 AppendLog("Configuração restaurada exatamente para o visual original (GameScene canônica intacta).");
             }
+        }
+
+        private void PreviewInOriginalGameSceneAction()
+        {
+            if (_sourceProfile == null) return;
+            if (VisualStyleGameplayIntegrator.ApplyRuntimePreviewInOriginalGameScene(_sourceProfile, _ruleSet))
+            {
+                _statusState = WizardStyleState.Applied;
+                UpdateDirtyAndStatusBadges();
+                AppendLog($"Modo A: '{_sourceProfile.displayName}' configurado para pre-visualizacao reversivel na GameScene original.");
+            }
+        }
+
+        private void SaveDefaultInOriginalGameSceneAction()
+        {
+            if (_sourceProfile == null) return;
+            if (!Application.isBatchMode && !EditorUtility.DisplayDialog(
+                "Modo B: Salvar Visual como Padrao da GameScene",
+                $"Isto criara backup e manifest de rollback seletivo antes de salvar bootstrap minimo para '{_sourceProfile.displayName}' na GameScene original.\nDeseja continuar?",
+                "Salvar como Padrao",
+                "Cancelar"))
+            {
+                return;
+            }
+
+            if (VisualStyleGameplayIntegrator.SaveAsDefaultInOriginalGameScene(_sourceProfile, _ruleSet, out string report))
+            {
+                _statusState = WizardStyleState.Applied;
+                UpdateDirtyAndStatusBadges();
+                AppendLog($"Modo B: {report}");
+            }
+            else
+            {
+                AppendLog($"Erro Modo B: {report}");
+            }
+        }
+
+        private void RunLightingAuditM0Action()
+        {
+            var report = ScaryParty.Lighting.Editor.LightingAuditEditor.RunFullAudit(saveReports: true);
+            AssetDatabase.Refresh();
+            AppendLog($"Auditoria M0 salva: Luzes={report.totalLightsCount}, Sombras locais={report.shadowedLocalLightsCount}, Slices={report.worstCaseLocalShadowSlices}, Risco Atlas={report.atlasDowngradeRisk}");
         }
 
         private void ExportReportAction()

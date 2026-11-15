@@ -17,6 +17,7 @@ namespace ScaryParty.VisualStyles
         public bool listenForStyleChanges = true;
 
         private bool _subscribed;
+        private VisualStyleManager _subscribedManager;
 
         private void Awake()
         {
@@ -28,15 +29,45 @@ namespace ScaryParty.VisualStyles
 
         private void OnEnable()
         {
+            VisualStyleManager.OnActiveManagerChanged += HandleActiveManagerChanged;
             TrySubscribe();
+            if (_subscribed)
+            {
+                _subscribedManager = VisualStyleManager.Active;
+            }
+            if (applyOnAwake && VisualStyleManager.Active != null)
+            {
+                ApplyNow();
+            }
         }
 
         private void OnDisable()
         {
-            if (_subscribed && VisualStyleManager.Active != null)
+            VisualStyleManager.OnActiveManagerChanged -= HandleActiveManagerChanged;
+            var targetMgr = _subscribedManager != null ? _subscribedManager : VisualStyleManager.Active;
+            if (_subscribed && targetMgr != null)
             {
-                VisualStyleManager.Active.OnStyleChanged -= HandleStyleChanged;
+                targetMgr.OnStyleChanged -= HandleStyleChanged;
+            }
+            _subscribed = false;
+            _subscribedManager = null;
+        }
+
+        private void HandleActiveManagerChanged(VisualStyleManager mgr)
+        {
+            if (_subscribed && _subscribedManager != null && _subscribedManager != mgr)
+            {
+                _subscribedManager.OnStyleChanged -= HandleStyleChanged;
                 _subscribed = false;
+            }
+            TrySubscribe();
+            if (_subscribed)
+            {
+                _subscribedManager = VisualStyleManager.Active;
+            }
+            if (applyOnAwake)
+            {
+                ApplyNow();
             }
         }
 

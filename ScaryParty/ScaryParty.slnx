@@ -80,6 +80,7 @@
   <Project Path="Unity.Services.Authentication.PlayerAccounts.Editor.csproj" />
   <Project Path="CoInspector.csproj" />
   <Project Path="Unity.Services.Core.Telemetry.csproj" />
+  <Project Path="ScaryParty.VisualStyles.Runtime.csproj" />
   <Project Path="Unity.Settings.Editor.csproj" />
   <Project Path="Lofelt.NiceVibrations.csproj" />
   <Project Path="Unity.InputSystem.TestFramework.csproj" />
@@ -115,7 +116,6 @@
   <Project Path="Unity.Services.Core.Configuration.Editor.csproj" />
   <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
   <Project Path="Sirenix.OdinInspector.Modules.UnityMathematics.csproj" />
-  <Project Path="ScaryParty.VisualStyles.Runtime.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetVis.Editor.Visualization.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1.csproj" />
   <Project Path="ScaryParty.Pizzeria.Tests.csproj" />

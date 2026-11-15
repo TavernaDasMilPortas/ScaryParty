@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace ScaryParty.VisualStyles
 {
@@ -64,6 +65,7 @@ namespace ScaryParty.VisualStyles
         public VisualConversionRuleSet ruleSet;
 
         [Header("Variant Render / Scene References")]
+        public RenderPipelineAsset renderPipelineAsset;
         public ScriptableObject renderPipelineRendererData;
         public GameObject styledPizzeriaVariantPrefab;
         public GameObject styledCharacterVariantPrefab;
@@ -82,6 +84,7 @@ namespace ScaryParty.VisualStyles
         [NonSerialized] private Dictionary<Material, MappedMaterialEntry> _sourceMatMap;
         [NonSerialized] private Dictionary<string, MappedMaterialEntry> _sourceNameMap;
         [NonSerialized] private Dictionary<string, ContextSlotBindingEntry> _contextSlotMap;
+        [NonSerialized] private HashSet<Material> _targetMatSet;
         [NonSerialized] private bool _initialized;
 
         public void InvalidateLookupCache()
@@ -91,6 +94,7 @@ namespace ScaryParty.VisualStyles
             _sourceMatMap = null;
             _sourceNameMap = null;
             _contextSlotMap = null;
+            _targetMatSet = null;
         }
 
         public void EnsureLookupInitialized()
@@ -140,7 +144,36 @@ namespace ScaryParty.VisualStyles
                 }
             }
 
+            _targetMatSet = new HashSet<Material>();
+            if (roleDefaults != null)
+            {
+                for (int i = 0; i < roleDefaults.Count; i++)
+                {
+                    if (roleDefaults[i]?.material != null) _targetMatSet.Add(roleDefaults[i].material);
+                }
+            }
+            if (mappedMaterials != null)
+            {
+                for (int i = 0; i < mappedMaterials.Count; i++)
+                {
+                    if (mappedMaterials[i]?.targetMaterial != null) _targetMatSet.Add(mappedMaterials[i].targetMaterial);
+                }
+            }
+            if (contextSlotBindings != null)
+            {
+                for (int i = 0; i < contextSlotBindings.Count; i++)
+                {
+                    if (contextSlotBindings[i]?.targetMaterial != null) _targetMatSet.Add(contextSlotBindings[i].targetMaterial);
+                }
+            }
+
             _initialized = true;
+        }
+
+        public bool ContainsTargetMaterial(Material mat)
+        {
+            EnsureLookupInitialized();
+            return mat != null && _targetMatSet != null && _targetMatSet.Contains(mat);
         }
 
         public Material GetRoleMaterial(VisualSemanticRole role)
@@ -156,6 +189,30 @@ namespace ScaryParty.VisualStyles
             if (source == null) return false;
             if (_sourceMatMap.TryGetValue(source, out entry)) return true;
             if (!string.IsNullOrEmpty(source.name) && _sourceNameMap.TryGetValue(source.name, out entry)) return true;
+
+            if (!string.IsNullOrEmpty(source.name) &&
+                source.name.StartsWith("Mat_VS_", StringComparison.OrdinalIgnoreCase) &&
+                mappedMaterials != null)
+            {
+                for (int i = 0; i < mappedMaterials.Count; i++)
+                {
+                    MappedMaterialEntry candidate = mappedMaterials[i];
+                    if (candidate == null) continue;
+                    if (ReferenceEquals(candidate.targetMaterial, source))
+                    {
+                        entry = candidate;
+                        return true;
+                    }
+
+                    if (!string.IsNullOrEmpty(candidate.sourceMaterialName) &&
+                        source.name.IndexOf("_" + candidate.sourceMaterialName + "_", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        entry = candidate;
+                        return true;
+                    }
+                }
+            }
+
             return false;
         }
 

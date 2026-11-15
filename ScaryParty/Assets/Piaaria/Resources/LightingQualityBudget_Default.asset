@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbadf55c84b53bc4a95767b49995efed, type: 3}
+  m_Name: LightingQualityBudget_Default
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.Lighting.LightingQualityBudget
+  activeTier: 1
+  low:
+    label: Low
+    mainShadowResolution: 1024
+    additionalShadowAtlasSize: 1024
+    shadowCascadeCount: 1
+    shadowDistance: 28
+    tierLowResolution: 128
+    tierMediumResolution: 128
+    tierHighResolution: 256
+    maxShadowedLocalLights: 0
+    maxPooledStreetLights: 4
+    cityLightCullDistance: 26
+    enableScreenSpaceOutline: 0
+    ssaoIntensity: 0.15
+    ssaoDirectLightingStrength: 0.12
+  medium:
+    label: Medium
+    mainShadowResolution: 2048
+    additionalShadowAtlasSize: 2048
+    shadowCascadeCount: 2
+    shadowDistance: 35
+    tierLowResolution: 128
+    tierMediumResolution: 256
+    tierHighResolution: 512
+    maxShadowedLocalLights: 1
+    maxPooledStreetLights: 8
+    cityLightCullDistance: 38
+    enableScreenSpaceOutline: 1
+    ssaoIntensity: 0.2
+    ssaoDirectLightingStrength: 0.15
+  high:
+    label: High
+    mainShadowResolution: 2048
+    additionalShadowAtlasSize: 2048
+    shadowCascadeCount: 2
+    shadowDistance: 42
+    tierLowResolution: 128
+    tierMediumResolution: 256
+    tierHighResolution: 512
+    maxShadowedLocalLights: 1
+    maxPooledStreetLights: 12
+    cityLightCullDistance: 48
+    enableScreenSpaceOutline: 1
+    ssaoIntensity: 0.2
+    ssaoDirectLightingStrength: 0.15

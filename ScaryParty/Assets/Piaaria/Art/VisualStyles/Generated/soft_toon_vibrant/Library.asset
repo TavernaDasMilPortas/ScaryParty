@@ -14,10 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualMaterialLibrary
   styleId: soft_toon_vibrant
   profileVersion: 1
-  profileContentHash: d710865b
-  generationTimestampUtc: 2026-11-12T21:57:01.1061969Z
+  profileContentHash: e538be43
+  generationTimestampUtc: 2026-11-14T19:49:31.3013581Z
   profile: {fileID: 11400000, guid: 1f07cf04111e48b4b828c0c14b243105, type: 2}
   ruleSet: {fileID: 11400000, guid: b6f4d93708197754488dbbbe0f17e42e, type: 2}
+  renderPipelineAsset: {fileID: 0}
   renderPipelineRendererData: {fileID: 11400000, guid: f10fbfdcd58efc84ab96ce03d50156f0, type: 2}
   styledPizzeriaVariantPrefab: {fileID: 7839670419698707023, guid: 928c96f1034459d44b7be81781323350, type: 3}
   styledCharacterVariantPrefab: {fileID: 7226512386113360530, guid: 11a90c9bb66b1de43838aa97df1e0bcf, type: 3}
@@ -4029,6 +4030,23 @@ MonoBehaviour:
       Opaque (review recommended).
     targetMaterial: {fileID: 2100000, guid: 220dd71a7537bc649bd6ce51ec45bd62, type: 2}
     targetMaterialGuid: 220dd71a7537bc649bd6ce51ec45bd62
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: soft_toon_vibrant_2516e6df1a16f814e99195892fb440e7_-876546973899608171_8d09ef79
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: 4225a82e408954b468c8ca94cd8f48eb, type: 2}
+    targetMaterialGuid: 4225a82e408954b468c8ca94cd8f48eb
     allowsDynamicTint: 0
     preservedOriginal: 0
   contextSlotBindings: []

@@ -77,6 +77,15 @@ namespace ScaryParty.Pizzeria.Presentation
                 VisualController.SetLocomotion(0f, 1f, true);
             }
 
+            if (visualInstance != null)
+            {
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    visualInstance,
+                    ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Characters);
+                ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(visualInstance);
+            }
+
             if (Appearance != null)
             {
                 Color c = NpcPalette[Mathf.Abs(dto.VisualColorIndex) % NpcPalette.Length];

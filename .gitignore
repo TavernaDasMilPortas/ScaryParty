@@ -53,3 +53,7 @@ sysinfo.txt
 __pycache__/
 *.pyc
 
+# Local Batch Logs & Agent Output
+UnityBatchLog.txt
+AgentOperations/*.tmp
+
