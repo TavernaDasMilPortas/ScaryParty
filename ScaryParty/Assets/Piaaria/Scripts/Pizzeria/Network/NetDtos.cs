@@ -153,8 +153,32 @@ namespace ScaryParty.Pizzeria.Network
         public override int GetHashCode() => HashCode.Combine(BaseDoughId, SauceId, ToppingCount, ToppingId_0, ToppingId_1, QuotedPrice);
     }
 
+    [Serializable]
+    public struct NetIngredientDto : INetworkSerializable, IEquatable<NetIngredientDto>
+    {
+        public int DefinitionId;
+        public byte Stage;
+        public byte Count;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref DefinitionId);
+            serializer.SerializeValue(ref Stage);
+            serializer.SerializeValue(ref Count);
+        }
+
+        public bool Equals(NetIngredientDto other)
+            => DefinitionId == other.DefinitionId && Stage == other.Stage && Count == other.Count;
+
+        public override bool Equals(object obj) => obj is NetIngredientDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(DefinitionId, Stage, Count);
+        public override string ToString() => $"IngDef({DefinitionId}, Stage={Stage}, x{Count})";
+    }
+
     public struct NetItemDto : INetworkSerializable, IEquatable<NetItemDto>
     {
+        public const int MaxDistinctIngredients = 8;
+
         public ulong ItemId;
         public int DefinitionId;
         public int BaseDoughDefinitionId;
@@ -165,18 +189,65 @@ namespace ScaryParty.Pizzeria.Network
         public byte LocationType;
         public ulong HolderId;
         public int SlotId;
+        public float WorldX;
+        public float WorldY;
+        public float WorldZ;
         public float Quality;
         public float CookProgress;
         public float BurnProgress;
         public int LabelAddressId;
         public ulong ReservedByHold;
         public uint Revision;
+
+        // Structured ingredients (up to 8 distinct entries with defId, stage and count)
+        public byte DistinctIngredientCount;
+        public NetIngredientDto Ing_0;
+        public NetIngredientDto Ing_1;
+        public NetIngredientDto Ing_2;
+        public NetIngredientDto Ing_3;
+        public NetIngredientDto Ing_4;
+        public NetIngredientDto Ing_5;
+        public NetIngredientDto Ing_6;
+        public NetIngredientDto Ing_7;
+
+        // Legacy compatibility fields
         public byte IngredientMask;
         public byte IngredientCount;
         public int IngredientId_0;
         public int IngredientId_1;
         public int IngredientId_2;
         public int IngredientId_3;
+
+        public NetIngredientDto GetIngredient(int index)
+        {
+            switch (index)
+            {
+                case 0: return Ing_0;
+                case 1: return Ing_1;
+                case 2: return Ing_2;
+                case 3: return Ing_3;
+                case 4: return Ing_4;
+                case 5: return Ing_5;
+                case 6: return Ing_6;
+                case 7: return Ing_7;
+                default: return default;
+            }
+        }
+
+        public void SetIngredient(int index, NetIngredientDto value)
+        {
+            switch (index)
+            {
+                case 0: Ing_0 = value; IngredientId_0 = value.DefinitionId; break;
+                case 1: Ing_1 = value; IngredientId_1 = value.DefinitionId; break;
+                case 2: Ing_2 = value; IngredientId_2 = value.DefinitionId; break;
+                case 3: Ing_3 = value; IngredientId_3 = value.DefinitionId; break;
+                case 4: Ing_4 = value; break;
+                case 5: Ing_5 = value; break;
+                case 6: Ing_6 = value; break;
+                case 7: Ing_7 = value; break;
+            }
+        }
 
         public int LabelDestinationId
         {
@@ -196,12 +267,26 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref LocationType);
             serializer.SerializeValue(ref HolderId);
             serializer.SerializeValue(ref SlotId);
+            serializer.SerializeValue(ref WorldX);
+            serializer.SerializeValue(ref WorldY);
+            serializer.SerializeValue(ref WorldZ);
             serializer.SerializeValue(ref Quality);
             serializer.SerializeValue(ref CookProgress);
             serializer.SerializeValue(ref BurnProgress);
             serializer.SerializeValue(ref LabelAddressId);
             serializer.SerializeValue(ref ReservedByHold);
             serializer.SerializeValue(ref Revision);
+
+            serializer.SerializeValue(ref DistinctIngredientCount);
+            Ing_0.NetworkSerialize(serializer);
+            Ing_1.NetworkSerialize(serializer);
+            Ing_2.NetworkSerialize(serializer);
+            Ing_3.NetworkSerialize(serializer);
+            Ing_4.NetworkSerialize(serializer);
+            Ing_5.NetworkSerialize(serializer);
+            Ing_6.NetworkSerialize(serializer);
+            Ing_7.NetworkSerialize(serializer);
+
             serializer.SerializeValue(ref IngredientMask);
             serializer.SerializeValue(ref IngredientCount);
             serializer.SerializeValue(ref IngredientId_0);
@@ -212,23 +297,34 @@ namespace ScaryParty.Pizzeria.Network
 
         public bool Equals(NetItemDto other)
             => ItemId == other.ItemId &&
-               Revision == other.Revision &&
                BaseDoughDefinitionId == other.BaseDoughDefinitionId &&
                LocationType == other.LocationType &&
                HolderId == other.HolderId &&
                SlotId == other.SlotId &&
+               Math.Abs(WorldX - other.WorldX) < 0.01f &&
+               Math.Abs(WorldY - other.WorldY) < 0.01f &&
+               Math.Abs(WorldZ - other.WorldZ) < 0.01f &&
                CookingStage == other.CookingStage &&
                PackagingState == other.PackagingState &&
                LabelAddressId == other.LabelAddressId &&
                ReservedByHold == other.ReservedByHold &&
+               DistinctIngredientCount == other.DistinctIngredientCount &&
+               Ing_0.Equals(other.Ing_0) &&
+               Ing_1.Equals(other.Ing_1) &&
+               Ing_2.Equals(other.Ing_2) &&
+               Ing_3.Equals(other.Ing_3) &&
+               Ing_4.Equals(other.Ing_4) &&
+               Ing_5.Equals(other.Ing_5) &&
+               Ing_6.Equals(other.Ing_6) &&
+               Ing_7.Equals(other.Ing_7) &&
                IngredientMask == other.IngredientMask &&
                IngredientCount == other.IngredientCount &&
                IngredientId_0 == other.IngredientId_0 &&
                IngredientId_1 == other.IngredientId_1 &&
                IngredientId_2 == other.IngredientId_2 &&
                IngredientId_3 == other.IngredientId_3 &&
-               Math.Abs(CookProgress - other.CookProgress) < 0.005f &&
-               Math.Abs(BurnProgress - other.BurnProgress) < 0.005f;
+               Math.Abs(CookProgress - other.CookProgress) < 0.04f &&
+               Math.Abs(BurnProgress - other.BurnProgress) < 0.04f;
 
         public override bool Equals(object obj) => obj is NetItemDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(ItemId, Revision, LocationType, HolderId, SlotId, CookingStage);
@@ -330,7 +426,7 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         public bool Equals(NetStationSlotDto other)
-            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && SecondaryItemId == other.SecondaryItemId && Kind == other.Kind && WorkerId == other.WorkerId && InitiatorClientId == other.InitiatorClientId && Phase == other.Phase && Revision == other.Revision && Math.Abs(Accumulated - other.Accumulated) < 0.005f;
+            => StationId == other.StationId && SlotIndex == other.SlotIndex && HeldItemId == other.HeldItemId && SecondaryItemId == other.SecondaryItemId && Kind == other.Kind && WorkerId == other.WorkerId && InitiatorClientId == other.InitiatorClientId && Phase == other.Phase && Revision == other.Revision && Math.Abs(Accumulated - other.Accumulated) < 0.15f;
 
         public override bool Equals(object obj) => obj is NetStationSlotDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(StationId, SlotIndex, Revision);
@@ -348,6 +444,8 @@ namespace ScaryParty.Pizzeria.Network
         public int QuotedReward;
         public int FinalEarnedReward;
         public bool TicketArchived;
+        public ulong ClaimedByClientId;
+        public byte TaskStage;
         public int LineCount;
         public uint Revision;
 
@@ -375,6 +473,8 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref QuotedReward);
             serializer.SerializeValue(ref FinalEarnedReward);
             serializer.SerializeValue(ref TicketArchived);
+            serializer.SerializeValue(ref ClaimedByClientId);
+            serializer.SerializeValue(ref TaskStage);
             serializer.SerializeValue(ref LineCount);
 
             Spec_0.NetworkSerialize(serializer);
@@ -398,13 +498,15 @@ namespace ScaryParty.Pizzeria.Network
                CustomerId == other.CustomerId &&
                Lifecycle == other.Lifecycle &&
                TicketArchived == other.TicketArchived &&
+               ClaimedByClientId == other.ClaimedByClientId &&
+               TaskStage == other.TaskStage &&
                Spec_0.Equals(other.Spec_0) &&
                Spec_1.Equals(other.Spec_1) &&
                Spec_2.Equals(other.Spec_2) &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetOrderDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(OrderId, Lifecycle, TicketArchived, Revision);
+        public override int GetHashCode() => HashCode.Combine(OrderId, Lifecycle, TicketArchived, ClaimedByClientId, TaskStage, Revision);
     }
 
     public struct NetOrderLineDto : INetworkSerializable, IEquatable<NetOrderLineDto>
@@ -499,6 +601,9 @@ namespace ScaryParty.Pizzeria.Network
         public float RotX, RotY, RotZ, RotW;
         public int Capacity;
         public int ItemCount;
+        public int Integrity;
+        public int MaxIntegrity;
+        public bool IsTorn;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -514,14 +619,23 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref RotW);
             serializer.SerializeValue(ref Capacity);
             serializer.SerializeValue(ref ItemCount);
+            serializer.SerializeValue(ref Integrity);
+            serializer.SerializeValue(ref MaxIntegrity);
+            serializer.SerializeValue(ref IsTorn);
             serializer.SerializeValue(ref Revision);
         }
 
         public bool Equals(NetBackpackDto other)
-            => BackpackId == other.BackpackId && EquippedBy == other.EquippedBy && ItemCount == other.ItemCount && Revision == other.Revision;
+            => BackpackId == other.BackpackId &&
+               EquippedBy == other.EquippedBy &&
+               ItemCount == other.ItemCount &&
+               Integrity == other.Integrity &&
+               MaxIntegrity == other.MaxIntegrity &&
+               IsTorn == other.IsTorn &&
+               Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetBackpackDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(BackpackId, Revision);
+        public override int GetHashCode() => HashCode.Combine(BackpackId, Integrity, IsTorn, Revision);
     }
 
     public struct NetSupplyDto : INetworkSerializable, IEquatable<NetSupplyDto>
@@ -639,8 +753,8 @@ namespace ScaryParty.Pizzeria.Network
                NegativeTraitId == other.NegativeTraitId &&
                AttendedByPlayerId == other.AttendedByPlayerId &&
                Math.Abs(AttendProgressNormalized - other.AttendProgressNormalized) < 0.01f &&
-               Math.Abs(QueuePatienceRemaining - other.QueuePatienceRemaining) < 0.25f &&
-               Math.Abs(FoodPatienceRemaining - other.FoodPatienceRemaining) < 0.25f &&
+               Math.Abs(QueuePatienceRemaining - other.QueuePatienceRemaining) < 1.0f &&
+               Math.Abs(FoodPatienceRemaining - other.FoodPatienceRemaining) < 1.0f &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetCustomerDto other && Equals(other);
@@ -699,5 +813,164 @@ namespace ScaryParty.Pizzeria.Network
             reader.ReadValueSafe(out float z);
             location = new LocationRef((LocationType)type, holderId, slotId, x, y, z);
         }
+    }
+
+    public struct NetNightStateDto : INetworkSerializable, IEquatable<NetNightStateDto>
+    {
+        public int NightNumber;
+        public byte Phase;
+        public byte DefeatReason;
+        public float RemainingSeconds;
+        public float PrepRemainingSeconds;
+        public float GraceRemainingSeconds;
+        public int EarnedRevenue;
+        public int RevenueGoal;
+        public int OrdersCompleted;
+        public int OrdersFailed;
+        public int LostCustomers;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref NightNumber);
+            serializer.SerializeValue(ref Phase);
+            serializer.SerializeValue(ref DefeatReason);
+            serializer.SerializeValue(ref RemainingSeconds);
+            serializer.SerializeValue(ref PrepRemainingSeconds);
+            serializer.SerializeValue(ref GraceRemainingSeconds);
+            serializer.SerializeValue(ref EarnedRevenue);
+            serializer.SerializeValue(ref RevenueGoal);
+            serializer.SerializeValue(ref OrdersCompleted);
+            serializer.SerializeValue(ref OrdersFailed);
+            serializer.SerializeValue(ref LostCustomers);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetNightStateDto other)
+            => NightNumber == other.NightNumber &&
+               Phase == other.Phase &&
+               DefeatReason == other.DefeatReason &&
+               EarnedRevenue == other.EarnedRevenue &&
+               RevenueGoal == other.RevenueGoal &&
+               OrdersCompleted == other.OrdersCompleted &&
+               OrdersFailed == other.OrdersFailed &&
+               LostCustomers == other.LostCustomers &&
+               Math.Abs(RemainingSeconds - other.RemainingSeconds) < 0.9f &&
+               Math.Abs(PrepRemainingSeconds - other.PrepRemainingSeconds) < 0.9f &&
+               Math.Abs(GraceRemainingSeconds - other.GraceRemainingSeconds) < 0.9f;
+
+        public override bool Equals(object obj) => obj is NetNightStateDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(NightNumber, Phase, EarnedRevenue, RevenueGoal, OrdersCompleted, Revision);
+    }
+
+    public struct NetWeaponStateDto : INetworkSerializable, IEquatable<NetWeaponStateDto>
+    {
+        public byte WeaponType;
+        public bool IsAvailableOnRack;
+        public ulong OwnerClientId;
+        public int CurrentMagAmmo;
+        public int MaxMagAmmo;
+        public int RackReserveAmmo;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref WeaponType);
+            serializer.SerializeValue(ref IsAvailableOnRack);
+            serializer.SerializeValue(ref OwnerClientId);
+            serializer.SerializeValue(ref CurrentMagAmmo);
+            serializer.SerializeValue(ref MaxMagAmmo);
+            serializer.SerializeValue(ref RackReserveAmmo);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetWeaponStateDto other)
+            => WeaponType == other.WeaponType &&
+               IsAvailableOnRack == other.IsAvailableOnRack &&
+               OwnerClientId == other.OwnerClientId &&
+               CurrentMagAmmo == other.CurrentMagAmmo &&
+               RackReserveAmmo == other.RackReserveAmmo &&
+               Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetWeaponStateDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(WeaponType, OwnerClientId, CurrentMagAmmo, RackReserveAmmo, Revision);
+    }
+
+    public struct NetPlayerCombatDto : INetworkSerializable, IEquatable<NetPlayerCombatDto>
+    {
+        public ulong ClientId;
+        public int CurrentHp;
+        public int MaxHp;
+        public bool IsIncapacitated;
+        public float RescueRemainingSeconds;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref ClientId);
+            serializer.SerializeValue(ref CurrentHp);
+            serializer.SerializeValue(ref MaxHp);
+            serializer.SerializeValue(ref IsIncapacitated);
+            serializer.SerializeValue(ref RescueRemainingSeconds);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetPlayerCombatDto other)
+            => ClientId == other.ClientId &&
+               CurrentHp == other.CurrentHp &&
+               MaxHp == other.MaxHp &&
+               IsIncapacitated == other.IsIncapacitated &&
+               Math.Abs(RescueRemainingSeconds - other.RescueRemainingSeconds) < 0.1f &&
+               Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetPlayerCombatDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(ClientId, CurrentHp, IsIncapacitated, Revision);
+    }
+
+    public struct NetMotorcycleDto : INetworkSerializable, IEquatable<NetMotorcycleDto>
+    {
+        public bool IsActive;
+        public bool IsMounted;
+        public ulong RiderClientId;
+        public float PosX;
+        public float PosY;
+        public float PosZ;
+        public float RotX;
+        public float RotY;
+        public float RotZ;
+        public float RotW;
+        public float Speed;
+        public uint HornCounter;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref IsActive);
+            serializer.SerializeValue(ref IsMounted);
+            serializer.SerializeValue(ref RiderClientId);
+            serializer.SerializeValue(ref PosX);
+            serializer.SerializeValue(ref PosY);
+            serializer.SerializeValue(ref PosZ);
+            serializer.SerializeValue(ref RotX);
+            serializer.SerializeValue(ref RotY);
+            serializer.SerializeValue(ref RotZ);
+            serializer.SerializeValue(ref RotW);
+            serializer.SerializeValue(ref Speed);
+            serializer.SerializeValue(ref HornCounter);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetMotorcycleDto other)
+            => IsActive == other.IsActive &&
+               IsMounted == other.IsMounted &&
+               RiderClientId == other.RiderClientId &&
+               Math.Abs(PosX - other.PosX) < 0.01f &&
+               Math.Abs(PosY - other.PosY) < 0.01f &&
+               Math.Abs(PosZ - other.PosZ) < 0.01f &&
+               HornCounter == other.HornCounter &&
+               Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetMotorcycleDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(IsActive, IsMounted, RiderClientId, HornCounter, Revision);
     }
 }

@@ -56,6 +56,12 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void EnsureVisualPrefabLoaded()
         {
+            var styledChar = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
+            if (styledChar != null)
+            {
+                characterVisualPrefab = styledChar;
+                return;
+            }
             if (characterVisualPrefab != null) return;
             characterVisualPrefab = Resources.Load<GameObject>("CharacterVisual");
 #if UNITY_EDITOR
@@ -322,6 +328,27 @@ namespace ScaryParty.Pizzeria.Presentation
                 TrySubscribeNetworkState();
             }
 
+            // Checar se algum cliente presencial concluiu a caminhada e sentou-se na cadeira
+            if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.CustomerService != null && PizzeriaRoot.Instance.DomainState != null)
+            {
+                bool anyStateChanged = false;
+                foreach (var kvp in _activeViews)
+                {
+                    var view = kvp.Value;
+                    if (view != null && view.HasReachedSeat && view.CurrentState.Phase == (byte)CustomerPhase.WalkingToTable)
+                    {
+                        if (PizzeriaRoot.Instance.CustomerService.ConfirmCustomerSeated(PizzeriaRoot.Instance.DomainState, new ScaryParty.Pizzeria.Domain.Types.CustomerId(view.CustomerId)))
+                        {
+                            anyStateChanged = true;
+                        }
+                    }
+                }
+                if (anyStateChanged)
+                {
+                    ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                }
+            }
+
             _cacheTimer -= Time.deltaTime;
             if (_cacheTimer <= 0f)
             {
@@ -435,6 +462,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 var inst = Instantiate(characterVisualPrefab);
                 inst.name = "CharacterVisual";
                 inst.SetActive(true);
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    inst,
+                    ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                    "character_visual");
                 return inst;
             }
 
@@ -445,6 +477,11 @@ namespace ScaryParty.Pizzeria.Presentation
             if (col != null) Destroy(col);
             fallback.AddComponent<CharacterAppearance>();
             fallback.AddComponent<CharacterVisualController>();
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                fallback,
+                ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                "character_visual");
             return fallback;
         }
 
@@ -468,16 +505,30 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
 
-            if ((phase == CustomerPhase.WalkingToTable ||
-                 phase == CustomerPhase.SeatedWaitingFood ||
-                 phase == CustomerPhase.Eating) &&
-                dto.AssignedTableId > 0 &&
-                _tableById.TryGetValue(dto.AssignedTableId, out var table) &&
-                table != null)
+            if (dto.AssignedTableId > 0)
             {
-                pos = table.GetSeatPosition();
-                rot = table.GetSeatRotation();
-                return;
+                DiningTableStation table = null;
+                if (!_tableById.TryGetValue(dto.AssignedTableId, out table) || table == null)
+                {
+                    DiningTableStation.TryGetTable(dto.AssignedTableId, out table);
+                }
+
+                if (table != null)
+                {
+                    if (phase == CustomerPhase.WalkingToTable)
+                    {
+                        pos = table.GetApproachPosition();
+                        rot = table.GetApproachRotation();
+                        return;
+                    }
+
+                    if (phase == CustomerPhase.SeatedWaitingFood || phase == CustomerPhase.Eating)
+                    {
+                        pos = table.GetSeatPosition();
+                        rot = table.GetSeatRotation();
+                        return;
+                    }
+                }
             }
 
             pos = SnapToFloor(GetEntrancePosition());

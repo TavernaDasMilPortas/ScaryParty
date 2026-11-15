@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,6 +64,19 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
     public static class PizzeriaGameplayValidator
     {
+        public static bool IsActiveInHierarchyOrPrefab(GameObject go)
+        {
+            if (go == null) return false;
+            if (go.activeInHierarchy) return true;
+            Transform t = go.transform;
+            while (t != null)
+            {
+                if (!t.gameObject.activeSelf) return false;
+                t = t.parent;
+            }
+            return true;
+        }
+
         /// <summary>
         /// ValidaÃƒÂ§ÃƒÂ£o SOMENTE LEITURA do prefab-alvo e suas configuraÃƒÂ§ÃƒÂµes referenciadas.
         /// NUNCA modifica o prefab durante a validaÃƒÂ§ÃƒÂ£o e NUNCA busca estaÃƒÂ§ÃƒÂµes soltas na cena fora do prefab-alvo.
@@ -271,7 +284,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 bool isStationValid = true;
 
                 // 1. Ativa na hierarquia e componente habilitado
-                if (!st.gameObject.activeInHierarchy || !st.enabled)
+                if (!IsActiveInHierarchyOrPrefab(st.gameObject) || !st.enabled)
                 {
                     isStationValid = false;
                     AddIssue(report.prefabIssues, report, PizzeriaValidationSeverity.BlockingError, "EstaÃƒÂ§ÃƒÂ£o",
@@ -323,7 +336,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 for (int c = 0; c < colliders.Length; c++)
                 {
                     var col = colliders[c];
-                    if (col != null && col.enabled && col.gameObject.activeInHierarchy)
+                    if (col != null && col.enabled && IsActiveInHierarchyOrPrefab(col.gameObject))
                     {
                         hasEnabledCollider = true;
                         if (col.gameObject.layer != ignoreRaycastLayer)
@@ -700,7 +713,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // Coletar quais ingredientes estÃƒÂ£o disponÃƒÂ­veis nas dispensas e geladeiras ativas do prefab
             var availableIngredientIdsInPrefabStorages = new HashSet<int>();
-            var activeStorages = allStations.OfType<StorageStation>().Where(s => s != null && s.gameObject.activeInHierarchy && s.enabled).ToList();
+            var activeStorages = allStations.OfType<StorageStation>().Where(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled).ToList();
 
             if (config.initialStorageSlots != null && config.initialStorageSlots.Count > 0)
             {
@@ -732,7 +745,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // Coletar processos aceitos pelas PrepStations ativas no prefab
             var supportedProcessIdsInPrefab = new HashSet<int>();
-            var activePreps = allStations.OfType<PrepStation>().Where(p => p != null && p.gameObject.activeInHierarchy && p.enabled).ToList();
+            var activePreps = allStations.OfType<PrepStation>().Where(p => p != null && IsActiveInHierarchyOrPrefab(p.gameObject) && p.enabled).ToList();
             foreach (var prep in activePreps)
             {
                 if (catalog.Stations.TryGetValue(prep.stationId, out var stData) && stData.AcceptedProcessIds != null)
@@ -744,7 +757,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             // Coletar capacidades de ferramentas disponÃƒÂ­veis no ToolRack ativo do prefab
             var availableToolCapabilities = new HashSet<ToolCapability> { ToolCapability.None };
-            var activeToolRacks = allStations.OfType<ToolRackStation>().Where(r => r != null && r.gameObject.activeInHierarchy && r.enabled).ToList();
+            var activeToolRacks = allStations.OfType<ToolRackStation>().Where(r => r != null && IsActiveInHierarchyOrPrefab(r.gameObject) && r.enabled).ToList();
             int totalInitialToolsCount = 0;
             foreach (var tool in catalog.Tools.Values)
             {
@@ -799,12 +812,12 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             }
 
             // 4. Validar estaÃƒÂ§ÃƒÂµes de fluxo (Montagem -> Forno -> Embalagem -> Retirada / Pilha / Mochila -> Entrega)
-            bool hasAssembly = allStations.OfType<AssemblyStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
-            bool hasOven = allStations.OfType<OvenStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
-            bool hasPackaging = allStations.OfType<PackagingStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
-            bool hasStaging = allStations.OfType<StagingStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
-            bool hasPhone = allStations.OfType<PhoneStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
-            bool hasTicketBoard = allStations.OfType<TicketBoardStation>().Any(s => s != null && s.gameObject.activeInHierarchy && s.enabled);
+            bool hasAssembly = allStations.OfType<AssemblyStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
+            bool hasOven = allStations.OfType<OvenStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
+            bool hasPackaging = allStations.OfType<PackagingStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
+            bool hasStaging = allStations.OfType<StagingStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
+            bool hasPhone = allStations.OfType<PhoneStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
+            bool hasTicketBoard = allStations.OfType<TicketBoardStation>().Any(s => s != null && IsActiveInHierarchyOrPrefab(s.gameObject) && s.enabled);
 
             if (!hasPhone || !hasTicketBoard || !hasAssembly || !hasOven || !hasPackaging || !hasStaging)
             {

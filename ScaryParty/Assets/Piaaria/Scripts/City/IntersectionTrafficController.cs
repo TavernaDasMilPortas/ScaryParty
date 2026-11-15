@@ -36,13 +36,48 @@ public class IntersectionTrafficController : MonoBehaviour
 
     private void Update()
     {
-        phaseTimer += Time.deltaTime;
-        float currentTargetDuration = GetCurrentPhaseDuration();
+        // A11: relógio determinístico baseado em ServerTime replicado quando conectado
+        double clockNow = (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsListening)
+            ? Unity.Netcode.NetworkManager.Singleton.ServerTime.Time
+            : Time.timeAsDouble;
 
-        if (phaseTimer >= currentTargetDuration)
+        float totalCycle = phaseAGreenDuration + phaseAYellowDuration + allRedDuration +
+                           phaseBGreenDuration + phaseBYellowDuration + clearanceDuration;
+        if (totalCycle > 0.01f)
         {
-            phaseTimer = 0f;
-            AdvanceToNextPhase();
+            float deterministicOffset = Mathf.Abs(Mathf.Sin(transform.position.x * 0.13f + transform.position.z * 0.17f)) * totalCycle;
+            float t = (float)((clockNow + deterministicOffset) % totalCycle);
+
+            if (t < phaseAGreenDuration)
+            {
+                currentPhase = IntersectionPhase.PhaseA_VehiclesGreen;
+                phaseTimer = t;
+            }
+            else if ((t -= phaseAGreenDuration) < phaseAYellowDuration)
+            {
+                currentPhase = IntersectionPhase.PhaseA_VehiclesYellow;
+                phaseTimer = t;
+            }
+            else if ((t -= phaseAYellowDuration) < allRedDuration)
+            {
+                currentPhase = IntersectionPhase.Phase_AllRedTransition;
+                phaseTimer = t;
+            }
+            else if ((t -= allRedDuration) < phaseBGreenDuration)
+            {
+                currentPhase = IntersectionPhase.PhaseB_VehiclesGreen;
+                phaseTimer = t;
+            }
+            else if ((t -= phaseBGreenDuration) < phaseBYellowDuration)
+            {
+                currentPhase = IntersectionPhase.PhaseB_VehiclesYellow;
+                phaseTimer = t;
+            }
+            else
+            {
+                currentPhase = IntersectionPhase.Phase_PedestrianClearance;
+                phaseTimer = t - phaseBYellowDuration;
+            }
         }
 
         UpdateControlledEntities();
@@ -89,26 +124,46 @@ public class IntersectionTrafficController : MonoBehaviour
 
     private void UpdateControlledEntities()
     {
-        bool isVehiclesGreen = currentPhase == IntersectionPhase.PhaseA_VehiclesGreen;
-        bool isVehiclesYellow = currentPhase == IntersectionPhase.PhaseA_VehiclesYellow;
-
         for (int i = 0; i < trafficLights.Count; i++)
         {
             var tl = trafficLights[i];
             if (tl == null) continue;
 
-            if (isVehiclesGreen) tl.currentState = TrafficLight.TrafficLightState.Green;
-            else if (isVehiclesYellow) tl.currentState = TrafficLight.TrafficLightState.Yellow;
-            else tl.currentState = TrafficLight.TrafficLightState.Red;
+            if (tl.signalGroupIndex == 0)
+            {
+                if (currentPhase == IntersectionPhase.PhaseA_VehiclesGreen) tl.currentState = TrafficLight.TrafficLightState.Green;
+                else if (currentPhase == IntersectionPhase.PhaseA_VehiclesYellow) tl.currentState = TrafficLight.TrafficLightState.Yellow;
+                else tl.currentState = TrafficLight.TrafficLightState.Red;
+            }
+            else
+            {
+                if (currentPhase == IntersectionPhase.PhaseB_VehiclesGreen) tl.currentState = TrafficLight.TrafficLightState.Green;
+                else if (currentPhase == IntersectionPhase.PhaseB_VehiclesYellow) tl.currentState = TrafficLight.TrafficLightState.Yellow;
+                else tl.currentState = TrafficLight.TrafficLightState.Red;
+            }
         }
     }
 
     public bool IsPedestrianCrossingPermitted(PedestrianCrossing crossing)
     {
-        // Pedestrians cross during AllRed or PedestrianClearance phases, or PhaseB
-        return currentPhase == IntersectionPhase.Phase_AllRedTransition ||
-               currentPhase == IntersectionPhase.Phase_PedestrianClearance ||
-               currentPhase == IntersectionPhase.PhaseB_VehiclesGreen;
+        if (currentPhase == IntersectionPhase.Phase_AllRedTransition ||
+            currentPhase == IntersectionPhase.Phase_PedestrianClearance)
+        {
+            return true;
+        }
+
+        if (crossing == null)
+        {
+            return false;
+        }
+
+        // Pedestre atravessando paralelo ao fluxo verde atual tem passagem protegida do fluxo perpendicular vermelho
+        Vector3 crossDir = crossing.crossingDirection;
+        bool crossesEastWest = Mathf.Abs(crossDir.x) >= Mathf.Abs(crossDir.z);
+        if (crossesEastWest)
+            return currentPhase == IntersectionPhase.PhaseB_VehiclesGreen;
+
+        return currentPhase == IntersectionPhase.PhaseA_VehiclesGreen;
     }
 
     public void RegisterTrafficLight(TrafficLight tl)

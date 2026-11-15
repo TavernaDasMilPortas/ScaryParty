@@ -1,3 +1,5 @@
+using ScaryParty.Pizzeria.Presentation.Feedback;
+using ScaryParty.VisualStyles;
 using UnityEngine;
 
 namespace ScaryParty.Pizzeria.Stations
@@ -5,6 +7,8 @@ namespace ScaryParty.Pizzeria.Stations
     [RequireComponent(typeof(AudioSource))]
     public class PhoneRinger : MonoBehaviour
     {
+        private const float RingCycleDuration = 3.0f;
+
         [Header("Audio")]
         public AudioSource audioSource;
         public AudioClip customRingClip;
@@ -12,12 +16,18 @@ namespace ScaryParty.Pizzeria.Stations
         [Header("Visual")]
         public Light beaconLight;
         public Renderer beaconRenderer;
+        [SerializeField] private Transform phoneVisualPivot;
         public Color ringingColor = Color.yellow;
         public Color idleColor = Color.gray;
 
         private bool _isRinging = false;
         private static AudioClip _proceduralClip;
-        private Material _instancedMat;
+        private MaterialPropertyBlock _beaconMpb;
+        private float _ringStartTime;
+        private int _lastPulsePhase;
+        private bool _pivotBaseCaptured;
+        private Vector3 _pivotBaseLocalPos;
+        private Quaternion _pivotBaseLocalRot = Quaternion.identity;
 
         public bool IsRinging => _isRinging;
 
@@ -32,10 +42,9 @@ namespace ScaryParty.Pizzeria.Stations
             audioSource.minDistance = 2f;
             audioSource.maxDistance = 20f;
 
-            if (beaconRenderer != null)
-            {
-                _instancedMat = beaconRenderer.material;
-            }
+            _beaconMpb = new MaterialPropertyBlock();
+            ApplyBeaconColor(idleColor, Color.black);
+            CapturePivotBaseIfAvailable();
 
             if (beaconLight == null)
             {
@@ -55,21 +64,36 @@ namespace ScaryParty.Pizzeria.Stations
         {
             if (!_isRinging) return;
 
-            // Pulso visual (piscar suave a ~4 Hz)
-            float pulse = Mathf.PingPong(Time.time * 4f, 1f);
+            float elapsed = Mathf.Max(0f, Time.time - _ringStartTime);
+            float cycleTime = elapsed % RingCycleDuration;
+            int pulsePhase = cycleTime < 0.4f ? 1 : (cycleTime >= 0.6f && cycleTime < 1.0f ? 2 : 0);
+
+            if (pulsePhase != 0 && pulsePhase != _lastPulsePhase)
+            {
+                GameFeelPresenter.EnsureInstance().TriggerSimple(
+                    GameFeelEventId.PhoneRingPulse,
+                    ResolvePivotTransform() ?? transform,
+                    0,
+                    0,
+                    0u,
+                    GameFeelMaterialFamily.RigidMetal,
+                    1f,
+                    false);
+            }
+            _lastPulsePhase = pulsePhase;
+
+            // Pulso visual (piscar suave a ~4 Hz ou brilho constante em movimento reduzido)
+            float pulse = GameFeelSettings.AllowFlashes && !GameFeelSettings.ReduceMotion
+                ? Mathf.PingPong(Time.time * 4f, 1f)
+                : 0.65f;
+
             if (beaconLight != null)
             {
                 beaconLight.intensity = pulse * 2.5f;
             }
 
-            if (_instancedMat != null)
-            {
-                _instancedMat.color = Color.Lerp(idleColor, ringingColor, pulse);
-                if (_instancedMat.HasProperty("_EmissionColor"))
-                {
-                    _instancedMat.SetColor("_EmissionColor", ringingColor * pulse);
-                }
-            }
+            ApplyBeaconColor(Color.Lerp(idleColor, ringingColor, pulse), ringingColor * pulse);
+            UpdateRingRattle(pulsePhase != 0, cycleTime);
         }
 
         public void SetRinging(bool ringing)
@@ -79,6 +103,10 @@ namespace ScaryParty.Pizzeria.Stations
 
             if (ringing)
             {
+                _ringStartTime = Time.time;
+                _lastPulsePhase = 0;
+                CapturePivotBaseIfAvailable();
+
                 if (customRingClip != null)
                 {
                     audioSource.clip = customRingClip;
@@ -102,15 +130,80 @@ namespace ScaryParty.Pizzeria.Stations
                     beaconLight.enabled = false;
                 }
 
-                if (_instancedMat != null)
-                {
-                    _instancedMat.color = idleColor;
-                    if (_instancedMat.HasProperty("_EmissionColor"))
-                    {
-                        _instancedMat.SetColor("_EmissionColor", Color.black);
-                    }
-                }
+                _lastPulsePhase = 0;
+                ApplyBeaconColor(idleColor, Color.black);
+                ResetVisualPivotToRest();
             }
+        }
+
+        private Transform ResolvePivotTransform()
+        {
+            if (phoneVisualPivot != null && phoneVisualPivot != transform)
+                return phoneVisualPivot;
+            if (beaconRenderer != null && beaconRenderer.transform != transform)
+                return beaconRenderer.transform;
+            return null;
+        }
+
+        private void CapturePivotBaseIfAvailable()
+        {
+            if (_pivotBaseCaptured) return;
+            var pivot = ResolvePivotTransform();
+            if (pivot == null) return;
+            _pivotBaseLocalPos = pivot.localPosition;
+            _pivotBaseLocalRot = pivot.localRotation;
+            _pivotBaseCaptured = true;
+        }
+
+        private void UpdateRingRattle(bool inToneWindow, float cycleTime)
+        {
+            var pivot = ResolvePivotTransform();
+            if (pivot == null) return;
+            CapturePivotBaseIfAvailable();
+
+            if (!inToneWindow || GameFeelSettings.ReduceMotion)
+            {
+                pivot.localPosition = _pivotBaseLocalPos;
+                pivot.localRotation = _pivotBaseLocalRot;
+                return;
+            }
+
+            float intensity = GameFeelSettings.GetEffectiveChannelIntensity(GameFeelChannel.Movement);
+            float localT = cycleTime < 0.4f ? cycleTime / 0.4f : (cycleTime - 0.6f) / 0.4f;
+            float envelope = Mathf.Sin(Mathf.Clamp01(localT) * Mathf.PI);
+            float rattleAngle = Mathf.Sin(Time.time * 48f) * 6.5f * envelope * intensity;
+            float hopY = Mathf.Abs(Mathf.Sin(Time.time * 24f)) * 0.008f * envelope * intensity;
+
+            pivot.localPosition = _pivotBaseLocalPos + new Vector3(0f, hopY, 0f);
+            pivot.localRotation = _pivotBaseLocalRot * Quaternion.Euler(0f, 0f, rattleAngle);
+        }
+
+        private void ResetVisualPivotToRest()
+        {
+            if (!_pivotBaseCaptured) return;
+            var pivot = ResolvePivotTransform();
+            if (pivot == null) return;
+            pivot.localPosition = _pivotBaseLocalPos;
+            pivot.localRotation = _pivotBaseLocalRot;
+        }
+
+        private void ApplyBeaconColor(Color baseColor, Color emissionColor)
+        {
+            if (beaconRenderer == null) return;
+            _beaconMpb ??= new MaterialPropertyBlock();
+            int slots = beaconRenderer.sharedMaterials != null ? Mathf.Max(1, beaconRenderer.sharedMaterials.Length) : 1;
+            for (int s = 0; s < slots; s++)
+            {
+                VisualStyleShaderUtility.ApplyColorBlockToSlot(beaconRenderer, s, baseColor, _beaconMpb);
+                beaconRenderer.GetPropertyBlock(_beaconMpb, s);
+                _beaconMpb.SetColor(VisualStyleShaderUtility.EmissionColorId, emissionColor);
+                beaconRenderer.SetPropertyBlock(_beaconMpb, s);
+            }
+        }
+
+        private void OnDisable()
+        {
+            ResetVisualPivotToRest();
         }
 
         private static AudioClip GenerateProceduralRingClip()
@@ -147,10 +240,7 @@ namespace ScaryParty.Pizzeria.Stations
 
         private void OnDestroy()
         {
-            if (_instancedMat != null)
-            {
-                Destroy(_instancedMat);
-            }
+            ResetVisualPivotToRest();
         }
     }
 }

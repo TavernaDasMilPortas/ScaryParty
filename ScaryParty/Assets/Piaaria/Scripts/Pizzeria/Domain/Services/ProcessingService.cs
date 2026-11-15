@@ -402,7 +402,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             op.Progress.Materialize((float)clock.Now);
             float p = op.Progress.Normalized;
-            if (Math.Abs(pizza.CookProgress - p) > 0.005f)
+            if (Math.Abs(pizza.CookProgress - p) > 0.04f)
             {
                 pizza.CookProgress = p;
                 pizza.Revision++;
@@ -421,7 +421,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 {
                     float burnP = timePastBaked / burnGraceDuration;
                     float clampedBurn = burnP > 1f ? 1f : burnP;
-                    if (Math.Abs(pizza.BurnProgress - clampedBurn) > 0.005f)
+                    if (Math.Abs(pizza.BurnProgress - clampedBurn) > 0.04f)
                     {
                         pizza.BurnProgress = clampedBurn;
                         pizza.Revision++;

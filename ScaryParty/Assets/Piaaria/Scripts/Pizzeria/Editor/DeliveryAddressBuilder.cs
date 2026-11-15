@@ -11,7 +11,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class DeliveryAddressBuilder
     {
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Configurar Pontos de Entrega na Cidade", false, 125)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Cidade/Configurar Pontos de Entrega na Cidade", false, 171)]
         public static void ConfigureCityDeliveryPoints()
         {
             var existingPoints = Object.FindObjectsByType<DeliveryPoint>(FindObjectsSortMode.None);

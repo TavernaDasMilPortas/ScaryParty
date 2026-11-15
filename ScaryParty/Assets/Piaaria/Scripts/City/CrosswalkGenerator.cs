@@ -184,19 +184,24 @@ public static class CrosswalkGenerator
             mf.sharedMesh = mesh;
 
             MeshRenderer mr = crosswalksRootObj.AddComponent<MeshRenderer>();
-            if (crosswalkMat == null)
-            {
-                Shader shader = Shader.Find("Universal Render Pipeline/Lit") 
-                             ?? Shader.Find("Universal Render Pipeline/Unlit") 
-                             ?? Shader.Find("Standard");
-                crosswalkMat = new Material(shader);
-                Color whiteColor = new Color(0.96f, 0.96f, 0.96f);
-                crosswalkMat.color = whiteColor;
-                if (crosswalkMat.HasProperty("_BaseColor")) crosswalkMat.SetColor("_BaseColor", whiteColor);
-                if (crosswalkMat.HasProperty("_Color")) crosswalkMat.SetColor("_Color", whiteColor);
-                if (crosswalkMat.HasProperty("_Smoothness")) crosswalkMat.SetFloat("_Smoothness", 0.05f);
-                crosswalkMat.renderQueue = 2010;
-            }
+            crosswalkMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                crosswalkMat,
+                ScaryParty.VisualStyles.VisualSemanticRole.Crosswalk,
+                ScaryParty.VisualStyles.VisualCategoryIds.Streets,
+                () =>
+                {
+                    Shader shader = Shader.Find("Universal Render Pipeline/Lit")
+                                 ?? Shader.Find("Universal Render Pipeline/Unlit")
+                                 ?? Shader.Find("Standard");
+                    var mat = new Material(shader);
+                    Color whiteColor = new Color(0.96f, 0.96f, 0.96f);
+                    mat.color = whiteColor;
+                    if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", whiteColor);
+                    if (mat.HasProperty("_Color")) mat.SetColor("_Color", whiteColor);
+                    if (mat.HasProperty("_Smoothness")) mat.SetFloat("_Smoothness", 0.05f);
+                    mat.renderQueue = 2010;
+                    return mat;
+                });
             mr.sharedMaterial = crosswalkMat;
         }
 

@@ -30,7 +30,7 @@ namespace ScaryParty.Pizzeria.Editor
             return ticketBoard;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Quadro de Comandas (Legado)", false, 120)]
+        [MenuItem("Tools/Scary Party/Legado/Pizzaria (Prefab Antigo)/Construir Quadro de Comandas", false, 311)]
         public static void BuildTicketBoard()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
@@ -43,11 +43,11 @@ namespace ScaryParty.Pizzeria.Editor
             var bindings = prefab.GetComponent<PizzeriaAuthoringBindings>();
             if (bindings != null && bindings.isManualAuthoring)
             {
-                Debug.LogWarning("[TicketBoardBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Pizzaria Modular' (Aba 3: Bancadas e Objetos) para atribuir o quadro de comandas.");
+                Debug.LogWarning("[TicketBoardBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' (Aba 3: Bancadas e Objetos) para atribuir o quadro de comandas.");
                 if (Application.isBatchMode) return;
                 EditorUtility.DisplayDialog(
                     "Autoria Manual Ativa",
-                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Pizzaria Modular' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Quadro de Comandas'.",
+                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Quadro de Comandas'.",
                     "OK");
                 return;
             }

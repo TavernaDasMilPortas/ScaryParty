@@ -25,13 +25,34 @@ public class TrafficLight : MonoBehaviour
     public IntersectionTrafficController controller;
     public int[] controlledEdgeIds;
 
+    [Tooltip("0 = Grupo A (Norte/Sul), 1 = Grupo B (Leste/Oeste)")]
+    public int signalGroupIndex = 0;
+
+    [Tooltip("Centro geométrico da interseção e raio da linha de retenção")]
+    public Vector3 intersectionCenter;
+    public float stopLineRadius = 6.5f;
+
     [Tooltip("Paired traffic light that runs perpendicular (when this is green, pair is red)")]
     public TrafficLight pairedLight;
+
+    public static readonly System.Collections.Generic.List<TrafficLight> ActiveLights =
+        new System.Collections.Generic.List<TrafficLight>();
 
     private Renderer _lightRenderer;
     private MaterialPropertyBlock _propBlock;
     private float _timer;
     private float _timeOffset;
+
+    private void OnEnable()
+    {
+        if (!ActiveLights.Contains(this))
+            ActiveLights.Add(this);
+    }
+
+    private void OnDisable()
+    {
+        ActiveLights.Remove(this);
+    }
 
     /// <summary>
     /// Returns true if the traffic light is currently green or yellow (vehicles may pass).
@@ -63,9 +84,12 @@ public class TrafficLight : MonoBehaviour
     /// <summary>
     /// Extended setup that also assigns controlled edges and optionally a paired light.
     /// </summary>
-    public void Setup(Renderer lightRenderer, float timeOffset, int[] edgeIds)
+    public void Setup(Renderer lightRenderer, float timeOffset, int[] edgeIds, int groupIndex = 0, Vector3 center = default, float stopRadius = 6.5f)
     {
         controlledEdgeIds = edgeIds;
+        signalGroupIndex = groupIndex;
+        intersectionCenter = center == default && controller != null ? controller.transform.position : center;
+        stopLineRadius = Mathf.Max(3f, stopRadius);
         Setup(lightRenderer, timeOffset);
     }
 

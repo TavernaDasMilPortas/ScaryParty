@@ -605,7 +605,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorGUILayout.BeginVertical("box");
             EditorGUILayout.LabelField("Builder Manual — Pizzaria Modular", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "Esta configuração alimenta a janela Tools > Scary Party > Pizzaria Modular. " +
+                "Esta configuração alimenta a janela Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab). " +
                 "Referências temporárias de Prefab Stage não são salvas neste asset.",
                 MessageType.Info);
 

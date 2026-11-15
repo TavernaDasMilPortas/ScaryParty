@@ -28,12 +28,15 @@ namespace ScaryParty.Pizzeria.Editor
         {
             EditorApplication.delayCall += () =>
             {
-                // Run once on load if needed
+                if (Application.isBatchMode || EditorApplication.isPlayingOrWillChangePlaymode) return;
+                if (SessionState.GetBool("ScaryParty_IngredientVisualSetup_Ran", false)) return;
+                SessionState.SetBool("ScaryParty_IngredientVisualSetup_Ran", true);
+                // Run once per editor session if needed
                 RunFullIngredientSetup(silent: true);
             };
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Configurar Modelos 3D dos Ingredientes e Mesas", false, 1)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Configurar Modelos 3D dos Ingredientes e Mesas", false, 243)]
         public static void RunFullIngredientSetupMenu()
         {
             RunFullIngredientSetup(silent: false);

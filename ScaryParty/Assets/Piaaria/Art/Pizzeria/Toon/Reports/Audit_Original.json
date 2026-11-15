@@ -1,0 +1,17 @@
+﻿{
+    "timestamp": "2026-11-10T16:06:29.3808646Z",
+    "targetPrefabPath": "Assets/Piaaria/Prefabs/Pizzeria/PizzeriaModular_Manual.prefab",
+    "targetPrefabGuid": "fc7266d1e4dbc5a46aa1445238583bbe",
+    "sourcePrefabHash": "16ef864761604f9bb9c5103201e25b73",
+    "totalGameObjects": 471,
+    "totalMeshRenderers": 323,
+    "totalSkinnedMeshRenderers": 0,
+    "totalSlots": 323,
+    "nullSlots": 0,
+    "uniqueMaterialsCount": 27,
+    "networkObjectsCount": 1,
+    "stationsCount": 21,
+    "collidersCount": 144,
+    "warnings": [],
+    "errors": []
+}

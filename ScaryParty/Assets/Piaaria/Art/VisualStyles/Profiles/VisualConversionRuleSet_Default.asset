@@ -1,0 +1,319 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7762ffaa8b3c08b4a88d29769fa6a907, type: 3}
+  m_Name: VisualConversionRuleSet_Default
+  m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualConversionRuleSet
+  ruleSetVersion: 1
+  categories:
+  - categoryId: Architecture
+    displayName: Architecture
+    description: 
+    defaultShaderFamily: 0
+    defaultSemanticRole: 10
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  - categoryId: City
+    displayName: City & Buildings
+    description: 
+    defaultShaderFamily: 0
+    defaultSemanticRole: 60
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 1
+  - categoryId: Streets
+    displayName: Streets & Signage
+    description: 
+    defaultShaderFamily: 1
+    defaultSemanticRole: 40
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  - categoryId: Characters
+    displayName: Characters & NPCs
+    description: 
+    defaultShaderFamily: 0
+    defaultSemanticRole: 80
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 1
+  - categoryId: Food
+    displayName: Food & Pizza
+    description: 
+    defaultShaderFamily: 0
+    defaultSemanticRole: 110
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 1
+  - categoryId: Props
+    displayName: Props & Tools
+    description: 
+    defaultShaderFamily: 0
+    defaultSemanticRole: 21
+    defaultAction: 0
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  - categoryId: Interaction
+    displayName: Interaction
+    description: 
+    defaultShaderFamily: 5
+    defaultSemanticRole: 1
+    defaultAction: 1
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  - categoryId: Effects
+    displayName: VFX & Particles
+    description: 
+    defaultShaderFamily: 5
+    defaultSemanticRole: 140
+    defaultAction: 1
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  - categoryId: Unclassified
+    displayName: Unclassified
+    description: 
+    defaultShaderFamily: 5
+    defaultSemanticRole: 0
+    defaultAction: 3
+    preserveTexturesByDefault: 1
+    allowDynamicTint: 0
+  exclusions:
+  - ruleName: Preserve Interaction Outline
+    enabled: 1
+    shaderNameContains: ScaryParty/Outline
+    assetPathPrefix: 
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: OutlineService focus highlight shader must remain untouched.
+  - ruleName: Preserve UI Shaders
+    enabled: 1
+    shaderNameContains: UI/
+    assetPathPrefix: 
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: UI materials must remain readable without cel lighting.
+  - ruleName: Preserve TextMeshPro
+    enabled: 1
+    shaderNameContains: TextMeshPro
+    assetPathPrefix: 
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: TMP fonts/SDF materials preserved.
+  - ruleName: Preserve Particles
+    enabled: 1
+    shaderNameContains: Particles
+    assetPathPrefix: 
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: Particle shaders preserved.
+  - ruleName: Preserve ParticleSystemRenderer
+    enabled: 1
+    shaderNameContains: 
+    assetPathPrefix: 
+    rendererTypeName: ParticleSystemRenderer
+    materialNameRegex: 
+    tagEquals: 
+    reason: VFX particle renderer preserved.
+  - ruleName: Preserve TrailRenderer
+    enabled: 1
+    shaderNameContains: 
+    assetPathPrefix: 
+    rendererTypeName: TrailRenderer
+    materialNameRegex: 
+    tagEquals: 
+    reason: Trail effect renderer preserved.
+  - ruleName: Preserve LineRenderer
+    enabled: 1
+    shaderNameContains: 
+    assetPathPrefix: 
+    rendererTypeName: LineRenderer
+    materialNameRegex: 
+    tagEquals: 
+    reason: Line renderer preserved.
+  - ruleName: Preserve SpriteRenderer
+    enabled: 1
+    shaderNameContains: 
+    assetPathPrefix: 
+    rendererTypeName: SpriteRenderer
+    materialNameRegex: 
+    tagEquals: 
+    reason: 2D sprite UI/markers preserved.
+  - ruleName: Preserve Sprites/Default
+    enabled: 1
+    shaderNameContains: Sprites/Default
+    assetPathPrefix: 
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: 2D sprite shader preserved.
+  - ruleName: Preserve DistantLands Package
+    enabled: 1
+    shaderNameContains: 
+    assetPathPrefix: Assets/ThirdParty/Distant Lands/
+    rendererTypeName: 
+    materialNameRegex: 
+    tagEquals: 
+    reason: Third-party source materials preserved.
+  rules:
+  - ruleName: Road Signage / Markings
+    enabled: 1
+    priority: 10
+    assetPathPrefix: 
+    assetPathRegex: 
+    materialNameRegex: (Crosswalk|Faixa|RoadYellow|RoadWhite|RoadSign|TrafficLightLens)
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: Streets
+    targetRole: 45
+    targetShaderFamily: 1
+    action: 0
+    confidence: 0.92
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 0
+    reason: Traffic markings and road signs use clean Illustrate Simple without outline
+      clutter.
+  - ruleName: Streets & Sidewalks
+    enabled: 1
+    priority: 15
+    assetPathPrefix: 
+    assetPathRegex: 
+    materialNameRegex: (Street|Sidewalk|Intersection|Asphalt|Road|Calcada)
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: Streets
+    targetRole: 40
+    targetShaderFamily: 1
+    action: 0
+    confidence: 0.88
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 0
+    reason: Road surfaces use lightweight Illustrate Simple.
+  - ruleName: City Modular Glass & Windows
+    enabled: 1
+    priority: 20
+    assetPathPrefix: 
+    assetPathRegex: 
+    materialNameRegex: (Glass|Window|Vidro|Janela)
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: City
+    targetRole: 62
+    targetShaderFamily: 2
+    action: 0
+    confidence: 0.9
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 0
+    reason: Windows/glass preserve transparency via Illustrate Transparent.
+  - ruleName: City Modular Buildings
+    enabled: 1
+    priority: 25
+    assetPathPrefix: Assets/Piaaria/Materials/City/
+    assetPathRegex: 
+    materialNameRegex: 
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: City
+    targetRole: 60
+    targetShaderFamily: 0
+    action: 0
+    confidence: 0.9
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 1
+    reason: Modular city materials mapped to City Opaque supporting MPB facade tints.
+  - ruleName: Characters Folder
+    enabled: 1
+    priority: 30
+    assetPathPrefix: Assets/Piaaria/Art/Characters/
+    assetPathRegex: 
+    materialNameRegex: 
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: Characters
+    targetRole: 80
+    targetShaderFamily: 0
+    action: 0
+    confidence: 0.92
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 1
+    reason: Character folder materials retain skin/body slots and MPB compatibility.
+  - ruleName: Food & Pizza Assets
+    enabled: 1
+    priority: 35
+    assetPathPrefix: 
+    assetPathRegex: 
+    materialNameRegex: (Pizza|Dough|Massa|Sauce|Molho|Cheese|Queijo|Pepperoni|Calabresa|Mushroom|Cogumelo|Ingredient)
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: Food
+    targetRole: 110
+    targetShaderFamily: 0
+    action: 0
+    confidence: 0.88
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 1
+    reason: Food/ingredient asset converted with full texture preservation.
+  - ruleName: Pizzeria Visuals & Props
+    enabled: 1
+    priority: 40
+    assetPathPrefix: Assets/Piaaria/Art/Pizzeria/
+    assetPathRegex: 
+    materialNameRegex: 
+    sourceShaderContains: 
+    requiredTextureProperty: 
+    requireTransparentQueue: 0
+    requireAlphaClipped: 0
+    requireEmission: 0
+    requiredTag: 
+    targetCategoryId: Props
+    targetRole: 21
+    targetShaderFamily: 0
+    action: 0
+    confidence: 0.85
+    preserveTexture: 1
+    preserveColor: 1
+    allowDynamicTint: 0
+    reason: Pizzeria props converted with Opaque shader.
+  manualOverrides: []

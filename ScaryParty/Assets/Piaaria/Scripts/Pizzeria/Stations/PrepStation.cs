@@ -104,6 +104,35 @@ namespace ScaryParty.Pizzeria.Stations
                 if (playerHasTool)
                     return "[E] Colocar Utensílio";
 
+                // Se o slot atual está vazio e as mãos estão vazias, mas outro slot nesta bancada tem item ou ferramenta:
+                if (!slotHasItem && !slotHasTool && !playerHasItem && !playerHasTool)
+                {
+                    for (int i = 0; i < netState.Items.Count; i++)
+                    {
+                        var it = netState.Items[i];
+                        if (it.LocationType == (byte)LocationType.StationSlot && it.HolderId == (ulong)stationId)
+                        {
+                            if (it.PrepStage == (byte)ProcessingStage.Raw)
+                            {
+                                if (it.DefinitionId == 1) return "[F] Iniciar Abrir Massa / [E] Pegar";
+                                if (it.DefinitionId == 4) return "[F] Iniciar Ralar Queijo / [E] Pegar";
+                                if (it.DefinitionId == 6 || it.DefinitionId == 8) return "[F] Iniciar Fatiar / [E] Pegar";
+                                return "[F] Iniciar Trabalhar / [E] Pegar";
+                            }
+                            return "[E] Pegar Ingrediente Preparado";
+                        }
+                    }
+                    for (int i = 0; i < netState.Tools.Count; i++)
+                    {
+                        var t = netState.Tools[i];
+                        if (t.LocationType == (byte)LocationType.StationSlot && t.HolderId == (ulong)stationId)
+                        {
+                            string tName = t.DefinitionId == 1 ? "Ralador" : "Faca";
+                            return $"[E] Pegar {tName}";
+                        }
+                    }
+                }
+
                 return "Bancada de Preparo";
             }
         }

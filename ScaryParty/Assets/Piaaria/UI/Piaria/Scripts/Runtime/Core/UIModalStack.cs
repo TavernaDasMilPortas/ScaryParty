@@ -26,6 +26,7 @@ namespace ScaryParty.UI.Piaria.Core
 
         private readonly Stack<IModalView> _modalStack = new Stack<IModalView>();
         private int _inputTokensAcquired = 0;
+        private int _lastPushFrame = -1;
 
         public bool HasActiveModal => _modalStack.Count > 0;
         public int ActiveModalCount => _modalStack.Count;
@@ -47,6 +48,7 @@ namespace ScaryParty.UI.Piaria.Core
             if (modal == null) return;
             if (_modalStack.Contains(modal)) return;
 
+            _lastPushFrame = Time.frameCount;
             _modalStack.Push(modal);
             AcquireInputLock();
         }
@@ -120,7 +122,7 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void Update()
         {
-            if (_modalStack.Count == 0) return;
+            if (_modalStack.Count == 0 || Time.frameCount == _lastPushFrame) return;
 
             bool escPressed = false;
 #if ENABLE_INPUT_SYSTEM

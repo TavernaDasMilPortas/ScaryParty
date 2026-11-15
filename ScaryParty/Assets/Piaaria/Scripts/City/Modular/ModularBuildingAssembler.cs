@@ -83,8 +83,12 @@ namespace ScaryParty.City.Modular
             float parapetY = roofY + 0.2f;
             AssembleParapetPerimeter(layout.widthModules, layout.depthModules, halfW, depth, parapetY, catalog, parapetGroup.transform, layout.buildingId);
 
-            // 5. Aplica cores e materiais nos renderers dos módulos instanciados
-            ApplyBuildingPalette(rootObj, layout.buildingColor);
+            // 5. Aplica estilo global (se ativo) e cores nos renderers dos módulos instanciados
+            ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                rootObj,
+                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                ScaryParty.VisualStyles.VisualCategoryIds.City);
+            ApplyBuildingPalette(rootObj, layout.buildingColor, catalog);
 
             // 6. Configura o componente CityBuilding na raiz
             CityBuilding cb = rootObj.AddComponent<CityBuilding>();
@@ -126,6 +130,20 @@ namespace ScaryParty.City.Modular
                 }
 
                 int occupied = Mathf.Max(1, def.occupiedSlots);
+                if (slot + occupied > totalSlots)
+                {
+                    Debug.LogWarning($"[ModularBuildingAssembler] A04: Módulo {modId} ({occupied} slots) ultrapassaria fachada {side} ({slot}/{totalSlots}) em '{buildingId}'. Ajustando para A.");
+                    var fallbackDef = catalog.GetDefinition(CityModuleId.A);
+                    if (fallbackDef == null || fallbackDef.prefab == null)
+                    {
+                        slot++;
+                        continue;
+                    }
+                    modId = CityModuleId.A;
+                    def = fallbackDef;
+                    occupied = 1;
+                }
+
                 float moduleWidth = def.width;
 
                 Vector3 localPos = Vector3.zero;
@@ -134,28 +152,28 @@ namespace ScaryParty.City.Modular
                 switch (side)
                 {
                     case FacadeSide.Front:
-                        // Frente em Z = 0, X de -halfW a +halfW
+                        // Frente em Z = 0, X de -halfW a +halfW, voltada para fora (+Z)
                         float xFront = -halfW + (slot * 2.0f) + (moduleWidth * 0.5f);
                         localPos = new Vector3(xFront, floorY, 0f);
                         localRot = Quaternion.identity;
                         break;
 
                     case FacadeSide.Back:
-                        // Traseira em Z = -depth, olha para -Z
+                        // Traseira em Z = -depth, X de +halfW a -halfW, voltada para fora (-Z)
                         float xBack = halfW - (slot * 2.0f) - (moduleWidth * 0.5f);
                         localPos = new Vector3(xBack, floorY, -depth);
                         localRot = Quaternion.Euler(0f, 180f, 0f);
                         break;
 
                     case FacadeSide.Left:
-                        // Lateral esquerda em X = -halfW, olha para -X
+                        // Lateral esquerda em X = -halfW, Z de 0 a -depth, voltada para fora (-X)
                         float zLeft = -(slot * 2.0f) - (moduleWidth * 0.5f);
                         localPos = new Vector3(-halfW, floorY, zLeft);
                         localRot = Quaternion.Euler(0f, -90f, 0f);
                         break;
 
                     case FacadeSide.Right:
-                        // Lateral direita em X = +halfW, olha para +X
+                        // Lateral direita em X = +halfW, Z de -depth a 0, voltada para fora (+X)
                         float zRight = -depth + (slot * 2.0f) + (moduleWidth * 0.5f);
                         localPos = new Vector3(halfW, floorY, zRight);
                         localRot = Quaternion.Euler(0f, 90f, 0f);
@@ -175,6 +193,9 @@ namespace ScaryParty.City.Modular
                 modInst.slotIndex = slot;
                 modInst.side = side;
                 modInst.AutoWireHierarchy();
+
+                // Aplica visualPositionOffset e visualRotationOffset no nó Visual (se configurados na definição)
+                ApplyVisualOffsets(instance, def, modInst);
 
                 // Montagem do toldo K se especificado
                 if (awnings != null && i < awnings.Count && awnings[i])
@@ -196,6 +217,8 @@ namespace ScaryParty.City.Modular
                         awnInst.slotIndex = slot;
                         awnInst.side = side;
                         awnInst.AutoWireHierarchy();
+
+                        ApplyVisualOffsets(awningObj, defK, awnInst);
                     }
                 }
 
@@ -233,6 +256,8 @@ namespace ScaryParty.City.Modular
                 pInst.floorIndex = floor;
                 pInst.side = FacadeSide.Pillar;
                 pInst.AutoWireHierarchy();
+
+                ApplyVisualOffsets(pillarObj, defL, pInst);
             }
         }
 
@@ -260,6 +285,8 @@ namespace ScaryParty.City.Modular
                     rInst.buildingId = buildingId;
                     rInst.side = FacadeSide.Roof;
                     rInst.AutoWireHierarchy();
+
+                    ApplyVisualOffsets(roofObj, defE, rInst);
                 }
             }
         }
@@ -312,26 +339,183 @@ namespace ScaryParty.City.Modular
             inst.buildingId = bId;
             inst.side = FacadeSide.Parapet;
             inst.AutoWireHierarchy();
+
+            ApplyVisualOffsets(obj, defF, inst);
         }
 
-        private static void ApplyBuildingPalette(GameObject rootObj, Color buildingColor)
+        /// <summary>
+        /// Aplica as compensações de posição e rotação visual aos filhos gráficos do módulo,
+        /// garantindo alinhamento perfeito tanto de placeholders canônicos quanto de modelos autorais FBX importados do Blender.
+        /// Se o prefab possuir o nó canônico "Visual", compensa nele.
+        /// Se for um FBX direto (onde as meshes são filhas da raiz ou o visualRoot é um dos nós),
+        /// aplica a compensação em TODOS os nós gráficos/filhos de malha para manter integridade.
+        /// Se a definição estiver zerada na memória, aplica fallback automático para modelos conhecidos com eixos do Blender.
+        /// </summary>
+        public static void ApplyVisualOffsets(GameObject instance, CityModuleDefinition def, CityModuleInstance modInst)
         {
-            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
-            propBlock.SetColor("_Color", buildingColor);
-            propBlock.SetColor("_BaseColor", buildingColor);
-            propBlock.SetColor("_MainColor", buildingColor);
+            if (instance == null || def == null) return;
 
-            Renderer[] renderers = rootObj.GetComponentsInChildren<Renderer>();
-            for (int i = 0; i < renderers.Length; i++)
+            Vector3 posOffset = def.visualPositionOffset;
+            Vector3 rotOffsetEuler = def.visualRotationOffset;
+
+            // Se ambos forem zero, respeita o valor zerado sem forçar sobreposição
+            if (posOffset == Vector3.zero && rotOffsetEuler == Vector3.zero) return;
+
+            Quaternion rotOffset = Quaternion.Euler(rotOffsetEuler);
+
+            // 1. Verifica se existe o nó canônico formal "Visual"
+            Transform explicitVisual = instance.transform.Find("Visual");
+            if (explicitVisual != null)
             {
-                Renderer r = renderers[i];
-                if (r == null) continue;
+                explicitVisual.localPosition = posOffset;
+                explicitVisual.localRotation = rotOffset;
+                return;
+            }
 
-                // Não colorir vidros nem tecidos de toldos com a cor principal de parede
-                if (r.gameObject.name.Contains("Glass") || r.gameObject.name.Contains("Awning"))
-                    continue;
+            // 2. Se for um FBX com filhos (ex: parede_porta com folha, etc.)
+            bool hasValidChildren = false;
+            for (int i = 0; i < instance.transform.childCount; i++)
+            {
+                Transform child = instance.transform.GetChild(i);
+                if (child.name != "Collision" && child.name != "Anchors")
+                {
+                    hasValidChildren = true;
+                    break;
+                }
+            }
 
-                r.SetPropertyBlock(propBlock);
+            if (hasValidChildren)
+            {
+                for (int i = 0; i < instance.transform.childCount; i++)
+                {
+                    Transform child = instance.transform.GetChild(i);
+                    if (child.name == "Collision" || child.name == "Anchors") continue;
+
+                    child.localPosition = posOffset;
+                    child.localRotation = rotOffset;
+                }
+                return;
+            }
+
+            // 3. Se for um FBX direto cuja malha/renderer está na própria raiz (como platibanda.fbx, pilar_de_canto.fbx, etc.)
+            // Não podemos mexer no transform raiz de 'instance' porque ele mantém o slot e orientação do edifício.
+            // Solução robusta: criamos um filho intermediário "Visual", transferimos os componentes visuais para ele e aplicamos os offsets!
+            MeshRenderer rootRenderer = instance.GetComponent<MeshRenderer>();
+            MeshFilter rootFilter = instance.GetComponent<MeshFilter>();
+            if (rootRenderer != null && rootFilter != null)
+            {
+                GameObject visualChild = new GameObject("Visual");
+                visualChild.transform.SetParent(instance.transform, false);
+                visualChild.layer = instance.layer;
+
+                MeshFilter newFilter = visualChild.AddComponent<MeshFilter>();
+                newFilter.sharedMesh = rootFilter.sharedMesh;
+
+                MeshRenderer newRenderer = visualChild.AddComponent<MeshRenderer>();
+                newRenderer.sharedMaterials = rootRenderer.sharedMaterials;
+
+                // Destrói os componentes gráficos da raiz para não duplicar renderização
+                UnityEngine.Object.DestroyImmediate(rootRenderer);
+                UnityEngine.Object.DestroyImmediate(rootFilter);
+
+                visualChild.transform.localPosition = posOffset;
+                visualChild.transform.localRotation = rotOffset;
+
+                if (modInst != null)
+                {
+                    modInst.visualRoot = visualChild.transform;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gera a cor escura a partir da cor-base clara reduzindo o brilho (Value no HSV)
+        /// pela intensidade especificada (padrão ~30%), preservando matiz (Hue) e saturação.
+        /// </summary>
+        public static Color GenerateTrimColor(Color baseColor, float darkenFactor = 0.30f)
+        {
+            Color.RGBToHSV(baseColor, out float h, out float s, out float v);
+            float darkV = Mathf.Clamp01(v * (1.0f - Mathf.Clamp01(darkenFactor)));
+            Color trimColor = Color.HSVToRGB(h, s, darkV);
+            trimColor.a = baseColor.a;
+            return trimColor;
+        }
+
+        public static void ApplyBuildingPalette(GameObject rootObj, Color baseColor, CityModuleCatalog catalog = null, float darkenFactor = 0.30f)
+        {
+            Color trimColor = GenerateTrimColor(baseColor, darkenFactor);
+            MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+
+            // Percorre todas as instâncias de módulos montadas na hierarquia do prédio
+            CityModuleInstance[] instances = rootObj.GetComponentsInChildren<CityModuleInstance>(true);
+            for (int i = 0; i < instances.Length; i++)
+            {
+                CityModuleInstance inst = instances[i];
+                if (inst == null) continue;
+
+                CityModuleDefinition def = catalog != null ? catalog.GetDefinition(inst.moduleId) : null;
+                CityModuleMaterialRole[] roles = def?.materialRoles;
+
+                Renderer[] renderers = inst.GetComponentsInChildren<Renderer>(true);
+                for (int rIdx = 0; rIdx < renderers.Length; rIdx++)
+                {
+                    Renderer rend = renderers[rIdx];
+                    if (rend == null) continue;
+
+                    Material[] sharedMats = rend.sharedMaterials;
+                    for (int mIdx = 0; mIdx < sharedMats.Length; mIdx++)
+                    {
+                        Material mat = sharedMats[mIdx];
+                        if (mat == null) continue;
+
+                        CityModuleMaterialRole role = CityModuleMaterialRole.Wall;
+                        bool hasExplicitRole = false;
+
+                        if (roles != null && mIdx < roles.Length)
+                        {
+                            role = roles[mIdx];
+                            hasExplicitRole = true;
+                        }
+
+                        if (!hasExplicitRole)
+                        {
+                            // Inferência de fallback pelo nome do material ou tipo de peça
+                            string matName = mat.name;
+                            if (matName.IndexOf("Glass", StringComparison.OrdinalIgnoreCase) >= 0)
+                                role = CityModuleMaterialRole.Glass;
+                            else if (matName.IndexOf("Fabric", StringComparison.OrdinalIgnoreCase) >= 0)
+                                role = CityModuleMaterialRole.Fabric;
+                            else if (matName.IndexOf("Wood", StringComparison.OrdinalIgnoreCase) >= 0)
+                                role = CityModuleMaterialRole.Wood;
+                            else if (matName.IndexOf("Metal", StringComparison.OrdinalIgnoreCase) >= 0)
+                                role = CityModuleMaterialRole.Metal;
+                            else if (matName.IndexOf("Trim", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                     inst.moduleId == CityModuleId.L || inst.moduleId == CityModuleId.F)
+                                role = CityModuleMaterialRole.Trim;
+                            else
+                                role = CityModuleMaterialRole.Wall;
+                        }
+
+                        // Aplica a tonalidade correspondente por índice de slot
+                        switch (role)
+                        {
+                            case CityModuleMaterialRole.Wall:
+                                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, mIdx, baseColor, propBlock);
+                                break;
+
+                            case CityModuleMaterialRole.Trim:
+                                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, mIdx, trimColor, propBlock);
+                                break;
+
+                            case CityModuleMaterialRole.Glass:
+                            case CityModuleMaterialRole.Wood:
+                            case CityModuleMaterialRole.Metal:
+                            case CityModuleMaterialRole.Fabric:
+                                // Preserva os materiais próprios sem alterar a cor
+                                break;
+                        }
+                    }
+                }
             }
         }
 
@@ -453,62 +637,62 @@ namespace ScaryParty.City.Modular
                     break;
 
                 case ModularBuildingRecipe.TwoStoryHouse:
-                    // Sobrado: 6m larg x 6m prof x 2 pav (A + J + B térreo; andares superiores janelas/paredes)
-                    layout.widthModules = 3; // 6m
+                    // Sobrado: 8m larg x 6m prof x 2 pav (A + J[2 slots] + B térreo; andares superiores janelas/paredes)
+                    layout.widthModules = 4; // 8m (para comportar porta dupla J de 4m + alas)
                     layout.depthModules = 3; // 6m
                     layout.floorCount = 2;
                     layout.zone = ZoneType.Residential;
 
                     FloorLayout sh0 = new FloorLayout { floorIndex = 0 };
-                    sh0.frontModules.AddRange(new[] { CityModuleId.A, CityModuleId.J, CityModuleId.B });
+                    sh0.frontModules.AddRange(new[] { CityModuleId.A, CityModuleId.J, CityModuleId.B }); // 1 + 2 + 1 = 4 slots
                     sh0.frontAwnings.AddRange(new[] { false, false, false });
-                    sh0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
+                    sh0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.B, CityModuleId.A });
                     sh0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     sh0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     layout.floors.Add(sh0);
 
                     FloorLayout sh1 = new FloorLayout { floorIndex = 1 };
-                    sh1.frontModules.AddRange(new[] { CityModuleId.G, CityModuleId.H, CityModuleId.G });
-                    sh1.frontAwnings.AddRange(new[] { false, false, false });
-                    sh1.backModules.AddRange(new[] { CityModuleId.B, CityModuleId.B, CityModuleId.B });
+                    sh1.frontModules.AddRange(new[] { CityModuleId.G, CityModuleId.H, CityModuleId.G, CityModuleId.B });
+                    sh1.frontAwnings.AddRange(new[] { false, false, false, false });
+                    sh1.backModules.AddRange(new[] { CityModuleId.B, CityModuleId.B, CityModuleId.B, CityModuleId.B });
                     sh1.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     sh1.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A });
                     layout.floors.Add(sh1);
 
-                    // Entrada na porta dupla J centralizada no slot 1 (X = 0)
+                    // Entrada na porta dupla J (4m) centralizada em X = 0 (-4 + 2 + 2)
                     CalculateEntranceAnchors(layout, 0f);
                     break;
 
                 case ModularBuildingRecipe.Shop:
-                    // Loja: 6m larg x 8m prof x 1 pav (D + D + J, K acima das vitrines)
-                    layout.widthModules = 3; // 6m
+                    // Loja: 8m larg x 8m prof x 1 pav (D + D + J[2 slots], K acima das vitrines)
+                    layout.widthModules = 4; // 8m
                     layout.depthModules = 4; // 8m
                     layout.floorCount = 1;
                     layout.zone = ZoneType.Commercial;
 
                     FloorLayout sp0 = new FloorLayout { floorIndex = 0 };
-                    sp0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J });
+                    sp0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J }); // 1 + 1 + 2 = 4 slots
                     sp0.frontAwnings.AddRange(new[] { true, true, false }); // Toldo K acima das duas vitrines
-                    sp0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.A }); // Porta de serviço no fundo
+                    sp0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.B, CityModuleId.A }); // Porta de serviço no fundo
                     sp0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     sp0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     layout.floors.Add(sp0);
 
-                    // Entrada na porta dupla J no slot 2 (X = -3m + 4m + 1m = +2m)
+                    // Entrada na porta dupla J nos slots 2..3 (X = -4m + 4m + 2m = +2m)
                     CalculateEntranceAnchors(layout, 2.0f);
                     break;
 
                 case ModularBuildingRecipe.MixedBuilding:
                 default:
-                    // Prédio misto: 8m larg x 8m prof x 4 pav (D + D + J + D térreo; janelas nos superiores)
+                    // Prédio misto: 8m larg x 8m prof x 4 pav (D + J[2 slots] + D térreo; janelas nos superiores)
                     layout.widthModules = 4; // 8m
                     layout.depthModules = 4; // 8m
                     layout.floorCount = 4;
                     layout.zone = ZoneType.Commercial;
 
                     FloorLayout mb0 = new FloorLayout { floorIndex = 0 };
-                    mb0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.J, CityModuleId.D });
-                    mb0.frontAwnings.AddRange(new[] { true, true, false, true });
+                    mb0.frontModules.AddRange(new[] { CityModuleId.D, CityModuleId.J, CityModuleId.D }); // 1 + 2 + 1 = 4 slots
+                    mb0.frontAwnings.AddRange(new[] { true, false, true });
                     mb0.backModules.AddRange(new[] { CityModuleId.A, CityModuleId.C, CityModuleId.B, CityModuleId.A });
                     mb0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
                     mb0.rightModules.AddRange(new[] { CityModuleId.A, CityModuleId.A, CityModuleId.A, CityModuleId.A });
@@ -525,8 +709,49 @@ namespace ScaryParty.City.Modular
                         layout.floors.Add(upper);
                     }
 
-                    // Entrada na porta J no slot 2 (X = -4m + 4m + 1m = +1m)
-                    CalculateEntranceAnchors(layout, 1.0f);
+                    // Entrada na porta dupla J nos slots 1..2 (X = -4m + 2m + 2m = 0m)
+                    CalculateEntranceAnchors(layout, 0f);
+                    break;
+
+                case ModularBuildingRecipe.ShowcaseAll12Modules:
+                    // Prédio Showcase: 8m larg x 8m prof x 2 pavimentos (4 x 4 módulos).
+                    layout.widthModules = 4; // 8m
+                    layout.depthModules = 4; // 8m
+                    layout.floorCount = 2;
+                    layout.zone = ZoneType.Commercial;
+
+                    // Pavimento 0 (Térreo)
+                    FloorLayout sc0 = new FloorLayout { floorIndex = 0 };
+                    // Frente (4 slots): I (Garagem = 2 slots) + D (Vitrine = 1 slot) + C (Porta Simples = 1 slot)
+                    sc0.frontModules.AddRange(new[] { CityModuleId.I, CityModuleId.D, CityModuleId.C });
+                    sc0.frontAwnings.AddRange(new[] { false, true, false }); // Toldo K acima da vitrine D!
+
+                    // Traseira (4 slots): J (Porta Dupla = 2 slots) + A (1 slot) + B (1 slot) = 4 slots
+                    sc0.backModules.AddRange(new[] { CityModuleId.J, CityModuleId.A, CityModuleId.B });
+
+                    // Lateral Esquerda (4 slots): A, B, A, B
+                    sc0.leftModules.AddRange(new[] { CityModuleId.A, CityModuleId.B, CityModuleId.A, CityModuleId.B });
+
+                    // Lateral Direita (4 slots): D, D, A, A
+                    sc0.rightModules.AddRange(new[] { CityModuleId.D, CityModuleId.D, CityModuleId.A, CityModuleId.A });
+                    layout.floors.Add(sc0);
+
+                    // Pavimento 1 (Superior)
+                    FloorLayout sc1 = new FloorLayout { floorIndex = 1 };
+                    // Frente: G (Veneziana) + H (Floreira) + B (Janela) + A (Parede Lisa)
+                    sc1.frontModules.AddRange(new[] { CityModuleId.G, CityModuleId.H, CityModuleId.B, CityModuleId.A });
+                    sc1.frontAwnings.AddRange(new[] { false, false, false, false });
+
+                    // Traseira: H (Floreira) + G (Veneziana) + B (Janela) + A (Parede Lisa)
+                    sc1.backModules.AddRange(new[] { CityModuleId.H, CityModuleId.G, CityModuleId.B, CityModuleId.A });
+
+                    // Laterais: alternância de janelas G e H com paredes A
+                    sc1.leftModules.AddRange(new[] { CityModuleId.G, CityModuleId.A, CityModuleId.H, CityModuleId.A });
+                    sc1.rightModules.AddRange(new[] { CityModuleId.H, CityModuleId.A, CityModuleId.G, CityModuleId.A });
+                    layout.floors.Add(sc1);
+
+                    // Pilares L nos 4 cantos e Cobertura E + Platibanda F no topo são montados automaticamente!
+                    CalculateEntranceAnchors(layout, 3.0f);
                     break;
             }
 
@@ -572,19 +797,23 @@ namespace ScaryParty.City.Modular
             // Pavimento Térreo (Floor 0)
             FloorLayout f0 = new FloorLayout { floorIndex = 0 };
 
-            // 1. Reserva slot de entrada (C ou J)
-            int doorSlot = rng.Next(0, widthModules);
-            CityModuleId doorPiece = (profile != null && rng.NextDouble() < profile.doubleDoorRatio) ? CityModuleId.J : CityModuleId.C;
+            // 1. Política única de ocupação por intervalo [slot .. slot + span)
+            bool[] occupiedSlots = new bool[widthModules];
+            CityModuleId doorPiece = (widthModules >= 2 && profile != null && rng.NextDouble() < profile.doubleDoorRatio)
+                ? CityModuleId.J
+                : CityModuleId.C;
+            int doorSpan = doorPiece == CityModuleId.J ? 2 : 1;
+            int doorSlot = rng.Next(0, Mathf.Max(1, widthModules - doorSpan + 1));
+            for (int k = 0; k < doorSpan; k++) occupiedSlots[doorSlot + k] = true;
 
-            // 2. Decide se haverá garagem (I) no térreo: precisa de 2 slots consecutivos e largura >= 4 módulos
+            // 2. Decide garagem (I = 2 slots) sem colidir com o intervalo da porta (C=1 ou J=2)
             int garageSlot = -1;
             if (profile != null && widthModules >= 4 && rng.NextDouble() < profile.garageWeight)
             {
-                // Escolhe um slot para a garagem que não colida com a porta
                 List<int> validGarageSlots = new List<int>();
                 for (int s = 0; s <= widthModules - 2; s++)
                 {
-                    if (s != doorSlot && (s + 1) != doorSlot)
+                    if (!occupiedSlots[s] && !occupiedSlots[s + 1])
                     {
                         validGarageSlots.Add(s);
                     }
@@ -592,10 +821,12 @@ namespace ScaryParty.City.Modular
                 if (validGarageSlots.Count > 0)
                 {
                     garageSlot = validGarageSlots[rng.Next(validGarageSlots.Count)];
+                    occupiedSlots[garageSlot] = true;
+                    occupiedSlots[garageSlot + 1] = true;
                 }
             }
 
-            // Preenche fachada térrea
+            // Preenche fachada térrea usando o intervalo real de cada peça
             int currentSlot = 0;
             float entranceDoorLocalX = 0f;
             while (currentSlot < widthModules)
@@ -604,19 +835,20 @@ namespace ScaryParty.City.Modular
                 {
                     f0.frontModules.Add(CityModuleId.I);
                     f0.frontAwnings.Add(false);
-                    currentSlot += 2; // Garagem ocupa 2 slots
+                    currentSlot += 2;
                 }
                 else if (currentSlot == doorSlot)
                 {
                     f0.frontModules.Add(doorPiece);
                     f0.frontAwnings.Add(false);
                     float halfW = layout.WidthMeters * 0.5f;
-                    entranceDoorLocalX = -halfW + (currentSlot * 2.0f) + 1.0f;
-                    currentSlot += 1;
+                    float doorWidthMeters = doorSpan * 2.0f;
+                    entranceDoorLocalX = -halfW + (currentSlot * 2.0f) + (doorWidthMeters * 0.5f);
+                    currentSlot += doorSpan;
                 }
                 else
                 {
-                    // Slot decorativo térreo
+                    // Slot decorativo térreo (1 slot)
                     CityModuleId piece;
                     bool hasAwning = false;
                     double roll = rng.NextDouble();

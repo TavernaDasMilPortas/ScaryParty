@@ -18,7 +18,9 @@ namespace ScaryParty.Interaction
         public float defaultOutlineWidth = 2.5f;
 
         public OutlineTarget CurrentTarget { get; private set; }
+        public bool HasActiveHighlight => CurrentTarget != null && CurrentTarget.gameObject.activeInHierarchy && CurrentTarget.enabled;
 
+        private bool _lastNotifiedHighlightState;
         private MaterialPropertyBlock _propBlock;
         private readonly Dictionary<SkinnedMeshRenderer, Mesh> _tempSkinnedMeshes = new Dictionary<SkinnedMeshRenderer, Mesh>();
 
@@ -80,17 +82,28 @@ namespace ScaryParty.Interaction
             if (CurrentTarget == null || !CurrentTarget.gameObject.activeInHierarchy || !CurrentTarget.enabled)
             {
                 CurrentTarget = null;
+                NotifyHighlightState(false);
                 return;
             }
 
             if (_maskMaterial == null || _fillMaterial == null)
             {
                 EnsureMaterials();
-                if (_maskMaterial == null || _fillMaterial == null) return;
+                if (_maskMaterial == null || _fillMaterial == null)
+                {
+                    NotifyHighlightState(false);
+                    return;
+                }
             }
 
             var renderers = CurrentTarget.GetEligibleRenderers();
-            if (renderers == null || renderers.Count == 0) return;
+            if (renderers == null || renderers.Count == 0)
+            {
+                NotifyHighlightState(false);
+                return;
+            }
+
+            NotifyHighlightState(true);
 
             Color targetColor = CurrentTarget.outlineColor;
             float targetWidth = CurrentTarget.outlineWidth > 0f ? CurrentTarget.outlineWidth : defaultOutlineWidth;
@@ -147,8 +160,21 @@ namespace ScaryParty.Interaction
             }
         }
 
+        private void NotifyHighlightState(bool active)
+        {
+            if (_lastNotifiedHighlightState == active) return;
+            _lastNotifiedHighlightState = active;
+            ScaryParty.VisualStyles.VisualStyleManager.SetInteractionHighlightActive(active);
+        }
+
+        private void OnDisable()
+        {
+            NotifyHighlightState(false);
+        }
+
         private void OnDestroy()
         {
+            NotifyHighlightState(false);
             if (Instance == this) Instance = null;
 
             foreach (var kvp in _tempSkinnedMeshes)

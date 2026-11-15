@@ -10,10 +10,16 @@ namespace ScaryParty.Pizzeria.Player
 {
     public class BackpackController : MonoBehaviour
     {
+        private const float RepairHoldDurationSeconds = 3.0f;
+
         private NetworkObject _netObj;
+        private PlayerInteraction _interaction;
+        private float _repairHoldTimer;
+        private bool _wasRepairingHudShown;
         private void Awake()
         {
             _netObj = GetComponent<NetworkObject>();
+            _interaction = GetComponent<PlayerInteraction>();
             if (GetComponent<BackpackVisualizer>() == null) gameObject.AddComponent<BackpackVisualizer>();
         }
 
@@ -29,6 +35,59 @@ namespace ScaryParty.Pizzeria.Player
             if (UnityEngine.InputSystem.Keyboard.current != null &&
                 UnityEngine.InputSystem.Keyboard.current.bKey.wasPressedThisFrame && !GameplayInputGate.IsLocked)
                 BackpackPanelPresenter.Instance?.Toggle();
+
+            HandleBagRepairHold();
+        }
+
+        private void HandleBagRepairHold()
+        {
+            if (GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
+            {
+                CancelRepairHold();
+                return;
+            }
+
+            if (_interaction != null && _interaction.IsBusyWithStationOrAiming)
+            {
+                CancelRepairHold();
+                return;
+            }
+
+            bool holdingF = false;
+            if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.fKey.isPressed)
+                holdingF = true;
+            else if (Input.GetKey(KeyCode.F))
+                holdingF = true;
+
+            if (!holdingF || !TryGetEquippedBag(out var bag) || bag.Integrity >= bag.MaxIntegrity)
+            {
+                CancelRepairHold();
+                return;
+            }
+
+            _repairHoldTimer += Time.deltaTime;
+            float progress = Mathf.Clamp01(_repairHoldTimer / RepairHoldDurationSeconds);
+            _wasRepairingHudShown = true;
+            ScaryParty.UI.Piaria.Presenters.HudPresenter.Instance?.ShowProgress(
+                progress,
+                bag.IsTorn ? "Costurando mochila rasgada [F]..." : "Reparando mochila [F]...");
+
+            if (_repairHoldTimer >= RepairHoldDurationSeconds)
+            {
+                _repairHoldTimer = 0f;
+                CancelRepairHold();
+                LogisticsCommands.Instance?.RepairBackpackServerRpc(bag.BackpackId);
+            }
+        }
+
+        private void CancelRepairHold()
+        {
+            _repairHoldTimer = 0f;
+            if (_wasRepairingHudShown)
+            {
+                _wasRepairingHudShown = false;
+                ScaryParty.UI.Piaria.Presenters.HudPresenter.Instance?.HideProgress();
+            }
         }
 
         public bool TryGetEquippedBag(out NetBackpackDto bag)

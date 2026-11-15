@@ -13,7 +13,7 @@ namespace ScaryParty.EditorScripts
             EditorApplication.delayCall += RunInspection;
         }
 
-        [MenuItem("Tools/Scary Party/Inspect FBX Hierarchy", false, 100)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Inspeção/Inspecionar Hierarquia FBX", false, 198)]
         public static void RunInspection()
         {
             var sb = new StringBuilder();

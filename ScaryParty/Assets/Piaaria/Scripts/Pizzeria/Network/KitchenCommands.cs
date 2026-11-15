@@ -88,6 +88,11 @@ namespace ScaryParty.Pizzeria.Network
             if (destType == LocationType.Hand)
             {
                 actualHolderId = sender;
+                if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, targetSlotId))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Esta mão está ocupada pela arma equipada.", true);
+                    return;
+                }
             }
 
             // Não permitir retirar item da mão de outro jogador
@@ -165,6 +170,11 @@ namespace ScaryParty.Pizzeria.Network
             if (destType == LocationType.Hand)
             {
                 actualHolderId = sender;
+                if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, targetSlotId))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, "Esta mão está ocupada pela arma equipada.", true);
+                    return;
+                }
             }
 
             // Não permitir retirar utensílio da mão de outro jogador

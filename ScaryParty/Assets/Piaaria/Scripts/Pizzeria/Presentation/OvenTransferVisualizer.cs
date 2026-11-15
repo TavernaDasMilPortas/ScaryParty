@@ -10,6 +10,9 @@ namespace ScaryParty.Pizzeria.Presentation
     {
         public static OvenTransferVisualizer Instance { get; private set; }
 
+        private readonly System.Collections.Generic.HashSet<ulong> _activePizzaTransfers =
+            new System.Collections.Generic.HashSet<ulong>();
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -18,6 +21,24 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
             Instance = this;
+        }
+
+        private void OnDisable()
+        {
+            CleanupAllActiveTransfers();
+        }
+
+        private void CleanupAllActiveTransfers()
+        {
+            if (_activePizzaTransfers.Count == 0) return;
+            var itemVis = PizzeriaItemVisualizer.Instance;
+            foreach (ulong id in _activePizzaTransfers)
+            {
+                itemVis?.SetItemInTransit(id, false);
+                var w = itemVis != null ? itemVis.GetItemVisual(id) : null;
+                w?.FeelPivot?.StopAndReset();
+            }
+            _activePizzaTransfers.Clear();
         }
 
         public static void EnsureInstance()
@@ -42,6 +63,11 @@ namespace ScaryParty.Pizzeria.Presentation
             float doorCloseDuration = 0.25f,
             Action onFlightComplete = null)
         {
+            if (!_activePizzaTransfers.Add(pizzaId))
+            {
+                onFlightComplete?.Invoke();
+                return;
+            }
             StartCoroutine(TransferRoutine(stationId, pizzaId, slotIndex, clientId, handIndex, isInsertion, doorOpenDuration, flightDuration, doorCloseDuration, onFlightComplete));
         }
 
@@ -60,95 +86,114 @@ namespace ScaryParty.Pizzeria.Presentation
             StationRegistry.TryGetStation(stationId, out var stationTrans);
             StationDoorPresenter presenter = stationTrans != null ? stationTrans.GetComponent<StationDoorPresenter>() : null;
             OvenStation oven = stationTrans != null ? stationTrans.GetComponent<OvenStation>() : null;
-
-            // 1. Abrir a porta antes da passagem da pizza
-            presenter?.SetTransferActive(true);
-            yield return new WaitForSeconds(Mathf.Max(0.05f, doorOpenDuration));
-
-            // 2. Localizar visual e âncoras espaciais
             var itemVis = PizzeriaItemVisualizer.Instance;
-            if (itemVis != null)
+            ItemVisualWrapper wrapper = null;
+
+            try
             {
-                itemVis.SetItemInTransit(pizzaId, true);
-            }
+                // 1. Abrir a porta antes da passagem da pizza
+                presenter?.SetTransferActive(true);
+                yield return new WaitForSeconds(Mathf.Max(0.05f, doorOpenDuration));
 
-            ItemVisualWrapper wrapper = itemVis != null ? itemVis.GetItemVisual(pizzaId) : null;
-
-            Transform handAnchor = itemVis != null ? itemVis.GetPlayerHandAnchor(clientId, handIndex) : null;
-            Transform entryAnchor = oven != null ? oven.GetEntryAnchor() : stationTrans;
-            Transform slotAnchor = null;
-            if (oven != null && oven.slotAnchors != null && slotIndex >= 0 && slotIndex < oven.slotAnchors.Length)
-            {
-                slotAnchor = oven.slotAnchors[slotIndex];
-            }
-
-            Vector3 pStart, pMid, pEnd;
-            Quaternion rStart, rEnd;
-
-            Vector3 handPos = handAnchor != null ? handAnchor.position : (stationTrans != null ? stationTrans.position + Vector3.up * 1.0f - stationTrans.forward * 1.2f : Vector3.zero);
-            Quaternion handRot = handAnchor != null ? handAnchor.rotation : Quaternion.identity;
-
-            Vector3 midPos = entryAnchor != null ? entryAnchor.position : (stationTrans != null ? stationTrans.position + Vector3.up * 0.45f : Vector3.zero);
-
-            Vector3 slotPos = slotAnchor != null ? slotAnchor.position : (stationTrans != null ? oven.GetSlotPosition(slotIndex) : Vector3.zero);
-            Quaternion slotRot = slotAnchor != null ? slotAnchor.rotation : (stationTrans != null ? stationTrans.rotation : Quaternion.identity);
-
-            if (isInsertion)
-            {
-                pStart = handPos;
-                rStart = handRot;
-                pMid = midPos;
-                pEnd = slotPos;
-                rEnd = slotRot;
-            }
-            else
-            {
-                pStart = slotPos;
-                rStart = slotRot;
-                pMid = midPos;
-                pEnd = handPos;
-                rEnd = handRot;
-            }
-
-            // 3. Animar trajetória parabólica através da boca do forno
-            float elapsed = 0f;
-            float totalFlight = Mathf.Max(0.1f, flightDuration);
-
-            while (elapsed < totalFlight)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(elapsed / totalFlight);
-                float curvedT = Mathf.SmoothStep(0f, 1f, t);
-
-                Vector3 currentPos = SampleTrajectory(pStart, pMid, pEnd, curvedT, arcHeight: 0.15f);
-                Quaternion currentRot = Quaternion.Slerp(rStart, rEnd, curvedT);
-
-                if (wrapper != null && wrapper.transform != null)
+                // 2. Localizar visual e âncoras espaciais
+                itemVis = PizzeriaItemVisualizer.Instance;
+                if (itemVis != null)
                 {
-                    wrapper.transform.position = currentPos;
-                    wrapper.transform.rotation = currentRot;
+                    itemVis.SetItemInTransit(pizzaId, true);
                 }
 
-                yield return null;
-            }
+                wrapper = itemVis != null ? itemVis.GetItemVisual(pizzaId) : null;
 
-            // Garante posição final
-            if (wrapper != null && wrapper.transform != null)
-            {
-                wrapper.transform.position = pEnd;
-                wrapper.transform.rotation = rEnd;
-            }
+                Transform handAnchor = itemVis != null ? itemVis.GetPlayerHandAnchor(clientId, handIndex) : null;
+                Transform entryAnchor = oven != null ? oven.GetEntryAnchor() : stationTrans;
+                Transform slotAnchor = null;
+                if (oven != null && oven.slotAnchors != null && slotIndex >= 0 && slotIndex < oven.slotAnchors.Length)
+                {
+                    slotAnchor = oven.slotAnchors[slotIndex];
+                }
 
-            // 4. Liberar flag in-transit e confirmar chegada
-            if (itemVis != null)
+                Vector3 pStart, pMid, pEnd;
+                Quaternion rStart, rEnd;
+
+                Vector3 handPos = handAnchor != null ? handAnchor.position : (stationTrans != null ? stationTrans.position + Vector3.up * 1.0f - stationTrans.forward * 1.2f : Vector3.zero);
+                Quaternion handRot = handAnchor != null ? handAnchor.rotation : Quaternion.identity;
+
+                Vector3 midPos = entryAnchor != null ? entryAnchor.position : (stationTrans != null ? stationTrans.position + Vector3.up * 0.45f : Vector3.zero);
+
+                Vector3 slotPos = slotAnchor != null ? slotAnchor.position : (stationTrans != null ? oven.GetSlotPosition(slotIndex) : Vector3.zero);
+                Quaternion slotRot = slotAnchor != null ? slotAnchor.rotation : (stationTrans != null ? stationTrans.rotation : Quaternion.identity);
+
+                if (isInsertion)
+                {
+                    pStart = handPos;
+                    rStart = handRot;
+                    pMid = midPos;
+                    pEnd = slotPos;
+                    rEnd = slotRot;
+                }
+                else
+                {
+                    pStart = slotPos;
+                    rStart = slotRot;
+                    pMid = midPos;
+                    pEnd = handPos;
+                    rEnd = handRot;
+                }
+
+                // 3. Animar trajetória parabólica através da boca do forno com inclinação cosmética segura
+                float elapsed = 0f;
+                float totalFlight = Mathf.Max(0.1f, flightDuration);
+
+                while (elapsed < totalFlight)
+                {
+                    elapsed += Time.deltaTime;
+                    float t = Mathf.Clamp01(elapsed / totalFlight);
+                    float curvedT = Mathf.SmoothStep(0f, 1f, t);
+
+                    Vector3 currentPos = SampleTrajectory(pStart, pMid, pEnd, curvedT, arcHeight: 0.15f);
+                    Quaternion currentRot = Quaternion.Slerp(rStart, rEnd, curvedT);
+
+                    if (wrapper != null && wrapper.transform != null)
+                    {
+                        wrapper.transform.position = currentPos;
+                        wrapper.transform.rotation = currentRot;
+
+                        if (wrapper.FeelPivot != null && !Feedback.GameFeelSettings.ReduceMotion)
+                        {
+                            float bankAngle = Mathf.Sin(t * Mathf.PI) * (isInsertion ? -8f : 8f);
+                            wrapper.FeelPivot.SetContinuousOffset(Vector3.zero, new Vector3(bankAngle, 0f, 0f), Vector3.one);
+                        }
+                    }
+
+                    yield return null;
+                }
+
+                // Garante posição final
+                if (wrapper != null && wrapper.transform != null)
+                {
+                    wrapper.transform.position = pEnd;
+                    wrapper.transform.rotation = rEnd;
+                    wrapper.FeelPivot?.ClearContinuousOffset();
+                }
+            }
+            finally
             {
-                itemVis.SetItemInTransit(pizzaId, false);
+                _activePizzaTransfers.Remove(pizzaId);
+                itemVis = PizzeriaItemVisualizer.Instance;
+                if (itemVis != null)
+                {
+                    itemVis.SetItemInTransit(pizzaId, false);
+                }
+                if (wrapper != null && wrapper.FeelPivot != null)
+                {
+                    wrapper.FeelPivot.ClearContinuousOffset();
+                }
+                presenter?.SetTransferActive(false);
             }
 
             onFlightComplete?.Invoke();
 
             // 5. Fechar porta vertical após a pizza estar totalmente posicionada
-            presenter?.SetTransferActive(false);
             yield return new WaitForSeconds(Mathf.Max(0.05f, doorCloseDuration));
             presenter?.CloseAndSuppressHover();
         }

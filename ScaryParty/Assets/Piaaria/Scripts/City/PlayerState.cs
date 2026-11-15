@@ -41,6 +41,18 @@ public class PlayerState : NetworkBehaviour
         _visualController = GetComponentInChildren<ScaryParty.Player.CharacterVisualController>(true);
         _appearance = GetComponentInChildren<ScaryParty.Player.CharacterAppearance>(true);
         _meshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>(true);
+
+        var netTransform = GetComponent<NetworkTransform>();
+        if (netTransform != null)
+        {
+            netTransform.UseUnreliableDeltas = true;
+            netTransform.PositionThreshold = 0.015f;
+            netTransform.RotAngleThreshold = 1.5f;
+            netTransform.ScaleThreshold = 0.05f;
+            netTransform.UseQuaternionSynchronization = true;
+            netTransform.UseQuaternionCompression = true;
+            netTransform.UseHalfFloatPrecision = true;
+        }
     }
 
     private void Start()
@@ -73,6 +85,7 @@ public class PlayerState : NetworkBehaviour
 
         if (isGameplayScene)
         {
+            ApplyActiveVisualStyleAndColor();
             if (IsOwner)
             {
                 RequestTeleportToSpawn();
@@ -112,7 +125,7 @@ public class PlayerState : NetworkBehaviour
 
         // Apply initial states
         UpdateMovementLock(IsGameStarted.Value);
-        ApplyColorToMesh(PlayerColor.Value);
+        ApplyActiveVisualStyleAndColor();
         
         // Atualiza o HUD com o dinheiro atual (pode ser 0 no início, mas garante consistência)
         if (IsOwner && UIManager.Instance != null)
@@ -394,6 +407,16 @@ public class PlayerState : NetworkBehaviour
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
+    }
+
+    private void ApplyActiveVisualStyleAndColor()
+    {
+        ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+            gameObject,
+            ScaryParty.VisualStyles.VisualSemanticRole.PlayerBody,
+            ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+            "character_visual");
+        ApplyColorToMesh(PlayerColor.Value);
     }
 
     private void ApplyColorToMesh(Color c)

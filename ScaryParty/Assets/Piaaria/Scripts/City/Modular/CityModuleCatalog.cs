@@ -131,12 +131,12 @@ namespace ScaryParty.City.Modular
                     errors.Add($"Módulo {def.id} possui dimensões inválidas: {def.width}x{def.height}x{def.depth}.");
                 }
 
-                if (def.id == CityModuleId.I && def.occupiedSlots != 2)
+                if ((def.id == CityModuleId.I || def.id == CityModuleId.J) && def.occupiedSlots != 2)
                 {
-                    errors.Add($"Módulo de garagem (I) DEVE ocupar exatamente 2 slots (4 metros). Valor atual: {def.occupiedSlots}.");
+                    errors.Add($"Módulo {def.id} DEVE ocupar exatamente 2 slots (4 metros). Valor atual: {def.occupiedSlots}.");
                 }
 
-                if (def.id != CityModuleId.I && def.id != CityModuleId.L && def.occupiedSlots != 1)
+                if (def.id != CityModuleId.I && def.id != CityModuleId.J && def.id != CityModuleId.L && def.occupiedSlots != 1)
                 {
                     errors.Add($"Módulo {def.id} deve ocupar 1 slot padrão (2 metros). Valor atual: {def.occupiedSlots}.");
                 }

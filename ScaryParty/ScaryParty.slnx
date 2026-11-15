@@ -57,6 +57,7 @@
   <Project Path="Unity.Multiplayer.Tools.NetworkSimulator.Runtime.csproj" />
   <Project Path="Unity.Multiplayer.Tools.MetricTestData.csproj" />
   <Project Path="Unity.Multiplayer.Center.NetcodeForGameObjectsExample.csproj" />
+  <Project Path="ScaryParty.VisualStyles.PlayModeTests.csproj" />
   <Project Path="Unity.AI.Navigation.Editor.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetworkProfiler.Editor.csproj" />
   <Project Path="Unity.Services.Core.Editor.csproj" />
@@ -79,6 +80,7 @@
   <Project Path="Unity.Services.Authentication.PlayerAccounts.Editor.csproj" />
   <Project Path="CoInspector.csproj" />
   <Project Path="Unity.Services.Core.Telemetry.csproj" />
+  <Project Path="ScaryParty.VisualStyles.Runtime.csproj" />
   <Project Path="Unity.Settings.Editor.csproj" />
   <Project Path="Lofelt.NiceVibrations.csproj" />
   <Project Path="Unity.InputSystem.TestFramework.csproj" />
@@ -94,6 +96,7 @@
   <Project Path="Unity.Services.Core.Analytics.csproj" />
   <Project Path="MPUIKit.Editor.csproj" />
   <Project Path="Unity.Netcode.Editor.csproj" />
+  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="Unity.AI.Navigation.csproj" />
   <Project Path="Unity.Mathematics.Editor.csproj" />
   <Project Path="Unity.Services.Core.csproj" />
@@ -116,7 +119,6 @@
   <Project Path="Sirenix.OdinInspector.Modules.UnityMathematics.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetVis.Editor.Visualization.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1.csproj" />
-  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetStatsReporting.csproj" />
   <Project Path="Unity.VisualScripting.SettingsProvider.Editor.csproj" />
   <Project Path="Unity.Services.Core.Scheduler.csproj" />

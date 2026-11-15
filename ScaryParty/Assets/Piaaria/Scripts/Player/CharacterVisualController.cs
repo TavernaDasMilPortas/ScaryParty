@@ -1,3 +1,4 @@
+using ScaryParty.Pizzeria.Presentation.Feedback;
 using UnityEngine;
 
 namespace ScaryParty.Player
@@ -6,6 +7,7 @@ namespace ScaryParty.Player
     /// Controlador visual compartilhado para o personagem canônico (CharacterVisual.prefab).
     /// Mantém referências explícitas ao Animator, SkinnedMeshRenderer, CharacterAppearance e ossos/sockets,
     /// e centraliza a escrita de parâmetros de animação para Players, Previews e Clientes (NPCs).
+    /// Garante atribuição persistente e fallback robusto de AnimatorController em Play Mode e runtime.
     /// </summary>
     [DisallowMultipleComponent]
     public class CharacterVisualController : MonoBehaviour
@@ -22,6 +24,7 @@ namespace ScaryParty.Player
 
         [Header("Referências Principais")]
         [SerializeField] private Animator _animator;
+        [SerializeField] private RuntimeAnimatorController _defaultAnimatorController;
         [SerializeField] private SkinnedMeshRenderer _skinnedMeshRenderer;
         [SerializeField] private CharacterAppearance _appearance;
 
@@ -39,13 +42,27 @@ namespace ScaryParty.Player
         private bool _isPreparing;
         private bool _isSitting;
         private float _currentPrepareLayerWeight;
+        private GameFeelVisualPivot _feelPivot;
 
         public Animator Animator
         {
             get
             {
-                if (_animator == null) ResolveReferences();
+                if (_animator == null || _animator.runtimeAnimatorController == null) ResolveReferences();
                 return _animator;
+            }
+        }
+
+        public RuntimeAnimatorController DefaultAnimatorController
+        {
+            get => _defaultAnimatorController;
+            set
+            {
+                _defaultAnimatorController = value;
+                if (_animator != null && _animator.runtimeAnimatorController == null && value != null)
+                {
+                    _animator.runtimeAnimatorController = value;
+                }
             }
         }
 
@@ -83,13 +100,17 @@ namespace ScaryParty.Player
             if (_animator != null)
             {
                 _animator.applyRootMotion = false;
+                EnsureAnimatorControllerAssigned();
             }
+            EnsureFeelPivot();
         }
 
         public void ResolveReferences()
         {
             if (_animator == null)
                 _animator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>(true);
+
+            EnsureAnimatorControllerAssigned();
 
             if (_skinnedMeshRenderer == null)
                 _skinnedMeshRenderer = GetComponentInChildren<SkinnedMeshRenderer>(true);
@@ -109,6 +130,43 @@ namespace ScaryParty.Player
             if (_rightHandBone == null) _rightHandBone = FindBone("arm2.r") ?? FindBone("RightHand");
         }
 
+        public void EnsureAnimatorControllerAssigned()
+        {
+            if (_animator == null) return;
+            _animator.applyRootMotion = false;
+            _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+            if (_animator.runtimeAnimatorController != null)
+            {
+                if (_defaultAnimatorController == null)
+                    _defaultAnimatorController = _animator.runtimeAnimatorController;
+                return;
+            }
+
+            if (_defaultAnimatorController != null)
+            {
+                _animator.runtimeAnimatorController = _defaultAnimatorController;
+                return;
+            }
+
+            // Fallback runtime Resources
+            var resCtrl = Resources.Load<RuntimeAnimatorController>("CharacterAnimator");
+            if (resCtrl != null)
+            {
+                _animator.runtimeAnimatorController = resCtrl;
+                _defaultAnimatorController = resCtrl;
+                return;
+            }
+
+#if UNITY_EDITOR
+            var editorCtrl = UnityEditor.AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>("Assets/Piaaria/Animations/Characters/CharacterAnimator.controller");
+            if (editorCtrl != null)
+            {
+                _animator.runtimeAnimatorController = editorCtrl;
+                _defaultAnimatorController = editorCtrl;
+            }
+#endif
+        }
+
         public void BindReferences(
             Animator animator,
             SkinnedMeshRenderer smr,
@@ -118,7 +176,8 @@ namespace ScaryParty.Player
             Transform neckBone,
             Transform headBone,
             Transform leftHandBone,
-            Transform rightHandBone)
+            Transform rightHandBone,
+            RuntimeAnimatorController defaultController = null)
         {
             _animator = animator;
             _skinnedMeshRenderer = smr;
@@ -129,9 +188,18 @@ namespace ScaryParty.Player
             _headBone = headBone;
             _leftHandBone = leftHandBone;
             _rightHandBone = rightHandBone;
+            if (defaultController != null)
+            {
+                _defaultAnimatorController = defaultController;
+                if (_animator != null && _animator.runtimeAnimatorController == null)
+                    _animator.runtimeAnimatorController = defaultController;
+            }
 
             if (_animator != null)
+            {
                 _animator.applyRootMotion = false;
+                EnsureAnimatorControllerAssigned();
+            }
         }
 
         private Transform FindBone(string exactOrPartialName)
@@ -195,6 +263,10 @@ namespace ScaryParty.Player
             if (_isSitting == sitting && !triggerTransition) return;
             bool changed = _isSitting != sitting;
             _isSitting = sitting;
+            if (_feelPivot != null)
+            {
+                _feelPivot.LockVerticalAndHipOffset = sitting;
+            }
 
             var anim = Animator;
             if (anim == null || !anim.isActiveAndEnabled || anim.runtimeAnimatorController == null) return;
@@ -215,6 +287,50 @@ namespace ScaryParty.Player
                 anim.ResetTrigger(AnimSitDown);
                 anim.SetTrigger(AnimStandUp);
             }
+        }
+
+        public GameFeelVisualPivot EnsureFeelPivot()
+        {
+            if (_feelPivot == null)
+            {
+                _feelPivot = GetComponent<GameFeelVisualPivot>() ?? gameObject.AddComponent<GameFeelVisualPivot>();
+                _feelPivot.CaptureCurrentAsBasePose();
+            }
+            _feelPivot.ClampAsCharacter = true;
+            _feelPivot.LockVerticalAndHipOffset = _isSitting;
+            return _feelPivot;
+        }
+
+        public void DesynchronizeIdleCycle(ulong entitySeed)
+        {
+            var anim = Animator;
+            if (anim == null || !anim.isActiveAndEnabled || anim.runtimeAnimatorController == null) return;
+            if (anim.IsInTransition(0)) return;
+            float offset = Mathf.Repeat((entitySeed % 997UL) / 997f, 1f);
+            var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.fullPathHash != 0)
+            {
+                anim.Play(stateInfo.fullPathHash, 0, offset);
+            }
+        }
+
+        public void PlayBodyReaction(GameFeelEventId eventId, float intensity = 1f, int variantSeed = 0, ulong entityId = 0)
+        {
+            if (eventId == GameFeelEventId.None) return;
+            var pivot = EnsureFeelPivot();
+            if (pivot == null) return;
+            pivot.ClampAsCharacter = true;
+            pivot.LockVerticalAndHipOffset = _isSitting;
+
+            GameFeelPresenter.EnsureInstance().TriggerSimple(
+                eventId,
+                pivot.transform,
+                entityId,
+                0,
+                unchecked((uint)variantSeed),
+                GameFeelMaterialFamily.CharacterBody,
+                intensity,
+                false);
         }
 
         public void SetColor(Color color)

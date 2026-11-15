@@ -186,26 +186,27 @@ public class CityEventManager : NetworkBehaviour
         GameObject model = null;
         MaterialPropertyBlock mpb = new MaterialPropertyBlock();
         
+        Color eventColor;
         switch (eventType)
         {
             case "accident":
                 model = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 model.transform.localScale = new Vector3(4f, 2f, 4f);
-                mpb.SetColor("_BaseColor", Color.yellow);
+                eventColor = Color.yellow;
                 break;
             case "construction":
                 model = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 model.transform.localScale = new Vector3(3f, 2f, 3f);
-                mpb.SetColor("_BaseColor", new Color(1f, 0.5f, 0f)); // Orange
+                eventColor = new Color(1f, 0.5f, 0f); // Orange
                 break;
             case "monster_attack":
                 model = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 model.transform.localScale = new Vector3(5f, 5f, 5f);
-                mpb.SetColor("_BaseColor", new Color(0.5f, 0f, 0.5f)); // Purple
+                eventColor = new Color(0.5f, 0f, 0.5f); // Purple
                 break;
             default:
                 model = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                mpb.SetColor("_BaseColor", Color.red);
+                eventColor = Color.red;
                 break;
         }
 
@@ -216,7 +217,12 @@ public class CityEventManager : NetworkBehaviour
             Renderer rend = model.GetComponent<Renderer>();
             if (rend != null)
             {
-                rend.SetPropertyBlock(mpb);
+                Material eventMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                    rend.sharedMaterial,
+                    ScaryParty.VisualStyles.VisualSemanticRole.Emission,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Effects);
+                if (eventMat != null) rend.sharedMaterial = eventMat;
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, eventColor, mpb);
             }
         }
 

@@ -74,11 +74,24 @@ public class IntersectionBuilder : MonoBehaviour
                 interObj.transform.SetParent(parent, false);
                 interObj.transform.position = node.worldPosition;
                 var controller = interObj.AddComponent<IntersectionTrafficController>();
-                var tlComp = PlaceTrafficLight(node.worldPosition, config.streetWidth, rng, interObj.transform);
-                if (tlComp != null)
+
+                List<int> northSouthEdges = new List<int>();
+                List<int> eastWestEdges = new List<int>();
+                for (int e = 0; e < sortedEdges.Count; e++)
                 {
-                    tlComp.controller = controller;
-                    controller.RegisterTrafficLight(tlComp);
+                    if (Mathf.Abs(sortedEdges[e].dir.z) >= Mathf.Abs(sortedEdges[e].dir.x))
+                        northSouthEdges.Add(sortedEdges[e].id);
+                    else
+                        eastWestEdges.Add(sortedEdges[e].id);
+                }
+
+                float stopRadius = Mathf.Max(5.5f, config.streetWidth * 0.75f);
+                var tlGroupA = PlaceTrafficLight(node.worldPosition, config.streetWidth, rng, interObj.transform, controller, 0, northSouthEdges.ToArray(), stopRadius, new Vector3(1f, 0f, 1f));
+                var tlGroupB = PlaceTrafficLight(node.worldPosition, config.streetWidth, rng, interObj.transform, controller, 1, eastWestEdges.ToArray(), stopRadius, new Vector3(-1f, 0f, -1f));
+                if (tlGroupA != null && tlGroupB != null)
+                {
+                    tlGroupA.pairedLight = tlGroupB;
+                    tlGroupB.pairedLight = tlGroupA;
                 }
             }
         }
@@ -109,11 +122,20 @@ public class IntersectionBuilder : MonoBehaviour
         return true;
     }
 
-    private TrafficLight PlaceTrafficLight(Vector3 center, float size, System.Random rng, Transform parent)
+    private TrafficLight PlaceTrafficLight(
+        Vector3 center,
+        float size,
+        System.Random rng,
+        Transform parent,
+        IntersectionTrafficController controller,
+        int groupIndex,
+        int[] edgeIds,
+        float stopRadius,
+        Vector3 cornerSign)
     {
-        GameObject tlObj = new GameObject("TrafficLight");
+        GameObject tlObj = new GameObject(groupIndex == 0 ? "TrafficLight_GroupA" : "TrafficLight_GroupB");
         tlObj.transform.SetParent(parent);
-        tlObj.transform.position = center + new Vector3(size / 2.5f, 0, size / 2.5f);
+        tlObj.transform.position = center + new Vector3(cornerSign.x * (size / 2.2f), 0f, cornerSign.z * (size / 2.2f));
 
         GameObject pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         pole.transform.SetParent(tlObj.transform);
@@ -125,8 +147,26 @@ public class IntersectionBuilder : MonoBehaviour
         sphere.transform.localPosition = new Vector3(0, 4.2f, 0);
         sphere.transform.localScale = new Vector3(0.8f, 0.8f, 0.8f);
 
+        Renderer poleRend = pole.GetComponent<Renderer>();
+        if (poleRend != null)
+        {
+            Material poleMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                poleRend.sharedMaterial, ScaryParty.VisualStyles.VisualSemanticRole.Metal, ScaryParty.VisualStyles.VisualCategoryIds.Props);
+            if (poleMat != null) poleRend.sharedMaterial = poleMat;
+        }
+
+        Renderer sphereRend = sphere.GetComponent<Renderer>();
+        if (sphereRend != null)
+        {
+            Material lensMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                sphereRend.sharedMaterial, ScaryParty.VisualStyles.VisualSemanticRole.TrafficLightLens, ScaryParty.VisualStyles.VisualCategoryIds.Streets);
+            if (lensMat != null) sphereRend.sharedMaterial = lensMat;
+        }
+
         TrafficLight tlComp = tlObj.AddComponent<TrafficLight>();
-        tlComp.Setup(sphere.GetComponent<Renderer>(), (float)rng.NextDouble() * 10f);
+        tlComp.controller = controller;
+        controller.RegisterTrafficLight(tlComp);
+        tlComp.Setup(sphereRend, (float)rng.NextDouble() * 10f, edgeIds, groupIndex, center, stopRadius);
 
         if (Application.isPlaying) { Destroy(pole.GetComponent<Collider>()); Destroy(sphere.GetComponent<Collider>()); }
         else { DestroyImmediate(pole.GetComponent<Collider>()); DestroyImmediate(sphere.GetComponent<Collider>()); }

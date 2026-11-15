@@ -63,6 +63,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 PizzeriaNetworkState.Instance.StorageSlots.OnListChanged += OnStorageListChanged;
                 PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsListChanged;
+                PizzeriaNetworkState.Instance.SupplyOrders.OnListChanged += OnSupplyOrdersChanged;
             }
         }
 
@@ -72,6 +73,15 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 PizzeriaNetworkState.Instance.StorageSlots.OnListChanged -= OnStorageListChanged;
                 PizzeriaNetworkState.Instance.Tools.OnListChanged -= OnToolsListChanged;
+                PizzeriaNetworkState.Instance.SupplyOrders.OnListChanged -= OnSupplyOrdersChanged;
+            }
+        }
+
+        private void OnSupplyOrdersChanged(Unity.Netcode.NetworkListEvent<NetSupplyDto> changeEvent)
+        {
+            if (_isOpen)
+            {
+                RefreshItems();
             }
         }
 
@@ -337,27 +347,40 @@ namespace ScaryParty.UI.Piaria.Presenters
             var catalog = PizzeriaRoot.Instance?.Catalog;
             int count = 0;
 
-            // 1. Ingredientes no armazém
+            // 1. Ingredientes no armazém (com nível visual e alerta de estoque O8/N6)
             for (int i = 0; i < netState.StorageSlots.Count; i++)
             {
                 var slot = netState.StorageSlots[i];
-                if (slot.StorageId == _currentStationId && slot.Quantity > 0)
+                if (slot.StorageId == _currentStationId)
                 {
                     count++;
                     string ingName = catalog != null && catalog.Ingredients.TryGetValue(slot.IngredientDefId, out var def) ? def.Name : $"Ingrediente #{slot.IngredientDefId}";
                     int ingId = slot.IngredientDefId;
+                    int maxCap = Mathf.Max(1, slot.MaxCapacity);
+                    float ratio = Mathf.Clamp01((float)slot.Quantity / maxCap);
+                    string stockStatus = slot.Quantity <= 0
+                        ? "ESGOTADO"
+                        : (slot.Quantity <= 3 ? "CRÍTICO" : (ratio <= 0.35f ? "BAIXO" : "OK"));
+                    Color statusColor = slot.Quantity <= 3
+                        ? new Color(0.88f, 0.22f, 0.20f)
+                        : (ratio <= 0.35f ? new Color(0.92f, 0.65f, 0.16f) : new Color(0.22f, 0.72f, 0.34f));
 
-                    VisualElement row = null;
-                    row = CreateItemRow(ingName, $"Qtd: {slot.Quantity}", () =>
-                    {
-                        if (_isPending) return;
-                        _isPending = true;
-                        _storageList?.SetEnabled(false);
-                        if (_statusLabel != null) _statusLabel.text = "Retirando ingrediente...";
+                    var row = CreateItemRow(
+                        ingName,
+                        $"Qtd: {slot.Quantity}/{maxCap} [{stockStatus}]",
+                        () =>
+                        {
+                            if (_isPending) return;
+                            _isPending = true;
+                            _storageList?.SetEnabled(false);
+                            if (_statusLabel != null) _statusLabel.text = "Retirando ingrediente...";
 
-                        PizzeriaCommandHandler.Instance?.DispenseIngredientServerRpc(_currentStationId, ingId, (byte)_selectedHand);
-                        _timeoutCoroutine = StartCoroutine(PendingTimeoutCoroutine());
-                    });
+                            PizzeriaCommandHandler.Instance?.DispenseIngredientServerRpc(_currentStationId, ingId, (byte)_selectedHand);
+                            _timeoutCoroutine = StartCoroutine(PendingTimeoutCoroutine());
+                        },
+                        ratio,
+                        statusColor,
+                        canTake: slot.Quantity > 0);
 
                     _storageList.Add(row);
                 }
@@ -391,6 +414,50 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
             }
 
+            // 3. Pedidos de reposição ativos (O8 / N6)
+            if (netState.SupplyOrders != null && netState.SupplyOrders.Count > 0)
+            {
+                var supHeader = new Label("REPOSIÇÃO DE SUPRIMENTOS:");
+                supHeader.style.fontSize = 15;
+                supHeader.style.unityFontStyleAndWeight = FontStyle.Bold;
+                supHeader.style.color = new Color(0.25f, 0.2f, 0.15f);
+                supHeader.style.marginTop = 10;
+                supHeader.style.marginBottom = 4;
+                _storageList.Add(supHeader);
+
+                double now = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening
+                    ? NetworkManager.Singleton.ServerTime.Time
+                    : Time.timeAsDouble;
+
+                for (int i = 0; i < netState.SupplyOrders.Count; i++)
+                {
+                    var sup = netState.SupplyOrders[i];
+                    var st = (SupplyOrderLifecycle)sup.State;
+                    if (st == SupplyOrderLifecycle.Unloaded) continue;
+
+                    string statusDesc;
+                    if (st == SupplyOrderLifecycle.InTransit)
+                    {
+                        int secs = Mathf.Max(0, Mathf.CeilToInt((float)(sup.ExpectedArrivalTime - now)));
+                        statusDesc = $"Em trânsito ({secs}s restantes)";
+                    }
+                    else if (st == SupplyOrderLifecycle.Arrived)
+                    {
+                        statusDesc = $"Na doca (Baía #{sup.ReceivingSlotIndex + 1}) — pronto para descarregar";
+                    }
+                    else
+                    {
+                        statusDesc = "Aguardando baía de recebimento";
+                    }
+
+                    var supLbl = new Label($"• Pedido #{sup.SupplyOrderId} (R$ {sup.TotalCost}): {statusDesc}");
+                    supLbl.style.fontSize = 14;
+                    supLbl.style.color = new Color(0.22f, 0.35f, 0.55f);
+                    supLbl.style.marginBottom = 2;
+                    _storageList.Add(supLbl);
+                }
+            }
+
             if (count == 0)
             {
                 var emptyLbl = new Label("Estoque vazio neste compartimento.");
@@ -402,7 +469,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
         }
 
-        private VisualElement CreateItemRow(string title, string badge, Action onTake)
+        private VisualElement CreateItemRow(string title, string badge, Action onTake, float fillRatio = -1f, Color? fillColor = null, bool canTake = true)
         {
             var row = new VisualElement();
             row.AddToClassList("storage-item-row");
@@ -415,11 +482,41 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             var qtyLbl = new Label(badge);
             qtyLbl.AddToClassList("storage-item-qty");
+            if (fillColor.HasValue)
+            {
+                qtyLbl.style.color = fillColor.Value;
+                qtyLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
+            }
 
             info.Add(titleLbl);
             info.Add(qtyLbl);
 
-            var takeBtn = new Button(onTake) { text = "PEGAR" };
+            if (fillRatio >= 0f)
+            {
+                var barBg = new VisualElement();
+                barBg.style.height = 6;
+                barBg.style.width = 180;
+                barBg.style.marginTop = 3;
+                barBg.style.backgroundColor = new Color(0.18f, 0.16f, 0.14f, 0.7f);
+                barBg.style.borderTopLeftRadius = 3;
+                barBg.style.borderTopRightRadius = 3;
+                barBg.style.borderBottomLeftRadius = 3;
+                barBg.style.borderBottomRightRadius = 3;
+
+                var barFill = new VisualElement();
+                barFill.style.height = 6;
+                barFill.style.width = new Length(Mathf.Clamp01(fillRatio) * 100f, LengthUnit.Percent);
+                barFill.style.backgroundColor = fillColor ?? new Color(0.22f, 0.72f, 0.34f);
+                barFill.style.borderTopLeftRadius = 3;
+                barFill.style.borderTopRightRadius = 3;
+                barFill.style.borderBottomLeftRadius = 3;
+                barFill.style.borderBottomRightRadius = 3;
+                barBg.Add(barFill);
+                info.Add(barBg);
+            }
+
+            var takeBtn = new Button(onTake) { text = canTake ? "PEGAR" : "VAZIO" };
+            takeBtn.SetEnabled(canTake);
             takeBtn.AddToClassList("piaria-button");
             takeBtn.AddToClassList("piaria-button-primary");
             takeBtn.AddToClassList("btn-take-item");

@@ -9,7 +9,7 @@ namespace ScaryParty.Pizzeria.Editor
 {
     public static class PizzeriaValidator
     {
-        [MenuItem("Tools/Scary Party/Pizzeria/Validate Setup", false, 11)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Validar Setup da Pizzaria", false, 110)]
         public static void ValidateSetup()
         {
             int errorCount = 0;

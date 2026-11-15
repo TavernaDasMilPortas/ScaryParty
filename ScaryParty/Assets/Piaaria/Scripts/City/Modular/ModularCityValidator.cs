@@ -72,22 +72,67 @@ namespace ScaryParty.City.Modular
                     ValidateDoorPassageClearance(def, ref res);
                 }
 
-                // 5. Valida regra de 2 slots para garagem I
-                if (def.id == CityModuleId.I)
+                // 5. Valida regra de 2 slots (4m) para garagem I e porta dupla J
+                if (def.id == CityModuleId.I || def.id == CityModuleId.J)
                 {
                     if (def.occupiedSlots != 2 || Mathf.Abs(def.width - 4.0f) > 0.01f)
                     {
                         res.isValid = false;
-                        res.errors.Add("Módulo de garagem I deve ter exatamente 4m de largura e 2 slots ocupados.");
+                        res.errors.Add($"Módulo {def.id} deve ter exatamente 4m de largura e 2 slots ocupados.");
                     }
                     else
                     {
-                        res.passes.Add("Módulo de garagem I configurado com 4m e 2 slots.");
+                        res.passes.Add($"Módulo {def.id} configurado com 4m e 2 slots.");
                     }
                 }
+
+                // 6. Valida materiais e normais da malha procedural/visual
+                ValidateMeshNormalsAndMaterials(def, ref res);
             }
 
             return res;
+        }
+
+        private static void ValidateMeshNormalsAndMaterials(CityModuleDefinition def, ref ValidationResult res)
+        {
+            if (def.materialRoles == null || def.materialRoles.Length == 0)
+            {
+                res.warnings.Add($"Módulo {def.id} não possui papéis funcionais de material (materialRoles) configurados.");
+            }
+            else
+            {
+                res.passes.Add($"Módulo {def.id} possui {def.materialRoles.Length} papéis de material configurados.");
+            }
+
+            if (def.prefab != null)
+            {
+                MeshFilter mf = def.prefab.GetComponentInChildren<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    Mesh mesh = mf.sharedMesh;
+                    Vector3[] normals = mesh.normals;
+                    if (normals != null && normals.Length > 0)
+                    {
+                        bool hasZeroNormal = false;
+                        for (int i = 0; i < normals.Length; i++)
+                        {
+                            if (normals[i].sqrMagnitude < 0.001f)
+                            {
+                                hasZeroNormal = true;
+                                break;
+                            }
+                        }
+                        if (hasZeroNormal)
+                        {
+                            res.warnings.Add($"Módulo {def.id} possui vértices com vetor normal nulo/degenerado.");
+                        }
+                        else
+                        {
+                            res.passes.Add($"Normais da malha do módulo {def.id} validadas.");
+                        }
+                    }
+                }
+            }
         }
 
         private static void ValidateDimensionsContract(CityModuleDefinition def, ref ValidationResult res)
@@ -100,7 +145,6 @@ namespace ScaryParty.City.Modular
                 case CityModuleId.D:
                 case CityModuleId.G:
                 case CityModuleId.H:
-                case CityModuleId.J:
                     if (Mathf.Abs(def.width - 2.0f) > 0.05f || Mathf.Abs(def.height - 3.0f) > 0.05f || Mathf.Abs(def.depth - 0.2f) > 0.05f)
                     {
                         res.isValid = false;
@@ -145,6 +189,19 @@ namespace ScaryParty.City.Modular
                     else
                     {
                         res.passes.Add("Dimensões do toldo K conformes (2x0.4x0.8m).");
+                    }
+                    break;
+
+                case CityModuleId.I:
+                case CityModuleId.J:
+                    if (Mathf.Abs(def.width - 4.0f) > 0.05f || Mathf.Abs(def.height - 3.0f) > 0.05f || Mathf.Abs(def.depth - 0.2f) > 0.05f)
+                    {
+                        res.isValid = false;
+                        res.errors.Add($"Módulo {def.id} fora das dimensões canônicas (4.0 x 3.0 x 0.2m): {def.width}x{def.height}x{def.depth}");
+                    }
+                    else
+                    {
+                        res.passes.Add($"Dimensões do módulo {def.id} conformes (4x3x0.2m).");
                     }
                     break;
 

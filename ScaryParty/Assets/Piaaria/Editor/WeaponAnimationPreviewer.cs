@@ -6,10 +6,10 @@ using System.Collections.Generic;
 /// <summary>
 /// Editor Window para pré-visualizar os AnimationClips de arma gerados,
 /// sem precisar modificar o Animator Controller.
-/// Menu: Tools > Weapons > Animation Previewer
+/// Menu: Tools > Scary Party > Legado > Weapons (Desativado) > Animation Previewer
 /// 
 /// Como usar:
-///   1. Abra a janela via Tools > Weapons > Animation Previewer
+///   1. Abra a janela via Tools > Scary Party > Legado > Weapons (Desativado) > Animation Previewer
 ///   2. Arraste o PlayerArmature (da cena ou do Project) no campo "Target Avatar"
 ///   3. Clique em qualquer clip da lista para samplear no avatar
 ///   4. Use o scrubber ou o botão Play
@@ -46,7 +46,7 @@ public class WeaponAnimationPreviewer : EditorWindow
     private static readonly Color ColGreen    = new Color(0.30f, 0.85f, 0.40f);
     private static readonly Color ColOrange   = new Color(1.00f, 0.65f, 0.20f);
 
-    [MenuItem("Tools/Weapons/Animation Previewer")]
+    [MenuItem("Tools/Scary Party/Legado/Weapons (Desativado)/Animation Previewer", false, 352)]
     public static void ShowWindow()
     {
         var w = GetWindow<WeaponAnimationPreviewer>("Weapon Animator");

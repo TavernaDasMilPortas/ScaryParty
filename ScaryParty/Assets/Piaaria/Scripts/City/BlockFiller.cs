@@ -287,27 +287,11 @@ public class BlockFiller : MonoBehaviour
                 buildingObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
 
                 Renderer renderer = buildingObj.GetComponent<Renderer>();
-                
-                Material baseMat = null;
-                if (buildingMaterials != null && buildingMaterials.Length > 0)
-                {
-                    baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
-                }
-                
-                if (baseMat == null)
-                {
-                    Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-                    if (shader == null) shader = Shader.Find("Standard");
-                    baseMat = new Material(shader);
-                }
-
+                Material baseMat = ResolveBuildingMaterial(buildingMaterials, rng);
                 renderer.sharedMaterial = baseMat;
 
                 Color buildingColor = GenerateOrganicColor(rng);
-                propBlock.SetColor("_Color", buildingColor); 
-                propBlock.SetColor("_BaseColor", buildingColor); 
-                propBlock.SetColor("_MainColor", buildingColor); 
-                renderer.SetPropertyBlock(propBlock);
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(renderer, 0, buildingColor, propBlock);
 
                 CityBuilding building = buildingObj.AddComponent<CityBuilding>();
                 building.zone = block.zoneType;
@@ -444,28 +428,12 @@ public class BlockFiller : MonoBehaviour
                 buildingObj.transform.localScale = new Vector3(bWidth, bHeight, bDepth);
 
                 Renderer renderer = buildingObj.GetComponent<Renderer>();
-                
-                Material baseMat = null;
-                if (buildingMaterials != null && buildingMaterials.Length > 0)
-                {
-                    baseMat = buildingMaterials[rng.Next(buildingMaterials.Length)];
-                }
-                
-                if (baseMat == null)
-                {
-                    Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-                    if (shader == null) shader = Shader.Find("Standard");
-                    baseMat = new Material(shader);
-                }
-
+                Material baseMat = ResolveBuildingMaterial(buildingMaterials, rng);
                 renderer.sharedMaterial = baseMat;
 
                 Color buildingColor = GenerateOrganicColor(rng);
                 buildingColor.a = 1f;
-                propBlock.SetColor("_Color", buildingColor); 
-                propBlock.SetColor("_BaseColor", buildingColor); 
-                propBlock.SetColor("_MainColor", buildingColor); 
-                renderer.SetPropertyBlock(propBlock);
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(renderer, 0, buildingColor, propBlock);
 
                 CityBuilding building = buildingObj.AddComponent<CityBuilding>();
                 building.zone = block.zoneType;
@@ -474,6 +442,23 @@ public class BlockFiller : MonoBehaviour
                 building.CalculateEntrance(block.worldCenter);
             }
         }
+    }
+
+    private static Material ResolveBuildingMaterial(Material[] buildingMaterials, System.Random rng)
+    {
+        Material candidate = (buildingMaterials != null && buildingMaterials.Length > 0)
+            ? buildingMaterials[rng.Next(buildingMaterials.Length)]
+            : null;
+
+        return ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            candidate,
+            ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+            ScaryParty.VisualStyles.VisualCategoryIds.City,
+            () =>
+            {
+                Shader shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                return new Material(shader);
+            });
     }
 
     private float GetRandomHeight(ZoneType zone, System.Random rng)

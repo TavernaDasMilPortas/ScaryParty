@@ -96,15 +96,77 @@ namespace ScaryParty.Pizzeria.Presentation
                 go.transform.SetParent(parent, false);
                 bar = go.AddComponent<StationProgressBar>();
                 bar.BuildProceduralUI();
+                // Offset inicial padrão somente para barra procedural quando ainda não posicionada por bounds/âncora
+                go.transform.localPosition = new Vector3(0f, 1.35f, 0f);
             }
 
-            // Offset padrão acima do slot anchor
-            go.transform.localPosition = new Vector3(0, 0.4f, 0);
             go.transform.localScale = Vector3.one * bar.worldScale;
             bar._baseScale = go.transform.localScale;
 
             bar.Hide();
             return bar;
+        }
+
+        /// <summary>
+        /// Posiciona a barra na âncora explícita (se informada) ou acima dos bounds visuais filtrados da estação,
+        /// mantendo margem consistente em metros e evitando colisão visual com itens/slots.
+        /// </summary>
+        public void PositionAboveBounds(Transform stationRoot, Transform explicitAnchor = null, float verticalMarginMeters = 0.25f)
+        {
+            if (explicitAnchor != null)
+            {
+                transform.position = explicitAnchor.position;
+                return;
+            }
+
+            if (stationRoot == null) return;
+
+            if (TryComputeFilteredStationBounds(stationRoot, out Bounds bodyBounds))
+            {
+                transform.position = new Vector3(
+                    bodyBounds.center.x,
+                    bodyBounds.max.y + Mathf.Max(0.05f, verticalMarginMeters),
+                    bodyBounds.center.z);
+            }
+            else
+            {
+                transform.position = stationRoot.position + Vector3.up * (1.25f + Mathf.Max(0.05f, verticalMarginMeters));
+            }
+        }
+
+        private static bool TryComputeFilteredStationBounds(Transform stationRoot, out Bounds bounds)
+        {
+            bounds = default;
+            bool hasBounds = false;
+
+            var renderers = stationRoot.GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var r = renderers[i];
+                if (r == null || !r.enabled) continue;
+                if (r is ParticleSystemRenderer || r is TrailRenderer || r is LineRenderer) continue;
+                if (r.GetComponentInParent<StationProgressBar>() != null) continue;
+                if (r.GetComponentInParent<Canvas>() != null) continue;
+
+                string lower = r.gameObject.name.ToLowerInvariant();
+                if (lower.Contains("highlight") || lower.Contains("indicator") || lower.Contains("progress") ||
+                    lower.Contains("ui") || lower.Contains("preview") || lower.Contains("fx"))
+                    continue;
+
+                if (r.bounds.size.sqrMagnitude < 0.0001f) continue;
+
+                if (!hasBounds)
+                {
+                    bounds = r.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    bounds.Encapsulate(r.bounds);
+                }
+            }
+
+            return hasBounds;
         }
 
         public void BuildProceduralUI()

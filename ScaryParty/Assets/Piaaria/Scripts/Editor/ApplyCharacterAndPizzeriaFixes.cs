@@ -21,7 +21,7 @@ namespace ScaryParty.EditorScripts
             EditorApplication.delayCall += ExecuteFixes;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Executar Correcao Geral (Personagem + Mesas + Animacoes)", false, 1)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Personagens/Executar Correção Geral (Personagem + Mesas + Animações)", false, 227)]
         public static void ForceExecuteFixes()
         {
             if (File.Exists(FlagFile)) File.Delete(FlagFile);
@@ -30,7 +30,7 @@ namespace ScaryParty.EditorScripts
 
         public static void ExecuteFixes()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (Application.isBatchMode || EditorApplication.isPlayingOrWillChangePlaymode) return;
             if (File.Exists(FlagFile)) return;
 
             var sb = new StringBuilder();
@@ -86,6 +86,128 @@ namespace ScaryParty.EditorScripts
 
                 // 6. Testar Amostragem de Animações no CharacterVisual.prefab
                 ValidateAnimations(sb);
+
+                // 7. Executar Validacao Automatizada de Animacoes e Assentos
+                sb.AppendLine("\n--- 7. SeatAndAnimationValidator ---");
+                bool seatValid = ScaryParty.Pizzeria.Editor.SeatAndAnimationValidator.RunValidation(out string seatReport);
+                sb.AppendLine(seatReport);
+
+                // 8. Teste de Validacao Visual de Pizza Modular & Preview Utility
+                sb.AppendLine("\n--- 8. Validacao do Pizza Studio 2.0 & Geometria 3D ---");
+                try
+                {
+                    // Validar malhas do PizzaModularGeometryFactory
+                    var dough = ScaryParty.Pizzeria.Visual.PizzaModularGeometryFactory.GetDoughMesh();
+                    var sauce = ScaryParty.Pizzeria.Visual.PizzaModularGeometryFactory.GetSauceMesh();
+                    var cheese = ScaryParty.Pizzeria.Visual.PizzaModularGeometryFactory.GetCheeseCoatingMesh();
+                    var pep = ScaryParty.Pizzeria.Visual.PizzaModularGeometryFactory.GetPepperoniSliceMesh();
+                    var mush = ScaryParty.Pizzeria.Visual.PizzaModularGeometryFactory.GetMushroomSliceMesh();
+
+                    sb.AppendLine($"   DoughMesh: verts={dough.vertexCount}, tris={dough.triangles.Length/3}, normalY={dough.normals[0].y:F2}");
+                    sb.AppendLine($"   SauceMesh: verts={sauce.vertexCount}, tris={sauce.triangles.Length/3}, normalY={sauce.normals[0].y:F2}");
+                    sb.AppendLine($"   CheeseMesh: verts={cheese.vertexCount}, tris={cheese.triangles.Length/3}, normalY={cheese.normals[0].y:F2}");
+                    sb.AppendLine($"   PepperoniMesh: verts={pep.vertexCount}, tris={pep.triangles.Length/3}, normalY={pep.normals[0].y:F2}");
+                    sb.AppendLine($"   MushroomMesh: verts={mush.vertexCount}, tris={mush.triangles.Length/3}, normalY={mush.normals[0].y:F2}");
+
+                    if (dough.normals[0].y > 0.05f && pep.normals[0].y > 0.05f)
+                    {
+                        sb.AppendLine("   [SUCESSO] Normais das malhas procedurais estao voltadas para cima (sem backface culling)!");
+                    }
+                    else
+                    {
+                        sb.AppendLine("   [FALHA] Normais procedurais invertidas!");
+                    }
+
+                    // Testar EnsureDoughBase e ApplyLayout sem MissingComponentException
+                    var testRoot = new GameObject("TestPizzaRoot");
+                    try
+                    {
+                        var doughGo = ScaryParty.Pizzeria.Visual.PizzaVisualComposer.EnsureDoughBase(testRoot, 0.5f, 0f);
+                        if (doughGo != null && doughGo.GetComponent<MeshFilter>() != null && doughGo.GetComponent<MeshRenderer>() != null)
+                        {
+                            sb.AppendLine("   [SUCESSO] EnsureDoughBase executou sem MissingComponentException (MeshFilter e MeshRenderer presentes)!");
+                        }
+
+                        // Analise dinamica da geometria da massa
+                        var surfaceMetrics = ScaryParty.Pizzeria.Visual.PizzaSurfaceAnalyzer.Analyze(testRoot);
+                        sb.AppendLine($"   [DYNAMIC_SURFACE] OuterR={surfaceMetrics.OuterRadius*100:F1}cm, UsableR={surfaceMetrics.UsableRadius*100:F1}cm, FloorY={surfaceMetrics.FloorY:F3}m, CrestY={surfaceMetrics.CrestY:F3}m");
+
+                        var testComp = new ScaryParty.Pizzeria.Visual.PizzaVisualComposition(
+                            42UL,
+                            2,
+                            ScaryParty.Pizzeria.Domain.Types.CookingStage.Uncooked,
+                            0.5f,
+                            0f,
+                            new System.Collections.Generic.List<ScaryParty.Pizzeria.Network.NetIngredientDto>
+                            {
+                                new ScaryParty.Pizzeria.Network.NetIngredientDto { DefinitionId = 3, Stage = (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared, Count = 1 },
+                                new ScaryParty.Pizzeria.Network.NetIngredientDto { DefinitionId = 5, Stage = (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared, Count = 1 },
+                                new ScaryParty.Pizzeria.Network.NetIngredientDto { DefinitionId = 7, Stage = (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared, Count = 2 },
+                                new ScaryParty.Pizzeria.Network.NetIngredientDto { DefinitionId = 9, Stage = (byte)ScaryParty.Pizzeria.Domain.Types.ProcessingStage.Prepared, Count = 1 }
+                            },
+                            surfaceMetrics
+                        );
+                        var layout = ScaryParty.Pizzeria.Visual.PizzaLayoutGenerator.Generate(testComp, ScaryParty.Pizzeria.Visual.PizzaVisualCatalog.Instance);
+                        sb.AppendLine($"   [PIZZA_LAYOUT_OK] Layout gerado com sucesso: {layout.Placements.Count} pecas.");
+
+                        // Validar que todas as pecas estao estritamente contidas no raio util dinamico
+                        float maxRadiusFound = 0f;
+                        for (int p = 0; p < layout.Placements.Count; p++)
+                        {
+                            var pos = layout.Placements[p].LocalPosition;
+                            float r = new Vector2(pos.x, pos.z).magnitude;
+                            if (r > maxRadiusFound) maxRadiusFound = r;
+                        }
+                        sb.AppendLine($"   Raio maximo das pecas: {maxRadiusFound * 100:F1} cm (limite util dinamico: {surfaceMetrics.UsableRadius * 100:F1} cm).");
+                        if (maxRadiusFound <= surfaceMetrics.UsableRadius + 0.01f)
+                        {
+                            sb.AppendLine("   [SUCESSO] Todos os ingredientes estao perfeitamente dentro da borda da pizza calculada dinamicamente!");
+                        }
+                        else
+                        {
+                            sb.AppendLine("   [FALHA] Ingredientes ultrapassando a borda!");
+                        }
+
+                        ScaryParty.Pizzeria.Visual.PizzaVisualComposer.ApplyLayout(testRoot, layout, default);
+                        sb.AppendLine($"   [SUCESSO] ApplyLayout executado com sucesso: {testRoot.transform.childCount} filhos criados.");
+
+                        // Testar PreviewRenderUtility
+                        var preview = new PreviewRenderUtility();
+                        try
+                        {
+                            preview.camera.clearFlags = CameraClearFlags.Color;
+                            preview.camera.backgroundColor = new Color(0.15f, 0.15f, 0.17f, 1f);
+                            preview.camera.cullingMask = ~0;
+                            preview.AddSingleGO(testRoot);
+
+                            preview.BeginPreview(new Rect(0, 0, 128, 128), GUIStyle.none);
+                            preview.camera.transform.position = new Vector3(0f, 0.5f, -0.5f);
+                            preview.camera.transform.LookAt(Vector3.zero);
+                            preview.Render(true);
+                            var tex = preview.EndPreview();
+                            if (tex != null && tex.width > 0 && tex.height > 0)
+                            {
+                                sb.AppendLine($"   [SUCESSO] PreviewRenderUtility renderizou textura 3D valida ({tex.width}x{tex.height})!");
+                            }
+                            else
+                            {
+                                sb.AppendLine("   [FALHA] Textura de PreviewRenderUtility nula ou vazia!");
+                            }
+                        }
+                        finally
+                        {
+                            preview.Cleanup();
+                        }
+                    }
+                    finally
+                    {
+                        UnityEngine.Object.DestroyImmediate(testRoot);
+                    }
+                }
+                catch (System.Exception pEx)
+                {
+                    sb.AppendLine($"   [PIZZA_PREVIEW_FAIL] Excecao ao validar pizza modular: {pEx}");
+                }
 
                 File.WriteAllText(FlagFile, DateTime.UtcNow.ToString());
                 sb.AppendLine("\n=== ALL FIXES APPLIED SUCCESSFULLY ===");

@@ -11,7 +11,7 @@ public class WeaponSystemSetup
     private const string ClipsPath = "Assets/Piaaria/Animations/Weapons/Generated";
     private const string MaskPath = "Assets/Piaaria/Animations/Weapons/WeaponsUpperBodyMask.mask";
 
-    [MenuItem("Tools/Weapons/Setup Entire System (Phase 2)")]
+    [MenuItem("Tools/Scary Party/Legado/Weapons (Desativado)/Setup Entire System (Phase 2)", false, 350)]
     public static void SetupSystem()
     {
         CreateDirectories();

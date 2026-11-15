@@ -37,6 +37,8 @@ namespace ScaryParty.Pizzeria.Stations
         private static AudioClip _proceduralDingClip;
         private bool _hasPlayedDing = false;
         private float _lastHighestCookProgress = 0f;
+        private float _lastBurningWarnTime = -10f;
+        private const float BurningWarnCooldown = 2.0f;
 
         public override string InteractPrompt
         {
@@ -226,15 +228,23 @@ namespace ScaryParty.Pizzeria.Stations
                     ovenFireLight.intensity = 2.0f + flicker * 1.5f;
                 }
 
-                // Tocar sinal sonoro ao atingir 100% de cozimento
+                // Tocar sinal sonoro e pulsar brilho quente ao atingir 100% de cozimento
                 if (cookProgress >= 1f && _lastHighestCookProgress < 1f && !_hasPlayedDing)
                 {
                     PlayBakeDoneDing();
                     _hasPlayedDing = true;
+                    TriggerPizzaGlowPulse(new Color(0.55f, 0.28f, 0.06f, 1f), 0.35f);
                 }
                 else if (cookProgress < 1f)
                 {
                     _hasPlayedDing = false;
+                }
+
+                // Aviso de quase queimando (cooldown por forno)
+                if (burnProgress >= 0.72f && Time.unscaledTime - _lastBurningWarnTime >= BurningWarnCooldown)
+                {
+                    _lastBurningWarnTime = Time.unscaledTime;
+                    TriggerPizzaGlowPulse(new Color(0.75f, 0.12f, 0.05f, 1f), 0.30f);
                 }
 
                 // Efeito de Fumaça
@@ -281,6 +291,23 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             _lastHighestCookProgress = cookProgress;
+        }
+
+        private void TriggerPizzaGlowPulse(Color glowColor, float duration)
+        {
+            var state = PizzeriaNetworkState.Instance;
+            var vis = Presentation.PizzeriaItemVisualizer.Instance;
+            if (state == null || vis == null) return;
+
+            for (int i = 0; i < state.Items.Count; i++)
+            {
+                var item = state.Items[i];
+                if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                {
+                    var wrapper = vis.GetItemVisual(item.ItemId);
+                    wrapper?.FeelPivot?.PulseMaterialHighlight(glowColor, duration);
+                }
+            }
         }
 
         private void PlayBakeDoneDing()

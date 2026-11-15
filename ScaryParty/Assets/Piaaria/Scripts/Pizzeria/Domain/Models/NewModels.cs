@@ -56,6 +56,10 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public DomainQuaternion WorldRot { get; set; }
         public int Capacity { get; set; }
         public List<ItemId> Items { get; } = new List<ItemId>();
+        public int Integrity { get; set; } = 100;
+        public int MaxIntegrity { get; set; } = 100;
+        public bool IsTorn => Integrity <= 0;
+        public bool HasDroppedBoxOnCurrentRupture { get; set; } = false;
         public uint Revision { get; set; } = 1;
 
         public const ulong NoOwner = ulong.MaxValue;
@@ -67,7 +71,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         }
 
         public bool IsEquipped => EquippedBy != NoOwner;
-        public bool CanAdd => Items.Count < Capacity;
+        public bool CanAdd => !IsTorn && Items.Count < Capacity;
         public bool IsEmpty => Items.Count == 0;
 
         public void Add(ItemId itemId)

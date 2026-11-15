@@ -3,11 +3,40 @@ using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Models
 {
+    public class NightStartSnapshot
+    {
+        public int NightNumber { get; }
+        public int RestaurantBudget { get; }
+        public Dictionary<(int storageId, int ingredientDefId), int> SavedStock { get; } = new Dictionary<(int, int), int>();
+        public Dictionary<int, int> SavedUpgrades { get; } = new Dictionary<int, int>();
+
+        public NightStartSnapshot(int nightNumber, int restaurantBudget)
+        {
+            NightNumber = nightNumber;
+            RestaurantBudget = restaurantBudget;
+        }
+    }
+
     public class PizzeriaState
     {
         public uint GenerationId { get; set; } = 1;
         public uint Revision { get; set; } = 1;
         public int RestaurantBudget { get; set; } = 500;
+
+        // Estado autoritativo do ciclo de noites (O5 / N1)
+        public int CurrentNightNumber { get; set; } = 1;
+        public NightPhase CurrentNightPhase { get; set; } = NightPhase.Preparing;
+        public NightDefeatReason NightDefeatReason { get; set; } = NightDefeatReason.None;
+        public float NightDurationSeconds { get; set; } = 360f;
+        public float NightRemainingSeconds { get; set; } = 360f;
+        public float NightGraceRemainingSeconds { get; set; } = 0f;
+        public float NightPrepRemainingSeconds { get; set; } = 4f;
+        public int NightEarnedRevenue { get; set; } = 0;
+        public int NightRevenueGoal { get; set; } = 60;
+        public int NightOrdersCompleted { get; set; } = 0;
+        public int NightOrdersFailed { get; set; } = 0;
+        public int NightLostCustomers { get; set; } = 0;
+        public NightStartSnapshot CurrentSnapshot { get; set; }
 
         private ulong _nextItemId = 1;
         private ulong _nextToolId = 1;
@@ -57,6 +86,19 @@ namespace ScaryParty.Pizzeria.Domain.Models
             GenerationId = newGenerationId;
             Revision = 1;
             RestaurantBudget = startingBudget;
+            CurrentNightNumber = 1;
+            CurrentNightPhase = NightPhase.Preparing;
+            NightDefeatReason = NightDefeatReason.None;
+            NightDurationSeconds = 360f;
+            NightRemainingSeconds = 360f;
+            NightGraceRemainingSeconds = 0f;
+            NightPrepRemainingSeconds = 4f;
+            NightEarnedRevenue = 0;
+            NightRevenueGoal = 60;
+            NightOrdersCompleted = 0;
+            NightOrdersFailed = 0;
+            NightLostCustomers = 0;
+            CurrentSnapshot = null;
             _nextItemId = 1;
             _nextToolId = 1;
             _nextOrderId = 1;

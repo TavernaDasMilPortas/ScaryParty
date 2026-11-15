@@ -15,10 +15,37 @@ namespace ScaryParty.UI.Piaria.Core
     {
         private static readonly Dictionary<VisualElement, List<Tween>> _activeTweens = new Dictionary<VisualElement, List<Tween>>();
 
+        public static event Action<bool> OnReduceMotionChanged;
+
         public static bool ReduceMotion
         {
             get => PlayerPrefs.GetInt("ReduceMotion", 0) == 1;
-            set => PlayerPrefs.SetInt("ReduceMotion", value ? 1 : 0);
+            set
+            {
+                bool current = ReduceMotion;
+                PlayerPrefs.SetInt("ReduceMotion", value ? 1 : 0);
+                if (current != value)
+                {
+                    OnReduceMotionChanged?.Invoke(value);
+                }
+            }
+        }
+
+        public static int ActiveTweenElementCount => _activeTweens.Count;
+
+        public static int GetActiveTweenCount(VisualElement target = null)
+        {
+            if (target != null)
+            {
+                return _activeTweens.TryGetValue(target, out var list) ? list.Count : 0;
+            }
+
+            int total = 0;
+            foreach (var kv in _activeTweens)
+            {
+                if (kv.Value != null) total += kv.Value.Count;
+            }
+            return total;
         }
 
         private static void RegisterTween(VisualElement target, Tween tween)
@@ -286,6 +313,112 @@ namespace ScaryParty.UI.Piaria.Core
                 .SetUpdate(true);
 
             RegisterTween(label, tw);
+        }
+
+        private static float GetSafeScale(VisualElement el)
+        {
+            if (el == null) return 1f;
+            try
+            {
+                float s = el.resolvedStyle.scale.value.x;
+                if (!float.IsNaN(s) && s > 0.01f && s < 10f)
+                    return s;
+            }
+            catch
+            {
+                // resolvedStyle pode falhar em elementos ainda não anexados a um painel
+            }
+
+            try
+            {
+                float inline = el.style.scale.value.value.x;
+                if (!float.IsNaN(inline) && inline > 0.01f && inline < 10f)
+                    return inline;
+            }
+            catch
+            {
+            }
+
+            return 1f;
+        }
+
+        public static Tween ScaleTo(VisualElement target, float toScale, float duration = 0.1f, Ease ease = Ease.OutQuad, Action onComplete = null)
+        {
+            if (target == null) return null;
+            KillTweens(target);
+
+            if (ReduceMotion || duration <= 0.001f)
+            {
+                float finalScale = ReduceMotion ? 1f : toScale;
+                target.style.scale = new StyleScale(new Scale(new Vector2(finalScale, finalScale)));
+                onComplete?.Invoke();
+                return null;
+            }
+
+            EnsureDOTweenInitialized();
+            float startScale = GetSafeScale(target);
+            var tw = DOTween.To(() => startScale, s =>
+            {
+                if (target != null)
+                {
+                    target.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
+                }
+            }, toScale, duration)
+                .SetEase(ease)
+                .SetUpdate(true)
+                .OnComplete(() =>
+                {
+                    if (target != null)
+                    {
+                        target.style.scale = new StyleScale(new Scale(new Vector2(toScale, toScale)));
+                    }
+                    onComplete?.Invoke();
+                });
+
+            RegisterTween(target, tw);
+            return tw;
+        }
+
+        public static Tween PulseScale(VisualElement target, float peakScale = 1.05f, float upDuration = 0.1f, float downDuration = 0.12f, Action onComplete = null)
+        {
+            if (target == null) return null;
+            KillTweens(target);
+
+            if (ReduceMotion || (upDuration <= 0.001f && downDuration <= 0.001f))
+            {
+                target.style.scale = new StyleScale(new Scale(Vector2.one));
+                onComplete?.Invoke();
+                return null;
+            }
+
+            EnsureDOTweenInitialized();
+            float startScale = GetSafeScale(target);
+            var seq = DOTween.Sequence().SetUpdate(true);
+            seq.Append(DOTween.To(() => startScale, s =>
+            {
+                if (target != null)
+                {
+                    target.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
+                }
+            }, peakScale, Mathf.Max(0.01f, upDuration)).SetEase(Ease.OutQuad));
+            seq.Append(DOTween.To(() => peakScale, s =>
+            {
+                if (target != null)
+                {
+                    target.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
+                }
+            }, 1f, Mathf.Max(0.01f, downDuration)).SetEase(Ease.OutBack));
+            seq.OnComplete(() =>
+            {
+                if (target != null)
+                {
+                    target.style.scale = new StyleScale(new Scale(Vector2.one));
+                }
+                onComplete?.Invoke();
+            });
+
+            RegisterTween(target, seq);
+            return seq;
         }
     }
 }

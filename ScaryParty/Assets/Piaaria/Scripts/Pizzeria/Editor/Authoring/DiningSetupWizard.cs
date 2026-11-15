@@ -31,7 +31,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorApplication.delayCall += AutoEnsurePrefabsIfMissingSilent;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Salão, Filas e Mesas (Dining Setup Wizard)", false, 15)]
+        [MenuItem("Tools/Scary Party/Wizards/Pizzaria/Salão, Filas e Mesas (Dining Setup Wizard)", false, 15)]
         public static void ShowWindow()
         {
             var win = GetWindow<DiningSetupWizard>("Salão, Filas & Mesas");

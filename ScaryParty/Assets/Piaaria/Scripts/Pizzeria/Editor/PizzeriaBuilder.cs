@@ -18,8 +18,7 @@ namespace ScaryParty.Pizzeria.Editor
         private const string ConfigFolder = "Assets/Piaaria/ScriptableObjects/Pizzeria";
         private const string NetworkPrefabsAssetPath = "Assets/Piaaria/DefaultNetworkPrefabs.asset";
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Reconstruir Pizzeria Prefab", false, 10)]
-        [MenuItem("Tools/Scary Party/Pizzeria/Build or Update", false, 20)]
+        [MenuItem("Tools/Scary Party/Legado/Pizzaria (Prefab Antigo)/Reconstruir Pizzeria Prefab", false, 310)]
         public static void BuildOrUpdate()
         {
             if (!EditorUtility.DisplayDialog(

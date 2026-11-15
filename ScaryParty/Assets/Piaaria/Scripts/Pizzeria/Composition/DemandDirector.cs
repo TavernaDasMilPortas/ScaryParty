@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Services;
@@ -14,7 +13,7 @@ namespace ScaryParty.Pizzeria.Composition
     /// - Respeita limites separados de filas/mesas presenciais e chamadas/pedidos de delivery;
     /// - Se um canal estiver lotado mas o outro tiver capacidade, redireciona para o canal disponível.
     /// </summary>
-    public class DemandDirector : NetworkBehaviour
+    public class DemandDirector : MonoBehaviour
     {
         public static DemandDirector Instance { get; private set; }
 
@@ -33,10 +32,9 @@ namespace ScaryParty.Pizzeria.Composition
             Instance = this;
         }
 
-        public override void OnDestroy()
+        private void OnDestroy()
         {
             if (Instance == this) Instance = null;
-            base.OnDestroy();
         }
 
         /// <summary>
@@ -119,6 +117,7 @@ namespace ScaryParty.Pizzeria.Composition
         public void TickDemand(PizzeriaRoot root, float deltaTime)
         {
             if (root == null || root.DomainState == null || root.Config == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.Active) return;
 
             if (!_initialized)
             {
@@ -142,6 +141,8 @@ namespace ScaryParty.Pizzeria.Composition
         public bool TriggerNextDemandEvent(PizzeriaRoot root)
         {
             if (root == null || root.DomainState == null || root.Config == null || root.Catalog == null)
+                return false;
+            if (root.DomainState.CurrentNightPhase != NightPhase.Active)
                 return false;
 
             var state = root.DomainState;
@@ -230,7 +231,15 @@ namespace ScaryParty.Pizzeria.Composition
                 if (CityPopulationDirector.Instance != null)
                 {
                     Vector3 entrancePos = root.entranceAnchor != null ? root.entranceAnchor.position : root.transform.position;
-                    CityPopulationDirector.Instance.TryRecruitPedestrianForPizzeria(entrancePos, out _);
+                    if (CityPopulationDirector.Instance.TryRecruitPedestrianForPizzeria(entrancePos, out var recruitedPed))
+                    {
+                        if (recruitedPed != null)
+                        {
+                            cust.VisualColorIndex = recruitedPed.ColorIndex;
+                            cust.Revision++;
+                            root.DomainState.IncrementRevision();
+                        }
+                    }
                 }
                 string summary = PizzaOrderFormatter.FormatShortTitle(cust.RequestedPizza, root.Catalog, false);
                 Debug.Log($"[DemandDirector] 🚶 Cliente presencial #{cust.Id.Value} entrou na Fila {cust.QueueIndex + 1} (Slot {cust.QueueSlotIndex + 1}) desejando {summary}!");

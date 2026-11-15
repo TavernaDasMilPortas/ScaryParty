@@ -1119,7 +1119,7 @@ Transform:
   m_GameObject: {fileID: 376086071567709785}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1150,7 +1150,7 @@ Transform:
   m_GameObject: {fileID: 454068533166361465}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1595,6 +1595,22 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
   Tables:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  Weapons:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  PlayerCombatStates:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  NightState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  MotorcycleState:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
@@ -2498,9 +2514,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1888632008876245828}
   - {fileID: 1721108179938074910}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &714908700748984002
 GameObject:
@@ -4798,7 +4818,7 @@ Transform:
   m_GameObject: {fileID: 1188266548160902898}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4874,9 +4894,13 @@ MonoBehaviour:
   stationId: 11
   stationName: Station_SupplierTerminal
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &1223801303890125023
 GameObject:
@@ -4949,9 +4973,13 @@ MonoBehaviour:
   stationName: Station_Stack
   slotAnchors:
   - {fileID: 6590742140785400753}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   stackId: 1
   capacity: 6
@@ -7611,7 +7639,7 @@ Transform:
   m_GameObject: {fileID: 1830963572010374570}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8489,9 +8517,13 @@ MonoBehaviour:
   stationId: 15
   stationName: Station_TicketBoard
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots: []
   maxVisibleTickets: 4
@@ -9801,9 +9833,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 4450452295161059692}
   - {fileID: 8650420071948136365}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -13269,9 +13305,13 @@ MonoBehaviour:
   stationId: 14
   stationName: Station_Trash
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &3666199127112860975
 GameObject:
@@ -13345,9 +13385,13 @@ MonoBehaviour:
   stationName: Station_Storage_Cupboard
   slotAnchors:
   - {fileID: 1879039473936040484}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &3673186286059960109
@@ -14687,7 +14731,14 @@ MonoBehaviour:
   tableId: 6
   tableName: Mesa 6
   seatAnchor: {fileID: 309989453834687741}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6003720415429448067}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6418703253578440912
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -14818,7 +14869,14 @@ MonoBehaviour:
   tableId: 5
   tableName: Mesa 5
   seatAnchor: {fileID: 4025818867281851691}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4134682602156565185}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4527219661317800668
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15179,7 +15237,7 @@ Transform:
   m_GameObject: {fileID: 4132372491026490874}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15496,7 +15554,14 @@ MonoBehaviour:
   tableId: 3
   tableName: Mesa 3
   seatAnchor: {fileID: 382884667208195379}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1956891609559374366}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2509065016171630116
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -16079,9 +16144,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 4100784721986934019}
   - {fileID: 2286145996519346706}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -17836,9 +17905,13 @@ MonoBehaviour:
   stationId: 13
   stationName: Station_Receiving
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &4950396977891507755
 GameObject:
@@ -18235,7 +18308,14 @@ MonoBehaviour:
   tableId: 4
   tableName: Mesa 4
   seatAnchor: {fileID: 6561077568740373293}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 7035114354810584313}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2158259934793215539
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19404,6 +19484,8 @@ MonoBehaviour:
   - {fileID: 2385516635036999525}
   - {fileID: 1726340740669478189}
   - {fileID: 7307850701960120323}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &5374306338536377720
 GameObject:
   m_ObjectHideFlags: 0
@@ -19429,7 +19511,7 @@ Transform:
   m_GameObject: {fileID: 5374306338536377720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.78, z: 0}
+  m_LocalPosition: {x: 0, y: 0.28, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19634,7 +19716,14 @@ MonoBehaviour:
   tableId: 1
   tableName: Mesa 1
   seatAnchor: {fileID: 9065091803205971534}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8610961646076596382}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2713371289012394634
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -21242,9 +21331,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 6745906872918997508}
   - {fileID: 5556692217430632028}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &5858492313775747193
@@ -21913,9 +22006,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 7838377277371700086}
   - {fileID: 5940033805415937054}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 0}
   smokeParticles: {fileID: 0}
@@ -23751,7 +23848,14 @@ MonoBehaviour:
   tableId: 2
   tableName: Mesa 2
   seatAnchor: {fileID: 1949913733508442708}
+  seatSurfaceAnchor: {fileID: 0}
+  approachAnchor: {fileID: 0}
+  exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 2168879368295403094}
+  sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4411790206493640840
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -23848,6 +23952,8 @@ MonoBehaviour:
   - {fileID: 7877262833172317054}
   - {fileID: 5053726988543958562}
   - {fileID: 5917996810253463638}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &6449839076095685583
 GameObject:
   m_ObjectHideFlags: 0
@@ -25879,9 +25985,13 @@ MonoBehaviour:
   - {fileID: 2552062226320613427}
   - {fileID: 3067951487986825478}
   - {fileID: 3668009606978789854}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &6954834434812605529
 GameObject:
@@ -28276,9 +28386,13 @@ MonoBehaviour:
   - {fileID: 1973416178014465761}
   - {fileID: 696506875348464162}
   - {fileID: 3980456617172671187}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &7370468080764018766
 GameObject:
@@ -29922,9 +30036,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1577233899612656353}
   - {fileID: 591239511101067278}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &7676138283859140152
 GameObject:
@@ -32623,9 +32741,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 1959038398947078540}
   - {fileID: 5696623712605977129}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &8495434487474355892
 GameObject:
@@ -33054,9 +33176,13 @@ MonoBehaviour:
   slotAnchors:
   - {fileID: 8089948546391835814}
   - {fileID: 2382478361717381442}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &8568972427860215919
@@ -33243,9 +33369,13 @@ MonoBehaviour:
   stationId: 12
   stationName: Station_Phone
   slotAnchors: []
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ringer: {fileID: 0}
   isRinging: 0
@@ -33362,6 +33492,7 @@ MonoBehaviour:
   customRingClip: {fileID: 0}
   beaconLight: {fileID: 0}
   beaconRenderer: {fileID: 0}
+  phoneVisualPivot: {fileID: 0}
   ringingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8614344853231986265
@@ -36130,9 +36261,13 @@ MonoBehaviour:
   - {fileID: 7010255747990965632}
   - {fileID: 4150840324153617846}
   - {fileID: 1710809775423454641}
+  slotLayoutAsset: {fileID: 0}
+  occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &9073107017787463271

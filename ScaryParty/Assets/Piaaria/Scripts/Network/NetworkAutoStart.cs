@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 
 /// <summary>
 /// Automatically starts the NetworkManager as Host when the scene loads (for solo testing).
@@ -21,10 +22,15 @@ public class NetworkAutoStart : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        EnsureTransportCapacity(nm);
     }
 
     private void Start()
     {
+        if (NetworkManager.Singleton != null)
+            EnsureTransportCapacity(NetworkManager.Singleton);
+
         if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
         {
             Debug.Log("[NetworkAutoStart] NetworkManager is already running/connected. Skipping auto-start.");
@@ -41,5 +47,15 @@ public class NetworkAutoStart : MonoBehaviour
 
         NetworkManager.Singleton.StartHost();
         Debug.Log("[NetworkAutoStart] ✅ Started as Host automatically.");
+    }
+
+    private static void EnsureTransportCapacity(NetworkManager nm)
+    {
+        if (nm == null) return;
+        var transport = nm.GetComponent<UnityTransport>();
+        if (transport == null) return;
+        if (transport.MaxPacketQueueSize < 2048) transport.MaxPacketQueueSize = 2048;
+        if (transport.MaxPayloadSize < 32768) transport.MaxPayloadSize = 32768;
+        if (transport.MaxSendQueueSize > 0 && transport.MaxSendQueueSize < 262144) transport.MaxSendQueueSize = 262144;
     }
 }

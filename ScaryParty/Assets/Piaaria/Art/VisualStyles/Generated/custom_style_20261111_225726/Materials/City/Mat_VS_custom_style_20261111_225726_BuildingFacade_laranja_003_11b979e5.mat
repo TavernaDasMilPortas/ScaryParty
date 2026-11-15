@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Mat_VS_custom_style_20261111_225726_BuildingFacade_laranja_003_11b979e5
+  m_Shader: {fileID: 4800000, guid: c6f0c72450503c54a91b712dadd9458f, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords:
+  - _CLAMPADJUSTMENTS_ON
+  - _MULTIPLYBYLIGHTCOLOR_ON
+  - _POSTERIZELIGHT_ON
+  - _RECEIVESHADOWS_ON
+  - _USERIMLIGHTING_ON
+  - _USESHADOWS_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AOTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMask:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Texture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AOStrength: 0.25
+    - _AdditionalLightsWeight: 1
+    - _AlphaClipThreshold: 0.5
+    - _AlphaCutoff: 0.5
+    - _ClampAdjustments: 1
+    - _ColorNumbers: 6
+    - _Contrast: 1.03
+    - _CullMode: 2
+    - _EmissionEffectScale: 1
+    - _EmissionMaskStrength: 0
+    - _HueShift: 0
+    - _IndirectDiffuseWeight: 1
+    - _InteriorZoneWeight: 0
+    - _LightRamp: 0.85
+    - _LightRampOffset: 0.5
+    - _LightSteps: 3
+    - _LightingMode: 1
+    - _MaxAdditionalLightContribution: 1.65
+    - _MinShadowBrightness: 0.36
+    - _MultiplyByLightColor: 1
+    - _NormalSurfaceOutline: 0
+    - _OutlineWidth: 0.014400001
+    - _PosterizeColors: 0
+    - _PosterizeLight: 1
+    - _ReceiveShadows: 1
+    - _RimLightLitIntensity: 0.35
+    - _RimLightRampOffset: 0.58
+    - _RimLightShadowIntensity: 0.12
+    - _RimRamp: 1
+    - _SaturationShift: 0.1
+    - _ShadowLift: 0.12
+    - _SpecularRamp: 0.1
+    - _SpecularRampOffset: 0.9
+    - _UseColorAdjustments: 1
+    - _UseEmission: 0
+    - _UseOutlines: 0
+    - _UseRimLighting: 1
+    - _UseShadows: 1
+    - _UseSpecular: 0
+    - _UseVertexAO: 0
+    - _ValueShift: 0.03
+    m_Colors:
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionMaskColor: {r: 1, g: 0.86, b: 0.58, a: 1}
+    - _InteriorZoneFillColor: {r: 0, g: 0, b: 0, a: 0}
+    - _LightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _MainColor: {r: 0.91853344, g: 0.40713185, b: 0.21579635, a: 1}
+    - _OutlineColor: {r: 0.13999996, g: 0.11999995, b: 0.15999997, a: 1}
+    - _RimLightColor: {r: 0.85, g: 0.9, b: 1, a: 1}
+    - _ShadowColor: {r: 0.6, g: 0.58, b: 0.7, a: 1}
+    - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

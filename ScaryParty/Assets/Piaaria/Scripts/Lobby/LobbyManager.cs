@@ -154,6 +154,7 @@ public class LobbyManager : MonoBehaviour
                 await Task.Delay(500);
             }
 
+            ConfigureTransportCapacity(transport);
             transport.UseWebSockets = true;
             transport.SetRelayServerData(relayServerData);
 
@@ -275,6 +276,7 @@ public class LobbyManager : MonoBehaviour
                 await Task.Delay(500);
             }
 
+            ConfigureTransportCapacity(transport);
             transport.UseWebSockets = true;
             transport.SetRelayServerData(relayServerData);
 
@@ -307,6 +309,7 @@ public class LobbyManager : MonoBehaviour
         }
 
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        ConfigureTransportCapacity(transport);
         // Remove relay data
         transport.SetRelayServerData(default);
         // Configure connection for LAN (listen on all interfaces)
@@ -371,6 +374,7 @@ public class LobbyManager : MonoBehaviour
         }
 
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        ConfigureTransportCapacity(transport);
         // Remove relay data
         transport.SetRelayServerData(default);
         // Configure connection for LAN (connect to target IP)
@@ -385,6 +389,14 @@ public class LobbyManager : MonoBehaviour
         {
             Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente LAN.");
         }
+    }
+
+    private static void ConfigureTransportCapacity(UnityTransport transport)
+    {
+        if (transport == null) return;
+        if (transport.MaxPacketQueueSize < 2048) transport.MaxPacketQueueSize = 2048;
+        if (transport.MaxPayloadSize < 32768) transport.MaxPayloadSize = 32768;
+        if (transport.MaxSendQueueSize > 0 && transport.MaxSendQueueSize < 262144) transport.MaxSendQueueSize = 262144;
     }
 
     private IEnumerator HeartbeatLobbyCoroutine(string lobbyId, float intervalSeconds)

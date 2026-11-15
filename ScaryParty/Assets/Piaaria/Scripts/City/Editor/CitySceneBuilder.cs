@@ -5,14 +5,14 @@ using ScaryParty.EditorScripts;
 
 /// <summary>
 /// Editor window for setting up the complete game scene structure.
-/// Access via: Tools > Scary Party > Scene Builder
+/// Access via: Tools > Scary Party > Wizards > Cidade > Scene Builder
 /// </summary>
 public class CitySceneBuilder : EditorWindow
 {
     private CityConfig _currentConfig;
     private Vector2 _scrollPos;
 
-    [MenuItem("Tools/Scary Party/Scene Builder")]
+    [MenuItem("Tools/Scary Party/Wizards/Cidade/Scene Builder", false, 51)]
     public static void ShowWindow()
     {
         GetWindow<CitySceneBuilder>("Scary Party Scene Builder");
@@ -734,6 +734,14 @@ public class CitySceneBuilder : EditorWindow
 
     private void AssignCartoonMaterials(CityGenerator generator)
     {
+        var activeScenePath = UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+        if (!string.IsNullOrEmpty(activeScenePath) &&
+            (activeScenePath.Contains("GameplayVariants/") || activeScenePath.Contains("VisualTests/")))
+        {
+            Debug.Log("[SceneBuilder] Active scene is a managed VisualStyle variant; preserving style-resolved materials.");
+            return;
+        }
+
         // Look for Distant Lands Toon Material
         string[] guids = AssetDatabase.FindAssets("Toon Preset t:Material");
         Material toonMat = null;

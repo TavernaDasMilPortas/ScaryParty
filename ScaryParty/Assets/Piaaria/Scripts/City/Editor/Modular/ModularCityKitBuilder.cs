@@ -21,13 +21,64 @@ namespace ScaryParty.City.Editor.Modular
         public const string PrefabsPath = "Assets/Piaaria/Prefabs/City/Modules";
         public const string CatalogPath = "Assets/Piaaria/ScriptableObjects/City/Modular/CityModuleCatalog.asset";
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Criar kit de teste (Placeholders)", false, 10)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Criar Kit de Teste (Placeholders)", false, 275)]
         public static void BuildKitMenuItem()
         {
             BuildCompleteKit(false);
         }
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Recriar kit completo (Sobrescrever Placeholders)", false, 11)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Sincronizar e Salvar Catálogo Modular", false, 276)]
+        public static void SyncCatalogMenuItem()
+        {
+            CityModuleCatalog catalog = AssetDatabase.LoadAssetAtPath<CityModuleCatalog>(CatalogPath);
+            if (catalog == null)
+            {
+                EditorUtility.DisplayDialog("Aviso", "Catálogo não encontrado em " + CatalogPath, "OK");
+                return;
+            }
+
+            // Garante que todas as definições canônicas possuam os offsets visuais adequados
+            catalog.EnsureAllCanonicalDefinitions();
+
+            // Mapeamento direto para os FBXs autorais caso estejam presentes na pasta de módulos
+            var fbxMap = new Dictionary<CityModuleId, string>()
+            {
+                { CityModuleId.A, "parede_lisa.fbx" },
+                { CityModuleId.B, "parede_janela.fbx" },
+                { CityModuleId.C, "parede_porta.fbx" },
+                { CityModuleId.D, "parede_vitrine.fbx" },
+                { CityModuleId.E, "cobertura_plana.fbx" },
+                { CityModuleId.F, "platibanda.fbx" },
+                { CityModuleId.G, "parede_veneziana_aberta.fbx" },
+                { CityModuleId.H, "parede_caneiro.fbx" },
+                { CityModuleId.I, "parede_garagem.fbx" },
+                { CityModuleId.J, "parede_porta_dupla.fbx" },
+                { CityModuleId.K, "toldo.fbx" },
+                { CityModuleId.L, "pilar_de_canto.fbx" }
+            };
+
+            foreach (var kvp in fbxMap)
+            {
+                var def = catalog.GetDefinition(kvp.Key);
+                if (def == null) continue;
+
+                string fbxPath = $"{PrefabsPath}/{kvp.Value}";
+                GameObject fbxObj = AssetDatabase.LoadAssetAtPath<GameObject>(fbxPath);
+                if (fbxObj != null)
+                {
+                    def.prefab = fbxObj;
+                }
+            }
+
+            EditorUtility.SetDirty(catalog);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+
+            EditorUtility.DisplayDialog("Sucesso", "Catálogo sincronizado e salvo com sucesso em disco e memória!\nAgora clique em 'Quick Rebuild City' para atualizar os prédios na cena.", "OK");
+            Debug.Log("[ModularCityKitBuilder] Catálogo modular sincronizado e salvo com sucesso.");
+        }
+
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Cidade Modular/Recriar Kit Completo (Sobrescrever Placeholders)", false, 277)]
         public static void RecreateKitMenuItem()
         {
             if (EditorUtility.DisplayDialog("Recriar Kit Modular",
@@ -37,7 +88,7 @@ namespace ScaryParty.City.Editor.Modular
             }
         }
 
-        [MenuItem("Tools/Piaaria/Cidade Modular/Validar integridade do kit", false, 12)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Cidade/Validar Integridade do Kit Modular", false, 170)]
         public static void ValidateKitMenuItem()
         {
             CityModuleCatalog catalog = AssetDatabase.LoadAssetAtPath<CityModuleCatalog>(CatalogPath);
@@ -269,10 +320,10 @@ namespace ScaryParty.City.Editor.Modular
                     break;
 
                 case CityModuleId.J:
-                    // Porta dupla: vão livre de 1.6m x 2.2m (X in [-0.8, 0.8], Y in [0, 2.2])
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(-0.9f, 1.5f, -0.1f), new Vector3(0.2f, 3.0f, 0.2f));
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0.9f, 1.5f, -0.1f), new Vector3(0.2f, 3.0f, 0.2f));
-                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0f, 2.6f, -0.1f), new Vector3(1.6f, 0.8f, 0.2f));
+                    // Porta dupla (4m / 2 slots): vão livre centralizado (X in [-1.6, 1.6], Y in [0, 2.2])
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(-1.8f, 1.5f, -0.1f), new Vector3(0.4f, 3.0f, 0.2f));
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(1.8f, 1.5f, -0.1f), new Vector3(0.4f, 3.0f, 0.2f));
+                    AddBoxGeometry(vertices, normals, uvs, submesh0Tris, new Vector3(0f, 2.6f, -0.1f), new Vector3(3.2f, 0.8f, 0.2f));
                     break;
 
                 case CityModuleId.K:
@@ -310,20 +361,48 @@ namespace ScaryParty.City.Editor.Modular
         private static void AddBoxGeometry(List<Vector3> verts, List<Vector3> norms, List<Vector2> uvs, List<int> tris, Vector3 center, Vector3 size)
         {
             Vector3 ext = size * 0.5f;
-            int startIdx = verts.Count;
 
-            // 6 faces do paralelepípedo
+            // 6 faces do paralelepípedo com normais externas estritas
+            // Definindo explicitamente os 4 vértices de cada face em sentido anti-horário olhando de fora (CCW)
+            // de modo que o enrolamento dos triângulos (0, 1, 2) e (0, 2, 3) aponte perfeitamente na direção da normal
+            // e nenhuma face fique invertida ou invisível por culling.
             Vector3[] faceNormals = new[]
             {
-                Vector3.forward, Vector3.back, Vector3.up, Vector3.down, Vector3.right, Vector3.left
+                Vector3.forward, // +Z (Frontal)
+                Vector3.back,    // -Z (Traseira)
+                Vector3.up,      // +Y (Superior / Topo)
+                Vector3.down,    // -Y (Inferior / Base)
+                Vector3.right,   // +X (Direita)
+                Vector3.left     // -X (Esquerda)
             };
 
             for (int f = 0; f < 6; f++)
             {
                 Vector3 n = faceNormals[f];
-                Vector3 u = (f == 2 || f == 3) ? Vector3.right : Vector3.Cross(n, Vector3.up);
-                Vector3 v = Vector3.Cross(u, n);
+                Vector3 u; // Tangente horizontal da face
+                Vector3 v; // Tangente vertical da face
 
+                if (f == 2) // +Y (Cima)
+                {
+                    u = Vector3.right;
+                    v = Vector3.forward;
+                }
+                else if (f == 3) // -Y (Baixo)
+                {
+                    u = Vector3.right;
+                    v = Vector3.back;
+                }
+                else
+                {
+                    // Faces laterais e frontais/traseiras (+Z, -Z, +X, -X):
+                    // v aponta para cima (+Y), u é perpendicular tal que u x v = n
+                    v = Vector3.up;
+                    u = Vector3.Cross(v, n);
+                }
+
+                // Vértices do quad dispostos em ordem anti-horária a partir de p0:
+                // p0 = (-u, -v), p1 = (+u, -v), p2 = (+u, +v), p3 = (-u, +v)
+                // Cross(p1 - p0, p2 - p0) = Cross(2u, 2v) = 4 (u x v) = 4 n -> normal correta voltada para fora!
                 Vector3 p0 = center + n * Vector3.Dot(ext, n) - u * Vector3.Dot(ext, u) - v * Vector3.Dot(ext, v);
                 Vector3 p1 = center + n * Vector3.Dot(ext, n) + u * Vector3.Dot(ext, u) - v * Vector3.Dot(ext, v);
                 Vector3 p2 = center + n * Vector3.Dot(ext, n) + u * Vector3.Dot(ext, u) + v * Vector3.Dot(ext, v);
@@ -472,6 +551,8 @@ namespace ScaryParty.City.Editor.Modular
                 switch (id)
                 {
                     case CityModuleId.E:
+                        mr.sharedMaterial = matWall;
+                        break;
                     case CityModuleId.F:
                     case CityModuleId.L:
                         mr.sharedMaterial = matTrim;
@@ -552,21 +633,21 @@ namespace ScaryParty.City.Editor.Modular
                     break;
 
                 case CityModuleId.J:
-                    // Porta dupla: NÃO BLOQUEAR O VÃO!
-                    // Batente esquerdo (X in [-1.0, -0.8])
+                    // Porta dupla (4m / 2 slots): NÃO BLOQUEAR O VÃO!
+                    // Batente esquerdo (X in [-2.0, -1.6])
                     BoxCollider colJL = colGo.AddComponent<BoxCollider>();
-                    colJL.center = new Vector3(-0.9f, 1.5f, -0.1f);
-                    colJL.size = new Vector3(0.2f, 3.0f, 0.2f);
+                    colJL.center = new Vector3(-1.8f, 1.5f, -0.1f);
+                    colJL.size = new Vector3(0.4f, 3.0f, 0.2f);
 
-                    // Batente direito (X in [0.8, 1.0])
+                    // Batente direito (X in [1.6, 2.0])
                     BoxCollider colJR = colGo.AddComponent<BoxCollider>();
-                    colJR.center = new Vector3(0.9f, 1.5f, -0.1f);
-                    colJR.size = new Vector3(0.2f, 3.0f, 0.2f);
+                    colJR.center = new Vector3(1.8f, 1.5f, -0.1f);
+                    colJR.size = new Vector3(0.4f, 3.0f, 0.2f);
 
                     // Dintel superior (Y in [2.2, 3.0])
                     BoxCollider colJT = colGo.AddComponent<BoxCollider>();
                     colJT.center = new Vector3(0f, 2.6f, -0.1f);
-                    colJT.size = new Vector3(1.6f, 0.8f, 0.2f);
+                    colJT.size = new Vector3(3.2f, 0.8f, 0.2f);
                     break;
 
                 case CityModuleId.K:
@@ -630,11 +711,11 @@ namespace ScaryParty.City.Editor.Modular
             }
             else if (id == CityModuleId.J)
             {
-                // Porta dupla: duas folhas
-                // Folha esquerda (dobradiça em X = -0.8)
+                // Porta dupla (4m / 2 slots): duas folhas largas
+                // Folha esquerda (dobradiça em X = -1.6)
                 GameObject hingeL = new GameObject("DoorLeaf_Left");
                 hingeL.transform.SetParent(movGo.transform, false);
-                hingeL.transform.localPosition = new Vector3(-0.8f, 0f, -0.1f);
+                hingeL.transform.localPosition = new Vector3(-1.6f, 0f, -0.1f);
 
                 GameObject visL = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 visL.name = "LeafVisual";
@@ -642,14 +723,14 @@ namespace ScaryParty.City.Editor.Modular
                 if (colL != null) UnityEngine.Object.DestroyImmediate(colL);
 
                 visL.transform.SetParent(hingeL.transform, false);
-                visL.transform.localPosition = new Vector3(0.39f, 1.1f, 0f);
-                visL.transform.localScale = new Vector3(0.78f, 2.18f, 0.05f);
+                visL.transform.localPosition = new Vector3(0.78f, 1.1f, 0f);
+                visL.transform.localScale = new Vector3(1.56f, 2.18f, 0.05f);
                 visL.GetComponent<Renderer>().sharedMaterial = materials[CityModuleMaterialRole.Wood];
 
-                // Folha direita (dobradiça em X = +0.8)
+                // Folha direita (dobradiça em X = +1.6)
                 GameObject hingeR = new GameObject("DoorLeaf_Right");
                 hingeR.transform.SetParent(movGo.transform, false);
-                hingeR.transform.localPosition = new Vector3(0.8f, 0f, -0.1f);
+                hingeR.transform.localPosition = new Vector3(1.6f, 0f, -0.1f);
 
                 GameObject visR = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 visR.name = "LeafVisual";
@@ -657,8 +738,8 @@ namespace ScaryParty.City.Editor.Modular
                 if (colR != null) UnityEngine.Object.DestroyImmediate(colR);
 
                 visR.transform.SetParent(hingeR.transform, false);
-                visR.transform.localPosition = new Vector3(-0.39f, 1.1f, 0f);
-                visR.transform.localScale = new Vector3(0.78f, 2.18f, 0.05f);
+                visR.transform.localPosition = new Vector3(-0.78f, 1.1f, 0f);
+                visR.transform.localScale = new Vector3(1.56f, 2.18f, 0.05f);
                 visR.GetComponent<Renderer>().sharedMaterial = materials[CityModuleMaterialRole.Wood];
             }
         }

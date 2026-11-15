@@ -172,6 +172,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (order.Lifecycle == OrderLifecycle.Accepted && now >= order.DeadlineTime)
                 {
                     order.Lifecycle = OrderLifecycle.Expired;
+                    order.TaskStage = OrderTaskBoardStage.Failed;
+                    state.NightOrdersFailed++;
                     order.Revision++;
                     state.IncrementRevision();
                 }
@@ -218,6 +220,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 return CommandResult.Fail(CommandError.InvalidOperation, "Pedido não está ativo.");
 
             order.Lifecycle = OrderLifecycle.Cancelled;
+            order.TaskStage = OrderTaskBoardStage.Failed;
+            state.NightOrdersFailed++;
             order.Revision++;
             state.IncrementRevision();
             return CommandResult.Ok();

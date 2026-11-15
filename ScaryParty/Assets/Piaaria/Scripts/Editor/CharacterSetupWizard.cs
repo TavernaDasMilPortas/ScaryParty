@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,15 +15,15 @@ using Debug = UnityEngine.Debug;
 namespace ScaryParty.EditorScripts
 {
     /// <summary>
-    /// Wizard de exportação, configuração e validação do Personagem Canônico (Fase 1 + Fase 7).
+    /// Wizard de exportaÃ§Ã£o, configuraÃ§Ã£o e validaÃ§Ã£o do Personagem CanÃ´nico (Fase 1 + Fase 7).
     /// Permite:
     /// 1) Re-exportar os .fbx a partir dos .blend usando o Blender local (export_character_fbx.py + character_export_manifest.json);
-    /// 2) Configurar os ModelImporters (Generic Rig, Avatar canônico, Loop Time, Root Motion off);
+    /// 2) Configurar os ModelImporters (Generic Rig, Avatar canÃ´nico, Loop Time, Root Motion off);
     /// 3) Gerar os materiais toon/URP de 4 slots (Corpo/Avental, Pupilas, Esclera, Pele);
-    /// 4) Gerar a AvatarMask de tronco/braços e o CharacterAnimator.controller (Locomotion BlendTree, Jump/FreeFall, SitDown/SitIdle/StandUp, Prepare);
+    /// 4) Gerar a AvatarMask de tronco/braÃ§os e o CharacterAnimator.controller (Locomotion BlendTree, Jump/FreeFall, SitDown/SitIdle/StandUp, Prepare);
     /// 5) Gerar o CharacterVisual.prefab compartilhado;
     /// 6) Integrar o CharacterVisual.prefab em PlayerArmature.prefab e regenerar PlayerArmature_Preview.prefab;
-    /// 7) Validar todas as referências, ossos, clips e prefabs.
+    /// 7) Validar todas as referÃªncias, ossos, clips e prefabs.
     /// </summary>
     [InitializeOnLoad]
     public class CharacterSetupWizard : EditorWindow
@@ -44,7 +44,7 @@ namespace ScaryParty.EditorScripts
 
         private static void EnsureSetupAutoAppliedOnce()
         {
-            if (EditorApplication.isPlayingOrWillChangePlaymode) return;
+            if (Application.isBatchMode || EditorApplication.isPlayingOrWillChangePlaymode) return;
             string flagPath = "Temp/CharacterSetupApplied_v2.flag";
             if (!File.Exists(flagPath))
             {
@@ -59,7 +59,7 @@ namespace ScaryParty.EditorScripts
         private string _report = "Pronto para configurar e validar o Personagem.";
         private MessageType _reportType = MessageType.Info;
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Personagens (Character Setup Wizard)", false, 15)]
+        [MenuItem("Tools/Scary Party/Wizards/Personagem & Interação/Personagens (Character Setup Wizard)", false, 70)]
         public static void ShowWindow()
         {
             var win = GetWindow<CharacterSetupWizard>("Character Setup Wizard");
@@ -93,18 +93,18 @@ namespace ScaryParty.EditorScripts
         private void OnGUI()
         {
             EditorGUILayout.Space(8);
-            GUILayout.Label("Scary Party — Wizard de Personagens (FBX, Visual Compartilhado & Animator)", EditorStyles.boldLabel);
+            GUILayout.Label("Scary Party â€” Wizard de Personagens (FBX, Visual Compartilhado & Animator)", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "Exporta os arquivos .blend para FBX, configura rig Generic canônico, materiais toon de 4 slots, " +
+                "Exporta os arquivos .blend para FBX, configura rig Generic canÃ´nico, materiais toon de 4 slots, " +
                 "AnimatorController (Idle/Walk/Run, Jump/FreeFall, SitDown/SitIdle/StandUp, Prepare), " +
                 "gera CharacterVisual.prefab e integra em PlayerArmature e PlayerArmature_Preview.",
                 MessageType.None);
 
             EditorGUILayout.Space(6);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            GUILayout.Label("1. Exportação Blender (.blend -> .fbx)", EditorStyles.boldLabel);
+            GUILayout.Label("1. ExportaÃ§Ã£o Blender (.blend -> .fbx)", EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();
-            _blenderExecutablePath = EditorGUILayout.TextField("Executável do Blender", _blenderExecutablePath);
+            _blenderExecutablePath = EditorGUILayout.TextField("ExecutÃ¡vel do Blender", _blenderExecutablePath);
             if (GUILayout.Button("Procurar...", GUILayout.Width(90)))
             {
                 string selected = EditorUtility.OpenFilePanel("Selecionar blender.exe", @"C:\Program Files\Blender Foundation", "exe");
@@ -126,7 +126,7 @@ namespace ScaryParty.EditorScripts
 
             EditorGUILayout.Space(6);
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-            GUILayout.Label("2. Pipeline de Configuração e Validação Unity", EditorStyles.boldLabel);
+            GUILayout.Label("2. Pipeline de ConfiguraÃ§Ã£o e ValidaÃ§Ã£o Unity", EditorStyles.boldLabel);
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Executar Setup Completo (FBX + Animator + Prefabs)", GUILayout.Height(32)))
             {
@@ -158,7 +158,7 @@ namespace ScaryParty.EditorScripts
             var sb = new StringBuilder();
             if (string.IsNullOrWhiteSpace(blenderExePath) || !File.Exists(blenderExePath))
             {
-                report = $"[ERRO] Executável do Blender não encontrado em: '{blenderExePath}'. Indique um caminho válido para blender.exe.";
+                report = $"[ERRO] ExecutÃ¡vel do Blender nÃ£o encontrado em: '{blenderExePath}'. Indique um caminho vÃ¡lido para blender.exe.";
                 Debug.LogError(report);
                 return false;
             }
@@ -205,7 +205,7 @@ namespace ScaryParty.EditorScripts
             }
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Aplicar Setup de Personagens Agora", false, 16)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Personagens/Aplicar Setup de Personagens Agora", false, 225)]
         public static void RunFullSetupMenu()
         {
             ApplyFullCharacterSetup(out string report);
@@ -215,7 +215,7 @@ namespace ScaryParty.EditorScripts
         public static bool ApplyFullCharacterSetup(out string report)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("=== APLICANDO SETUP DO PERSONAGEM CANÔNICO ===");
+            sb.AppendLine("=== APLICANDO SETUP DO PERSONAGEM CANÃ”NICO ===");
 
             try
             {
@@ -266,7 +266,7 @@ namespace ScaryParty.EditorScripts
             }
             catch (Exception ex)
             {
-                sb.AppendLine($"[EXCEÇÃO] {ex}");
+                sb.AppendLine($"[EXCEÃ‡ÃƒO] {ex}");
                 Debug.LogException(ex);
                 report = sb.ToString();
                 return false;
@@ -295,11 +295,11 @@ namespace ScaryParty.EditorScripts
             string canonicalPath = $"{GeneratedFbxFolder}/Character.fbx";
             if (!File.Exists(canonicalPath))
             {
-                sb.AppendLine($"[ERRO] Arquivo canônico não encontrado: {canonicalPath}. Execute a exportação do Blender primeiro.");
+                sb.AppendLine($"[ERRO] Arquivo canÃ´nico nÃ£o encontrado: {canonicalPath}. Execute a exportaÃ§Ã£o do Blender primeiro.");
                 return false;
             }
 
-            // 1. Configurar Character.fbx (cria o Avatar Generic canônico)
+            // 1. Configurar Character.fbx (cria o Avatar Generic canÃ´nico)
             var canonicalImporter = AssetImporter.GetAtPath(canonicalPath) as ModelImporter;
             if (canonicalImporter == null)
             {
@@ -383,7 +383,7 @@ namespace ScaryParty.EditorScripts
 
             sb.AppendLine($"[OK] Character.fbx importado (Avatar: {(canonicalAvatar != null ? canonicalAvatar.name : "Generic Default")}).");
 
-            // 2. Configurar os 7 arquivos de animação
+            // 2. Configurar os 7 arquivos de animaÃ§Ã£o
             var clipSpecs = new (string fileName, string clipName, bool loop)[]
             {
                 ("Character_Idle.fbx", "Idle", true),
@@ -400,7 +400,7 @@ namespace ScaryParty.EditorScripts
                 string path = $"{GeneratedFbxFolder}/{spec.fileName}";
                 if (!File.Exists(path))
                 {
-                    sb.AppendLine($"[ERRO] FBX de animação ausente: {path}");
+                    sb.AppendLine($"[ERRO] FBX de animaÃ§Ã£o ausente: {path}");
                     return false;
                 }
 
@@ -463,7 +463,7 @@ namespace ScaryParty.EditorScripts
                 ("Mat_Character_Apron.mat", new Color(0.95f, 0.95f, 0.95f, 1f)),       // Slot 0: M_Apron (Avental branco limpo)
                 ("Mat_Character_Pupils.mat", new Color(0.05f, 0.05f, 0.06f, 1f)),      // Slot 1: M_EyePupil (Pupilas pretas)
                 ("Mat_Character_EyesWhite.mat", new Color(0.96f, 0.96f, 0.96f, 1f)),   // Slot 2: M_EyeWhite (Esclera branca)
-                ("Mat_Character_BodyPrimary.mat", new Color(0.85f, 0.55f, 0.25f, 1f))  // Slot 3: M_Body (Corpo do personagem - customizável)
+                ("Mat_Character_BodyPrimary.mat", new Color(0.85f, 0.55f, 0.25f, 1f))  // Slot 3: M_Body (Corpo do personagem - customizÃ¡vel)
             };
 
             Material[] result = new Material[specs.Length];
@@ -539,7 +539,7 @@ namespace ScaryParty.EditorScripts
             }
 
             EditorUtility.SetDirty(mask);
-            sb.AppendLine($"[OK] AvatarMask de tronco/braços salva em {UpperBodyMaskPath}.");
+            sb.AppendLine($"[OK] AvatarMask de tronco/braÃ§os salva em {UpperBodyMaskPath}.");
             return mask;
         }
 
@@ -570,14 +570,32 @@ namespace ScaryParty.EditorScripts
             AnimationClip sitDownClip = LoadClipFromFbx("Character_SitDown.fbx", "SitDown");
             AnimationClip standUpClip = LoadClipFromFbx("Character_StandUp.fbx", "StandUp");
 
-            if (File.Exists(AnimatorControllerPath))
+            AnimatorController controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(AnimatorControllerPath);
+            if (controller == null)
             {
-                AssetDatabase.DeleteAsset(AnimatorControllerPath);
+                controller = AnimatorController.CreateAnimatorControllerAtPath(AnimatorControllerPath);
+            }
+            else
+            {
+                while (controller.layers.Length > 1)
+                {
+                    controller.RemoveLayer(controller.layers.Length - 1);
+                }
+                while (controller.parameters.Length > 0)
+                {
+                    controller.RemoveParameter(0);
+                }
+                var sm = controller.layers[0].stateMachine;
+                if (sm != null)
+                {
+                    sm.states = new ChildAnimatorState[0];
+                    sm.stateMachines = new ChildAnimatorStateMachine[0];
+                    sm.anyStateTransitions = new AnimatorStateTransition[0];
+                    sm.entryTransitions = new AnimatorTransition[0];
+                }
             }
 
-            var controller = AnimatorController.CreateAnimatorControllerAtPath(AnimatorControllerPath);
-
-            // Parâmetros compatíveis com ThirdPersonController + extensões de preparo/assento/armas
+            // ParÃ¢metros compatÃ­veis com ThirdPersonController + extensÃµes de preparo/assento/armas
             controller.AddParameter("Speed", AnimatorControllerParameterType.Float);
             controller.AddParameter("MotionSpeed", AnimatorControllerParameterType.Float);
             controller.AddParameter("Grounded", AnimatorControllerParameterType.Bool);
@@ -593,7 +611,7 @@ namespace ScaryParty.EditorScripts
             controller.AddParameter("IsMoving", AnimatorControllerParameterType.Bool);
             controller.AddParameter("IsSprinting", AnimatorControllerParameterType.Bool);
 
-            // Definir Grounded = true por padrão
+            // Definir Grounded = true por padrÃ£o
             var parameters = controller.parameters;
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -606,7 +624,7 @@ namespace ScaryParty.EditorScripts
             var rootSm = controller.layers[0].stateMachine;
 
             // 1. BlendTree Locomotion (Idle / Walk / Run)
-            AnimatorState locomotionState = controller.CreateBlendTreeInController("Idle Walk Run Blend", out BlendTree blendTree, 0);
+            AnimatorState locomotionState = controller.CreateBlendTreeInController("Locomotion", out BlendTree blendTree, 0);
             locomotionState.speedParameterActive = true;
             locomotionState.speedParameter = "MotionSpeed";
             rootSm.defaultState = locomotionState;
@@ -702,7 +720,7 @@ namespace ScaryParty.EditorScripts
             emptyUpper.motion = null;
             prepSm.defaultState = emptyUpper;
 
-            var prepActive = prepSm.AddState("Preparing", new Vector3(520, 60, 0));
+            var prepActive = prepSm.AddState("Prepare", new Vector3(520, 60, 0));
             prepActive.motion = prepareClip;
 
             var tToPrep = emptyUpper.AddTransition(prepActive);
@@ -718,7 +736,21 @@ namespace ScaryParty.EditorScripts
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
 
-            sb.AppendLine($"[OK] CharacterAnimator.controller gerado em {AnimatorControllerPath} com BlendTree Idle/Walk/Run, Jump/FreeFall, SitDown/SitIdle/StandUp e camada PrepareUpperBody.");
+            string resDir = "Assets/Piaaria/Resources";
+            if (!Directory.Exists(resDir)) Directory.CreateDirectory(resDir);
+            string resPath = $"{resDir}/CharacterAnimator.controller";
+            if (File.Exists(resPath))
+            {
+                File.Copy(AnimatorControllerPath, resPath, true);
+                AssetDatabase.ImportAsset(resPath, ImportAssetOptions.ForceUpdate);
+            }
+            else
+            {
+                AssetDatabase.CopyAsset(AnimatorControllerPath, resPath);
+                AssetDatabase.ImportAsset(resPath, ImportAssetOptions.ForceUpdate);
+            }
+
+            sb.AppendLine($"[OK] CharacterAnimator.controller sincronizado persistentemente em {AnimatorControllerPath} e {resPath}.");
             return controller;
         }
 
@@ -740,7 +772,7 @@ namespace ScaryParty.EditorScripts
                 var modelInstance = (GameObject)PrefabUtility.InstantiatePrefab(fbxAsset);
                 PrefabUtility.UnpackPrefabInstance(modelInstance, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
 
-                // Transferir filhos do FBX (Armature e Cylinder.002) diretamente para CharacterVisual para casar com os caminhos de animação ("Armature/central/...")
+                // Transferir filhos do FBX (Armature e Cylinder.002) diretamente para CharacterVisual para casar com os caminhos de animaÃ§Ã£o ("Armature/central/...")
                 var childrenToMove = new List<Transform>();
                 for (int i = 0; i < modelInstance.transform.childCount; i++)
                 {
@@ -789,6 +821,7 @@ namespace ScaryParty.EditorScripts
                 appearance.SetPrimaryRenderer(smr, 3, true);
 
                 var visualCtrl = rootGo.AddComponent<CharacterVisualController>();
+                visualCtrl.DefaultAnimatorController = controller;
                 visualCtrl.ResolveReferences();
 
                 var savedPrefab = PrefabUtility.SaveAsPrefabAsset(rootGo, CharacterVisualPrefabPath);
@@ -808,7 +841,7 @@ namespace ScaryParty.EditorScripts
         {
             if (!File.Exists(PlayerArmaturePrefabPath))
             {
-                sb.AppendLine($"[ERRO] PlayerArmature.prefab não encontrado em {PlayerArmaturePrefabPath}.");
+                sb.AppendLine($"[ERRO] PlayerArmature.prefab nÃ£o encontrado em {PlayerArmaturePrefabPath}.");
                 return false;
             }
 
@@ -830,7 +863,7 @@ namespace ScaryParty.EditorScripts
                     }
                 }
 
-                // 2. Remover Animator antigo da raiz se não houver RequireComponent exigindo
+                // 2. Remover Animator antigo da raiz se nÃ£o houver RequireComponent exigindo
                 var rootAnimator = contents.GetComponent<Animator>();
                 if (rootAnimator != null)
                 {
@@ -847,7 +880,7 @@ namespace ScaryParty.EditorScripts
                 var visualCtrl = visualInst.GetComponent<CharacterVisualController>();
                 var childAnimator = visualInst.GetComponent<Animator>();
 
-                // 4. Atualizar ThirdPersonController com referência explícita ao Animator e CharacterVisualController
+                // 4. Atualizar ThirdPersonController com referÃªncia explÃ­cita ao Animator e CharacterVisualController
                 var tpc = contents.GetComponent<ThirdPersonController>();
                 if (tpc != null)
                 {
@@ -890,7 +923,7 @@ namespace ScaryParty.EditorScripts
                     soBp.ApplyModifiedPropertiesWithoutUndo();
                 }
 
-                // 8. Garantir ajuste de CharacterController compatível com 1.60m de altura mantendo jogabilidade
+                // 8. Garantir ajuste de CharacterController compatÃ­vel com 1.60m de altura mantendo jogabilidade
                 var cc = contents.GetComponent<CharacterController>();
                 if (cc != null)
                 {
@@ -900,7 +933,7 @@ namespace ScaryParty.EditorScripts
                 }
 
                 PrefabUtility.SaveAsPrefabAsset(contents, PlayerArmaturePrefabPath);
-                sb.AppendLine($"[OK] PlayerArmature.prefab atualizado com CharacterVisual.prefab e bindings explícitos.");
+                sb.AppendLine($"[OK] PlayerArmature.prefab atualizado com CharacterVisual.prefab e bindings explÃ­citos.");
                 return true;
             }
             finally
@@ -913,7 +946,7 @@ namespace ScaryParty.EditorScripts
         {
             bool ok = true;
             var sb = new StringBuilder();
-            sb.AppendLine("=== VALIDAÇÃO DO SETUP DE PERSONAGENS ===");
+            sb.AppendLine("=== VALIDAÃ‡ÃƒO DO SETUP DE PERSONAGENS ===");
 
             // 1. Verificar FBXs
             string[] fbxs = new[]
@@ -950,14 +983,27 @@ namespace ScaryParty.EditorScripts
                 var vc = visualPrefab.GetComponent<CharacterVisualController>();
                 var app = visualPrefab.GetComponent<CharacterAppearance>();
                 var anim = visualPrefab.GetComponent<Animator>();
-                if (vc == null || app == null || anim == null || anim.runtimeAnimatorController == null)
+                if (vc == null) { sb.AppendLine("[ERRO] CharacterVisual.prefab: CharacterVisualController ausente."); ok = false; }
+                if (app == null) { sb.AppendLine("[ERRO] CharacterVisual.prefab: CharacterAppearance ausente."); ok = false; }
+                if (anim == null) { sb.AppendLine("[ERRO] CharacterVisual.prefab: Animator ausente."); ok = false; }
+                else if (anim.runtimeAnimatorController == null)
                 {
-                    sb.AppendLine("[ERRO] CharacterVisual.prefab está incompleto (faltando Controller, Appearance ou AnimatorController).");
-                    ok = false;
+                    if (vc != null && vc.DefaultAnimatorController != null)
+                    {
+                        anim.runtimeAnimatorController = vc.DefaultAnimatorController;
+                        EditorUtility.SetDirty(visualPrefab);
+                        AssetDatabase.SaveAssets();
+                        sb.AppendLine($"[AUTO_FIX] runtimeAnimatorController reatribuÃ­do via DefaultAnimatorController no prefab.");
+                    }
+                    else
+                    {
+                        sb.AppendLine("[ERRO] CharacterVisual.prefab: Animator.runtimeAnimatorController nulo.");
+                        ok = false;
+                    }
                 }
                 else
                 {
-                    sb.AppendLine($"[OK] CharacterVisual.prefab válido (RootBone={vc.RootBone?.name}, Chest={vc.ChestBone?.name}, LHand={vc.LeftHandBone?.name}, RHand={vc.RightHandBone?.name}).");
+                    sb.AppendLine($"[OK] CharacterVisual.prefab vÃ¡lido (RootBone={vc.RootBone?.name}, Chest={vc.ChestBone?.name}, LHand={vc.LeftHandBone?.name}, RHand={vc.RightHandBone?.name}).");
 
                     var smr = visualPrefab.GetComponentInChildren<SkinnedMeshRenderer>();
                     if (smr != null && smr.sharedMesh != null)
@@ -966,16 +1012,16 @@ namespace ScaryParty.EditorScripts
                         float h = b.size.y;
                         if (h < 1.3f || h > 1.9f)
                         {
-                            sb.AppendLine($"[AVISO] Altura da malha: {h:F2}m (fora do intervalo canônico 1.4-1.8m).");
+                            sb.AppendLine($"[AVISO] Altura da malha: {h:F2}m (fora do intervalo canÃ´nico 1.4-1.8m).");
                         }
                         else
                         {
-                            sb.AppendLine($"[OK] Altura canônica validada: {h:F2}m (pivot nos pés).");
+                            sb.AppendLine($"[OK] Altura canÃ´nica validada: {h:F2}m (pivot nos pÃ©s).");
                         }
                     }
                     if (app != null)
                     {
-                        sb.AppendLine($"[OK] CharacterAppearance configurado (Slot primário={app.PrimaryColorMaterialSlot} - Corpo).");
+                        sb.AppendLine($"[OK] CharacterAppearance configurado (Slot primÃ¡rio={app.PrimaryColorMaterialSlot} - Corpo).");
                     }
                 }
             }
@@ -998,7 +1044,7 @@ namespace ScaryParty.EditorScripts
                 var ownerNetAnim = playerPrefab.GetComponent<OwnerNetworkAnimator>();
                 if (ownerNetAnim == null || ownerNetAnim.Animator == null)
                 {
-                    sb.AppendLine("[ERRO] OwnerNetworkAnimator no PlayerArmature está sem referência de Animator.");
+                    sb.AppendLine("[ERRO] OwnerNetworkAnimator no PlayerArmature estÃ¡ sem referÃªncia de Animator.");
                     ok = false;
                 }
                 else
@@ -1019,12 +1065,12 @@ namespace ScaryParty.EditorScripts
                 var smr = previewPrefab.GetComponentInChildren<SkinnedMeshRenderer>(true);
                 if (smr == null)
                 {
-                    sb.AppendLine("[ERRO] PlayerArmature_Preview.prefab não contém SkinnedMeshRenderer.");
+                    sb.AppendLine("[ERRO] PlayerArmature_Preview.prefab nÃ£o contÃ©m SkinnedMeshRenderer.");
                     ok = false;
                 }
                 else
                 {
-                    sb.AppendLine($"[OK] PlayerArmature_Preview.prefab válido (Mesh={smr.sharedMesh?.name}).");
+                    sb.AppendLine($"[OK] PlayerArmature_Preview.prefab vÃ¡lido (Mesh={smr.sharedMesh?.name}).");
                 }
             }
 

@@ -139,6 +139,20 @@ namespace ScaryParty.Pizzeria.Player
                         else if (tool.SlotId == (int)HandSlotIndex.Right) rightDesc = toolName;
                     }
                 }
+
+                // Verificar arma equipada no Rack
+                if (netState.TryGetEquippedWeapon(myId, out var weapon))
+                {
+                    if (weapon.WeaponType == 2)
+                    {
+                        leftDesc = "Escopeta (2 mãos)";
+                        rightDesc = "Escopeta (2 mãos)";
+                    }
+                    else if (weapon.WeaponType == 1)
+                    {
+                        rightDesc = "Pistola (1 mão)";
+                    }
+                }
             }
 
             UIManager.Instance.SetHandState(false, ActiveHand == HandSlotIndex.Left, leftDesc);

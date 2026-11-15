@@ -29,7 +29,7 @@ namespace ScaryParty.Pizzeria.Editor
             return stackStation;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Builders/Construir Pilha de Staging (Legado)", false, 122)]
+        [MenuItem("Tools/Scary Party/Legado/Pizzaria (Prefab Antigo)/Construir Pilha de Staging", false, 313)]
         public static void BuildStagingStack()
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath);
@@ -42,11 +42,11 @@ namespace ScaryParty.Pizzeria.Editor
             var bindings = prefab.GetComponent<PizzeriaAuthoringBindings>();
             if (bindings != null && bindings.isManualAuthoring)
             {
-                Debug.LogWarning("[StackBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Pizzaria Modular' (Aba 3: Bancadas e Objetos) para atribuir a pilha de caixas.");
+                Debug.LogWarning("[StackBuilder] O prefab está em modo de Autoria Manual Assistida. Use 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' (Aba 3: Bancadas e Objetos) para atribuir a pilha de caixas.");
                 if (Application.isBatchMode) return;
                 EditorUtility.DisplayDialog(
                     "Autoria Manual Ativa",
-                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Pizzaria Modular' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Pilha de Caixas'.",
+                    "Este prefab usa o Builder Manual da Pizzaria Modular.\n\nAbra 'Tools > Scary Party > Wizards > Pizzaria > Pizzaria Modular (Autoria de Prefab)' → Aba '3. Bancadas e Objetos', selecione o objeto e clique em 'Criar Pilha de Caixas'.",
                     "OK");
                 return;
             }

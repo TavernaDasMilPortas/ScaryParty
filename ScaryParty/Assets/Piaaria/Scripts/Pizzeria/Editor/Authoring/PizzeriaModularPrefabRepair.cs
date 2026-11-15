@@ -27,13 +27,13 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             public int index;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Reparar prefab modular manual...")]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Reparar Prefab Modular Manual...", false, 150)]
         private static void RepairManual() => RepairAsset(ManualPrefabPath);
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Reparar prefab selecionado...")]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Reparar Prefab Selecionado...", false, 151)]
         private static void RepairSelected() => RepairAsset(AssetDatabase.GetAssetPath(Selection.activeObject));
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Reparar prefab selecionado...", true)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Reparar Prefab Selecionado...", true)]
         private static bool CanRepairSelected() => Selection.activeObject is GameObject &&
             AssetDatabase.GetAssetPath(Selection.activeObject).EndsWith(".prefab", StringComparison.OrdinalIgnoreCase);
 

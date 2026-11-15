@@ -263,7 +263,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (UnityEngine.InputSystem.Keyboard.current != null)
             {
                 var kb = UnityEngine.InputSystem.Keyboard.current;
-                if (kb.hKey.wasPressedThisFrame)
+                if (kb.hKey.wasPressedThisFrame && !WeaponController.LocalDrivingMotorcycle)
                 {
                     Toggle();
                 }

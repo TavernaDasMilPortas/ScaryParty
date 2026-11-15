@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,6 +22,12 @@ namespace ScaryParty.Pizzeria.Authoring
         public string stationName;
         [Tooltip("Contagem padrão de slots de trabalho/espera da bancada")]
         public int slotCount = 1;
+        [Tooltip("Layout reutilizável de slots padrão para esta estação")]
+        public StationSlotLayoutAsset defaultSlotLayout;
+        [Tooltip("Tipo padrão da estação")]
+        public PizzeriaStationKind defaultStationKind = PizzeriaStationKind.None;
+        [Tooltip("Prefab de modelo visual ou placeholder")]
+        public GameObject visualPrefab;
         [Tooltip("Processos aceitos nesta bancada")]
         public List<ProcessDef> acceptedProcesses = new List<ProcessDef>();
         public List<int> acceptedProcessIds = new List<int>();

@@ -2,8 +2,26 @@
     "blocks": [
         {
             "blockIndex": 0,
-            "area": 11441.2099609375,
-            "vertexCount": 6,
+            "area": 11362.4541015625,
+            "vertexCount": 7,
+            "edges": []
+        },
+        {
+            "blockIndex": 1,
+            "area": 1153.266357421875,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 2,
+            "area": 1978.6448974609375,
+            "vertexCount": 5,
+            "edges": []
+        },
+        {
+            "blockIndex": 3,
+            "area": 871.8395385742188,
+            "vertexCount": 4,
             "edges": []
         }
     ]

@@ -42,7 +42,7 @@ namespace ScaryParty.Navigation.Agents
             if (visualController == null || motor == null) return;
 
             float currentSpeed = motor.CurrentSpeed;
-            float animSpeed = currentSpeed > _minAnimSpeedThreshold ? Mathf.Max(currentSpeed, _walkAnimSpeed) : 0f;
+            float animSpeed = currentSpeed > _minAnimSpeedThreshold ? Mathf.Clamp(currentSpeed, 0f, _walkAnimSpeed) : 0f;
 
             visualController.SetLocomotion(animSpeed, 1f, true);
         }

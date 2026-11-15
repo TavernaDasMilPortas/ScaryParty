@@ -27,7 +27,7 @@ namespace ScaryParty.Pizzeria.Editor
             EditorApplication.delayCall += EnsureContentAssetsInitializedSilent;
         }
 
-        [MenuItem("Tools/Scary Party/Pizzeria/Clientes e Traços (Customer Trait Wizard)", false, 14)]
+        [MenuItem("Tools/Scary Party/Wizards/Pizzaria/Clientes e Traços (Customer Trait Wizard)", false, 14)]
         public static void ShowWindow()
         {
             var win = GetWindow<CustomerTraitWizard>("Clientes & Composição");

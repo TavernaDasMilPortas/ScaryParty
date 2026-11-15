@@ -29,21 +29,21 @@ namespace ScaryParty.UI.Piaria.Editor
             }
         }
 
-        [MenuItem("Tools/Scary Party/UI/Abrir LobbyScene", false, 1)]
+        [MenuItem("Tools/Scary Party/Uso Comum/UI/Abrir LobbyScene", false, 185)]
         public static void OpenLobbyScene()
         {
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/Piaaria/Scenes/LobbyScene.unity", UnityEditor.SceneManagement.OpenSceneMode.Single);
             AutoConfigureActiveScene();
         }
 
-        [MenuItem("Tools/Scary Party/UI/Configurar Cena Atual", false, 13)]
+        [MenuItem("Tools/Scary Party/Uso Comum/UI/Configurar Cena Atual", false, 186)]
         public static void ForceConfigureCurrentScene()
         {
             AutoConfigureActiveScene();
             Debug.Log("[PiariaAutoRunner] Cena atual configurada com sucesso!");
         }
 
-        [MenuItem("Tools/Scary Party/UI/Executar Trigger", false, 14)]
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/UI (P.I.A.R.I.A)/Executar Trigger de AutoRunner", false, 288)]
         public static void ForceRun()
         {
             Execute();

@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a71073ccfea27840a71123a2db8c489, type: 3}
   m_Name: PizzeriaConfig_PizzeriaModular_Manual
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaConfig
+  compositionRules: {fileID: 0}
+  customerTraits: []
   ingredients:
   - {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
   - {fileID: 11400000, guid: 2c665dd7e6ec4324baf3a0c66c1db920, type: 2}
@@ -49,6 +51,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1865027e78b4dfb4ba50634bf421aabd, type: 2}
   - {fileID: 11400000, guid: 142c94a6dc6dee24cbd0254d14e1663f, type: 2}
   - {fileID: 11400000, guid: 90b3b77ee62e49141980d609b2636a26, type: 2}
+  - {fileID: 11400000, guid: 599c964a0e3397644a285e3701b15b39, type: 2}
+  - {fileID: 11400000, guid: e06e59c4560e9524d9214b06c6de4139, type: 2}
+  - {fileID: 11400000, guid: be3814db497ded54590c829c2915c07c, type: 2}
+  - {fileID: 11400000, guid: 1ca8a41c91f0c30478161b12cb3dd68d, type: 2}
+  - {fileID: 11400000, guid: 45898db6611f9e6488650f50be7b20ca, type: 2}
+  - {fileID: 11400000, guid: 744ba02e83c1cd3469143a65652364b9, type: 2}
   stationInstances:
   - instanceId: 19
     definition: {fileID: 11400000, guid: 40a5c32d746e2f946820c7bdfa860527, type: 2}
@@ -92,7 +100,7 @@ MonoBehaviour:
     durationOverrides: []
   - instanceId: 10
     definition: {fileID: 11400000, guid: 6fb2c2556f769374795c17e0eb786135, type: 2}
-    displayName: Pilha de Caixas
+    displayName: "Bancada de Retirada / Expedi\xE7\xE3o"
     overrideSlotCount: 2
     durationOverrides: []
   - instanceId: 13
@@ -118,12 +126,42 @@ MonoBehaviour:
   - instanceId: 4
     definition: {fileID: 11400000, guid: 331a740e33a07344cb037e5f0eda3828, type: 2}
     displayName: Quadro de Comandas
-    overrideSlotCount: 1
+    overrideSlotCount: 6
     durationOverrides: []
   - instanceId: 15
     definition: {fileID: 11400000, guid: 90b3b77ee62e49141980d609b2636a26, type: 2}
     displayName: Quadro de Comandas
     overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 16
+    definition: {fileID: 11400000, guid: 599c964a0e3397644a285e3701b15b39, type: 2}
+    displayName: Pilha de Caixas
+    overrideSlotCount: 2
+    durationOverrides: []
+  - instanceId: 17
+    definition: {fileID: 11400000, guid: e06e59c4560e9524d9214b06c6de4139, type: 2}
+    displayName: "Dispensa (Secund\xE1ria)"
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 18
+    definition: {fileID: 11400000, guid: be3814db497ded54590c829c2915c07c, type: 2}
+    displayName: "Geladeira (Secund\xE1ria)"
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 14
+    definition: {fileID: 11400000, guid: 1ca8a41c91f0c30478161b12cb3dd68d, type: 2}
+    displayName: "\xC1rea de Recebimento"
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 20
+    definition: {fileID: 11400000, guid: 45898db6611f9e6488650f50be7b20ca, type: 2}
+    displayName: Terminal de Fornecedor
+    overrideSlotCount: 1
+    durationOverrides: []
+  - instanceId: 21
+    definition: {fileID: 11400000, guid: 744ba02e83c1cd3469143a65652364b9, type: 2}
+    displayName: Bancada de Apoio / Espera
+    overrideSlotCount: 2
     durationOverrides: []
   supplyItems:
   - {fileID: 11400000, guid: abc5fc56a0c0657459df2394c1e3e5c7, type: 2}
@@ -163,13 +201,25 @@ MonoBehaviour:
     ingredientId: 1
     initialStock: 20
     capacity: 30
+  - storageId: 17
+    ingredient: {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
+    ingredientId: 1
+    initialStock: 10
+    capacity: 30
+  - storageId: 18
+    ingredient: {fileID: 11400000, guid: 846a2e739d83d364c85a86cbe520531e, type: 2}
+    ingredientId: 4
+    initialStock: 10
+    capacity: 100
   workLeaseSeconds: 0.75
   serverDistanceTolerance: 1.5
   interactDistance: 3
   defaultBakeDuration: 15
+  addIngredientDuration: 0
   packagingDuration: 2
   discardDuration: 1
   archiveHoldDuration: 1
+  customerAttendHoldDuration: 0.6
   maxActiveOrders: 6
   maxPendingCalls: 4
   callExpireSeconds: 30
@@ -178,6 +228,19 @@ MonoBehaviour:
   backpackCount: 2
   backpackCapacity: 4
   ticketBoardCapacity: 6
+  queueCount: 2
+  maxCustomersPerQueue: 3
+  maxActiveDineInCustomers: 6
+  dineInChannelWeight: 0.5
+  deliveryChannelWeight: 0.5
+  maxConsecutiveSameChannel: 2
+  customerQueuePatienceMin: 60
+  customerQueuePatienceMax: 100
+  customerFoodPatienceMin: 180
+  customerFoodPatienceMax: 300
+  customerEatingDuration: 12
+  queueStagnationThresholdSeconds: 35
+  queueStagnationDecayMultiplier: 1.35
   startingBudget: 500
   deliveryTimeLimit: 300
   phoneRingDuration: 30

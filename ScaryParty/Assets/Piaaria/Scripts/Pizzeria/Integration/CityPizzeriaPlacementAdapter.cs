@@ -108,6 +108,11 @@ namespace ScaryParty.Pizzeria.Integration
                 {
                     var instance = Object.Instantiate(pizzeriaPrefab, position, rotation, parent);
                     instance.name = "The_Pizzeria_Building";
+                    ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                        instance,
+                        ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                        ScaryParty.VisualStyles.VisualCategoryIds.Architecture,
+                        "pizzeria_modular");
                     return instance;
                 }
             }
