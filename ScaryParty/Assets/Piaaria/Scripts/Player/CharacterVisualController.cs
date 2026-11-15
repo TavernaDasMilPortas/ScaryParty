@@ -1,3 +1,4 @@
+using ScaryParty.Pizzeria.Presentation.Feedback;
 using UnityEngine;
 
 namespace ScaryParty.Player
@@ -41,6 +42,7 @@ namespace ScaryParty.Player
         private bool _isPreparing;
         private bool _isSitting;
         private float _currentPrepareLayerWeight;
+        private GameFeelVisualPivot _feelPivot;
 
         public Animator Animator
         {
@@ -100,6 +102,7 @@ namespace ScaryParty.Player
                 _animator.applyRootMotion = false;
                 EnsureAnimatorControllerAssigned();
             }
+            EnsureFeelPivot();
         }
 
         public void ResolveReferences()
@@ -258,6 +261,10 @@ namespace ScaryParty.Player
             if (_isSitting == sitting && !triggerTransition) return;
             bool changed = _isSitting != sitting;
             _isSitting = sitting;
+            if (_feelPivot != null)
+            {
+                _feelPivot.LockVerticalAndHipOffset = sitting;
+            }
 
             var anim = Animator;
             if (anim == null || !anim.isActiveAndEnabled || anim.runtimeAnimatorController == null) return;
@@ -278,6 +285,50 @@ namespace ScaryParty.Player
                 anim.ResetTrigger(AnimSitDown);
                 anim.SetTrigger(AnimStandUp);
             }
+        }
+
+        public GameFeelVisualPivot EnsureFeelPivot()
+        {
+            if (_feelPivot == null)
+            {
+                _feelPivot = GetComponent<GameFeelVisualPivot>() ?? gameObject.AddComponent<GameFeelVisualPivot>();
+                _feelPivot.CaptureCurrentAsBasePose();
+            }
+            _feelPivot.ClampAsCharacter = true;
+            _feelPivot.LockVerticalAndHipOffset = _isSitting;
+            return _feelPivot;
+        }
+
+        public void DesynchronizeIdleCycle(ulong entitySeed)
+        {
+            var anim = Animator;
+            if (anim == null || !anim.isActiveAndEnabled || anim.runtimeAnimatorController == null) return;
+            if (anim.IsInTransition(0)) return;
+            float offset = Mathf.Repeat((entitySeed % 997UL) / 997f, 1f);
+            var stateInfo = anim.GetCurrentAnimatorStateInfo(0);
+            if (stateInfo.fullPathHash != 0)
+            {
+                anim.Play(stateInfo.fullPathHash, 0, offset);
+            }
+        }
+
+        public void PlayBodyReaction(GameFeelEventId eventId, float intensity = 1f, int variantSeed = 0, ulong entityId = 0)
+        {
+            if (eventId == GameFeelEventId.None) return;
+            var pivot = EnsureFeelPivot();
+            if (pivot == null) return;
+            pivot.ClampAsCharacter = true;
+            pivot.LockVerticalAndHipOffset = _isSitting;
+
+            GameFeelPresenter.EnsureInstance().TriggerSimple(
+                eventId,
+                pivot.transform,
+                entityId,
+                0,
+                unchecked((uint)variantSeed),
+                GameFeelMaterialFamily.CharacterBody,
+                intensity,
+                false);
         }
 
         public void SetColor(Color color)

@@ -41,6 +41,18 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 Instance.AddToast(message, type);
             }
+
+            if (type == NotificationType.Error && Feedback.GameFeelPresenter.Instance != null)
+            {
+                var ctx = Feedback.GameFeelContext.Create(
+                    Feedback.GameFeelEventId.ActionRejected,
+                    entityId: 0,
+                    stationId: 0,
+                    revision: (uint)Mathf.FloorToInt(Time.unscaledTime * 100f),
+                    family: Feedback.GameFeelMaterialFamily.Default);
+                ctx.IsLocalOwner = true;
+                Feedback.GameFeelPresenter.Instance.Trigger(in ctx);
+            }
         }
 
         private void AddToast(string message, NotificationType type)

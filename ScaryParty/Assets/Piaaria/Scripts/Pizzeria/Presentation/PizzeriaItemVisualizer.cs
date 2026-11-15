@@ -52,9 +52,55 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (inTransit) _inTransitItems.Add(itemId);
             else _inTransitItems.Remove(itemId);
+
+            if (_visualWrappers.TryGetValue(itemId, out var wrapper) && wrapper != null)
+            {
+                wrapper.IsInTransit = inTransit;
+            }
         }
 
         public bool IsItemInTransit(ulong itemId) => _inTransitItems.Contains(itemId);
+
+        public void TriggerStackWave(int stationId, bool added)
+        {
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null) return;
+
+            var presenter = ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance;
+            if (presenter == null) return;
+
+            ulong matchingStackId = 0;
+            for (int i = 0; i < netState.Stacks.Count; i++)
+            {
+                if (netState.Stacks[i].StationId == stationId)
+                {
+                    matchingStackId = netState.Stacks[i].StackId;
+                    break;
+                }
+            }
+            if (matchingStackId == 0) return;
+
+            for (int i = 0; i < netState.Items.Count; i++)
+            {
+                var item = netState.Items[i];
+                if (item.LocationType != (byte)LocationType.Stack || item.HolderId != matchingStackId)
+                    continue;
+
+                if (_visualWrappers.TryGetValue(item.ItemId, out var wrapper) && wrapper != null && wrapper.FeelPivot != null)
+                {
+                    float heightFactor = Mathf.Clamp(1f - item.SlotId * 0.14f, 0.35f, 1.15f);
+                    var recipe = ScaryParty.Pizzeria.Presentation.Feedback.GameFeelRecipe.CreateDefault(
+                        added ? ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.StackPlaced : ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.StackRemoved,
+                        ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.CardboardPaper);
+                    recipe.Duration = 0.22f;
+                    recipe.SquashScale = added ? new Vector3(1.04f, 0.90f, 1.04f) : new Vector3(0.98f, 1.04f, 0.98f);
+                    recipe.MaxTiltDegrees = Mathf.Clamp(2f + item.SlotId * 0.6f, 2f, 4f);
+                    float intensity = ScaryParty.Pizzeria.Presentation.Feedback.GameFeelSettings.GetEffectiveChannelIntensity(
+                        ScaryParty.Pizzeria.Presentation.Feedback.GameFeelChannel.Movement) * heightFactor;
+                    wrapper.FeelPivot.PlayRecipe(in recipe, intensity, unchecked((int)item.ItemId + item.SlotId));
+                }
+            }
+        }
 
         public Transform GetPlayerHandAnchor(ulong clientId, int handIndex)
         {
@@ -80,6 +126,9 @@ namespace ScaryParty.Pizzeria.Presentation
             EnsureCatalog();
             if (GetComponent<KitchenProcessEffects>() == null)
                 gameObject.AddComponent<KitchenProcessEffects>();
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.EnsureInstance();
+            if (GetComponent<ScaryParty.Pizzeria.Presentation.Feedback.GameFeelNetworkBridge>() == null)
+                gameObject.AddComponent<ScaryParty.Pizzeria.Presentation.Feedback.GameFeelNetworkBridge>();
         }
 
         public void EnsureCatalog()

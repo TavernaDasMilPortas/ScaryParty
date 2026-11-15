@@ -5,6 +5,18 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-14] — Sistema Completo de Game Feel Cartoon, Animações Táteis, Audio 3D e Studio Wizard (Fases 0–6)
+- **Escopo:** `Presentation/Feedback/*`, `Pizzeria/Presentation/*`, `Pizzeria/Visual/PizzaVisualComposer.cs`, `Pizzeria/Stations/{OvenStation,PhoneRinger,TicketSheetView,StationView}.cs`, `Player/{PlayerInteraction,FirstPersonCameraController,CharacterVisualController}.cs`, `UI/Piaria/Scripts/Runtime/Core/{UIToolkitTweenService,UIFeedbackService}.cs`, `Editor/GameFeel/GameFeelStudioWindow.cs`, `Pizzeria/Editor/Tests/GameFeelSystemTests.cs`, `Docs/GameFeel/*`, `Docs/{CURRENT_STATE,PizzeriaSetup,INDEX}.md`.
+- **Alterações:**
+  - Correções base (UI Toolkit tweens rastreados via `ScaleTo`/`PulseScale`, callbacks `Pointer*`/`Focus*` unificados sem duplicidade de `MouseEnter`, remoção do `#if MOREMOUNTAINS_FEEL` inativo e correção de caminhos de prefabs na documentação).
+  - Criação do núcleo de Game Feel (`GameFeelPresenter`, `GameFeelNetworkBridge` com snapshot inicial silencioso para *late-joiners*, `GameFeelProfile` com receitas A–D, `GameFeelSettings` com clamps/presets/ReduceMotion e `GameFeelVisualPivot` em pivô cosmético isolado).
+  - Enriquecimento tátil de bancadas/processos (`KitchenProcessEffects` com pool e fatias decorativas sem collider, `PizzaVisualComposer`, `OvenTransferVisualizer` com guarda anti-concorrência, `OvenStation`, `PhoneRinger`/`TicketSheetView` via `MaterialPropertyBlock`, `BackpackVisualizer` com sway de carga, `CharacterVisualController`/`CustomerNpcView` com LOD `<=20m` e `PizzeriaSoundManager` 3D pooled).
+  - Criação do Wizard `Tools/Scary Party/Wizards/Visuals/Game Feel Studio` (8 abas + rollback seletivo) e suíte `GameFeelSystemTests.cs`.
+- **Validação:** Validações estáticas `dotnet build` e `git diff --check` executadas sem tocar cenas/prefabs binários; execução EditMode Test Runner (`GameFeelSystemTests`) e testes PlayMode/ParrelSync pendentes no Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).
+- **Risco:** Baixo; comportamento autoritativo, colisões, câmera FPS e `NavMeshAgent` preservados intactos com clamps de escala e desligamento completo via `ReduceMotion`.
+
+---
+
 ## [2026-11-14] — Espessura de Outlines e Utilitário de Troca de Horas em Play Mode
 - **Escopo:** `Shaders/IllustrateScreenSpaceOutline.shader`, `VisualStyles/Runtime/TimeOfDayTestOverlay.cs`, `VisualStyles/Runtime/TimeOfDayLightingDirector.cs`, `VisualStyles/Runtime/VisualStyleProfile.cs`, `VisualStyles/Editor/GlobalCelShadingWizard.cs`, `Art/VisualStyles/Profiles/*.asset`, `Art/VisualStyles/Generated/*/Render/*_ScreenSpaceOutline.mat`.
 - **Alterações:**

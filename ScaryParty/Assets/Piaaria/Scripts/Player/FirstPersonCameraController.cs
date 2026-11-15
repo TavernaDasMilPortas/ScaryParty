@@ -335,34 +335,71 @@ namespace ScaryParty.Player
             UpdateHandAnchors();
         }
 
+        private Vector3 _leftHandImpulsePos;
+        private Vector3 _rightHandImpulsePos;
+        private Vector3 _leftHandImpulseEuler;
+        private Vector3 _rightHandImpulseEuler;
+
+        /// <summary>
+        /// Aplica um recuo/acomodação tátil apenas nos anchors de mão em 1ª pessoa.
+        /// Nunca desloca nem sacode o _cameraPivot.
+        /// handIndex: 0 = esquerda, 1 = direita, -1 = ambas.
+        /// </summary>
+        public void TriggerHandImpulse(int handIndex, Vector3 localPosImpulse, Vector3 localEulerImpulse)
+        {
+            if (ScaryParty.Pizzeria.Presentation.Feedback.GameFeelSettings.ReduceMotion) return;
+
+            float mult = Mathf.Clamp(ScaryParty.Pizzeria.Presentation.Feedback.GameFeelSettings.GetEffectiveChannelIntensity(
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelChannel.Movement), 0f, 1.35f);
+            if (mult <= 0.001f) return;
+
+            Vector3 clampedPos = Vector3.ClampMagnitude(localPosImpulse * mult, 0.08f);
+            Vector3 clampedEuler = new Vector3(
+                Mathf.Clamp(localEulerImpulse.x * mult, -14f, 14f),
+                Mathf.Clamp(localEulerImpulse.y * mult, -14f, 14f),
+                Mathf.Clamp(localEulerImpulse.z * mult, -14f, 14f));
+
+            if (handIndex == 0 || handIndex < 0)
+            {
+                _leftHandImpulsePos = clampedPos;
+                _leftHandImpulseEuler = clampedEuler;
+            }
+            if (handIndex == 1 || handIndex < 0)
+            {
+                _rightHandImpulsePos = clampedPos;
+                _rightHandImpulseEuler = clampedEuler;
+            }
+        }
+
         private void UpdateHandAnchors()
         {
             if (_leftHandAnchor == null || _rightHandAnchor == null) return;
 
-            if (!enableHandSwayBob)
-            {
-                // Posição e rotação estáveis e travadas na câmera (sem atraso de frame nem oscilação)
-                _leftHandAnchor.localPosition = _leftAnchorBasePos;
-                _leftHandAnchor.localRotation = Quaternion.identity;
+            float recoverSpeed = 16f;
+            float dt = Time.deltaTime;
+            _leftHandImpulsePos = Vector3.Lerp(_leftHandImpulsePos, Vector3.zero, 1f - Mathf.Exp(-recoverSpeed * dt));
+            _rightHandImpulsePos = Vector3.Lerp(_rightHandImpulsePos, Vector3.zero, 1f - Mathf.Exp(-recoverSpeed * dt));
+            _leftHandImpulseEuler = Vector3.Lerp(_leftHandImpulseEuler, Vector3.zero, 1f - Mathf.Exp(-recoverSpeed * dt));
+            _rightHandImpulseEuler = Vector3.Lerp(_rightHandImpulseEuler, Vector3.zero, 1f - Mathf.Exp(-recoverSpeed * dt));
 
-                _rightHandAnchor.localPosition = _rightAnchorBasePos;
-                _rightHandAnchor.localRotation = Quaternion.identity;
-                return;
+            Vector3 swayOffset = Vector3.zero;
+            if (enableHandSwayBob)
+            {
+                float lookX = _starterInputs != null ? _starterInputs.look.x : 0f;
+                float lookY = _starterInputs != null ? _starterInputs.look.y : 0f;
+
+                swayOffset = new Vector3(
+                    Mathf.Clamp(-lookX * handSwayAmount, -0.05f, 0.05f),
+                    Mathf.Clamp(-lookY * handSwayAmount, -0.05f, 0.05f),
+                    0f
+                );
             }
 
-            // Caso o usuário habilite sway/bob opcional nas mãos (nunca na câmera)
-            float speed = _cc != null ? new Vector3(_cc.velocity.x, 0, _cc.velocity.z).magnitude : 0f;
-            float lookX = _starterInputs != null ? _starterInputs.look.x : 0f;
-            float lookY = _starterInputs != null ? _starterInputs.look.y : 0f;
+            _leftHandAnchor.localPosition = _leftAnchorBasePos + swayOffset + _leftHandImpulsePos;
+            _leftHandAnchor.localRotation = Quaternion.Euler(_leftHandImpulseEuler);
 
-            Vector3 swayOffset = new Vector3(
-                Mathf.Clamp(-lookX * handSwayAmount, -0.05f, 0.05f),
-                Mathf.Clamp(-lookY * handSwayAmount, -0.05f, 0.05f),
-                0f
-            );
-
-            _leftHandAnchor.localPosition = _leftAnchorBasePos + swayOffset;
-            _rightHandAnchor.localPosition = _rightAnchorBasePos + swayOffset;
+            _rightHandAnchor.localPosition = _rightAnchorBasePos + swayOffset + _rightHandImpulsePos;
+            _rightHandAnchor.localRotation = Quaternion.Euler(_rightHandImpulseEuler);
         }
 
         public void EnsureRig()

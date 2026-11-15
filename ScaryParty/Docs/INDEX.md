@@ -24,11 +24,15 @@ Este índice reúne a documentação técnica do projeto com links relativos e d
 
 ---
 
-## 3. Submódulo Pizzaria (`ScaryParty/Docs/Pizzeria/`)
+## 3. Submódulo Pizzaria (`ScaryParty/Docs/Pizzeria/`) & Game Feel (`ScaryParty/Docs/GameFeel/`)
 - [Auditoria.md](Pizzeria/Auditoria.md) — Auditoria estática de componentes, referências e conformidade com NGO.
 - [Checklist.md](Pizzeria/Checklist.md) — Lista de checagem para validação manual de bancadas e interação no Editor.
 - [Decisoes.md](Pizzeria/Decisoes.md) — Registro de decisões técnicas tomadas durante o desenvolvimento da pizzaria.
 - [Guia.md](Pizzeria/Guia.md) — Guia prático de desenvolvimento e extensão de receitas e ingredientes.
+- [GameFeel/README.md](GameFeel/README.md) — Arquitetura do sistema de Game Feel, pivôs cosméticos, acessibilidade e presets.
+- [GameFeel/EventCatalog.md](GameFeel/EventCatalog.md) — Catálogo de `GameFeelEventId` e famílias de materiais.
+- [GameFeel/BindingAudit.md](GameFeel/BindingAudit.md) — Auditoria de acoplamento aos scripts da pizzaria, NPCs e UI Toolkit.
+- [GameFeel/Validation.md](GameFeel/Validation.md) — Testes NUnit EditMode e checklist de validação manual no PlayMode.
 
 ---
 

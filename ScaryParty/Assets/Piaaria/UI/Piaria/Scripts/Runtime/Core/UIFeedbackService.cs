@@ -1,17 +1,15 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using DG.Tweening;
-#if MOREMOUNTAINS_FEEL
 using MoreMountains.Feedbacks;
-#endif
 
 namespace ScaryParty.UI.Piaria.Core
 {
     /// <summary>
     /// Serviço de feedbacks visuais e sonoros para componentes de UI Toolkit.
-    /// Aciona efeitos de hover, clique, confirmação e erro via Feel ou DOTween.
-    /// Seguro contra concorrência e perfeitamente compatível com elementos estáveis e dinâmicos.
+    /// Aciona efeitos de hover, foco, clique, confirmação e erro via Feel e UIToolkitTweenService.
+    /// Mantém ownership exclusivo dos tweens de escala via UIToolkitTweenService e desregistro seguro em Detach.
     /// </summary>
     public class UIFeedbackService : MonoBehaviour
     {
@@ -25,15 +23,30 @@ namespace ScaryParty.UI.Piaria.Core
         public AudioClip errorClip;
         public AudioClip readyClip;
 
-#if MOREMOUNTAINS_FEEL
         [Header("Feel Players (Opcional)")]
         public MMF_Player hoverPlayer;
         public MMF_Player clickPlayer;
         public MMF_Player successPlayer;
         public MMF_Player errorPlayer;
-#endif
 
-        private readonly System.Collections.Generic.HashSet<VisualElement> _boundButtons = new System.Collections.Generic.HashSet<VisualElement>();
+        private sealed class ButtonCallbackRecord
+        {
+            public EventCallback<PointerEnterEvent> OnPointerEnter;
+            public EventCallback<PointerLeaveEvent> OnPointerLeave;
+            public EventCallback<PointerDownEvent> OnPointerDown;
+            public EventCallback<PointerUpEvent> OnPointerUp;
+            public EventCallback<FocusInEvent> OnFocusIn;
+            public EventCallback<FocusOutEvent> OnFocusOut;
+            public EventCallback<DetachFromPanelEvent> OnDetach;
+            public bool IsPointerInside;
+            public bool HasFocus;
+        }
+
+        private readonly Dictionary<Button, ButtonCallbackRecord> _boundButtons = new Dictionary<Button, ButtonCallbackRecord>();
+        private float _lastHoverSoundTime = -10f;
+        private const float HoverSoundCooldown = 0.045f;
+
+        public int BoundButtonCount => _boundButtons.Count;
 
         private void Awake()
         {
@@ -41,6 +54,7 @@ namespace ScaryParty.UI.Piaria.Core
             {
                 Instance = this;
                 if (audioSource == null) audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
+                audioSource.spatialBlend = 0f;
 
                 if (clickClip == null)
                 {
@@ -55,146 +69,163 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        private void OnDestroy()
+        {
+            ClearAllBindings();
+            if (Instance == this) Instance = null;
+        }
+
         public void BindButton(Button btn)
         {
-            if (btn == null) return;
-            if (!_boundButtons.Add(btn)) return; // Garante idempotência
+            if (btn == null || _boundButtons.ContainsKey(btn)) return;
 
-            btn.RegisterCallback<MouseEnterEvent>(evt =>
+            var record = new ButtonCallbackRecord();
+
+            record.OnPointerEnter = _ =>
             {
                 if (!btn.enabledSelf) return;
-                OnButtonHover(btn);
-            });
+                bool wasHighlighted = record.IsPointerInside || record.HasFocus;
+                record.IsPointerInside = true;
+                if (!wasHighlighted) OnButtonHover(btn);
+            };
 
-            btn.RegisterCallback<PointerEnterEvent>(evt =>
+            record.OnPointerLeave = _ =>
+            {
+                record.IsPointerInside = false;
+                if (!record.HasFocus) OnButtonReset(btn);
+            };
+
+            record.OnFocusIn = _ =>
             {
                 if (!btn.enabledSelf) return;
-                OnButtonHover(btn);
-            });
+                bool wasHighlighted = record.IsPointerInside || record.HasFocus;
+                record.HasFocus = true;
+                if (!wasHighlighted) OnButtonHover(btn);
+            };
 
-            btn.RegisterCallback<PointerDownEvent>(evt =>
+            record.OnFocusOut = _ =>
+            {
+                record.HasFocus = false;
+                if (!record.IsPointerInside) OnButtonReset(btn);
+            };
+
+            record.OnPointerDown = _ =>
             {
                 if (!btn.enabledSelf) return;
                 OnButtonDown(btn);
-            });
+            };
 
-            btn.RegisterCallback<PointerUpEvent>(evt =>
+            record.OnPointerUp = _ =>
             {
                 if (!btn.enabledSelf) return;
-                OnButtonUp(btn);
-            });
+                OnButtonUp(btn, record.IsPointerInside || record.HasFocus);
+            };
 
-            btn.RegisterCallback<MouseLeaveEvent>(evt =>
-            {
-                OnButtonReset(btn);
-            });
+            record.OnDetach = _ => UnbindButton(btn);
 
-            btn.RegisterCallback<PointerLeaveEvent>(evt =>
-            {
-                OnButtonReset(btn);
-            });
+            btn.RegisterCallback(record.OnPointerEnter);
+            btn.RegisterCallback(record.OnPointerLeave);
+            btn.RegisterCallback(record.OnFocusIn);
+            btn.RegisterCallback(record.OnFocusOut);
+            btn.RegisterCallback(record.OnPointerDown);
+            btn.RegisterCallback(record.OnPointerUp);
+            btn.RegisterCallback(record.OnDetach);
+
+            _boundButtons[btn] = record;
+        }
+
+        public void UnbindButton(Button btn)
+        {
+            if (btn == null || !_boundButtons.TryGetValue(btn, out var record)) return;
+
+            btn.UnregisterCallback(record.OnPointerEnter);
+            btn.UnregisterCallback(record.OnPointerLeave);
+            btn.UnregisterCallback(record.OnFocusIn);
+            btn.UnregisterCallback(record.OnFocusOut);
+            btn.UnregisterCallback(record.OnPointerDown);
+            btn.UnregisterCallback(record.OnPointerUp);
+            btn.UnregisterCallback(record.OnDetach);
+
+            UIToolkitTweenService.KillTweens(btn);
+            btn.style.scale = new StyleScale(new Scale(Vector2.one));
+            _boundButtons.Remove(btn);
         }
 
         public void BindHierarchy(VisualElement root)
         {
             if (root == null) return;
             var buttons = root.Query<Button>().ToList();
-            foreach (var b in buttons)
+            for (int i = 0; i < buttons.Count; i++)
             {
-                BindButton(b);
+                BindButton(buttons[i]);
             }
         }
 
-        private float GetSafeScale(VisualElement el)
+        public void UnbindHierarchy(VisualElement root)
         {
-            if (el == null) return 1f;
-            try
+            if (root == null) return;
+            var buttons = root.Query<Button>().ToList();
+            for (int i = 0; i < buttons.Count; i++)
             {
-                if (el.resolvedStyle.scale.value.x > 0.01f)
-                    return el.resolvedStyle.scale.value.x;
+                UnbindButton(buttons[i]);
             }
-            catch { }
-            return 1f;
+        }
+
+        public void ClearAllBindings()
+        {
+            if (_boundButtons.Count == 0) return;
+            var keys = new List<Button>(_boundButtons.Keys);
+            for (int i = 0; i < keys.Count; i++)
+            {
+                UnbindButton(keys[i]);
+            }
+            _boundButtons.Clear();
         }
 
         private void OnButtonHover(VisualElement el)
         {
-            PlaySound(hoverClip);
-#if MOREMOUNTAINS_FEEL
-            if (hoverPlayer != null) hoverPlayer.PlayFeedbacks();
-#endif
+            float now = Time.unscaledTime;
+            if (now - _lastHoverSoundTime >= HoverSoundCooldown)
+            {
+                _lastHoverSoundTime = now;
+                PlaySound(hoverClip, 0.65f);
+                PlayFeelPlayer(hoverPlayer);
+            }
 
-            if (UIToolkitTweenService.ReduceMotion) return;
-
-            UIToolkitTweenService.KillTweens(el);
-            float currentScale = GetSafeScale(el);
-            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.05f, 0.12f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
+            UIToolkitTweenService.ScaleTo(el, 1.05f, 0.11f);
         }
 
         private void OnButtonDown(VisualElement el)
         {
-            PlaySound(clickClip);
-#if MOREMOUNTAINS_FEEL
-            if (clickPlayer != null) clickPlayer.PlayFeedbacks();
-#endif
-
-            if (UIToolkitTweenService.ReduceMotion) return;
-
-            UIToolkitTweenService.KillTweens(el);
-            float currentScale = GetSafeScale(el);
-            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 0.95f, 0.08f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
+            PlaySound(clickClip, 0.85f);
+            PlayFeelPlayer(clickPlayer);
+            UIToolkitTweenService.ScaleTo(el, 0.94f, 0.07f);
         }
 
-        private void OnButtonUp(VisualElement el)
+        private void OnButtonUp(VisualElement el, bool keepHoverScale = true)
         {
-            if (UIToolkitTweenService.ReduceMotion) return;
-
-            UIToolkitTweenService.KillTweens(el);
-            float currentScale = GetSafeScale(el);
-            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.05f, 0.08f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
+            UIToolkitTweenService.ScaleTo(el, keepHoverScale ? 1.05f : 1f, 0.09f);
         }
 
         private void OnButtonReset(VisualElement el)
         {
-            UIToolkitTweenService.KillTweens(el);
-            if (UIToolkitTweenService.ReduceMotion)
-            {
-                el.style.scale = new StyleScale(new Scale(Vector2.one));
-                return;
-            }
-
-            float currentScale = GetSafeScale(el);
-            DOTween.To(() => currentScale, s => el.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.1f)
-                .SetEase(Ease.OutQuad)
-                .SetUpdate(true);
+            UIToolkitTweenService.ScaleTo(el, 1f, 0.1f);
         }
 
         public void PlaySuccess(VisualElement target = null)
         {
             PlaySound(successClip);
-#if MOREMOUNTAINS_FEEL
-            if (successPlayer != null) successPlayer.PlayFeedbacks();
-#endif
-            if (target != null && !UIToolkitTweenService.ReduceMotion)
+            PlayFeelPlayer(successPlayer);
+            if (target != null)
             {
-                DOTween.Sequence().SetUpdate(true)
-                    .Append(DOTween.To(() => 1f, s => target.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1.05f, 0.1f))
-                    .Append(DOTween.To(() => 1.05f, s => target.style.scale = new StyleScale(new Scale(new Vector2(s, s))), 1f, 0.12f));
+                UIToolkitTweenService.PulseScale(target, 1.06f, 0.09f, 0.12f);
             }
         }
 
         public void PlayError(VisualElement target = null)
         {
             PlaySound(errorClip);
-#if MOREMOUNTAINS_FEEL
-            if (errorPlayer != null) errorPlayer.PlayFeedbacks();
-#endif
+            PlayFeelPlayer(errorPlayer);
             if (target != null)
             {
                 UIToolkitTweenService.Shake(target, 6f, 0.22f);
@@ -206,11 +237,17 @@ namespace ScaryParty.UI.Piaria.Core
             PlaySound(readyClip != null ? readyClip : successClip);
         }
 
-        private void PlaySound(AudioClip clip)
+        private void PlayFeelPlayer(MMF_Player player)
+        {
+            if (player == null || UIToolkitTweenService.ReduceMotion) return;
+            player.PlayFeedbacks();
+        }
+
+        private void PlaySound(AudioClip clip, float volume = 0.8f)
         {
             if (clip != null && audioSource != null)
             {
-                audioSource.PlayOneShot(clip, 0.8f);
+                audioSource.PlayOneShot(clip, volume);
             }
         }
     }

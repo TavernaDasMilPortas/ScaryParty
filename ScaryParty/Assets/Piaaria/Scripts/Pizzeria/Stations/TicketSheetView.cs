@@ -7,22 +7,38 @@ using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Presentation;
+using ScaryParty.Pizzeria.Presentation.Feedback;
+using ScaryParty.VisualStyles;
 
 namespace ScaryParty.Pizzeria.Stations
 {
     public class TicketSheetView : MonoBehaviour, IInteractable
     {
+        private const float EntryFlutterDuration = 0.28f;
+        private const float UrgentEnterSeconds = 45f;
+        private const float UrgentExitSeconds = 48f;
+
         [Header("Components")]
         public TextMeshPro textMesh;
         public Renderer paperRenderer;
+        [SerializeField] private Transform sheetVisualPivot;
 
         public NetOrderDto Order { get; private set; }
         public bool HasOrder { get; private set; }
 
-        private Material _paperMaterial;
+        private MaterialPropertyBlock _paperMpb;
         private Color _basePaperColor = new Color(0.96f, 0.94f, 0.88f);
         private Color _focusedColor = new Color(1.0f, 0.98f, 0.75f);
+        private Color _urgentPaperColor = new Color(1.0f, 0.82f, 0.74f);
         private bool _isFocused = false;
+        private ulong _boundOrderId;
+        private bool _isUrgentPulseActive;
+        private bool _hasFiredDeadlineWarning;
+        private float _entryFlutterTimer;
+        private bool _pivotCaptured;
+        private Vector3 _pivotBaseLocalPos;
+        private Quaternion _pivotBaseLocalRot = Quaternion.identity;
+        private Vector3 _pivotBaseLocalScale = Vector3.one;
 
         public string InteractPrompt => HasOrder ? $"[E] Abrir Comanda #{Order.OrderId}" : string.Empty;
 
@@ -33,11 +49,9 @@ namespace ScaryParty.Pizzeria.Stations
                 paperRenderer = GetComponent<Renderer>();
             }
 
-            if (paperRenderer != null)
-            {
-                _paperMaterial = paperRenderer.material;
-                _paperMaterial.color = _basePaperColor;
-            }
+            _paperMpb = new MaterialPropertyBlock();
+            ApplyPaperTint(_basePaperColor);
+            CaptureVisualPivotIfSafe();
 
             var col = GetComponent<Collider>();
             if (col == null || col is MeshCollider)
@@ -76,9 +90,62 @@ namespace ScaryParty.Pizzeria.Stations
 
         public void BindOrder(NetOrderDto order, double serverTime, DefinitionCatalog catalog)
         {
+            bool isNewOrder = !HasOrder || _boundOrderId != order.OrderId;
             Order = order;
+            _boundOrderId = order.OrderId;
             HasOrder = true;
             gameObject.SetActive(true);
+
+            bool isTerminal = order.Lifecycle == (byte)OrderLifecycle.Delivered ||
+                              order.Lifecycle == (byte)OrderLifecycle.Cancelled;
+            double remaining = order.DeadlineTime - serverTime;
+
+            if (isNewOrder)
+            {
+                _hasFiredDeadlineWarning = false;
+                _isUrgentPulseActive = false;
+                _entryFlutterTimer = EntryFlutterDuration;
+                GameFeelPresenter.EnsureInstance().TriggerSimple(
+                    GameFeelEventId.OrderPosted,
+                    ResolveVisualPivot() ?? transform,
+                    order.OrderId,
+                    0,
+                    (uint)order.OrderId,
+                    GameFeelMaterialFamily.CardboardPaper,
+                    1f,
+                    false);
+            }
+
+            if (isTerminal)
+            {
+                _isUrgentPulseActive = false;
+            }
+            else
+            {
+                if (remaining > 0 && remaining < UrgentEnterSeconds)
+                {
+                    _isUrgentPulseActive = true;
+                    if (!_hasFiredDeadlineWarning)
+                    {
+                        _hasFiredDeadlineWarning = true;
+                        GameFeelPresenter.EnsureInstance().TriggerSimple(
+                            GameFeelEventId.OrderDeadlineWarning,
+                            ResolveVisualPivot() ?? transform,
+                            order.OrderId,
+                            0,
+                            (uint)order.OrderId,
+                            GameFeelMaterialFamily.CardboardPaper,
+                            1f,
+                            false);
+                    }
+                }
+                else if (remaining >= UrgentExitSeconds || remaining <= 0)
+                {
+                    _isUrgentPulseActive = false;
+                }
+            }
+
+            RefreshPaperColor();
 
             if (textMesh == null) return;
 
@@ -113,7 +180,6 @@ namespace ScaryParty.Pizzeria.Stations
             }
             else
             {
-                double remaining = order.DeadlineTime - serverTime;
                 if (remaining > 0)
                 {
                     int mins = (int)(remaining / 60);
@@ -130,9 +196,29 @@ namespace ScaryParty.Pizzeria.Stations
             textMesh.text = sb.ToString();
         }
 
+        private void Update()
+        {
+            if (_isUrgentPulseActive)
+            {
+                RefreshPaperColor();
+            }
+
+            if (_entryFlutterTimer > 0f)
+            {
+                _entryFlutterTimer = Mathf.Max(0f, _entryFlutterTimer - Time.deltaTime);
+                UpdateEntryFlutter();
+            }
+        }
+
         public void Clear()
         {
             HasOrder = false;
+            _boundOrderId = 0;
+            _isUrgentPulseActive = false;
+            _hasFiredDeadlineWarning = false;
+            _entryFlutterTimer = 0f;
+            ResetVisualPivotToRest();
+            ApplyPaperTint(_basePaperColor);
             gameObject.SetActive(false);
             if (textMesh != null) textMesh.text = string.Empty;
         }
@@ -140,6 +226,16 @@ namespace ScaryParty.Pizzeria.Stations
         public void OnInteract(GameObject interactor)
         {
             if (!HasOrder) return;
+
+            GameFeelPresenter.EnsureInstance().TriggerSimple(
+                GameFeelEventId.OrderInspected,
+                ResolveVisualPivot() ?? transform,
+                Order.OrderId,
+                0,
+                (uint)Order.OrderId,
+                GameFeelMaterialFamily.CardboardPaper,
+                1f,
+                true);
 
             if (TicketModalPresenter.Instance != null)
             {
@@ -150,27 +246,108 @@ namespace ScaryParty.Pizzeria.Stations
         public void OnFocus()
         {
             _isFocused = true;
-            if (_paperMaterial != null)
-            {
-                _paperMaterial.color = _focusedColor;
-            }
+            RefreshPaperColor();
         }
 
         public void OnLoseFocus()
         {
             _isFocused = false;
-            if (_paperMaterial != null)
+            RefreshPaperColor();
+        }
+
+        private Transform ResolveVisualPivot()
+        {
+            if (sheetVisualPivot != null && sheetVisualPivot != transform)
+                return sheetVisualPivot;
+            if (paperRenderer != null && paperRenderer.transform != transform)
+                return paperRenderer.transform;
+            return null;
+        }
+
+        private void CaptureVisualPivotIfSafe()
+        {
+            if (_pivotCaptured) return;
+            var pivot = ResolveVisualPivot();
+            if (pivot == null) return;
+            _pivotBaseLocalPos = pivot.localPosition;
+            _pivotBaseLocalRot = pivot.localRotation;
+            _pivotBaseLocalScale = pivot.localScale;
+            _pivotCaptured = true;
+        }
+
+        private void UpdateEntryFlutter()
+        {
+            var pivot = ResolveVisualPivot();
+            if (pivot == null) return;
+            CaptureVisualPivotIfSafe();
+
+            if (_entryFlutterTimer <= 0f || GameFeelSettings.ReduceMotion)
             {
-                _paperMaterial.color = _basePaperColor;
+                ResetVisualPivotToRest();
+                return;
             }
+
+            float t = 1f - (_entryFlutterTimer / EntryFlutterDuration);
+            float intensity = GameFeelSettings.GetEffectiveChannelIntensity(GameFeelChannel.Movement);
+            float flutter = Mathf.Sin(t * Mathf.PI * 2.5f) * Mathf.Exp(-3.5f * t) * 8f * intensity;
+            float stretchY = 1f + Mathf.Sin(t * Mathf.PI) * 0.08f * intensity;
+            float stretchX = 1f - Mathf.Sin(t * Mathf.PI) * 0.04f * intensity;
+
+            pivot.localPosition = _pivotBaseLocalPos + new Vector3(0f, Mathf.Sin(t * Mathf.PI) * 0.015f * intensity, 0f);
+            pivot.localRotation = _pivotBaseLocalRot * Quaternion.Euler(flutter * 0.5f, 0f, flutter);
+            pivot.localScale = Vector3.Scale(_pivotBaseLocalScale, new Vector3(stretchX, stretchY, 1f));
+        }
+
+        private void ResetVisualPivotToRest()
+        {
+            if (!_pivotCaptured) return;
+            var pivot = ResolveVisualPivot();
+            if (pivot == null) return;
+            pivot.localPosition = _pivotBaseLocalPos;
+            pivot.localRotation = _pivotBaseLocalRot;
+            pivot.localScale = _pivotBaseLocalScale;
+        }
+
+        private void RefreshPaperColor()
+        {
+            if (_isFocused)
+            {
+                ApplyPaperTint(_focusedColor);
+                return;
+            }
+
+            if (_isUrgentPulseActive)
+            {
+                float weight = (GameFeelSettings.AllowFlashes && !GameFeelSettings.ReduceMotion)
+                    ? (0.45f + 0.55f * (0.5f + 0.5f * Mathf.Sin(Time.time * 5.5f)))
+                    : 0.75f;
+                ApplyPaperTint(Color.Lerp(_basePaperColor, _urgentPaperColor, weight));
+                return;
+            }
+
+            ApplyPaperTint(_basePaperColor);
+        }
+
+        private void ApplyPaperTint(Color color)
+        {
+            if (paperRenderer == null) return;
+            _paperMpb ??= new MaterialPropertyBlock();
+            int slots = paperRenderer.sharedMaterials != null ? Mathf.Max(1, paperRenderer.sharedMaterials.Length) : 1;
+            for (int s = 0; s < slots; s++)
+            {
+                VisualStyleShaderUtility.ApplyColorBlockToSlot(paperRenderer, s, color, _paperMpb);
+            }
+        }
+
+        private void OnDisable()
+        {
+            _entryFlutterTimer = 0f;
+            ResetVisualPivotToRest();
         }
 
         private void OnDestroy()
         {
-            if (_paperMaterial != null)
-            {
-                Destroy(_paperMaterial);
-            }
+            ResetVisualPivotToRest();
         }
     }
 }

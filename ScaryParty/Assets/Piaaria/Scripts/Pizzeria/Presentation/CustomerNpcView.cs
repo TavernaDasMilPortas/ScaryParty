@@ -1,11 +1,12 @@
-using UnityEngine;
-using UnityEngine.AI;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
+using ScaryParty.Pizzeria.Presentation.Feedback;
 using ScaryParty.Pizzeria.Stations;
 using ScaryParty.Player;
+using UnityEngine;
+using UnityEngine.AI;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
@@ -35,6 +36,10 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _wasSeated;
         private bool _isExitingSeat;
         private float _exitTimer;
+        private bool _hasLastFeelState;
+        private CustomerPhase _lastFeelPhase;
+        private bool _impatienceTriggered;
+        private float _nextMicroFidgetTime;
 
         public bool HasReachedSeat => _hasReachedSeat;
 
@@ -75,7 +80,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 VisualController.SetPreparing(false);
                 VisualController.SetSitting(false, false);
                 VisualController.SetLocomotion(0f, 1f, true);
+                VisualController.EnsureFeelPivot();
+                VisualController.DesynchronizeIdleCycle(dto.CustomerId);
             }
+
+            _hasLastFeelState = true;
+            _lastFeelPhase = (CustomerPhase)dto.Phase;
+            _impatienceTriggered = false;
+            _nextMicroFidgetTime = Time.time + 2.5f + ((dto.CustomerId % 7UL) * 0.45f);
 
             if (visualInstance != null)
             {
@@ -135,6 +147,7 @@ namespace ScaryParty.Pizzeria.Presentation
             _walkSpeed = 2.4f * Mathf.Clamp(walkSpeedMultiplier, 0.7f, 1.5f);
 
             var phase = (CustomerPhase)dto.Phase;
+            ProcessCustomerFeelTransitions(dto, phase);
             bool shouldBeSeated = phase == CustomerPhase.SeatedWaitingFood ||
                                   phase == CustomerPhase.Eating;
 
@@ -353,6 +366,32 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     _wasSeated = seatedNow;
                     VisualController.SetSitting(seatedNow, triggerTransition: true);
+                    if (seatedNow && IsWithinMicroReactionDistance())
+                    {
+                        VisualController.PlayBodyReaction(
+                            GameFeelEventId.NpcSeatedSettle,
+                            0.9f,
+                            (int)CurrentState.Revision,
+                            CurrentState.CustomerId);
+                    }
+                }
+
+                if (Time.time >= _nextMicroFidgetTime)
+                {
+                    _nextMicroFidgetTime = Time.time + 3.6f + ((CustomerId % 5UL) * 0.5f);
+                    var currentPhase = (CustomerPhase)CurrentState.Phase;
+                    if (!GameFeelSettings.ReduceMotion && IsWithinMicroReactionDistance())
+                    {
+                        if (currentPhase == CustomerPhase.Eating)
+                        {
+                            VisualController.PlayBodyReaction(GameFeelEventId.NpcEatingLoop, 0.7f, (int)Time.frameCount, CustomerId);
+                        }
+                        else if ((currentPhase == CustomerPhase.WaitingInQueue || currentPhase == CustomerPhase.SeatedWaitingFood) &&
+                                 CurrentState.ActivePatienceNormalized > 0f && CurrentState.ActivePatienceNormalized <= 0.45f)
+                        {
+                            VisualController.PlayBodyReaction(GameFeelEventId.NpcImpatient, 0.8f, (int)Time.frameCount, CustomerId);
+                        }
+                    }
                 }
 
                 VisualController.SetPreparing(false);
@@ -439,6 +478,69 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                 }
             }
+        }
+
+        private void ProcessCustomerFeelTransitions(in NetCustomerDto dto, CustomerPhase phase)
+        {
+            if (VisualController == null) return;
+
+            if (!_hasLastFeelState)
+            {
+                _hasLastFeelState = true;
+                _lastFeelPhase = phase;
+                return;
+            }
+
+            if (phase != _lastFeelPhase)
+            {
+                _lastFeelPhase = phase;
+                _impatienceTriggered = false;
+                switch (phase)
+                {
+                    case CustomerPhase.WaitingInQueue:
+                        if (IsWithinMicroReactionDistance())
+                        {
+                            VisualController.PlayBodyReaction(GameFeelEventId.NpcCounterArrived, 0.9f, (int)dto.Revision, dto.CustomerId);
+                        }
+                        break;
+                    case CustomerPhase.SeatedWaitingFood:
+                        if (IsWithinMicroReactionDistance())
+                        {
+                            VisualController.PlayBodyReaction(GameFeelEventId.NpcSeatedSettle, 0.85f, (int)dto.Revision, dto.CustomerId);
+                        }
+                        break;
+                    case CustomerPhase.Eating:
+                        VisualController.PlayBodyReaction(GameFeelEventId.NpcOrderGood, 1.05f, (int)dto.Revision, dto.CustomerId);
+                        break;
+                    case CustomerPhase.LeavingSatisfied:
+                        VisualController.PlayBodyReaction(GameFeelEventId.NpcOrderGood, 1.15f, (int)dto.Revision, dto.CustomerId);
+                        break;
+                    case CustomerPhase.LeavingAngry:
+                        VisualController.PlayBodyReaction(GameFeelEventId.NpcLeavingAngry, 1.15f, (int)dto.Revision, dto.CustomerId);
+                        break;
+                }
+            }
+
+            if ((phase == CustomerPhase.WaitingInQueue || phase == CustomerPhase.SeatedWaitingFood) &&
+                !_impatienceTriggered && dto.ActivePatienceNormalized > 0f && dto.ActivePatienceNormalized <= 0.30f)
+            {
+                _impatienceTriggered = true;
+                if (IsWithinMicroReactionDistance())
+                {
+                    VisualController.PlayBodyReaction(GameFeelEventId.NpcImpatient, 0.9f, (int)dto.Revision, dto.CustomerId);
+                }
+            }
+            else if (dto.ActivePatienceNormalized > 0.38f)
+            {
+                _impatienceTriggered = false;
+            }
+        }
+
+        private bool IsWithinMicroReactionDistance()
+        {
+            var cam = Camera.main;
+            if (cam == null) return true;
+            return (cam.transform.position - transform.position).sqrMagnitude <= 400f;
         }
 
         public void OnFocus() { }

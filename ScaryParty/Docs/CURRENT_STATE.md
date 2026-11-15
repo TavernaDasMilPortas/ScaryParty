@@ -27,7 +27,11 @@
 - **Ciclo da Pizzaria:** Interação do jogador com estações de corte, molho, queijo e forno.
 - **Geração da Cidade:** Construção procedural determinística através de `DefaultCityConfig.asset` e seed compartilhada em rede.
 - **Minimapa:** Rastreamento dinâmico da câmera do jogador com culling mask apropriada.
-- **Ferramentas de Menu:** Organização de itens de menu conforme padrão `unity-tools-menu-organization`.
+- **Ferramentas de Menu:** Organização de itens de menu conforme padrão `unity-tools-menu-organization` (incluindo `Game Feel Studio` em `Wizards/Visuals`).
+- **Sistema de Game Feel e Animações Cartoon (`Presentation/Feedback`, `Editor/GameFeel`, `UI/Piaria`):**
+  - Arquitetura desacoplada da lógica de rede (`GameFeelTypes`, `GameFeelSettings`, `GameFeelProfile`, `GameFeelVisualPivot`, `GameFeelPresenter`, `GameFeelNetworkBridge`) com presets `Suave`/`Cartoon`/`Sloppy`/`Reduzido`, sincronização com `UIToolkitTweenService.ReduceMotion` e janela `Game Feel Studio`.
+  - Pivôs cosméticos isolados em `ItemVisualWrapper` (`PosePivot -> CosmeticPivot -> VisualInstance`), animações por processo em `KitchenProcessEffects` e `PizzaVisualComposer`, proteção contra concorrência em `OvenTransferVisualizer` e pulso seguro de forno em `OvenStation`.
+  - `PhoneRinger` e `TicketSheetView` migrados para `MaterialPropertyBlock`; `BackpackVisualizer` com `CosmeticPivot` + sway de carga; reações corporais seguras + LOD (`<= 20m`) em `CharacterVisualController`/`CustomerNpcView`; emissores 3D pooled em `PizzeriaSoundManager`; unificação de callbacks Pointer/Focus em `UIFeedbackService`.
 - **Iluminação Cartoon e Estilos Visuais (Solução A + Contratos B0–B3):**
   - **Modos A/B/C:** `VisualStyleRuntimeConfig` separa rota (`Original` vs `CelShadedVariant`) de `VisualApplicationMode`; Modo A pré-visualiza em PlayMode sem alterar `GameScene.unity`, Modo B salva padrão com backup e rollback seletivo (`OriginalGameSceneStylePersistence`), Modo C gera variante protegendo alterações locais.
   - **Shaders Próprios e Troca ao Vivo:** `ScaryParty/Illustrate Stylized/*` (incluindo `IllustrateScreenSpaceOutline.shader` plane-invariante `1/Z`, normal cardinal e color edge sem conflito de `#pragma`/keywords) com Forward+ `_CLUSTER_LIGHT_LOOP` Additional Lights, faixas toon completas `[0..1]`, controle de contraste/teto em `StylizedFrag`, zonas (`_InteriorZoneFillColor`/`_Weight`), ganchos B1 e `_SP_DebugLightingView`.
@@ -37,7 +41,7 @@
 
 ## 3. O que Está Parcial ou em Desenvolvimento
 - **Estabilidade Multiplayer em Conexões Instáveis:** Requisitos de validação contínua para sincronização de estados de clientes que entram com a partida em andamento (late-joiners), agora incluindo `NetworkTimeOfDayState`.
-- **Padronização Visual Cel-Shaded:** Código C#, shaders (`IllustrateStylizedCore.hlsl` e `IllustrateScreenSpaceOutline.shader`), perfis `.asset` e materiais `*_ScreenSpaceOutline.mat` calibrados e compilando em `dotnet build`; falta validação visual em PlayMode e execução dos testes EditMode/PlayMode no Unity Editor aberto.
+- **Padronização Visual Cel-Shaded e Game Feel:** Código C#, shaders (`IllustrateStylizedCore.hlsl` e `IllustrateScreenSpaceOutline.shader`), sistema de Game Feel, perfis `.asset` e materiais calibrados e compilando em `dotnet build`; falta validação visual/tátil em PlayMode (incluindo *late-joiner* via ParrelSync) e execução dos testes EditMode/PlayMode no Unity Editor aberto (`Docs/GameFeel/Validation.md`).
 - **Contratos Futuros (Solução B):** Interfaces e stubs B0–B3 (`LightingFeatureRegistry`, ganchos AO/Emissão B1, `FixedInteriorLightingData` B2) ativos com fallback seguro para Solução A; baking futuro fora deste escopo.
 - **NPCs e Entregas:** Mecânica de entrega nas portas de clientes pela cidade em fase de polimento de rotas de IA.
 
@@ -47,7 +51,7 @@
 - **Cena Principal de Jogo:** `ScaryParty/Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity` (canônica com suporte a Modo A/B) e variante `ScaryParty/Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity`.
 - **Wizard de Estilos & Iluminação:** `Tools/Scary Party/Wizards/Visuals/Global Cel Shading Wizard` (`GlobalCelShadingWizard.cs`).
 - **Gerador da Cidade:** `ScaryParty/Assets/Piaaria/Scripts/City/CityGenerator.cs`.
-- **Prefab Central da Pizzaria:** `ScaryParty/Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab`.
+- **Prefab Central da Pizzaria:** `ScaryParty/Assets/Piaaria/Prefabs/Pizzeria/` (`PizzeriaModular_Manual.prefab` ativo no fluxo modular, `PizzeriaModular_CelShaded.prefab` variante cel-shaded e `PizzeriaPrefab.prefab` legado/fallback).
 - **Configuração da Cidade:** `ScaryParty/Assets/Piaaria/ScriptableObjects/DefaultCityConfig.asset`.
 
 ---

@@ -444,6 +444,17 @@ public class PlayerInteraction : NetworkBehaviour
                 {
                     StopTrackedWork();
                 }
+
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                    ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.ActiveHandChanged,
+                    target: null,
+                    entityId: OwnerClientId,
+                    stationId: 0,
+                    revision: (uint)Mathf.FloorToInt(Time.unscaledTime * 100f),
+                    family: ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.Default,
+                    intensity: 0.65f,
+                    isLocal: true,
+                    slotIndex: (int)invAdapter.ActiveHand);
             }
         }
 
@@ -546,6 +557,21 @@ public class PlayerInteraction : NetworkBehaviour
 
                 _currentInteractable = interactable;
                 _currentInteractable.OnFocus();
+
+                if (_currentInteractable is Component comp && comp != null)
+                {
+                    int stId = comp is ScaryParty.Pizzeria.Stations.StationView st ? st.stationId : 0;
+                    ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                        ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.FocusEnter,
+                        target: aimedWorkpost != null ? aimedWorkpost.transform : comp.transform,
+                        entityId: (ulong)comp.GetInstanceID(),
+                        stationId: stId,
+                        revision: (uint)Mathf.FloorToInt(Time.unscaledTime * 100f),
+                        family: ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.Default,
+                        intensity: 0.7f,
+                        isLocal: true,
+                        slotIndex: aimedWorkpost != null ? aimedWorkpost.slotIndex : -1);
+                }
             }
 
             // Outline:

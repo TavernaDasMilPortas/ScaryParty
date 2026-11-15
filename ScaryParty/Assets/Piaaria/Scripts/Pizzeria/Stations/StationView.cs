@@ -189,6 +189,28 @@ namespace ScaryParty.Pizzeria.Stations
         public virtual void OnFocus()
         {
             _doorPresenter?.OnHoverEnter();
+
+            var netState = PizzeriaNetworkState.Instance;
+            var vis = ScaryParty.Pizzeria.Presentation.PizzeriaItemVisualizer.Instance;
+            if (netState != null && vis != null)
+            {
+                int targetSlot = ResolveTargetSlotIndex();
+                for (int i = 0; i < netState.Items.Count; i++)
+                {
+                    var it = netState.Items[i];
+                    if (it.LocationType == (byte)LocationType.StationSlot &&
+                        it.HolderId == (ulong)stationId &&
+                        (targetSlot < 0 || it.SlotId == targetSlot))
+                    {
+                        var wrapper = vis.GetItemVisual(it.ItemId);
+                        if (wrapper != null && wrapper.FeelPivot != null)
+                        {
+                            wrapper.FeelPivot.PulseMaterialHighlight(new Color(0.14f, 0.12f, 0.08f, 1f), 0.18f);
+                        }
+                        break;
+                    }
+                }
+            }
         }
 
         public virtual void OnLoseFocus()

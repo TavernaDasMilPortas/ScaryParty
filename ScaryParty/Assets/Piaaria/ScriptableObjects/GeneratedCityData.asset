@@ -13,120 +13,18 @@ MonoBehaviour:
   m_Name: GeneratedCityData
   m_EditorClassIdentifier: Assembly-CSharp::CityData
   streetGraph:
-    nodes:
-    - id: 0
-      worldPosition: {x: 0, y: 0, z: 0}
-      connectedEdges: 000000000100000006000000
-    - id: 1
-      worldPosition: {x: 40.6305, y: 0, z: 112.912186}
-      connectedEdges: 000000000200000005000000
-    - id: 2
-      worldPosition: {x: -113.006226, y: 0, z: 40.368233}
-      connectedEdges: 0100000003000000
-    - id: 3
-      worldPosition: {x: 106.31209, y: 0, z: 114.44543}
-      connectedEdges: 0200000008000000
-    - id: 4
-      worldPosition: {x: -82.42678, y: 0, z: 104.64842}
-      connectedEdges: 0300000004000000
-    - id: 5
-      worldPosition: {x: -15.263802, y: 0, z: 104.555824}
-      connectedEdges: 0400000005000000
-    - id: 6
-      worldPosition: {x: 119.93605, y: 0, z: -3.9172437}
-      connectedEdges: 0600000007000000
-    - id: 7
-      worldPosition: {x: 118.201324, y: 0, z: 50.82128}
-      connectedEdges: 0700000008000000
-    edges:
-    - id: 0
-      nodeA: 0
-      nodeB: 1
-      length: 120
-      isBlocked: 0
-      streetType: 0
-    - id: 1
-      nodeA: 0
-      nodeB: 2
-      length: 120.00001
-      isBlocked: 0
-      streetType: 0
-    - id: 2
-      nodeA: 1
-      nodeB: 3
-      length: 65.69948
-      isBlocked: 0
-      streetType: 1
-    - id: 3
-      nodeA: 2
-      nodeB: 4
-      length: 71.18318
-      isBlocked: 0
-      streetType: 1
-    - id: 4
-      nodeA: 4
-      nodeB: 5
-      length: 67.16304
-      isBlocked: 0
-      streetType: 1
-    - id: 5
-      nodeA: 5
-      nodeB: 1
-      length: 56.5155
-      isBlocked: 0
-      streetType: 1
-    - id: 6
-      nodeA: 0
-      nodeB: 6
-      length: 120.00001
-      isBlocked: 0
-      streetType: 0
-    - id: 7
-      nodeA: 6
-      nodeB: 7
-      length: 54.766006
-      isBlocked: 0
-      streetType: 1
-    - id: 8
-      nodeA: 7
-      nodeB: 3
-      length: 64.725464
-      isBlocked: 0
-      streetType: 1
-  blocks:
-  - worldCenter: {x: 76.1255, y: 0, z: 54.705067}
-    size: {x: 105.298706, y: 0, z: 106.03955}
-    zoneType: 0
-    deliveryPointIndices: 
-    polygon:
-    - {x: 8.43767, y: 0, z: 5.727616}
-    - {x: 113.736374, y: 0, z: 2.2884443}
-    - {x: 112.2189, y: 0, z: 50.171463}
-    - {x: 101.35138, y: 0, z: 108.327995}
-    - {x: 44.883217, y: 0, z: 107.00983}
-    area: 8613.266
-    hasPizzaria: 0
-  - worldCenter: {x: -34.04642, y: 0, z: 70.82817}
-    size: {x: 136.32043, y: 0, z: 97.829}
-    zoneType: 0
-    deliveryPointIndices: 
-    polygon:
-    - {x: -3.6187959, y: 0, z: 7.6640415}
-    - {x: 31.584152, y: 0, z: 105.49304}
-    - {x: -14.821915, y: 0, z: 98.5552}
-    - {x: -78.63926, y: 0, z: 98.64319}
-    - {x: -104.73628, y: 0, z: 43.78537}
-    area: 8292.409
-    hasPizzaria: 1
-  pizzariaPosition: {x: 3.583695, y: 2.15, z: 29.156488}
-  pizzariaRotation: {x: 0, y: 0.98512316, z: 0, w: -0.17185041}
-  bancadaPosition: {x: 5.4773135, y: 1.02, z: 30.579376}
-  pizzariaBlockIndex: 1
-  hasPizzariaReserved: 1
+    nodes: []
+    edges: []
+  blocks: []
+  pizzariaPosition: {x: 0, y: 0, z: 0}
+  pizzariaRotation: {x: 0, y: 0, z: 0, w: 1}
+  bancadaPosition: {x: 0, y: 0, z: 0}
+  pizzariaBlockIndex: -1
+  hasPizzariaReserved: 0
   enemySpawnPoints: []
   _gridWidth: 3
   _gridHeight: 3
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 6
-  _deliveryPointCount: 13
+  _deliveryPointCount: 0

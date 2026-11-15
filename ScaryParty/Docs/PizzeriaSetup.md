@@ -9,11 +9,11 @@ Este documento fornece as instruções para configurar, autoralizar e jogar o m�
 Todos os menus da pizzaria estão centralizados em `Tools > Scary Party > Pizzeria`:
 
 1. **`Tools > Scary Party > Pizzeria > Build or Update`**:
-   - Cria as pastas de assets caso não existam (`Assets/Prefabs/Pizzeria/`, `Assets/ScriptableObjects/Pizzeria/`, etc.).
+   - Cria as pastas de assets caso não existam (`Assets/Piaaria/Prefabs/Pizzeria/`, `Assets/Piaaria/ScriptableObjects/Pizzeria/`, etc.).
    - Gera materiais e prefabs placeholders de itens físicos (`PizzaBox`, `PizzaWIP`, `IngredientItem`, `Tool_Grater`, `Tool_Knife`, `SupplyCrate`).
    - Registra todos os prefabs em `Assets/DefaultNetworkPrefabs.asset` de forma idempotente (sem duplicatas).
    - Cria o ScriptableObject `PizzeriaConfig.asset` com definições padrão de receitas, ingredientes, processos e upgrades.
-   - Constrói e salva o `Assets/Prefabs/Pizzeria/PizzeriaPrefab.prefab` com paredes, portas abertas, 14 bancadas/estações especializadas, e âncoras de spawn para 4 jogadores.
+   - Mantém os prefabs centrais em `Assets/Piaaria/Prefabs/Pizzeria/` (`PizzeriaModular_Manual.prefab`, `PizzeriaModular_CelShaded.prefab` e `PizzeriaPrefab.prefab`) com paredes, portas abertas, estações especializadas e âncoras de spawn para jogadores.
 
 2. **`Tools > Scary Party > Pizzeria > Validate Setup`**:
    - Executa uma varredura de integridade estrutural sem alterar arquivos.

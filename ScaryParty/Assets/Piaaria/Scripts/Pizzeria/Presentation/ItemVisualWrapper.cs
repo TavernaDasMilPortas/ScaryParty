@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Netcode;
+using ScaryParty.Pizzeria.Presentation.Feedback;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
@@ -13,15 +14,74 @@ namespace ScaryParty.Pizzeria.Presentation
         public byte PrepStage { get; set; }
         public bool IsTool { get; set; }
         public bool IsFallbackPrimitive { get; set; }
+        public int VisualGeneration { get; private set; }
+        public bool IsInTransit { get; set; }
         public ItemPresentationProfile CurrentProfile { get; private set; }
         public GameObject VisualInstance { get; private set; }
+        public Transform PosePivot { get; private set; }
+        public Transform CosmeticPivot { get; private set; }
+        public GameFeelVisualPivot FeelPivot { get; private set; }
         public Transform GripPoint { get; private set; }
         public Transform SupportPoint { get; private set; }
         public Vector3 LastHandPosition { get; private set; }
         public float LastHandTime { get; private set; } = float.NegativeInfinity;
 
+        public void EnsurePivots()
+        {
+            if (PosePivot == null)
+            {
+                var foundPose = transform.Find("PosePivot");
+                if (foundPose != null)
+                {
+                    PosePivot = foundPose;
+                }
+                else
+                {
+                    var poseGo = new GameObject("PosePivot");
+                    PosePivot = poseGo.transform;
+                    PosePivot.SetParent(transform, false);
+                    PosePivot.localPosition = Vector3.zero;
+                    PosePivot.localRotation = Quaternion.identity;
+                    PosePivot.localScale = Vector3.one;
+                }
+            }
+
+            if (CosmeticPivot == null)
+            {
+                var foundCosmetic = PosePivot.Find("CosmeticPivot");
+                if (foundCosmetic != null)
+                {
+                    CosmeticPivot = foundCosmetic;
+                }
+                else
+                {
+                    var cosmeticGo = new GameObject("CosmeticPivot");
+                    CosmeticPivot = cosmeticGo.transform;
+                    CosmeticPivot.SetParent(PosePivot, false);
+                    CosmeticPivot.localPosition = Vector3.zero;
+                    CosmeticPivot.localRotation = Quaternion.identity;
+                    CosmeticPivot.localScale = Vector3.one;
+                }
+            }
+
+            if (FeelPivot == null)
+            {
+                FeelPivot = CosmeticPivot.GetComponent<GameFeelVisualPivot>()
+                         ?? CosmeticPivot.gameObject.AddComponent<GameFeelVisualPivot>();
+                FeelPivot.SetExplicitBasePose(Vector3.zero, Quaternion.identity, Vector3.one);
+            }
+        }
+
         public void BindVisual(ItemPresentationProfile profile, GameObject visualInstance)
         {
+            EnsurePivots();
+            VisualGeneration++;
+            FeelPivot?.StopAndReset();
+            if (FeelPivot != null)
+            {
+                FeelPivot.VisualGeneration = VisualGeneration;
+            }
+
             CurrentProfile = profile;
             VisualInstance = visualInstance;
 
@@ -29,7 +89,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 StripNetworkComponents(visualInstance);
 
-                visualInstance.transform.SetParent(transform, false);
+                visualInstance.transform.SetParent(CosmeticPivot, false);
 
                 // Desativa colisores para evitar bloquear raycasts e empurrar o jogador
                 var colliders = visualInstance.GetComponentsInChildren<Collider>(true);
@@ -90,6 +150,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void LateUpdate()
         {
+            if (IsInTransit) return;
+
             if (!_followsSurface && transform.parent != null)
             {
                 LastHandPosition = VisualInstance != null ? VisualInstance.transform.position : transform.position;
@@ -114,6 +176,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void AttachTo(Transform parent, ItemPoseOffset pose, int targetLayer, bool useSupportPoint = false)
         {
+            EnsurePivots();
             _followsSurface = useSupportPoint && parent != null;
             _surfaceAnchor = _followsSurface ? parent : null;
             _surfacePose = pose;
@@ -121,9 +184,21 @@ namespace ScaryParty.Pizzeria.Presentation
             transform.SetParent(_followsSurface ? null : parent, false);
             SetLayerRecursively(gameObject, targetLayer);
 
+            // Salva temporariamente qualquer offset cosmético ativo no CosmeticPivot para não contaminar a medição de alinhamento
+            Vector3 savedCosmPos = CosmeticPivot.localPosition;
+            Quaternion savedCosmRot = CosmeticPivot.localRotation;
+            Vector3 savedCosmScale = CosmeticPivot.localScale;
+            CosmeticPivot.localPosition = Vector3.zero;
+            CosmeticPivot.localRotation = Quaternion.identity;
+            CosmeticPivot.localScale = Vector3.one;
+
+            PosePivot.localPosition = Vector3.zero;
+            PosePivot.localRotation = Quaternion.identity;
+            PosePivot.localScale = Vector3.one;
+
             Transform anchorPoint = (useSupportPoint && SupportPoint != null) ? SupportPoint : GripPoint;
 
-            // Se o modelo contiver um ponto de alinhamento, compensa a transformação para que o ponto fique na origem
+            // Se o modelo contiver um ponto de alinhamento, compensa em PosePivot preservando escala e CosmeticPivot
             if (anchorPoint != null && VisualInstance != null)
             {
                 VisualInstance.transform.localPosition = Vector3.zero;
@@ -133,8 +208,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 Vector3 relPos = transform.InverseTransformPoint(anchorPoint.position);
 
                 Quaternion invRot = Quaternion.Inverse(relRot);
-                VisualInstance.transform.localRotation = invRot;
-                VisualInstance.transform.localPosition = -(invRot * relPos);
+                PosePivot.localRotation = invRot;
+                PosePivot.localPosition = -(invRot * relPos);
             }
             else if (VisualInstance != null)
             {
@@ -142,8 +217,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 VisualInstance.transform.localRotation = Quaternion.identity;
             }
 
+            CosmeticPivot.localPosition = savedCosmPos;
+            CosmeticPivot.localRotation = savedCosmRot;
+            CosmeticPivot.localScale = savedCosmScale;
+
             pose.ApplyTo(transform);
-            if (_followsSurface) UpdateSurfacePose();
+            if (_followsSurface && !IsInTransit) UpdateSurfacePose();
         }
 
         public static void SetLayerRecursively(GameObject obj, int layer)
