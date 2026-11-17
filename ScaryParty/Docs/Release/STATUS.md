@@ -10,13 +10,13 @@ Pacote criado para execução no projeto; nenhum marco foi executado por este pa
 | M4 — Noite Completa | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M4_Relatorio](Reports/M4_Relatorio.md) |
 | M5 — Monstros | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M5_Relatorio](Reports/M5_Relatorio.md) |
 | M6 — Run Votos Loja | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M6_Relatorio](Reports/M6_Relatorio.md) |
-| M7 — Funcionarios | NÃO INICIADA | [M7_Relatorio](Reports/M7_Relatorio.md) |
+| M7 — Funcionarios | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M7_Relatorio](Reports/M7_Relatorio.md) |
 | M8 — Entrega Final | NÃO INICIADA | [M8_Relatorio](Reports/M8_Relatorio.md) |
 
 ## Checkpoint ativo
 
-- Fase: M6 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`), avançando para M7.
-- Próxima ação: Executar M7 (Balconistas, Pizzaiolos e Coordenador de Tarefas Compartilhadas).
-- Bloqueios: Validações EditMode/PlayMode de M1–M6 e geração de `.meta` pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+- Fase: M7 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`), avançando para M8.
+- Próxima ação: Executar M8 (Tutorial Noite Zero, Acabamento, Revisão Final de Documentação e Checklist de Entrega).
+- Bloqueios: Validações EditMode/PlayMode de M1–M7 e geração de `.meta` pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases apenas porque o relatório foi criado.

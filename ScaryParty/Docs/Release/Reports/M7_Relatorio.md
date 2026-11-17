@@ -1,57 +1,25 @@
-# M7 — Relatório de execução
+# Relatório M7 — Balconistas e Pizzaiolos
 
-Status: NÃO INICIADA
+**Status:** IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE  
+**Data:** 2026-11-16  
+**Branch / Commit M7 (código):** `release/marcos-noturnos` @ `2d7ca29e`
 
-Este arquivo é um modelo. Nenhuma implementação ou teste foi realizado por sua criação.
+---
 
-## Contexto
+## 1. Implementação Realizada
 
-- Data/hora:
-- Branch / SHA inicial / SHA final:
-- Raiz Unity / cena / prefab / preset / seed:
-- Alterações locais preexistentes preservadas:
-- Dependências e pendências herdadas:
+1. **Coordenador de Tarefas e Contratação (`EmployeeTaskService.cs`):**
+   - Contratação coletiva com custo por função/nível (`Cashier` = 180, `Pizzaiolo` = 120) sem ocupar vaga humana do lobby nem alterar a meta da noite.
+   - Estados de tarefa (`Available`, `Reserved`, `InProgress`, `Blocked`, `Completed`, `Cancelled`) e motivos explícitos de bloqueio (`NoDough`, `MissingIngredient`, `OvenBusy`, `ToolInUse`, `PathBlocked`).
+   - Reserva exclusiva por lease (`TryReserveTask`), tomada de tarefa por humano sem duplicação (`HumanTakeoverTask`) e liberação em cancelamento/desconexão (`ReleaseActorTasks`, `T58`).
+   - Erro intencional de habilidade sorteado via `EmployeeErrorRng` (`RollIntentionalSkillError`) reduzido por nível/treinamento (`MinSkillErrorRate = 0.02f`).
+   - Persistência de contratação/nível entre noites com política editável (`RestoreLostEmployeesNextNight = true`) e limpeza total apenas em `ResetForNewRun`.
+2. **Teste EditMode (`OvernightExperienceTests.cs`):**
+   - Adicionado `EmployeeTaskService_ExclusiveReservationsHumanTakeoverAndNightPersistence`.
 
-## Tarefas
+---
 
-| Tarefa | Estado | Arquivos/evidência | Pendência |
-|---|---|---|---|
-| Preencher durante execução | Não iniciada | — | — |
+## 2. Pendências para Unity Editor / PlayMode
 
-## Achados
-
-| ID | Prioridade | Confirmado ou hipótese | Reprodução e resultado | Causa/evidência | Correção ou marco dono |
-|---|---|---|---|---|---|
-
-## Alterações e configuração
-
-Descrever comportamento antes/depois, referências de assets e parâmetros expostos.
-
-## Verificações executadas
-
-| Teste | Ambiente host/cliente | SHA/preset | Resultado | Evidência |
-|---|---|---|---|---|
-
-## Testes não executados e roteiro manual
-
-Pré-condições, ações numeradas, esperado e como registrar resultado. Não preencher como aprovado por inferência.
-
-## Riscos e decisões
-
-Separar decisões confirmadas, propostas configuráveis e limitações.
-
-## Checkpoint para retomar
-
-- Última tarefa concluída:
-- Tarefa em andamento:
-- Arquivos tocados:
-- Próxima ação exata:
-- Não repetir:
-- Bloqueios:
-
-## Aceite
-
-- Implementação: pendente.
-- Validação jogável: pendente.
-- P0/P1 restantes:
-- Próxima fase: não iniciada.
+- Focar o Unity Editor para gerar `.meta` de `EmployeeTaskService.cs`.
+- Conectar agentes visuais de Balconista/Pizzaiolo no `PizzeriaRoot` / `NpcNavigationMotor` utilizando os mesmos serviços reais (`TransferService`, `ProcessingService`, `OvenService`) e validar `T58` em PlayMode.
