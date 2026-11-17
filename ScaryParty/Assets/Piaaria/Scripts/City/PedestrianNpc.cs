@@ -138,6 +138,8 @@ public class PedestrianNpc : MonoBehaviour
 
     public void SpawnAt(Vector3 position, Quaternion rotation)
     {
+        if (NavMesh.SamplePosition(position, out var navHit, 4.0f, NavMesh.AllAreas))
+            position = navHit.position;
         transform.position = position;
         transform.rotation = rotation;
         if (Motor != null && Motor.Agent != null)
@@ -147,22 +149,47 @@ public class PedestrianNpc : MonoBehaviour
         gameObject.SetActive(true);
     }
 
+    private bool TryResolveReachableNavMeshPoint(Vector3 desired, out Vector3 safeDest)
+    {
+        safeDest = desired;
+        if (!NavMesh.SamplePosition(desired, out var hit, 4.0f, NavMesh.AllAreas))
+            return false;
+
+        if (Motor != null && Motor.Agent != null && Motor.Agent.isOnNavMesh)
+        {
+            var path = new NavMeshPath();
+            if (!NavMesh.CalculatePath(transform.position, hit.position, NavMesh.AllAreas, path) ||
+                path.status != NavMeshPathStatus.PathComplete)
+            {
+                return false;
+            }
+        }
+        safeDest = hit.position;
+        return true;
+    }
+
     public void AssignTravelToBuilding(CityBuilding target, float dwellTime = 8f)
     {
         if (target == null) return;
         TargetBuilding = target;
         _dwellDuration = dwellTime;
         State = PedestrianState.Travelling;
-        TargetPosition = target.entrancePosition;
-        Motor.MoveTo(TargetPosition);
+        if (TryResolveReachableNavMeshPoint(target.entrancePosition, out var safeDest))
+        {
+            TargetPosition = safeDest;
+            Motor.MoveTo(TargetPosition);
+        }
     }
 
     public void AssignVisitPizzeria(Vector3 pizzeriaEntrance)
     {
         TargetBuilding = null;
         State = PedestrianState.VisitingPizzeria;
-        TargetPosition = pizzeriaEntrance;
-        Motor.MoveTo(TargetPosition);
+        if (TryResolveReachableNavMeshPoint(pizzeriaEntrance, out var safeDest))
+        {
+            TargetPosition = safeDest;
+            Motor.MoveTo(TargetPosition);
+        }
     }
 
     private void Update()

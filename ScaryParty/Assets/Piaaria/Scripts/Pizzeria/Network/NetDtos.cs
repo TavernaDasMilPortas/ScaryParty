@@ -1082,4 +1082,49 @@ namespace ScaryParty.Pizzeria.Network
         public override bool Equals(object obj) => obj is NetRunStateDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(CurrentRunNight, IsRunCompleted, IsRunVictory, IsPreparationOpen, ReadyCount, Revision);
     }
+
+    public struct NetMonsterDto : INetworkSerializable, IEquatable<NetMonsterDto>
+    {
+        public ulong MonsterId;
+        public byte Species;
+        public byte BehaviorState;
+        public int CurrentHp;
+        public int MaxHp;
+        public float PosX;
+        public float PosY;
+        public float PosZ;
+        public float Yaw;
+        public bool IsAlerted;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref MonsterId);
+            serializer.SerializeValue(ref Species);
+            serializer.SerializeValue(ref BehaviorState);
+            serializer.SerializeValue(ref CurrentHp);
+            serializer.SerializeValue(ref MaxHp);
+            serializer.SerializeValue(ref PosX);
+            serializer.SerializeValue(ref PosY);
+            serializer.SerializeValue(ref PosZ);
+            serializer.SerializeValue(ref Yaw);
+            serializer.SerializeValue(ref IsAlerted);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetMonsterDto other)
+            => MonsterId == other.MonsterId &&
+               Species == other.Species &&
+               BehaviorState == other.BehaviorState &&
+               CurrentHp == other.CurrentHp &&
+               MaxHp == other.MaxHp &&
+               IsAlerted == other.IsAlerted &&
+               Math.Abs(PosX - other.PosX) < 0.05f &&
+               Math.Abs(PosY - other.PosY) < 0.05f &&
+               Math.Abs(PosZ - other.PosZ) < 0.05f &&
+               Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetMonsterDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(MonsterId, Species, BehaviorState, CurrentHp, IsAlerted, Revision);
+    }
 }

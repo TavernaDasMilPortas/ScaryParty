@@ -503,6 +503,32 @@ namespace ScaryParty.Pizzeria.Tests
             processing.TickOven(ovenSlot, state, burnGraceDuration: 2f, clock, ovenAutoShutoff: false);
             Assert.AreEqual(CookingStage.Burned, pizza.CookingStage);
         }
+
+        [Test]
+        public void R5_SpeciesHostilityGarlicOffenseAndZombieConversionIdempotency()
+        {
+            var hostility = new SpeciesHostilityService();
+            Assert.AreEqual(0, hostility.GetHostility(NpcSpecies.Vampire));
+
+            // Ingrediente comum não ofende vampiro
+            Assert.IsFalse(hostility.TryRegisterIngredientOffense(NpcSpecies.Vampire, 1));
+            Assert.AreEqual(0, hostility.GetHostility(NpcSpecies.Vampire));
+
+            // Alho (id 10) ofende vampiro e aumenta hostilidade
+            Assert.IsTrue(hostility.TryRegisterIngredientOffense(NpcSpecies.Vampire, 10));
+            Assert.Greater(hostility.GetHostility(NpcSpecies.Vampire), 0);
+
+            // Reset no fim da noite (PersistAcrossNights == false por padrão)
+            hostility.OnNightEnded();
+            Assert.AreEqual(0, hostility.GetHostility(NpcSpecies.Vampire));
+
+            // Conversão de zumbi: única por targetId e respeita teto
+            var zSvc = new ZombieConversionService { MaxInfectedCap = 2, ConversionChance = 1.0f, ConversionCooldownSeconds = 0.0 };
+            var rng = new System.Random(42);
+            Assert.IsTrue(zSvc.TryConvertTarget(101UL, activeInfectedCount: 0, now: 1.0, rng: rng));
+            Assert.IsFalse(zSvc.TryConvertTarget(101UL, activeInfectedCount: 1, now: 2.0, rng: rng));
+            Assert.IsFalse(zSvc.TryConvertTarget(102UL, activeInfectedCount: 2, now: 3.0, rng: rng));
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

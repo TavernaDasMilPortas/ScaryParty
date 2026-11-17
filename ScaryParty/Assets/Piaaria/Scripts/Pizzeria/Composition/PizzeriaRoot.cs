@@ -44,6 +44,8 @@ namespace ScaryParty.Pizzeria.Composition
         public CustomerService CustomerService { get; private set; }
         public RunProgressionService RunProgressionService { get; private set; }
         public EmployeeTaskService EmployeeTaskService { get; private set; }
+        public SpeciesHostilityService SpeciesHostilityService { get; private set; }
+        public ZombieConversionService ZombieConversionService { get; private set; }
         public AddressRegistry AddressRegistry { get; } = new AddressRegistry();
 
         public event Action OnPizzeriaInitialized;
@@ -323,6 +325,9 @@ namespace ScaryParty.Pizzeria.Composition
             int runSeed = System.Environment.TickCount ^ GetInstanceID();
             RunProgressionService = new RunProgressionService(runSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
             EmployeeTaskService = new EmployeeTaskService();
+            SpeciesHostilityService = new SpeciesHostilityService();
+            ZombieConversionService = new ZombieConversionService();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.EnsureOn(this);
 
             // Inicializar mesas do salão configuradas no prefab (ou 4 mesas padrão)
             var tableStations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.DiningTableStation>(true);
@@ -540,6 +545,7 @@ namespace ScaryParty.Pizzeria.Composition
                 // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais
                 OrderService?.TickOrders(DomainState, Clock);
                 CallService?.TickCalls(DomainState, (float)Clock.Now);
+                SpeciesHostilityService?.Tick(Time.deltaTime);
                 dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
 
                 int prevHoldCount = DomainState.PlayerHolds.Count;

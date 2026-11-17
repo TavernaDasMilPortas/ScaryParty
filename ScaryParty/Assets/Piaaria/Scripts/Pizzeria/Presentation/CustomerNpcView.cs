@@ -201,7 +201,15 @@ namespace ScaryParty.Pizzeria.Presentation
                     Agent.isStopped = false;
                     if (Vector3.Distance(Agent.destination, _targetPosition) > 0.15f)
                     {
-                        Agent.SetDestination(_targetPosition);
+                        if (UnityEngine.AI.NavMesh.SamplePosition(_targetPosition, out var navHit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
+                        {
+                            var path = new UnityEngine.AI.NavMeshPath();
+                            if (UnityEngine.AI.NavMesh.CalculatePath(transform.position, navHit.position, UnityEngine.AI.NavMesh.AllAreas, path) &&
+                                path.status == UnityEngine.AI.NavMeshPathStatus.PathComplete)
+                            {
+                                Agent.SetDestination(navHit.position);
+                            }
+                        }
                     }
                 }
             }

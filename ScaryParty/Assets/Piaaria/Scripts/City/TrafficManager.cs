@@ -210,6 +210,11 @@ public class TrafficManager : NetworkBehaviour
         Collider col = vehicleObj.GetComponent<Collider>();
         if (col != null) col.isTrigger = true;
 
+        var rb = vehicleObj.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+
         TrafficVehicle vehicle = vehicleObj.AddComponent<TrafficVehicle>();
         vehicle.VehicleId = _nextVehicleId++;
         vehicle.speed = _baseSpeed * (0.8f + (float)_rng.NextDouble() * 0.4f);

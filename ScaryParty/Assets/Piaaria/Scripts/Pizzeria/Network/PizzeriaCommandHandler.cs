@@ -1146,6 +1146,22 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             var eval = res.Value;
+            if (root.DomainState.Items.TryGetValue(new ItemId(pizzaItemIdVal), out var servedPizza) &&
+                servedPizza.Ingredients != null)
+            {
+                for (int i = 0; i < servedPizza.Ingredients.Count; i++)
+                {
+                    if (servedPizza.Ingredients[i].IngredientDefId == 10)
+                    {
+                        if (root.SpeciesHostilityService != null &&
+                            root.SpeciesHostilityService.TryRegisterIngredientOffense(NpcSpecies.Vampire, 10))
+                        {
+                            BroadcastNoticeClientRpc("Cliente vampiro se ofendeu com Alho na pizza!", isError: true);
+                        }
+                        break;
+                    }
+                }
+            }
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderClientId, out var client))
             {
                 if (client.PlayerObject != null)
@@ -1266,6 +1282,9 @@ namespace ScaryParty.Pizzeria.Network
             int newSeed = System.Environment.TickCount ^ GetInstanceID();
             root.RunProgressionService?.ResetRun(root.DomainState, newSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
             root.EmployeeTaskService?.ResetForNewRun();
+            root.SpeciesHostilityService?.ResetForNewRun();
+            root.ZombieConversionService?.Reset();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
 
             var nightParams = root.Config != null ? root.Config.ResolveNightParameters(1) : (NightGoalParameters?)null;
             NightCycleService.StartNight(root.DomainState, 1, nightParams);
@@ -1313,6 +1332,9 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             run?.ExpireTemporaryModifiersAtNightEnd();
+            root.SpeciesHostilityService?.OnNightEnded();
+            root.ZombieConversionService?.Reset();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
             int nextNight = root.DomainState.CurrentNightNumber + 1;
             NightCycleService.ClearTransientNightEntities(root.DomainState, repairBackpacks: true);
             root.DomainState.CurrentNightPhase = NightPhase.PreparingNextNight;

@@ -351,12 +351,31 @@ namespace ScaryParty.Pizzeria.Network
             float unbakedFactor = root.Config != null ? root.Config.unbakedPayoutFactor : 0f;
             int baseBonus = root.Config != null ? root.Config.restaurantBaseBonus : 20;
 
+            // R5 (T45): Ofensa por alho aumenta hostilidade dos vampiros contra a equipe
+            bool hasGarlicOffense = false;
+            foreach (var it in list)
+            {
+                if (root.DomainState.Items.TryGetValue(it, out var deliveredItem) && ItemHasGarlicIngredient(deliveredItem))
+                {
+                    hasGarlicOffense = true;
+                    break;
+                }
+            }
+
             var res = deliveryService.SubmitDelivery(
                 root.DomainState, destination, list, attemptId, sender, root.Catalog, root.OrderService,
                 burnedFactor, unbakedFactor, baseBonus, root.Clock?.Now);
 
             if (!res.Success)
                 return res;
+
+            if (hasGarlicOffense && root.SpeciesHostilityService != null)
+            {
+                if (root.SpeciesHostilityService.TryRegisterIngredientOffense(NpcSpecies.Vampire, 10))
+                {
+                    PizzeriaSession.Notifier?.BroadcastFeedback("Aroma de alho irritou os Vampiros da cidade!", true);
+                }
+            }
 
             var eval = res.Value;
 
@@ -375,6 +394,17 @@ namespace ScaryParty.Pizzeria.Network
 
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
             return res;
+        }
+
+        private static bool ItemHasGarlicIngredient(ItemState item)
+        {
+            if (item == null || item.Ingredients == null) return false;
+            for (int i = 0; i < item.Ingredients.Count; i++)
+            {
+                if (item.Ingredients[i].IngredientDefId == 10)
+                    return true;
+            }
+            return false;
         }
 
         public void DispatchDeliveryClientFeedback(ulong sender, int addressIdVal, DeliveryEvaluationResult eval)

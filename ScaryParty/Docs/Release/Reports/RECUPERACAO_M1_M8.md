@@ -72,6 +72,16 @@
   - Criado `RunPreparationPresenter` com votação Opção A vs B, loja compartilhada e botão `MARCAR PRONTO`. `NightResultsPresenter` atualizado para vitória da RUN (Noite 3), botão de preparação inter-noites e Nova RUN na derrota.
 - **Teste e verificação R4:** Teste unitário `R4_OvenTimerPreventsBurnAndOvenBurnsWithoutModifier` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R5 — M2/M5: `MonsterPopulationDirector`, Arquétipos/Hostilidade, Conversão Zumbi, NavMesh e Tráfego
+- **Tráfego e guardas NavMesh (`TrafficManager.cs`, `PedestrianNpc.cs`, `CustomerNpcView.cs`):**
+  - `TrafficManager.SpawnVehicle()` passa a anexar `Rigidbody` cinemático (`isKinematic = true`, `useGravity = false`) quando ausente no veículo spawnado para detecção física consistente.
+  - `PedestrianNpc` e `CustomerNpcView` validam origem/destino via `NavMesh.SamplePosition` + `NavMesh.CalculatePath` (`NavMeshPathStatus.PathComplete`) antes de acionar `SetDestination`.
+- **Hostilidade de espécies, conversão zumbi e diretor de população (`SpeciesHostilityService.cs`, `MonsterPopulationDirector.cs` + `.meta`, `MonsterNpcController.cs`, `PizzeriaRoot.cs`, `LogisticsCommands.cs`, `PizzeriaCommandHandler.cs`, `NetDtos.cs`, `PizzeriaNetworkState.cs`):**
+  - Adicionado `NetMonsterDto` e `NetworkList<NetMonsterDto> Monsters` em `PizzeriaNetworkState`.
+  - `PizzeriaRoot` instancia e atualiza `SpeciesHostilityService` e `ZombieConversionService`, além de anexar/acionar `MonsterPopulationDirector.EnsureOn(this)`.
+  - `MonsterNpcController` remove hostilidade incondicional e implementa comportamentos por arquétipo: Vampiro com vigília em telhado + drop telegrafado (ou ofensa por alho `IngredientDefId == 10` em entrega/mesa), Lobisomem com preparação `0.55s` + `SphereCast` anti-parede e `Warp`, Fantasma com flutuação seletiva `1.15f` + blink telegrafado `0.45s` validado em NavMesh, e Zumbi com conversão idempotente de NPC via `ZombieConversionService`.
+- **Teste e verificação R5:** Teste unitário `R5_SpeciesHostilityGarlicOffenseAndZombieConversionIdempotency` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -81,7 +91,7 @@
 | R2 | M3 | T25–T35 | Contrato único mãos, 2 pistolas por `WeaponId`, bandoleira 3P/1P, sweep moto e saída segura | **Concluído** (0 erros nos 3 `.csproj`) | Pendente (PlayMode/ParrelSync) |
 | R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
-| R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | Pendente | Pendente |
+| R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | Pendente | Pendente |
 | R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | Pendente | Pendente |
 | R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | Pendente | Pendente |
