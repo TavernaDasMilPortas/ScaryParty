@@ -28,7 +28,17 @@ namespace ScaryParty.Pizzeria.Network
 
         private void OnClientDisconnected(ulong clientId)
         {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                root.RunProgressionService?.OnParticipantDisconnected(clientId);
+                root.EmployeeTaskService?.ReleaseActorTasks(clientId, isHuman: true);
+            }
             CleanupPlayerWorldAndDomainStateServer(clientId);
+            if (root != null && root.IsServer)
+            {
+                PizzeriaCommandHandler.Instance?.ResolveAndStartPreparedNightIfReadyServer();
+            }
         }
 
         public static void CleanupPlayerWorldAndDomainStateServer(ulong clientId)
@@ -56,6 +66,7 @@ namespace ScaryParty.Pizzeria.Network
             // 1b. Liberar clientes em atendimento e comandas assumidas pelo jogador
             root.CustomerService?.ReleaseCustomersAttendedByPlayer(state, clientId);
             root.OrderService?.ReleaseOrdersClaimedByPlayer(state, clientId);
+            root.EmployeeTaskService?.ReleaseActorTasks(clientId, isHuman: true);
 
             // Cancelar montagens cujos ingredientes estavam nas mãos do jogador desconectado/morto.
             var assemblySlots = new List<StationSlotId>();

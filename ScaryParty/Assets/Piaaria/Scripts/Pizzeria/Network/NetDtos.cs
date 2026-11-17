@@ -1006,4 +1006,80 @@ namespace ScaryParty.Pizzeria.Network
         public override bool Equals(object obj) => obj is NetMotorcycleDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(IsActive, IsMounted, RiderClientId, HornCounter, Revision);
     }
+
+    public struct NetRunStateDto : INetworkSerializable, IEquatable<NetRunStateDto>
+    {
+        public int CurrentRunNight;
+        public int MaxRunNights;
+        public bool IsRunCompleted;
+        public bool IsRunVictory;
+        public bool IsPreparationOpen;
+        public bool IsVoteResolved;
+        public Unity.Collections.FixedString32Bytes OptionAId;
+        public Unity.Collections.FixedString64Bytes OptionATitle;
+        public Unity.Collections.FixedString128Bytes OptionADesc;
+        public int OptionAVotes;
+        public Unity.Collections.FixedString32Bytes OptionBId;
+        public Unity.Collections.FixedString64Bytes OptionBTitle;
+        public Unity.Collections.FixedString128Bytes OptionBDesc;
+        public int OptionBVotes;
+        public Unity.Collections.FixedString64Bytes WinningOptionTitle;
+        public int ReadyCount;
+        public int TotalHumans;
+        public bool HasOvenTimer;
+        public int ExtraBackpackCapacity;
+        public float EmployeeErrorMultiplier;
+        public float VampireSpawnMultiplier;
+        public float DemandMultiplier;
+        public uint Revision;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref CurrentRunNight);
+            serializer.SerializeValue(ref MaxRunNights);
+            serializer.SerializeValue(ref IsRunCompleted);
+            serializer.SerializeValue(ref IsRunVictory);
+            serializer.SerializeValue(ref IsPreparationOpen);
+            serializer.SerializeValue(ref IsVoteResolved);
+            serializer.SerializeValue(ref OptionAId);
+            serializer.SerializeValue(ref OptionATitle);
+            serializer.SerializeValue(ref OptionADesc);
+            serializer.SerializeValue(ref OptionAVotes);
+            serializer.SerializeValue(ref OptionBId);
+            serializer.SerializeValue(ref OptionBTitle);
+            serializer.SerializeValue(ref OptionBDesc);
+            serializer.SerializeValue(ref OptionBVotes);
+            serializer.SerializeValue(ref WinningOptionTitle);
+            serializer.SerializeValue(ref ReadyCount);
+            serializer.SerializeValue(ref TotalHumans);
+            serializer.SerializeValue(ref HasOvenTimer);
+            serializer.SerializeValue(ref ExtraBackpackCapacity);
+            serializer.SerializeValue(ref EmployeeErrorMultiplier);
+            serializer.SerializeValue(ref VampireSpawnMultiplier);
+            serializer.SerializeValue(ref DemandMultiplier);
+            serializer.SerializeValue(ref Revision);
+        }
+
+        public bool Equals(NetRunStateDto other)
+            => CurrentRunNight == other.CurrentRunNight &&
+               MaxRunNights == other.MaxRunNights &&
+               IsRunCompleted == other.IsRunCompleted &&
+               IsRunVictory == other.IsRunVictory &&
+               IsPreparationOpen == other.IsPreparationOpen &&
+               IsVoteResolved == other.IsVoteResolved &&
+               OptionAId.Equals(other.OptionAId) &&
+               OptionAVotes == other.OptionAVotes &&
+               OptionBId.Equals(other.OptionBId) &&
+               OptionBVotes == other.OptionBVotes &&
+               WinningOptionTitle.Equals(other.WinningOptionTitle) &&
+               ReadyCount == other.ReadyCount &&
+               TotalHumans == other.TotalHumans &&
+               HasOvenTimer == other.HasOvenTimer &&
+               ExtraBackpackCapacity == other.ExtraBackpackCapacity &&
+               Math.Abs(EmployeeErrorMultiplier - other.EmployeeErrorMultiplier) < 0.01f &&
+               Revision == other.Revision;
+
+        public override bool Equals(object obj) => obj is NetRunStateDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(CurrentRunNight, IsRunCompleted, IsRunVictory, IsPreparationOpen, ReadyCount, Revision);
+    }
 }

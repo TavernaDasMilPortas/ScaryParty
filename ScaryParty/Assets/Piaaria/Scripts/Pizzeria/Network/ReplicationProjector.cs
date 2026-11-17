@@ -33,6 +33,13 @@ namespace ScaryParty.Pizzeria.Network
                 anyChanged = true;
             }
 
+            var runDto = CreateRunStateDto(domainState);
+            if (!_netState.RunState.Value.Equals(runDto))
+            {
+                _netState.RunState.Value = runDto;
+                anyChanged = true;
+            }
+
             anyChanged |= ProjectItemsDelta(domainState);
             anyChanged |= ProjectToolsDelta(domainState);
             anyChanged |= ProjectStorageSlotsDelta(domainState);
@@ -875,5 +882,86 @@ namespace ScaryParty.Pizzeria.Network
                 Revision = domainState.Revision
             };
         }
+
+        private NetRunStateDto CreateRunStateDto(PizzeriaState domainState)
+        {
+            var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance;
+            var run = root != null ? root.RunProgressionService : null;
+            var stats = run != null ? run.RecalculateEffectiveStats() : new Domain.Services.RunEffectiveStats();
+
+            int totalHumans = 1;
+            if (Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.ConnectedClientsIds.Count > 0)
+            {
+                totalHumans = Unity.Netcode.NetworkManager.Singleton.ConnectedClientsIds.Count;
+            }
+
+            string optAId = string.Empty, optATitle = string.Empty, optADesc = string.Empty;
+            string optBId = string.Empty, optBTitle = string.Empty, optBDesc = string.Empty;
+            int optAVotes = 0, optBVotes = 0;
+
+            if (run != null && run.CurrentVoteOptions != null)
+            {
+                if (run.CurrentVoteOptions.Count > 0)
+                {
+                    optAId = run.CurrentVoteOptions[0].Id ?? string.Empty;
+                    optATitle = run.CurrentVoteOptions[0].DisplayName ?? optAId;
+                    optADesc = run.CurrentVoteOptions[0].Description ?? string.Empty;
+                }
+                if (run.CurrentVoteOptions.Count > 1)
+                {
+                    optBId = run.CurrentVoteOptions[1].Id ?? string.Empty;
+                    optBTitle = run.CurrentVoteOptions[1].DisplayName ?? optBId;
+                    optBDesc = run.CurrentVoteOptions[1].Description ?? string.Empty;
+                }
+                foreach (var v in run.Votes.Values)
+                {
+                    if (!string.IsNullOrEmpty(optAId) && v == optAId) optAVotes++;
+                    else if (!string.IsNullOrEmpty(optBId) && v == optBId) optBVotes++;
+                }
+            }
+
+            string winTitle = string.Empty;
+            if (run != null && run.IsVoteResolved && !string.IsNullOrEmpty(run.LastResolvedOptionId))
+            {
+                var def = run.GetModifierDefinition(run.LastResolvedOptionId);
+                winTitle = def != null ? def.DisplayName : run.LastResolvedOptionId;
+            }
+
+            return new NetRunStateDto
+            {
+                CurrentRunNight = domainState.CurrentNightNumber,
+                MaxRunNights = run != null ? run.MaxNights : 3,
+                IsRunCompleted = run != null && run.IsRunCompleted,
+                IsRunVictory = run != null && run.IsRunVictory,
+                IsPreparationOpen = domainState.CurrentNightPhase == Domain.Types.NightPhase.PreparingNextNight,
+                IsVoteResolved = run != null && run.IsVoteResolved,
+                OptionAId = TruncateFs32(optAId),
+                OptionATitle = TruncateFs64(optATitle),
+                OptionADesc = TruncateFs128(optADesc),
+                OptionAVotes = optAVotes,
+                OptionBId = TruncateFs32(optBId),
+                OptionBTitle = TruncateFs64(optBTitle),
+                OptionBDesc = TruncateFs128(optBDesc),
+                OptionBVotes = optBVotes,
+                WinningOptionTitle = TruncateFs64(winTitle),
+                ReadyCount = run != null ? run.ReadyPlayers.Count : 0,
+                TotalHumans = totalHumans,
+                HasOvenTimer = stats.OvenAutoShutoffEnabled,
+                ExtraBackpackCapacity = stats.ExtraBackpackCapacity,
+                EmployeeErrorMultiplier = stats.EmployeeErrorMultiplier,
+                VampireSpawnMultiplier = stats.VampireSpawnMultiplier,
+                DemandMultiplier = stats.DemandMultiplier,
+                Revision = domainState.Revision
+            };
+        }
+
+        private static Unity.Collections.FixedString32Bytes TruncateFs32(string s)
+            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString32Bytes(s.Length > 28 ? s.Substring(0, 28) : s);
+
+        private static Unity.Collections.FixedString64Bytes TruncateFs64(string s)
+            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString64Bytes(s.Length > 60 ? s.Substring(0, 60) : s);
+
+        private static Unity.Collections.FixedString128Bytes TruncateFs128(string s)
+            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString128Bytes(s.Length > 120 ? s.Substring(0, 120) : s);
     }
 }

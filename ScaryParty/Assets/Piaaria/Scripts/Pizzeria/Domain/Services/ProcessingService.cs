@@ -395,7 +395,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return CommandResult<ItemId>.Ok(pizza.Id);
         }
 
-        public void TickOven(StationSlotId ovenSlot, PizzeriaState state, float burnGraceDuration, IClock clock)
+        public void TickOven(StationSlotId ovenSlot, PizzeriaState state, float burnGraceDuration, IClock clock, bool ovenAutoShutoff = false)
         {
             if (!state.ActiveOperations.TryGetValue(ovenSlot, out var op)) return;
             if (!state.Items.TryGetValue(op.InputItemId, out var pizza)) return;
@@ -414,6 +414,17 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 {
                     pizza.CookingStage = CookingStage.Baked;
                     pizza.Revision++;
+                }
+
+                // Modificador permanent "oven_timer": desliga o forno no ponto ideal sem queimar (T51)
+                if (ovenAutoShutoff)
+                {
+                    if (pizza.BurnProgress != 0f)
+                    {
+                        pizza.BurnProgress = 0f;
+                        pizza.Revision++;
+                    }
+                    return;
                 }
 
                 float timePastBaked = op.Progress.Accumulated - op.Progress.Duration;

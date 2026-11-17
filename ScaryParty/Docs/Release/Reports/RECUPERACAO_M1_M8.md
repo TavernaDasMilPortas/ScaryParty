@@ -60,6 +60,18 @@
   - `BackpackState.EffectiveCapacity` reduz pela metade (`Math.Max(1, Capacity / 2)`) enquanto `IsDamaged`.
 - **Teste e verificação R3:** Teste unitário `R3_MultiPizzaMissingCountsWrongDamagedBagHalvesCapacityAndSuppliesTick` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R4 — M6: `RunProgressionService` na RUN, `NetRunStateDto`, Votos/Loja/Prontidão e UI Toolkit
+- **Serviço único por RUN (`PizzeriaRoot.cs`, `PlayerLifecycleBridge.cs`, `RunProgressionService.cs`):**
+  - `RunProgressionService` instanciado uma única vez no servidor em `PizzeriaRoot.InitializeServerDomain()` e preservado entre noites; desconexão de participante limpa voto/prontidão e reavalia início da noite (`OnParticipantDisconnected` + `ResolveAndStartPreparedNightIfReadyServer`).
+- **Replicação e RPCs de votação/loja/RUN (`NetDtos.cs`, `PizzeriaNetworkState.cs`, `ReplicationProjector.cs`, `PizzeriaCommandHandler.cs`, `ProcessingService.cs`, `PizzeriaConfig.cs`):**
+  - Adicionado `NetRunStateDto` e `NetworkVariable<NetRunStateDto> RunState` replicando opções A/B, votos, vencedor, contagem de prontos (`ReadyCount/TotalHumans`), modificadores ativos e conclusão/vitória da RUN.
+  - `AdvanceToNextNightServerRpc` encerra a RUN em vitória na Noite 3 (`IsRunCompleted=true, IsRunVictory=true`) ou abre `NightPhase.PreparingNextNight` entre N1→N2 e N2→N3.
+  - `RetryNightServerRpc` em produção redireciona para `StartNewRunInternalServer` quando `allowDebugNightRetryOnDefeat == false`.
+  - `CastRunVoteServerRpc`, `SetRunReadyServerRpc`, `StartNewRunServerRpc` e `PurchaseRunShopItemServerRpc` integrados com efeitos reais: `oven_timer` impede queima em `ProcessingService.TickOven`, `reinforced_bag` amplia capacidade das mochilas, `staff_training` reduz multiplicador de erro, suprimentos adicionam +5 em estoque base, e contratação de Caixa/Pizzaiolo usa `EmployeeTaskService` e o caixa compartilhado.
+- **UI Toolkit inter-noites e resultados (`RunPreparationPresenter.cs` + `.meta`, `NightResultsPresenter.cs`):**
+  - Criado `RunPreparationPresenter` com votação Opção A vs B, loja compartilhada e botão `MARCAR PRONTO`. `NightResultsPresenter` atualizado para vitória da RUN (Noite 3), botão de preparação inter-noites e Nova RUN na derrota.
+- **Teste e verificação R4:** Teste unitário `R4_OvenTimerPreventsBurnAndOvenBurnsWithoutModifier` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -68,7 +80,7 @@
 | R1 | M4 | T31, T32 | Estados de vida, permissões, cura/resgate 3s, cleanup morte, espectador, queda moto | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R2 | M3 | T25–T35 | Contrato único mãos, 2 pistolas por `WeaponId`, bandoleira 3P/1P, sweep moto e saída segura | **Concluído** (0 erros nos 3 `.csproj`) | Pendente (PlayMode/ParrelSync) |
 | R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
-| R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | Pendente | Pendente |
+| R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | Pendente | Pendente |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | Pendente | Pendente |
 | R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | Pendente | Pendente |

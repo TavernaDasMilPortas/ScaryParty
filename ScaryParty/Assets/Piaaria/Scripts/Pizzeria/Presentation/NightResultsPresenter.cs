@@ -55,6 +55,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
             Instance = this;
+            RunPreparationPresenter.EnsureInstance();
         }
 
         private void OnDestroy()
@@ -196,6 +197,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var dto = netState.NightState.Value;
             if (dto.NightNumber <= 0) return;
+            RunPreparationPresenter.EnsureInstance();
 
             bool shouldBeOpen = dto.Phase == (byte)NightPhase.Results || dto.Phase == (byte)NightPhase.Defeat;
             if (shouldBeOpen)
@@ -235,7 +237,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void RefreshLabels(NetNightStateDto dto, int totalBudget)
         {
+            var netState = PizzeriaNetworkState.Instance;
+            var runDto = netState != null ? netState.RunState.Value : default;
+            int maxNights = runDto.MaxRunNights > 0 ? runDto.MaxRunNights : 3;
             bool isVictory = dto.Phase == (byte)NightPhase.Results;
+            bool isRunFinalVictory = isVictory && (runDto.IsRunVictory || dto.NightNumber >= maxNights);
             Color accent = isVictory ? new Color(0.3f, 0.85f, 0.45f) : new Color(0.9f, 0.28f, 0.25f);
 
             if (_card != null)
@@ -248,17 +254,24 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (_titleLabel != null)
             {
-                _titleLabel.text = isVictory
-                    ? $"NOITE {dto.NightNumber} CONCLUÍDA!"
-                    : $"DERROTA OPERACIONAL — NOITE {dto.NightNumber}";
+                if (isRunFinalVictory)
+                    _titleLabel.text = $"VITÓRIA DA RUN! ({dto.NightNumber}/{maxNights})";
+                else if (isVictory)
+                    _titleLabel.text = $"NOITE {dto.NightNumber}/{maxNights} CONCLUÍDA!";
+                else
+                    _titleLabel.text = $"DERROTA OPERACIONAL — NOITE {dto.NightNumber}";
                 _titleLabel.style.color = accent;
             }
 
             if (_subtitleLabel != null)
             {
-                if (isVictory)
+                if (isRunFinalVictory)
                 {
-                    _subtitleLabel.text = "Meta de faturamento atingida! A equipe manteve a pizzaria aberta.";
+                    _subtitleLabel.text = "Parabéns! A equipe sobreviveu e cumpriu todas as metas da RUN!";
+                }
+                else if (isVictory)
+                {
+                    _subtitleLabel.text = "Meta atingida! Avance para a preparação inter-noites (votação e loja).";
                 }
                 else
                 {
@@ -266,6 +279,7 @@ namespace ScaryParty.Pizzeria.Presentation
                     {
                         (byte)NightDefeatReason.RevenueBelowGoal => "A receita obtida nesta noite ficou abaixo da meta estipulada.",
                         (byte)NightDefeatReason.AllPlayersIncapacitated => "Toda a equipe foi incapacitada durante o turno.",
+                        (byte)NightDefeatReason.ReputationZeroed => "A reputação da pizzaria zerou durante o expediente.",
                         _ => "Falha crítica na operação da pizzaria."
                     };
                 }
@@ -275,10 +289,10 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _statsLabel.text =
                     $"Receita da Noite: R$ {dto.EarnedRevenue} / Meta: R$ {dto.RevenueGoal}\n" +
-                    $"Pedidos Concluídos: {dto.OrdersCompleted}\n" +
-                    $"Pedidos Falhados/Expirados: {dto.OrdersFailed}\n" +
+                    $"Reputação Atual: {dto.Reputation}/100\n" +
+                    $"Pedidos Concluídos: {dto.OrdersCompleted} | Falhados: {dto.OrdersFailed}\n" +
                     $"Clientes Perdidos: {dto.LostCustomers}\n" +
-                    $"Caixa Total Acumulado: R$ {totalBudget}";
+                    $"Caixa Total Compartilhado: R$ {totalBudget}";
             }
 
             bool isHost = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
@@ -287,13 +301,15 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (_retryNightBtn != null)
             {
-                _retryNightBtn.text = $"Tentar Novamente (Noite {dto.NightNumber})";
-                _retryNightBtn.style.display = isHost ? DisplayStyle.Flex : DisplayStyle.None;
+                bool showNewRunOnEnd = !isVictory || isRunFinalVictory;
+                _retryNightBtn.text = "Iniciar Nova RUN (Noite 1)";
+                _retryNightBtn.style.display = (isHost && showNewRunOnEnd) ? DisplayStyle.Flex : DisplayStyle.None;
             }
 
             if (_nextNightBtn != null)
             {
-                _nextNightBtn.style.display = (isHost && isVictory) ? DisplayStyle.Flex : DisplayStyle.None;
+                _nextNightBtn.text = "Ir para Votação e Loja";
+                _nextNightBtn.style.display = (isHost && isVictory && !isRunFinalVictory) ? DisplayStyle.Flex : DisplayStyle.None;
             }
         }
 

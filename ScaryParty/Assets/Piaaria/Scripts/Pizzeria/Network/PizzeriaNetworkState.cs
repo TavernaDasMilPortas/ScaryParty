@@ -30,6 +30,9 @@ namespace ScaryParty.Pizzeria.Network
         public NetworkVariable<NetMotorcycleDto> MotorcycleState = new NetworkVariable<NetMotorcycleDto>(
             default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+        public NetworkVariable<NetRunStateDto> RunState = new NetworkVariable<NetRunStateDto>(
+            default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
         public NetworkVariable<int> RestaurantBudget = new NetworkVariable<int>(
             500, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 

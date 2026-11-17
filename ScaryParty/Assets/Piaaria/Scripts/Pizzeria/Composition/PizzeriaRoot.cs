@@ -42,6 +42,8 @@ namespace ScaryParty.Pizzeria.Composition
         public CallService CallService { get; private set; }
         public PlayerHoldService PlayerHoldService { get; private set; }
         public CustomerService CustomerService { get; private set; }
+        public RunProgressionService RunProgressionService { get; private set; }
+        public EmployeeTaskService EmployeeTaskService { get; private set; }
         public AddressRegistry AddressRegistry { get; } = new AddressRegistry();
 
         public event Action OnPizzeriaInitialized;
@@ -318,6 +320,9 @@ namespace ScaryParty.Pizzeria.Composition
             CallService = new CallService();
             PlayerHoldService = new PlayerHoldService();
             CustomerService = new CustomerService();
+            int runSeed = System.Environment.TickCount ^ GetInstanceID();
+            RunProgressionService = new RunProgressionService(runSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
+            EmployeeTaskService = new EmployeeTaskService();
 
             // Inicializar mesas do salão configuradas no prefab (ou 4 mesas padrão)
             var tableStations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.DiningTableStation>(true);
@@ -495,7 +500,8 @@ namespace ScaryParty.Pizzeria.Composition
                                 oldBurnProgress = pizzaItem.BurnProgress;
                             }
 
-                            ProcessingService.TickOven(slot, DomainState, _config.ovenBurnGraceDuration, Clock);
+                            var runStats = RunProgressionService != null ? RunProgressionService.RecalculateEffectiveStats() : null;
+                            ProcessingService.TickOven(slot, DomainState, _config.ovenBurnGraceDuration, Clock, runStats != null && runStats.OvenAutoShutoffEnabled);
                             
                             if (DomainState.Items.TryGetValue(op.InputItemId, out var updatedPizza))
                             {

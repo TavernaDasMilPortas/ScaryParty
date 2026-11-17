@@ -477,6 +477,32 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsTrue(NightCycleService.TickSupplies(state, 95.0));
             Assert.GreaterOrEqual(state.StorageSlots[(1, 1)].Quantity, 7);
         }
+
+        [Test]
+        public void R4_OvenTimerPreventsBurnAndOvenBurnsWithoutModifier()
+        {
+            var state = new PizzeriaState();
+            var catalog = new DefinitionCatalog();
+            var clock = new FixedClock(0.0);
+            var processing = new ProcessingService();
+            var ovenService = new OvenService();
+
+            var pizzaId = state.GenerateItemId();
+            var pizza = new ItemState(pizzaId, 100, ItemCategory.Pizza, LocationRef.InHand(0UL, HandSlotIndex.Left));
+            state.Items[pizzaId] = pizza;
+
+            var ovenSlot = new StationSlotId(1, 0);
+            Assert.IsTrue(ovenService.InsertPizza(state, ovenSlot, pizzaId, 0UL, catalog, defaultBakeDuration: 5f).Success);
+
+            clock.Now = 10.0; // 5s bake + 5s past bake (> grace 2s)
+            processing.TickOven(ovenSlot, state, burnGraceDuration: 2f, clock, ovenAutoShutoff: true);
+            Assert.AreEqual(CookingStage.Baked, pizza.CookingStage);
+            Assert.AreEqual(0f, pizza.BurnProgress);
+
+            // Sem o modificador oven_timer, queima após a tolerância
+            processing.TickOven(ovenSlot, state, burnGraceDuration: 2f, clock, ovenAutoShutoff: false);
+            Assert.AreEqual(CookingStage.Burned, pizza.CookingStage);
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

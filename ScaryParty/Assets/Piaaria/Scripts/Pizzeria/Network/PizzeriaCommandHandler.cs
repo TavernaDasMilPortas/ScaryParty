@@ -1209,13 +1209,20 @@ namespace ScaryParty.Pizzeria.Network
         public void RetryNightServerRpc(ServerRpcParams rpcParams = default)
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
-            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
+            var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             if (senderId != NetworkManager.ServerClientId)
             {
-                NotifyErrorClientRpc("Apenas o Host pode reiniciar a noite.", targetParams);
+                NotifyErrorClientRpc("Apenas o Host pode reiniciar.", targetParams);
+                return;
+            }
+
+            bool allowDebugRetry = root.Config != null && root.Config.allowDebugNightRetryOnDefeat;
+            if (!allowDebugRetry)
+            {
+                StartNewRunInternalServer();
                 return;
             }
 
@@ -1225,46 +1232,304 @@ namespace ScaryParty.Pizzeria.Network
 
             var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nightNum) : (NightGoalParameters?)null;
             NightCycleService.RetryCurrentNight(root.DomainState, nightParams);
-            OnServerResetNightCombatRequested?.Invoke();
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
 
             ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
                 root.DomainState.CurrentNightNumber,
                 root.DomainState.NightRevenueGoal);
 
             CommitAndReplicate();
-            BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} reiniciada pelo Host!", isError: false);
+            BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} reiniciada (modo debug) pelo Host!", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void StartNewRunServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            if (senderId != NetworkManager.ServerClientId)
+            {
+                NotifyErrorClientRpc("Apenas o Host pode iniciar uma nova RUN.", TargetSender(senderId));
+                return;
+            }
+
+            StartNewRunInternalServer();
+        }
+
+        private void StartNewRunInternalServer()
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            int newSeed = System.Environment.TickCount ^ GetInstanceID();
+            root.RunProgressionService?.ResetRun(root.DomainState, newSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
+            root.EmployeeTaskService?.ResetForNewRun();
+
+            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(1) : (NightGoalParameters?)null;
+            NightCycleService.StartNight(root.DomainState, 1, nightParams);
+
+            int humanCount = NetworkManager.Singleton != null ? Mathf.Max(1, NetworkManager.Singleton.ConnectedClientsIds.Count) : 1;
+            root.RunProgressionService?.FreezeNightStartParameters(root.DomainState, humanCount);
+
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
+
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
+                root.DomainState.CurrentNightNumber,
+                root.DomainState.NightRevenueGoal);
+
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"Nova RUN iniciada! Noite 1 — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void AdvanceToNextNightServerRpc(ServerRpcParams rpcParams = default)
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
-            var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
+            var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             if (senderId != NetworkManager.ServerClientId)
             {
-                NotifyErrorClientRpc("Apenas o Host pode avançar para a próxima noite.", targetParams);
+                NotifyErrorClientRpc("Apenas o Host pode avançar para a preparação/próxima noite.", targetParams);
                 return;
             }
 
-            int nextNight = root.DomainState.CurrentNightNumber + 1;
-            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nextNight) : (NightGoalParameters?)null;
-            if (!NightCycleService.AdvanceToNextNight(root.DomainState, nightParams))
+            if (root.DomainState.CurrentNightPhase != NightPhase.Results)
             {
                 NotifyErrorClientRpc("A noite atual precisa ser vencida antes de avançar.", targetParams);
                 return;
             }
 
-            OnServerResetNightCombatRequested?.Invoke();
+            var run = root.RunProgressionService;
+            if (run != null && root.DomainState.CurrentNightNumber >= run.MaxNights)
+            {
+                run.TryCompleteNightAndAdvance(root.DomainState);
+                CommitAndReplicate();
+                BroadcastNoticeClientRpc("VITÓRIA DA RUN! Todas as 3 noites foram concluídas com sucesso!", isError: false);
+                return;
+            }
 
+            run?.ExpireTemporaryModifiersAtNightEnd();
+            int nextNight = root.DomainState.CurrentNightNumber + 1;
+            NightCycleService.ClearTransientNightEntities(root.DomainState, repairBackpacks: true);
+            root.DomainState.CurrentNightPhase = NightPhase.PreparingNextNight;
+            root.DomainState.IncrementRevision();
+            run?.OpenChoiceVote(nextNight, 2);
+
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"Preparação para Noite {nextNight} aberta: votem, comprem melhorias e marquem Pronto!", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CastRunVoteServerRpc(Unity.Collections.FixedString32Bytes optionId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            if (root.RunProgressionService.CastVote(senderId, optionId.ToString()))
+            {
+                root.DomainState.IncrementRevision();
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SetRunReadyServerRpc(bool ready, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            root.RunProgressionService.SetPlayerReady(senderId, ready);
+            ResolveAndStartPreparedNightIfReadyServer();
+            CommitAndReplicate();
+        }
+
+        public void ResolveAndStartPreparedNightIfReadyServer()
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            var connected = new List<ulong>();
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClientsIds.Count > 0)
+            {
+                foreach (var cid in NetworkManager.Singleton.ConnectedClientsIds) connected.Add(cid);
+            }
+            else
+            {
+                connected.Add(0UL);
+            }
+
+            var run = root.RunProgressionService;
+            bool allReady = true;
+            for (int i = 0; i < connected.Count; i++)
+            {
+                if (!ContainsClientId(run.ReadyPlayers, connected[i]))
+                {
+                    allReady = false;
+                    break;
+                }
+            }
+
+            if (!allReady) return;
+
+            if (!run.IsVoteResolved)
+            {
+                run.ResolveVoteServer();
+            }
+
+            if (!run.CanStartNight(connected)) return;
+
+            int nextNight = root.DomainState.CurrentNightNumber + 1;
+            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nextNight) : (NightGoalParameters?)null;
+            NightCycleService.StartNight(root.DomainState, nextNight, nightParams);
+            run.FreezeNightStartParameters(root.DomainState, connected.Count);
+            ApplyRunBackpackCapacityBonusServer(root);
+
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
             ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
                 root.DomainState.CurrentNightNumber,
                 root.DomainState.NightRevenueGoal);
 
-            CommitAndReplicate();
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} iniciada! Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+        }
+
+        private static bool ContainsClientId(IReadOnlyCollection<ulong> set, ulong target)
+        {
+            foreach (var v in set)
+            {
+                if (v == target) return true;
+            }
+            return false;
+        }
+
+        private static void ApplyRunBackpackCapacityBonusServer(PizzeriaRoot root)
+        {
+            if (root == null || root.DomainState == null || root.RunProgressionService == null) return;
+            int baseCap = root.Config != null ? Mathf.Max(2, root.Config.backpackCapacity) : 4;
+            int bonus = root.RunProgressionService.RecalculateEffectiveStats().ExtraBackpackCapacity;
+            int targetCap = baseCap + Mathf.Max(0, bonus);
+            foreach (var bp in root.DomainState.Backpacks.Values)
+            {
+                if (bp.Capacity < targetCap)
+                {
+                    bp.Capacity = targetCap;
+                    bp.Revision++;
+                }
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void PurchaseRunShopItemServerRpc(byte shopItemId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight)
+            {
+                NotifyErrorClientRpc("A loja só está disponível durante a preparação inter-noites.", targetParams);
+                return;
+            }
+
+            var run = root.RunProgressionService;
+            var state = root.DomainState;
+            bool ok = false;
+            string purchasedMsg = null;
+
+            switch (shopItemId)
+            {
+                case 1: // Timer do Forno (único)
+                {
+                    var item = new RunShopItem { Id = "oven_timer_shop", Name = "Timer do Forno", Cost = 90, IsUnique = true };
+                    ok = run.TryPurchaseShopItem(state, item);
+                    if (ok)
+                    {
+                        var def = run.GetModifierDefinition("oven_timer");
+                        if (def != null) run.ApplyModifier(def);
+                        purchasedMsg = "Timer do Forno adquirido (pizzas não queimam)!";
+                    }
+                    break;
+                }
+                case 2: // Bolsa Reforçada (+1 slot)
+                {
+                    var item = new RunShopItem { Id = "reinforced_bag_shop", Name = "Bolsa Reforçada", Cost = 75, IsUnique = false };
+                    if (run.TryPurchaseShopItem(state, item))
+                    {
+                        var def = run.GetModifierDefinition("reinforced_bag");
+                        if (def != null) run.ApplyModifier(def);
+                        ApplyRunBackpackCapacityBonusServer(root);
+                        ok = true;
+                        purchasedMsg = "Bolsa Reforçada adquirida (+1 capacidade de carga)!";
+                    }
+                    break;
+                }
+                case 3: // Treinamento de Equipe
+                {
+                    var item = new RunShopItem { Id = "staff_training_shop", Name = "Treinamento Equipe", Cost = 85, IsUnique = false };
+                    if (run.TryPurchaseShopItem(state, item))
+                    {
+                        var def = run.GetModifierDefinition("staff_training");
+                        if (def != null) run.ApplyModifier(def);
+                        ok = true;
+                        purchasedMsg = "Treinamento aplicado (-25% chance de erro dos funcionários)!";
+                    }
+                    break;
+                }
+                case 4: // Suprimentos Base +5
+                {
+                    var item = new RunShopItem { Id = "extra_supplies_shop", Name = "Suprimentos Base +5", Cost = 45, IsUnique = false };
+                    if (run.TryPurchaseShopItem(state, item))
+                    {
+                        foreach (var kvp in state.StorageSlots)
+                        {
+                            if (kvp.Key.ingredientDefId >= 1 && kvp.Key.ingredientDefId <= 3)
+                            {
+                                kvp.Value.Quantity = Mathf.Min(kvp.Value.MaxCapacity, kvp.Value.Quantity + 5);
+                                kvp.Value.Revision++;
+                            }
+                        }
+                        ok = true;
+                        purchasedMsg = "+5 de Massa, Molho e Queijo adicionados ao estoque!";
+                    }
+                    break;
+                }
+                case 5: // Contratar Caixa
+                {
+                    if (root.EmployeeTaskService != null && root.EmployeeTaskService.TryHireEmployee(state, EmployeeRole.Cashier) != null)
+                    {
+                        ok = true;
+                        purchasedMsg = "Caixa contratado para o atendimento!";
+                    }
+                    break;
+                }
+                case 6: // Contratar Pizzaiolo
+                {
+                    if (root.EmployeeTaskService != null && root.EmployeeTaskService.TryHireEmployee(state, EmployeeRole.Pizzaiolo) != null)
+                    {
+                        ok = true;
+                        purchasedMsg = "Pizzaiolo contratado para a cozinha!";
+                    }
+                    break;
+                }
+            }
+
+            if (!ok)
+            {
+                NotifyErrorClientRpc("Saldo insuficiente no caixa ou item único já adquirido.", targetParams);
+                return;
+            }
+
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc(purchasedMsg ?? "Compra concluída!", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]

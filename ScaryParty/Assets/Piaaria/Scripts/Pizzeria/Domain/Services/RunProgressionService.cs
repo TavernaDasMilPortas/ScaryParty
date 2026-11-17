@@ -89,8 +89,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         public IReadOnlyList<RunModifierDefinition> CurrentVoteOptions => _currentVoteOptions;
         public IReadOnlyDictionary<string, ActiveRunModifier> ActiveModifiers => _activeModifiers;
+        public IReadOnlyDictionary<ulong, string> Votes => _votes;
+        public IReadOnlyCollection<ulong> ReadyPlayers => _readyPlayers;
         public bool IsVoteResolved { get; private set; }
         public string LastResolvedOptionId { get; private set; }
+
+        public bool HasModifier(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.ContainsKey(id);
+        public RunModifierDefinition GetModifierDefinition(string id) => !string.IsNullOrEmpty(id) && _catalog.TryGetValue(id, out var d) ? d : null;
 
         public RunProgressionService(int seed = 12345, int maxNights = 3, RunDifficulty difficulty = RunDifficulty.Normal)
         {
