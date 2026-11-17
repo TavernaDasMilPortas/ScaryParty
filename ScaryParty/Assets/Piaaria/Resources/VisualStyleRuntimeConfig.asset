@@ -20,8 +20,8 @@ MonoBehaviour:
   lockTimeOfDayForTests: 0
   migratedLegacyFields: 1
   useStyledGameplay: 0
-  activeStyleId: dispatch_inspired
+  activeStyleId: flat_graphic
   activeGameplaySceneName: GameScene
-  activeProfile: {fileID: 11400000, guid: 2acf500dfb605f04ca33442ec7a85953, type: 2}
-  activeLibrary: {fileID: 11400000, guid: 86163759cf51a314080bdd860340712d, type: 2}
+  activeProfile: {fileID: 11400000, guid: b7801c213a0f6024e98766921cecb400, type: 2}
+  activeLibrary: {fileID: 11400000, guid: 4608a252cfb3cd74088f725453136019, type: 2}
   replicateStyleIdInMultiplayer: 0

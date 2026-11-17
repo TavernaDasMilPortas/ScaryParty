@@ -15,7 +15,7 @@ MonoBehaviour:
   styleId: flat_graphic
   displayName: Flat Graphic
   description: 1-2 faixas graficas chapadas, texturas essenciais e silhuetas limpas.
-  profileVersion: 1
+  profileVersion: 2
   presetType: 4
   thumbnail: {fileID: 0}
   lighting:
@@ -60,20 +60,20 @@ MonoBehaviour:
     posterizeColors: 0
     colorNumbers: 6
   outlines:
-    outlineMode: 0
+    outlineMode: 1
     outlineColor: {r: 0.14, g: 0.12, b: 0.16, a: 1}
-    outlineWidth: 0
+    outlineWidth: 0.1
     normalSurfaceOutline: 0
-    screenSpaceWidth: 0
+    screenSpaceWidth: 2
     useDepthTest: 1
     depthThreshold: 5.4
     useNormalsTest: 1
-    normalThreshold: 0.5
+    normalThreshold: 0.42
     useColorTest: 0
-    colorThreshold: 0.35
-    characterOutlineMultiplier: 1.25
-    buildingOutlineMultiplier: 0.2
-    foodOutlineMultiplier: 0.15
+    colorThreshold: 0.3
+    characterOutlineMultiplier: 1.35
+    buildingOutlineMultiplier: 0.22
+    foodOutlineMultiplier: 0.1
     maxOutlineDistanceArchitecture: 45
     maxOutlineDistanceCharacters: 60
     maxOutlineDistanceProps: 35

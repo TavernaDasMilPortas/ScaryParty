@@ -131,7 +131,7 @@ Material:
     - _BumpScale: 1
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
-    - _ColorThreshold: 0.35
+    - _ColorThreshold: 0.3
     - _Colorspace_Steps: 255
     - _Cull: 2
     - _Cutoff: 0.5
@@ -147,7 +147,7 @@ Material:
     - _GlossyReflections: 0
     - _METALNESS: 0
     - _Metallic: 0
-    - _NormalThreshold: 0.5
+    - _NormalThreshold: 0.42
     - _OVERLAY: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.005
@@ -167,7 +167,7 @@ Material:
     - _USECOLORTEST: 0
     - _USEDEPTHTEST: 1
     - _USENORMALSTEST: 1
-    - _Width: 0
+    - _Width: 2
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

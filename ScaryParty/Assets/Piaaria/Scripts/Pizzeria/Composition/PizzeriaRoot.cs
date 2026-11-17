@@ -431,6 +431,9 @@ namespace ScaryParty.Pizzeria.Composition
             if (ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.Instance == null)
                 ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.EnsureInstance();
 
+            if (ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.Instance == null)
+                ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.EnsureInstance();
+
             PizzeriaParkingLotBuilder.EnsureBuilt(this);
         }
 
@@ -554,10 +557,13 @@ namespace ScaryParty.Pizzeria.Composition
                     dirty |= custDirty;
                 }
 
-                var nightParams = _config != null ? _config.ResolveNightParameters(DomainState.CurrentNightNumber) : (NightGoalParameters?)null;
-                if (NightCycleService.TickNight(DomainState, Time.deltaTime, nightParams))
+                if (!ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused)
                 {
-                    dirty = true;
+                    var nightParams = _config != null ? _config.ResolveNightParameters(DomainState.CurrentNightNumber) : (NightGoalParameters?)null;
+                    if (NightCycleService.TickNight(DomainState, Time.deltaTime, nightParams))
+                    {
+                        dirty = true;
+                    }
                 }
 
                 _nightSyncAccumulator += Time.deltaTime;

@@ -16,66 +16,111 @@ MonoBehaviour:
     nodes:
     - id: 0
       worldPosition: {x: 0, y: 0, z: 0}
-      connectedEdges: 0000000002000000
+      connectedEdges: 000000000200000004000000
     - id: 1
-      worldPosition: {x: 7.417129, y: 0, z: 119.77055}
-      connectedEdges: 0000000001000000
+      worldPosition: {x: 2.4361315, y: 0, z: 119.975266}
+      connectedEdges: 000000000100000008000000
     - id: 2
-      worldPosition: {x: 56.661724, y: 0, z: 116.33526}
-      connectedEdges: 0100000003000000
+      worldPosition: {x: 59.707607, y: 0, z: 117.5559}
+      connectedEdges: 0100000007000000
     - id: 3
-      worldPosition: {x: 116.38132, y: 0, z: 29.24705}
-      connectedEdges: 0200000004000000
+      worldPosition: {x: -110.27918, y: 0, z: 47.31282}
+      connectedEdges: 0200000003000000
     - id: 4
-      worldPosition: {x: 113.17935, y: 0, z: 111.17512}
-      connectedEdges: 0300000004000000
+      worldPosition: {x: -96.63168, y: 0, z: 82.256096}
+      connectedEdges: 0300000006000000
+    - id: 5
+      worldPosition: {x: 119.815056, y: 0, z: -6.6597347}
+      connectedEdges: 0400000005000000
+    - id: 6
+      worldPosition: {x: 116.62211, y: 0, z: 113.297775}
+      connectedEdges: 0500000007000000
+    - id: 7
+      worldPosition: {x: -97.31481, y: 0, z: 113.98823}
+      connectedEdges: 0600000008000000
     edges:
     - id: 0
       nodeA: 0
       nodeB: 1
-      length: 120
+      length: 119.99999
       isBlocked: 0
       streetType: 0
     - id: 1
       nodeA: 1
       nodeB: 2
-      length: 49.364273
+      length: 57.322556
       isBlocked: 0
       streetType: 1
     - id: 2
       nodeA: 0
       nodeB: 3
-      length: 120
+      length: 120.00001
       isBlocked: 0
       streetType: 0
     - id: 3
-      nodeA: 2
+      nodeA: 3
       nodeB: 4
-      length: 56.752705
+      length: 37.51382
       isBlocked: 0
       streetType: 1
     - id: 4
-      nodeA: 3
-      nodeB: 4
-      length: 81.990616
+      nodeA: 0
+      nodeB: 5
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 5
+      nodeA: 5
+      nodeB: 6
+      length: 120
+      isBlocked: 0
+      streetType: 0
+    - id: 6
+      nodeA: 4
+      nodeB: 7
+      length: 31.739485
       isBlocked: 0
       streetType: 1
+    - id: 7
+      nodeA: 2
+      nodeB: 6
+      length: 57.073566
+      isBlocked: 0
+      streetType: 1
+    - id: 8
+      nodeA: 7
+      nodeB: 1
+      length: 99.93046
+      isBlocked: 0
+      streetType: 0
   blocks:
-  - worldCenter: {x: 58.65868, y: 0, z: 74.21908}
-    size: {x: 103.700005, y: 0, z: 105.545334}
+  - worldCenter: {x: 59.639275, y: 0, z: 67.67358}
+    size: {x: 107.5275, y: 0, z: 114.02921}
     zoneType: 0
     deliveryPointIndices: 
     polygon:
-    - {x: 6.4957047, y: 0, z: 7.8189545}
-    - {x: 110.19571, y: 0, z: 33.879143}
-    - {x: 107.38959, y: 0, z: 105.67878}
-    - {x: 56.180515, y: 0, z: 110.35424}
-    - {x: 13.031897, y: 0, z: 113.36429}
-    area: 8787.799
+    - {x: 6.1163535, y: 0, z: 5.6692934}
+    - {x: 113.64385, y: 0, z: -0.3074565}
+    - {x: 110.76847, y: 0, z: 107.71895}
+    - {x: 59.357296, y: 0, z: 111.565346}
+    - {x: 8.3103895, y: 0, z: 113.721756}
+    area: 11384.062
     hasPizzaria: 1
-  pizzariaPosition: {x: 28.82968, y: 2.15, z: 13.947111}
-  pizzariaRotation: {x: 0, y: 0.7885828, z: 0, w: -0.6149288}
-  bancadaPosition: {x: 31.066814, y: 1.02, z: 13.16889}
+  - worldCenter: {x: -58.778023, y: 0, z: 72.53851}
+    size: {x: 98.88363, y: 0, z: 104.57153}
+    zoneType: 0
+    deliveryPointIndices: 
+    polygon:
+    - {x: -5.8179827, y: 0, z: 9.02496}
+    - {x: -3.6946282, y: 0, z: 113.5965}
+    - {x: -91.19193, y: 0, z: 108.34492}
+    - {x: -90.6073, y: 0, z: 81.18838}
+    - {x: -102.578255, y: 0, z: 50.537796}
+    area: 7430.8394
+    hasPizzaria: 0
+  pizzariaPosition: {x: 29.390465, y: 2.15, z: 4.8764095}
+  pizzariaRotation: {x: 0, y: 0.6872054, z: 0, w: -0.7264633}
+  bancadaPosition: {x: 31.295267, y: 1.02, z: 3.4685278}
   pizzariaBlockIndex: 0
   hasPizzariaReserved: 1
   enemySpawnPoints: []
@@ -84,4 +129,4 @@ MonoBehaviour:
   _blockWidth: 80
   _blockDepth: 80
   _streetWidth: 6
-  _deliveryPointCount: 6
+  _deliveryPointCount: 13

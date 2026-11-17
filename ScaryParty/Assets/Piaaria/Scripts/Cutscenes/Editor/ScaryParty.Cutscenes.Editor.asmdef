@@ -1,0 +1,22 @@
+{
+  "name": "ScaryParty.Cutscenes.Editor",
+  "rootNamespace": "ScaryParty.Cutscenes.Editor",
+  "references": [
+    "ScaryParty.Cutscenes.Runtime",
+    "ScaryParty.VisualStyles.Runtime",
+    "Unity.Timeline",
+    "Unity.Timeline.Editor",
+    "Unity.RenderPipelines.Universal.Runtime"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

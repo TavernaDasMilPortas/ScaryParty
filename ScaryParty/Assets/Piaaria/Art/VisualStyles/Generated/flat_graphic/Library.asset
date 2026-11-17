@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: Library
   m_EditorClassIdentifier: ScaryParty.VisualStyles.Runtime::ScaryParty.VisualStyles.VisualMaterialLibrary
   styleId: flat_graphic
-  profileVersion: 1
-  profileContentHash: d0b8de6b
-  generationTimestampUtc: 2026-11-12T22:05:53.0655033Z
+  profileVersion: 2
+  profileContentHash: 4e6ce52f
+  generationTimestampUtc: 2026-11-16T13:31:19.7604107Z
   profile: {fileID: 11400000, guid: b7801c213a0f6024e98766921cecb400, type: 2}
   ruleSet: {fileID: 11400000, guid: b6f4d93708197754488dbbbe0f17e42e, type: 2}
+  renderPipelineAsset: {fileID: 11400000, guid: 697e5e3003022424cbbcc675efd5646d, type: 2}
   renderPipelineRendererData: {fileID: 11400000, guid: 924b1a738486f15499f9022d3cc63741, type: 2}
   styledPizzeriaVariantPrefab: {fileID: 7063361115283994964, guid: 9da144fdc6d46ea4db09457d43f332cf, type: 3}
   styledCharacterVariantPrefab: {fileID: 5889259697203075956, guid: 64a20593c4ab5c044873a7b9926447d7, type: 3}
@@ -3978,6 +3979,23 @@ MonoBehaviour:
       without outline clutter.
     targetMaterial: {fileID: 2100000, guid: 6b42d8f8219fc1448bd6fd63af4c630a, type: 2}
     targetMaterialGuid: 6b42d8f8219fc1448bd6fd63af4c630a
+    allowsDynamicTint: 0
+    preservedOriginal: 0
+  - conversionKey: flat_graphic_2516e6df1a16f814e99195892fb440e7_-876546973899608171_e35c01e7
+    sourceMaterialGuid: 2516e6df1a16f814e99195892fb440e7
+    sourceLocalFileId: -876546973899608171
+    sourceMaterialName: Material
+    sourceShaderName: Universal Render Pipeline/Lit
+    sourceTextureGuid: 
+    sourceMaterial: {fileID: -876546973899608171, guid: 2516e6df1a16f814e99195892fb440e7, type: 3}
+    categoryId: Architecture
+    semanticRole: 10
+    shaderFamily: 0
+    action: 0
+    confidence: 0.96
+    classificationReason: Gameplay:PizzeriaManual
+    targetMaterial: {fileID: 2100000, guid: fcfba5b9c0ea46148821874e1e0e849c, type: 2}
+    targetMaterialGuid: fcfba5b9c0ea46148821874e1e0e849c
     allowsDynamicTint: 0
     preservedOriginal: 0
   contextSlotBindings: []
