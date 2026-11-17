@@ -1326,9 +1326,14 @@ namespace ScaryParty.Pizzeria.Network
             public int CurrentHp = 100;
             public int MaxHp = 100;
             public bool IsIncapacitated;
+            public bool IsDead;
             public float RescueRemaining;
+            public float RescueProgress;
+            public ulong RescuedByClientId;
             public uint Revision = 1;
         }
+
+        private readonly Dictionary<ulong, double> _customerAttackRepCooldown = new Dictionary<ulong, double>();
 
         private readonly Dictionary<ulong, PlayerCombatRuntime> _playerCombat = new Dictionary<ulong, PlayerCombatRuntime>();
         private readonly Dictionary<uint, double> _lastWeaponFireServerTime = new Dictionary<uint, double>();
@@ -1414,7 +1419,7 @@ namespace ScaryParty.Pizzeria.Network
             });
         }
 
-        private void HandleResetNightCombatServer()
+        private void HandleResetNightCombatServer(bool resetWeaponsAndAmmo = false)
         {
             if (!IsServer) return;
 
@@ -1422,26 +1427,32 @@ namespace ScaryParty.Pizzeria.Network
             {
                 kvp.Value.CurrentHp = kvp.Value.MaxHp;
                 kvp.Value.IsIncapacitated = false;
+                kvp.Value.IsDead = false;
                 kvp.Value.RescueRemaining = 0f;
+                kvp.Value.RescueProgress = 0f;
                 kvp.Value.Revision++;
             }
             SyncPlayerCombatListServer();
 
-            var netState = PizzeriaNetworkState.Instance;
-            if (netState != null && netState.Weapons != null)
+            // A10: nunca repor munição gratuitamente entre noites; resetar armas apenas ao iniciar nova RUN
+            if (resetWeaponsAndAmmo)
             {
-                for (int i = 0; i < netState.Weapons.Count; i++)
+                var netState = PizzeriaNetworkState.Instance;
+                if (netState != null && netState.Weapons != null)
                 {
-                    var w = netState.Weapons[i];
-                    bool isShotgun = w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun;
-                    w.IsAvailableOnRack = true;
-                    w.IsSlinged = false;
-                    w.OwnerClientId = 0;
-                    w.MaxMagAmmo = isShotgun ? 4 : 12;
-                    w.CurrentMagAmmo = w.MaxMagAmmo;
-                    w.RackReserveAmmo = isShotgun ? 16 : 36;
-                    w.Revision++;
-                    netState.Weapons[i] = w;
+                    for (int i = 0; i < netState.Weapons.Count; i++)
+                    {
+                        var w = netState.Weapons[i];
+                        bool isShotgun = w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun;
+                        w.IsAvailableOnRack = true;
+                        w.IsSlinged = false;
+                        w.OwnerClientId = 0;
+                        w.MaxMagAmmo = isShotgun ? 4 : 12;
+                        w.CurrentMagAmmo = w.MaxMagAmmo;
+                        w.RackReserveAmmo = isShotgun ? 16 : 36;
+                        w.Revision++;
+                        netState.Weapons[i] = w;
+                    }
                 }
             }
 
@@ -1473,42 +1484,31 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (_playerCombat.Count == 0) return;
             bool changed = false;
-            var root = PizzeriaRoot.Instance;
 
             foreach (var kvp in _playerCombat)
             {
                 var c = kvp.Value;
-                if (!c.IsIncapacitated) continue;
+                if (!c.IsIncapacitated || c.IsDead) continue;
 
                 c.RescueRemaining = Mathf.Max(0f, c.RescueRemaining - dt);
                 changed = true;
                 if (c.RescueRemaining <= 0f)
                 {
+                    // A04: sem auto-resgate; sangramento leva a morte/espectador até a próxima noite vencida
                     c.IsIncapacitated = false;
-                    c.CurrentHp = Mathf.Max(1, c.MaxHp / 2);
+                    c.IsDead = true;
                     c.RescueRemaining = 0f;
+                    c.RescueProgress = 0f;
                     c.Revision++;
 
-                    Vector3 safePos = root != null && root.recoveryAnchor != null
-                        ? root.recoveryAnchor.position
-                        : (root != null ? root.GetPlayerSpawnPosition(0) : Vector3.zero);
-                    Quaternion safeRot = root != null && root.recoveryAnchor != null
-                        ? root.recoveryAnchor.rotation
-                        : (root != null ? root.GetPlayerSpawnRotation(0) : Quaternion.identity);
-
-                    if (NetworkManager.Singleton != null &&
-                        NetworkManager.Singleton.ConnectedClients.TryGetValue(kvp.Key, out var client) &&
-                        client.PlayerObject != null)
-                    {
-                        var cc = client.PlayerObject.GetComponent<CharacterController>();
-                        if (cc != null) cc.enabled = false;
-                        client.PlayerObject.transform.SetPositionAndRotation(safePos, safeRot);
-                        if (cc != null) cc.enabled = true;
-                    }
-
-                    TeleportPlayerClientRpc(kvp.Key, safePos, safeRot);
                     var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { kvp.Key } } };
-                    NotifySuccessClientRpc($"Reanimação automática concluída ({c.CurrentHp} HP).", targetParams);
+                    NotifyErrorClientRpc("Você morreu! Aguarde a equipe vencer a noite em modo espectador.", targetParams);
+
+                    if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
+                    {
+                        NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
+                        CommitAndReplicate();
+                    }
                 }
             }
 
@@ -1516,6 +1516,44 @@ namespace ScaryParty.Pizzeria.Network
             {
                 SyncPlayerCombatListServer();
             }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void AdvanceAllyRescueServerRpc(ulong targetClientId, float dt, ServerRpcParams rpcParams = default)
+        {
+            ulong helperId = rpcParams.Receive.SenderClientId;
+            if (!IsServer || helperId == targetClientId || dt <= 0f) return;
+            if (!_playerCombat.TryGetValue(helperId, out var helper) || helper.IsIncapacitated || helper.IsDead) return;
+            if (!_playerCombat.TryGetValue(targetClientId, out var target) || !target.IsIncapacitated || target.IsDead) return;
+
+            target.RescuedByClientId = helperId;
+            target.RescueProgress += Mathf.Min(dt, 0.25f) / 3.0f;
+            if (target.RescueProgress >= 1.0f)
+            {
+                target.IsIncapacitated = false;
+                target.CurrentHp = Mathf.Max(1, target.MaxHp / 2);
+                target.RescueRemaining = 0f;
+                target.RescueProgress = 0f;
+                target.Revision++;
+                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { targetClientId } } };
+                NotifySuccessClientRpc($"Resgatado por aliado ({target.CurrentHp} HP)!", targetParams);
+            }
+            else
+            {
+                target.Revision++;
+            }
+            SyncPlayerCombatListServer();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ReportCustomerAttackInPizzeriaServerRpc(ulong customerId, bool insidePizzeriaVolume, ServerRpcParams rpcParams = default)
+        {
+            if (!IsServer || !insidePizzeriaVolume || root == null || root.DomainState == null) return;
+            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
+            if (_customerAttackRepCooldown.TryGetValue(customerId, out double nextAllowed) && now < nextAllowed) return;
+            _customerAttackRepCooldown[customerId] = now + 3.0;
+            NightCycleService.AdjustReputation(root.DomainState, -15, "Cliente atacado dentro da pizzaria");
+            CommitAndReplicate();
         }
 
         private void SyncPlayerCombatListServer()
@@ -1532,7 +1570,9 @@ namespace ScaryParty.Pizzeria.Network
                     CurrentHp = r.CurrentHp,
                     MaxHp = r.MaxHp,
                     IsIncapacitated = r.IsIncapacitated,
+                    IsDead = r.IsDead,
                     RescueRemainingSeconds = r.RescueRemaining,
+                    RescueProgress = r.RescueProgress,
                     Revision = r.Revision
                 };
 
@@ -1626,12 +1666,24 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
+            // Interromper qualquer cura/resgate em andamento se o alvo ou o ajudante sofrer dano
+            combat.RescueProgress = 0f;
+            foreach (var kvp in _playerCombat)
+            {
+                if (kvp.Value.RescuedByClientId == targetClientId && kvp.Value.RescueProgress > 0f)
+                {
+                    kvp.Value.RescueProgress = 0f;
+                    kvp.Value.Revision++;
+                }
+            }
+
             if (combat.CurrentHp <= 0)
             {
                 combat.IsIncapacitated = true;
-                combat.RescueRemaining = ScaryParty.Combat.PlayerHealth.DefaultAutoRescueSeconds;
+                combat.RescueRemaining = 45f;
+                combat.RescueProgress = 0f;
                 combat.Revision++;
-                BroadcastNoticeClientRpc("Jogador nocauteado! Reanimação automática em 10s...", isError: true);
+                BroadcastNoticeClientRpc("Jogador nocauteado! Um aliado precisa resgatá-lo antes que morra.", isError: true);
 
                 if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
                 {
@@ -1649,7 +1701,7 @@ namespace ScaryParty.Pizzeria.Network
             if (nm == null || nm.ConnectedClientsIds.Count == 0) return false;
             foreach (var id in nm.ConnectedClientsIds)
             {
-                if (!_playerCombat.TryGetValue(id, out var r) || !r.IsIncapacitated)
+                if (!_playerCombat.TryGetValue(id, out var r) || (!r.IsIncapacitated && !r.IsDead))
                     return false;
             }
             return true;

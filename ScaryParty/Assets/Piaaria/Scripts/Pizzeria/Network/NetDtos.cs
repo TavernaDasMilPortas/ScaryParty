@@ -908,7 +908,9 @@ namespace ScaryParty.Pizzeria.Network
         public int CurrentHp;
         public int MaxHp;
         public bool IsIncapacitated;
+        public bool IsDead;
         public float RescueRemainingSeconds;
+        public float RescueProgress;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -917,7 +919,9 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref CurrentHp);
             serializer.SerializeValue(ref MaxHp);
             serializer.SerializeValue(ref IsIncapacitated);
+            serializer.SerializeValue(ref IsDead);
             serializer.SerializeValue(ref RescueRemainingSeconds);
+            serializer.SerializeValue(ref RescueProgress);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -926,11 +930,13 @@ namespace ScaryParty.Pizzeria.Network
                CurrentHp == other.CurrentHp &&
                MaxHp == other.MaxHp &&
                IsIncapacitated == other.IsIncapacitated &&
+               IsDead == other.IsDead &&
                Math.Abs(RescueRemainingSeconds - other.RescueRemainingSeconds) < 0.1f &&
+               Math.Abs(RescueProgress - other.RescueProgress) < 0.05f &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetPlayerCombatDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(ClientId, CurrentHp, IsIncapacitated, Revision);
+        public override int GetHashCode() => HashCode.Combine(ClientId, CurrentHp, IsIncapacitated, IsDead, Revision);
     }
 
     public struct NetMotorcycleDto : INetworkSerializable, IEquatable<NetMotorcycleDto>

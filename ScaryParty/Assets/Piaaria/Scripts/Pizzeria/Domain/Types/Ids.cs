@@ -429,7 +429,8 @@ namespace ScaryParty.Pizzeria.Domain.Types
         None = 0,
         RevenueBelowGoal = 1,
         CriticalOperationalFailure = 2,
-        AllPlayersIncapacitated = 3
+        AllPlayersIncapacitated = 3,
+        ReputationZeroed = 4
     }
 
     public enum OrderTaskBoardStage : byte

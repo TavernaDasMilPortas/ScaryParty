@@ -20,9 +20,9 @@ namespace ScaryParty.Pizzeria.Authoring
     {
         public List<NightLevelEntry> nights = new List<NightLevelEntry>
         {
-            new NightLevelEntry { nightNumber = 1, durationSeconds = 360f, revenueGoal = 60, prepSeconds = 4f, closingGraceSeconds = 20f },
-            new NightLevelEntry { nightNumber = 2, durationSeconds = 390f, revenueGoal = 110, prepSeconds = 4f, closingGraceSeconds = 20f },
-            new NightLevelEntry { nightNumber = 3, durationSeconds = 420f, revenueGoal = 170, prepSeconds = 4f, closingGraceSeconds = 20f },
+            new NightLevelEntry { nightNumber = 1, durationSeconds = 600f, revenueGoal = 60, prepSeconds = 4f, closingGraceSeconds = 0f },
+            new NightLevelEntry { nightNumber = 2, durationSeconds = 600f, revenueGoal = 110, prepSeconds = 4f, closingGraceSeconds = 0f },
+            new NightLevelEntry { nightNumber = 3, durationSeconds = 600f, revenueGoal = 170, prepSeconds = 4f, closingGraceSeconds = 0f },
         };
 
         public NightGoalParameters ResolveParameters(int nightNumber)

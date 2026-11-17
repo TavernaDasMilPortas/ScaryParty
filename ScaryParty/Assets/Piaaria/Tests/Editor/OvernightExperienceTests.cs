@@ -244,5 +244,36 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.AreEqual(LocationRef.InStation(15, 1), state.Tools[toolInHandId].Location);
             Assert.IsFalse(state.Tools[toolInHandId].IsReserved(10.0));
         }
+
+        [Test]
+        public void NightCycle_ClockZero_SettlesOpenOrdersOnceWithoutClosingGraceAndPreservesSupplies()
+        {
+            var state = new PizzeriaState
+            {
+                RestaurantBudget = 100,
+                Reputation = 100
+            };
+
+            NightCycleService.StartNight(state, 1, new NightGoalParameters(1, 10f, 50, 0f, 0f));
+            var openOrder = new OrderState(state.GenerateOrderId(), OrderSourceType.Phone, new AddressId(1), CustomerId.None, 0.0, 60.0);
+            state.Orders[openOrder.Id] = openOrder;
+
+            // Suprimento pago pendente não deve desaparecer ao avançar de noite
+            var supplyId = state.GenerateSupplyOrderId();
+            state.SupplyOrders[supplyId] = new SupplyOrderState(supplyId, 1, 1, 5, 25, 0.0, 20.0);
+
+            NightCycleService.RecordNightRevenue(state, 50);
+            NightCycleService.TickNight(state, 10f);
+
+            Assert.AreEqual(OrderLifecycle.Expired, openOrder.Lifecycle);
+            Assert.AreEqual(1, state.NightOrdersFailed);
+            Assert.AreEqual(90, state.Reputation);
+            Assert.AreEqual(NightPhase.Results, state.CurrentNightPhase);
+
+            Assert.IsTrue(NightCycleService.AdvanceToNextNight(state));
+            Assert.IsTrue(state.SupplyOrders.ContainsKey(supplyId));
+            Assert.AreEqual(150, state.RestaurantBudget);
+            Assert.AreEqual(50, state.RunTotalRevenue);
+        }
     }
 }

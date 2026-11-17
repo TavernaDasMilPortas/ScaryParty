@@ -87,14 +87,17 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.IncrementRevision();
         }
 
-        public static void ClearTransientNightEntities(PizzeriaState state, bool repairBackpacks)
+        public static void ClearTransientNightEntities(PizzeriaState state, bool repairBackpacks, bool preservePendingSupplies = true)
         {
             if (state == null) return;
 
             state.Items.Clear();
             state.Orders.Clear();
             state.ActiveOperations.Clear();
-            state.SupplyOrders.Clear();
+            if (!preservePendingSupplies)
+            {
+                state.SupplyOrders.Clear();
+            }
             state.Calls.Clear();
             state.PlayerHolds.Clear();
             state.Customers.Clear();
@@ -233,27 +236,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
                     if (state.NightRemainingSeconds <= 0f)
                     {
-                        if (HasOpenOrders(state))
-                        {
-                            float grace = closingParams.HasValue ? closingParams.Value.ClosingGraceSeconds : 20f;
-                            state.CurrentNightPhase = NightPhase.Closing;
-                            state.NightGraceRemainingSeconds = grace;
-                        }
-                        else
-                        {
-                            EvaluateNightOutcome(state);
-                        }
-                        state.IncrementRevision();
-                        dirty = true;
-                    }
-                    break;
-
-                case NightPhase.Closing:
-                    state.NightGraceRemainingSeconds = Math.Max(0f, state.NightGraceRemainingSeconds - dt);
-                    dirty |= RefreshOrderTaskStages(state);
-
-                    if (!HasOpenOrders(state) || state.NightGraceRemainingSeconds <= 0f)
-                    {
+                        // A06: ao zerar o relógio, liquidar pedidos abertos uma única vez e avaliar resultado sem prorrogação.
+                        SettleOpenOrdersAtNightEnd(state);
                         EvaluateNightOutcome(state);
                         state.IncrementRevision();
                         dirty = true;
@@ -264,12 +248,69 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return dirty;
         }
 
-        public static void EvaluateNightOutcome(PizzeriaState state)
+        public static void SettleOpenOrdersAtNightEnd(PizzeriaState state)
         {
             if (state == null) return;
 
-            // Regra canônica N1: derrota operacional usa apenas receita obtida nesta noite vs meta da noite.
-            if (state.NightEarnedRevenue >= state.NightRevenueGoal)
+            int expiredCount = 0;
+            foreach (var kvp in state.Orders)
+            {
+                var order = kvp.Value;
+                if (order.Lifecycle == OrderLifecycle.Accepted)
+                {
+                    order.Lifecycle = OrderLifecycle.Expired;
+                    order.TaskStage = OrderTaskBoardStage.Failed;
+                    expiredCount++;
+                }
+            }
+
+            if (expiredCount > 0)
+            {
+                state.NightOrdersFailed += expiredCount;
+                AdjustReputation(state, -10 * expiredCount, $"Fim do expediente com {expiredCount} pedido(s) em aberto");
+            }
+        }
+
+        public static void AdjustReputation(PizzeriaState state, int delta, string reason)
+        {
+            if (state == null) return;
+            state.Reputation = Math.Clamp(state.Reputation + delta, 0, 100);
+            state.LastReputationReason = reason ?? string.Empty;
+            if (state.Reputation <= 0 && state.CurrentNightPhase == NightPhase.Active)
+            {
+                ForceOperationalDefeat(state, NightDefeatReason.ReputationZeroed);
+            }
+            state.IncrementRevision();
+        }
+
+        public static void RecordNightRevenue(PizzeriaState state, int amount)
+        {
+            if (state == null || amount <= 0) return;
+            state.NightEarnedRevenue += amount;
+            state.RunTotalRevenue += amount;
+            state.RestaurantBudget += amount;
+            state.IncrementRevision();
+        }
+
+        public static void EvaluateNightOutcome(PizzeriaState state)
+        {
+            if (state == null) return;
+            if (state.CurrentNightPhase == NightPhase.Defeat) return;
+
+            if (state.Reputation <= 0)
+            {
+                state.CurrentNightPhase = NightPhase.Defeat;
+                state.NightDefeatReason = NightDefeatReason.ReputationZeroed;
+                return;
+            }
+
+            // Derrota operacional usa receita obtida nesta noite vs meta (independente do saldo gasto),
+            // além de metas mínimas de reputação e pizzas quando configuradas.
+            bool revenueOk = state.NightEarnedRevenue >= state.NightRevenueGoal;
+            bool repOk = state.Reputation >= state.NightReputationMinGoal;
+            bool pizzasOk = state.NightPizzasDelivered >= state.NightPizzasMinGoal;
+
+            if (revenueOk && repOk && pizzasOk)
             {
                 state.CurrentNightPhase = NightPhase.Results;
                 state.NightDefeatReason = NightDefeatReason.None;
@@ -277,7 +318,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             else
             {
                 state.CurrentNightPhase = NightPhase.Defeat;
-                state.NightDefeatReason = NightDefeatReason.RevenueBelowGoal;
+                state.NightDefeatReason = revenueOk ? NightDefeatReason.CriticalOperationalFailure : NightDefeatReason.RevenueBelowGoal;
             }
         }
 

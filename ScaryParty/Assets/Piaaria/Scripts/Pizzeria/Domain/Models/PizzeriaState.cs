@@ -32,7 +32,13 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public float NightGraceRemainingSeconds { get; set; } = 0f;
         public float NightPrepRemainingSeconds { get; set; } = 4f;
         public int NightEarnedRevenue { get; set; } = 0;
+        public int RunTotalRevenue { get; set; } = 0;
         public int NightRevenueGoal { get; set; } = 60;
+        public int Reputation { get; set; } = 100;
+        public int NightReputationMinGoal { get; set; } = 0;
+        public string LastReputationReason { get; set; } = string.Empty;
+        public int NightPizzasDelivered { get; set; } = 0;
+        public int NightPizzasMinGoal { get; set; } = 0;
         public int NightOrdersCompleted { get; set; } = 0;
         public int NightOrdersFailed { get; set; } = 0;
         public int NightLostCustomers { get; set; } = 0;
