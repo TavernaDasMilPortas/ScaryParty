@@ -5,7 +5,7 @@ Pacote criado para execução no projeto; nenhum marco foi executado por este pa
 | Marco | Status | Relatório |
 |---|---|---|
 | M1 — Auditoria | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M1_Relatorio](Reports/M1_Relatorio.md) |
-| M2 — Cidade Navegacao | NÃO INICIADA | [M2_Relatorio](Reports/M2_Relatorio.md) |
+| M2 — Cidade Navegacao | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M2_Relatorio](Reports/M2_Relatorio.md) |
 | M3 — Maos Armas Moto | NÃO INICIADA | [M3_Relatorio](Reports/M3_Relatorio.md) |
 | M4 — Noite Completa | NÃO INICIADA | [M4_Relatorio](Reports/M4_Relatorio.md) |
 | M5 — Monstros | NÃO INICIADA | [M5_Relatorio](Reports/M5_Relatorio.md) |
@@ -15,8 +15,8 @@ Pacote criado para execução no projeto; nenhum marco foi executado por este pa
 
 ## Checkpoint ativo
 
-- Fase: M1 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`).
-- Próxima ação: No Unity Editor aberto, rodar Test Runner EditMode e bateria manual PlayMode (`T01–T32`, `T35`, `T38–T42`, `T45–T49`) listada em `Reports/M1_Relatorio.md`, atualizando `TEST_MATRIX.md` antes de avançar para M2.
-- Bloqueios: Validação EditMode/PlayMode/ParrelSync depende do usuário no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+- Fase: M2 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`), avançando para M3.
+- Próxima ação: Executar M3 (Mãos, Armas, Bandoleira e Moto).
+- Bloqueios: Validações EditMode/PlayMode de M1–M2 pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases apenas porque o relatório foi criado.
