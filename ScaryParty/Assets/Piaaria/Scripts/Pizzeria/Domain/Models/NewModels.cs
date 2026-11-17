@@ -59,6 +59,8 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int Integrity { get; set; } = 100;
         public int MaxIntegrity { get; set; } = 100;
         public bool IsTorn => Integrity <= 0;
+        public bool IsDamaged => !IsTorn && Integrity < MaxIntegrity;
+        public int EffectiveCapacity => IsDamaged ? System.Math.Max(1, Capacity / 2) : Capacity;
         public bool HasDroppedBoxOnCurrentRupture { get; set; } = false;
         public uint Revision { get; set; } = 1;
 
@@ -71,7 +73,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         }
 
         public bool IsEquipped => EquippedBy != NoOwner;
-        public bool CanAdd => !IsTorn && Items.Count < Capacity;
+        public bool CanAdd => !IsTorn && Items.Count < EffectiveCapacity;
         public bool IsEmpty => Items.Count == 0;
 
         public void Add(ItemId itemId)

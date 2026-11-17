@@ -125,7 +125,7 @@ namespace ScaryParty.Pizzeria.Network
         public void RequestOpenStorageSessionServerRpc(int stationId, ServerRpcParams rpcParams = default)
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_storageSessions.TryGetValue(stationId, out var existing) && existing.ClientId != senderClientId && Time.time < existing.Expiry)
@@ -206,7 +206,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             var targetHand = (HandSlotIndex)hand;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
@@ -247,7 +247,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             var itemId = new ItemId(itemIdVal);
             if (!root.DomainState.Items.TryGetValue(itemId, out var sourceItem))
@@ -320,7 +320,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             var toolId = new ToolItemId(toolIdVal);
             if (root.DomainState.Tools.TryGetValue(toolId, out var toolState) &&
@@ -460,7 +460,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             Debug.Log($"[Server] StartWorkAtomicServerRpc recebido: stationId={stationId}, slotIndex={slotIndex}, processId={processId}, hand={activeHand}, client={senderClientId}");
             if (root == null || root.DomainState == null || slotIndex < 0)
             {
@@ -616,7 +616,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             Debug.Log($"[Server] AddIngredientToPizzaServerRpc recebido: pizzaId={pizzaIdVal}, ingredientId={ingredientIdVal}, client={senderClientId}");
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
@@ -666,7 +666,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_activeOvenTransfers.ContainsKey(stationId))
@@ -730,7 +730,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_activeOvenTransfers.ContainsKey(stationId))
@@ -842,7 +842,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             var pizzaId = new ItemId(pizzaIdVal);
             if (!root.DomainState.Items.TryGetValue(pizzaId, out var pizza))
@@ -912,7 +912,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             if (chosenDestinationId <= 0)
             {
@@ -975,7 +975,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             if (!IsStationWithinReach(senderId, phoneStationId, out string reachError))
             {
@@ -1041,7 +1041,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             ulong serverAttemptId = ((ulong)root.DomainState.Revision << 20)
                 ^ ((ulong)(uint)destinationId << 8)
@@ -1067,7 +1067,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null || root.PlayerHoldService == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             float holdDur = root.Config != null && root.Config.customerAttendHoldDuration > 0.1f
@@ -1124,7 +1124,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null || root.CustomerService == null) return;
-            if (RejectIfCannotActServer(senderClientId)) return;
+            if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             var res = root.CustomerService.ServeTableUnboxedPizza(
@@ -1190,7 +1190,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
             var res = NightCycleService.ToggleOrderClaim(root.DomainState, new OrderId(orderIdVal), senderId);
             if (!res.Success)
@@ -1382,7 +1382,7 @@ namespace ScaryParty.Pizzeria.Network
             public uint Revision = 1;
         }
 
-        public bool CanPlayerPerformGameplayActionServer(ulong clientId, out string reason)
+        public bool CanPlayerPerformGameplayActionServer(ulong clientId, out string reason, bool requireOpenShift = false)
         {
             if (_playerCombat.TryGetValue(clientId, out var combat))
             {
@@ -1397,13 +1397,24 @@ namespace ScaryParty.Pizzeria.Network
                     return false;
                 }
             }
+            if (requireOpenShift)
+            {
+                var root = PizzeriaRoot.Instance;
+                if (root != null && root.DomainState != null &&
+                    root.DomainState.CurrentNightPhase != NightPhase.Active &&
+                    root.DomainState.CurrentNightPhase != NightPhase.Preparing)
+                {
+                    reason = "O expediente desta noite já foi encerrado!";
+                    return false;
+                }
+            }
             reason = null;
             return true;
         }
 
-        private bool RejectIfCannotActServer(ulong clientId)
+        private bool RejectIfCannotActServer(ulong clientId, bool requireOpenShift = false)
         {
-            if (CanPlayerPerformGameplayActionServer(clientId, out string reason))
+            if (CanPlayerPerformGameplayActionServer(clientId, out string reason, requireOpenShift))
                 return false;
             NotifyErrorClientRpc(reason, TargetSender(clientId));
             return true;
@@ -1983,12 +1994,39 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void ReportCustomerAttackInPizzeriaServerRpc(ulong customerId, bool insidePizzeriaVolume, ServerRpcParams rpcParams = default)
         {
+            ulong senderId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
-            if (!IsServer || !insidePizzeriaVolume || root == null || root.DomainState == null) return;
+            if (!IsServer || root == null || root.DomainState == null) return;
+
+            Vector3 victimPos = Vector3.zero;
+            bool foundVictim = false;
+            var views = FindObjectsByType<ScaryParty.Pizzeria.Presentation.CustomerNpcView>(FindObjectsSortMode.None);
+            for (int i = 0; i < views.Length; i++)
+            {
+                if (views[i] != null && views[i].CustomerId == customerId)
+                {
+                    victimPos = views[i].transform.position;
+                    foundVictim = true;
+                    break;
+                }
+            }
+
+            if (!foundVictim && NetworkManager.Singleton != null &&
+                NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var senderClient) &&
+                senderClient.PlayerObject != null)
+            {
+                victimPos = senderClient.PlayerObject.transform.position;
+                foundVictim = true;
+            }
+
+            if (!foundVictim || !root.IsWorldPositionInsidePizzeria(victimPos))
+                return;
+
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
             if (_customerAttackRepCooldown.TryGetValue(customerId, out double nextAllowed) && now < nextAllowed) return;
             _customerAttackRepCooldown[customerId] = now + 3.0;
-            NightCycleService.AdjustReputation(root.DomainState, -15, "Cliente atacado dentro da pizzaria");
+            int penalty = root.Config != null ? root.Config.repPenaltyExpiredOrAttack : -15;
+            NightCycleService.AdjustReputation(root.DomainState, penalty, "Cliente atacado dentro da pizzaria");
             CommitAndReplicate();
         }
 
@@ -2181,7 +2219,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: false)) return;
 
             EnsureDefaultWeaponsInitializedServer();
             var netState = PizzeriaNetworkState.Instance;
@@ -2283,7 +2321,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: false)) return;
             var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
             var netState = PizzeriaNetworkState.Instance;
@@ -2609,7 +2647,7 @@ namespace ScaryParty.Pizzeria.Network
             var net = PizzeriaNetworkState.Instance;
             var bike = ScaryParty.City.DeliveryMotorcycleController.Instance;
             if (!IsServer || root == null || root.DomainState == null || net == null || bike == null) return;
-            if (RejectIfCannotActServer(senderId)) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: false)) return;
 
             var st = net.MotorcycleState.Value;
             if (!st.IsActive)

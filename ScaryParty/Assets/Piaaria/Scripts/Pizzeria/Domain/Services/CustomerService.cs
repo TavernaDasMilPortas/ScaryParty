@@ -407,15 +407,17 @@ namespace ScaryParty.Pizzeria.Domain.Services
             customer.EatingRemainingSeconds = Math.Max(3f, eatingDuration);
             customer.Revision++;
 
-            state.RestaurantBudget += eval.RestaurantEarned;
-            state.NightEarnedRevenue += eval.RestaurantEarned;
+            NightCycleService.RecordNightRevenue(state, eval.RestaurantEarned);
             if (eval.RestaurantEarned > 0)
             {
+                state.NightPizzasDelivered++;
                 state.NightOrdersCompleted++;
+                NightCycleService.AdjustReputation(state, 5, "Cliente na mesa satisfeito");
             }
             else
             {
                 state.NightOrdersFailed++;
+                NightCycleService.AdjustReputation(state, -10, "Pizza incorreta servida na mesa");
             }
 
             // Concluir e arquivar o pedido correspondente no quadro
@@ -489,6 +491,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         cust.LeavingRemainingSeconds = 5f;
                         cust.Revision++;
                         state.NightLostCustomers++;
+                        NightCycleService.AdjustReputation(state, -15, "Cliente abandonou a fila");
                         _queueService.CompactAndAdvanceQueue(state, qIdx, now);
                         dirty = true;
                     }

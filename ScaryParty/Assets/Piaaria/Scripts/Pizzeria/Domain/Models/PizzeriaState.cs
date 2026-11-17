@@ -36,6 +36,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int NightRevenueGoal { get; set; } = 60;
         public int Reputation { get; set; } = 100;
         public int NightReputationMinGoal { get; set; } = 0;
+        public int LastReputationDelta { get; set; } = 0;
         public string LastReputationReason { get; set; } = string.Empty;
         public int NightPizzasDelivered { get; set; } = 0;
         public int NightPizzasMinGoal { get; set; } = 0;

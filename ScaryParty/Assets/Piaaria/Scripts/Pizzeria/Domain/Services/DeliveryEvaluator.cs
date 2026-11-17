@@ -140,6 +140,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     else
                         result.WrongOrIncompleteCount++;
                 }
+                else
+                {
+                    result.WrongOrIncompleteCount++;
+                }
             }
 
             for (int d = 0; d < deliveredItems.Count; d++)
@@ -184,7 +188,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             OrderService orderService,
             float burnedFactor = 0.25f,
             float unbakedFactor = 0f,
-            int baseRestaurantBonus = 20)
+            int baseRestaurantBonus = 20,
+            double? nowTime = null)
         {
             if (itemIds == null || itemIds.Count == 0)
                 return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.InvalidOperation, "Nenhum item selecionado.");
@@ -238,6 +243,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
 
             bool deliverySucceeded = result.CorrectBakedCount > 0;
+            bool wasLate = order != null && nowTime.HasValue && nowTime.Value > order.DeadlineTime;
             if (order != null)
             {
                 order.Lifecycle = OrderLifecycle.Completed;
@@ -246,15 +252,22 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 order.Revision++;
             }
 
-            state.RestaurantBudget += result.RestaurantEarned;
-            state.NightEarnedRevenue += result.RestaurantEarned;
+            NightCycleService.RecordNightRevenue(state, result.RestaurantEarned);
+            state.NightPizzasDelivered += result.CorrectBakedCount;
             if (deliverySucceeded)
             {
                 state.NightOrdersCompleted++;
+                if (result.WrongOrIncompleteCount > 0 || result.BurnedCount > 0)
+                    NightCycleService.AdjustReputation(state, -10, "Entrega incompleta ou queimada");
+                else if (wasLate)
+                    NightCycleService.AdjustReputation(state, -8, "Entrega realizada com atraso");
+                else
+                    NightCycleService.AdjustReputation(state, 5, "Entrega perfeita no prazo");
             }
             else
             {
                 state.NightOrdersFailed++;
+                NightCycleService.AdjustReputation(state, -10, "Entrega errada ou sem pizzas válidas");
             }
             state.DeliveryAttempts.Record(attemptId);
             state.IncrementRevision();

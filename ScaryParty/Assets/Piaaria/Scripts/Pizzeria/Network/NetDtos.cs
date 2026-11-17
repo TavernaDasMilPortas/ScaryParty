@@ -828,6 +828,9 @@ namespace ScaryParty.Pizzeria.Network
         public int OrdersCompleted;
         public int OrdersFailed;
         public int LostCustomers;
+        public int Reputation;
+        public int LastReputationDelta;
+        public Unity.Collections.FixedString64Bytes LastReputationReason;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -843,6 +846,9 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref OrdersCompleted);
             serializer.SerializeValue(ref OrdersFailed);
             serializer.SerializeValue(ref LostCustomers);
+            serializer.SerializeValue(ref Reputation);
+            serializer.SerializeValue(ref LastReputationDelta);
+            serializer.SerializeValue(ref LastReputationReason);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -855,12 +861,15 @@ namespace ScaryParty.Pizzeria.Network
                OrdersCompleted == other.OrdersCompleted &&
                OrdersFailed == other.OrdersFailed &&
                LostCustomers == other.LostCustomers &&
+               Reputation == other.Reputation &&
+               LastReputationDelta == other.LastReputationDelta &&
+               LastReputationReason.Equals(other.LastReputationReason) &&
                Math.Abs(RemainingSeconds - other.RemainingSeconds) < 0.9f &&
                Math.Abs(PrepRemainingSeconds - other.PrepRemainingSeconds) < 0.9f &&
                Math.Abs(GraceRemainingSeconds - other.GraceRemainingSeconds) < 0.9f;
 
         public override bool Equals(object obj) => obj is NetNightStateDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(NightNumber, Phase, EarnedRevenue, RevenueGoal, OrdersCompleted, Revision);
+        public override int GetHashCode() => HashCode.Combine(NightNumber, Phase, EarnedRevenue, RevenueGoal, Reputation, OrdersCompleted, Revision);
     }
 
     public struct NetWeaponStateDto : INetworkSerializable, IEquatable<NetWeaponStateDto>

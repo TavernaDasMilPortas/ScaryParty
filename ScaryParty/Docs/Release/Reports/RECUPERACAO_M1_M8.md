@@ -46,6 +46,20 @@
   - `ResolveMotorcycleExitPosition` valida saídas com `Physics.CheckCapsule` para evitar clipping em paredes.
 - **Verificação estática R2:** Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R3 — M4: Entrega Multi-Pizza, Receita/Reputação Unificadas, Bounds no Servidor e Fechamento Atômico
+- **Avaliação multi-pizza definitiva (`DeliveryEvaluator.cs`, `LogisticsCommands.cs`):**
+  - Pizzas faltantes em pedidos multi-pizza (`bestDeliveredIdx < 0`) agora incrementam `WrongOrIncompleteCount`, bloqueando falso perfeito e aplicando pagamento proporcional.
+- **Receita e reputação unificadas (`NightCycleService.cs`, `CustomerService.cs`, `OrderService.cs`, `PizzeriaState.cs`, `NetDtos.cs`, `ReplicationProjector.cs`, `PizzeriaConfig.cs`):**
+  - Entrega (`DeliveryService.SubmitDelivery`) e serviço de mesa (`CustomerService.ServeTableUnboxedPizza`) unificados via `NightCycleService.RecordNightRevenue` e `NightPizzasDelivered`.
+  - Eventos padronizados via `NightCycleService.AdjustReputation`: `+5` entrega/mesa no prazo, `-8` atrasada (`nowTime > DeadlineTime`), `-10` errada/incompleta/queimada, `-15` cliente perdido/pedido expirado/ataque dentro da pizzaria. `Reputation`, `LastReputationDelta` e `LastReputationReason` replicados em `NetNightStateDto`.
+  - Parâmetros de turno/reputação expostos em `PizzeriaConfig`.
+- **Bounds autoritativos no servidor, fechamento atômico, piso de estoque e mochila danificada (`PizzeriaRoot.cs`, `PizzeriaCommandHandler.cs`, `NewModels.cs`, `NightCycleService.cs`):**
+  - `ReportCustomerAttackInPizzeriaServerRpc` ignora bool do cliente e valida `PizzeriaRoot.IsWorldPositionInsidePizzeria(victimPos)` no servidor.
+  - `CanPlayerPerformGameplayActionServer(..., requireOpenShift: true)` bloqueia cozinha, pedidos, atendimento, mesa e entregas após o fechamento do turno (`Phase != Active && Phase != Preparing`).
+  - `NightCycleService.EnsureMinimumIngredientFloor` garante piso de ingredientes base no início da noite; `NightCycleService.TickSupplies` processa chegada de pedidos de suprimento em `PizzeriaRoot.Update()`.
+  - `BackpackState.EffectiveCapacity` reduz pela metade (`Math.Max(1, Capacity / 2)`) enquanto `IsDamaged`.
+- **Teste e verificação R3:** Teste unitário `R3_MultiPizzaMissingCountsWrongDamagedBagHalvesCapacityAndSuppliesTick` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -53,7 +67,7 @@
 | R0 | Base P0 | Compilação / `.meta` / Docs | Correções CS0103/CS1061/CS1503/CS1729 e reclassificação documental | **Concluído** (0 erros nos 4 `.csproj`) | Pendente (focar Editor e verificar Console) |
 | R1 | M4 | T31, T32 | Estados de vida, permissões, cura/resgate 3s, cleanup morte, espectador, queda moto | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R2 | M3 | T25–T35 | Contrato único mãos, 2 pistolas por `WeaponId`, bandoleira 3P/1P, sweep moto e saída segura | **Concluído** (0 erros nos 3 `.csproj`) | Pendente (PlayMode/ParrelSync) |
-| R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | Pendente | Pendente |
+| R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | Pendente | Pendente |
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | Pendente | Pendente |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | Pendente | Pendente |

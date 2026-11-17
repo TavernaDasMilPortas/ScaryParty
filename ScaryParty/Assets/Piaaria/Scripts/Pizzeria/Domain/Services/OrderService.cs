@@ -175,6 +175,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     order.TaskStage = OrderTaskBoardStage.Failed;
                     state.NightOrdersFailed++;
                     order.Revision++;
+                    NightCycleService.AdjustReputation(state, -15, "Pedido expirou sem entrega");
                     state.IncrementRevision();
                 }
             }

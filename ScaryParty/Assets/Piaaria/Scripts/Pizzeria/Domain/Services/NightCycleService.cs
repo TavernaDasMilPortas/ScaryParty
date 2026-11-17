@@ -172,8 +172,60 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.CurrentNightPhase = parameters.PrepSeconds > 0f ? NightPhase.Preparing : NightPhase.Active;
 
             BackpackService.ResetAllBackpacksForNight(state);
+            EnsureMinimumIngredientFloor(state);
             CaptureSnapshot(state);
             state.IncrementRevision();
+        }
+
+        public static void EnsureMinimumIngredientFloor(PizzeriaState state, int minUnitsPerBaseSlot = 2)
+        {
+            if (state == null || minUnitsPerBaseSlot <= 0) return;
+            bool changed = false;
+            foreach (var kvp in state.StorageSlots)
+            {
+                int defId = kvp.Key.ingredientDefId;
+                // Ingredientes base (Massa=1, Molho=2, Queijo=3) recebem piso mínimo para evitar soft-lock
+                if (defId >= 1 && defId <= 3 && kvp.Value.Quantity < minUnitsPerBaseSlot)
+                {
+                    kvp.Value.Quantity = Math.Min(kvp.Value.MaxCapacity, minUnitsPerBaseSlot);
+                    kvp.Value.Revision++;
+                    changed = true;
+                }
+            }
+            if (changed) state.IncrementRevision();
+        }
+
+        public static bool TickSupplies(PizzeriaState state, double now)
+        {
+            if (state == null || state.SupplyOrders.Count == 0) return false;
+            bool changed = false;
+            foreach (var order in state.SupplyOrders.Values)
+            {
+                if (order.State == SupplyOrderLifecycle.InTransit && now >= order.ExpectedArrivalTime)
+                {
+                    foreach (var line in order.Lines)
+                    {
+                        int remaining = line.RemainingUnits;
+                        foreach (var slot in state.StorageSlots.Values)
+                        {
+                            if (slot.IngredientDefId == line.IngredientDefId && slot.Quantity < slot.MaxCapacity)
+                            {
+                                int add = Math.Min(remaining, slot.MaxCapacity - slot.Quantity);
+                                slot.Quantity += add;
+                                slot.Revision++;
+                                remaining -= add;
+                                if (remaining <= 0) break;
+                            }
+                        }
+                        line.RemainingUnits = remaining;
+                    }
+                    order.State = order.IsFullyUnloaded() ? SupplyOrderLifecycle.Unloaded : SupplyOrderLifecycle.Arrived;
+                    order.Revision++;
+                    changed = true;
+                }
+            }
+            if (changed) state.IncrementRevision();
+            return changed;
         }
 
         public static bool RetryCurrentNight(PizzeriaState state, NightGoalParameters? customParams = null)
@@ -275,6 +327,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (state == null) return;
             state.Reputation = Math.Clamp(state.Reputation + delta, 0, 100);
+            state.LastReputationDelta = delta;
             state.LastReputationReason = reason ?? string.Empty;
             if (state.Reputation <= 0 && state.CurrentNightPhase == NightPhase.Active)
             {

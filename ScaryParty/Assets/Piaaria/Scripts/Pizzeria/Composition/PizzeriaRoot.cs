@@ -305,6 +305,7 @@ namespace ScaryParty.Pizzeria.Composition
         {
             DomainState = new PizzeriaState();
             DomainState.RestaurantBudget = _config.startingBudget;
+            DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
 
             // Inicializar Serviços
             TransferService = new TransferService(DomainState, Catalog);
@@ -530,9 +531,10 @@ namespace ScaryParty.Pizzeria.Composition
                     }
                 }
 
-                // Tick de Pedidos (A15), Chamadas, Holds do Jogador e Clientes Presenciais
+                // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais
                 OrderService?.TickOrders(DomainState, Clock);
                 CallService?.TickCalls(DomainState, (float)Clock.Now);
+                dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
 
                 int prevHoldCount = DomainState.PlayerHolds.Count;
                 PlayerHoldService?.TickHolds(
@@ -607,6 +609,27 @@ namespace ScaryParty.Pizzeria.Composition
                     return playerSpawnAnchors[safeIdx].rotation;
             }
             return transform.rotation;
+        }
+
+        public Bounds GetPizzeriaInteriorBounds()
+        {
+            var box = GetComponent<BoxCollider>();
+            if (box != null)
+            {
+                return box.bounds;
+            }
+            Vector3 center = entranceAnchor != null ? entranceAnchor.position - transform.forward * 6f : transform.position;
+            Bounds bounds = new Bounds(center, new Vector3(22f, 8f, 22f));
+            if (recoveryAnchor != null) bounds.Encapsulate(recoveryAnchor.position);
+            if (receivingAnchor != null) bounds.Encapsulate(receivingAnchor.position);
+            bounds.Expand(new Vector3(2f, 4f, 2f));
+            return bounds;
+        }
+
+        public bool IsWorldPositionInsidePizzeria(Vector3 worldPos)
+        {
+            Bounds b = GetPizzeriaInteriorBounds();
+            return b.Contains(worldPos);
         }
     }
 

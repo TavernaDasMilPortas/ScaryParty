@@ -866,6 +866,12 @@ namespace ScaryParty.Pizzeria.Network
                 OrdersCompleted = domainState.NightOrdersCompleted,
                 OrdersFailed = domainState.NightOrdersFailed,
                 LostCustomers = domainState.NightLostCustomers,
+                Reputation = domainState.Reputation,
+                LastReputationDelta = domainState.LastReputationDelta,
+                LastReputationReason = new Unity.Collections.FixedString64Bytes(
+                    string.IsNullOrEmpty(domainState.LastReputationReason)
+                        ? string.Empty
+                        : (domainState.LastReputationReason.Length > 60 ? domainState.LastReputationReason.Substring(0, 60) : domainState.LastReputationReason)),
                 Revision = domainState.Revision
             };
         }

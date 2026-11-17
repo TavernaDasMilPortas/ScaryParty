@@ -50,6 +50,13 @@ namespace ScaryParty.Pizzeria.Authoring
         [Header("Ciclo de Noites e Metas")]
         public NightConfig nightConfig;
         public bool enableAllPlayersDeadDefeat = true;
+        public float baseNightDurationSeconds = 360f;
+        public int baseQuotaMoney = 60;
+        public int initialReputation = 100;
+        public int repBonusDelivery = 5;
+        public int repPenaltyLate = -8;
+        public int repPenaltyWrong = -10;
+        public int repPenaltyExpiredOrAttack = -15;
 
         public NightGoalParameters ResolveNightParameters(int nightNumber)
         {

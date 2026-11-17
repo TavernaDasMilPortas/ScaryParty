@@ -32,7 +32,7 @@ namespace ScaryParty.Pizzeria.Network
         private static bool RejectIfCannotActServer(ulong sender)
         {
             var handler = PizzeriaCommandHandler.Instance;
-            if (handler != null && !handler.CanPlayerPerformGameplayActionServer(sender, out string reason))
+            if (handler != null && !handler.CanPlayerPerformGameplayActionServer(sender, out string reason, requireOpenShift: true))
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, reason, true);
                 return true;
@@ -353,7 +353,7 @@ namespace ScaryParty.Pizzeria.Network
 
             var res = deliveryService.SubmitDelivery(
                 root.DomainState, destination, list, attemptId, sender, root.Catalog, root.OrderService,
-                burnedFactor, unbakedFactor, baseBonus);
+                burnedFactor, unbakedFactor, baseBonus, root.Clock?.Now);
 
             if (!res.Success)
                 return res;

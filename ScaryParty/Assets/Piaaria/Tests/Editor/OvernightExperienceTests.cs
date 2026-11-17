@@ -424,6 +424,59 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsFalse(bp.IsEquipped);
             Assert.AreEqual(BackpackState.NoOwner, bp.EquippedBy);
         }
+
+        [Test]
+        public void R3_MultiPizzaMissingCountsWrongDamagedBagHalvesCapacityAndSuppliesTick()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 100 };
+            NightCycleService.StartNight(state, 1);
+
+            var catalog = new DefinitionCatalog();
+            var orderService = new OrderService();
+            var clock = new FixedClock(50.0);
+            var oRes = orderService.CreatePhoneOrder(new AddressId(2), new[] { (1, 3) }, state, catalog, clock, 6, deliveryDuration: 120.0);
+            Assert.IsTrue(oRes.Success);
+
+            // Cria 2 pizzas corretas (faltando 1 de 3)
+            var deliveredIds = new System.Collections.Generic.List<ItemId>();
+            for (int i = 0; i < 2; i++)
+            {
+                var pid = state.GenerateItemId();
+                var pizza = new ItemState(pid, 100, ItemCategory.Pizza, LocationRef.InHand(0UL, HandSlotIndex.Left));
+                pizza.CookingStage = CookingStage.Baked;
+                pizza.PackagingState = PackagingState.Boxed;
+                pizza.LabelAddress = new AddressId(2);
+                state.Items[pid] = pizza;
+                deliveredIds.Add(pid);
+            }
+
+            var delivery = new DeliveryService();
+            var dRes = delivery.SubmitDelivery(state, new AddressId(2), deliveredIds, attemptId: 1001, requesterId: 0UL, catalog, orderService, 0f, 0f, 15, nowTime: 60.0);
+            Assert.IsTrue(dRes.Success);
+            Assert.AreEqual(2, dRes.Value.CorrectBakedCount);
+            Assert.AreEqual(1, dRes.Value.WrongOrIncompleteCount);
+            Assert.AreEqual(dRes.Value.RestaurantEarned, state.NightEarnedRevenue);
+            Assert.AreEqual(90, state.Reputation); // -10 por entrega incompleta
+
+            // T39: mochila danificada reduz capacidade efetiva pela metade
+            var bpId = state.GenerateBackpackId();
+            Assert.IsTrue(BackpackService.Register(state, bpId, 4, new DomainVector3(0, 0, 0), new DomainQuaternion(0, 0, 0, 1)).Success);
+            var bp = state.Backpacks[bpId];
+            bp.Integrity = 50;
+            Assert.IsTrue(bp.IsDamaged);
+            Assert.AreEqual(2, bp.EffectiveCapacity);
+
+            // T18: piso mínimo de ingredientes + TickSupplies
+            state.StorageSlots[(1, 1)] = new StorageSlotState(1, 1, 0, 20);
+            NightCycleService.EnsureMinimumIngredientFloor(state);
+            Assert.GreaterOrEqual(state.StorageSlots[(1, 1)].Quantity, 2);
+
+            var supId = state.GenerateSupplyOrderId();
+            state.SupplyOrders[supId] = new SupplyOrderState(supId, 1, 1, 5, 25, 60.0, 90.0);
+            Assert.IsFalse(NightCycleService.TickSupplies(state, 80.0));
+            Assert.IsTrue(NightCycleService.TickSupplies(state, 95.0));
+            Assert.GreaterOrEqual(state.StorageSlots[(1, 1)].Quantity, 7);
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock
