@@ -358,5 +358,38 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.AreEqual(0, run.ActiveModifiers.Count);
             Assert.AreEqual(1, state.CurrentNightNumber);
         }
+
+        [Test]
+        public void EmployeeTaskService_ExclusiveReservationsHumanTakeoverAndNightPersistence()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 400 };
+            var service = new EmployeeTaskService();
+
+            var cashier = service.TryHireEmployee(state, EmployeeRole.Cashier);
+            var pizzaiolo = service.TryHireEmployee(state, EmployeeRole.Pizzaiolo);
+            Assert.IsNotNull(cashier);
+            Assert.IsNotNull(pizzaiolo);
+            Assert.AreEqual(100, state.RestaurantBudget); // 400 - 180 - 120
+
+            var task = service.EnqueueOrderTask(new OrderId(50), EmployeeRole.Pizzaiolo);
+            Assert.IsTrue(service.TryReserveTask(task.TaskId, (ulong)pizzaiolo.EmployeeId, isHuman: false, now: 10.0));
+            // Humano não rouba por TryReserveTask enquanto lease ativa; usa HumanTakeoverTask
+            Assert.IsFalse(service.TryReserveTask(task.TaskId, 0UL, isHuman: true, now: 12.0));
+            Assert.IsTrue(service.HumanTakeoverTask(task.TaskId, 0UL, now: 12.0));
+            Assert.IsTrue(task.IsReservedByHuman);
+
+            // Liberação por cancelamento/desconexão torna tarefa disponível novamente
+            service.ReleaseActorTasks(0UL, isHuman: true);
+            Assert.AreEqual(EmployeeTaskState.Available, task.State);
+
+            // Persistência entre noites mantém funcionários contratados e limpa apenas na nova RUN
+            pizzaiolo.IsAlive = false;
+            service.OnNightEnded();
+            Assert.AreEqual(2, service.Employees.Count);
+            Assert.IsTrue(pizzaiolo.IsAlive);
+
+            service.ResetForNewRun();
+            Assert.AreEqual(0, service.Employees.Count);
+        }
     }
 }
