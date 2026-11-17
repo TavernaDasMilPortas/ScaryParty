@@ -216,7 +216,7 @@ namespace ScaryParty.Pizzeria.Presentation
             DismissTutorial();
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
             {
-                PizzeriaCommandHandler.Instance?.AdvanceToNextNightServerRpc();
+                PizzeriaCommandHandler.Instance?.SkipTutorialToNight1ServerRpc();
             }
         }
 

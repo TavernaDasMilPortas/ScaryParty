@@ -59,8 +59,26 @@ namespace ScaryParty.Pizzeria.Authoring
         public int repPenaltyWrong = -10;
         public int repPenaltyExpiredOrAttack = -15;
 
+        [Header("RUN, Tutorial (Noite 0) e Funcionários")]
+        public bool enableTutorialNight0ByDefault = false;
+        public float tutorialNight0DurationSeconds = 600f;
+        public int tutorialNight0RevenueGoal = 15;
+        public int runMaxNights = 3;
+        public RunDifficulty runDifficulty = RunDifficulty.Normal;
+        [Tooltip("0 = semente aleatória por sessão.")]
+        public int runSeedOverride = 0;
+        public int minimumIngredientFloor = 2;
+        public float cashierAttendBaseSeconds = 2.2f;
+        public float pizzaioloStepBaseSeconds = 1.8f;
+        [Range(0.02f, 0.9f)]
+        public float employeeBaseErrorRate = 0.20f;
+
         public NightGoalParameters ResolveNightParameters(int nightNumber)
         {
+            if (nightNumber == 0)
+            {
+                return new NightGoalParameters(0, tutorialNight0DurationSeconds, tutorialNight0RevenueGoal, 2f, 0f);
+            }
             return nightConfig != null
                 ? nightConfig.ResolveParameters(nightNumber)
                 : NightCycleService.GetDefaultParameters(nightNumber);

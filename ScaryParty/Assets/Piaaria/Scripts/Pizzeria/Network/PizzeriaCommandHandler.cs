@@ -1292,13 +1292,79 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            int newSeed = System.Environment.TickCount ^ GetInstanceID();
-            root.ReinitializeForNewRunServer(newSeed, maxNights: 3, difficulty: RunDifficulty.Normal, startNight: 1);
+            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
+                ? root.Config.runSeedOverride
+                : (System.Environment.TickCount ^ GetInstanceID());
+            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
+            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
+            int startNight = (root.Config != null && root.Config.enableTutorialNight0ByDefault) ? 0 : 1;
+
+            root.ReinitializeForNewRunServer(newSeed, maxNights: maxNights, difficulty: diff, startNight: startNight);
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
 
             CommitAndReplicate();
-            BroadcastNoticeClientRpc($"Nova RUN iniciada! Noite {root.DomainState.CurrentNightNumber} — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+            string nightLabel = startNight == 0 ? "Noite 0 (Tutorial)" : $"Noite {root.DomainState.CurrentNightNumber}";
+            BroadcastNoticeClientRpc($"Nova RUN iniciada! {nightLabel} — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void StartNight0TutorialServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            if (senderId != NetworkManager.ServerClientId)
+            {
+                NotifyErrorClientRpc("Apenas o Host pode ativar a Noite 0 (Tutorial).", targetParams);
+                return;
+            }
+
+            if (root.DomainState.CurrentNightNumber == 0) return;
+
+            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
+                ? root.Config.runSeedOverride
+                : (System.Environment.TickCount ^ GetInstanceID());
+            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
+            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
+
+            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 0);
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc("Modo Tutorial (Noite 0) iniciado! Conclua 1 pizza ou clique em 'Ir p/ Noite 1'.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void SkipTutorialToNight1ServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            if (senderId != NetworkManager.ServerClientId)
+            {
+                NotifyErrorClientRpc("Apenas o Host pode concluir o tutorial.", targetParams);
+                return;
+            }
+
+            if (root.DomainState.CurrentNightNumber != 0)
+            {
+                return;
+            }
+
+            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
+                ? root.Config.runSeedOverride
+                : (System.Environment.TickCount ^ GetInstanceID());
+            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
+            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
+
+            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1);
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"Tutorial concluído! Noite 1 iniciada — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1318,6 +1384,12 @@ namespace ScaryParty.Pizzeria.Network
             if (root.DomainState.CurrentNightPhase != NightPhase.Results)
             {
                 NotifyErrorClientRpc("A noite atual precisa ser vencida antes de avançar.", targetParams);
+                return;
+            }
+
+            if (root.DomainState.CurrentNightNumber == 0)
+            {
+                SkipTutorialToNight1ServerRpc(rpcParams);
                 return;
             }
 

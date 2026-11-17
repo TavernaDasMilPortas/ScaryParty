@@ -20,7 +20,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             float prepSeconds = 4f,
             float closingGraceSeconds = 20f)
         {
-            NightNumber = Math.Max(1, nightNumber);
+            NightNumber = Math.Max(0, nightNumber);
             DurationSeconds = Math.Max(30f, durationSeconds);
             RevenueGoal = Math.Max(10, revenueGoal);
             PrepSeconds = Math.Max(0f, prepSeconds);
@@ -36,7 +36,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
     {
         public static NightGoalParameters GetDefaultParameters(int nightNumber)
         {
-            int n = Math.Max(1, nightNumber);
+            if (nightNumber <= 0) return new NightGoalParameters(0, 600f, 15, 2f, 0f);
+            int n = nightNumber;
             if (n == 1) return new NightGoalParameters(1, 360f, 60, 4f, 20f);
             if (n == 2) return new NightGoalParameters(2, 390f, 110, 4f, 20f);
             if (n == 3) return new NightGoalParameters(3, 420f, 170, 4f, 20f);

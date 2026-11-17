@@ -321,8 +321,14 @@ namespace ScaryParty.Pizzeria.Composition
             CallService = new CallService();
             PlayerHoldService = new PlayerHoldService();
             CustomerService = new CustomerService();
-            int runSeed = System.Environment.TickCount ^ GetInstanceID();
-            RunProgressionService = new RunProgressionService(runSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
+            int runSeed = (_config != null && _config.runSeedOverride != 0)
+                ? _config.runSeedOverride
+                : (System.Environment.TickCount ^ GetInstanceID());
+            int maxNights = _config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3;
+            var diff = _config != null ? _config.runDifficulty : RunDifficulty.Normal;
+            int initialNight = (_config != null && _config.enableTutorialNight0ByDefault) ? 0 : 1;
+
+            RunProgressionService = new RunProgressionService(runSeed, maxNights: maxNights, difficulty: diff);
             EmployeeTaskService = new EmployeeTaskService();
             SpeciesHostilityService = new SpeciesHostilityService();
             ZombieConversionService = new ZombieConversionService();
@@ -332,7 +338,11 @@ namespace ScaryParty.Pizzeria.Composition
             DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
             RebuildSceneDomainStateForNewRunServer();
 
-            NightCycleService.StartNight(DomainState, 1, _config.ResolveNightParameters(1));
+            NightCycleService.StartNight(DomainState, initialNight, _config.ResolveNightParameters(initialNight));
+            if (initialNight == 0)
+            {
+                SeedPredictableTutorialOrderServer();
+            }
             ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
                 DomainState.CurrentNightNumber,
                 DomainState.NightRevenueGoal);
@@ -460,6 +470,10 @@ namespace ScaryParty.Pizzeria.Composition
 
             var nightParams = _config != null ? _config.ResolveNightParameters(startNight) : (NightGoalParameters?)null;
             NightCycleService.StartNight(DomainState, startNight, nightParams);
+            if (startNight == 0)
+            {
+                SeedPredictableTutorialOrderServer();
+            }
 
             int humanCount = Unity.Netcode.NetworkManager.Singleton != null
                 ? Mathf.Max(1, Unity.Netcode.NetworkManager.Singleton.ConnectedClientsIds.Count)
@@ -469,6 +483,21 @@ namespace ScaryParty.Pizzeria.Composition
             Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
                 DomainState.CurrentNightNumber,
                 DomainState.NightRevenueGoal);
+        }
+
+        private void SeedPredictableTutorialOrderServer()
+        {
+            if (DomainState == null || CustomerService == null) return;
+            var res = CustomerService.SpawnWalkInCustomer(DomainState, Catalog, Clock, rng: new System.Random(1001));
+            if (res.Success && DomainState.Customers.TryGetValue(res.Value, out var cust))
+            {
+                cust.RequestedPizza = PizzaSpecification.CreateDefaultCheese(15, 12f);
+                cust.QueuePatienceMax = 600f;
+                cust.QueuePatienceRemaining = 600f;
+                cust.FoodPatienceMax = 600f;
+                cust.FoodPatienceRemaining = 600f;
+                cust.Revision++;
+            }
         }
 
         private float _nightSyncAccumulator = 0f;

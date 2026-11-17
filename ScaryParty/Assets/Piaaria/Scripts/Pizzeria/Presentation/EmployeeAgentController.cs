@@ -209,7 +209,8 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_stepIndex != (int)WorkStep.CashierAttendWait)
             {
                 _stepIndex = (int)WorkStep.CashierAttendWait;
-                _stepTimer = Mathf.Max(0.8f, 2.2f - (emp.Level - 1) * 0.35f);
+                float baseAttend = root.Config != null ? root.Config.cashierAttendBaseSeconds : 2.2f;
+                _stepTimer = Mathf.Max(0.8f, baseAttend - (emp.Level - 1) * 0.35f);
             }
 
             _stepTimer -= dt;
@@ -357,7 +358,8 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     }
                     root.EmployeeTaskService.ClearTaskBlocked(currentTask.TaskId);
-                    _stepTimer = Mathf.Max(0.75f, 1.8f - (emp.Level - 1) * 0.25f);
+                    float baseStep = root.Config != null ? root.Config.pizzaioloStepBaseSeconds : 1.8f;
+                    _stepTimer = Mathf.Max(0.75f, baseStep - (emp.Level - 1) * 0.25f);
                 }
 
                 _stepTimer -= dt;
@@ -377,7 +379,8 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     }
                     _stepIndex = (int)WorkStep.PizzaioloAssembleToppings;
-                    _stepTimer = Mathf.Max(0.75f, 1.8f - (emp.Level - 1) * 0.25f);
+                    float baseStep2 = root.Config != null ? root.Config.pizzaioloStepBaseSeconds : 1.8f;
+                    _stepTimer = Mathf.Max(0.75f, baseStep2 - (emp.Level - 1) * 0.25f);
                     PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 }
                 return;

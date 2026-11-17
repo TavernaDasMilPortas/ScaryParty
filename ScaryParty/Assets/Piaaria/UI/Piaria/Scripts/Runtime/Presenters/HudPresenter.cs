@@ -613,7 +613,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (netState == null) return;
 
             var n = netState.NightState.Value;
-            if (_nightBannerLabel != null && n.NightNumber > 0)
+            if (_nightBannerLabel != null && n.NightNumber >= 0)
             {
                 var phase = (NightPhase)n.Phase;
                 string phaseLabel = phase switch
@@ -630,7 +630,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                     ? $" ({(n.LastReputationDelta > 0 ? "+" : "")}{n.LastReputationDelta})"
                     : string.Empty;
                 int budget = netState.RestaurantBudget.Value;
-                _nightBannerLabel.text = $"NOITE {n.NightNumber} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue}/{n.RevenueGoal}  |  CAIXA: R$ {budget}  |  REP: {n.Reputation}{repDelta}";
+                string nightTag = n.NightNumber == 0 ? "NOITE 0 (TUTORIAL)" : $"NOITE {n.NightNumber}";
+                _nightBannerLabel.text = $"{nightTag} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue}/{n.RevenueGoal}  |  CAIXA: R$ {budget}  |  REP: {n.Reputation}{repDelta}";
             }
 
             ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
