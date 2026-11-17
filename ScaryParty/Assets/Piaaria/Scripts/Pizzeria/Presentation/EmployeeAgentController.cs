@@ -285,7 +285,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 order.Lifecycle != OrderLifecycle.Accepted ||
                 order.Lines == null || order.Lines.Count == 0)
             {
-                root.EmployeeTaskService.CompleteTask(currentTask.TaskId);
+                root.EmployeeTaskService.CancelTask(currentTask.TaskId);
                 ResetWorkState();
                 return;
             }
@@ -293,6 +293,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_rolledTaskId != currentTask.TaskId)
             {
                 _rolledTaskId = currentTask.TaskId;
+                currentTask.TotalUnitsRequired = EmployeeTaskService.ComputeTotalOrderUnits(order);
                 var stats = root.RunProgressionService != null
                     ? root.RunProgressionService.RecalculateEffectiveStats()
                     : new RunEffectiveStats();
@@ -301,11 +302,34 @@ namespace ScaryParty.Pizzeria.Presentation
                     EmployeeId, rng, stats.EmployeeErrorMultiplier);
             }
 
-            var spec = order.Lines[0].Specification ?? PizzaSpecification.CreateDefaultCheese();
+            if (currentTask.CurrentLineIndex >= order.Lines.Count)
+            {
+                root.EmployeeTaskService.CompleteTask(currentTask.TaskId);
+                ResetWorkState();
+                return;
+            }
+
+            var activeLine = order.Lines[currentTask.CurrentLineIndex];
+            var spec = activeLine.Specification ?? PizzaSpecification.CreateDefaultCheese();
             ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
 
             if (_stepIndex == (int)WorkStep.PizzaioloPrepareDough || _stepIndex == (int)WorkStep.Idle)
             {
+                // Não duplica unidades que humanos já finalizaram e disponibilizaram na bancada para esta linha
+                if (!_workingPizzaId.IsValid && CountReadyMatchingPizzasForLine(root, order, spec) >= activeLine.Quantity)
+                {
+                    if (root.EmployeeTaskService.AdvanceUnitProgress(currentTask.TaskId, order))
+                    {
+                        ResetWorkState();
+                    }
+                    else
+                    {
+                        ResetUnitState();
+                    }
+                    PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                    return;
+                }
+
                 Vector3 prepPos = ResolveStationPosition<PrepStation>(root.transform.position);
                 if (!MoveToValidated(prepPos, out bool pathBlocked))
                 {
@@ -321,6 +345,17 @@ namespace ScaryParty.Pizzeria.Presentation
                         root.EmployeeTaskService.MarkTaskBlocked(currentTask.TaskId, EmployeeBlockReason.NoDough);
                         return;
                     }
+                    var prepSlot = new StationSlotId(_prepStationId, _prepSlotIndex);
+                    if (root.DomainState.Items.TryGetValue(_workingPizzaId, out var rawDough) &&
+                        rawDough.PrepStage == ProcessingStage.Raw)
+                    {
+                        var workRes = root.ProcessingService.StartWork(prepSlot, 1, actorKey, root.DomainState, root.Catalog, root.Clock);
+                        if (!workRes.Success)
+                        {
+                            root.EmployeeTaskService.MarkTaskBlocked(currentTask.TaskId, EmployeeBlockReason.ToolInUse);
+                            return;
+                        }
+                    }
                     root.EmployeeTaskService.ClearTaskBlocked(currentTask.TaskId);
                     _stepTimer = Mathf.Max(0.75f, 1.8f - (emp.Level - 1) * 0.25f);
                 }
@@ -332,9 +367,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     if (dough.PrepStage == ProcessingStage.Raw)
                     {
-                        dough.PrepStage = ProcessingStage.Prepared;
-                        dough.BaseDoughStage = ProcessingStage.Prepared;
-                        dough.Revision++;
+                        var prepSlot = new StationSlotId(_prepStationId, _prepSlotIndex);
+                        var compRes = root.ProcessingService.CompleteWork(prepSlot, root.DomainState, root.Catalog);
+                        if (!compRes.Success)
+                        {
+                            dough.PrepStage = ProcessingStage.Prepared;
+                            dough.BaseDoughStage = ProcessingStage.Prepared;
+                            dough.Revision++;
+                        }
                     }
                     _stepIndex = (int)WorkStep.PizzaioloAssembleToppings;
                     _stepTimer = Mathf.Max(0.75f, 1.8f - (emp.Level - 1) * 0.25f);
@@ -392,13 +432,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 var ovenSlot = new StationSlotId(ovenId, slotIdx);
-                var insertRes = root.OvenService.InsertPizza(
-                    root.DomainState,
-                    ovenSlot,
+                float bakeDur = spec.BakeDuration > 0.1f ? spec.BakeDuration : (root.Config != null ? root.Config.defaultBakeDuration : 15f);
+                var insertRes = root.ProcessingService.InsertOven(
                     _workingPizzaId,
-                    actorKey,
-                    root.Catalog,
-                    root.Config != null ? root.Config.defaultBakeDuration : 15f);
+                    ovenSlot,
+                    root.DomainState,
+                    bakeDur,
+                    root.Clock);
 
                 if (!insertRes.Success)
                 {
@@ -488,8 +528,14 @@ namespace ScaryParty.Pizzeria.Presentation
                     finishedPizza.Revision++;
                 }
 
-                root.EmployeeTaskService.CompleteTask(currentTask.TaskId);
-                ResetWorkState();
+                if (root.EmployeeTaskService.AdvanceUnitProgress(currentTask.TaskId, order))
+                {
+                    ResetWorkState();
+                }
+                else
+                {
+                    ResetUnitState();
+                }
                 PizzeriaCommandHandler.Instance?.CommitAndReplicate();
             }
         }
@@ -529,12 +575,13 @@ namespace ScaryParty.Pizzeria.Presentation
             out EmployeeBlockReason blockReason)
         {
             blockReason = EmployeeBlockReason.None;
-            if (spec.RequiresSauce && spec.SauceId > 0 && !HasIngredient(pizza, spec.SauceId))
+            if (spec.RequiresSauce && spec.SauceId > 0)
             {
-                if (!TryDispenseAndApply(root, pizza, spec.SauceId, ProcessingStage.Prepared, actorKey))
+                int targetSauce = Math.Max(1, spec.SaucePortions);
+                while (GetIngredientCount(pizza, spec.SauceId) < targetSauce)
                 {
-                    blockReason = EmployeeBlockReason.MissingIngredient;
-                    return false;
+                    if (!TryDispenseAndProcessIngredient(root, pizza, spec.SauceId, ProcessingStage.Prepared, actorKey, out blockReason))
+                        return false;
                 }
             }
 
@@ -544,18 +591,15 @@ namespace ScaryParty.Pizzeria.Presentation
                 for (int i = 0; i < count; i++)
                 {
                     var top = spec.Toppings[i];
+                    int targetPortions = Math.Max(1, top.PortionCount);
                     if (intentionalError && i == count - 1)
                     {
-                        // Erro intencional: omite o último ingrediente quando RNG aciona
-                        continue;
+                        targetPortions = Math.Max(0, targetPortions - 1);
                     }
-                    if (!HasIngredient(pizza, top.IngredientDefId))
+                    while (GetIngredientCount(pizza, top.IngredientDefId) < targetPortions)
                     {
-                        if (!TryDispenseAndApply(root, pizza, top.IngredientDefId, top.RequiredStage, actorKey))
-                        {
-                            blockReason = EmployeeBlockReason.MissingIngredient;
+                        if (!TryDispenseAndProcessIngredient(root, pizza, top.IngredientDefId, top.RequiredStage, actorKey, out blockReason))
                             return false;
-                        }
                     }
                 }
             }
@@ -563,29 +607,152 @@ namespace ScaryParty.Pizzeria.Presentation
             return true;
         }
 
-        private static bool HasIngredient(ItemState pizza, int defId)
+        private static int GetIngredientCount(ItemState pizza, int defId)
         {
-            if (pizza.Ingredients == null) return false;
+            if (pizza.Ingredients == null) return 0;
+            int total = 0;
             for (int i = 0; i < pizza.Ingredients.Count; i++)
             {
-                if (pizza.Ingredients[i].IngredientDefId == defId) return true;
+                if (pizza.Ingredients[i].IngredientDefId == defId)
+                    total += Math.Max(1, pizza.Ingredients[i].Count);
             }
-            return false;
+            return total;
         }
 
-        private static bool TryDispenseAndApply(
+        private static bool TryDispenseAndProcessIngredient(
             PizzeriaRoot root,
             ItemState pizza,
             int ingredientDefId,
             ProcessingStage stage,
+            ulong actorKey,
+            out EmployeeBlockReason failReason)
+        {
+            failReason = EmployeeBlockReason.None;
+
+            // 1. Tenta dispensar o ingrediente diretamente no estágio esperado
+            if (TryDispenseIngredientFromAnyStorage(root, ingredientDefId, actorKey, out var ingItemId))
+            {
+                return ApplyIngredientViaAssembly(root, pizza, ingItemId, ingredientDefId, stage, actorKey);
+            }
+
+            // 2. Se requer estágio Prepared, procura processo que transforme ingrediente cru (ex: Queijo 4->5, Calabresa 6->7, Cogumelo 8->9)
+            if (stage == ProcessingStage.Prepared && root.Catalog != null)
+            {
+                ProcessData matchingProc = null;
+                foreach (var kvp in root.Catalog.Processes)
+                {
+                    if (kvp.Value != null && kvp.Value.OutputIngredientId == ingredientDefId)
+                    {
+                        matchingProc = kvp.Value;
+                        break;
+                    }
+                }
+
+                if (matchingProc != null &&
+                    TryDispenseIngredientFromAnyStorage(root, matchingProc.InputIngredientId, actorKey, out var rawItemId))
+                {
+                    int prepStationId = ResolvePrepOrAssemblyStationId(root);
+                    int prepSlotIdx = FindFirstFreeStationSlot(root.DomainState, prepStationId, 4);
+                    if (prepSlotIdx < 0)
+                    {
+                        TransferService.DestroyItem(root.DomainState, rawItemId);
+                        failReason = EmployeeBlockReason.ToolInUse;
+                        return false;
+                    }
+
+                    // Reserva ferramenta necessária se o processo exigir
+                    ToolItemState leasedTool = null;
+                    if (matchingProc.RequiredCapability != ToolCapability.None)
+                    {
+                        double now = root.Clock != null ? root.Clock.Now : Time.timeAsDouble;
+                        foreach (var tKvp in root.DomainState.Tools)
+                        {
+                            var tool = tKvp.Value;
+                            if (tool != null && tool.Capabilities.HasFlag(matchingProc.RequiredCapability) &&
+                                tool.TryAcquireLease(actorKey, now, 10.0))
+                            {
+                                leasedTool = tool;
+                                break;
+                            }
+                        }
+                        if (leasedTool == null)
+                        {
+                            failReason = EmployeeBlockReason.ToolInUse;
+                            return false;
+                        }
+                    }
+
+                    var prepSlot = new StationSlotId(prepStationId, prepSlotIdx);
+                    TransferService.TransferItem(root.DomainState, rawItemId, LocationRef.InStation(prepStationId, prepSlotIdx), actorKey, bypassReservation: true);
+                    var beginRes = root.ProcessingService.BeginOperation(
+                        root.DomainState,
+                        prepSlot,
+                        OperationKind.Process,
+                        ResumePolicy.Resumable,
+                        rawItemId,
+                        leasedTool != null ? leasedTool.Id : ToolItemId.None,
+                        matchingProc.Id,
+                        actorKey,
+                        root.Catalog,
+                        (float)(root.Clock != null ? root.Clock.Now : Time.timeAsDouble),
+                        10f);
+
+                    if (beginRes.Success)
+                    {
+                        root.ProcessingService.CompleteWork(prepSlot, root.DomainState, root.Catalog);
+                    }
+                    leasedTool?.ReleaseLease(actorKey);
+
+                    TransferService.TransferItem(root.DomainState, rawItemId, LocationRef.InHand(actorKey, HandSlotIndex.Right), actorKey, bypassReservation: true);
+                    return ApplyIngredientViaAssembly(root, pizza, rawItemId, ingredientDefId, stage, actorKey);
+                }
+            }
+
+            failReason = EmployeeBlockReason.MissingIngredient;
+            return false;
+        }
+
+        private static bool ApplyIngredientViaAssembly(
+            PizzeriaRoot root,
+            ItemState pizza,
+            ItemId ingItemId,
+            int fallbackDefId,
+            ProcessingStage fallbackStage,
             ulong actorKey)
         {
-            if (!TryDispenseIngredientFromAnyStorage(root, ingredientDefId, actorKey, out var ingItemId))
-                return false;
+            if (pizza.Location.Type == LocationType.StationSlot)
+            {
+                var slot = new StationSlotId((int)pizza.Location.HolderId, pizza.Location.SlotId);
+                float now = (float)(root.Clock != null ? root.Clock.Now : Time.timeAsDouble);
+                if (PizzaAssemblyService.Begin(root.DomainState, pizza.Id, ingItemId, actorKey, now, 0.2f).Success &&
+                    PizzaAssemblyService.Complete(root.DomainState, slot))
+                {
+                    return true;
+                }
+            }
 
-            pizza.AddIngredient(ingredientDefId, stage, 1);
+            pizza.AddIngredient(fallbackDefId, fallbackStage, 1);
             TransferService.DestroyItem(root.DomainState, ingItemId);
             return true;
+        }
+
+        private static int CountReadyMatchingPizzasForLine(PizzeriaRoot root, OrderState order, PizzaSpecification spec)
+        {
+            if (root.DomainState == null) return 0;
+            int targetStationId = ResolvePackagingOrStagingStationId(root);
+            int matches = 0;
+            var specEvaluator = new PizzaSpecificationEvaluator();
+            foreach (var kvp in root.DomainState.Items)
+            {
+                var it = kvp.Value;
+                if (it == null || !it.IsPizzaLike) continue;
+                if (it.Location.Type != LocationType.StationSlot || (int)it.Location.HolderId != targetStationId) continue;
+                if (it.CookingStage != CookingStage.Baked) continue;
+                if (!order.IsDineIn && it.PackagingState != PackagingState.Boxed) continue;
+                var eval = specEvaluator.Evaluate(it, spec);
+                if (eval.IsExactMatch) matches++;
+            }
+            return matches;
         }
 
         private static bool TryDispenseIngredientFromAnyStorage(
@@ -656,6 +823,17 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             _activeTaskId = -1;
             _stepIndex = (int)WorkStep.Idle;
+            _stepTimer = 0f;
+            _workingPizzaId = ItemId.None;
+            _ovenStationId = -1;
+            _ovenSlotIndex = -1;
+            _prepStationId = -1;
+            _prepSlotIndex = -1;
+        }
+
+        private void ResetUnitState()
+        {
+            _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
             _stepTimer = 0f;
             _workingPizzaId = ItemId.None;
             _ovenStationId = -1;

@@ -52,6 +52,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public bool IsReservedByHuman;
         public double LeaseExpiresAt;
         public bool IntentionalErrorTriggered;
+        public int CurrentLineIndex;
+        public int UnitsCompletedInLine;
+        public int TotalUnitsCompleted;
+        public int TotalUnitsRequired;
     }
 
     /// <summary>
@@ -205,6 +209,65 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 task.State = EmployeeTaskState.Blocked;
                 task.BlockReason = reason;
             }
+        }
+
+        public void CancelTask(int taskId)
+        {
+            if (_tasks.TryGetValue(taskId, out var task))
+            {
+                task.State = EmployeeTaskState.Cancelled;
+                task.BlockReason = EmployeeBlockReason.None;
+                if (!task.IsReservedByHuman && _employees.TryGetValue((int)task.ReservedByActorId, out var emp))
+                {
+                    emp.AssignedTaskId = -1;
+                }
+            }
+        }
+
+        public static int ComputeTotalOrderUnits(OrderState order)
+        {
+            if (order == null || order.Lines == null) return 0;
+            int total = 0;
+            for (int i = 0; i < order.Lines.Count; i++)
+            {
+                total += Math.Max(1, order.Lines[i].Quantity);
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// Avança uma unidade produzida na tarefa multipizza/multilinha. Retorna true quando todas as linhas e quantidades foram concluídas.
+        /// </summary>
+        public bool AdvanceUnitProgress(int taskId, OrderState order)
+        {
+            if (!_tasks.TryGetValue(taskId, out var task)) return true;
+            if (order == null || order.Lines == null || order.Lines.Count == 0)
+            {
+                CompleteTask(taskId);
+                return true;
+            }
+
+            task.TotalUnitsRequired = ComputeTotalOrderUnits(order);
+            task.TotalUnitsCompleted++;
+            task.UnitsCompletedInLine++;
+
+            while (task.CurrentLineIndex < order.Lines.Count)
+            {
+                int lineQty = Math.Max(1, order.Lines[task.CurrentLineIndex].Quantity);
+                if (task.UnitsCompletedInLine < lineQty)
+                    break;
+
+                task.CurrentLineIndex++;
+                task.UnitsCompletedInLine = 0;
+            }
+
+            if (task.CurrentLineIndex >= order.Lines.Count || task.TotalUnitsCompleted >= task.TotalUnitsRequired)
+            {
+                CompleteTask(taskId);
+                return true;
+            }
+
+            return false;
         }
 
         public void CompleteTask(int taskId)
