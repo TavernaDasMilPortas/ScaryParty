@@ -115,6 +115,11 @@ namespace ScaryParty.Pizzeria.Composition
             collider.center = new Vector3(0f, 0.6f, 0f);
             collider.size = new Vector3(0.9f, 1.15f, 2.1f);
 
+            var rb = bike.AddComponent<Rigidbody>();
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
+
             var chassis = GameObject.CreatePrimitive(PrimitiveType.Cube);
             chassis.name = "Chassis";
             chassis.transform.SetParent(bike.transform, false);
@@ -153,8 +158,37 @@ namespace ScaryParty.Pizzeria.Composition
             seat.transform.SetParent(bike.transform, false);
             seat.transform.localPosition = new Vector3(0f, 0.78f, -0.1f);
 
+            var hbLeft = new GameObject("HandlebarLeftAnchor");
+            hbLeft.transform.SetParent(bike.transform, false);
+            hbLeft.transform.localPosition = new Vector3(-0.32f, 1.02f, 0.52f);
+
+            var hbRight = new GameObject("HandlebarRightAnchor");
+            hbRight.transform.SetParent(bike.transform, false);
+            hbRight.transform.localPosition = new Vector3(0.32f, 1.02f, 0.52f);
+
+            var leftExit = new GameObject("LeftExitAnchor");
+            leftExit.transform.SetParent(bike.transform, false);
+            leftExit.transform.localPosition = new Vector3(-1.35f, 0.05f, 0f);
+
+            var rightExit = new GameObject("RightExitAnchor");
+            rightExit.transform.SetParent(bike.transform, false);
+            rightExit.transform.localPosition = new Vector3(1.35f, 0.05f, 0f);
+
+            var cargoRack = new GameObject("CargoRackAnchor");
+            cargoRack.transform.SetParent(bike.transform, false);
+            cargoRack.transform.localPosition = new Vector3(0f, 0.86f, -0.78f);
+
             var ctrl = bike.AddComponent<DeliveryMotorcycleController>();
-            ctrl.ConfigureParking(worldPos, rot, lotBounds, seat.transform);
+            ctrl.ConfigureParking(
+                worldPos,
+                rot,
+                lotBounds,
+                seat.transform,
+                hbLeft.transform,
+                hbRight.transform,
+                leftExit.transform,
+                rightExit.transform,
+                cargoRack.transform);
         }
 
         private static void BuildWeaponRack(Transform parent, Vector3 localPos)

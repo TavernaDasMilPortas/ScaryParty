@@ -328,7 +328,8 @@ namespace ScaryParty.Player
                 }
 #endif
                 float deltaMult = isMouse ? 1.0f : Time.deltaTime;
-                float sens = isMouse ? mouseSensitivity : gamepadSensitivity;
+                float adsMult = _isAiming ? adsSensitivityMultiplier : 1.0f;
+                float sens = (isMouse ? mouseSensitivity : gamepadSensitivity) * adsMult;
 
                 float yawFactor = invertYaw ? -1f : 1f;
                 _yaw += _starterInputs.look.x * sens * deltaMult * yawFactor;
@@ -426,6 +427,7 @@ namespace ScaryParty.Player
         [Header("Mira (ADS)")]
         public Vector3 adsRightHandOffset = new Vector3(-0.20f, 0.08f, -0.05f);
         public float adsFovDelta = -12f;
+        public float adsSensitivityMultiplier = 0.55f;
 
         public void SetAimState(bool aiming) => _isAiming = aiming;
 

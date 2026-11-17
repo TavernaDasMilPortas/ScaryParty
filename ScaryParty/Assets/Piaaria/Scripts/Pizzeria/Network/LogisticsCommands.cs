@@ -76,6 +76,13 @@ namespace ScaryParty.Pizzeria.Network
             var expectedTop = new ItemId(expectedTopItemIdVal);
             var handLoc = LocationRef.InHand(sender, hand);
 
+            if (PizzeriaCommandHandler.Instance != null &&
+                !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, hand, out string handErr))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, handErr, true);
+                return;
+            }
+
             if (TransferService.IsLocationOccupied(root.DomainState, handLoc) ||
                 (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, (int)hand)))
             {
@@ -228,6 +235,13 @@ namespace ScaryParty.Pizzeria.Network
             var boxId = new ItemId(boxItemIdVal);
             if (hand != HandSlotIndex.Left && hand != HandSlotIndex.Right) return;
             var handLoc = LocationRef.InHand(sender, hand);
+
+            if (PizzeriaCommandHandler.Instance != null &&
+                !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, hand, out string handErr))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, handErr, true);
+                return;
+            }
 
             if (TransferService.IsLocationOccupied(root.DomainState, handLoc) ||
                 (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, (int)hand)))

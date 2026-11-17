@@ -29,6 +29,11 @@ namespace ScaryParty.City
         private Quaternion _parkingRot = Quaternion.identity;
         private Bounds _parkingBounds;
         private Transform _riderSeatAnchor;
+        public Transform HandlebarLeftAnchor { get; private set; }
+        public Transform HandlebarRightAnchor { get; private set; }
+        public Transform LeftExitAnchor { get; private set; }
+        public Transform RightExitAnchor { get; private set; }
+        public Transform CargoRackAnchor { get; private set; }
         private CityGenerator _cityGen;
         private float _localSpeed;
         private float _netSendTimer;
@@ -82,12 +87,26 @@ namespace ScaryParty.City
             ReleaseLocalDrivingState();
         }
 
-        public void ConfigureParking(Vector3 parkPos, Quaternion parkRot, Bounds lotBounds, Transform seatAnchor)
+        public void ConfigureParking(
+            Vector3 parkPos,
+            Quaternion parkRot,
+            Bounds lotBounds,
+            Transform seatAnchor,
+            Transform handlebarLeft = null,
+            Transform handlebarRight = null,
+            Transform leftExit = null,
+            Transform rightExit = null,
+            Transform cargoRack = null)
         {
             _parkingPos = parkPos;
             _parkingRot = parkRot;
             _parkingBounds = lotBounds;
             _riderSeatAnchor = seatAnchor;
+            HandlebarLeftAnchor = handlebarLeft;
+            HandlebarRightAnchor = handlebarRight;
+            LeftExitAnchor = leftExit;
+            RightExitAnchor = rightExit;
+            CargoRackAnchor = cargoRack;
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && PizzeriaNetworkState.Instance != null)
             {

@@ -64,13 +64,13 @@ namespace ScaryParty.Pizzeria.Stations
             var state = PizzeriaNetworkState.Instance;
             if (state == null || state.Weapons == null) return;
 
-            bool pistolAvail = true;
-            bool shotgunAvail = true;
+            bool pistolAvail = false;
+            bool shotgunAvail = false;
             for (int i = 0; i < state.Weapons.Count; i++)
             {
                 var w = state.Weapons[i];
-                if (w.WeaponType == (byte)WeaponType.Pistol) pistolAvail = w.IsAvailableOnRack;
-                else if (w.WeaponType == (byte)WeaponType.Shotgun) shotgunAvail = w.IsAvailableOnRack;
+                if (w.WeaponType == (byte)WeaponType.Pistol && w.IsAvailableOnRack) pistolAvail = true;
+                else if (w.WeaponType == (byte)WeaponType.Shotgun && w.IsAvailableOnRack) shotgunAvail = true;
             }
 
             if (pistolRackVisual != null && pistolRackVisual.activeSelf != pistolAvail)
@@ -91,9 +91,12 @@ namespace ScaryParty.Pizzeria.Stations
             RequestInteractSlot((byte)WeaponType.Pistol);
         }
 
-        public void RequestInteractSlot(byte requestedWeaponType)
+        public void RequestInteractSlot(byte requestedWeaponType, uint requestedWeaponId = 0)
         {
-            PizzeriaCommandHandler.Instance?.InteractWeaponRackServerRpc(requestedWeaponType);
+            if (requestedWeaponId > 0)
+                PizzeriaCommandHandler.Instance?.InteractWeaponRackByIdServerRpc(requestedWeaponType, requestedWeaponId);
+            else
+                PizzeriaCommandHandler.Instance?.InteractWeaponRackServerRpc(requestedWeaponType);
         }
 
         public void OnFocus() { }
@@ -126,15 +129,30 @@ namespace ScaryParty.Pizzeria.Stations
                         return $"[E] Devolver {label} ao Rack";
                     }
 
+                    int availCount = 0;
+                    int totalCount = 0;
+                    NetWeaponStateDto firstAvail = default;
                     for (int i = 0; i < state.Weapons.Count; i++)
                     {
                         if (state.Weapons[i].WeaponType == (byte)weaponType)
                         {
-                            var w = state.Weapons[i];
-                            if (w.IsAvailableOnRack)
-                                return $"[E] Pegar {label} ({w.CurrentMagAmmo}/{w.RackReserveAmmo})";
-                            return $"{label} em uso por outro jogador";
+                            totalCount++;
+                            if (state.Weapons[i].IsAvailableOnRack)
+                            {
+                                if (availCount == 0) firstAvail = state.Weapons[i];
+                                availCount++;
+                            }
                         }
+                    }
+
+                    if (totalCount > 0)
+                    {
+                        if (availCount > 0)
+                        {
+                            string qtyInfo = totalCount > 1 ? $" ({availCount}/{totalCount} disp.)" : string.Empty;
+                            return $"[E] Pegar {label}{qtyInfo} ({firstAvail.CurrentMagAmmo}/{firstAvail.RackReserveAmmo})";
+                        }
+                        return $"{label} em uso por outro(s) jogador(es)";
                     }
                 }
 

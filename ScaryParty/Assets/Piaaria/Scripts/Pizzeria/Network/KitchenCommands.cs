@@ -59,7 +59,13 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            // 2. Validar mão explícita (sem fallback silencioso)
+            // 2. Validar mão explícita (auto-bandoleira para Escopeta ou erro se mão ocupada)
+            if (PizzeriaCommandHandler.Instance != null &&
+                !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, hand, out string handWeaponErr))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, handWeaponErr, true);
+                return;
+            }
             var targetHand = LocationRef.InHand(sender, hand);
             if (TransferService.IsLocationOccupied(root.DomainState, targetHand))
             {
@@ -101,6 +107,12 @@ namespace ScaryParty.Pizzeria.Network
             if (destType == LocationType.Hand)
             {
                 actualHolderId = sender;
+                if (PizzeriaCommandHandler.Instance != null &&
+                    !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, (HandSlotIndex)targetSlotId, out string handErr))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, handErr, true);
+                    return;
+                }
                 if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, targetSlotId))
                 {
                     PizzeriaSession.Notifier?.NotifyClient(sender, "Esta mão está ocupada pela arma equipada.", true);
@@ -184,6 +196,12 @@ namespace ScaryParty.Pizzeria.Network
             if (destType == LocationType.Hand)
             {
                 actualHolderId = sender;
+                if (PizzeriaCommandHandler.Instance != null &&
+                    !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, (HandSlotIndex)targetSlotId, out string handErr))
+                {
+                    PizzeriaSession.Notifier?.NotifyClient(sender, handErr, true);
+                    return;
+                }
                 if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.IsHandOccupiedByWeapon(sender, targetSlotId))
                 {
                     PizzeriaSession.Notifier?.NotifyClient(sender, "Esta mão está ocupada pela arma equipada.", true);
@@ -405,6 +423,13 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+
+            if (PizzeriaCommandHandler.Instance != null &&
+                !PizzeriaCommandHandler.Instance.TryPrepareHandForItemOrToolPickupServer(sender, targetHand, out string ovenHandErr))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, ovenHandErr, true);
+                return;
+            }
 
             int ovenStationId = ResolvePrimaryOvenStationId(root);
             var slotId = new StationSlotId(ovenStationId, slotIndex);

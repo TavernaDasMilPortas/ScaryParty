@@ -156,12 +156,12 @@ namespace ScaryParty.Pizzeria.Player
                     }
                     else if (weapon.WeaponType == 1)
                     {
-                        rightDesc = "Pistola (1 mão)";
+                        rightDesc = $"Pistola #{weapon.WeaponId} (1 mão)";
                     }
                 }
                 else if (netState.TryGetSlingedWeapon(myId, out _))
                 {
-                    if (leftDesc == "Vazia") leftDesc = "Vazia (Espingarda na bandoleira)";
+                    if (leftDesc == "Vazio") leftDesc = "Vazio (Escopeta na bandoleira)";
                 }
             }
 

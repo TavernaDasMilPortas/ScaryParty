@@ -26,6 +26,8 @@ public class WeaponController : MonoBehaviour
     private WeaponBase currentWeaponInstance;
     private PistolWeapon pistolInstance;
     private ShotgunWeapon shotgunInstance;
+    private GameObject slungShotgunVisual;
+    private Transform slingBackAttachment;
     private NetworkObject _netObj;
     private WeaponInputHandler _inputHandler;
     private PlayerHealth _health;
@@ -138,6 +140,40 @@ public class WeaponController : MonoBehaviour
         }
 
         SetWeaponMode(WeaponMode.Unarmed, forceFromReplication: true);
+        EnsureSlingVisualInitialized(visualCtrl, isLocal);
+    }
+
+    private void EnsureSlingVisualInitialized(ScaryParty.Player.CharacterVisualController visualCtrl, bool isLocal)
+    {
+        if (slungShotgunVisual != null) return;
+
+        if (visualCtrl != null && visualCtrl.ChestBone != null)
+            slingBackAttachment = visualCtrl.ChestBone;
+        else if (animator != null && animator.isHuman)
+            slingBackAttachment = animator.GetBoneTransform(HumanBodyBones.UpperChest) ?? animator.GetBoneTransform(HumanBodyBones.Chest);
+
+        if (slingBackAttachment == null) slingBackAttachment = transform;
+
+        slungShotgunVisual = new GameObject("SlungShotgun3PVisual");
+        slungShotgunVisual.transform.SetParent(slingBackAttachment, false);
+        slungShotgunVisual.transform.localPosition = new Vector3(-0.08f, 0.04f, -0.15f);
+        slungShotgunVisual.transform.localRotation = Quaternion.Euler(15f, 90f, 38f);
+
+        var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        body.name = "Mesh";
+        Destroy(body.GetComponent<Collider>());
+        body.transform.SetParent(slungShotgunVisual.transform, false);
+        body.transform.localScale = new Vector3(0.06f, 0.08f, 0.56f);
+        var renderer = body.GetComponent<Renderer>();
+        if (renderer != null && renderer.material != null)
+            renderer.material.color = new Color(0.28f, 0.22f, 0.18f);
+
+        if (isLocal)
+        {
+            int localModelLayer = LayerMask.NameToLayer("LocalPlayerModel");
+            if (localModelLayer >= 0) SetLayerRecursively(slungShotgunVisual, localModelLayer);
+        }
+        slungShotgunVisual.SetActive(false);
     }
 
     private void Update()
@@ -157,8 +193,22 @@ public class WeaponController : MonoBehaviour
             SetWeaponMode(repMode, forceFromReplication: true);
         }
 
+        if (slungShotgunVisual != null)
+        {
+            bool isSlinged = netState != null && netState.TryGetSlingedWeapon(ownerId, out _);
+            if (slungShotgunVisual.activeSelf != isSlinged)
+                slungShotgunVisual.SetActive(isSlinged);
+        }
+
         bool isLocalOwner = _netObj != null ? _netObj.IsOwner : (tpc != null && tpc.IsOwner);
-        if (!isLocalOwner) return;
+        if (!isLocalOwner)
+        {
+            if (animator != null && netState != null && netState.TryGetPlayerCombatState(ownerId, out var repCombat))
+            {
+                animator.SetBool(AnimIsAiming, repCombat.IsAiming);
+            }
+            return;
+        }
 
         bool lifeBlocked = _health != null && (_health.IsIncapacitated || _health.IsDead);
         bool controlsAllowed = currentMode != WeaponMode.Unarmed && !lifeBlocked && (!LocalDrivingMotorcycle || currentMode == WeaponMode.Pistol);
@@ -292,16 +342,24 @@ public class WeaponController : MonoBehaviour
     {
         if (_inputHandler != null && !_inputHandler.enableWeaponControls) return;
         if (currentMode == WeaponMode.Unarmed || _isReloading) return;
-        isAiming = true;
-        if (animator != null) animator.SetBool(AnimIsAiming, true);
-        ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(true);
+        if (!isAiming)
+        {
+            isAiming = true;
+            if (animator != null) animator.SetBool(AnimIsAiming, true);
+            ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(true);
+            PizzeriaCommandHandler.Instance?.SetWeaponAimServerRpc(true);
+        }
     }
 
     public void StopAim()
     {
-        isAiming = false;
-        if (animator != null) animator.SetBool(AnimIsAiming, false);
-        ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(false);
+        if (isAiming)
+        {
+            isAiming = false;
+            if (animator != null) animator.SetBool(AnimIsAiming, false);
+            ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(false);
+            PizzeriaCommandHandler.Instance?.SetWeaponAimServerRpc(false);
+        }
     }
 
     public void TriggerFire()

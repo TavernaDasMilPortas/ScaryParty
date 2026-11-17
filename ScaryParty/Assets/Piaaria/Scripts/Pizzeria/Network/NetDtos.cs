@@ -914,6 +914,7 @@ namespace ScaryParty.Pizzeria.Network
         public ulong RescuedByClientId;
         public byte RescueMode; // 0 = None, 1 = HealWounded, 2 = ReviveIncapacitated
         public ulong SpectatingTargetClientId;
+        public bool IsAiming;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -928,6 +929,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref RescuedByClientId);
             serializer.SerializeValue(ref RescueMode);
             serializer.SerializeValue(ref SpectatingTargetClientId);
+            serializer.SerializeValue(ref IsAiming);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -942,10 +944,11 @@ namespace ScaryParty.Pizzeria.Network
                RescuedByClientId == other.RescuedByClientId &&
                RescueMode == other.RescueMode &&
                SpectatingTargetClientId == other.SpectatingTargetClientId &&
+               IsAiming == other.IsAiming &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetPlayerCombatDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(ClientId, CurrentHp, IsIncapacitated, IsDead, RescueMode, RescuedByClientId, SpectatingTargetClientId, Revision);
+        public override int GetHashCode() => HashCode.Combine(ClientId, CurrentHp, IsIncapacitated, IsDead, RescueMode, RescuedByClientId, IsAiming, Revision);
     }
 
     public struct NetMotorcycleDto : INetworkSerializable, IEquatable<NetMotorcycleDto>

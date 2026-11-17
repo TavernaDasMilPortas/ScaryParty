@@ -31,13 +31,28 @@
   - Dano de queda da moto (`motorcycleRiderFallDamage`) roteado por `ApplyDamageToPlayerServer` (`DamageSourceType.Collision`).
 - **Teste e verificação R1:** Teste unitário `R1_LifeStateCleanupReleasesAttendedCustomersClaimedOrdersAndBackpack` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R2 — M3: Contrato Único de Mãos, Duas Pistolas por `WeaponId`, Bandoleira e Moto Autoritativa
+- **Contrato unificado de mãos (`PizzeriaCommandHandler.cs`, `KitchenCommands.cs`, `LogisticsCommands.cs`, `PlayerInventoryAdapter.cs`):**
+  - Centralizado `TryPrepareHandForItemOrToolPickupServer`: esquerda = moto/item, direita = pistola/item, duas mãos = escopeta ativa, bandoleira = 0 mãos. Pegar item/ferramenta segurando escopeta move automaticamente a escopeta para a bandoleira (`IsSlinged = true`); montar na moto com escopeta também a move para a bandoleira, permitindo pilotar (mão esquerda) com pistola (mão direita).
+- **Instâncias distintas por `WeaponId` (`PizzeriaCommandHandler.cs`, `WeaponRackStation.cs`):**
+  - `EnsureDefaultWeaponsInitializedServer` passa a inicializar 3 instâncias distintas: `WeaponId=1` (Pistola #1, 12/48), `WeaponId=2` (Pistola #2, 12/48) e `WeaponId=3` (Escopeta #1, 6/24), permitindo que dois jogadores equipem pistolas simultaneamente via `InteractWeaponRackServerRpc` / `InteractWeaponRackByIdServerRpc`.
+- **Visual 3P na bandoleira, mira remota e ADS (`NetDtos.cs`, `WeaponController.cs`, `FirstPersonCameraController.cs`):**
+  - `NetPlayerCombatDto.IsAiming` sincronizado via `SetWeaponAimServerRpc` para pose de mira remota em `WeaponController`.
+  - `WeaponController` instancia `SlungShotgun3PVisual` ancorado em `ChestBone`/`UpperChest` quando `IsSlinged == true`.
+  - `FirstPersonCameraController` aplica `adsSensitivityMultiplier = 0.55f` durante ADS.
+- **Moto autoritativa (`PizzeriaCommandHandler.cs`, `DeliveryMotorcycleController.cs`, `PizzeriaParkingLotBuilder.cs`):**
+  - `PizzeriaParkingLotBuilder` cria `Rigidbody` cinemático + âncoras explícitas (`HandlebarLeftAnchor`, `HandlebarRightAnchor`, `LeftExitAnchor`, `RightExitAnchor`, `CargoRackAnchor`).
+  - `ReportMotorcycleImpactServerRpc` valida distância máxima (`5m`) e linha de visão (`Physics.Linecast`) no servidor; `HandleResetNightCombatServer` limpa `_processedMotorcycleImpacts` e `_lastWeaponFireServerTime`.
+  - `ResolveMotorcycleExitPosition` valida saídas com `Physics.CheckCapsule` para evitar clipping em paredes.
+- **Verificação estática R2:** Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
 |---|---|---|---|---|---|
 | R0 | Base P0 | Compilação / `.meta` / Docs | Correções CS0103/CS1061/CS1503/CS1729 e reclassificação documental | **Concluído** (0 erros nos 4 `.csproj`) | Pendente (focar Editor e verificar Console) |
 | R1 | M4 | T31, T32 | Estados de vida, permissões, cura/resgate 3s, cleanup morte, espectador, queda moto | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
-| R2 | M3 | T25–T35 | Contrato único mãos, 2 pistolas por `WeaponId`, bandoleira 3P/1P, sweep moto e saída segura | Pendente | Pendente |
+| R2 | M3 | T25–T35 | Contrato único mãos, 2 pistolas por `WeaponId`, bandoleira 3P/1P, sweep moto e saída segura | **Concluído** (0 erros nos 3 `.csproj`) | Pendente (PlayMode/ParrelSync) |
 | R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | Pendente | Pendente |
 | R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | Pendente | Pendente |
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | Pendente | Pendente |
