@@ -1,9 +1,9 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 15/11/2026
+**Última Revisão:** 16/11/2026
 **Versão Unity:** Unity 6000.3.6f1
-**Branch Atual:** `feature/global-cel-shading-wizard`
-**Commit Base:** `466c067` (com evolução sobre plano noturno Revisão 2)
+**Branch Atual:** `main`
+**Commit Base:** `a7cc598b` (auditoria M1 sobre `main`)
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
@@ -24,6 +24,11 @@
 ---
 
 ## 2. O que Está Funcional
+- **Marco M1 — Auditoria e Reparos de Base (Implementação Concluída — Validação Pendente):**
+  - Revalidação de `A01–A12` e investigação dos 4 relatos principais documentadas em `Docs/Release/Reports/M1_Relatorio.md`, `Docs/Release/STATUS.md` e `Docs/Release/TEST_MATRIX.md`.
+  - **A01 (Disparo semiautomático e trava pós-modal):** `WeaponBase.isAutomatic` (padrão `false`), `WeaponController.IsCurrentWeaponAutomatic`, disparo por borda (`_wasFirePressed`) e `_requireFireRelease` + limpeza de `aim`/`fire` em `WeaponInputHandler.cs`.
+  - **A07 (Travessia indevida de NPCs):** `CustomerNpcView.cs` tenta reinserção no NavMesh (`NavMesh.SamplePosition` + `Warp`) antes de qualquer fallback e bloqueia movimento através de obstáculos via `Physics.Linecast`.
+  - **A09 (Retorno seguro de utensílios ao ToolRack):** `PizzeriaState.ToolRackStationId` populado por `PizzeriaRoot`, utilizado em `NightCycleService.ClearTransientNightEntities` e `PlayerLifecycleBridge` sem colisão de slots; coberto em `OvernightExperienceTests.cs`.
 - **Plano Noturno Revisão 2 (Fases 0–7 — código e estática compilados):**
   - Correções base `A01–A16` (separação servidor/cliente no lobby + `PizzeriaSceneLoadingCoordinator`, validação de posse do Host `clientId==0` no `TransferService`, barras de estação sem offset fixo, mesa/cadeira + animação discreta de sentar, fachada `J=4m/2 slots` + ocupação por intervalo, trânsito e cruzamentos sincronizados por `ServerTime`).
   - Ciclo de noites (`O5`, metas N1/N2/N3, derrota operacional por `NightEarnedRevenue < NightRevenueGoal` e retry por snapshot), quadro de comandas (`O7`), HUD e dicas contextuais (`O1/O2/O8`), menu de pausa + recuperação de personagem/moto (`O3/O20`), combate base + mochila danificável (`12B`) e moto lateral com buzina (`MOTO` + `O13`).

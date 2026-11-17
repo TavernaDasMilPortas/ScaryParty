@@ -5,6 +5,20 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-16] — Marco M1: Auditoria de Base, A01/A07/A09 e Matriz de Testes
+- **Escopo:** `WeaponBase.cs`, `WeaponController.cs`, `WeaponInputHandler.cs`, `CustomerNpcView.cs`, `PizzeriaState.cs`, `PizzeriaRoot.cs`, `NightCycleService.cs`, `PlayerLifecycleBridge.cs`, `OvernightExperienceTests.cs`, `Docs/Release/{STATUS.md,TEST_MATRIX.md,Reports/M1_Relatorio.md}`, `Docs/{CURRENT_STATE.md,CHANGELOG.md}`.
+- **Auditoria e Diagnósticos:**
+  - Revalidados `A01–A12` na branch `main` (`a7cc598b`) e classificados os 60 casos `T01–T60` em `TEST_MATRIX.md` entre `NÃO EXECUTADO` e `LACUNA — M3..M7`.
+  - **Ausência de mira (M3):** confirmada ausência de transições para `WeaponMode`/`IsAiming` em `CharacterAnimator.controller` e ausência de offset ADS/FOV em `FirstPersonCameraController`/`RightHandAnchor`.
+  - **Carros imóveis (M2):** confirmada causa no cliente — `CityGenerator` cria `_cityRoot` sem `NetworkObject` e adiciona `TrafficManager : NetworkBehaviour` em runtime, mantendo `IsSpawned == false` e impedindo `SyncVehiclesClientRpc`.
+- **Alterações Aplicadas:**
+  - **A01:** disparo semiautomático por borda de pressionamento (`WeaponBase.isAutomatic`, `WeaponController.IsCurrentWeaponAutomatic`) e limpeza de `aim`/`fire` com trava `_requireFireRelease` ao travar input/cursor em `WeaponInputHandler.cs`.
+  - **A07:** `CustomerNpcView.cs` substituído `MoveTowards` cego por `NavMesh.SamplePosition` + `Agent.Warp` e guarda `Physics.Linecast` para evitar travessia de paredes/móveis.
+  - **A09:** adicionado `PizzeriaState.ToolRackStationId` (preenchido por `PizzeriaRoot`), aplicado em `NightCycleService.ClearTransientNightEntities` e `PlayerLifecycleBridge` com alocação sem colisão de slots, mais teste unitário em `OvernightExperienceTests.cs`.
+- **Validação:** `git diff --check` limpo (0 erros). `dotnet build` CLI não concluído sem `Temp/obj` restaurado; Test Runner EditMode e bateria manual PlayMode/ParrelSync pendentes no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-15] — Correção do Ciclo de Interação e Bancadas (Colocação, Coleta e Trabalho)
 - **Escopo:** `PizzeriaCommandHandler.cs`, `PlayerInteraction.cs`, `StationView.cs`, `PrepStation.cs`, `Docs/CURRENT_STATE.md`, `Docs/CHANGELOG.md`.
 - **Causa Raiz:** Quatro fatores combinados travavam o ciclo de bancadas: 1) `IsStationWithinReach` no servidor media distância apenas até o pivô central do GameObject da mesa, rejeitando jogadores em slots periféricos de bancadas longas (> 6.5m); 2) `HandleRaycast` limitava `maxReach` na malha da própria mesa, impedindo detecção de postos 3D (`StationWorkpostTarget`) e acionando `blockedByBoundStationBody`; 3) resolução rígida de slots não encontrava itens ao mirar ligeiramente fora do centro do slot; 4) `UpdateTrackedWork` aguardava fase `Completed` que nunca era vista porque o servidor remove o slot de `StationSlots` no frame de término, prendendo o look lock de câmera.

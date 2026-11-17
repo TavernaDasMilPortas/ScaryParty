@@ -1,0 +1,22 @@
+# Estado das fases
+
+Pacote criado para execução no projeto; nenhum marco foi executado por este pacote. A auditoria estática histórica está no ROADMAP e deve ser revalidada na branch local.
+
+| Marco | Status | Relatório |
+|---|---|---|
+| M1 — Auditoria | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M1_Relatorio](Reports/M1_Relatorio.md) |
+| M2 — Cidade Navegacao | NÃO INICIADA | [M2_Relatorio](Reports/M2_Relatorio.md) |
+| M3 — Maos Armas Moto | NÃO INICIADA | [M3_Relatorio](Reports/M3_Relatorio.md) |
+| M4 — Noite Completa | NÃO INICIADA | [M4_Relatorio](Reports/M4_Relatorio.md) |
+| M5 — Monstros | NÃO INICIADA | [M5_Relatorio](Reports/M5_Relatorio.md) |
+| M6 — Run Votos Loja | NÃO INICIADA | [M6_Relatorio](Reports/M6_Relatorio.md) |
+| M7 — Funcionarios | NÃO INICIADA | [M7_Relatorio](Reports/M7_Relatorio.md) |
+| M8 — Entrega Final | NÃO INICIADA | [M8_Relatorio](Reports/M8_Relatorio.md) |
+
+## Checkpoint ativo
+
+- Fase: M1 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`).
+- Próxima ação: No Unity Editor aberto, rodar Test Runner EditMode e bateria manual PlayMode (`T01–T32`, `T35`, `T38–T42`, `T45–T49`) listada em `Reports/M1_Relatorio.md`, atualizando `TEST_MATRIX.md` antes de avançar para M2.
+- Bloqueios: Validação EditMode/PlayMode/ParrelSync depende do usuário no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases apenas porque o relatório foi criado.
