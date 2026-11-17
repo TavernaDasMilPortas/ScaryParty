@@ -83,6 +83,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
         public ulong AttendedByPlayerId { get; set; }
         public bool HasPaid { get; set; }
+        public bool IsMonsterCustomer { get; set; }
         public uint Revision { get; set; } = 1;
 
         public bool IsInQueue => Phase == CustomerPhase.EnteringQueue ||

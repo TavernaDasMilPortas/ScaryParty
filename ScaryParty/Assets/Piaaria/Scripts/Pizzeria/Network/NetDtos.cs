@@ -700,6 +700,7 @@ namespace ScaryParty.Pizzeria.Network
         public float FoodPatienceRemaining;
         public ulong AttendedByPlayerId;
         public float AttendProgressNormalized;
+        public bool IsMonsterCustomer;
         public uint Revision;
 
         public bool IsInQueue => Phase == (byte)CustomerPhase.EnteringQueue ||
@@ -739,6 +740,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref FoodPatienceRemaining);
             serializer.SerializeValue(ref AttendedByPlayerId);
             serializer.SerializeValue(ref AttendProgressNormalized);
+            serializer.SerializeValue(ref IsMonsterCustomer);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -752,6 +754,7 @@ namespace ScaryParty.Pizzeria.Network
                PositiveTraitId == other.PositiveTraitId &&
                NegativeTraitId == other.NegativeTraitId &&
                AttendedByPlayerId == other.AttendedByPlayerId &&
+               IsMonsterCustomer == other.IsMonsterCustomer &&
                Math.Abs(AttendProgressNormalized - other.AttendProgressNormalized) < 0.01f &&
                Math.Abs(QueuePatienceRemaining - other.QueuePatienceRemaining) < 1.0f &&
                Math.Abs(FoodPatienceRemaining - other.FoodPatienceRemaining) < 1.0f &&

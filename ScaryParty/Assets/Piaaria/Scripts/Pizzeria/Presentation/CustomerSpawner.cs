@@ -366,7 +366,7 @@ namespace ScaryParty.Pizzeria.Presentation
             for (int i = 0; i < netState.Customers.Count; i++)
             {
                 var dto = netState.Customers[i];
-                if (dto.Phase == (byte)CustomerPhase.Despawned) continue;
+                if (dto.Phase == (byte)CustomerPhase.Despawned || dto.IsMonsterCustomer) continue;
                 presentIds.Add(dto.CustomerId);
                 SyncCustomerView(dto);
             }
@@ -495,7 +495,7 @@ namespace ScaryParty.Pizzeria.Presentation
             return SnapToFloor(pos);
         }
 
-        private void ResolveTargetPose(NetCustomerDto dto, out Vector3 pos, out Quaternion rot)
+        public void ResolveTargetPose(NetCustomerDto dto, out Vector3 pos, out Quaternion rot)
         {
             var phase = (CustomerPhase)dto.Phase;
             if (dto.IsInQueue && _counterByQueue.TryGetValue(dto.QueueIndex, out var counter) && counter != null)

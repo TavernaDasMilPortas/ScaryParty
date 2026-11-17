@@ -312,6 +312,44 @@ namespace ScaryParty.Pizzeria.Domain.Services
         }
 
         /// <summary>
+        /// Interrompe um cliente (ex: monstro em papel de cliente entrando em combate),
+        /// liberando fila, mesa reservada, atendimento e cancelando o pedido sem travar outros NPCs.
+        /// </summary>
+        public bool InterruptCustomerForCombat(PizzeriaState state, CustomerId customerId, double now)
+        {
+            if (state == null || !customerId.IsValid) return false;
+            if (!state.Customers.TryGetValue(customerId, out var cust)) return false;
+
+            int prevQueue = cust.QueueIndex;
+            if (prevQueue >= 0)
+            {
+                cust.QueueIndex = -1;
+                cust.QueueSlotIndex = -1;
+                cust.AttendedByPlayerId = 0;
+                _queueService.CompactAndAdvanceQueue(state, prevQueue, now);
+            }
+
+            if (cust.AssignedTableId > 0)
+            {
+                _tableService.ReleaseTable(state, cust.AssignedTableId);
+                cust.AssignedTableId = -1;
+            }
+
+            if (cust.OrderId.IsValid && state.Orders.TryGetValue(cust.OrderId, out var ord) &&
+                ord.Lifecycle == OrderLifecycle.Accepted)
+            {
+                ord.Lifecycle = OrderLifecycle.Cancelled;
+                ord.TaskStage = OrderTaskBoardStage.Failed;
+                ord.IsArchivedFromBoard = true;
+                ord.Revision++;
+            }
+
+            state.Customers.Remove(customerId);
+            state.IncrementRevision();
+            return true;
+        }
+
+        /// <summary>
         /// Confirma que o cliente presencial concluiu a caminhada atÃ© a mesa e sentou-se na cadeira,
         /// promovendo o estado do cliente de WalkingToTable para SeatedWaitingFood.
         /// </summary>

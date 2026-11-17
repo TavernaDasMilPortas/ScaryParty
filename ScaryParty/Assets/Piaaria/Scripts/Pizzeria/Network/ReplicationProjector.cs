@@ -788,6 +788,7 @@ namespace ScaryParty.Pizzeria.Network
                     FoodPatienceRemaining = cust.FoodPatienceRemaining,
                     AttendedByPlayerId = cust.AttendedByPlayerId,
                     AttendProgressNormalized = attendNorm,
+                    IsMonsterCustomer = cust.IsMonsterCustomer,
                     Revision = cust.Revision
                 };
 

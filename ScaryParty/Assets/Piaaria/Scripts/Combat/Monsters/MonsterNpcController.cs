@@ -1,5 +1,7 @@
 using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Services;
+using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Presentation;
 using Unity.Netcode;
@@ -68,6 +70,11 @@ namespace ScaryParty.Combat.Monsters
         private float _clientTargetYaw;
         private bool _hasClientTarget;
         private float _deadHideTimer;
+        private float _routineDecisionTimer;
+        private float _customerVisitCooldown = 12f;
+        private bool _hasRoutineDest;
+        private Vector3 _routineDest;
+        private CustomerId _boundCustomerId = CustomerId.None;
 
         public ulong MonsterId { get; private set; }
         public uint Revision { get; private set; } = 1;
@@ -220,11 +227,22 @@ namespace ScaryParty.Combat.Monsters
             switch (curState)
             {
                 case NpcBehaviorState.Routine:
-                case NpcBehaviorState.Customer:
                     if (ShouldEnterHostileStateServer())
                     {
                         TryAcquireNearestTarget();
+                        break;
                     }
+                    TickPeacefulRoutine(dt);
+                    break;
+
+                case NpcBehaviorState.Customer:
+                    if (ShouldEnterHostileStateServer())
+                    {
+                        InterruptBoundCustomerServer();
+                        TryAcquireNearestTarget();
+                        break;
+                    }
+                    TickCustomerRole(dt);
                     break;
 
                 case NpcBehaviorState.Aggressive:
@@ -246,9 +264,135 @@ namespace ScaryParty.Combat.Monsters
                 case NpcBehaviorState.Disengaging:
                     _currentTarget = null;
                     _outOfRangeTimer = 0f;
+                    _isDirectlyProvoked = false;
+                    _hasRoutineDest = false;
                     SetBehaviorStateInternal(NpcBehaviorState.Routine);
                     break;
             }
+        }
+
+        private void TickPeacefulRoutine(float dt)
+        {
+            if (_isPerchedOnRooftop || _agent == null || !_agent.enabled) return;
+
+            _customerVisitCooldown -= dt;
+            var root = PizzeriaRoot.Instance;
+            if (_customerVisitCooldown <= 0f && species != NpcSpecies.Zombie &&
+                root != null && root.DomainState != null &&
+                root.DomainState.CurrentNightPhase == NightPhase.Active &&
+                root.CustomerService != null)
+            {
+                _customerVisitCooldown = 28f + (float)_rng.NextDouble() * 18f;
+                var hostility = root.SpeciesHostilityService;
+                if (hostility == null || hostility.GetHostility(species) < 50)
+                {
+                    if (TryEnterAsCustomerServer(root)) return;
+                }
+            }
+
+            _routineDecisionTimer -= dt;
+            if (!_hasRoutineDest || _routineDecisionTimer <= 0f ||
+                (!_agent.pathPending && _agent.remainingDistance <= 1.2f))
+            {
+                _routineDecisionTimer = 6f + (float)_rng.NextDouble() * 6f;
+                Vector3 center = root != null ? root.transform.position : transform.position;
+                float angle = (float)(_rng.NextDouble() * Mathf.PI * 2.0);
+                float dist = 10f + (float)_rng.NextDouble() * 16f;
+                Vector3 candidate = center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * dist;
+                if (NavMesh.SamplePosition(candidate, out var hit, 6f, NavMesh.AllAreas))
+                {
+                    var path = new NavMeshPath();
+                    if (_agent.isOnNavMesh && NavMesh.CalculatePath(transform.position, hit.position, NavMesh.AllAreas, path) &&
+                        path.status == NavMeshPathStatus.PathComplete)
+                    {
+                        _routineDest = hit.position;
+                        _hasRoutineDest = true;
+                        _agent.speed = 2.2f;
+                        _agent.SetDestination(_routineDest);
+                    }
+                }
+            }
+        }
+
+        private bool TryEnterAsCustomerServer(PizzeriaRoot root)
+        {
+            var res = root.CustomerService.SpawnWalkInCustomer(
+                root.DomainState,
+                root.Catalog,
+                root.Clock,
+                rng: _rng);
+            if (!res.Success) return false;
+
+            if (root.DomainState.Customers.TryGetValue(res.Value, out var cust))
+            {
+                cust.IsMonsterCustomer = true;
+                cust.Revision++;
+            }
+            _boundCustomerId = res.Value;
+            SetBehaviorStateInternal(NpcBehaviorState.Customer);
+            PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+            return true;
+        }
+
+        private void TickCustomerRole(float dt)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null || !_boundCustomerId.IsValid ||
+                !root.DomainState.Customers.TryGetValue(_boundCustomerId, out var cust) ||
+                cust.Phase == CustomerPhase.Despawned)
+            {
+                _boundCustomerId = CustomerId.None;
+                _hasRoutineDest = false;
+                SetBehaviorStateInternal(NpcBehaviorState.Routine);
+                return;
+            }
+
+            if (_agent == null || !_agent.enabled) return;
+
+            var spawner = CustomerSpawner.Instance;
+            if (spawner != null)
+            {
+                var dto = new NetCustomerDto
+                {
+                    CustomerId = cust.Id.Value,
+                    Phase = (byte)cust.Phase,
+                    QueueIndex = cust.QueueIndex,
+                    QueueSlotIndex = cust.QueueSlotIndex,
+                    AssignedTableId = cust.AssignedTableId,
+                    OrderId = cust.OrderId.Value,
+                    IsMonsterCustomer = true
+                };
+                spawner.ResolveTargetPose(dto, out Vector3 targetPos, out Quaternion targetRot);
+                if (NavMesh.SamplePosition(targetPos, out var navHit, 3.0f, NavMesh.AllAreas))
+                {
+                    _agent.speed = 2.4f;
+                    if (_agent.isOnNavMesh) _agent.SetDestination(navHit.position);
+
+                    if (cust.Phase == CustomerPhase.WalkingToTable &&
+                        (transform.position - navHit.position).sqrMagnitude <= 1.2f * 1.2f)
+                    {
+                        if (root.CustomerService.ConfirmCustomerSeated(root.DomainState, _boundCustomerId))
+                        {
+                            transform.rotation = targetRot;
+                            PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void InterruptBoundCustomerServer()
+        {
+            if (!_boundCustomerId.IsValid) return;
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.DomainState != null && root.CustomerService != null)
+            {
+                if (root.CustomerService.InterruptCustomerForCombat(root.DomainState, _boundCustomerId, root.Clock.Now))
+                {
+                    PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                }
+            }
+            _boundCustomerId = CustomerId.None;
         }
 
         private bool ShouldEnterHostileStateServer()
@@ -261,8 +405,13 @@ namespace ScaryParty.Combat.Monsters
         public void TriggerAggression(Transform target)
         {
             if (!IsAuthoritativeServer || !IsAlive || target == null) return;
+            InterruptBoundCustomerServer();
             _currentTarget = target;
             _outOfRangeTimer = 0f;
+            if (_agent != null && _agent.enabled)
+            {
+                _agent.speed = species == NpcSpecies.Werewolf ? 4.8f : (species == NpcSpecies.Zombie ? 2.4f : 3.6f);
+            }
             if (_isPerchedOnRooftop && species == NpcSpecies.Vampire && _dropTelegraphTimer <= 0f)
             {
                 _dropTelegraphTimer = 0.85f;
@@ -292,8 +441,17 @@ namespace ScaryParty.Combat.Monsters
         public void ApplyDamageServer(DamageEvent evt)
         {
             if (!IsAuthoritativeServer || !IsAlive) return;
+            bool wasCustomer = _boundCustomerId.IsValid;
+            InterruptBoundCustomerServer();
             _isDirectlyProvoked = true;
             SetHealthInternal(CurrentHealth - Mathf.Max(1, evt.Amount));
+
+            if (wasCustomer && PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.DomainState != null &&
+                PizzeriaRoot.Instance.IsWorldPositionInsidePizzeria(transform.position))
+            {
+                NightCycleService.AdjustReputation(PizzeriaRoot.Instance.DomainState, -15, "Cliente atacado dentro da pizzaria");
+                PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+            }
 
             if (CurrentHealth <= 0)
             {
