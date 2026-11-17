@@ -9,14 +9,14 @@ Pacote criado para execução no projeto; nenhum marco foi executado por este pa
 | M3 — Maos Armas Moto | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M3_Relatorio](Reports/M3_Relatorio.md) |
 | M4 — Noite Completa | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M4_Relatorio](Reports/M4_Relatorio.md) |
 | M5 — Monstros | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M5_Relatorio](Reports/M5_Relatorio.md) |
-| M6 — Run Votos Loja | NÃO INICIADA | [M6_Relatorio](Reports/M6_Relatorio.md) |
+| M6 — Run Votos Loja | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M6_Relatorio](Reports/M6_Relatorio.md) |
 | M7 — Funcionarios | NÃO INICIADA | [M7_Relatorio](Reports/M7_Relatorio.md) |
 | M8 — Entrega Final | NÃO INICIADA | [M8_Relatorio](Reports/M8_Relatorio.md) |
 
 ## Checkpoint ativo
 
-- Fase: M5 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`), avançando para M6.
-- Próxima ação: Executar M6 (RUN de 3 noites, escala congelada, votos com desempate, modificadores e loja atômica).
-- Bloqueios: Validações EditMode/PlayMode de M1–M5 e geração de `.meta` pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+- Fase: M6 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`), avançando para M7.
+- Próxima ação: Executar M7 (Balconistas, Pizzaiolos e Coordenador de Tarefas Compartilhadas).
+- Bloqueios: Validações EditMode/PlayMode de M1–M6 e geração de `.meta` pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases apenas porque o relatório foi criado.
