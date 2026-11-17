@@ -1293,26 +1293,12 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             int newSeed = System.Environment.TickCount ^ GetInstanceID();
-            root.RunProgressionService?.ResetRun(root.DomainState, newSeed, maxNights: 3, difficulty: RunDifficulty.Normal);
-            root.EmployeeTaskService?.ResetForNewRun();
-            root.SpeciesHostilityService?.ResetForNewRun();
-            root.ZombieConversionService?.Reset();
-            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
-
-            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(1) : (NightGoalParameters?)null;
-            NightCycleService.StartNight(root.DomainState, 1, nightParams);
-
-            int humanCount = NetworkManager.Singleton != null ? Mathf.Max(1, NetworkManager.Singleton.ConnectedClientsIds.Count) : 1;
-            root.RunProgressionService?.FreezeNightStartParameters(root.DomainState, humanCount);
+            root.ReinitializeForNewRunServer(newSeed, maxNights: 3, difficulty: RunDifficulty.Normal, startNight: 1);
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
 
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
-                root.DomainState.CurrentNightNumber,
-                root.DomainState.NightRevenueGoal);
-
             CommitAndReplicate();
-            BroadcastNoticeClientRpc($"Nova RUN iniciada! Noite 1 — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+            BroadcastNoticeClientRpc($"Nova RUN iniciada! Noite {root.DomainState.CurrentNightNumber} — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]

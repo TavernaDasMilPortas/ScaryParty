@@ -89,11 +89,18 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
         public void IncrementRevision() => Revision++;
 
-        public void Reset(uint newGenerationId, int startingBudget = 500)
+        public void Reset(uint newGenerationId, int startingBudget = 500, int initialReputation = 100)
         {
             GenerationId = newGenerationId;
             Revision = 1;
             RestaurantBudget = startingBudget;
+            Reputation = System.Math.Clamp(initialReputation, 0, 100);
+            NightReputationMinGoal = 0;
+            LastReputationDelta = 0;
+            LastReputationReason = string.Empty;
+            RunTotalRevenue = 0;
+            NightPizzasDelivered = 0;
+            NightPizzasMinGoal = 0;
             CurrentNightNumber = 1;
             CurrentNightPhase = NightPhase.Preparing;
             NightDefeatReason = NightDefeatReason.None;
@@ -129,6 +136,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
             Backpacks.Clear();
             Calls.Clear();
             PlayerHolds.Clear();
+            DeliveryAttempts.Clear();
             Customers.Clear();
             Tables.Clear();
             QueueLastAdvanceTime.Clear();

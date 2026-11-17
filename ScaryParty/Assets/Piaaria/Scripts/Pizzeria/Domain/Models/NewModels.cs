@@ -127,6 +127,12 @@ namespace ScaryParty.Pizzeria.Domain.Models
             }
         }
 
+        public void Clear()
+        {
+            _history.Clear();
+            _set.Clear();
+        }
+
         public bool HasAttempt(ulong attemptId) => _set.Contains(attemptId);
     }
 }

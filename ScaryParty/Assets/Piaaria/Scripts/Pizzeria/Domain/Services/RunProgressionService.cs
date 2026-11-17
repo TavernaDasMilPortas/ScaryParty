@@ -112,7 +112,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
             EmployeeErrorRng = new Random(seed ^ 0x3E91B7);
         }
 
-        public void ResetRun(PizzeriaState state, int seed, int maxNights = 3, RunDifficulty difficulty = RunDifficulty.Normal)
+        public void ResetRun(
+            PizzeriaState state,
+            int seed,
+            int maxNights = 3,
+            RunDifficulty difficulty = RunDifficulty.Normal,
+            int startingBudget = 500,
+            int initialReputation = 100)
         {
             MaxNights = Math.Clamp(maxNights, 1, 7);
             Difficulty = difficulty;
@@ -130,7 +136,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             if (state != null)
             {
-                state.Reset(state.GenerationId + 1);
+                state.Reset(state.GenerationId + 1, startingBudget, initialReputation);
                 NightCycleService.ClearTransientNightEntities(state, repairBackpacks: true, preservePendingSupplies: false);
             }
         }

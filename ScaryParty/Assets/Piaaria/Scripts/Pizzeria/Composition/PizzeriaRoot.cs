@@ -309,8 +309,6 @@ namespace ScaryParty.Pizzeria.Composition
         private void InitializeServerDomain()
         {
             DomainState = new PizzeriaState();
-            DomainState.RestaurantBudget = _config.startingBudget;
-            DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
 
             // Inicializar Serviços
             TransferService = new TransferService(DomainState, Catalog);
@@ -330,7 +328,27 @@ namespace ScaryParty.Pizzeria.Composition
             ZombieConversionService = new ZombieConversionService();
             ScaryParty.Combat.Monsters.MonsterPopulationDirector.EnsureOn(this);
 
-            // Inicializar mesas do salão configuradas no prefab (ou 4 mesas padrão)
+            DomainState.RestaurantBudget = _config != null ? _config.startingBudget : 500;
+            DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
+            RebuildSceneDomainStateForNewRunServer();
+
+            NightCycleService.StartNight(DomainState, 1, _config.ResolveNightParameters(1));
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
+                DomainState.CurrentNightNumber,
+                DomainState.NightRevenueGoal);
+
+            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas, {DomainState.Tables.Count} mesas.");
+        }
+
+        /// <summary>
+        /// Reconstrói apenas os registros derivados das definições de cena/prefab (mesas, estoques iniciais,
+        /// utensílios, pilhas e mochilas) sem duplicar referências, reutilizado na inicialização e ao reiniciar RUN.
+        /// </summary>
+        public void RebuildSceneDomainStateForNewRunServer()
+        {
+            if (DomainState == null) return;
+
+            DomainState.Tables.Clear();
             var tableStations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.DiningTableStation>(true);
             if (tableStations != null && tableStations.Length > 0)
             {
@@ -346,8 +364,8 @@ namespace ScaryParty.Pizzeria.Composition
 
             var bindings = GetComponent<PizzeriaAuthoringBindings>();
 
-            // Inicializar Estoque nos StorageSlots
-            if (_config.initialStorageSlots != null && _config.initialStorageSlots.Count > 0)
+            DomainState.StorageSlots.Clear();
+            if (_config != null && _config.initialStorageSlots != null && _config.initialStorageSlots.Count > 0)
             {
                 foreach (var slotCfg in _config.initialStorageSlots)
                 {
@@ -355,22 +373,18 @@ namespace ScaryParty.Pizzeria.Composition
                     InitStorageSlot(slotCfg.storageId, slotCfg.EffectiveIngredientId, slotCfg.initialStock, slotCfg.capacity);
                 }
             }
-            else
+            else if (_config != null)
             {
                 int fridgeId = bindings != null ? bindings.ResolvePrimaryFridgeId(1) : 1;
                 int pantryId = bindings != null ? bindings.ResolvePrimaryPantryId(2) : 2;
 
-                // Geladeira (ID padrão 1)
-                InitStorageSlot(fridgeId, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);     // Molho
-                InitStorageSlot(fridgeId, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);    // Queijo Inteiro
-                InitStorageSlot(fridgeId, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient); // Calabresa Inteira
-                InitStorageSlot(fridgeId, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);  // Cogumelo Inteiro
-
-                // Armário/Dispensa (ID padrão 2)
-                InitStorageSlot(pantryId, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);    // Massa
+                InitStorageSlot(fridgeId, 3, _config.initialSauceStock, _config.fridgeCapacityPerIngredient);
+                InitStorageSlot(fridgeId, 4, _config.initialCheeseStock, _config.fridgeCapacityPerIngredient);
+                InitStorageSlot(fridgeId, 6, _config.initialCalabresaStock, _config.fridgeCapacityPerIngredient);
+                InitStorageSlot(fridgeId, 8, _config.initialMushroomStock, _config.fridgeCapacityPerIngredient);
+                InitStorageSlot(pantryId, 1, _config.initialDoughStock, _config.cupboardCapacityPerIngredient);
             }
 
-            // Inicializar Utensílios Compartilhados no ToolRack com índice contínuo (A12)
             int toolRackStationId = bindings != null ? bindings.ResolvePrimaryToolRackId(3) : 3;
             if (toolRackStationId == 3 && toolRackAnchor != null)
             {
@@ -380,19 +394,23 @@ namespace ScaryParty.Pizzeria.Composition
             }
             DomainState.ToolRackStationId = toolRackStationId;
 
+            DomainState.Tools.Clear();
             int globalToolSlotIndex = 0;
-            foreach (var kvp in Catalog.Tools)
+            if (Catalog != null)
             {
-                var toolData = kvp.Value;
-                for (int i = 0; i < toolData.InitialCount; i++)
+                foreach (var kvp in Catalog.Tools)
                 {
-                    var toolId = DomainState.GenerateToolId();
-                    var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(toolRackStationId, globalToolSlotIndex++));
-                    DomainState.Tools[toolId] = toolState;
+                    var toolData = kvp.Value;
+                    for (int i = 0; i < toolData.InitialCount; i++)
+                    {
+                        var toolId = DomainState.GenerateToolId();
+                        var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(toolRackStationId, globalToolSlotIndex++));
+                        DomainState.Tools[toolId] = toolState;
+                    }
                 }
             }
 
-            // Inicializar Pilhas de Caixas configuradas no prefab
+            DomainState.Stacks.Clear();
             var stackStations = GetComponentsInChildren<ScaryParty.Pizzeria.Stations.StackStation>(true);
             for (int i = 0; i < stackStations.Length; i++)
             {
@@ -406,7 +424,7 @@ namespace ScaryParty.Pizzeria.Composition
                 }
             }
 
-            // Only authored, physical bags are registered; player IDs never determine bag IDs.
+            DomainState.Backpacks.Clear();
             int bpCap = _config != null && _config.backpackInitialSlots > 0 ? _config.backpackInitialSlots : 3;
             var bags = GetComponentsInChildren<DeliveryBagAuthoring>(true);
             foreach (var bag in bags)
@@ -422,13 +440,35 @@ namespace ScaryParty.Pizzeria.Composition
                     new DomainVector3(pos.x, pos.y, pos.z), new DomainQuaternion(rot.x, rot.y, rot.z, rot.w));
                 if (!result.Success) Debug.LogError($"[PizzeriaRoot] {bag.name}: {result.Message}");
             }
+        }
 
-            NightCycleService.StartNight(DomainState, 1, _config.ResolveNightParameters(1));
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
+        public void ReinitializeForNewRunServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight = 1)
+        {
+            if (!IsServer || DomainState == null) return;
+
+            Presentation.EmployeePopulationDirector.ClearAll();
+            EmployeeTaskService?.ResetForNewRun();
+            SpeciesHostilityService?.ResetForNewRun();
+            ZombieConversionService?.Reset();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+
+            int startBudget = _config != null ? _config.startingBudget : 500;
+            int startRep = _config != null ? _config.initialReputation : 100;
+            RunProgressionService?.ResetRun(DomainState, newSeed, maxNights, difficulty, startBudget, startRep);
+
+            RebuildSceneDomainStateForNewRunServer();
+
+            var nightParams = _config != null ? _config.ResolveNightParameters(startNight) : (NightGoalParameters?)null;
+            NightCycleService.StartNight(DomainState, startNight, nightParams);
+
+            int humanCount = Unity.Netcode.NetworkManager.Singleton != null
+                ? Mathf.Max(1, Unity.Netcode.NetworkManager.Singleton.ConnectedClientsIds.Count)
+                : 1;
+            RunProgressionService?.FreezeNightStartParameters(DomainState, humanCount);
+
+            Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
                 DomainState.CurrentNightNumber,
                 DomainState.NightRevenueGoal);
-
-            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas, {DomainState.Tables.Count} mesas.");
         }
 
         private float _nightSyncAccumulator = 0f;
