@@ -39,6 +39,8 @@ namespace ScaryParty.City
         private uint _lastHornCounter;
         private bool _wasLocalDriver;
         private ThirdPersonController _lockedLocalTpc;
+        private uint _impactReportedForMountRevision;
+        private uint _nextImpactEpisodeId = 1;
 
         public Vector3 ParkingSpawnPos => _parkingPos;
         public Quaternion ParkingSpawnRot => _parkingRot;
@@ -60,7 +62,7 @@ namespace ScaryParty.City
                             : "Moto em uso por outro entregador";
                     }
                 }
-                return "[E] Montar na Moto (requer mãos livres e sem arma; mantém mochila)";
+                return "[E] Montar na Moto (requer mão esquerda livre; permite pistola na direita)";
             }
         }
 
@@ -445,6 +447,29 @@ namespace ScaryParty.City
         public void OnInteract(GameObject interactor)
         {
             PizzeriaCommandHandler.Instance?.ToggleMotorcycleMountServerRpc();
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (!_wasLocalDriver || Mathf.Abs(_localSpeed) < 3.5f || other == null) return;
+            var net = PizzeriaNetworkState.Instance;
+            if (net == null) return;
+
+            var st = net.MotorcycleState.Value;
+            ulong localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0;
+            if (!st.IsActive || !st.IsMounted || st.RiderClientId != localId) return;
+            if (_impactReportedForMountRevision == st.Revision) return;
+
+            var targetDmg = other.GetComponentInParent<ScaryParty.Combat.IDamageable>();
+            var targetNet = other.GetComponentInParent<NetworkObject>();
+            if (targetDmg == null || targetNet == null || targetNet.OwnerClientId == localId && other.GetComponentInParent<PlayerState>() != null)
+                return;
+
+            _impactReportedForMountRevision = st.Revision;
+            PizzeriaCommandHandler.Instance?.ReportMotorcycleImpactServerRpc(
+                targetNet.NetworkObjectId,
+                _nextImpactEpisodeId++,
+                other.ClosestPoint(transform.position));
         }
 
         public void OnFocus() { }

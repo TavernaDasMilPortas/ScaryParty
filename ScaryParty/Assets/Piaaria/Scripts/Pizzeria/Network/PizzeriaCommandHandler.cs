@@ -1331,7 +1331,10 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         private readonly Dictionary<ulong, PlayerCombatRuntime> _playerCombat = new Dictionary<ulong, PlayerCombatRuntime>();
-        private readonly Dictionary<byte, double> _lastWeaponFireServerTime = new Dictionary<byte, double>();
+        private readonly Dictionary<uint, double> _lastWeaponFireServerTime = new Dictionary<uint, double>();
+        private readonly HashSet<ulong> _processedMotorcycleImpacts = new HashSet<ulong>();
+        [SerializeField] private int motorcycleHitDamage = 40;
+        [SerializeField] private int motorcycleRiderFallDamage = 0;
 
         private static readonly Vector2[] ShotgunPelletOffsetsDeg = new[]
         {
@@ -1386,8 +1389,10 @@ namespace ScaryParty.Pizzeria.Network
 
             netState.Weapons.Add(new NetWeaponStateDto
             {
+                WeaponId = 1,
                 WeaponType = (byte)ScaryParty.Combat.WeaponType.Pistol,
                 IsAvailableOnRack = true,
+                IsSlinged = false,
                 OwnerClientId = 0,
                 CurrentMagAmmo = 12,
                 MaxMagAmmo = 12,
@@ -1397,8 +1402,10 @@ namespace ScaryParty.Pizzeria.Network
 
             netState.Weapons.Add(new NetWeaponStateDto
             {
+                WeaponId = 2,
                 WeaponType = (byte)ScaryParty.Combat.WeaponType.Shotgun,
                 IsAvailableOnRack = true,
+                IsSlinged = false,
                 OwnerClientId = 0,
                 CurrentMagAmmo = 4,
                 MaxMagAmmo = 4,
@@ -1428,6 +1435,7 @@ namespace ScaryParty.Pizzeria.Network
                     var w = netState.Weapons[i];
                     bool isShotgun = w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun;
                     w.IsAvailableOnRack = true;
+                    w.IsSlinged = false;
                     w.OwnerClientId = 0;
                     w.MaxMagAmmo = isShotgun ? 4 : 12;
                     w.CurrentMagAmmo = w.MaxMagAmmo;
@@ -1718,6 +1726,12 @@ namespace ScaryParty.Pizzeria.Network
 
             if (requestedWeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun)
             {
+                var moto = netState.MotorcycleState.Value;
+                if (moto.IsActive && moto.IsMounted && moto.RiderClientId == senderId)
+                {
+                    NotifyErrorClientRpc("Desça da moto antes de empunhar a Escopeta (2 mãos)!", targetParams);
+                    return;
+                }
                 if (IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Left) ||
                     IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Right))
                 {
@@ -1735,6 +1749,7 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             targetWeapon.IsAvailableOnRack = false;
+            targetWeapon.IsSlinged = false;
             targetWeapon.OwnerClientId = senderId;
             targetWeapon.Revision++;
             netState.Weapons[targetIdx] = targetWeapon;
@@ -1743,6 +1758,65 @@ namespace ScaryParty.Pizzeria.Network
                 ? "Escopeta equipada (2 mãos)."
                 : "Pistola equipada (1 mão — mão esquerda [1] livre).";
             NotifySuccessClientRpc(msg, targetParams);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ToggleSlingShotgunServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!IsServer) return;
+            var targetParams = TargetSender(senderId);
+
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null || netState.Weapons == null || root == null || root.DomainState == null) return;
+
+            int shotgunIdx = -1;
+            for (int i = 0; i < netState.Weapons.Count; i++)
+            {
+                var w = netState.Weapons[i];
+                if (!w.IsAvailableOnRack && w.OwnerClientId == senderId && w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun)
+                {
+                    shotgunIdx = i;
+                    break;
+                }
+            }
+
+            if (shotgunIdx < 0)
+            {
+                NotifyErrorClientRpc("Você não possui uma Escopeta para guardar/sacar da bandoleira.", targetParams);
+                return;
+            }
+
+            var shotgun = netState.Weapons[shotgunIdx];
+            if (!shotgun.IsSlinged)
+            {
+                shotgun.IsSlinged = true;
+                shotgun.Revision++;
+                netState.Weapons[shotgunIdx] = shotgun;
+                NotifySuccessClientRpc("Escopeta guardada na bandoleira (mãos livres).", targetParams);
+                return;
+            }
+
+            // Sacar da bandoleira é transação atômica: exige não estar pilotando e ambas as mãos livres
+            var moto = netState.MotorcycleState.Value;
+            if (moto.IsActive && moto.IsMounted && moto.RiderClientId == senderId)
+            {
+                NotifyErrorClientRpc("Não é possível sacar a Escopeta (2 mãos) enquanto pilota a moto!", targetParams);
+                return;
+            }
+
+            if (IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Left) ||
+                IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Right) ||
+                netState.TryGetEquippedWeapon(senderId, out _))
+            {
+                NotifyErrorClientRpc("Esvazie as DUAS mãos antes de sacar a Escopeta da bandoleira!", targetParams);
+                return;
+            }
+
+            shotgun.IsSlinged = false;
+            shotgun.Revision++;
+            netState.Weapons[shotgunIdx] = shotgun;
+            NotifySuccessClientRpc("Escopeta sacada da bandoleira (2 mãos).", targetParams);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1758,7 +1832,7 @@ namespace ScaryParty.Pizzeria.Network
             int weaponIdx = -1;
             for (int i = 0; i < netState.Weapons.Count; i++)
             {
-                if (!netState.Weapons[i].IsAvailableOnRack && netState.Weapons[i].OwnerClientId == senderId)
+                if (!netState.Weapons[i].IsAvailableOnRack && !netState.Weapons[i].IsSlinged && netState.Weapons[i].OwnerClientId == senderId)
                 {
                     weaponIdx = i;
                     break;
@@ -1771,10 +1845,11 @@ namespace ScaryParty.Pizzeria.Network
 
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
             float minCooldown = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 0.72f : 0.25f;
-            if (_lastWeaponFireServerTime.TryGetValue(weapon.WeaponType, out double lastTime) && now - lastTime < minCooldown)
+            uint weaponKey = weapon.WeaponId > 0 ? weapon.WeaponId : (uint)(weaponIdx + 1);
+            if (_lastWeaponFireServerTime.TryGetValue(weaponKey, out double lastTime) && now - lastTime < minCooldown)
                 return;
 
-            _lastWeaponFireServerTime[weapon.WeaponType] = now;
+            _lastWeaponFireServerTime[weaponKey] = now;
             weapon.CurrentMagAmmo--;
             weapon.Revision++;
             netState.Weapons[weaponIdx] = weapon;
@@ -1786,6 +1861,18 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             Vector3 dir = rayDir.normalized;
+            if (shooterRoot != null)
+            {
+                Vector3 chestOrigin = shooterRoot.position + Vector3.up * 1.45f;
+                if (Physics.Linecast(chestOrigin, rayOrigin, out RaycastHit muzzleBlock, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                {
+                    if (!muzzleBlock.collider.transform.IsChildOf(shooterRoot))
+                    {
+                        BroadcastWeaponFireVisualClientRpc(senderId, rayOrigin, muzzleBlock.point, true);
+                        return;
+                    }
+                }
+            }
             float range = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 38f : 65f;
             int rayCount = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? ShotgunPelletOffsetsDeg.Length : 1;
             int perRayDmg = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 10 : 25;
@@ -2025,16 +2112,15 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (net.TryGetEquippedWeapon(senderId, out _))
+            if (net.TryGetEquippedWeapon(senderId, out var eqWeapon) && eqWeapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun)
             {
-                NotifyErrorClientRpc("Guarde sua arma no rack antes de pilotar a moto!", targetParams);
+                NotifyErrorClientRpc("Guarde a Escopeta na bandoleira [G] ou no rack antes de pilotar a moto!", targetParams);
                 return;
             }
 
-            if (IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Left) ||
-                IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Right))
+            if (IsDomainHandOccupiedByItemOrToolServer(root.DomainState, senderId, HandSlotIndex.Left))
             {
-                NotifyErrorClientRpc("Esvazie as duas mãos antes de pilotar! Guarde as caixas na mochila.", targetParams);
+                NotifyErrorClientRpc("Esvazie a mão esquerda [1] para conduzir a moto (pistola na direita permitida).", targetParams);
                 return;
             }
 
@@ -2044,6 +2130,60 @@ namespace ScaryParty.Pizzeria.Network
             st.Speed = 0f;
             st.Revision++;
             net.MotorcycleState.Value = st;
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ReportMotorcycleImpactServerRpc(ulong targetNetworkObjectId, uint impactEpisodeId, Vector3 impactPoint, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!IsServer) return;
+
+            var net = PizzeriaNetworkState.Instance;
+            var bike = ScaryParty.City.DeliveryMotorcycleController.Instance;
+            if (net == null || bike == null) return;
+
+            var st = net.MotorcycleState.Value;
+            if (!st.IsActive || !st.IsMounted || st.RiderClientId != senderId) return;
+            if (Mathf.Abs(st.Speed) < 3.5f) return;
+
+            ulong dedupKey = ((ulong)st.Revision << 32) | impactEpisodeId;
+            if (!_processedMotorcycleImpacts.Add(dedupKey)) return;
+
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetNetworkObjectId, out var targetObj) && targetObj != null)
+            {
+                var dmgTarget = targetObj.GetComponentInParent<ScaryParty.Combat.IDamageable>();
+                if (dmgTarget != null && dmgTarget.IsAlive)
+                {
+                    dmgTarget.ApplyDamageServer(new ScaryParty.Combat.DamageEvent
+                    {
+                        Amount = Mathf.Max(1, motorcycleHitDamage),
+                        Source = ScaryParty.Combat.DamageSourceType.Collision,
+                        InstigatorClientId = senderId,
+                        HitPoint = impactPoint,
+                        HitNormal = (targetObj.transform.position - bike.transform.position).normalized
+                    });
+                }
+            }
+
+            // Derruba imediatamente o condutor no servidor (dano ao condutor configurável, padrão 0)
+            st.IsMounted = false;
+            st.RiderClientId = 0;
+            st.Speed = 0f;
+            st.Revision++;
+            net.MotorcycleState.Value = st;
+
+            if (motorcycleRiderFallDamage > 0 && _playerCombat.TryGetValue(senderId, out var riderCombat) && !riderCombat.IsIncapacitated)
+            {
+                riderCombat.CurrentHp = Mathf.Max(0, riderCombat.CurrentHp - motorcycleRiderFallDamage);
+                riderCombat.Revision++;
+                SyncPlayerCombatListServer();
+            }
+
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var client) && client.PlayerObject != null)
+            {
+                Vector3 safeExit = bike.transform.position + bike.transform.right * 1.4f;
+                client.PlayerObject.transform.position = safeExit;
+            }
         }
 
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Unreliable)]

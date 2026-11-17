@@ -140,7 +140,13 @@ namespace ScaryParty.Pizzeria.Player
                     }
                 }
 
-                // Verificar arma equipada no Rack
+                var moto = netState.MotorcycleState.Value;
+                if (moto.IsActive && moto.IsMounted && moto.RiderClientId == myId)
+                {
+                    leftDesc = "Moto (Direção)";
+                }
+
+                // Verificar arma equipada no Rack ou bandoleira
                 if (netState.TryGetEquippedWeapon(myId, out var weapon))
                 {
                     if (weapon.WeaponType == 2)
@@ -152,6 +158,10 @@ namespace ScaryParty.Pizzeria.Player
                     {
                         rightDesc = "Pistola (1 mão)";
                     }
+                }
+                else if (netState.TryGetSlingedWeapon(myId, out _))
+                {
+                    if (leftDesc == "Vazia") leftDesc = "Vazia (Espingarda na bandoleira)";
                 }
             }
 

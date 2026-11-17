@@ -339,6 +339,15 @@ namespace ScaryParty.Player
         private Vector3 _rightHandImpulsePos;
         private Vector3 _leftHandImpulseEuler;
         private Vector3 _rightHandImpulseEuler;
+        private bool _isAiming;
+        private float _aimLerp;
+        private float _baseFov = -1f;
+
+        [Header("Mira (ADS)")]
+        public Vector3 adsRightHandOffset = new Vector3(-0.20f, 0.08f, -0.05f);
+        public float adsFovDelta = -12f;
+
+        public void SetAimState(bool aiming) => _isAiming = aiming;
 
         /// <summary>
         /// Aplica um recuo/acomodação tátil apenas nos anchors de mão em 1ª pessoa.
@@ -398,8 +407,16 @@ namespace ScaryParty.Player
             _leftHandAnchor.localPosition = _leftAnchorBasePos + swayOffset + _leftHandImpulsePos;
             _leftHandAnchor.localRotation = Quaternion.Euler(_leftHandImpulseEuler);
 
-            _rightHandAnchor.localPosition = _rightAnchorBasePos + swayOffset + _rightHandImpulsePos;
+            _aimLerp = Mathf.Lerp(_aimLerp, _isAiming ? 1f : 0f, 1f - Mathf.Exp(-14f * dt));
+            Vector3 adsOffset = Vector3.Lerp(Vector3.zero, adsRightHandOffset, _aimLerp);
+            _rightHandAnchor.localPosition = _rightAnchorBasePos + swayOffset + _rightHandImpulsePos + adsOffset;
             _rightHandAnchor.localRotation = Quaternion.Euler(_rightHandImpulseEuler);
+
+            if (_playerCamera != null)
+            {
+                if (_baseFov <= 0f) _baseFov = _playerCamera.fieldOfView;
+                _playerCamera.fieldOfView = Mathf.Lerp(_baseFov, Mathf.Max(30f, _baseFov + adsFovDelta), _aimLerp);
+            }
         }
 
         public void EnsureRig()

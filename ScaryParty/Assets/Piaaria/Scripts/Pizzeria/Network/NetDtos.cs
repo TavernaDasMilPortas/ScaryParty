@@ -865,8 +865,10 @@ namespace ScaryParty.Pizzeria.Network
 
     public struct NetWeaponStateDto : INetworkSerializable, IEquatable<NetWeaponStateDto>
     {
+        public uint WeaponId;
         public byte WeaponType;
         public bool IsAvailableOnRack;
+        public bool IsSlinged;
         public ulong OwnerClientId;
         public int CurrentMagAmmo;
         public int MaxMagAmmo;
@@ -875,8 +877,10 @@ namespace ScaryParty.Pizzeria.Network
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
+            serializer.SerializeValue(ref WeaponId);
             serializer.SerializeValue(ref WeaponType);
             serializer.SerializeValue(ref IsAvailableOnRack);
+            serializer.SerializeValue(ref IsSlinged);
             serializer.SerializeValue(ref OwnerClientId);
             serializer.SerializeValue(ref CurrentMagAmmo);
             serializer.SerializeValue(ref MaxMagAmmo);
@@ -885,15 +889,17 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         public bool Equals(NetWeaponStateDto other)
-            => WeaponType == other.WeaponType &&
+            => WeaponId == other.WeaponId &&
+               WeaponType == other.WeaponType &&
                IsAvailableOnRack == other.IsAvailableOnRack &&
+               IsSlinged == other.IsSlinged &&
                OwnerClientId == other.OwnerClientId &&
                CurrentMagAmmo == other.CurrentMagAmmo &&
                RackReserveAmmo == other.RackReserveAmmo &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetWeaponStateDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(WeaponType, OwnerClientId, CurrentMagAmmo, RackReserveAmmo, Revision);
+        public override int GetHashCode() => HashCode.Combine(WeaponId, WeaponType, IsSlinged, OwnerClientId, CurrentMagAmmo, RackReserveAmmo, Revision);
     }
 
     public struct NetPlayerCombatDto : INetworkSerializable, IEquatable<NetPlayerCombatDto>

@@ -161,11 +161,16 @@ public class WeaponController : MonoBehaviour
         if (!isLocalOwner) return;
 
         bool incapacitated = _health != null && _health.IsIncapacitated;
-        bool controlsAllowed = currentMode != WeaponMode.Unarmed && !incapacitated && !LocalDrivingMotorcycle;
+        bool controlsAllowed = currentMode != WeaponMode.Unarmed && !incapacitated && (!LocalDrivingMotorcycle || currentMode == WeaponMode.Pistol);
         if (_inputHandler != null && _inputHandler.enableWeaponControls != controlsAllowed)
         {
             _inputHandler.enableWeaponControls = controlsAllowed;
             if (!controlsAllowed) StopAim();
+        }
+
+        if (!incapacitated && !GameplayInputGate.IsLocked && IsSlingPressed())
+        {
+            PizzeriaCommandHandler.Instance?.ToggleSlingShotgunServerRpc();
         }
 
         if (_isReloading)
@@ -197,7 +202,7 @@ public class WeaponController : MonoBehaviour
         };
 
         HudPresenter.Instance?.SetWeaponAmmoHud(
-            currentMode != WeaponMode.Unarmed && !incapacitated && !LocalDrivingMotorcycle,
+            controlsAllowed,
             weaponLabel,
             hasRepWeapon ? repWeapon.CurrentMagAmmo : 0,
             hasRepWeapon ? repWeapon.RackReserveAmmo : 0,
@@ -219,6 +224,15 @@ public class WeaponController : MonoBehaviour
             return true;
 #endif
         return Input.GetKeyDown(KeyCode.R);
+    }
+
+    private static bool IsSlingPressed()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null && Keyboard.current.gKey.wasPressedThisFrame)
+            return true;
+#endif
+        return Input.GetKeyDown(KeyCode.G);
     }
 
     public bool IsCurrentWeaponAutomatic => currentWeaponInstance != null && currentWeaponInstance.isAutomatic;
@@ -280,18 +294,20 @@ public class WeaponController : MonoBehaviour
         if (currentMode == WeaponMode.Unarmed || _isReloading) return;
         isAiming = true;
         if (animator != null) animator.SetBool(AnimIsAiming, true);
+        ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(true);
     }
 
     public void StopAim()
     {
         isAiming = false;
         if (animator != null) animator.SetBool(AnimIsAiming, false);
+        ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(false);
     }
 
     public void TriggerFire()
     {
         if (_inputHandler != null && !_inputHandler.enableWeaponControls) return;
-        if (_isReloading || LocalDrivingMotorcycle) return;
+        if (_isReloading || (LocalDrivingMotorcycle && currentMode != WeaponMode.Pistol)) return;
         if (currentMode == WeaponMode.Unarmed || currentWeaponInstance == null) return;
         if (_health != null && _health.IsIncapacitated) return;
 

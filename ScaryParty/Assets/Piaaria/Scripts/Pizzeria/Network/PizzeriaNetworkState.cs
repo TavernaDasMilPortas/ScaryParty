@@ -64,11 +64,19 @@ namespace ScaryParty.Pizzeria.Network
 
         public bool IsHandOccupiedByWeapon(ulong playerId, int slotId)
         {
+            // Mão esquerda reservada pela condução da moto
+            var moto = MotorcycleState.Value;
+            if (moto.IsActive && moto.IsMounted && moto.RiderClientId == playerId &&
+                slotId == (int)ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left)
+            {
+                return true;
+            }
+
             if (Weapons == null) return false;
             for (int i = 0; i < Weapons.Count; i++)
             {
                 var w = Weapons[i];
-                if (w.IsAvailableOnRack || w.OwnerClientId != playerId) continue;
+                if (w.IsAvailableOnRack || w.OwnerClientId != playerId || w.IsSlinged) continue;
                 if (w.WeaponType == 2) return true; // Shotgun (2 maos)
                 if (w.WeaponType == 1 && slotId == (int)ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Right) return true; // Pistola na mao direita
             }
@@ -81,7 +89,24 @@ namespace ScaryParty.Pizzeria.Network
             {
                 for (int i = 0; i < Weapons.Count; i++)
                 {
-                    if (!Weapons[i].IsAvailableOnRack && Weapons[i].OwnerClientId == playerId)
+                    if (!Weapons[i].IsAvailableOnRack && !Weapons[i].IsSlinged && Weapons[i].OwnerClientId == playerId)
+                    {
+                        weapon = Weapons[i];
+                        return true;
+                    }
+                }
+            }
+            weapon = default;
+            return false;
+        }
+
+        public bool TryGetSlingedWeapon(ulong playerId, out NetWeaponStateDto weapon)
+        {
+            if (Weapons != null)
+            {
+                for (int i = 0; i < Weapons.Count; i++)
+                {
+                    if (!Weapons[i].IsAvailableOnRack && Weapons[i].IsSlinged && Weapons[i].OwnerClientId == playerId)
                     {
                         weapon = Weapons[i];
                         return true;
