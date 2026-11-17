@@ -48,15 +48,15 @@ Estados: NÃO EXECUTADO / PASSOU / FALHOU / BLOQUEADO / LACUNA — Mx. Para cada
 | T40 | Cair ao lado de parede, morrer pilotando e desconectar pilotando | Saída válida, moto liberada, mãos e controles restaurados | NÃO EXECUTADO | — |
 | T41 | Dano rompe mochila cheia | Quedas de caixas e capacidade consistentes; sem duplicação | NÃO EXECUTADO | — |
 | T42 | Reparar mochila; interromper antes de terminar | Regra consistente e replicada; nada termina sozinho após cancelar | NÃO EXECUTADO | — |
-| T43 | Ferir aliado, curar e sofrer ataque aos 90% da interação | Cura interrompe e volta a zero | LACUNA — M4 | [M1_Relatorio](Reports/M1_Relatorio.md) (A04: cura aliada ausente) |
-| T44 | Incapacitar, resgatar, deixar morrer e espectar | Sem auto-resgate; espectador não interage; retorno na próxima noite vencida | LACUNA — M4 | [M1_Relatorio](Reports/M1_Relatorio.md) (A04: auto-resgate 10s ativo) |
+| T43 | Ferir aliado, curar e sofrer ataque aos 90% da interação | Cura interrompe e volta a zero | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (AdvanceAllyRescueServerRpc implementado) |
+| T44 | Incapacitar, resgatar, deixar morrer e espectar | Sem auto-resgate; espectador não interage; retorno na próxima noite vencida | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (A04 substituído por sangramento/espectador) |
 | T45 | Incapacitar todos, inclusive condutor | Derrota única; nenhum avanço de noite posterior | NÃO EXECUTADO | — |
 | T46 | Ganhar meta 100 e gastar até saldo 20 | Vitória financeira mantida | NÃO EXECUTADO | — |
 | T47 | Bater meta com tempo restante | Noite continua; novo faturamento é contabilizado | NÃO EXECUTADO | — |
-| T48 | Encerrar noite com pedidos abertos | Penalidades aplicadas uma vez antes da avaliação; sem graça extra | NÃO EXECUTADO | [M1_Relatorio](Reports/M1_Relatorio.md) (A06: Closing atual dá prazo extra) |
-| T49 | Avançar carregando ferramentas, arma, pizza e suprimento pendente | Recursos preservados conforme tabela; sem ID fixo inválido nem munição grátis | NÃO EXECUTADO | [M1_Relatorio](Reports/M1_Relatorio.md) (A09 corrigido; A10 pendente M4/M6) |
-| T50 | Atacar cliente dentro e fora do volume da pizzaria | Penalidade territorial correta, sem multiplicação por collider | LACUNA — M4 | [M1_Relatorio](Reports/M1_Relatorio.md) (reputação territorial ausente) |
-| T51 | Completar pedidos com reputação cheia e baixa | Recuperação respeita teto; interface mostra causa | LACUNA — M4 | [M1_Relatorio](Reports/M1_Relatorio.md) (sistema de reputação ausente) |
+| T48 | Encerrar noite com pedidos abertos | Penalidades aplicadas uma vez antes da avaliação; sem graça extra | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (A06 corrigido) |
+| T49 | Avançar carregando ferramentas, arma, pizza e suprimento pendente | Recursos preservados conforme tabela; sem ID fixo inválido nem munição grátis | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (A09/A10 e suprimentos corrigidos) |
+| T50 | Atacar cliente dentro e fora do volume da pizzaria | Penalidade territorial correta, sem multiplicação por collider | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (ReportCustomerAttackInPizzeriaServerRpc) |
+| T51 | Completar pedidos com reputação cheia e baixa | Recuperação respeita teto; interface mostra causa | NÃO EXECUTADO | [M4_Relatorio](Reports/M4_Relatorio.md) (AdjustReputation 0..100 implementado) |
 | T52 | Começar com 1/2/4 humanos; alguém morre ou sai | Meta congelada na noite; recalculada somente depois | LACUNA — M6 | [M1_Relatorio](Reports/M1_Relatorio.md) (escala dinâmica ausente) |
 | T53 | Votação empatada, alteração de voto e desconexão | Um voto válido por pessoa; empate sorteado uma vez; sem deadlock | LACUNA — M6 | [M1_Relatorio](Reports/M1_Relatorio.md) (sistema de votos ausente) |
 | T54 | Todos prontos, cliente desmarca antes do início | Transição atômica; não iniciar duas vezes nem ignorar estado vigente | LACUNA — M6 | [M1_Relatorio](Reports/M1_Relatorio.md) (preparação votada ausente) |

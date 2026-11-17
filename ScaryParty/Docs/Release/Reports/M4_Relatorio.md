@@ -1,57 +1,34 @@
-# M4 — Relatório de execução
+# Relatório M4 — Uma Noite Completa
 
-Status: NÃO INICIADA
+**Status:** IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE  
+**Data:** 2026-11-16  
+**Branch / Commit M4 (código):** `release/marcos-noturnos` @ `7f24b45b`
 
-Este arquivo é um modelo. Nenhuma implementação ou teste foi realizado por sua criação.
+---
 
-## Contexto
+## 1. Implementação Realizada
 
-- Data/hora:
-- Branch / SHA inicial / SHA final:
-- Raiz Unity / cena / prefab / preset / seed:
-- Alterações locais preexistentes preservadas:
-- Dependências e pendências herdadas:
+1. **Fechamento no Relógio sem Prorrogação (`A06` — `NightCycleService.cs`, `NightConfig.cs`):**
+   - Ao zerar `NightRemainingSeconds`, `TickNight` agora executa `SettleOpenOrdersAtNightEnd` (expira pedidos `Accepted` uma única vez, incrementa `NightOrdersFailed` e aplica penalidade de reputação `-10` por pedido) e avalia o resultado imediatamente, sem entrar em `NightPhase.Closing`.
+   - `NightConfig` atualizado para `durationSeconds = 600f` (10 min) e `closingGraceSeconds = 0f` (**A12**).
+2. **Reputação Compartilhada e Separação Faturamento/Saldo (`Ids.cs`, `PizzeriaState.cs`, `NightCycleService.cs`, `PizzeriaCommandHandler.cs`):**
+   - Adicionados `Reputation` (`0..100`), `NightReputationMinGoal`, `NightPizzasMinGoal`, `RunTotalRevenue` e `NightDefeatReason.ReputationZeroed`.
+   - `ReportCustomerAttackInPizzeriaServerRpc` aplica penalidade territorial (`-15` com cooldown de 3s) apenas quando o ataque ocorre dentro do volume da pizzaria (`T50`).
+3. **Incapacitação, Resgate Aliado e Espectador (`A04` — `NetDtos.cs`, `PizzeriaCommandHandler.cs`):**
+   - Removido auto-resgate de 10s; incapacitado entra em sangramento (`45s`) e passa para `IsDead = true` (espectador até a próxima noite vencida).
+   - Adicionado `AdvanceAllyRescueServerRpc` (3s de interação); qualquer dano ao alvo ou ao ajudante em `ApplyDamageServer` zera `RescueProgress` (`T43`).
+   - `AreAllPlayersIncapacitatedServer` considera incapacitados e mortos para derrota operacional (`T45`).
+4. **Preservação de Munição (`A10`) e Suprimentos entre Noites:**
+   - `HandleResetNightCombatServer(bool resetWeaponsAndAmmo = false)` não recarrega mais armas gratuitamente ao avançar de noite.
+   - `ClearTransientNightEntities(..., preservePendingSupplies: true)` preserva `SupplyOrders` pagas ainda em trânsito entre noites.
+5. **Teste EditMode (`OvernightExperienceTests.cs`):**
+   - Adicionado `NightCycle_ClockZero_SettlesOpenOrdersOnceWithoutClosingGraceAndPreservesSupplies`.
 
-## Tarefas
+---
 
-| Tarefa | Estado | Arquivos/evidência | Pendência |
-|---|---|---|---|
-| Preencher durante execução | Não iniciada | — | — |
+## 2. Validação e Pendências (PlayMode / Editor)
 
-## Achados
-
-| ID | Prioridade | Confirmado ou hipótese | Reprodução e resultado | Causa/evidência | Correção ou marco dono |
-|---|---|---|---|---|---|
-
-## Alterações e configuração
-
-Descrever comportamento antes/depois, referências de assets e parâmetros expostos.
-
-## Verificações executadas
-
-| Teste | Ambiente host/cliente | SHA/preset | Resultado | Evidência |
-|---|---|---|---|---|
-
-## Testes não executados e roteiro manual
-
-Pré-condições, ações numeradas, esperado e como registrar resultado. Não preencher como aprovado por inferência.
-
-## Riscos e decisões
-
-Separar decisões confirmadas, propostas configuráveis e limitações.
-
-## Checkpoint para retomar
-
-- Última tarefa concluída:
-- Tarefa em andamento:
-- Arquivos tocados:
-- Próxima ação exata:
-- Não repetir:
-- Bloqueios:
-
-## Aceite
-
-- Implementação: pendente.
-- Validação jogável: pendente.
-- P0/P1 restantes:
-- Próxima fase: não iniciada.
+- **Executado:** `git diff --check` limpo.
+- **Pendente no Unity Editor aberto (`T07–T20`, `T41–T52`):**
+  - Rodar `OvernightExperienceTests` e `PizzeriaDomainTests` no Test Runner EditMode.
+  - Em PlayMode (Host + Cliente ParrelSync), validar noite completa com entrega multipizza, compras de suprimentos, incapacitação/resgate/morte/espectador e retorno na noite seguinte.
