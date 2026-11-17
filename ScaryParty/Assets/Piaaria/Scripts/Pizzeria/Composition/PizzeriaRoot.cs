@@ -599,6 +599,10 @@ namespace ScaryParty.Pizzeria.Composition
                     ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 }
             }
+            else if (IsSpawned && !IsServer)
+            {
+                Presentation.EmployeePopulationDirector.TickClientProxies(Network.PizzeriaNetworkState.Instance);
+            }
         }
 
         public Vector3 GetPlayerSpawnPosition(int index)

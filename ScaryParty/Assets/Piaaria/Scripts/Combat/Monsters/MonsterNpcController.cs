@@ -1,5 +1,6 @@
 using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Services;
+using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Presentation;
 using Unity.Netcode;
 using UnityEngine;
@@ -9,9 +10,9 @@ namespace ScaryParty.Combat.Monsters
 {
     /// <summary>
     /// Base comum de estado e combate para NPCs/Monstros (Humano agressivo, Vampiro, Lobisomem, Fantasma e Zumbi).
-    /// Separa autoridade de decisão (servidor) da apresentação visual (olhos vermelhos, telemetria e efeitos).
+    /// Separa autoridade de decisão (servidor) da apresentação visual interpolada (host e clientes).
     /// </summary>
-    public class MonsterNpcController : NetworkBehaviour, IDamageable
+    public class MonsterNpcController : MonoBehaviour, IDamageable
     {
         [Header("Espécie e Capacidades")]
         [SerializeField] private NpcSpecies species = NpcSpecies.Vampire;
@@ -39,10 +40,9 @@ namespace ScaryParty.Combat.Monsters
         [SerializeField] private Color calmEyeColor = Color.white;
         [SerializeField] private Color aggressiveEyeColor = Color.red;
 
-        private readonly NetworkVariable<byte> _netState = new NetworkVariable<byte>((byte)NpcBehaviorState.Routine);
-        private readonly NetworkVariable<int> _netHealth = new NetworkVariable<int>(130);
         private readonly System.Random _rng = new System.Random();
 
+        private Animator _animator;
         private NavMeshAgent _agent;
         private Transform _currentTarget;
         private float _outOfRangeTimer;
@@ -63,19 +63,53 @@ namespace ScaryParty.Combat.Monsters
         private NpcBehaviorState _localBehaviorState = NpcBehaviorState.Routine;
         private int _localHealth = 130;
         private NpcBehaviorState _lastVisualState = NpcBehaviorState.Routine;
+        private bool _isClientProxy;
+        private Vector3 _clientTargetPos;
+        private float _clientTargetYaw;
+        private bool _hasClientTarget;
+        private float _deadHideTimer;
 
         public ulong MonsterId { get; private set; }
         public uint Revision { get; private set; } = 1;
         public NpcSpecies Species => species;
         public int MaxHealth => maxHealth;
-        public int CurrentHealth => IsSpawned ? _netHealth.Value : _localHealth;
-        public NpcBehaviorState CurrentBehaviorState => IsSpawned ? (NpcBehaviorState)_netState.Value : _localBehaviorState;
+        public int CurrentHealth => _localHealth;
+        public NpcBehaviorState CurrentBehaviorState => _localBehaviorState;
         public bool IsAlive => CurrentHealth > 0 && CurrentBehaviorState != NpcBehaviorState.Dead;
-        private bool IsAuthoritativeServer => IsSpawned ? IsServer : (_configuredOnServer && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer));
+        private bool IsAuthoritativeServer => !_isClientProxy && _configuredOnServer && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer);
 
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
+            _animator = GetComponentInChildren<Animator>(true);
+        }
+
+        public void ConfigureClientProxy(ulong monsterId, NpcSpecies npcSpecies, Renderer[] eyes, NetMonsterDto initialDto)
+        {
+            MonsterId = monsterId;
+            species = npcSpecies;
+            _isClientProxy = true;
+            _configuredOnServer = false;
+            if (eyes != null && eyes.Length > 0) eyeRenderers = eyes;
+            _animator = GetComponentInChildren<Animator>(true);
+            ApplyReplicatedDto(initialDto, snapImmediately: true);
+        }
+
+        public void ApplyReplicatedDto(NetMonsterDto dto, bool snapImmediately = false)
+        {
+            maxHealth = Mathf.Max(1, dto.MaxHp);
+            _localHealth = Mathf.Max(0, dto.CurrentHp);
+            _localBehaviorState = (NpcBehaviorState)dto.BehaviorState;
+            Revision = dto.Revision;
+            _clientTargetPos = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+            _clientTargetYaw = dto.Yaw;
+            if (snapImmediately || !_hasClientTarget || (_clientTargetPos - transform.position).sqrMagnitude > 36f)
+            {
+                transform.position = _clientTargetPos;
+                transform.rotation = Quaternion.Euler(0f, _clientTargetYaw, 0f);
+            }
+            _hasClientTarget = true;
+            UpdateEyePresentation();
         }
 
         public void ConfigureServer(
@@ -99,36 +133,24 @@ namespace ScaryParty.Combat.Monsters
             _isPerchedOnRooftop = perchedOnRooftop && species == NpcSpecies.Vampire;
             if (eyes != null && eyes.Length > 0) eyeRenderers = eyes;
             _configuredOnServer = true;
+            _isClientProxy = false;
             _localHealth = maxHealth;
+            _animator = GetComponentInChildren<Animator>(true);
             SetBehaviorStateInternal(NpcBehaviorState.Routine);
             if (_agent != null && _isPerchedOnRooftop)
                 _agent.enabled = false;
             UpdateEyePresentation();
         }
 
-        public override void OnNetworkSpawn()
-        {
-            if (IsServer)
-            {
-                _netHealth.Value = Mathf.Max(1, maxHealth);
-                _netState.Value = (byte)NpcBehaviorState.Routine;
-            }
-            UpdateEyePresentation();
-        }
-
         private void SetBehaviorStateInternal(NpcBehaviorState next)
         {
             _localBehaviorState = next;
-            if (IsSpawned && IsServer)
-                _netState.Value = (byte)next;
             Revision++;
         }
 
         private void SetHealthInternal(int nextHp)
         {
             _localHealth = Mathf.Max(0, nextHp);
-            if (IsSpawned && IsServer)
-                _netHealth.Value = _localHealth;
             Revision++;
         }
 
@@ -141,7 +163,35 @@ namespace ScaryParty.Combat.Monsters
                 UpdateEyePresentation();
             }
 
-            if (!IsAuthoritativeServer || !IsAlive) return;
+            if (_isClientProxy)
+            {
+                float cdt = Time.deltaTime;
+                if (_hasClientTarget && IsAlive)
+                {
+                    Vector3 prev = transform.position;
+                    transform.position = Vector3.Lerp(prev, _clientTargetPos, Mathf.Clamp01(cdt * 12f));
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, _clientTargetYaw, 0f), Mathf.Clamp01(cdt * 12f));
+                    float estSpeed = cdt > 0.0001f ? (transform.position - prev).magnitude / cdt : 0f;
+                    DriveAnimatorLocomotion(estSpeed);
+                }
+                else if (!IsAlive)
+                {
+                    DriveAnimatorLocomotion(0f);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, _clientTargetYaw, 0f), Mathf.Clamp01(cdt * 8f));
+                }
+                return;
+            }
+
+            if (!IsAuthoritativeServer) return;
+
+            if (!IsAlive)
+            {
+                DriveAnimatorLocomotion(0f);
+                _deadHideTimer += Time.deltaTime;
+                return;
+            }
+
+            DriveAnimatorLocomotion(_agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f);
 
             float dt = Time.deltaTime;
             if (_attackCooldownTimer > 0f) _attackCooldownTimer -= dt;
@@ -527,6 +577,15 @@ namespace ScaryParty.Combat.Monsters
                 mpb.SetColor("_Color", targetColor);
                 eyeRenderers[i].SetPropertyBlock(mpb);
             }
+        }
+
+        private void DriveAnimatorLocomotion(float speed)
+        {
+            if (_animator == null) return;
+            _animator.SetFloat("Speed", speed);
+            _animator.SetFloat("MotionSpeed", speed > 0.1f ? 1f : 0f);
+            _animator.SetBool("Grounded", true);
+            _animator.SetBool("IsMoving", speed > 0.15f);
         }
     }
 }

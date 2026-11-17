@@ -33,11 +33,14 @@ namespace ScaryParty.Combat.Monsters
         }
 
         private readonly List<MonsterNpcController> _activeMonsters = new List<MonsterNpcController>();
+        private readonly Dictionary<ulong, MonsterNpcController> _clientProxies = new Dictionary<ulong, MonsterNpcController>();
+        private PizzeriaNetworkState _subscribedNetState;
         private int _spawnedForNight = -1;
         private ulong _nextMonsterId = 1;
         private float _syncTimer;
 
         public IReadOnlyList<MonsterNpcController> ActiveMonsters => _activeMonsters;
+        public IReadOnlyDictionary<ulong, MonsterNpcController> ClientProxies => _clientProxies;
 
         private void Awake()
         {
@@ -46,13 +49,21 @@ namespace ScaryParty.Combat.Monsters
 
         private void OnDestroy()
         {
+            UnsubscribeClientMonsters();
+            ClearAllClientProxies();
             if (Instance == this) Instance = null;
         }
 
         private void Update()
         {
             var root = PizzeriaRoot.Instance;
-            if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (root == null || root.DomainState == null) return;
+
+            if (!root.IsServer)
+            {
+                EnsureClientSubscribed();
+                return;
+            }
 
             var phase = root.DomainState.CurrentNightPhase;
             int night = root.DomainState.CurrentNightNumber;
@@ -91,6 +102,75 @@ namespace ScaryParty.Combat.Monsters
             if (ns != null && ns.Monsters != null && NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
             {
                 ns.Monsters.Clear();
+            }
+        }
+
+        public void ClearAllClientProxies()
+        {
+            foreach (var kvp in _clientProxies)
+            {
+                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+            }
+            _clientProxies.Clear();
+        }
+
+        private void EnsureClientSubscribed()
+        {
+            var ns = PizzeriaNetworkState.Instance;
+            if (ns == null || ns.Monsters == null) return;
+            if (_subscribedNetState == ns) return;
+
+            UnsubscribeClientMonsters();
+            _subscribedNetState = ns;
+            _subscribedNetState.Monsters.OnListChanged += OnClientMonstersListChanged;
+            SyncClientProxiesFromNetworkList();
+        }
+
+        private void UnsubscribeClientMonsters()
+        {
+            if (_subscribedNetState != null && _subscribedNetState.Monsters != null)
+            {
+                _subscribedNetState.Monsters.OnListChanged -= OnClientMonstersListChanged;
+            }
+            _subscribedNetState = null;
+        }
+
+        private void OnClientMonstersListChanged(NetworkListEvent<NetMonsterDto> changeEvent)
+        {
+            SyncClientProxiesFromNetworkList();
+        }
+
+        public void SyncClientProxiesFromNetworkList()
+        {
+            var ns = PizzeriaNetworkState.Instance;
+            if (ns == null || ns.Monsters == null) return;
+
+            var aliveIds = new HashSet<ulong>();
+            for (int i = 0; i < ns.Monsters.Count; i++)
+            {
+                var dto = ns.Monsters[i];
+                aliveIds.Add(dto.MonsterId);
+                if (_clientProxies.TryGetValue(dto.MonsterId, out var proxy) && proxy != null)
+                {
+                    proxy.ApplyReplicatedDto(dto);
+                }
+                else
+                {
+                    _clientProxies[dto.MonsterId] = SpawnMonsterClientProxy(dto);
+                }
+            }
+
+            var toRemove = new List<ulong>();
+            foreach (var kvp in _clientProxies)
+            {
+                if (kvp.Value == null || !aliveIds.Contains(kvp.Key))
+                    toRemove.Add(kvp.Key);
+            }
+            for (int i = 0; i < toRemove.Count; i++)
+            {
+                if (_clientProxies.TryGetValue(toRemove[i], out var p) && p != null)
+                    Destroy(p.gameObject);
+                _clientProxies.Remove(toRemove[i]);
             }
         }
 
@@ -165,31 +245,7 @@ namespace ScaryParty.Combat.Monsters
             capsule.height = 1.8f;
             capsule.radius = 0.38f;
 
-            var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            body.name = "BodyVisual";
-            Destroy(body.GetComponent<Collider>());
-            body.transform.SetParent(go.transform, false);
-            body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
-            body.transform.localScale = new Vector3(0.75f, 0.9f, 0.75f);
-            var bodyRend = body.GetComponent<Renderer>();
-            if (bodyRend != null && bodyRend.material != null)
-            {
-                bodyRend.material.color = species switch
-                {
-                    NpcSpecies.Vampire => new Color(0.25f, 0.08f, 0.14f),
-                    NpcSpecies.Werewolf => new Color(0.32f, 0.24f, 0.18f),
-                    NpcSpecies.Ghost => new Color(0.72f, 0.88f, 0.95f),
-                    NpcSpecies.Zombie => new Color(0.26f, 0.48f, 0.24f),
-                    _ => Color.gray
-                };
-            }
-
-            var eyeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            eyeObj.name = "Eyes";
-            Destroy(eyeObj.GetComponent<Collider>());
-            eyeObj.transform.SetParent(go.transform, false);
-            eyeObj.transform.localPosition = new Vector3(0f, 1.52f, 0.34f);
-            eyeObj.transform.localScale = new Vector3(0.42f, 0.10f, 0.12f);
+            BuildMonsterVisual(go, species, out var eyeRenderers);
 
             var agent = go.AddComponent<NavMeshAgent>();
             agent.speed = species == NpcSpecies.Werewolf ? 4.8f : (species == NpcSpecies.Zombie ? 2.4f : 3.6f);
@@ -200,9 +256,80 @@ namespace ScaryParty.Combat.Monsters
             var profile = root.SpeciesHostilityService != null
                 ? root.SpeciesHostilityService.GetProfile(species)
                 : new SpeciesCapabilityProfile { Species = species };
-            ctrl.ConfigureServer(monsterId, species, profile, perchedOnRooftop, new[] { eyeObj.GetComponent<Renderer>() });
+            ctrl.ConfigureServer(monsterId, species, profile, perchedOnRooftop, eyeRenderers);
             _activeMonsters.Add(ctrl);
             return ctrl;
+        }
+
+        private MonsterNpcController SpawnMonsterClientProxy(NetMonsterDto dto)
+        {
+            var species = (NpcSpecies)dto.Species;
+            var go = new GameObject($"MonsterProxy_{species}_{dto.MonsterId}");
+            go.transform.position = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+
+            var capsule = go.AddComponent<CapsuleCollider>();
+            capsule.center = new Vector3(0f, 0.9f, 0f);
+            capsule.height = 1.8f;
+            capsule.radius = 0.38f;
+
+            BuildMonsterVisual(go, species, out var eyeRenderers);
+
+            var ctrl = go.AddComponent<MonsterNpcController>();
+            ctrl.ConfigureClientProxy(dto.MonsterId, species, eyeRenderers, dto);
+            return ctrl;
+        }
+
+        private static void BuildMonsterVisual(GameObject go, NpcSpecies species, out Renderer[] eyeRenderers)
+        {
+            Color tint = species switch
+            {
+                NpcSpecies.Vampire => new Color(0.25f, 0.08f, 0.14f),
+                NpcSpecies.Werewolf => new Color(0.32f, 0.24f, 0.18f),
+                NpcSpecies.Ghost => new Color(0.72f, 0.88f, 0.95f),
+                NpcSpecies.Zombie => new Color(0.26f, 0.48f, 0.24f),
+                _ => Color.gray
+            };
+
+            GameObject visualPrefab = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
+            if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
+            if (visualPrefab != null)
+            {
+                var inst = Instantiate(visualPrefab, go.transform, false);
+                inst.name = "CharacterVisual";
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+                var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                if (smr != null)
+                {
+                    var mpb = new MaterialPropertyBlock();
+                    smr.GetPropertyBlock(mpb);
+                    mpb.SetColor("_Color", tint);
+                    mpb.SetColor("_BaseColor", tint);
+                    smr.SetPropertyBlock(mpb);
+                }
+            }
+            else
+            {
+                var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                body.name = "BodyVisual";
+                Destroy(body.GetComponent<Collider>());
+                body.transform.SetParent(go.transform, false);
+                body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+                body.transform.localScale = new Vector3(0.75f, 0.9f, 0.75f);
+                var bodyRend = body.GetComponent<Renderer>();
+                if (bodyRend != null && bodyRend.material != null)
+                {
+                    bodyRend.material.color = tint;
+                }
+            }
+
+            var eyeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            eyeObj.name = "Eyes";
+            Destroy(eyeObj.GetComponent<Collider>());
+            eyeObj.transform.SetParent(go.transform, false);
+            eyeObj.transform.localPosition = new Vector3(0f, 1.52f, 0.34f);
+            eyeObj.transform.localScale = new Vector3(0.42f, 0.10f, 0.12f);
+            eyeRenderers = new[] { eyeObj.GetComponent<Renderer>() };
         }
 
         private static Vector3 ResolveRooftopOrStreetSpawn(CityBuilding[] buildings, Vector3 pizzeriaPos, int salt, bool rooftop)

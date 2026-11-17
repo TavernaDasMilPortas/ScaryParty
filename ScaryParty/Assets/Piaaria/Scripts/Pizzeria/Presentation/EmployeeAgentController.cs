@@ -24,7 +24,13 @@ namespace ScaryParty.Pizzeria.Presentation
         public EmployeeRole Role { get; private set; }
 
         private NavMeshAgent _agent;
+        private Animator _animator;
         private readonly System.Random _fallbackRng = new System.Random();
+
+        private bool _isClientProxy;
+        private Vector3 _clientTargetPos;
+        private bool _hasClientTarget;
+        private bool _clientIsAlive = true;
 
         private float _hp = 100f;
         private int _activeTaskId = -1;
@@ -49,20 +55,69 @@ namespace ScaryParty.Pizzeria.Presentation
             PizzaioloPackageAndStage = 7
         }
 
-        public void Initialize(int employeeId, EmployeeRole role)
+        public void Initialize(int employeeId, EmployeeRole role, bool isClientProxy = false)
         {
             EmployeeId = employeeId;
             Role = role;
-            _agent = GetComponent<NavMeshAgent>();
-            if (_agent == null)
+            _isClientProxy = isClientProxy;
+            _animator = GetComponentInChildren<Animator>(true);
+            if (!isClientProxy)
             {
-                _agent = gameObject.AddComponent<NavMeshAgent>();
-                _agent.radius = 0.35f;
-                _agent.height = 1.75f;
-                _agent.speed = 3.6f;
-                _agent.angularSpeed = 540f;
-                _agent.stoppingDistance = 0.9f;
+                _agent = GetComponent<NavMeshAgent>();
+                if (_agent == null)
+                {
+                    _agent = gameObject.AddComponent<NavMeshAgent>();
+                    _agent.radius = 0.35f;
+                    _agent.height = 1.75f;
+                    _agent.speed = 3.6f;
+                    _agent.angularSpeed = 540f;
+                    _agent.stoppingDistance = 0.9f;
+                }
             }
+        }
+
+        public void ApplyReplicatedDto(NetEmployeeDto dto, bool snapImmediately = false)
+        {
+            _clientIsAlive = dto.IsAlive;
+            _clientTargetPos = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+            if (snapImmediately || !_hasClientTarget || (_clientTargetPos - transform.position).sqrMagnitude > 36f)
+            {
+                transform.position = _clientTargetPos;
+            }
+            _hasClientTarget = true;
+        }
+
+        private void Update()
+        {
+            if (!_isClientProxy || !_hasClientTarget) return;
+            float dt = Time.deltaTime;
+            if (!_clientIsAlive)
+            {
+                DriveAnimatorLocomotion(0f);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, transform.eulerAngles.y, 0f), Mathf.Clamp01(dt * 8f));
+                return;
+            }
+
+            Vector3 prev = transform.position;
+            Vector3 next = Vector3.Lerp(prev, _clientTargetPos, Mathf.Clamp01(dt * 12f));
+            Vector3 delta = next - prev;
+            delta.y = 0f;
+            transform.position = next;
+            if (delta.sqrMagnitude > 0.0001f)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(delta.normalized, Vector3.up), Mathf.Clamp01(dt * 12f));
+            }
+            float estSpeed = dt > 0.0001f ? delta.magnitude / dt : 0f;
+            DriveAnimatorLocomotion(estSpeed);
+        }
+
+        private void DriveAnimatorLocomotion(float speed)
+        {
+            if (_animator == null) return;
+            _animator.SetFloat("Speed", speed);
+            _animator.SetFloat("MotionSpeed", speed > 0.1f ? 1f : 0f);
+            _animator.SetBool("Grounded", true);
+            _animator.SetBool("IsMoving", speed > 0.15f);
         }
 
         public void TakeDamageServer(float damage)
@@ -91,11 +146,13 @@ namespace ScaryParty.Pizzeria.Presentation
             if (!emp.IsAlive)
             {
                 if (_agent != null && _agent.enabled) _agent.isStopped = true;
+                DriveAnimatorLocomotion(0f);
                 return;
             }
 
             if (_hp <= 0f) _hp = 100f;
             if (_agent != null && _agent.enabled && _agent.isStopped) _agent.isStopped = false;
+            DriveAnimatorLocomotion(_agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f);
 
             if (root.DomainState.CurrentNightPhase != NightPhase.Active)
             {
@@ -667,6 +724,7 @@ namespace ScaryParty.Pizzeria.Presentation
     public static class EmployeePopulationDirector
     {
         private static readonly Dictionary<int, EmployeeAgentController> _spawned = new Dictionary<int, EmployeeAgentController>();
+        private static readonly Dictionary<int, EmployeeAgentController> _clientProxies = new Dictionary<int, EmployeeAgentController>();
 
         public static void TickAndProjectServer(PizzeriaRoot root, PizzeriaNetworkState netState, float dt)
         {
@@ -755,6 +813,50 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (kvp.Value != null) UnityEngine.Object.Destroy(kvp.Value.gameObject);
             }
             _spawned.Clear();
+            foreach (var kvp in _clientProxies)
+            {
+                if (kvp.Value != null) UnityEngine.Object.Destroy(kvp.Value.gameObject);
+            }
+            _clientProxies.Clear();
+
+            var ns = PizzeriaNetworkState.Instance;
+            if (ns != null && ns.Employees != null && Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                ns.Employees.Clear();
+            }
+        }
+
+        public static void TickClientProxies(PizzeriaNetworkState netState)
+        {
+            if (netState == null || netState.Employees == null) return;
+
+            var aliveIds = new HashSet<int>();
+            for (int i = 0; i < netState.Employees.Count; i++)
+            {
+                var dto = netState.Employees[i];
+                aliveIds.Add(dto.EmployeeId);
+                if (_clientProxies.TryGetValue(dto.EmployeeId, out var proxy) && proxy != null)
+                {
+                    proxy.ApplyReplicatedDto(dto);
+                }
+                else
+                {
+                    _clientProxies[dto.EmployeeId] = SpawnEmployeeClientProxy(dto);
+                }
+            }
+
+            var toRemove = new List<int>();
+            foreach (var kvp in _clientProxies)
+            {
+                if (kvp.Value == null || !aliveIds.Contains(kvp.Key))
+                    toRemove.Add(kvp.Key);
+            }
+            for (int i = 0; i < toRemove.Count; i++)
+            {
+                if (_clientProxies.TryGetValue(toRemove[i], out var p) && p != null)
+                    UnityEngine.Object.Destroy(p.gameObject);
+                _clientProxies.Remove(toRemove[i]);
+            }
         }
 
         private static void SyncOrderTasksFromDomain(PizzeriaRoot root)
@@ -792,20 +894,65 @@ namespace ScaryParty.Pizzeria.Presentation
                 spawnPos = hit.position;
             }
 
-            var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            go.name = $"Employee_{emp.Role}_{emp.EmployeeId}";
+            var go = new GameObject($"Employee_{emp.Role}_{emp.EmployeeId}");
             go.transform.position = spawnPos;
-            var renderer = go.GetComponent<Renderer>();
-            if (renderer != null && renderer.material != null)
-            {
-                renderer.material.color = emp.Role == EmployeeRole.Cashier
-                    ? new Color(0.20f, 0.55f, 0.85f)
-                    : new Color(0.92f, 0.90f, 0.82f);
-            }
+            BuildEmployeeVisual(go, emp.Role);
 
             var ctrl = go.AddComponent<EmployeeAgentController>();
-            ctrl.Initialize(emp.EmployeeId, emp.Role);
+            ctrl.Initialize(emp.EmployeeId, emp.Role, isClientProxy: false);
             return ctrl;
+        }
+
+        private static EmployeeAgentController SpawnEmployeeClientProxy(NetEmployeeDto dto)
+        {
+            var role = (EmployeeRole)dto.Role;
+            var go = new GameObject($"EmployeeProxy_{role}_{dto.EmployeeId}");
+            go.transform.position = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+            BuildEmployeeVisual(go, role);
+
+            var ctrl = go.AddComponent<EmployeeAgentController>();
+            ctrl.Initialize(dto.EmployeeId, role, isClientProxy: true);
+            ctrl.ApplyReplicatedDto(dto, snapImmediately: true);
+            return ctrl;
+        }
+
+        private static void BuildEmployeeVisual(GameObject go, EmployeeRole role)
+        {
+            Color tint = role == EmployeeRole.Cashier
+                ? new Color(0.20f, 0.55f, 0.85f)
+                : new Color(0.92f, 0.90f, 0.82f);
+
+            GameObject visualPrefab = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
+            if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
+            if (visualPrefab != null)
+            {
+                var inst = UnityEngine.Object.Instantiate(visualPrefab, go.transform, false);
+                inst.name = "CharacterVisual";
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+                var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                if (smr != null)
+                {
+                    var mpb = new MaterialPropertyBlock();
+                    smr.GetPropertyBlock(mpb);
+                    mpb.SetColor("_Color", tint);
+                    mpb.SetColor("_BaseColor", tint);
+                    smr.SetPropertyBlock(mpb);
+                }
+            }
+            else
+            {
+                var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                cap.name = "BodyVisual";
+                UnityEngine.Object.Destroy(cap.GetComponent<Collider>());
+                cap.transform.SetParent(go.transform, false);
+                cap.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+                var renderer = cap.GetComponent<Renderer>();
+                if (renderer != null && renderer.material != null)
+                {
+                    renderer.material.color = tint;
+                }
+            }
         }
     }
 }
