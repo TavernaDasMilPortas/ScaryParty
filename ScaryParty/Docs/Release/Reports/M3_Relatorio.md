@@ -1,57 +1,37 @@
-# M3 — Relatório de execução
+# Relatório M3 — Mãos, Armas, Bandoleira e Moto
 
-Status: NÃO INICIADA
+**Status:** IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE  
+**Data:** 2026-11-16  
+**Branch / Commit M3 (código):** `release/marcos-noturnos` @ `557632c6`
 
-Este arquivo é um modelo. Nenhuma implementação ou teste foi realizado por sua criação.
+---
 
-## Contexto
+## 1. Implementação Realizada
 
-- Data/hora:
-- Branch / SHA inicial / SHA final:
-- Raiz Unity / cena / prefab / preset / seed:
-- Alterações locais preexistentes preservadas:
-- Dependências e pendências herdadas:
+1. **IDs de Instância de Armas e Bandoleira (`NetDtos.cs`, `PizzeriaNetworkState.cs`, `PizzeriaCommandHandler.cs`):**
+   - `NetWeaponStateDto` agora possui `WeaponId` (`uint`) e `IsSlinged` (`bool`).
+   - `_lastWeaponFireServerTime` em `PizzeriaCommandHandler` agora é indexado por `WeaponId` (**A08**).
+   - `ToggleSlingShotgunServerRpc` (tecla `[G]` em `WeaponController`) guarda a Escopeta na bandoleira (`IsSlinged = true`), liberando ambas as mãos sem devolvê-la ao rack nem repor munição, e realiza o saque como transação atômica (exige não estar pilotando e ambas as mãos livres).
+2. **Reserva Unificada de Mãos: Moto + Pistola (`PizzeriaNetworkState.cs`, `PizzeriaCommandHandler.cs`, `WeaponController.cs`, `PlayerInventoryAdapter.cs`):**
+   - Moto reserva a mão esquerda (`HandSlotIndex.Left`) em `PizzeriaNetworkState.IsHandOccupiedByWeapon` e `MountMotorcycleServerRpc` (**A02 / A03**).
+   - Pistola (mão direita) pode ser usada, mirada e disparada durante a condução; Escopeta ativa continua exigindo 2 mãos e sendo recusada na moto.
+3. **Mira ADS em 1ª Pessoa e Obstrução de Cano (`FirstPersonCameraController.cs`, `WeaponController.cs`, `PizzeriaCommandHandler.cs`):**
+   - `FirstPersonCameraController.SetAimState(bool)` interpola suavemente `RightHandAnchor` (`adsRightHandOffset`) e `fieldOfView` (`adsFovDelta = -12`).
+   - `FireWeaponServerRpc` verifica obstrução física entre o peito do atirador e `rayOrigin` para impedir disparo através de parede colada à arma (`T32`).
+4. **Atropelamento Idempotente (`DeliveryMotorcycleController.cs`, `PizzeriaCommandHandler.cs`):**
+   - `OnTriggerEnter` emite `ReportMotorcycleImpactServerRpc` no máximo uma vez por `Revision` de montaria quando `|_localSpeed| >= 3.5f`.
+   - Servidor deduplica por `(st.Revision, impactEpisodeId)`, aplica dano único ao alvo `IDamageable` (`motorcycleHitDamage = 40`), desmonta o condutor para posição lateral segura (`motorcycleRiderFallDamage = 0` por padrão) e libera a mão de direção.
 
-## Tarefas
+---
 
-| Tarefa | Estado | Arquivos/evidência | Pendência |
-|---|---|---|---|
-| Preencher durante execução | Não iniciada | — | — |
+## 2. Cortes/Pendências Registrados (Roadmap M3)
 
-## Achados
+- **Itens 8–10 (Authoring visual no Editor / Animator 3ª pessoa):** Transições de `IsAiming` / `WeaponMode` em `CharacterAnimator.controller` e preview de bones head/tail no wizard dependem de authoring direto no Unity Editor.
+- **Item 11 (Rifle automático e Granada):** Mantidos no backlog pós-entrega base conforme permitido no roadmap.
 
-| ID | Prioridade | Confirmado ou hipótese | Reprodução e resultado | Causa/evidência | Correção ou marco dono |
-|---|---|---|---|---|---|
+---
 
-## Alterações e configuração
+## 3. Validação Pendente no Unity Editor
 
-Descrever comportamento antes/depois, referências de assets e parâmetros expostos.
-
-## Verificações executadas
-
-| Teste | Ambiente host/cliente | SHA/preset | Resultado | Evidência |
-|---|---|---|---|---|
-
-## Testes não executados e roteiro manual
-
-Pré-condições, ações numeradas, esperado e como registrar resultado. Não preencher como aprovado por inferência.
-
-## Riscos e decisões
-
-Separar decisões confirmadas, propostas configuráveis e limitações.
-
-## Checkpoint para retomar
-
-- Última tarefa concluída:
-- Tarefa em andamento:
-- Arquivos tocados:
-- Próxima ação exata:
-- Não repetir:
-- Bloqueios:
-
-## Aceite
-
-- Implementação: pendente.
-- Validação jogável: pendente.
-- P0/P1 restantes:
-- Próxima fase: não iniciada.
+- `git diff --check`: **PASSOU**.
+- Testar manualmente em PlayMode (Host + Cliente ParrelSync): `T12`, `T29–T42` (moto + pistola no cliente, bandoleira `[G]`, mira ADS, atropelamento idempotente).

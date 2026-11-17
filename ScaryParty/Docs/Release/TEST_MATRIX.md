@@ -38,11 +38,11 @@ Estados: NÃO EXECUTADO / PASSOU / FALHOU / BLOQUEADO / LACUNA — Mx. Para cada
 | T30 | Dez cliques válidos, pente vazio, recarga e troca rápida | Munição e cadência coerentes; nenhuma recarga duplicada | NÃO EXECUTADO | — |
 | T31 | Mirar, abrir mapa/menu, soltar botão e fechar | Sem tiro residual; mira/cursor/câmera voltam ao estado correto | NÃO EXECUTADO | — |
 | T32 | Mirar e atirar perto de parede e em alvo remoto | Impacto coerente; não disparar através de obstáculo junto à arma | NÃO EXECUTADO | — |
-| T33 | Dois jogadores usam duas pistolas distintas | Cooldowns e munições independentes por instância | LACUNA — M3 | [M1_Relatorio](Reports/M1_Relatorio.md) (A08: cooldown por WeaponType) |
-| T34 | Montar moto com uma mão livre e pistola na outra | Dirige, mira e atira; servidor aceita composição | LACUNA — M3 | [M1_Relatorio](Reports/M1_Relatorio.md) (A02/A03: bloqueio total de mãos/direção) |
+| T33 | Dois jogadores usam duas pistolas distintas | Cooldowns e munições independentes por instância | NÃO EXECUTADO | [M3_Relatorio](Reports/M3_Relatorio.md) (WeaponId implementado) |
+| T34 | Montar moto com uma mão livre e pistola na outra | Dirige, mira e atira; servidor aceita composição | NÃO EXECUTADO | [M3_Relatorio](Reports/M3_Relatorio.md) (A02/A03 implementados) |
 | T35 | Tentar montar com arma de duas mãos em uso | Recusa clara; nenhuma mão ou arma perdida | NÃO EXECUTADO | — |
-| T36 | Guardar espingarda, cozinhar e sacar com ambas livres | Bandoleira libera mãos; saque reserva duas atomicamente | LACUNA — M3 | [M1_Relatorio](Reports/M1_Relatorio.md) (bandoleira ausente) |
-| T37 | Tentar sacar espingarda pilotando ou com item numa mão | Recusa mantém estado anterior | LACUNA — M3 | [M1_Relatorio](Reports/M1_Relatorio.md) (bandoleira ausente) |
+| T36 | Guardar espingarda, cozinhar e sacar com ambas livres | Bandoleira libera mãos; saque reserva duas atomicamente | NÃO EXECUTADO | [M3_Relatorio](Reports/M3_Relatorio.md) (bandoleira [G] implementada) |
+| T37 | Tentar sacar espingarda pilotando ou com item numa mão | Recusa mantém estado anterior | NÃO EXECUTADO | [M3_Relatorio](Reports/M3_Relatorio.md) (bandoleira [G] implementada) |
 | T38 | Atropelar NPC com múltiplos colliders | Um dano e uma queda; não repetir ao permanecer encostado | NÃO EXECUTADO | — |
 | T39 | Repetir atropelamento como cliente remoto | Mesma decisão no servidor; câmera/posição corrigidas | NÃO EXECUTADO | — |
 | T40 | Cair ao lado de parede, morrer pilotando e desconectar pilotando | Saída válida, moto liberada, mãos e controles restaurados | NÃO EXECUTADO | — |
