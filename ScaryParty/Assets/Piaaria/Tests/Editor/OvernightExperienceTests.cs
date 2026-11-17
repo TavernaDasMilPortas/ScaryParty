@@ -275,5 +275,28 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.AreEqual(150, state.RestaurantBudget);
             Assert.AreEqual(50, state.RunTotalRevenue);
         }
+
+        [Test]
+        public void SpeciesHostilityAndZombieConversion_EnforceCatalogOffenseCapResetAndIdempotency()
+        {
+            var hostility = new SpeciesHostilityService { MaxHostilityLevel = 100, PersistAcrossNights = false };
+            Assert.IsTrue(hostility.TryRegisterIngredientOffense(NpcSpecies.Vampire, 10)); // Alho
+            Assert.IsFalse(hostility.TryRegisterIngredientOffense(NpcSpecies.Werewolf, 10));
+            Assert.AreEqual(35, hostility.GetHostility(NpcSpecies.Vampire));
+
+            hostility.RegisterOffense(NpcSpecies.Vampire, 200);
+            Assert.AreEqual(100, hostility.GetHostility(NpcSpecies.Vampire));
+
+            hostility.OnNightEnded();
+            Assert.AreEqual(0, hostility.GetHostility(NpcSpecies.Vampire));
+
+            var zombie = new ZombieConversionService { MaxInfectedCap = 2, ConversionChance = 1f, ConversionCooldownSeconds = 1.0 };
+            var rng = new System.Random(42);
+            Assert.IsTrue(zombie.TryConvertTarget(101UL, 0, 10.0, rng));
+            Assert.IsFalse(zombie.TryConvertTarget(101UL, 1, 15.0, rng)); // Idempotente: não converte 2x
+            Assert.IsFalse(zombie.TryConvertTarget(102UL, 1, 10.5, rng)); // Cooldown
+            Assert.IsTrue(zombie.TryConvertTarget(102UL, 1, 12.0, rng));
+            Assert.IsFalse(zombie.TryConvertTarget(103UL, 2, 20.0, rng)); // Teto atingido
+        }
     }
 }
