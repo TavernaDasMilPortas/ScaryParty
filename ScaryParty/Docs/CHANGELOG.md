@@ -5,6 +5,13 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-16] — Marcos M2–M8 na branch `release/marcos-noturnos`
+- **Escopo:** `City/{TrafficVehicle,TrafficManager,CityGenerator}.cs`, `City/Editor/CityGraphPathfinderTests.cs`, `Weapons/{WeaponBase,WeaponController,WeaponInputHandler}.cs`, `Player/FirstPersonCameraController.cs`, `City/DeliveryMotorcycleController.cs`, `Pizzeria/Player/PlayerInventoryAdapter.cs`, `Pizzeria/Domain/Services/{NightCycleService,SpeciesHostilityService,RunProgressionService,EmployeeTaskService}.cs`, `Combat/Monsters/MonsterNpcController.cs`, `Pizzeria/Network/{NetDtos,PizzeriaNetworkState,PizzeriaCommandHandler}.cs`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Release/*`.
+- **Resumo:** Implementados em blocos sequenciais com commits locais: M2 (relay de tráfego no `CityGenerator`, sensores A11, colisão e overlay `F7`), M3 (bandoleira `[G]`, moto 1 mão + pistola, ADS 1P, `WeaponId` A08 e atropelamento idempotente), M4 (fechamento no relógio A06, reputação `0..100`, resgate aliado/espectador A04, preservação de munição A10 e suprimentos), M5 (`MonsterNpcController`, `SpeciesHostilityService` e `ZombieConversionService`), M6 (`RunProgressionService` com N noites, votos, modificadores, loja atômica e RNG separado), M7 (`EmployeeTaskService` com reservas exclusivas `T58` e erro por habilidade) e consolidação M8.
+- **Validação:** `git diff --check` limpo em cada etapa; Test Runner EditMode e bateria PlayMode/ParrelSync pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-16] — Marco M1: Auditoria de Base, A01/A07/A09 e Matriz de Testes
 - **Escopo:** `WeaponBase.cs`, `WeaponController.cs`, `WeaponInputHandler.cs`, `CustomerNpcView.cs`, `PizzeriaState.cs`, `PizzeriaRoot.cs`, `NightCycleService.cs`, `PlayerLifecycleBridge.cs`, `OvernightExperienceTests.cs`, `Docs/Release/{STATUS.md,TEST_MATRIX.md,Reports/M1_Relatorio.md}`, `Docs/{CURRENT_STATE.md,CHANGELOG.md}`.
 - **Auditoria e Diagnósticos:**

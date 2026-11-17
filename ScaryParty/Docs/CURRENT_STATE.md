@@ -2,8 +2,8 @@
 
 **Última Revisão:** 16/11/2026
 **Versão Unity:** Unity 6000.3.6f1
-**Branch Atual:** `main`
-**Commit Base:** `a7cc598b` (auditoria M1 sobre `main`)
+**Branch Atual:** `release/marcos-noturnos`
+**Commit Base:** `a7cc598b` (marcos M1–M8 implementados em `release/marcos-noturnos`)
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
