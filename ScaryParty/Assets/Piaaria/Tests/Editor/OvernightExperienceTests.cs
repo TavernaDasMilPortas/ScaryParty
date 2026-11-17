@@ -391,5 +391,44 @@ namespace ScaryParty.Pizzeria.Tests
             service.ResetForNewRun();
             Assert.AreEqual(0, service.Employees.Count);
         }
+
+        [Test]
+        public void R1_LifeStateCleanupReleasesAttendedCustomersClaimedOrdersAndBackpack()
+        {
+            var state = new PizzeriaState();
+            var catalog = new DefinitionCatalog();
+            var clock = new FixedClock(100.0);
+            var customerService = new CustomerService(new QueueService(), new TableService());
+            var orderService = new OrderService();
+
+            var cRes = customerService.SpawnWalkInCustomer(state, catalog, clock, rng: new System.Random(1));
+            Assert.IsTrue(cRes.Success);
+            var cust = state.Customers[cRes.Value];
+            cust.AttendedByPlayerId = 7UL;
+
+            var oRes = orderService.CreatePhoneOrder(new AddressId(1), new[] { (1, 1) }, state, catalog, clock, 6);
+            Assert.IsTrue(oRes.Success);
+            state.Orders[oRes.Value].ClaimedByClientId = 7UL;
+
+            var bpId = state.GenerateBackpackId();
+            Assert.IsTrue(BackpackService.Register(state, bpId, 6, new DomainVector3(0f, 0f, 0f), new DomainQuaternion(0f, 0f, 0f, 1f)).Success);
+            Assert.IsTrue(BackpackService.Equip(state, bpId, 7UL).Success);
+            var bp = state.Backpacks[bpId];
+
+            customerService.ReleaseCustomersAttendedByPlayer(state, 7UL);
+            orderService.ReleaseOrdersClaimedByPlayer(state, 7UL);
+            BackpackService.ReleaseOnDisconnect(state, 7UL, new DomainVector3(2, 0, 3));
+
+            Assert.AreEqual(0UL, cust.AttendedByPlayerId);
+            Assert.AreEqual(OrderState.UnclaimedClientId, state.Orders[oRes.Value].ClaimedByClientId);
+            Assert.IsFalse(bp.IsEquipped);
+            Assert.AreEqual(BackpackState.NoOwner, bp.EquippedBy);
+        }
+    }
+
+    internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock
+    {
+        public FixedClock(double now) => Now = now;
+        public double Now { get; set; }
     }
 }

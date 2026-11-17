@@ -160,15 +160,15 @@ public class WeaponController : MonoBehaviour
         bool isLocalOwner = _netObj != null ? _netObj.IsOwner : (tpc != null && tpc.IsOwner);
         if (!isLocalOwner) return;
 
-        bool incapacitated = _health != null && _health.IsIncapacitated;
-        bool controlsAllowed = currentMode != WeaponMode.Unarmed && !incapacitated && (!LocalDrivingMotorcycle || currentMode == WeaponMode.Pistol);
+        bool lifeBlocked = _health != null && (_health.IsIncapacitated || _health.IsDead);
+        bool controlsAllowed = currentMode != WeaponMode.Unarmed && !lifeBlocked && (!LocalDrivingMotorcycle || currentMode == WeaponMode.Pistol);
         if (_inputHandler != null && _inputHandler.enableWeaponControls != controlsAllowed)
         {
             _inputHandler.enableWeaponControls = controlsAllowed;
             if (!controlsAllowed) StopAim();
         }
 
-        if (!incapacitated && !GameplayInputGate.IsLocked && IsSlingPressed())
+        if (!lifeBlocked && !GameplayInputGate.IsLocked && IsSlingPressed())
         {
             PizzeriaCommandHandler.Instance?.ToggleSlingShotgunServerRpc();
         }
@@ -309,7 +309,7 @@ public class WeaponController : MonoBehaviour
         if (_inputHandler != null && !_inputHandler.enableWeaponControls) return;
         if (_isReloading || (LocalDrivingMotorcycle && currentMode != WeaponMode.Pistol)) return;
         if (currentMode == WeaponMode.Unarmed || currentWeaponInstance == null) return;
-        if (_health != null && _health.IsIncapacitated) return;
+        if (_health != null && (_health.IsIncapacitated || _health.IsDead)) return;
 
         if (Time.time < lastFireTime + currentWeaponInstance.fireRate) return;
 

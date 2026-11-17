@@ -106,6 +106,8 @@ namespace ScaryParty.Pizzeria.Network
 
             if (IsServer)
             {
+                ReleaseAssistSessionsForClientServer(clientId);
+
                 var net = PizzeriaNetworkState.Instance;
                 if (net != null && net.MotorcycleState.Value.IsMounted && net.MotorcycleState.Value.RiderClientId == clientId)
                 {
@@ -123,6 +125,7 @@ namespace ScaryParty.Pizzeria.Network
         public void RequestOpenStorageSessionServerRpc(int stationId, ServerRpcParams rpcParams = default)
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
+            if (RejectIfCannotActServer(senderClientId)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_storageSessions.TryGetValue(stationId, out var existing) && existing.ClientId != senderClientId && Time.time < existing.Expiry)
@@ -203,6 +206,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
 
             var targetHand = (HandSlotIndex)hand;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
@@ -243,6 +247,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             var itemId = new ItemId(itemIdVal);
             if (!root.DomainState.Items.TryGetValue(itemId, out var sourceItem))
@@ -315,6 +320,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             var toolId = new ToolItemId(toolIdVal);
             if (root.DomainState.Tools.TryGetValue(toolId, out var toolState) &&
@@ -454,6 +460,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
+            if (RejectIfCannotActServer(senderClientId)) return;
             Debug.Log($"[Server] StartWorkAtomicServerRpc recebido: stationId={stationId}, slotIndex={slotIndex}, processId={processId}, hand={activeHand}, client={senderClientId}");
             if (root == null || root.DomainState == null || slotIndex < 0)
             {
@@ -609,6 +616,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
 
             Debug.Log($"[Server] AddIngredientToPizzaServerRpc recebido: pizzaId={pizzaIdVal}, ingredientId={ingredientIdVal}, client={senderClientId}");
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
@@ -658,6 +666,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_activeOvenTransfers.ContainsKey(stationId))
@@ -721,6 +730,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
             if (_activeOvenTransfers.ContainsKey(stationId))
@@ -824,6 +834,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             var pizzaId = new ItemId(pizzaIdVal);
             if (!root.DomainState.Items.TryGetValue(pizzaId, out var pizza))
@@ -893,6 +904,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             if (chosenDestinationId <= 0)
             {
@@ -955,6 +967,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             if (!IsStationWithinReach(senderId, phoneStationId, out string reachError))
             {
@@ -1020,6 +1033,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
 
             ulong serverAttemptId = ((ulong)root.DomainState.Revision << 20)
                 ^ ((ulong)(uint)destinationId << 8)
@@ -1045,6 +1059,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null || root.PlayerHoldService == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
 
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             float holdDur = root.Config != null && root.Config.customerAttendHoldDuration > 0.1f
@@ -1101,6 +1116,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null || root.CustomerService == null) return;
+            if (RejectIfCannotActServer(senderClientId)) return;
 
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
             var res = root.CustomerService.ServeTableUnboxedPizza(
@@ -1166,6 +1182,7 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderId } } };
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             var res = NightCycleService.ToggleOrderClaim(root.DomainState, new OrderId(orderIdVal), senderId);
             if (!res.Success)
@@ -1334,6 +1351,12 @@ namespace ScaryParty.Pizzeria.Network
         // Combate, Armas no Rack (1P/2P) e Mochila Danificável
         // ============================================================
 
+        private const float AssistDurationSeconds = 3.0f;
+        private const float AssistHeartbeatTimeoutSeconds = 0.65f;
+        private const float AssistMaxDistance = 2.85f;
+        private const int AllyHealAmount = 25;
+        private const double AllyHealCooldownSeconds = 6.0;
+
         private sealed class PlayerCombatRuntime
         {
             public int CurrentHp = 100;
@@ -1342,8 +1365,39 @@ namespace ScaryParty.Pizzeria.Network
             public bool IsDead;
             public float RescueRemaining;
             public float RescueProgress;
+            public byte RescueMode; // 0 = None, 1 = HealWounded, 2 = ReviveIncapacitated
             public ulong RescuedByClientId;
+            public double AssistHeartbeatTime = -999.0;
+            public double NextHealAllowedTime = -999.0;
+            public ulong SpectatingTargetClientId;
             public uint Revision = 1;
+        }
+
+        public bool CanPlayerPerformGameplayActionServer(ulong clientId, out string reason)
+        {
+            if (_playerCombat.TryGetValue(clientId, out var combat))
+            {
+                if (combat.IsDead)
+                {
+                    reason = "Você morreu nesta noite e está em modo espectador.";
+                    return false;
+                }
+                if (combat.IsIncapacitated)
+                {
+                    reason = "Você está nocauteado! Aguarde um aliado segurar [E] (3s).";
+                    return false;
+                }
+            }
+            reason = null;
+            return true;
+        }
+
+        private bool RejectIfCannotActServer(ulong clientId)
+        {
+            if (CanPlayerPerformGameplayActionServer(clientId, out string reason))
+                return false;
+            NotifyErrorClientRpc(reason, TargetSender(clientId));
+            return true;
         }
 
         private readonly Dictionary<ulong, double> _customerAttackRepCooldown = new Dictionary<ulong, double>();
@@ -1446,16 +1500,35 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (!IsServer) return;
 
+            var root = PizzeriaRoot.Instance;
+            var clientsToRespawn = new List<ulong>();
             foreach (var kvp in _playerCombat)
             {
+                bool wasDeadOrDown = kvp.Value.IsDead || kvp.Value.IsIncapacitated;
                 kvp.Value.CurrentHp = kvp.Value.MaxHp;
                 kvp.Value.IsIncapacitated = false;
                 kvp.Value.IsDead = false;
                 kvp.Value.RescueRemaining = 0f;
                 kvp.Value.RescueProgress = 0f;
+                kvp.Value.RescueMode = 0;
+                kvp.Value.RescuedByClientId = 0;
+                kvp.Value.AssistHeartbeatTime = -999.0;
+                kvp.Value.NextHealAllowedTime = -999.0;
+                kvp.Value.SpectatingTargetClientId = 0;
                 kvp.Value.Revision++;
+                if (wasDeadOrDown)
+                    clientsToRespawn.Add(kvp.Key);
             }
             SyncPlayerCombatListServer();
+
+            if (root != null)
+            {
+                for (int i = 0; i < clientsToRespawn.Count; i++)
+                {
+                    ulong cid = clientsToRespawn[i];
+                    TeleportRiderSafelyServer(cid, root.GetPlayerSpawnPosition((int)cid), root.GetPlayerSpawnRotation((int)cid));
+                }
+            }
 
             // A10: nunca repor munição gratuitamente entre noites; resetar armas apenas ao iniciar nova RUN
             if (resetWeaponsAndAmmo)
@@ -1507,39 +1580,219 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (_playerCombat.Count == 0) return;
             var root = PizzeriaRoot.Instance;
+            var net = PizzeriaNetworkState.Instance;
+            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
             bool enableAllPlayersDeadDefeat = ResolveAllPlayersDeadDefeatPolicy(root);
             bool changed = false;
 
+            var bleedoutExpired = new List<ulong>();
             foreach (var kvp in _playerCombat)
             {
+                ulong targetId = kvp.Key;
                 var c = kvp.Value;
-                if (!c.IsIncapacitated || c.IsDead) continue;
 
-                c.RescueRemaining = Mathf.Max(0f, c.RescueRemaining - dt);
-                changed = true;
-                if (c.RescueRemaining <= 0f)
+                if (c.IsDead)
                 {
-                    // A04: sem auto-resgate; sangramento leva a morte/espectador até a próxima noite vencida
-                    c.IsIncapacitated = false;
-                    c.IsDead = true;
-                    c.RescueRemaining = 0f;
-                    c.RescueProgress = 0f;
-                    c.Revision++;
-
-                    var targetParams = TargetSender(kvp.Key);
-                    NotifyErrorClientRpc("Você morreu! Aguarde a equipe vencer a noite em modo espectador.", targetParams);
-
-                    if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
+                    ulong validSpec = ResolveValidSpectatorTargetServer(targetId, c.SpectatingTargetClientId, 0);
+                    if (validSpec != c.SpectatingTargetClientId)
                     {
-                        NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
-                        CommitAndReplicate();
+                        c.SpectatingTargetClientId = validSpec;
+                        c.Revision++;
+                        changed = true;
+                    }
+                    continue;
+                }
+
+                // 1. Sangramento quando nocauteado
+                if (c.IsIncapacitated)
+                {
+                    c.RescueRemaining = Mathf.Max(0f, c.RescueRemaining - dt);
+                    changed = true;
+                    if (c.RescueRemaining <= 0f)
+                    {
+                        bleedoutExpired.Add(targetId);
+                        continue;
                     }
                 }
+
+                // 2. Progresso autoritativo no servidor de cura/reanimação por [E]
+                if (c.RescueMode != 0)
+                {
+                    bool modeValid = (c.RescueMode == 2 && c.IsIncapacitated) ||
+                                     (c.RescueMode == 1 && !c.IsIncapacitated && c.CurrentHp > 0 && c.CurrentHp < c.MaxHp);
+                    bool helperValid = _playerCombat.TryGetValue(c.RescuedByClientId, out var helper) &&
+                                       !helper.IsIncapacitated && !helper.IsDead &&
+                                       (net == null || !net.MotorcycleState.Value.IsMounted || net.MotorcycleState.Value.RiderClientId != c.RescuedByClientId);
+                    bool heartbeatFresh = (now - c.AssistHeartbeatTime) <= AssistHeartbeatTimeoutSeconds;
+                    bool inRange = IsClientsWithinDistanceServer(c.RescuedByClientId, targetId, AssistMaxDistance);
+
+                    if (!modeValid || !helperValid || !heartbeatFresh || !inRange)
+                    {
+                        c.RescueMode = 0;
+                        c.RescueProgress = 0f;
+                        c.RescuedByClientId = 0;
+                        c.Revision++;
+                        changed = true;
+                        continue;
+                    }
+
+                    c.RescueProgress = Mathf.Clamp01(c.RescueProgress + dt / AssistDurationSeconds);
+                    c.Revision++;
+                    changed = true;
+
+                    if (c.RescueProgress >= 1.0f)
+                    {
+                        ulong helperId = c.RescuedByClientId;
+                        byte completedMode = c.RescueMode;
+                        c.RescueMode = 0;
+                        c.RescueProgress = 0f;
+                        c.RescuedByClientId = 0;
+
+                        if (completedMode == 2)
+                        {
+                            c.IsIncapacitated = false;
+                            c.CurrentHp = Mathf.Max(35, c.MaxHp / 2);
+                            c.RescueRemaining = 0f;
+                            NotifySuccessClientRpc($"Reanimado por aliado ({c.CurrentHp} HP)!", TargetSender(targetId));
+                            NotifySuccessClientRpc($"Você reanimou o aliado #{targetId}!", TargetSender(helperId));
+                        }
+                        else
+                        {
+                            c.CurrentHp = Mathf.Min(c.MaxHp, c.CurrentHp + AllyHealAmount);
+                            c.NextHealAllowedTime = now + AllyHealCooldownSeconds;
+                            NotifySuccessClientRpc($"Curado por aliado (+{AllyHealAmount} HP -> {c.CurrentHp}/{c.MaxHp})!", TargetSender(targetId));
+                            NotifySuccessClientRpc($"Aliado #{targetId} curado ({c.CurrentHp}/{c.MaxHp} HP)!", TargetSender(helperId));
+                        }
+                        c.Revision++;
+                    }
+                }
+            }
+
+            for (int i = 0; i < bleedoutExpired.Count; i++)
+            {
+                HandlePlayerTransitionToDeadServer(bleedoutExpired[i], enableAllPlayersDeadDefeat);
+                changed = true;
             }
 
             if (changed)
             {
                 SyncPlayerCombatListServer();
+            }
+        }
+
+        private bool IsClientsWithinDistanceServer(ulong clientA, ulong clientB, float maxDistance)
+        {
+            var nm = NetworkManager.Singleton;
+            if (nm == null) return false;
+            if (!nm.ConnectedClients.TryGetValue(clientA, out var a) || a.PlayerObject == null) return false;
+            if (!nm.ConnectedClients.TryGetValue(clientB, out var b) || b.PlayerObject == null) return false;
+            return (a.PlayerObject.transform.position - b.PlayerObject.transform.position).sqrMagnitude <= maxDistance * maxDistance;
+        }
+
+        private void ReleaseAssistSessionsForClientServer(ulong clientId)
+        {
+            bool changed = false;
+            foreach (var kvp in _playerCombat)
+            {
+                if ((kvp.Key == clientId || kvp.Value.RescuedByClientId == clientId) &&
+                    (kvp.Value.RescueMode != 0 || kvp.Value.RescueProgress > 0f))
+                {
+                    kvp.Value.RescueMode = 0;
+                    kvp.Value.RescueProgress = 0f;
+                    kvp.Value.RescuedByClientId = 0;
+                    kvp.Value.Revision++;
+                    changed = true;
+                }
+            }
+            if (changed) SyncPlayerCombatListServer();
+        }
+
+        private void ForceEjectClientFromMotorcycleServer(ulong clientId)
+        {
+            var net = PizzeriaNetworkState.Instance;
+            if (net == null) return;
+            var st = net.MotorcycleState.Value;
+            if (st.IsMounted && st.RiderClientId == clientId)
+            {
+                st.IsMounted = false;
+                st.RiderClientId = 0;
+                st.Speed = 0f;
+                st.Revision++;
+                net.MotorcycleState.Value = st;
+            }
+        }
+
+        private void ReturnPlayerWeaponsToRackServer(ulong clientId)
+        {
+            var net = PizzeriaNetworkState.Instance;
+            if (net == null || net.Weapons == null) return;
+            for (int i = 0; i < net.Weapons.Count; i++)
+            {
+                var w = net.Weapons[i];
+                if (!w.IsAvailableOnRack && w.OwnerClientId == clientId)
+                {
+                    w.IsAvailableOnRack = true;
+                    w.IsSlinged = false;
+                    w.OwnerClientId = 0;
+                    w.Revision++;
+                    net.Weapons[i] = w;
+                }
+            }
+        }
+
+        private ulong ResolveValidSpectatorTargetServer(ulong deadClientId, ulong currentTarget, int stepDirection)
+        {
+            var candidates = new List<ulong>();
+            var nm = NetworkManager.Singleton;
+            if (nm != null)
+            {
+                foreach (var cid in nm.ConnectedClientsIds)
+                {
+                    if (cid == deadClientId) continue;
+                    if (_playerCombat.TryGetValue(cid, out var c) && c.IsDead) continue;
+                    candidates.Add(cid);
+                }
+            }
+            if (candidates.Count == 0) return 0;
+
+            int idx = candidates.IndexOf(currentTarget);
+            if (idx < 0) return candidates[0];
+            if (stepDirection == 0) return candidates[idx];
+            int nextIdx = ((idx + stepDirection) % candidates.Count + candidates.Count) % candidates.Count;
+            return candidates[nextIdx];
+        }
+
+        private void HandlePlayerTransitionToDeadServer(ulong clientId, bool enableAllPlayersDeadDefeat)
+        {
+            if (!_playerCombat.TryGetValue(clientId, out var c) || c.IsDead) return;
+
+            c.IsIncapacitated = false;
+            c.IsDead = true;
+            c.CurrentHp = 0;
+            c.RescueRemaining = 0f;
+            c.RescueProgress = 0f;
+            c.RescueMode = 0;
+            c.RescuedByClientId = 0;
+            c.SpectatingTargetClientId = ResolveValidSpectatorTargetServer(clientId, 0, 0);
+            c.Revision++;
+
+            ReleaseAssistSessionsForClientServer(clientId);
+            ForceEjectClientFromMotorcycleServer(clientId);
+            ReturnPlayerWeaponsToRackServer(clientId);
+            PlayerLifecycleBridge.CleanupPlayerWorldAndDomainStateServer(clientId);
+
+            string specLabel = c.SpectatingTargetClientId != 0
+                ? $" Espectando Aliado #{c.SpectatingTargetClientId}."
+                : string.Empty;
+            NotifyErrorClientRpc(
+                $"Você morreu! Aguarde a equipe vencer a noite em modo espectador.{specLabel}",
+                TargetSender(clientId));
+
+            var root = PizzeriaRoot.Instance;
+            if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
+            {
+                NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
+                CommitAndReplicate();
             }
         }
 
@@ -1555,30 +1808,110 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void AdvanceAllyRescueServerRpc(ulong targetClientId, float dt, ServerRpcParams rpcParams = default)
+        public void BeginAssistAllyServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
+        {
+            TryBeginOrHeartbeatAssistServer(rpcParams.Receive.SenderClientId, targetClientId, isBegin: true);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void HeartbeatAssistAllyServerRpc(ulong targetClientId, ServerRpcParams rpcParams = default)
+        {
+            TryBeginOrHeartbeatAssistServer(rpcParams.Receive.SenderClientId, targetClientId, isBegin: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CancelAssistAllyServerRpc(ServerRpcParams rpcParams = default)
         {
             ulong helperId = rpcParams.Receive.SenderClientId;
-            if (!IsServer || helperId == targetClientId || dt <= 0f) return;
-            if (!_playerCombat.TryGetValue(helperId, out var helper) || helper.IsIncapacitated || helper.IsDead) return;
-            if (!_playerCombat.TryGetValue(targetClientId, out var target) || !target.IsIncapacitated || target.IsDead) return;
+            if (!IsServer) return;
+            bool changed = false;
+            foreach (var kvp in _playerCombat)
+            {
+                if (kvp.Value.RescuedByClientId == helperId && kvp.Value.RescueMode != 0)
+                {
+                    kvp.Value.RescueMode = 0;
+                    kvp.Value.RescueProgress = 0f;
+                    kvp.Value.RescuedByClientId = 0;
+                    kvp.Value.Revision++;
+                    changed = true;
+                }
+            }
+            if (changed) SyncPlayerCombatListServer();
+        }
 
-            target.RescuedByClientId = helperId;
-            target.RescueProgress += Mathf.Min(dt, 0.25f) / 3.0f;
-            if (target.RescueProgress >= 1.0f)
+        [ServerRpc(RequireOwnership = false)]
+        public void AdvanceAllyRescueServerRpc(ulong targetClientId, float dt, ServerRpcParams rpcParams = default)
+        {
+            // Mantido por compatibilidade, sem confiar em dt do cliente para evitar acelerar timer por spam.
+            TryBeginOrHeartbeatAssistServer(rpcParams.Receive.SenderClientId, targetClientId, isBegin: false);
+        }
+
+        private void TryBeginOrHeartbeatAssistServer(ulong helperId, ulong targetClientId, bool isBegin)
+        {
+            if (!IsServer || helperId == targetClientId) return;
+            if (RejectIfCannotActServer(helperId)) return;
+
+            var net = PizzeriaNetworkState.Instance;
+            if (net != null && net.MotorcycleState.Value.IsMounted && net.MotorcycleState.Value.RiderClientId == helperId)
             {
-                target.IsIncapacitated = false;
-                target.CurrentHp = Mathf.Max(1, target.MaxHp / 2);
-                target.RescueRemaining = 0f;
+                if (isBegin) NotifyErrorClientRpc("Desça da moto para ajudar um aliado.", TargetSender(helperId));
+                return;
+            }
+
+            if (!_playerCombat.TryGetValue(targetClientId, out var target) || target.IsDead) return;
+            if (!IsClientsWithinDistanceServer(helperId, targetClientId, AssistMaxDistance)) return;
+
+            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
+            byte desiredMode = 0;
+            if (target.IsIncapacitated)
+            {
+                desiredMode = 2;
+            }
+            else if (target.CurrentHp > 0 && target.CurrentHp < target.MaxHp)
+            {
+                if (now < target.NextHealAllowedTime)
+                {
+                    if (isBegin)
+                    {
+                        int wait = Mathf.CeilToInt((float)(target.NextHealAllowedTime - now));
+                        NotifyErrorClientRpc($"Aguarde {wait}s antes de curar este aliado novamente.", TargetSender(helperId));
+                    }
+                    return;
+                }
+                desiredMode = 1;
+            }
+
+            if (desiredMode == 0) return;
+
+            if (target.RescueMode != desiredMode || target.RescuedByClientId != helperId)
+            {
+                if (target.RescueMode != 0 && target.RescuedByClientId != helperId && (now - target.AssistHeartbeatTime) <= AssistHeartbeatTimeoutSeconds)
+                    return; // Já está sendo ajudado por outro aliado neste instante
+                target.RescueMode = desiredMode;
                 target.RescueProgress = 0f;
-                target.Revision++;
-                var targetParams = TargetSender(targetClientId);
-                NotifySuccessClientRpc($"Resgatado por aliado ({target.CurrentHp} HP)!", targetParams);
+                target.RescuedByClientId = helperId;
             }
-            else
-            {
-                target.Revision++;
-            }
+
+            target.AssistHeartbeatTime = now;
+            target.Revision++;
             SyncPlayerCombatListServer();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CycleSpectatorTargetServerRpc(int direction, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!IsServer) return;
+            if (!_playerCombat.TryGetValue(senderId, out var c) || !c.IsDead) return;
+
+            int step = direction >= 0 ? 1 : -1;
+            ulong nextTarget = ResolveValidSpectatorTargetServer(senderId, c.SpectatingTargetClientId, step);
+            if (nextTarget != c.SpectatingTargetClientId)
+            {
+                c.SpectatingTargetClientId = nextTarget;
+                c.Revision++;
+                SyncPlayerCombatListServer();
+            }
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1610,6 +1943,9 @@ namespace ScaryParty.Pizzeria.Network
                     IsDead = r.IsDead,
                     RescueRemainingSeconds = r.RescueRemaining,
                     RescueProgress = r.RescueProgress,
+                    RescuedByClientId = r.RescuedByClientId,
+                    RescueMode = r.RescueMode,
+                    SpectatingTargetClientId = r.SpectatingTargetClientId,
                     Revision = r.Revision
                 };
 
@@ -1636,7 +1972,7 @@ namespace ScaryParty.Pizzeria.Network
             if (!IsServer || evt.Amount <= 0) return;
 
             var combat = GetOrCreateCombatRuntime(targetClientId);
-            if (combat.IsIncapacitated) return;
+            if (combat.IsDead || combat.IsIncapacitated) return;
 
             combat.CurrentHp = Mathf.Max(0, combat.CurrentHp - evt.Amount);
             combat.Revision++;
@@ -1704,23 +2040,18 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             // Interromper qualquer cura/resgate em andamento se o alvo ou o ajudante sofrer dano
-            combat.RescueProgress = 0f;
-            foreach (var kvp in _playerCombat)
-            {
-                if (kvp.Value.RescuedByClientId == targetClientId && kvp.Value.RescueProgress > 0f)
-                {
-                    kvp.Value.RescueProgress = 0f;
-                    kvp.Value.Revision++;
-                }
-            }
+            ReleaseAssistSessionsForClientServer(targetClientId);
 
             if (combat.CurrentHp <= 0)
             {
                 combat.IsIncapacitated = true;
                 combat.RescueRemaining = 45f;
                 combat.RescueProgress = 0f;
+                combat.RescueMode = 0;
+                combat.RescuedByClientId = 0;
                 combat.Revision++;
-                BroadcastNoticeClientRpc("Jogador nocauteado! Um aliado precisa resgatá-lo antes que morra.", isError: true);
+                ForceEjectClientFromMotorcycleServer(targetClientId);
+                BroadcastNoticeClientRpc("Jogador nocauteado! Um aliado precisa segurar [E] por 3s para reanimá-lo.", isError: true);
 
                 if ((enableAllPlayersDeadDefeat || ResolveAllPlayersDeadDefeatPolicy(root)) && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
                 {
@@ -1758,11 +2089,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (_playerCombat.TryGetValue(senderId, out var c) && c.IsIncapacitated)
-            {
-                NotifyErrorClientRpc("Você está nocauteado.", targetParams);
-                return;
-            }
+            if (RejectIfCannotActServer(senderId)) return;
 
             EnsureDefaultWeaponsInitializedServer();
             var netState = PizzeriaNetworkState.Instance;
@@ -1854,6 +2181,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer) return;
+            if (RejectIfCannotActServer(senderId)) return;
             var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
             var netState = PizzeriaNetworkState.Instance;
@@ -1913,7 +2241,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer || rayDir.sqrMagnitude < 0.001f) return;
-            if (_playerCombat.TryGetValue(senderId, out var c) && c.IsIncapacitated) return;
+            if (!CanPlayerPerformGameplayActionServer(senderId, out _)) return;
 
             var netState = PizzeriaNetworkState.Instance;
             if (netState == null || netState.Weapons == null) return;
@@ -2039,6 +2367,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer) return;
+            if (!CanPlayerPerformGameplayActionServer(senderId, out _)) return;
 
             var netState = PizzeriaNetworkState.Instance;
             if (netState == null || netState.Weapons == null) return;
@@ -2158,6 +2487,7 @@ namespace ScaryParty.Pizzeria.Network
             var net = PizzeriaNetworkState.Instance;
             var bike = ScaryParty.City.DeliveryMotorcycleController.Instance;
             if (!IsServer || root == null || root.DomainState == null || net == null || bike == null) return;
+            if (RejectIfCannotActServer(senderId)) return;
 
             var st = net.MotorcycleState.Value;
             if (!st.IsActive)
@@ -2261,11 +2591,16 @@ namespace ScaryParty.Pizzeria.Network
             st.Revision++;
             net.MotorcycleState.Value = st;
 
-            if (motorcycleRiderFallDamage > 0 && _playerCombat.TryGetValue(senderId, out var riderCombat) && !riderCombat.IsIncapacitated)
+            if (motorcycleRiderFallDamage > 0)
             {
-                riderCombat.CurrentHp = Mathf.Max(0, riderCombat.CurrentHp - motorcycleRiderFallDamage);
-                riderCombat.Revision++;
-                SyncPlayerCombatListServer();
+                ApplyDamageToPlayerServer(senderId, new ScaryParty.Combat.DamageEvent
+                {
+                    Amount = motorcycleRiderFallDamage,
+                    Source = ScaryParty.Combat.DamageSourceType.Collision,
+                    InstigatorClientId = senderId,
+                    HitPoint = bike.transform.position,
+                    HitNormal = Vector3.up
+                }, ResolveAllPlayersDeadDefeatPolicy(PizzeriaRoot.Instance));
             }
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var client) && client.PlayerObject != null)
@@ -2317,6 +2652,7 @@ namespace ScaryParty.Pizzeria.Network
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer) return;
+            if (!CanPlayerPerformGameplayActionServer(senderId, out _)) return;
             var net = PizzeriaNetworkState.Instance;
             if (net == null) return;
 

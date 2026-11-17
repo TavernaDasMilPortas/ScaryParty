@@ -26,12 +26,24 @@ namespace ScaryParty.Pizzeria.Network
                 PizzeriaSession.Orders = null;
         }
 
+        private static bool RejectIfCannotActServer(ulong sender)
+        {
+            var handler = PizzeriaCommandHandler.Instance;
+            if (handler != null && !handler.CanPlayerPerformGameplayActionServer(sender, out string reason))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, reason, true);
+                return true;
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void AnswerCallServerRpc(ulong callIdVal, ServerRpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var callId = new CallId(callIdVal);
             var res = root.CallService.AnswerCall(
@@ -50,8 +62,10 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void ArchiveTicketDirectServerRpc(ulong orderIdVal, ServerRpcParams rpcParams = default)
         {
+            ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var orderId = new OrderId(orderIdVal);
             root.OrderService.ArchiveTicket(orderId, root.DomainState);
@@ -64,6 +78,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var orderId = new OrderId(orderIdVal);
             var res = root.PlayerHoldService.BeginArchiveTicket(
@@ -105,6 +120,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var orderId = new OrderId(orderIdVal);
             var res = root.OrderService.RestoreTicket(orderId, root.DomainState);
@@ -124,6 +140,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var orderId = new OrderId(orderIdVal);
             var res = root.OrderService.CancelOrder(orderId, root.DomainState);

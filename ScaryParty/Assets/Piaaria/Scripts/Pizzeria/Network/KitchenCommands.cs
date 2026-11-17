@@ -27,12 +27,24 @@ namespace ScaryParty.Pizzeria.Network
                 PizzeriaSession.Kitchen = null;
         }
 
+        private static bool RejectIfCannotActServer(ulong sender)
+        {
+            var handler = PizzeriaCommandHandler.Instance;
+            if (handler != null && !handler.CanPlayerPerformGameplayActionServer(sender, out string reason))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, reason, true);
+                return true;
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void DispenseIngredientServerRpc(int storageId, int ingredientDefId, HandSlotIndex hand, ServerRpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             // 1. Validar jogador e posição
             Vector3 playerPos = PlayerContextResolver.GetPlayerPosition(sender);
@@ -73,6 +85,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var itemId = new ItemId(itemIdVal);
             if (!root.DomainState.Items.TryGetValue(itemId, out var item))
@@ -155,6 +168,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var toolId = new ToolItemId(toolIdVal);
             if (!root.DomainState.Tools.TryGetValue(toolId, out var toolState))
@@ -237,6 +251,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var pizzaId = new ItemId(pizzaIdVal);
             var ingId = new ItemId(ingredientIdVal);
@@ -270,6 +285,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             if (!StationRegistry.TryGetStation(stationId, out var stTrans) || stTrans == null ||
                 !InteractionValidator.ValidateDistanceAndSight(sender, stTrans.position, root.Config.interactDistance, root.Config.serverDistanceTolerance))
@@ -368,6 +384,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             int ovenStationId = ResolvePrimaryOvenStationId(root);
             var slotId = new StationSlotId(ovenStationId, slotIndex);
@@ -387,6 +404,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             int ovenStationId = ResolvePrimaryOvenStationId(root);
             var slotId = new StationSlotId(ovenStationId, slotIndex);
@@ -413,6 +431,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var slotId = new StationSlotId(stationId, slotIndex);
             var pizzaId = new ItemId(pizzaIdVal);
@@ -436,6 +455,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var res = root.PlayerHoldService.BeginDiscard(
                 root.DomainState, sender, new ItemId(itemIdVal), root.Config.discardDuration, (float)root.Clock.Now, root.Config.workLeaseSeconds);

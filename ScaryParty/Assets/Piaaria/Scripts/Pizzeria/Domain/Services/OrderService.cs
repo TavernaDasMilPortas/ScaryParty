@@ -226,5 +226,21 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.IncrementRevision();
             return CommandResult.Ok();
         }
+
+        public void ReleaseOrdersClaimedByPlayer(PizzeriaState state, ulong clientId)
+        {
+            if (state == null) return;
+            bool dirty = false;
+            foreach (var order in state.Orders.Values)
+            {
+                if (order.ClaimedByClientId == clientId)
+                {
+                    order.ClaimedByClientId = OrderState.UnclaimedClientId;
+                    order.Revision++;
+                    dirty = true;
+                }
+            }
+            if (dirty) state.IncrementRevision();
+        }
     }
 }

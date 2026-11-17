@@ -14,12 +14,14 @@ namespace ScaryParty.Pizzeria.Player
 
         private NetworkObject _netObj;
         private PlayerInteraction _interaction;
+        private ScaryParty.Combat.PlayerHealth _health;
         private float _repairHoldTimer;
         private bool _wasRepairingHudShown;
         private void Awake()
         {
             _netObj = GetComponent<NetworkObject>();
             _interaction = GetComponent<PlayerInteraction>();
+            _health = GetComponent<ScaryParty.Combat.PlayerHealth>();
             if (GetComponent<BackpackVisualizer>() == null) gameObject.AddComponent<BackpackVisualizer>();
         }
 
@@ -32,6 +34,12 @@ namespace ScaryParty.Pizzeria.Player
         private void Update()
         {
             if (_netObj != null && !_netObj.IsOwner) return;
+            if (_health == null) _health = GetComponent<ScaryParty.Combat.PlayerHealth>();
+            if (_health != null && (_health.IsIncapacitated || _health.IsDead))
+            {
+                CancelRepairHold();
+                return;
+            }
             if (UnityEngine.InputSystem.Keyboard.current != null &&
                 UnityEngine.InputSystem.Keyboard.current.bKey.wasPressedThisFrame && !GameplayInputGate.IsLocked)
                 BackpackPanelPresenter.Instance?.Toggle();

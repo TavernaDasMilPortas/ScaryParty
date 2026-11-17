@@ -261,18 +261,61 @@ namespace ScaryParty.Player
             return false;
         }
 
+        private ScaryParty.Combat.PlayerHealth _health;
+
+        private bool IsLocalPlayerDead()
+        {
+            if (_health == null) _health = GetComponent<ScaryParty.Combat.PlayerHealth>();
+            return _health != null && _health.IsDead;
+        }
+
+        private void HandleSpectatorCycleInput()
+        {
+            int dir = 0;
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.qKey.wasPressedThisFrame) dir = -1;
+                else if (Keyboard.current.eKey.wasPressedThisFrame) dir = 1;
+            }
+            if (dir == 0 && Mouse.current != null)
+            {
+                if (Mouse.current.leftButton.wasPressedThisFrame) dir = 1;
+                else if (Mouse.current.rightButton.wasPressedThisFrame) dir = -1;
+            }
+#endif
+            if (dir == 0)
+            {
+                if (Input.GetKeyDown(KeyCode.Q)) dir = -1;
+                else if (Input.GetKeyDown(KeyCode.E) || Input.GetMouseButtonDown(0)) dir = 1;
+                else if (Input.GetMouseButtonDown(1)) dir = -1;
+            }
+
+            if (dir != 0)
+            {
+                ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CycleSpectatorTargetServerRpc(dir);
+            }
+        }
+
         private void Update()
         {
             if (!IsOwner) return;
 
+            bool isDead = IsLocalPlayerDead();
+
             // Quando estiver em qualquer menu ou com bloqueio de orientação ativo (ex: trabalho manual com F)
-            if (IsMenuOrInputBlocked() || IsLookLocked)
+            if (IsMenuOrInputBlocked() || (!isDead && IsLookLocked))
             {
                 if (_starterInputs != null)
                 {
                     _starterInputs.look = Vector2.zero;
                 }
                 return;
+            }
+
+            if (isDead)
+            {
+                HandleSpectatorCycleInput();
             }
 
             if (_starterInputs != null)
@@ -296,8 +339,11 @@ namespace ScaryParty.Player
                 float pitchFactor = invertPitch ? -1f : 1f;
                 _pitch = Mathf.Clamp(_pitch + (_starterInputs.look.y * sens * deltaMult * pitchFactor), bottomClamp, topClamp);
 
-                // O yaw gira a raiz do personagem no plano horizontal
-                transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+                // Em modo espectador não gira o corpo morto; caso contrário gira a raiz do personagem
+                if (!isDead)
+                {
+                    transform.rotation = Quaternion.Euler(0f, _yaw, 0f);
+                }
 
                 // O pitch gira apenas o pivot da câmera. Roll é rigorosamente 0.
                 if (_cameraPivot != null)
@@ -311,6 +357,40 @@ namespace ScaryParty.Player
         private void LateUpdate()
         {
             if (!IsOwner) return;
+
+            if (IsLocalPlayerDead() && _playerCamera != null)
+            {
+                ulong targetId = _health.SpectatingTargetClientId;
+                Transform targetTf = null;
+                var nm = NetworkManager.Singleton;
+                if (nm != null && nm.ConnectedClients.TryGetValue(targetId, out var targetClient) && targetClient.PlayerObject != null)
+                {
+                    targetTf = targetClient.PlayerObject.transform;
+                }
+
+                if (targetTf != null && targetTf != transform)
+                {
+                    Quaternion orbitRot = Quaternion.Euler(_pitch, _yaw, 0f);
+                    Vector3 focusPoint = targetTf.position + Vector3.up * 1.45f;
+                    Vector3 desiredPos = focusPoint - orbitRot * Vector3.forward * 2.75f;
+                    if (Physics.Linecast(focusPoint, desiredPos, out var camHit, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                    {
+                        if (!camHit.collider.transform.IsChildOf(targetTf))
+                        {
+                            desiredPos = camHit.point + camHit.normal * 0.22f;
+                        }
+                    }
+
+                    _playerCamera.transform.position = Vector3.Lerp(_playerCamera.transform.position, desiredPos, 1f - Mathf.Exp(-14f * Time.deltaTime));
+                    _playerCamera.transform.rotation = orbitRot;
+                    if (_tpc != null && _tpc.CinemachineCameraTarget != null)
+                    {
+                        _tpc.CinemachineCameraTarget.transform.position = _playerCamera.transform.position;
+                        _tpc.CinemachineCameraTarget.transform.rotation = orbitRot;
+                    }
+                    return;
+                }
+            }
 
             // Mantém posição fixa do pivot sem oscilação de animações de esqueleto
             if (_cameraPivot != null)

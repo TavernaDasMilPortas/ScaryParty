@@ -275,6 +275,11 @@ public class PlayerInteraction : NetworkBehaviour
     private int _workSlot;
     private ulong _attendingCustomerId = 0;
     private float _nextWorkHeartbeat;
+    private ulong _assistingAllyClientId = 0;
+    private float _nextAssistHeartbeat;
+    private bool _assistCompletedAwaitingERelease = false;
+    private bool _wasAssistHudShown = false;
+    private ScaryParty.Combat.PlayerHealth _localHealth;
     private ScaryParty.Player.CameraLookLockToken _workCameraLock;
     private int _workAttemptGeneration = 0;
     private bool _workCompletedAwaitingFRelease = false;
@@ -282,7 +287,7 @@ public class PlayerInteraction : NetworkBehaviour
     private bool _workSawRunning = false;
     private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
 
-    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _currentInteractable != null;
+    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _assistingAllyClientId != 0 || _currentInteractable != null;
 
     private bool IsWorkFKeyHeld()
     {
@@ -291,6 +296,75 @@ public class PlayerInteraction : NetworkBehaviour
             return true;
 #endif
         return Input.GetKey(KeyCode.F);
+    }
+
+    private bool IsInteractEKeyHeld()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.eKey.isPressed)
+            return true;
+#endif
+        return Input.GetKey(KeyCode.E);
+    }
+
+    private void StopAssistAlly()
+    {
+        if (_assistingAllyClientId != 0)
+        {
+            _assistingAllyClientId = 0;
+            if (IsSpawned && IsOwner)
+                ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CancelAssistAllyServerRpc();
+        }
+        if (_wasAssistHudShown)
+        {
+            _wasAssistHudShown = false;
+            ScaryParty.UI.Piaria.Presenters.HudPresenter.Instance?.HideProgress();
+        }
+    }
+
+    private void UpdateAssistAlly()
+    {
+        if (!IsInteractEKeyHeld())
+            _assistCompletedAwaitingERelease = false;
+
+        if (_assistingAllyClientId == 0) return;
+
+        if (!IsInteractEKeyHeld())
+        {
+            StopAssistAlly();
+            return;
+        }
+
+        if (!(_currentInteractable is ScaryParty.Combat.PlayerAllyHelpInteractable ally) ||
+            ally.TargetClientId != _assistingAllyClientId)
+        {
+            StopAssistAlly();
+            return;
+        }
+
+        var ns = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+        if (ns != null && ns.TryGetPlayerCombatState(_assistingAllyClientId, out var dto))
+        {
+            if (dto.IsDead || (!dto.IsIncapacitated && dto.CurrentHp >= dto.MaxHp))
+            {
+                _assistCompletedAwaitingERelease = true;
+                StopAssistAlly();
+                return;
+            }
+            if (dto.RescueProgress > 0f && dto.RescueMode != 0)
+            {
+                _wasAssistHudShown = true;
+                ScaryParty.UI.Piaria.Presenters.HudPresenter.Instance?.ShowProgress(
+                    dto.RescueProgress,
+                    dto.RescueMode == 2 ? "Reanimando aliado [E]..." : "Curando aliado [E]...");
+            }
+        }
+
+        if (Time.unscaledTime >= _nextAssistHeartbeat)
+        {
+            _nextAssistHeartbeat = Time.unscaledTime + 0.25f;
+            ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.HeartbeatAssistAllyServerRpc(_assistingAllyClientId);
+        }
     }
 
     private void ReleaseWorkLockOnly()
@@ -462,6 +536,24 @@ public class PlayerInteraction : NetworkBehaviour
     {
         if (!IsOwner) return;
 
+        if (_localHealth == null) _localHealth = GetComponent<ScaryParty.Combat.PlayerHealth>();
+        if (_localHealth != null && (_localHealth.IsDead || _localHealth.IsIncapacitated))
+        {
+            StopTrackedWork();
+            StopAssistAlly();
+            if (_currentInteractable != null)
+            {
+                _currentInteractable.OnLoseFocus();
+                _currentInteractable = null;
+            }
+            if (OutlineService.Instance != null)
+                OutlineService.Instance.SetTarget(null);
+            _currentOutline = null;
+            if (UIManager.Instance != null)
+                UIManager.Instance.HideInteractionPrompt();
+            return;
+        }
+
         // Se F não está pressionado, resetar flag de conclusão aguardando soltura
         bool isFHeld = IsWorkFKeyHeld();
         if (!isFHeld)
@@ -529,6 +621,7 @@ public class PlayerInteraction : NetworkBehaviour
         HandleRaycast();
         HandleInput();
         UpdateTrackedWork();
+        UpdateAssistAlly();
 
         if (Time.time - _lastSyncTime > 0.5f)
         {
@@ -684,6 +777,7 @@ public class PlayerInteraction : NetworkBehaviour
     {
         ScaryParty.Pizzeria.Presentation.NotificationManager.OnNotificationShown -= HandleNotificationShown;
         StopTrackedWork();
+        StopAssistAlly();
         if (_currentInteractable != null)
         {
             _currentInteractable.OnLoseFocus();
@@ -697,6 +791,7 @@ public class PlayerInteraction : NetworkBehaviour
     {
         ScaryParty.Pizzeria.Presentation.NotificationManager.OnNotificationShown -= HandleNotificationShown;
         StopTrackedWork();
+        StopAssistAlly();
         ScaryParty.Interaction.OutlineService.Instance?.ClearTarget();
         base.OnDestroy();
     }
@@ -1009,7 +1104,19 @@ public class PlayerInteraction : NetworkBehaviour
 
         if (interactPressed && _currentInteractable != null)
         {
-            _currentInteractable.OnInteract(this.gameObject);
+            if (_currentInteractable is ScaryParty.Combat.PlayerAllyHelpInteractable allyHelp)
+            {
+                if (!_assistCompletedAwaitingERelease && !string.IsNullOrEmpty(allyHelp.InteractPrompt))
+                {
+                    _assistingAllyClientId = allyHelp.TargetClientId;
+                    _nextAssistHeartbeat = Time.unscaledTime + 0.25f;
+                    allyHelp.OnInteract(this.gameObject);
+                }
+            }
+            else
+            {
+                _currentInteractable.OnInteract(this.gameObject);
+            }
         }
 
         if (workPressed)
@@ -1030,7 +1137,19 @@ public class PlayerInteraction : NetworkBehaviour
 
         if (interactPressed && _currentInteractable != null)
         {
-            _currentInteractable.OnInteract(this.gameObject);
+            if (_currentInteractable is ScaryParty.Combat.PlayerAllyHelpInteractable allyHelp)
+            {
+                if (!_assistCompletedAwaitingERelease && !string.IsNullOrEmpty(allyHelp.InteractPrompt))
+                {
+                    _assistingAllyClientId = allyHelp.TargetClientId;
+                    _nextAssistHeartbeat = Time.unscaledTime + 0.25f;
+                    allyHelp.OnInteract(this.gameObject);
+                }
+            }
+            else
+            {
+                _currentInteractable.OnInteract(this.gameObject);
+            }
         }
 
         if (workPressed)

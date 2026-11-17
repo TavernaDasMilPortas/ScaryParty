@@ -21,6 +21,9 @@ namespace ScaryParty.Combat
 
         private NetworkObject _netObj;
         private ThirdPersonController _tpc;
+        private float _baseMoveSpeed = 2f;
+        private float _baseSprintSpeed = 5.335f;
+        private float _baseJumpHeight = 1.2f;
         private int _lastObservedHp = DefaultMaxHp;
         private bool _hasObservedInitial;
 
@@ -52,7 +55,27 @@ namespace ScaryParty.Combat
             get
             {
                 var state = PizzeriaNetworkState.Instance;
-                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) && dto.IsIncapacitated;
+                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) && dto.IsIncapacitated && !dto.IsDead;
+            }
+        }
+
+        public bool IsDead
+        {
+            get
+            {
+                var state = PizzeriaNetworkState.Instance;
+                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) && dto.IsDead;
+            }
+        }
+
+        public bool IsSpectating => IsDead;
+
+        public ulong SpectatingTargetClientId
+        {
+            get
+            {
+                var state = PizzeriaNetworkState.Instance;
+                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) ? dto.SpectatingTargetClientId : 0;
             }
         }
 
@@ -67,12 +90,32 @@ namespace ScaryParty.Combat
             }
         }
 
-        public bool IsAlive => !IsIncapacitated && CurrentHp > 0;
+        public float RescueProgress
+        {
+            get
+            {
+                var state = PizzeriaNetworkState.Instance;
+                if (state != null && state.TryGetPlayerCombatState(ClientId, out var dto))
+                    return dto.RescueProgress;
+                return 0f;
+            }
+        }
+
+        public bool IsAlive => !IsIncapacitated && !IsDead && CurrentHp > 0;
+        public bool CanPerformGameplayActions => IsAlive;
 
         private void Awake()
         {
             _netObj = GetComponent<NetworkObject>();
             _tpc = GetComponent<ThirdPersonController>();
+            if (_tpc != null)
+            {
+                _baseMoveSpeed = _tpc.MoveSpeed;
+                _baseSprintSpeed = _tpc.SprintSpeed;
+                _baseJumpHeight = _tpc.JumpHeight;
+            }
+            if (GetComponent<PlayerAllyHelpInteractable>() == null)
+                gameObject.AddComponent<PlayerAllyHelpInteractable>();
         }
 
         private void Start()
@@ -92,18 +135,43 @@ namespace ScaryParty.Combat
             bool hasState = netState.TryGetPlayerCombatState(ClientId, out var dto);
             int hp = hasState ? dto.CurrentHp : maxHp;
             int totalMax = hasState && dto.MaxHp > 0 ? dto.MaxHp : maxHp;
-            bool incap = hasState && dto.IsIncapacitated;
+            bool isDead = hasState && dto.IsDead;
+            bool incap = hasState && dto.IsIncapacitated && !isDead;
             float rescue = hasState ? dto.RescueRemainingSeconds : 0f;
 
             if (_netObj != null && _netObj.IsOwner)
             {
-                HudPresenter.Instance?.SetCombatHealthHud(hp, totalMax, incap, rescue);
+                HudPresenter.Instance?.SetCombatHealthHud(
+                    hp,
+                    totalMax,
+                    incap,
+                    rescue,
+                    isDead,
+                    hasState ? dto.RescueProgress : 0f,
+                    hasState ? dto.RescueMode : (byte)0,
+                    hasState ? dto.SpectatingTargetClientId : 0UL);
 
                 if (_tpc != null)
                 {
-                    // Enquanto nocauteado, pausa o deslocamento local sem bloquear câmera/pause.
-                    if (_tpc.enabled == incap)
-                        _tpc.enabled = !incap;
+                    if (isDead)
+                    {
+                        if (_tpc.enabled) _tpc.enabled = false;
+                    }
+                    else if (incap)
+                    {
+                        // Enquanto nocauteado, permite rastejo lento e bloqueia corrida/pulo
+                        if (!_tpc.enabled) _tpc.enabled = true;
+                        _tpc.MoveSpeed = 0.70f;
+                        _tpc.SprintSpeed = 0.70f;
+                        _tpc.JumpHeight = 0f;
+                    }
+                    else
+                    {
+                        if (!_tpc.enabled) _tpc.enabled = true;
+                        _tpc.MoveSpeed = _baseMoveSpeed;
+                        _tpc.SprintSpeed = _baseSprintSpeed;
+                        _tpc.JumpHeight = _baseJumpHeight;
+                    }
                 }
 
                 if (_hasObservedInitial && hp < _lastObservedHp)

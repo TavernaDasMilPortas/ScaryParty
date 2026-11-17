@@ -580,5 +580,21 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             return dirty;
         }
+
+        public void ReleaseCustomersAttendedByPlayer(PizzeriaState state, ulong playerId)
+        {
+            if (state == null) return;
+            bool dirty = false;
+            foreach (var cust in state.Customers.Values)
+            {
+                if (cust.AttendedByPlayerId == playerId)
+                {
+                    cust.AttendedByPlayerId = 0;
+                    cust.Revision++;
+                    dirty = true;
+                }
+            }
+            if (dirty) state.IncrementRevision();
+        }
     }
 }

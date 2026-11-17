@@ -29,12 +29,24 @@ namespace ScaryParty.Pizzeria.Network
                 PizzeriaSession.Logistics = null;
         }
 
+        private static bool RejectIfCannotActServer(ulong sender)
+        {
+            var handler = PizzeriaCommandHandler.Instance;
+            if (handler != null && !handler.CanPlayerPerformGameplayActionServer(sender, out string reason))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, reason, true);
+                return true;
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void DepositStackServerRpc(ulong stackIdVal, ulong boxItemIdVal, HandSlotIndex hand, int addressIdVal, ServerRpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var stackId = new StackId(stackIdVal);
             var boxId = new ItemId(boxItemIdVal);
@@ -58,6 +70,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var stackId = new StackId(stackIdVal);
             var expectedTop = new ItemId(expectedTopItemIdVal);
@@ -86,6 +99,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var bpId = new BackpackId(backpackIdVal);
             if (!CanAccessBackpack(root.DomainState, bpId, sender, false)) return;
@@ -107,6 +121,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             if (!PlayerContextResolver.TryGetPlayer(sender, out var player, out _)) return;
             BackpackState equipped = null;
@@ -181,6 +196,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var bpId = new BackpackId(backpackIdVal);
             var boxId = new ItemId(boxItemIdVal);
@@ -206,6 +222,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var bpId = new BackpackId(backpackIdVal);
             var boxId = new ItemId(boxItemIdVal);
@@ -237,6 +254,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var bpId = new BackpackId(backpackIdVal);
             if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
@@ -277,6 +295,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong sender = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
 
             var res = ExecuteServerDeliveryCore(root, sender, addressIdVal, itemIds, attemptId);
             if (!res.Success)

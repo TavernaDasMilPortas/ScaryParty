@@ -28,6 +28,11 @@ namespace ScaryParty.Pizzeria.Network
 
         private void OnClientDisconnected(ulong clientId)
         {
+            CleanupPlayerWorldAndDomainStateServer(clientId);
+        }
+
+        public static void CleanupPlayerWorldAndDomainStateServer(ulong clientId)
+        {
             PizzeriaCommandHandler.Instance?.ReleasePlayerSessions(clientId);
 
             var root = PizzeriaRoot.Instance;
@@ -37,7 +42,7 @@ namespace ScaryParty.Pizzeria.Network
             Vector3 recoveryPos = root.recoveryAnchor != null ? root.recoveryAnchor.position : root.transform.position;
             DomainVector3 domainRecoveryPos = new DomainVector3(recoveryPos.x, recoveryPos.y, recoveryPos.z);
 
-            // 1. Cancelar holds ativos do jogador
+            // 1. Cancelar holds ativos do jogador (incluindo atendimento em balcão)
             if (state.PlayerHolds.TryGetValue(clientId, out var hold))
             {
                 if (hold.Kind == PlayerHoldKind.Discard && hold.TargetItemId.IsValid)
@@ -48,7 +53,11 @@ namespace ScaryParty.Pizzeria.Network
                 state.PlayerHolds.Remove(clientId);
             }
 
-            // Cancelar montagens cujos ingredientes estavam nas mãos do jogador desconectado.
+            // 1b. Liberar clientes em atendimento e comandas assumidas pelo jogador
+            root.CustomerService?.ReleaseCustomersAttendedByPlayer(state, clientId);
+            root.OrderService?.ReleaseOrdersClaimedByPlayer(state, clientId);
+
+            // Cancelar montagens cujos ingredientes estavam nas mãos do jogador desconectado/morto.
             var assemblySlots = new List<StationSlotId>();
             foreach (var pair in state.ActiveOperations)
             {
@@ -129,10 +138,10 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
-            Debug.Log($"[PlayerLifecycleBridge] Desconexão do cliente {clientId} tratada: itens recuperados e reservas limpas.");
+            Debug.Log($"[PlayerLifecycleBridge] Limpeza do cliente {clientId} aplicada: itens, ferramentas, balcões e comandas liberados.");
         }
 
-        private StationSlotId? FindFreeNeutralSlot(PizzeriaState state, PizzeriaRoot root)
+        private static StationSlotId? FindFreeNeutralSlot(PizzeriaState state, PizzeriaRoot root)
         {
             // Procurar slots livres na estação neutra (ex: Station 1 slots)
             for (int s = 0; s < 4; s++)
@@ -148,7 +157,7 @@ namespace ScaryParty.Pizzeria.Network
             return null;
         }
 
-        private int FindFreeToolRackSlot(PizzeriaState state, int rackStationId)
+        private static int FindFreeToolRackSlot(PizzeriaState state, int rackStationId)
         {
             for (int i = 0; i < 16; i++)
             {

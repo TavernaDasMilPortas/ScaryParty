@@ -284,19 +284,36 @@ namespace ScaryParty.UI.Piaria.Presenters
             _root.Add(_crosshairContainer);
         }
 
-        public void SetCombatHealthHud(int currentHp, int maxHp, bool incapacitated, float rescueSeconds = 0f)
+        public void SetCombatHealthHud(
+            int currentHp,
+            int maxHp,
+            bool incapacitated,
+            float rescueSeconds = 0f,
+            bool isDead = false,
+            float rescueProgress = 0f,
+            byte rescueMode = 0,
+            ulong spectatingTargetClientId = 0)
         {
             EnsureInitialized();
             if (_healthStatusLabel == null) return;
 
-            if (incapacitated)
+            if (isDead)
             {
-                _healthStatusLabel.text = $"INCAPACITADO ({Mathf.CeilToInt(rescueSeconds)}s resgate)";
+                _healthStatusLabel.text = $"MORTO — Espectando Aliado #{spectatingTargetClientId} ([Q]/[E] trocar)";
+                _healthStatusLabel.style.color = new Color(0.85f, 0.35f, 0.45f);
+            }
+            else if (incapacitated)
+            {
+                string pct = rescueProgress > 0.01f ? $" | Resgatando {Mathf.RoundToInt(rescueProgress * 100f)}%" : string.Empty;
+                _healthStatusLabel.text = $"INCAPACITADO ({Mathf.CeilToInt(rescueSeconds)}s restantes{pct})";
                 _healthStatusLabel.style.color = new Color(0.95f, 0.28f, 0.28f);
             }
             else
             {
-                _healthStatusLabel.text = $"HP: {currentHp} / {maxHp}";
+                string healPct = rescueMode == 1 && rescueProgress > 0.01f
+                    ? $" | Curando {Mathf.RoundToInt(rescueProgress * 100f)}%"
+                    : string.Empty;
+                _healthStatusLabel.text = $"HP: {currentHp} / {maxHp}{healPct}";
                 float ratio = maxHp > 0 ? (float)currentHp / maxHp : 1f;
                 _healthStatusLabel.style.color = ratio <= 0.3f
                     ? new Color(0.95f, 0.35f, 0.30f)
