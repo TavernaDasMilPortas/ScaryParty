@@ -43,7 +43,7 @@ public class WeaponInputHandler : MonoBehaviour
             return;
         }
 
-        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
+        if (IsUiBlockingWeaponInput())
         {
             starterAssetsInputs.scrollWeapon = 0f;
             starterAssetsInputs.aim = false;
@@ -130,5 +130,19 @@ public class WeaponInputHandler : MonoBehaviour
         {
             starterAssetsInputs.scrollWeapon = 0f;
         }
+    }
+
+    private static bool IsUiBlockingWeaponInput()
+    {
+        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked ||
+            Cursor.lockState != CursorLockMode.Locked ||
+            Cursor.visible)
+            return true;
+
+        if (UnityEngine.EventSystems.EventSystem.current != null &&
+            UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            return true;
+
+        return false;
     }
 }

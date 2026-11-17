@@ -5,6 +5,10 @@ using Unity.Netcode;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
 
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
+
 namespace ScaryParty.Pizzeria.Presentation
 {
     /// <summary>
@@ -37,6 +41,9 @@ namespace ScaryParty.Pizzeria.Presentation
         private Label[] _stepLabels = new Label[6];
         private Button _toggleMinimizeBtn;
         private Button _skipBtn;
+        private Button _skipNight0Btn;
+
+        public static bool IsTutorialNight0Enabled { get; set; } = false;
 
         private bool _dismissed = false;
         private bool _minimized = false;
@@ -123,7 +130,7 @@ namespace ScaryParty.Pizzeria.Presentation
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 6;
 
-            var title = new Label("PRIMEIRO TURNO — GUIA");
+            var title = new Label("GUIA OPERACIONAL [H]");
             title.style.fontSize = 14;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             title.style.color = new Color(0.98f, 0.82f, 0.42f);
@@ -131,6 +138,16 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var headerBtns = new VisualElement();
             headerBtns.style.flexDirection = FlexDirection.Row;
+
+            _skipNight0Btn = new Button(SkipTutorialToNight1);
+            _skipNight0Btn.text = "Ir p/ Noite 1";
+            _skipNight0Btn.style.height = 24;
+            _skipNight0Btn.style.marginRight = 4;
+            _skipNight0Btn.style.fontSize = 11;
+            _skipNight0Btn.style.backgroundColor = new Color(0.18f, 0.42f, 0.28f);
+            _skipNight0Btn.style.color = Color.white;
+            _skipNight0Btn.style.display = DisplayStyle.None;
+            headerBtns.Add(_skipNight0Btn);
 
             _toggleMinimizeBtn = new Button(ToggleMinimize);
             _toggleMinimizeBtn.text = "—";
@@ -193,6 +210,16 @@ namespace ScaryParty.Pizzeria.Presentation
             RefreshChecklistVisuals();
         }
 
+        public void SkipTutorialToNight1()
+        {
+            IsTutorialNight0Enabled = false;
+            DismissTutorial();
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+            {
+                PizzeriaCommandHandler.Instance?.AdvanceToNextNightServerRpc();
+            }
+        }
+
         public static void NotifyContextualTip(string tipKey, string title, string message)
         {
             if (string.IsNullOrEmpty(tipKey) || !ShownTips.Add(tipKey)) return;
@@ -201,7 +228,21 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void Update()
         {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame && !GameplayInputGate.IsLocked)
+            {
+                if (_dismissed) ShowTutorial();
+                else ToggleMinimize();
+            }
+#endif
             if (_dismissed || _panel == null) return;
+
+            var netCheck = PizzeriaNetworkState.Instance;
+            if (_skipNight0Btn != null && netCheck != null)
+            {
+                bool showSkipN0 = netCheck.NightState.Value.NightNumber == 0 || IsTutorialNight0Enabled;
+                _skipNight0Btn.style.display = showSkipN0 ? DisplayStyle.Flex : DisplayStyle.None;
+            }
 
             _checkTimer += Time.deltaTime;
             if (_checkTimer < 0.5f) return;

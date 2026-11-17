@@ -65,6 +65,8 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Label _healthStatusLabel;
         private Label _bagIntegrityLabel;
         private Label _weaponAmmoLabel;
+        private Label _claimedOrdersLabel;
+        private Label _employeesStatusLabel;
         private VisualElement _crosshairContainer;
         private float _hudMonitorTimer = 0f;
         private readonly Dictionary<int, float> _lowStockAlertCooldowns = new Dictionary<int, float>();
@@ -256,6 +258,21 @@ namespace ScaryParty.UI.Piaria.Presenters
             _weaponAmmoLabel.style.color = new Color(0.98f, 0.82f, 0.42f);
             _weaponAmmoLabel.style.display = DisplayStyle.None;
             _combatStatusBox.Add(_weaponAmmoLabel);
+
+            _claimedOrdersLabel = new Label("");
+            _claimedOrdersLabel.pickingMode = PickingMode.Ignore;
+            _claimedOrdersLabel.style.fontSize = 12;
+            _claimedOrdersLabel.style.color = new Color(0.75f, 0.90f, 0.98f);
+            _claimedOrdersLabel.style.display = DisplayStyle.None;
+            _combatStatusBox.Add(_claimedOrdersLabel);
+
+            _employeesStatusLabel = new Label("");
+            _employeesStatusLabel.pickingMode = PickingMode.Ignore;
+            _employeesStatusLabel.style.fontSize = 12;
+            _employeesStatusLabel.style.color = new Color(0.86f, 0.82f, 0.96f);
+            _employeesStatusLabel.style.display = DisplayStyle.None;
+            _combatStatusBox.Add(_employeesStatusLabel);
+
             _root.Add(_combatStatusBox);
 
             _crosshairContainer = new VisualElement();
@@ -609,7 +626,84 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _ => ""
                 };
 
-                _nightBannerLabel.text = $"NOITE {n.NightNumber} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue} / R$ {n.RevenueGoal}";
+                string repDelta = n.LastReputationDelta != 0
+                    ? $" ({(n.LastReputationDelta > 0 ? "+" : "")}{n.LastReputationDelta})"
+                    : string.Empty;
+                int budget = netState.RestaurantBudget.Value;
+                _nightBannerLabel.text = $"NOITE {n.NightNumber} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue}/{n.RevenueGoal}  |  CAIXA: R$ {budget}  |  REP: {n.Reputation}{repDelta}";
+            }
+
+            ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
+            if (_claimedOrdersLabel != null && netState.Orders != null)
+            {
+                var claimedSb = new System.Text.StringBuilder();
+                double now = PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.Clock != null
+                    ? PizzeriaRoot.Instance.Clock.Now
+                    : Time.timeAsDouble;
+                for (int i = 0; i < netState.Orders.Count; i++)
+                {
+                    var ord = netState.Orders[i];
+                    if (ord.Lifecycle == (byte)OrderLifecycle.Accepted && ord.ClaimedByClientId == localClientId)
+                    {
+                        int remSec = Mathf.Max(0, Mathf.CeilToInt((float)(ord.DeadlineTime - now)));
+                        if (claimedSb.Length > 0) claimedSb.Append(" | ");
+                        claimedSb.Append($"#{ord.OrderId} ({remSec}s)");
+                    }
+                }
+                if (claimedSb.Length > 0)
+                {
+                    _claimedOrdersLabel.text = $"Comandas Assumidas: {claimedSb}";
+                    _claimedOrdersLabel.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    _claimedOrdersLabel.style.display = DisplayStyle.None;
+                }
+            }
+
+            if (_employeesStatusLabel != null && netState.Employees != null)
+            {
+                if (netState.Employees.Count == 0)
+                {
+                    _employeesStatusLabel.style.display = DisplayStyle.None;
+                }
+                else
+                {
+                    var empSb = new System.Text.StringBuilder("Equipe: ");
+                    for (int i = 0; i < netState.Employees.Count; i++)
+                    {
+                        if (i > 0) empSb.Append(" | ");
+                        var emp = netState.Employees[i];
+                        string roleName = emp.Role == 0 ? "Caixa" : "Pizzaiolo";
+                        if (!emp.IsAlive)
+                        {
+                            empSb.Append($"{roleName}#{emp.EmployeeId}: Caído");
+                        }
+                        else if (emp.TaskState == (byte)ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Blocked)
+                        {
+                            string reason = emp.BlockReason switch
+                            {
+                                1 => "Sem Massa",
+                                2 => "Falta Ingred.",
+                                3 => "Forno Cheio",
+                                4 => "Ferram. em Uso",
+                                5 => "Caminho Bloq.",
+                                _ => "Bloqueado"
+                            };
+                            empSb.Append($"{roleName}#{emp.EmployeeId}: {reason}");
+                        }
+                        else if (emp.TargetOrderId > 0)
+                        {
+                            empSb.Append($"{roleName}#{emp.EmployeeId}: Ped.#{emp.TargetOrderId}");
+                        }
+                        else
+                        {
+                            empSb.Append($"{roleName}#{emp.EmployeeId}: Livre");
+                        }
+                    }
+                    _employeesStatusLabel.text = empSb.ToString();
+                    _employeesStatusLabel.style.display = DisplayStyle.Flex;
+                }
             }
 
             if (_bagIntegrityLabel != null && netState.Backpacks != null)

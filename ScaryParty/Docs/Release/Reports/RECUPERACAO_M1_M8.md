@@ -93,6 +93,19 @@
   - `PizzeriaCommandHandler.ToggleClaimOrderServerRpc` dispara `HumanTakeoverTask` ao assumir comanda em andamento de funcionário e `ReleaseActorTasks` ao liberar.
 - **Teste e verificação R6:** Teste unitário `R6_EmployeeActorIdIsolationAndBlockedTaskPreservation` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R7 — M3/M8: Tutorial Opcional Noite 0, Trava UI→Arma, HUD Operacional Completo e `CharacterSetupWizard`
+- **Tutorial contextual (`ContextualTutorialPresenter.cs`):**
+  - Adicionado atalho `[H]` para recolher/reabrir o guia operacional, flag `IsTutorialNight0Enabled` e botão `Ir p/ Noite 1` (`SkipTutorialToNight1`) exibido no modo Noite 0 / tutorial.
+- **Trava de clique UI → arma (`WeaponInputHandler.cs`):**
+  - Adicionado `IsUiBlockingWeaponInput()` verificando `GameplayInputGate.IsLocked`, estado do cursor, e `EventSystem.current.IsPointerOverGameObject()`, exigindo liberação do botão antes do próximo disparo (`_requireFireRelease = true`).
+- **HUD operacional completo (`HudPresenter.cs`):**
+  - Banner noturno ampliado com Caixa compartilhado (`CAIXA: R$ ...`) e Reputação + último delta (`REP: X (+/-Y)`).
+  - Painel operacional expandido com timers de comandas assumidas (`Comandas Assumidas: #id (Xs)`) e status/motivos de bloqueio de funcionários contratados (`Equipe: Caixa/Pizzaiolo — Sem Massa, Falta Ingred., Forno Cheio, Ferram. em Uso, Caminho Bloq., Caído`).
+- **Pipeline de personagem e Animator (`CharacterSetupWizard.cs`):**
+  - Adicionado parâmetro `IsRidingBike`, estado `RidingBike` na Base Layer e nova Layer `WeaponUpperBody` com estados `WeaponUnarmed`, `PistolReady`/`PistolAim`, `ShotgunReady`/`ShotgunAim` e `ShotgunSlung` (`WeaponMode 0..3`, `IsAiming`).
+  - Adicionada seção `3. Preview Multi-Contexto & Authoring de Offsets` no Wizard para inspeção de contextos (`Base`, `Moto`, `Pistola`, `Escopeta`, `Bandoleira`, `Susto`, `Conversão Zumbi`) e ajuste de offsets de ossos/âncoras com `Undo.RecordObject` + `EditorUtility.SetDirty`.
+- **Verificação estática R7:** Build estático dos 4 projetos (`Domain`, `Tests`, `Assembly-CSharp`, `Assembly-CSharp-Editor`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -104,5 +117,5 @@
 | R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
-| R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | Pendente | Pendente |
+| R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | **Concluído** (0 erros nos 4 `.csproj`) | Pendente (Editor Wizard / PlayMode) |
 | R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | Pendente | Pendente |

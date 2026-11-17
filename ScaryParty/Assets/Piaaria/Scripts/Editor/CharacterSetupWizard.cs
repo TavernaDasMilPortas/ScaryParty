@@ -59,6 +59,12 @@ namespace ScaryParty.EditorScripts
         private string _report = "Pronto para configurar e validar o Personagem.";
         private MessageType _reportType = MessageType.Info;
 
+        private static readonly string[] PreviewContexts = { "Base", "Moto", "Pistola", "Escopeta", "Bandoleira", "Susto", "Conversão Zumbi" };
+        private int _previewContextIndex = 0;
+        private Transform _offsetTargetBone;
+        private Vector3 _bonePosOffset = Vector3.zero;
+        private Vector3 _boneRotOffset = Vector3.zero;
+
         [MenuItem("Tools/Scary Party/Wizards/Personagem & Interação/Personagens (Character Setup Wizard)", false, 70)]
         public static void ShowWindow()
         {
@@ -143,6 +149,25 @@ namespace ScaryParty.EditorScripts
             {
                 bool ok = ValidateCharacterSetup(out _report);
                 _reportType = ok ? MessageType.Info : MessageType.Error;
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            GUILayout.Label("3. Preview Multi-Contexto & Authoring de Offsets", EditorStyles.boldLabel);
+            _previewContextIndex = EditorGUILayout.Popup("Contexto", _previewContextIndex, PreviewContexts);
+            _offsetTargetBone = (Transform)EditorGUILayout.ObjectField("Osso / Ancora Alvo", _offsetTargetBone, typeof(Transform), true);
+            _bonePosOffset = EditorGUILayout.Vector3Field("Delta Posicao Local", _bonePosOffset);
+            _boneRotOffset = EditorGUILayout.Vector3Field("Delta Rotacao Euler", _boneRotOffset);
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Aplicar Preview no Animator Selecionado", GUILayout.Height(24)))
+            {
+                ApplyMultiContextPreview(_previewContextIndex);
+            }
+            if (GUILayout.Button("Aplicar Offset no Osso (Undo)", GUILayout.Height(24)))
+            {
+                ApplyBoneOffsetWithUndo(_offsetTargetBone, _bonePosOffset, _boneRotOffset);
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
@@ -607,6 +632,7 @@ namespace ScaryParty.EditorScripts
             controller.AddParameter("StandUp", AnimatorControllerParameterType.Trigger);
             controller.AddParameter("WeaponMode", AnimatorControllerParameterType.Int);
             controller.AddParameter("IsAiming", AnimatorControllerParameterType.Bool);
+            controller.AddParameter("IsRidingBike", AnimatorControllerParameterType.Bool);
             controller.AddParameter("Fire", AnimatorControllerParameterType.Trigger);
             controller.AddParameter("IsMoving", AnimatorControllerParameterType.Bool);
             controller.AddParameter("IsSprinting", AnimatorControllerParameterType.Bool);
@@ -732,6 +758,48 @@ namespace ScaryParty.EditorScripts
             tFromPrep.AddCondition(AnimatorConditionMode.IfNot, 0, "IsPreparing");
             tFromPrep.hasExitTime = false;
             tFromPrep.duration = 0.12f;
+
+            // --- BASE LAYER: MOTO ---
+            var bikeState = rootSm.AddState("RidingBike", new Vector3(120, 200, 0));
+            bikeState.motion = sitIdleClip;
+            var tToBike = locomotionState.AddTransition(bikeState);
+            tToBike.AddCondition(AnimatorConditionMode.If, 0, "IsRidingBike");
+            tToBike.hasExitTime = false;
+            tToBike.duration = 0.12f;
+            var tFromBike = bikeState.AddTransition(locomotionState);
+            tFromBike.AddCondition(AnimatorConditionMode.IfNot, 0, "IsRidingBike");
+            tFromBike.hasExitTime = false;
+            tFromBike.duration = 0.12f;
+
+            // --- LAYER 2: WEAPON UPPER BODY (WeaponMode 0..3 & IsAiming) ---
+            var weaponLayer = new AnimatorControllerLayer
+            {
+                name = "WeaponUpperBody",
+                defaultWeight = 1f,
+                avatarMask = upperBodyMask,
+                blendingMode = AnimatorLayerBlendingMode.Override,
+                stateMachine = new AnimatorStateMachine { name = "WeaponUpperBody", hideFlags = HideFlags.HideInHierarchy }
+            };
+            AssetDatabase.AddObjectToAsset(weaponLayer.stateMachine, controller);
+            controller.AddLayer(weaponLayer);
+
+            var wSm = weaponLayer.stateMachine;
+            var wIdle = wSm.AddState("WeaponUnarmed", new Vector3(220, 40, 0));
+            wIdle.motion = null;
+            wSm.defaultState = wIdle;
+
+            var wPistolReady = wSm.AddState("PistolReady", new Vector3(480, -40, 0));
+            wPistolReady.motion = prepareClip;
+            var wPistolAim = wSm.AddState("PistolAim", new Vector3(720, -40, 0));
+            wPistolAim.motion = prepareClip;
+            var wShotgunReady = wSm.AddState("ShotgunReady", new Vector3(480, 60, 0));
+            wShotgunReady.motion = prepareClip;
+            var wShotgunAim = wSm.AddState("ShotgunAim", new Vector3(720, 60, 0));
+            wShotgunAim.motion = prepareClip;
+            var wShotgunSlung = wSm.AddState("ShotgunSlung", new Vector3(480, 160, 0));
+            wShotgunSlung.motion = null;
+
+            ConfigureWeaponModeTransitions(wIdle, wPistolReady, wPistolAim, wShotgunReady, wShotgunAim, wShotgunSlung);
 
             EditorUtility.SetDirty(controller);
             AssetDatabase.SaveAssets();
@@ -1076,6 +1144,103 @@ namespace ScaryParty.EditorScripts
 
             report = sb.ToString();
             return ok;
+        }
+
+        private static void ConfigureWeaponModeTransitions(
+            AnimatorState idle,
+            AnimatorState pistolReady,
+            AnimatorState pistolAim,
+            AnimatorState shotgunReady,
+            AnimatorState shotgunAim,
+            AnimatorState shotgunSlung)
+        {
+            void LinkMode(AnimatorState from, AnimatorState to, int mode)
+            {
+                var tr = from.AddTransition(to);
+                tr.AddCondition(AnimatorConditionMode.Equals, mode, "WeaponMode");
+                tr.hasExitTime = false;
+                tr.duration = 0.08f;
+            }
+
+            void LinkAim(AnimatorState ready, AnimatorState aim)
+            {
+                var toAim = ready.AddTransition(aim);
+                toAim.AddCondition(AnimatorConditionMode.If, 0, "IsAiming");
+                toAim.hasExitTime = false;
+                toAim.duration = 0.08f;
+
+                var fromAim = aim.AddTransition(ready);
+                fromAim.AddCondition(AnimatorConditionMode.IfNot, 0, "IsAiming");
+                fromAim.hasExitTime = false;
+                fromAim.duration = 0.08f;
+            }
+
+            LinkMode(idle, pistolReady, 1);
+            LinkMode(pistolReady, idle, 0);
+            LinkMode(pistolAim, idle, 0);
+            LinkAim(pistolReady, pistolAim);
+
+            LinkMode(idle, shotgunReady, 2);
+            LinkMode(shotgunReady, idle, 0);
+            LinkMode(shotgunAim, idle, 0);
+            LinkAim(shotgunReady, shotgunAim);
+
+            LinkMode(idle, shotgunSlung, 3);
+            LinkMode(shotgunSlung, idle, 0);
+            LinkMode(shotgunSlung, pistolReady, 1);
+            LinkMode(pistolReady, shotgunSlung, 3);
+        }
+
+        private void ApplyMultiContextPreview(int contextIndex)
+        {
+            var selected = Selection.activeGameObject;
+            var anim = selected != null ? selected.GetComponentInChildren<Animator>(true) : null;
+            if (anim == null)
+            {
+                _report = "[AVISO] Selecione um objeto na cena com Animator (ex: CharacterVisual) para aplicar o preview.";
+                _reportType = MessageType.Warning;
+                return;
+            }
+
+            Undo.RecordObject(anim, "Apply Character Context Preview");
+            bool isRiding = contextIndex == 1;
+            int weaponMode = contextIndex switch
+            {
+                2 => 1, // Pistola
+                3 => 2, // Escopeta
+                4 => 3, // Bandoleira
+                _ => 0
+            };
+            bool isAiming = contextIndex == 2 || contextIndex == 3;
+            bool isPreparing = contextIndex == 5;
+
+            if (Application.isPlaying)
+            {
+                anim.SetBool("IsRidingBike", isRiding);
+                anim.SetInteger("WeaponMode", weaponMode);
+                anim.SetBool("IsAiming", isAiming);
+                anim.SetBool("IsPreparing", isPreparing);
+            }
+            EditorUtility.SetDirty(anim);
+            _report = $"[OK] Contexto '{PreviewContexts[contextIndex]}' aplicado ao Animator '{anim.name}' (WeaponMode={weaponMode}, IsAiming={isAiming}, IsRidingBike={isRiding}).";
+            _reportType = MessageType.Info;
+        }
+
+        private void ApplyBoneOffsetWithUndo(Transform targetBone, Vector3 posDelta, Vector3 rotDelta)
+        {
+            if (targetBone == null)
+            {
+                _report = "[AVISO] Atribua um Osso / Ancora Alvo antes de aplicar offset.";
+                _reportType = MessageType.Warning;
+                return;
+            }
+
+            Undo.RecordObject(targetBone, "Apply Character Bone Offset");
+            targetBone.localPosition += posDelta;
+            targetBone.localRotation *= Quaternion.Euler(rotDelta);
+            EditorUtility.SetDirty(targetBone);
+            _report = $"[OK] Offset aplicado em '{targetBone.name}' (Undo registrado).";
+            _reportType = MessageType.Info;
         }
     }
 }
