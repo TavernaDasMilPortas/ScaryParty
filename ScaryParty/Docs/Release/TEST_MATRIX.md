@@ -1,6 +1,6 @@
 # Matriz de testes — acompanhamento
 
-O ROADMAP contém a especificação original. Este arquivo registra a execução e não comprova que ela ocorreu. Todos os casos começam NÃO EXECUTADO. Para sistema ausente usar LACUNA — Mx. Resultado anterior não substitui regressão na versão alterada.
+O ROADMAP contém a especificação original. Este arquivo registra a execução e não comprova que ela ocorreu. Todos os casos T01–T60 permanecem `NÃO EXECUTADO` no Unity Editor / PlayMode (`UNITY_EXECUTION=MANUAL_ONLY`). Nota R8: os **33 testes unitários puros de domínio** (`OvernightExperienceTests` + `PizzeriaDomainTests`) foram executados via runner `.NET` em scratch com **33/33 aprovados**; testes de runtime, física, UI e rede aguardam validação manual do usuário.
 
 Estados: NÃO EXECUTADO / PASSOU / FALHOU / BLOQUEADO / LACUNA — Mx. Para cada execução registrar data, SHA, preset/seed e host/cliente em evidência ou relatório. Preservar histórico relevante.
 

@@ -263,7 +263,7 @@ namespace ScaryParty.Pizzeria.Tests
             state.SupplyOrders[supplyId] = new SupplyOrderState(supplyId, 1, 1, 5, 25, 0.0, 20.0);
 
             NightCycleService.RecordNightRevenue(state, 50);
-            NightCycleService.TickNight(state, 10f);
+            NightCycleService.TickNight(state, 30f);
 
             Assert.AreEqual(OrderLifecycle.Expired, openOrder.Lifecycle);
             Assert.AreEqual(1, state.NightOrdersFailed);
@@ -442,7 +442,9 @@ namespace ScaryParty.Pizzeria.Tests
             for (int i = 0; i < 2; i++)
             {
                 var pid = state.GenerateItemId();
-                var pizza = new ItemState(pid, 100, ItemCategory.Pizza, LocationRef.InHand(0UL, HandSlotIndex.Left));
+                var pizza = new ItemState(pid, 2, ItemCategory.Pizza, LocationRef.InHand(0UL, HandSlotIndex.Left));
+                pizza.AddIngredient(3, ProcessingStage.Prepared, 1);
+                pizza.AddIngredient(5, ProcessingStage.Prepared, 1);
                 pizza.CookingStage = CookingStage.Baked;
                 pizza.PackagingState = PackagingState.Boxed;
                 pizza.LabelAddress = new AddressId(2);
@@ -492,7 +494,7 @@ namespace ScaryParty.Pizzeria.Tests
             state.Items[pizzaId] = pizza;
 
             var ovenSlot = new StationSlotId(1, 0);
-            Assert.IsTrue(ovenService.InsertPizza(state, ovenSlot, pizzaId, 0UL, catalog, defaultBakeDuration: 5f).Success);
+            Assert.IsTrue(processing.InsertOven(pizzaId, ovenSlot, state, bakeDuration: 5f, clock).Success);
 
             clock.Now = 10.0; // 5s bake + 5s past bake (> grace 2s)
             processing.TickOven(ovenSlot, state, burnGraceDuration: 2f, clock, ovenAutoShutoff: true);

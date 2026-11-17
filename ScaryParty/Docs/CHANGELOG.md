@@ -5,6 +5,22 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-17] — Recuperação e Integração M1–M8 (Etapas R0–R8) em `release/marcos-noturnos`
+- **Escopo:** `Pizzeria/Domain/**`, `Pizzeria/Network/**`, `Pizzeria/Composition/PizzeriaRoot.cs`, `Pizzeria/Presentation/{EmployeeAgentController,RunPreparationPresenter,NightResultsPresenter,ContextualTutorialPresenter,CustomerNpcView}.cs`, `Player/{PlayerHealth,PlayerAllyHelpInteractable,FirstPersonCameraController,PlayerInteraction}.cs`, `Weapons/{WeaponController,WeaponInputHandler}.cs`, `Combat/Monsters/{MonsterNpcController,MonsterPopulationDirector}.cs`, `City/{TrafficManager,PedestrianNpc,PizzeriaParkingLotBuilder}.cs`, `UI/Piaria/Scripts/Runtime/Presenters/HudPresenter.cs`, `Editor/CharacterSetupWizard.cs`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Release/*`, `Docs/{CURRENT_STATE,CHANGELOG}.md`.
+- **Resumo:** Executadas as etapas **R0–R8** do plano `Docs/Release/RECUPERACAO_M1_M8.md` com commits locais por bloco funcional:
+  - **R0:** correção de erros P0 de compilação e reclassificação honesta de status.
+  - **R1:** estados coerentes `Alive`/`Incapacitated`/`Dead`, cura/reanimação 3s autoritativa (`PlayerAllyHelpInteractable`), cleanup completo de morte/desconexão e câmera espectador `[Q]`/`[E]`.
+  - **R2:** contrato único de mãos, duas pistolas por `WeaponId` (`1`/`2`), bandoleira `[G]` com visual 3P e ADS `0.55x`, moto autoritativa (LOS/alcance + saída segura `CheckCapsule`).
+  - **R3:** avaliação multi-pizza definitiva, receita/reputação unificadas (`NetNightStateDto`), bounds da pizzaria no servidor, fechamento atômico, piso de estoque/suprimentos e capacidade reduzida de mochila danificada.
+  - **R4:** instância única de `RunProgressionService`, `NetRunStateDto`, `RunPreparationPresenter` (votação A/B, loja e `MARCAR PRONTO`), auto-desligamento do forno (`oven_timer`) e vitória da RUN na Noite 3.
+  - **R5:** `MonsterPopulationDirector`, `SpeciesHostilityService` (ofensa por alho `IngredientDefId == 10`), `ZombieConversionService`, `Rigidbody` no tráfego e guardas NavMesh (`SamplePosition` + `CalculatePath`).
+  - **R6:** correção de isolamento de ator/bloqueio em `EmployeeTaskService`, `NetEmployeeDto` e `EmployeeAgentController`/`EmployeePopulationDirector` (Balconista e Pizzaiolo autônomos com `HumanTakeoverTask`).
+  - **R7:** tutorial `[H]` / Noite 0 opcional, trava de clique UI→arma, HUD operacional completo (Caixa, Reputação, Comandas, Equipe) e `CharacterSetupWizard` (`IsRidingBike`, layer `WeaponUpperBody`, preview multi-contexto).
+  - **R8:** compilação estática limpa nos 4 `.csproj`, **33/33** testes pure `.NET` de domínio aprovados e documentação consolidada.
+- **Validação:** Build estático (0 erros) + 33/33 testes pure `.NET` aprovados + `git diff --check` limpo + auditoria `.meta`. Validações no Unity Editor (EditMode/PlayMode/ParrelSync/Wizard) permanecem pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-16] — Marcos M2–M8 na branch `release/marcos-noturnos`
 - **Escopo:** `City/{TrafficVehicle,TrafficManager,CityGenerator}.cs`, `City/Editor/CityGraphPathfinderTests.cs`, `Weapons/{WeaponBase,WeaponController,WeaponInputHandler}.cs`, `Player/FirstPersonCameraController.cs`, `City/DeliveryMotorcycleController.cs`, `Pizzeria/Player/PlayerInventoryAdapter.cs`, `Pizzeria/Domain/Services/{NightCycleService,SpeciesHostilityService,RunProgressionService,EmployeeTaskService}.cs`, `Combat/Monsters/MonsterNpcController.cs`, `Pizzeria/Network/{NetDtos,PizzeriaNetworkState,PizzeriaCommandHandler}.cs`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Release/*`.
 - **Resumo:** Implementados em blocos sequenciais com commits locais: M2 (relay de tráfego no `CityGenerator`, sensores A11, colisão e overlay `F7`), M3 (bandoleira `[G]`, moto 1 mão + pistola, ADS 1P, `WeaponId` A08 e atropelamento idempotente), M4 (fechamento no relógio A06, reputação `0..100`, resgate aliado/espectador A04, preservação de munição A10 e suprimentos), M5 (`MonsterNpcController`, `SpeciesHostilityService` e `ZombieConversionService`), M6 (`RunProgressionService` com N noites, votos, modificadores, loja atômica e RNG separado), M7 (`EmployeeTaskService` com reservas exclusivas `T58` e erro por habilidade) e consolidação M8.

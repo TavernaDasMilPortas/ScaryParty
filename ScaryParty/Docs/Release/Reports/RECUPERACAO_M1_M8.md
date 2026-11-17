@@ -106,6 +106,15 @@
   - Adicionada seção `3. Preview Multi-Contexto & Authoring de Offsets` no Wizard para inspeção de contextos (`Base`, `Moto`, `Pistola`, `Escopeta`, `Bandoleira`, `Susto`, `Conversão Zumbi`) e ajuste de offsets de ossos/âncoras com `Undo.RecordObject` + `EditorUtility.SetDirty`.
 - **Verificação estática R7:** Build estático dos 4 projetos (`Domain`, `Tests`, `Assembly-CSharp`, `Assembly-CSharp-Editor`) com 0 erros e `git diff --check` limpo.
 
+### R8 — Verificação Final, Execução de Domínio Pure `.NET` e Consolidação Documental
+- **Build estático final:** `ScaryParty.Pizzeria.Domain.csproj`, `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` compilados via `scratch/build_check.ps1` com **0 erros**.
+- **Testes unitários de domínio (pure `.NET` via `scratch/DomainTestRunner`):** **33/33 passaram (`0 falhas, 0 ignorados`)** — 14 em `OvernightExperienceTests` e 19 em `PizzeriaDomainTests`. (Nota: durante R8, foram corrigidos 3 setups de teste em `OvernightExperienceTests`: duração mínima de 30s em `NightGoalParameters`, ingredientes compatíveis com `CreateDefaultCheese()` no caso multi-pizza, e criação de operação em forno via `ProcessingService.InsertOven`).
+- **Auditoria de integridade:** Todos os novos scripts (`PlayerAllyHelpInteractable.cs`, `RunPreparationPresenter.cs`, `MonsterPopulationDirector.cs`, `EmployeeAgentController.cs`) possuem `.cs.meta` com GUID único; `CutsceneMaterialCatalog.cs` e `CutsceneSceneAssembler.cs` preservados intactos; `git diff --check` limpo.
+- **Testes que dependem do usuário no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`):**
+  1. Focar o Unity Editor e aguardar importação/recompilação (Console com 0 erros) + rodar Test Runner EditMode (`OvernightExperienceTests` e `ModularCityTests`).
+  2. Abrir `Tools/Scary Party/Wizards/Personagem & Interação/Personagens (Character Setup Wizard)`, executar setup completo/validação para persistir o novo layer `WeaponUpperBody` e parâmetro `IsRidingBike` em `CharacterAnimator.controller` e testar o Preview Multi-Contexto.
+  3. **PlayMode + ParrelSync (Host + 1 Cliente):** validar T01–T60 manualmente no Editor: estados `Incapacitated`/`Dead`/espectador (`[Q]`/`[E]`) + resgate 3s; 2 pistolas por `WeaponId` + bandoleira `[G]` + moto 1 mão + saída segura; entrega multi-pizza/reputação; votação inter-noites, loja, `MARCAR PRONTO` e vitória na Noite 3; tráfego, NPCs e arquétipos de monstros; contratação e ciclo autônomo de Balconista/Pizzaiolo com takeover; tutorial `[H]` e trava de clique UI→arma.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -118,4 +127,4 @@
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | **Concluído** (0 erros nos 4 `.csproj`) | Pendente (Editor Wizard / PlayMode) |
-| R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | Pendente | Pendente |
+| R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | **Concluído** (0 erros nos 4 `.csproj`; 33/33 testes pure `.NET` aprovados) | Pendente (`MANUAL_ONLY`: EditMode/PlayMode/ParrelSync) |
