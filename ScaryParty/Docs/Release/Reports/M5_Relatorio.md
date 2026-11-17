@@ -1,57 +1,26 @@
-# M5 — Relatório de execução
+# Relatório M5 — Monstros e Hostilidade
 
-Status: NÃO INICIADA
+**Status:** IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE  
+**Data:** 2026-11-16  
+**Branch / Commit M5 (código):** `release/marcos-noturnos` @ `b71d6b09`
 
-Este arquivo é um modelo. Nenhuma implementação ou teste foi realizado por sua criação.
+---
 
-## Contexto
+## 1. Implementação Realizada
 
-- Data/hora:
-- Branch / SHA inicial / SHA final:
-- Raiz Unity / cena / prefab / preset / seed:
-- Alterações locais preexistentes preservadas:
-- Dependências e pendências herdadas:
+1. **Domínio de Espécies, Hostilidade e Conversão (`SpeciesHostilityService.cs`):**
+   - Base única por capacidades (`SpeciesCapabilityProfile`) para `Human`, `Vampire`, `Werewolf`, `Ghost` e `Zombie`.
+   - `SpeciesHostilityService` com teto (`MaxHostilityLevel = 100`), duração, ofensa orientada a dado do catálogo (`OffenseIngredientId = 10` para alho vs vampiro) e política padrão configurável (`PersistAcrossNights = false`, documentada como proposta no roadmap).
+   - `ZombieConversionService` com teto configurável (`MaxInfectedCap = 6`), cooldown e idempotência por entidade (`_convertedIds`).
+2. **Base Comum Runtime/Rede (`MonsterNpcController.cs`):**
+   - `NetworkBehaviour` + `IDamageable` com `NetworkVariable` para `NpcBehaviorState` e HP, separando decisão no servidor da apresentação visual (olhos vermelhos via `MaterialPropertyBlock`).
+   - Aquisição/desistência por distância + tempo (`T57`), descida segura de telhado do Vampiro (`TryDropFromRooftop`), investida comprometida com recuperação do Lobisomem e blink com `NavMesh.SamplePosition` + máscara isolada do Fantasma.
+3. **Teste EditMode (`OvernightExperienceTests.cs`):**
+   - Adicionado `SpeciesHostilityAndZombieConversion_EnforceCatalogOffenseCapResetAndIdempotency`.
 
-## Tarefas
+---
 
-| Tarefa | Estado | Arquivos/evidência | Pendência |
-|---|---|---|---|
-| Preencher durante execução | Não iniciada | — | — |
+## 2. Pendências para Unity Editor / PlayMode
 
-## Achados
-
-| ID | Prioridade | Confirmado ou hipótese | Reprodução e resultado | Causa/evidência | Correção ou marco dono |
-|---|---|---|---|---|---|
-
-## Alterações e configuração
-
-Descrever comportamento antes/depois, referências de assets e parâmetros expostos.
-
-## Verificações executadas
-
-| Teste | Ambiente host/cliente | SHA/preset | Resultado | Evidência |
-|---|---|---|---|---|
-
-## Testes não executados e roteiro manual
-
-Pré-condições, ações numeradas, esperado e como registrar resultado. Não preencher como aprovado por inferência.
-
-## Riscos e decisões
-
-Separar decisões confirmadas, propostas configuráveis e limitações.
-
-## Checkpoint para retomar
-
-- Última tarefa concluída:
-- Tarefa em andamento:
-- Arquivos tocados:
-- Próxima ação exata:
-- Não repetir:
-- Bloqueios:
-
-## Aceite
-
-- Implementação: pendente.
-- Validação jogável: pendente.
-- P0/P1 restantes:
-- Próxima fase: não iniciada.
+- Focar o Unity Editor para gerar `.meta` dos dois scripts novos (`SpeciesHostilityService.cs` e `MonsterNpcController.cs`).
+- Associar `MonsterNpcController` aos prefabs/spawns das espécies e executar `T43–T45`, `T50`, `T57` em PlayMode (Host + Cliente).
