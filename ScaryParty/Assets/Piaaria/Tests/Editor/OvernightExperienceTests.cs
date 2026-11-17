@@ -298,5 +298,65 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsTrue(zombie.TryConvertTarget(102UL, 1, 12.0, rng));
             Assert.IsFalse(zombie.TryConvertTarget(103UL, 2, 20.0, rng)); // Teto atingido
         }
+
+        [Test]
+        public void RunProgression_ThreeNightsVotesModifiersShopAndCleanReset()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 100 };
+            var run = new RunProgressionService(seed: 777, maxNights: 3, difficulty: RunDifficulty.Normal);
+
+            // T52: Escala congelada na noite mesmo se alguém desconectar
+            run.FreezeNightStartParameters(state, 2);
+            int night1Goal = state.NightRevenueGoal;
+            Assert.AreEqual(run.ComputeTabulatedGoal(1, 2), night1Goal);
+
+            // T53 & T54: Votação com empate, desconexão e prontidão coletiva
+            var options = run.OpenChoiceVote(1, 2);
+            Assert.AreEqual(2, options.Count);
+            Assert.IsTrue(run.CastVote(0UL, options[0].Id));
+            Assert.IsTrue(run.CastVote(1UL, options[1].Id));
+            run.SetPlayerReady(0UL, true);
+            run.SetPlayerReady(1UL, false);
+            Assert.IsFalse(run.CanStartNight(new[] { 0UL, 1UL }));
+
+            run.OnParticipantDisconnected(1UL);
+            var winner = run.ResolveVoteServer();
+            Assert.IsNotNull(winner);
+            Assert.IsTrue(run.CanStartNight(new[] { 0UL }));
+
+            // T55: Modificador temporário expira, permanente persiste sem duplicar
+            run.ApplyModifier(new RunModifierDefinition { Id = "blood_moon", Duration = RunModifierDuration.OneNight, Value = 0.5f });
+            run.ApplyModifier(new RunModifierDefinition { Id = "oven_timer", Duration = RunModifierDuration.Permanent, Value = 1f });
+            Assert.IsTrue(run.RecalculateEffectiveStats().OvenAutoShutoffEnabled);
+            Assert.Greater(run.RecalculateEffectiveStats().VampireSpawnMultiplier, 1f);
+
+            // T56: Compra única atômica com saldo para 1 unidade
+            var item = new RunShopItem { Id = "espresso_machine", Name = "Café", Cost = 80, IsUnique = true };
+            Assert.IsTrue(run.TryPurchaseShopItem(state, item));
+            Assert.AreEqual(20, state.RestaurantBudget);
+            Assert.IsFalse(run.TryPurchaseShopItem(state, item));
+
+            // T59: Avançar N1 -> N2 -> N3 e encerrar RUN na 3ª noite
+            state.CurrentNightPhase = NightPhase.Results;
+            Assert.IsTrue(run.TryCompleteNightAndAdvance(state));
+            Assert.AreEqual(2, state.CurrentNightNumber);
+            Assert.IsFalse(run.ActiveModifiers.ContainsKey("blood_moon"));
+            Assert.IsTrue(run.ActiveModifiers.ContainsKey("oven_timer"));
+
+            state.CurrentNightPhase = NightPhase.Results;
+            Assert.IsTrue(run.TryCompleteNightAndAdvance(state));
+            Assert.AreEqual(3, state.CurrentNightNumber);
+
+            state.CurrentNightPhase = NightPhase.Results;
+            Assert.IsFalse(run.TryCompleteNightAndAdvance(state));
+            Assert.IsTrue(run.IsRunCompleted);
+            Assert.IsTrue(run.IsRunVictory);
+
+            // Nova RUN limpa toda persistência
+            run.ResetRun(state, seed: 888);
+            Assert.IsFalse(run.IsRunCompleted);
+            Assert.AreEqual(0, run.ActiveModifiers.Count);
+            Assert.AreEqual(1, state.CurrentNightNumber);
+        }
     }
 }
