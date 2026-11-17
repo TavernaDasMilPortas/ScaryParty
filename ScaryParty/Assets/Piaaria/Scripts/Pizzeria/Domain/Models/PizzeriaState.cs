@@ -36,6 +36,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int NightOrdersCompleted { get; set; } = 0;
         public int NightOrdersFailed { get; set; } = 0;
         public int NightLostCustomers { get; set; } = 0;
+        public int ToolRackStationId { get; set; } = 3;
         public NightStartSnapshot CurrentSnapshot { get; set; }
 
         private ulong _nextItemId = 1;

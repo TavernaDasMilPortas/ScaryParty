@@ -4,6 +4,7 @@ public abstract class WeaponBase : MonoBehaviour
 {
     public float fireRate = 0.5f;
     public int damage = 25;
+    public bool isAutomatic = false;
     public ParticleSystem muzzleFlash;
 
     public virtual void OnEquip()

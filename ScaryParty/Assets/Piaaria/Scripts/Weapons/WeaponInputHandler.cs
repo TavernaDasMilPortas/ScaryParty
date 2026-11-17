@@ -17,6 +17,8 @@ public class WeaponInputHandler : MonoBehaviour
     private WeaponController weaponController;
     private StarterAssetsInputs starterAssetsInputs;
     private Unity.Netcode.NetworkObject netObj;
+    private bool _wasFirePressed = false;
+    private bool _requireFireRelease = false;
 
     private void Start()
     {
@@ -36,10 +38,21 @@ public class WeaponInputHandler : MonoBehaviour
             starterAssetsInputs.scrollWeapon = 0f;
             starterAssetsInputs.aim = false;
             starterAssetsInputs.fire = false;
+            _wasFirePressed = false;
+            _requireFireRelease = true;
             return;
         }
 
-        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible) return;
+        if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
+        {
+            starterAssetsInputs.scrollWeapon = 0f;
+            starterAssetsInputs.aim = false;
+            starterAssetsInputs.fire = false;
+            _wasFirePressed = false;
+            _requireFireRelease = true;
+            weaponController?.StopAim();
+            return;
+        }
 
         // Scroll (Troca de arma)
         if (enableWeaponScroll)
@@ -70,14 +83,28 @@ public class WeaponInputHandler : MonoBehaviour
             weaponController.StopAim();
         }
 
-        // Fire
-        if (starterAssetsInputs.fire)
+        // Fire: semiautomático por borda de pressionamento; automático apenas se configurado na arma
+        bool firePressed = starterAssetsInputs.fire;
+        if (_requireFireRelease)
+        {
+            if (!firePressed)
+            {
+                _requireFireRelease = false;
+            }
+            _wasFirePressed = firePressed;
+            return;
+        }
+
+        bool shouldFire = weaponController != null && weaponController.IsCurrentWeaponAutomatic
+            ? firePressed
+            : (firePressed && !_wasFirePressed);
+
+        if (shouldFire)
         {
             weaponController.TriggerFire();
-            // We do not set starterAssetsInputs.fire = false here. 
-            // The new Input System will set it to false when the user releases the button.
-            // TriggerFire() already handles the fireRate cooldown.
         }
+
+        _wasFirePressed = firePressed;
     }
 
     public void SetWeaponControlsEnabled(bool enabled)

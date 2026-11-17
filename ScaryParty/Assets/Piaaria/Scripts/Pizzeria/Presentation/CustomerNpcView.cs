@@ -43,6 +43,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _impatienceTriggered;
         private float _nextMicroFidgetTime;
         private DiningTableStation _chairOccupantTable;
+        private bool _loggedNoNavMeshWarning;
 
         private void OnDestroy()
         {
@@ -318,10 +319,34 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                     else
                     {
-                        transform.position = Vector3.MoveTowards(transform.position, approachPos, Time.deltaTime * _walkSpeed);
-                        if (Vector3.Distance(transform.position, approachPos) <= 0.35f)
+                        // A07: Tentar reinserção no NavMesh antes de qualquer fallback; nunca atravessar obstáculos em linha reta
+                        if (Agent != null && UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var navHit, 2.5f, UnityEngine.AI.NavMesh.AllAreas))
                         {
-                            _hasReachedApproach = true;
+                            Agent.enabled = true;
+                            Agent.Warp(navHit.position);
+                            Agent.SetDestination(approachPos);
+                            _loggedNoNavMeshWarning = false;
+                        }
+                        else
+                        {
+                            float distToApproach = Vector3.Distance(transform.position, approachPos);
+                            Vector3 rayStart = transform.position + Vector3.up * 0.5f;
+                            Vector3 rayEnd = approachPos + Vector3.up * 0.5f;
+                            bool obstructed = Physics.Linecast(rayStart, rayEnd, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+                            if (!obstructed && distToApproach <= 1.5f)
+                            {
+                                transform.position = Vector3.MoveTowards(transform.position, approachPos, Time.deltaTime * _walkSpeed);
+                                if (Vector3.Distance(transform.position, approachPos) <= 0.35f)
+                                {
+                                    _hasReachedApproach = true;
+                                }
+                            }
+                            else if (!_loggedNoNavMeshWarning)
+                            {
+                                _loggedNoNavMeshWarning = true;
+                                Debug.LogWarning($"[CustomerNpcView] NPC {CustomerId} sem NavMesh válido para alcançar {approachPos} (obstructed={obstructed}, dist={distToApproach:F2}m). Movimento bloqueado para evitar atravessar obstáculos.");
+                            }
                         }
                     }
                 }

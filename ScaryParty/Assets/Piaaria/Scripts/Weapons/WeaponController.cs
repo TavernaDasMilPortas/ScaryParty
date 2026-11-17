@@ -221,6 +221,8 @@ public class WeaponController : MonoBehaviour
         return Input.GetKeyDown(KeyCode.R);
     }
 
+    public bool IsCurrentWeaponAutomatic => currentWeaponInstance != null && currentWeaponInstance.isAutomatic;
+
     public void CycleWeapon(int direction)
     {
         if (_inputHandler != null && (!_inputHandler.enableWeaponControls || !_inputHandler.enableWeaponScroll))

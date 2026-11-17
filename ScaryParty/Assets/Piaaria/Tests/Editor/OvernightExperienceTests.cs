@@ -220,5 +220,29 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsTrue(hostAttempt.Success);
             Assert.AreEqual(LocationType.StationSlot, state.Items[item.Id].Location.Type);
         }
+
+        [Test]
+        public void ClearTransientNightEntities_ReturnsToolsToConfiguredToolRackWithoutSlotCollision()
+        {
+            var state = new PizzeriaState
+            {
+                ToolRackStationId = 15
+            };
+
+            var toolInHandId = state.GenerateToolId();
+            var toolInHand = new ToolItemState(toolInHandId, 1, ToolCapability.Grate, LocationRef.InHand(0UL, HandSlotIndex.Left));
+            toolInHand.TryAcquireLease(101, 10.0, 2.0);
+            state.Tools[toolInHandId] = toolInHand;
+
+            var toolOnRackId = state.GenerateToolId();
+            var toolOnRack = new ToolItemState(toolOnRackId, 2, ToolCapability.Slice, LocationRef.InStation(15, 0));
+            state.Tools[toolOnRackId] = toolOnRack;
+
+            NightCycleService.ClearTransientNightEntities(state, repairBackpacks: true);
+
+            Assert.AreEqual(LocationRef.InStation(15, 0), state.Tools[toolOnRackId].Location);
+            Assert.AreEqual(LocationRef.InStation(15, 1), state.Tools[toolInHandId].Location);
+            Assert.IsFalse(state.Tools[toolInHandId].IsReserved(10.0));
+        }
     }
 }

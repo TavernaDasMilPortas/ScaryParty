@@ -120,11 +120,12 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
+            int rackStationId = state.ToolRackStationId > 0 ? state.ToolRackStationId : 3;
             foreach (var toolId in handTools)
             {
-                // Voltar ao ToolRack (Station 3) em slot livre
-                int rackSlot = FindFreeToolRackSlot(state);
-                TransferService.TransferTool(state, toolId, LocationRef.InStation(3, rackSlot), 0, root.Clock.Now);
+                // Voltar ao ToolRack configurado em slot livre
+                int rackSlot = FindFreeToolRackSlot(state, rackStationId);
+                TransferService.TransferTool(state, toolId, LocationRef.InStation(rackStationId, rackSlot), 0, root.Clock.Now);
             }
 
             ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CommitAndReplicate();
@@ -147,11 +148,11 @@ namespace ScaryParty.Pizzeria.Network
             return null;
         }
 
-        private int FindFreeToolRackSlot(PizzeriaState state)
+        private int FindFreeToolRackSlot(PizzeriaState state, int rackStationId)
         {
             for (int i = 0; i < 16; i++)
             {
-                var loc = LocationRef.InStation(3, i);
+                var loc = LocationRef.InStation(rackStationId, i);
                 bool occupied = false;
                 foreach (var tool in state.Tools.Values)
                 {

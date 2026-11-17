@@ -366,6 +366,7 @@ namespace ScaryParty.Pizzeria.Composition
                 if (rackStation != null && rackStation.stationId > 0)
                     toolRackStationId = rackStation.stationId;
             }
+            DomainState.ToolRackStationId = toolRackStationId;
 
             int globalToolSlotIndex = 0;
             foreach (var kvp in Catalog.Tools)

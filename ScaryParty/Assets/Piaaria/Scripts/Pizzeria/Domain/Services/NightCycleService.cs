@@ -123,17 +123,28 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 bp.Revision++;
             }
 
-            int fallbackRackIdx = 0;
+            int rackStationId = state.ToolRackStationId > 0 ? state.ToolRackStationId : 3;
+            var occupiedRackSlots = new HashSet<int>();
             foreach (var tool in state.Tools.Values)
             {
                 tool.ForceReleaseLease();
+                if (tool.Location.Type == LocationType.StationSlot && tool.Location.StationId == rackStationId)
+                {
+                    occupiedRackSlots.Add(tool.Location.SlotIndex);
+                }
+            }
+
+            int fallbackRackIdx = 0;
+            foreach (var tool in state.Tools.Values)
+            {
                 if (tool.Location.Type != LocationType.StationSlot)
                 {
-                    tool.Location = LocationRef.InStation(3, fallbackRackIdx++);
-                }
-                else
-                {
-                    fallbackRackIdx = Math.Max(fallbackRackIdx, tool.Location.SlotIndex + 1);
+                    while (occupiedRackSlots.Contains(fallbackRackIdx))
+                        fallbackRackIdx++;
+
+                    tool.Location = LocationRef.InStation(rackStationId, fallbackRackIdx);
+                    occupiedRackSlots.Add(fallbackRackIdx);
+                    fallbackRackIdx++;
                 }
                 tool.Revision++;
             }
