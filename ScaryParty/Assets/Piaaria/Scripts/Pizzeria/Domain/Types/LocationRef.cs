@@ -6,6 +6,7 @@ namespace ScaryParty.Pizzeria.Domain.Types
     {
         public readonly LocationType Type;
         public readonly ulong HolderId;
+        public int StationId => (int)HolderId;
         public readonly int SlotId;
         public int SlotIndex => SlotId;
         public readonly float WorldX;

@@ -23,8 +23,10 @@ namespace ScaryParty.Pizzeria.Network
         {
             if (IsServer)
             {
-                OnServerResetNightCombatRequested -= HandleResetNightCombatServer;
-                OnServerResetNightCombatRequested += HandleResetNightCombatServer;
+                OnServerResetNightCombatRequested -= HandleResetNightCombatRequestedServer;
+                OnServerResetNightCombatRequested += HandleResetNightCombatRequestedServer;
+                OnServerResetNightCombatWithPolicyRequested -= HandleResetNightCombatServer;
+                OnServerResetNightCombatWithPolicyRequested += HandleResetNightCombatServer;
                 OnServerRecoverMotorcycleRequested -= HandleRecoverMotorcycleServer;
                 OnServerRecoverMotorcycleRequested += HandleRecoverMotorcycleServer;
                 if (_projector == null)
@@ -40,7 +42,8 @@ namespace ScaryParty.Pizzeria.Network
 
         public override void OnDestroy()
         {
-            OnServerResetNightCombatRequested -= HandleResetNightCombatServer;
+            OnServerResetNightCombatRequested -= HandleResetNightCombatRequestedServer;
+            OnServerResetNightCombatWithPolicyRequested -= HandleResetNightCombatServer;
             OnServerRecoverMotorcycleRequested -= HandleRecoverMotorcycleServer;
             if (Instance == this) Instance = null;
             base.OnDestroy();
@@ -1145,6 +1148,16 @@ namespace ScaryParty.Pizzeria.Network
 
         public static event System.Func<bool> OnServerRecoverMotorcycleRequested;
         public static event System.Action OnServerResetNightCombatRequested;
+        public static event System.Action<bool> OnServerResetNightCombatWithPolicyRequested;
+
+        public static void RequestResetNightCombatServer(bool resetWeaponsAndAmmo)
+        {
+            OnServerResetNightCombatWithPolicyRequested?.Invoke(resetWeaponsAndAmmo);
+            if (!resetWeaponsAndAmmo)
+            {
+                OnServerResetNightCombatRequested?.Invoke();
+            }
+        }
 
         [ServerRpc(RequireOwnership = false)]
         public void ToggleClaimOrderServerRpc(ulong orderIdVal, ServerRpcParams rpcParams = default)
@@ -1419,6 +1432,16 @@ namespace ScaryParty.Pizzeria.Network
             });
         }
 
+        private static ClientRpcParams TargetSender(ulong clientId)
+        {
+            return new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { clientId } } };
+        }
+
+        private void HandleResetNightCombatRequestedServer()
+        {
+            HandleResetNightCombatServer(resetWeaponsAndAmmo: false);
+        }
+
         private void HandleResetNightCombatServer(bool resetWeaponsAndAmmo = false)
         {
             if (!IsServer) return;
@@ -1483,6 +1506,8 @@ namespace ScaryParty.Pizzeria.Network
         private void TickServerCombat(float dt)
         {
             if (_playerCombat.Count == 0) return;
+            var root = PizzeriaRoot.Instance;
+            bool enableAllPlayersDeadDefeat = ResolveAllPlayersDeadDefeatPolicy(root);
             bool changed = false;
 
             foreach (var kvp in _playerCombat)
@@ -1501,7 +1526,7 @@ namespace ScaryParty.Pizzeria.Network
                     c.RescueProgress = 0f;
                     c.Revision++;
 
-                    var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { kvp.Key } } };
+                    var targetParams = TargetSender(kvp.Key);
                     NotifyErrorClientRpc("Você morreu! Aguarde a equipe vencer a noite em modo espectador.", targetParams);
 
                     if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
@@ -1516,6 +1541,17 @@ namespace ScaryParty.Pizzeria.Network
             {
                 SyncPlayerCombatListServer();
             }
+        }
+
+        private static bool ResolveAllPlayersDeadDefeatPolicy(PizzeriaRoot root)
+        {
+            if (root != null && root.Config != null)
+            {
+                if (!root.Config.enableAllPlayersDeadDefeat) return false;
+                if (root.Config.nightConfig != null) return root.Config.nightConfig.enableAllPlayersDeadDefeat;
+                return true;
+            }
+            return true;
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1535,7 +1571,7 @@ namespace ScaryParty.Pizzeria.Network
                 target.RescueRemaining = 0f;
                 target.RescueProgress = 0f;
                 target.Revision++;
-                var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { targetClientId } } };
+                var targetParams = TargetSender(targetClientId);
                 NotifySuccessClientRpc($"Resgatado por aliado ({target.CurrentHp} HP)!", targetParams);
             }
             else
@@ -1548,6 +1584,7 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void ReportCustomerAttackInPizzeriaServerRpc(ulong customerId, bool insidePizzeriaVolume, ServerRpcParams rpcParams = default)
         {
+            var root = PizzeriaRoot.Instance;
             if (!IsServer || !insidePizzeriaVolume || root == null || root.DomainState == null) return;
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
             if (_customerAttackRepCooldown.TryGetValue(customerId, out double nextAllowed) && now < nextAllowed) return;
@@ -1685,7 +1722,7 @@ namespace ScaryParty.Pizzeria.Network
                 combat.Revision++;
                 BroadcastNoticeClientRpc("Jogador nocauteado! Um aliado precisa resgatá-lo antes que morra.", isError: true);
 
-                if (enableAllPlayersDeadDefeat && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
+                if ((enableAllPlayersDeadDefeat || ResolveAllPlayersDeadDefeatPolicy(root)) && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
                 {
                     NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
                     CommitAndReplicate();
@@ -1818,7 +1855,7 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!IsServer) return;
             var targetParams = TargetSender(senderId);
-
+            var root = PizzeriaRoot.Instance;
             var netState = PizzeriaNetworkState.Instance;
             if (netState == null || netState.Weapons == null || root == null || root.DomainState == null) return;
 
@@ -1920,7 +1957,7 @@ namespace ScaryParty.Pizzeria.Network
                 {
                     if (!muzzleBlock.collider.transform.IsChildOf(shooterRoot))
                     {
-                        BroadcastWeaponFireVisualClientRpc(senderId, rayOrigin, muzzleBlock.point, true);
+                        PlayWeaponFireEffectsClientRpc(senderId, weapon.WeaponType, rayOrigin, muzzleBlock.point, true);
                         return;
                     }
                 }

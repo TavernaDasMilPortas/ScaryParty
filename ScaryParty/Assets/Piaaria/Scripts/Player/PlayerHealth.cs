@@ -17,7 +17,7 @@ namespace ScaryParty.Combat
         public const float DefaultAutoRescueSeconds = 10f;
 
         [SerializeField] private int maxHp = DefaultMaxHp;
-        [SerializeField] private bool enableAllPlayersDeadDefeat = false;
+        [SerializeField] private bool enableAllPlayersDeadDefeat = true;
 
         private NetworkObject _netObj;
         private ThirdPersonController _tpc;

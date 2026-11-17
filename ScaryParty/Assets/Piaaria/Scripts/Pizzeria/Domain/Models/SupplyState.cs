@@ -63,6 +63,12 @@ namespace ScaryParty.Pizzeria.Domain.Models
             TotalCost = cost;
         }
 
+        public SupplyOrderState(SupplyOrderId id, int supplyItemId, int ingredientDefId, int unitsPerPack, int cost, double orderedTime, double arrivalTime)
+            : this(id, orderedTime, arrivalTime, cost)
+        {
+            AddLine(supplyItemId, ingredientDefId, unitsPerPack, 1);
+        }
+
         public void AddLine(int supplyItemId, int ingredientDefId, int unitsPerPack, int packQuantity)
         {
             _lines.Add(new SupplyOrderLine(supplyItemId, ingredientDefId, unitsPerPack, packQuantity));

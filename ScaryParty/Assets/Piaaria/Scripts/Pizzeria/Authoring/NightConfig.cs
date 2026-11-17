@@ -18,6 +18,8 @@ namespace ScaryParty.Pizzeria.Authoring
     [CreateAssetMenu(fileName = "NightConfig", menuName = "Scary Party/Pizzeria/Night Config")]
     public class NightConfig : ScriptableObject
     {
+        public bool enableAllPlayersDeadDefeat = true;
+
         public List<NightLevelEntry> nights = new List<NightLevelEntry>
         {
             new NightLevelEntry { nightNumber = 1, durationSeconds = 600f, revenueGoal = 60, prepSeconds = 4f, closingGraceSeconds = 0f },

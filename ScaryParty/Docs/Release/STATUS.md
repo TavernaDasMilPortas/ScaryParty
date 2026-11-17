@@ -1,22 +1,22 @@
 # Estado das fases
 
-Pacote criado para execução no projeto; nenhum marco foi executado por este pacote. A auditoria estática histórica está no ROADMAP e deve ser revalidada na branch local.
+Status reclassificado na etapa **R0** da recuperação M1–M8 (`Docs/Release/RECUPERACAO_M1_M8.md`): a classificação anterior marcava todos os marcos como concluídos apesar de existir código desconectado, UI/HUD ausentes e erros P0 de compilação. O status abaixo reflete apenas código compilado e integrado na branch `release/marcos-noturnos`; validações PlayMode/EditMode no Unity Editor continuam pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 | Marco | Status | Relatório |
 |---|---|---|
-| M1 — Auditoria | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M1_Relatorio](Reports/M1_Relatorio.md) |
-| M2 — Cidade Navegacao | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M2_Relatorio](Reports/M2_Relatorio.md) |
-| M3 — Maos Armas Moto | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M3_Relatorio](Reports/M3_Relatorio.md) |
-| M4 — Noite Completa | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M4_Relatorio](Reports/M4_Relatorio.md) |
-| M5 — Monstros | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M5_Relatorio](Reports/M5_Relatorio.md) |
-| M6 — Run Votos Loja | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M6_Relatorio](Reports/M6_Relatorio.md) |
-| M7 — Funcionarios | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M7_Relatorio](Reports/M7_Relatorio.md) |
-| M8 — Entrega Final | IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE | [M8_Relatorio](Reports/M8_Relatorio.md) |
+| M1 — Auditoria | PARCIAL — INTEGRAÇÃO/VALIDAÇÃO PENDENTE | [M1_Relatorio](Reports/M1_Relatorio.md) |
+| M2 — Cidade Navegacao | PARCIAL — INTEGRAÇÃO/VALIDAÇÃO PENDENTE | [M2_Relatorio](Reports/M2_Relatorio.md) |
+| M3 — Maos Armas Moto | PARCIAL — INTEGRAÇÃO/VALIDAÇÃO PENDENTE | [M3_Relatorio](Reports/M3_Relatorio.md) |
+| M4 — Noite Completa | INTEGRAÇÃO INCOMPLETA | [M4_Relatorio](Reports/M4_Relatorio.md) |
+| M5 — Monstros | INTEGRAÇÃO INCOMPLETA | [M5_Relatorio](Reports/M5_Relatorio.md) |
+| M6 — Run Votos Loja | INTEGRAÇÃO INCOMPLETA | [M6_Relatorio](Reports/M6_Relatorio.md) |
+| M7 — Funcionarios | INTEGRAÇÃO INCOMPLETA | [M7_Relatorio](Reports/M7_Relatorio.md) |
+| M8 — Entrega Final | NÃO CONCLUÍDA | [M8_Relatorio](Reports/M8_Relatorio.md) |
 
 ## Checkpoint ativo
 
-- Fase: M8 (`IMPLEMENTAÇÃO CONCLUÍDA — VALIDAÇÃO PENDENTE`). Todos os marcos M1–M8 tiveram sua implementação e documentação de base concluídas na branch `release/marcos-noturnos`.
-- Próxima ação: No Unity Editor aberto, focar o projeto para gerar `.meta` dos novos scripts, rodar o Test Runner EditMode e executar a lista priorizada de testes manuais em PlayMode/ParrelSync antes de gerar a build candidata.
-- Bloqueios: Validações EditMode, PlayMode, authoring de Animator/UI em cena e geração/teste de build dependem do usuário no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+- Fase: Recuperação M1–M8 em andamento — Etapa **R0 concluída** (compilação P0 restaurada e status reclassificado). Ver [RECUPERACAO_M1_M8](Reports/RECUPERACAO_M1_M8.md).
+- Próxima ação: Executar etapas **R1–R7** de integração funcional e depois **R8** (verificação final + checklist para execução manual no Unity Editor aberto).
+- Bloqueios: Validações EditMode/PlayMode/ParrelSync, authoring de prefabs/cena/Animator no Editor e build final dependem do usuário no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).
 
-Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases apenas porque o relatório foi criado.
+Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases nem marcar marcos como concluídos com sistemas desconectados ou sem UI/prefab configurados.
