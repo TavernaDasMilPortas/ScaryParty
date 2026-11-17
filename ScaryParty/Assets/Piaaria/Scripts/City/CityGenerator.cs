@@ -557,6 +557,7 @@ public class CityGenerator : NetworkBehaviour
 
         if (config.maxTrafficVehicles > 0)
         {
+            _trafficManager.SetNetworkRelay(this);
             _trafficManager.Initialize(_pathfinder, graph, seed + 1000, config.maxTrafficVehicles, config.trafficBaseSpeed);
         }
         _eventManager.Initialize(graph, _trafficManager, config, seed + 2000, _eventsRoot.transform, this);
@@ -1386,6 +1387,19 @@ public class CityGenerator : NetworkBehaviour
             if (p.z > maxZ) maxZ = p.z;
         }
         return new Vector3(maxX - minX, 0f, maxZ - minZ);
+    }
+
+    public void BroadcastTrafficStates(TrafficManager.VehicleState[] states)
+    {
+        if (!IsSpawned || !IsServer || states == null) return;
+        SyncTrafficVehiclesClientRpc(states);
+    }
+
+    [ClientRpc(Delivery = RpcDelivery.Unreliable)]
+    private void SyncTrafficVehiclesClientRpc(TrafficManager.VehicleState[] states)
+    {
+        if (IsServer || _trafficManager == null) return;
+        _trafficManager.ApplySyncedVehicleStatesFromRelay(states);
     }
 
     private void OnDrawGizmosSelected()

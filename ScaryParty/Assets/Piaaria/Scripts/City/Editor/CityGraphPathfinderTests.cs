@@ -87,5 +87,43 @@ public class CityGraphPathfinderTests
         _pathfinder.SetRoutesReady(true);
         Assert.IsTrue(_pathfinder.TryFindPath(Vector3.zero, new Vector3(10, 0, 0), out _));
     }
+
+    [Test]
+    public void TrafficVehicle_AdvancesWaypointsAndDetectsChildColliderAhead()
+    {
+        var leadGo = new GameObject("LeadVehicle");
+        var leadVeh = leadGo.AddComponent<TrafficVehicle>();
+        leadVeh.isActive = true;
+        leadGo.transform.position = new Vector3(0f, 0f, 5f);
+        leadGo.transform.rotation = Quaternion.identity;
+
+        var childColliderGo = new GameObject("ChildHull");
+        childColliderGo.transform.SetParent(leadGo.transform, false);
+        var box = childColliderGo.AddComponent<BoxCollider>();
+        box.size = new Vector3(2f, 1.5f, 3f);
+
+        var followerGo = new GameObject("FollowerVehicle");
+        var followerVeh = followerGo.AddComponent<TrafficVehicle>();
+        followerVeh.isActive = true;
+        followerVeh.speed = 8f;
+        followerVeh.waypoints = new List<Vector3> { Vector3.zero, new Vector3(0f, 0f, 20f) };
+        followerGo.transform.position = Vector3.zero;
+        followerGo.transform.rotation = Quaternion.identity;
+
+        Physics.SyncTransforms();
+
+        // Deve detectar o collider filho do veículo à frente (A11)
+        followerVeh.UpdateMovement(0.05f);
+        Assert.AreEqual(TrafficStopReason.VehicleAhead, followerVeh.CurrentStopReason);
+
+        // Se o outro veículo estiver em sentido oposto, não deve travar
+        leadGo.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        Physics.SyncTransforms();
+        followerVeh.UpdateMovement(0.05f);
+        Assert.AreEqual(TrafficStopReason.None, followerVeh.CurrentStopReason);
+
+        Object.DestroyImmediate(leadGo);
+        Object.DestroyImmediate(followerGo);
+    }
 }
 #endif
