@@ -1,6 +1,6 @@
 # Estado das fases
 
-Status atualizado após conclusão das etapas **R0–R8** da recuperação M1–M8 (`Docs/Release/RECUPERACAO_M1_M8.md`) na branch `release/marcos-noturnos`. O código e integrações dos marcos M1–M8 estão compilados (0 erros nos 4 `.csproj`) com **33/33** testes unitários puros de domínio aprovados em runner `.NET`; **nenhum** teste de Unity Editor (EditMode/PlayMode/ParrelSync/UI/Física/NavMesh) foi executado por política `UNITY_EXECUTION=MANUAL_ONLY`.
+Status atualizado após conclusão das **Etapas 1–6** de fechamento da recuperação M1–M8 (`Docs/Release/Reports/RECUPERACAO_M1_M8.md`) na branch `release/marcos-noturnos`. Os 4 `.csproj` compilam com 0 erros e **37/37** testes unitários puros de domínio passaram em runner `.NET`; **nenhum** teste de Unity Editor (EditMode/PlayMode/ParrelSync/UI/Física/NavMesh) foi executado por política `UNITY_EXECUTION=MANUAL_ONLY`.
 
 | Marco | Status | Relatório |
 |---|---|---|

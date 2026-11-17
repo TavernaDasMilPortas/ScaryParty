@@ -558,6 +558,85 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsTrue(task.IsReservedByHuman);
             Assert.AreEqual(-1, emp1.AssignedTaskId);
         }
+
+        [Test]
+        public void Etapa2_RunReset_IncrementsGenerationResetsReputationBudgetAndAttempts()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 120, Reputation = 35, RunTotalRevenue = 420 };
+            state.DeliveryAttempts.Record(999UL);
+            var run = new RunProgressionService(seed: 10, maxNights: 3, difficulty: RunDifficulty.Normal);
+            run.ResetRun(state, seed: 20, maxNights: 3, difficulty: RunDifficulty.Normal, startingBudget: 650, initialReputation: 95);
+
+            Assert.AreEqual(2u, state.GenerationId);
+            Assert.AreEqual(650, state.RestaurantBudget);
+            Assert.AreEqual(95, state.Reputation);
+            Assert.AreEqual(0, state.RunTotalRevenue);
+            Assert.IsFalse(state.DeliveryAttempts.HasAttempt(999UL));
+        }
+
+        [Test]
+        public void Etapa3_EmployeeMultiLineMultiQuantityTaskProgress_AndCancelOnExpire()
+        {
+            var state = new PizzeriaState();
+            var order = new OrderState(state.GenerateOrderId(), OrderSourceType.Phone, new AddressId(1), CustomerId.None, 0.0, 100.0);
+            order.AddLine(state.GenerateOrderLineId(), PizzaSpecification.CreateDefaultCheese(), 2);
+            order.AddLine(state.GenerateOrderLineId(), PizzaSpecification.CreateDefaultCheese(), 1);
+
+            var svc = new EmployeeTaskService();
+            var task = svc.EnqueueOrderTask(order.Id, EmployeeRole.Pizzaiolo);
+
+            Assert.IsFalse(svc.AdvanceUnitProgress(task.TaskId, order)); // Line 0: 1/2
+            Assert.AreEqual(0, task.CurrentLineIndex);
+            Assert.AreEqual(1, task.UnitsCompletedInLine);
+            Assert.AreEqual(EmployeeTaskState.Available, task.State);
+
+            Assert.IsFalse(svc.AdvanceUnitProgress(task.TaskId, order)); // Line 0: 2/2 -> Line 1
+            Assert.AreEqual(1, task.CurrentLineIndex);
+            Assert.AreEqual(0, task.UnitsCompletedInLine);
+
+            Assert.IsTrue(svc.AdvanceUnitProgress(task.TaskId, order));  // Line 1: 1/1 -> Completed
+            Assert.AreEqual(EmployeeTaskState.Completed, task.State);
+            Assert.AreEqual(3, task.TotalUnitsCompleted);
+
+            var t2 = svc.EnqueueOrderTask(new OrderId(88), EmployeeRole.Pizzaiolo);
+            svc.CancelTask(t2.TaskId);
+            Assert.AreEqual(EmployeeTaskState.Cancelled, t2.State);
+        }
+
+        [Test]
+        public void Etapa4_InterruptCustomerForCombat_FreesQueueTableAndOrder()
+        {
+            var state = new PizzeriaState();
+            var catalog = new DefinitionCatalog();
+            var clock = new FixedClock(10.0);
+            var orderService = new OrderService();
+            var custSvc = new CustomerService();
+
+            var cRes = custSvc.SpawnWalkInCustomer(state, catalog, clock);
+            Assert.IsTrue(cRes.Success);
+            var oRes = custSvc.CompleteAttendCustomer(state, cRes.Value, orderService, clock);
+            Assert.IsTrue(oRes.Success);
+
+            Assert.IsTrue(state.Customers.TryGetValue(cRes.Value, out var cust));
+            int tableId = cust.AssignedTableId;
+            Assert.IsFalse(state.Tables[tableId].IsFree);
+
+            Assert.IsTrue(custSvc.InterruptCustomerForCombat(state, cRes.Value, clock.Now));
+            Assert.IsFalse(state.Customers.ContainsKey(cRes.Value));
+            Assert.IsTrue(state.Tables[tableId].IsFree);
+            Assert.AreEqual(OrderLifecycle.Cancelled, state.Orders[oRes.Value].Lifecycle);
+        }
+
+        [Test]
+        public void Etapa5_Night0TutorialParameters_AllowNight0WithoutConsumingRunNights()
+        {
+            var state = new PizzeriaState();
+            var n0 = NightCycleService.GetDefaultParameters(0);
+            Assert.AreEqual(0, n0.NightNumber);
+            NightCycleService.StartNight(state, 0, n0);
+            Assert.AreEqual(0, state.CurrentNightNumber);
+            Assert.AreEqual(15, state.NightRevenueGoal);
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

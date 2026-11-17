@@ -127,4 +127,32 @@
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | **Concluído** (0 erros nos 4 `.csproj`) | Pendente (Editor Wizard / PlayMode) |
-| R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | **Concluído** (0 erros nos 4 `.csproj`; 33/33 testes pure `.NET` aprovados) | Pendente (`MANUAL_ONLY`: EditMode/PlayMode/ParrelSync) |
+| R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | **Concluído** (0 erros nos 4 `.csproj`; 37/37 testes pure `.NET` aprovados) | Pendente (`MANUAL_ONLY`: EditMode/PlayMode/ParrelSync) |
+
+## Rodada de Fechamento das Pendências (Etapas 1–6 pós-`a4d1ab57`)
+
+### Etapa 1 — Monstros e Funcionários Visíveis no Multiplayer (`4bacf814`)
+- **Achados confirmados:** `MonsterPopulationDirector` e `EmployeePopulationDirector` instanciavam corpos apenas no servidor sem consumidor nos clientes para `PizzeriaNetworkState.Monsters` e `PizzeriaNetworkState.Employees`, e `MonsterNpcController` herdava `NetworkBehaviour` sem `NetworkObject.Spawn()`.
+- **Decisão arquitetural e correção:** Seguindo o padrão de `CustomerSpawner`, IA/navegação/dano permanecem autoritativos no servidor; clientes consomem `Monsters` (`OnListChanged` + sync inicial) e `Employees` (`TickClientProxies` em `PizzeriaRoot.Update()`) com proxies visuais interpolados reutilizando `CharacterVisual` (`Resources/CharacterVisual` / variante estilizada) e `Animator` (`Speed`, `MotionSpeed`, `Grounded`, `IsMoving`). `MonsterNpcController` convertido para `MonoBehaviour`, eliminando `NetworkBehaviour` não spawnado e duplicatas no Host; limpeza unificada (`ClearNightMonstersServer`, `ClearAllClientProxies`, `EmployeePopulationDirector.ClearAll`).
+
+### Etapa 2 — Reiniciar RUN sem Destruir a Cozinha (`00643f9b`)
+- **Achados confirmados:** `PizzeriaState.Reset` limpava `StorageSlots`, `Tools`, `Backpacks`, `Stacks` e `Tables` e não reiniciava `Reputation`, `RunTotalRevenue` ou `DeliveryAttempts`; `StartNewRunInternalServer` não reconstruía os registros da cena.
+- **Correção:** Extraído `PizzeriaRoot.RebuildSceneDomainStateForNewRunServer()` e `ReinitializeForNewRunServer(...)` (fluxo único entre startup e nova RUN), `DeliveryAttemptLog.Clear()` e reset completo de reputação/orçamento/geração em `PizzeriaState.Reset(...)` / `RunProgressionService.ResetRun(...)`.
+
+### Etapa 3 — Pizzaiolo Completa Pedidos Reais (`868077f2`)
+- **Achados confirmados:** `EmployeeAgentController` lia apenas `order.Lines[0]`, concluía após 1 pizza, checava presença booleana por ingrediente e mutava estágios manualmente.
+- **Correção:** Adicionados `CurrentLineIndex`, `UnitsCompletedInLine`, `TotalUnitsCompleted`, `TotalUnitsRequired`, `AdvanceUnitProgress` e `CancelTask` em `EmployeeTaskService`; `EmployeeAgentController` agora planeja todas as linhas e quantidades, verifica pizzas já prontas na bancada para não duplicar trabalho humano, usa `ProcessingService` (`StartWork`/`CompleteWork` para massa e preparo com lease de `ToolItemState` + `InsertOven`), aplica porções exatas via `PizzaAssemblyService` com consumo real de estoque e conclui a tarefa somente após todas as unidades.
+
+### Etapa 4 — Monstros com Rotina e Papel de Cliente (`20c4752d`)
+- **Achados confirmados:** Estados `Routine` e `Customer` de `MonsterNpcController` apenas verificavam transição hostil sem executar patrulha nem fluxo de cliente.
+- **Correção:** Implementados `TickPeacefulRoutine` (patrulha NavMesh) e `TickCustomerRole` (fila, atendimento, mesa e saída compartilhando `CustomerSpawner.ResolveTargetPose` com `CustomerState.IsMonsterCustomer` para evitar corpo duplicado), `CustomerService.InterruptCustomerForCombat` ao entrar em combate, e retorno limpo a `Routine` em `Disengaging` sem confundir provocação individual com hostilidade de espécie.
+
+### Etapa 5 — Noite 0 Funcional e Parâmetros Editáveis (`b047d541`)
+- **Achados confirmados:** `NightGoalParameters` bloqueava `NightNumber < 1` e `SkipTutorialToNight1` chamava `AdvanceToNextNightServerRpc` (exigindo `Results`); parâmetros de RUN/funcionários estavam fixos em código.
+- **Correção:** Suporte real a `NightNumber == 0` em `NightCycleService`, RPCs `StartNight0TutorialServerRpc` / `SkipTutorialToNight1ServerRpc` em `PizzeriaCommandHandler` sem consumir as 3 noites da RUN, `HudPresenter` exibindo `NOITE 0 (TUTORIAL)` e parâmetros de RUN/Noite 0/funcionários expostos em `PizzeriaConfig`.
+
+### Etapa 6 — Regressão, Verificação Estática e Pendências Manuais (Commit atual)
+- **Testes adicionados e executados (`scratch/DomainTestRunner`):** **37/37 testes unitários puros de domínio aprovados (`0 falhas, 0 ignorados`)** — incluindo `Etapa2_RunReset_IncrementsGenerationResetsReputationBudgetAndAttempts`, `Etapa3_EmployeeMultiLineMultiQuantityTaskProgress_AndCancelOnExpire`, `Etapa4_InterruptCustomerForCombat_FreesQueueTableAndOrder` e `Etapa5_Night0TutorialParameters_AllowNight0WithoutConsumingRunNights`.
+- **Compilação estática (`scratch/build_check.ps1`):** `ScaryParty.Pizzeria.Domain.csproj`, `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com **0 erros**.
+- **Testes NÃO EXECUTADOS (`UNITY_EXECUTION=MANUAL_ONLY` — dependem do usuário no Unity Editor):**
+  - Bateria Host + 1 Cliente (PlayMode + ParrelSync): 1) começar sessão e produzir 1 pizza; 2) entregar pedido com 2 pizzas diferentes; 3) contratar e observar funcionários nos 2 jogadores; 4) encontrar monstro pacífico/cliente e provocar agressividade; 5) dano, interrupção/conclusão de resgate 3s e morte/espectador; 6) pistola com moto + atropelamento + queda; 7) bandoleira `[G]` da escopeta e duas mãos; 8) encerrar noite, votar, comprar, confirmar pronto e avançar; 9) vitória na Noite 3 e condição de derrota; 10) iniciar nova RUN na mesma sessão e repetir ciclo básico; além da validação visual de `CharacterVisual` no `CharacterSetupWizard` e salvamento de prefabs/cena se modificados no Editor.

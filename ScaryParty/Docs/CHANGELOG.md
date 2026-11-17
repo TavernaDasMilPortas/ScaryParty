@@ -5,6 +5,18 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-17] — Fechamento de Pendências M1–M8 (Etapas 1–6 pós-`a4d1ab57`)
+- **Escopo:** `MonsterNpcController.cs`, `MonsterPopulationDirector.cs`, `EmployeeAgentController.cs`, `EmployeeTaskService.cs`, `CustomerState.cs`, `CustomerService.cs`, `CustomerSpawner.cs`, `NewModels.cs`, `PizzeriaState.cs`, `RunProgressionService.cs`, `NightCycleService.cs`, `PizzeriaConfig.cs`, `PizzeriaRoot.cs`, `PizzeriaCommandHandler.cs`, `ContextualTutorialPresenter.cs`, `HudPresenter.cs`, `NetDtos.cs`, `ReplicationProjector.cs`, `OvernightExperienceTests.cs`, `Docs/Release/*`.
+- **Resumo:**
+  - **Etapa 1 (`4bacf814`):** proxies visuais interpolados de monstros e funcionários nos clientes usando `CharacterVisual`, remoção de `NetworkBehaviour` não spawnado em `MonsterNpcController` e limpeza unificada.
+  - **Etapa 2 (`00643f9b`):** fluxo único `RebuildSceneDomainStateForNewRunServer` / `ReinitializeForNewRunServer` reconstruindo mesas, estoques, utensílios, pilhas e mochilas ao reiniciar RUN, além de reset completo de `Reputation`, `RunTotalRevenue` e `DeliveryAttempts`.
+  - **Etapa 3 (`868077f2`):** Pizzaiolo autônomo planejando todas as linhas/quantidades do pedido, porções/estágios exatos com `ProcessingService`/`PizzaAssemblyService`/ferramentas e cooperação sem duplicar pizzas humanas.
+  - **Etapa 4 (`20c4752d`):** rotinas pacíficas e papel de cliente em `MonsterNpcController` com `InterruptCustomerForCombat` liberando fila/mesa/pedido ao entrar em combate.
+  - **Etapa 5 (`b047d541`):** Noite 0 funcional com transição segura para Noite 1 sem consumir noites da RUN e parâmetros de RUN/tutorial/funcionários expostos em `PizzeriaConfig`.
+  - **Etapa 6:** 4 novos testes de regressão em `OvernightExperienceTests.cs` (**37/37** aprovados no runner `.NET`), 4 `.csproj` com 0 erros e checklist Host + Cliente registrado em `RECUPERACAO_M1_M8.md`.
+
+---
+
 ## [2026-11-17] — Recuperação e Integração M1–M8 (Etapas R0–R8) em `release/marcos-noturnos`
 - **Escopo:** `Pizzeria/Domain/**`, `Pizzeria/Network/**`, `Pizzeria/Composition/PizzeriaRoot.cs`, `Pizzeria/Presentation/{EmployeeAgentController,RunPreparationPresenter,NightResultsPresenter,ContextualTutorialPresenter,CustomerNpcView}.cs`, `Player/{PlayerHealth,PlayerAllyHelpInteractable,FirstPersonCameraController,PlayerInteraction}.cs`, `Weapons/{WeaponController,WeaponInputHandler}.cs`, `Combat/Monsters/{MonsterNpcController,MonsterPopulationDirector}.cs`, `City/{TrafficManager,PedestrianNpc,PizzeriaParkingLotBuilder}.cs`, `UI/Piaria/Scripts/Runtime/Presenters/HudPresenter.cs`, `Editor/CharacterSetupWizard.cs`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Release/*`, `Docs/{CURRENT_STATE,CHANGELOG}.md`.
 - **Resumo:** Executadas as etapas **R0–R8** do plano `Docs/Release/RECUPERACAO_M1_M8.md` com commits locais por bloco funcional:
