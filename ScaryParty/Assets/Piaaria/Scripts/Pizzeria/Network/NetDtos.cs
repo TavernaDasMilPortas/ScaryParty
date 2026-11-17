@@ -1127,4 +1127,53 @@ namespace ScaryParty.Pizzeria.Network
         public override bool Equals(object obj) => obj is NetMonsterDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(MonsterId, Species, BehaviorState, CurrentHp, IsAlerted, Revision);
     }
+
+    public struct NetEmployeeDto : INetworkSerializable, IEquatable<NetEmployeeDto>
+    {
+        public int EmployeeId;
+        public byte Role; // 0=Cashier, 1=Pizzaiolo
+        public byte Level;
+        public bool IsAlive;
+        public byte TaskState; // EmployeeTaskState
+        public byte BlockReason; // EmployeeBlockReason
+        public int AssignedTaskId;
+        public int TargetOrderId;
+        public bool IntentionalErrorTriggered;
+        public float PosX;
+        public float PosY;
+        public float PosZ;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref EmployeeId);
+            serializer.SerializeValue(ref Role);
+            serializer.SerializeValue(ref Level);
+            serializer.SerializeValue(ref IsAlive);
+            serializer.SerializeValue(ref TaskState);
+            serializer.SerializeValue(ref BlockReason);
+            serializer.SerializeValue(ref AssignedTaskId);
+            serializer.SerializeValue(ref TargetOrderId);
+            serializer.SerializeValue(ref IntentionalErrorTriggered);
+            serializer.SerializeValue(ref PosX);
+            serializer.SerializeValue(ref PosY);
+            serializer.SerializeValue(ref PosZ);
+        }
+
+        public bool Equals(NetEmployeeDto other)
+            => EmployeeId == other.EmployeeId &&
+               Role == other.Role &&
+               Level == other.Level &&
+               IsAlive == other.IsAlive &&
+               TaskState == other.TaskState &&
+               BlockReason == other.BlockReason &&
+               AssignedTaskId == other.AssignedTaskId &&
+               TargetOrderId == other.TargetOrderId &&
+               IntentionalErrorTriggered == other.IntentionalErrorTriggered &&
+               Math.Abs(PosX - other.PosX) < 0.1f &&
+               Math.Abs(PosY - other.PosY) < 0.1f &&
+               Math.Abs(PosZ - other.PosZ) < 0.1f;
+
+        public override bool Equals(object obj) => obj is NetEmployeeDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(EmployeeId, Role, Level, IsAlive, TaskState, BlockReason, AssignedTaskId, TargetOrderId);
+    }
 }

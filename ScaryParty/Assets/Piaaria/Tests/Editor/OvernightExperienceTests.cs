@@ -529,6 +529,33 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsFalse(zSvc.TryConvertTarget(101UL, activeInfectedCount: 1, now: 2.0, rng: rng));
             Assert.IsFalse(zSvc.TryConvertTarget(102UL, activeInfectedCount: 2, now: 3.0, rng: rng));
         }
+
+        [Test]
+        public void R6_EmployeeActorIdIsolationAndBlockedTaskPreservation()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 1000 };
+            var svc = new EmployeeTaskService();
+            var emp1 = svc.TryHireEmployee(state, EmployeeRole.Pizzaiolo);
+            var emp2 = svc.TryHireEmployee(state, EmployeeRole.Pizzaiolo);
+            Assert.IsNotNull(emp1);
+            Assert.IsNotNull(emp2);
+
+            var task = svc.EnqueueOrderTask(new OrderId(77), EmployeeRole.Pizzaiolo);
+            Assert.IsTrue(svc.TryReserveTask(task.TaskId, (ulong)emp1.EmployeeId, isHuman: false, now: 10.0, leaseSeconds: 20.0));
+
+            // Humano com ClientId == emp1.EmployeeId (1) NÃO pode colidir em TryReserveTask
+            Assert.IsFalse(svc.TryReserveTask(task.TaskId, 1UL, isHuman: true, now: 11.0, leaseSeconds: 20.0));
+
+            // Tarefa bloqueada permanece reservada a emp1 durante lease, impedindo emp2 de roubar
+            svc.MarkTaskBlocked(task.TaskId, EmployeeBlockReason.NoDough);
+            Assert.AreEqual(EmployeeTaskState.Blocked, task.State);
+            Assert.IsFalse(svc.TryReserveTask(task.TaskId, (ulong)emp2.EmployeeId, isHuman: false, now: 12.0, leaseSeconds: 20.0));
+
+            // Takeover explícito por humano assume sem duplicar e libera emp1
+            Assert.IsTrue(svc.HumanTakeoverTask(task.TaskId, 1UL, now: 13.0));
+            Assert.IsTrue(task.IsReservedByHuman);
+            Assert.AreEqual(-1, emp1.AssignedTaskId);
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

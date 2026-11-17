@@ -128,10 +128,21 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!_tasks.TryGetValue(taskId, out var task)) return false;
             if (task.State == EmployeeTaskState.Completed || task.State == EmployeeTaskState.Cancelled) return false;
 
-            if (task.State == EmployeeTaskState.Reserved || task.State == EmployeeTaskState.InProgress)
+            if (task.State == EmployeeTaskState.Reserved ||
+                task.State == EmployeeTaskState.InProgress ||
+                task.State == EmployeeTaskState.Blocked)
             {
-                if (task.ReservedByActorId == actorId) return true;
+                if (task.ReservedByActorId == actorId && task.IsReservedByHuman == isHuman)
+                {
+                    task.LeaseExpiresAt = now + leaseSeconds;
+                    return true;
+                }
                 if (now < task.LeaseExpiresAt) return false; // Reserva exclusiva ativa
+            }
+
+            if (!isHuman && _employees.TryGetValue((int)actorId, out var emp))
+            {
+                emp.AssignedTaskId = taskId;
             }
 
             task.ReservedByActorId = actorId;
@@ -140,6 +151,32 @@ namespace ScaryParty.Pizzeria.Domain.Services
             task.State = EmployeeTaskState.Reserved;
             task.BlockReason = EmployeeBlockReason.None;
             return true;
+        }
+
+        public bool TryGetTaskForOrder(OrderId orderId, EmployeeRole role, out SharedEmployeeTask task)
+        {
+            foreach (var candidate in _tasks.Values)
+            {
+                if (candidate.TargetOrderId.Equals(orderId) &&
+                    candidate.RequiredRole == role &&
+                    candidate.State != EmployeeTaskState.Completed &&
+                    candidate.State != EmployeeTaskState.Cancelled)
+                {
+                    task = candidate;
+                    return true;
+                }
+            }
+            task = null;
+            return false;
+        }
+
+        public void ClearTaskBlocked(int taskId)
+        {
+            if (_tasks.TryGetValue(taskId, out var task) && task.State == EmployeeTaskState.Blocked)
+            {
+                task.State = EmployeeTaskState.InProgress;
+                task.BlockReason = EmployeeBlockReason.None;
+            }
         }
 
         /// <summary>Humano assume tarefa em andamento de um funcionário, liberando o funcionário sem duplicar a tarefa.</summary>

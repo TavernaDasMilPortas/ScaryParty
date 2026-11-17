@@ -82,6 +82,17 @@
   - `MonsterNpcController` remove hostilidade incondicional e implementa comportamentos por arquétipo: Vampiro com vigília em telhado + drop telegrafado (ou ofensa por alho `IngredientDefId == 10` em entrega/mesa), Lobisomem com preparação `0.55s` + `SphereCast` anti-parede e `Warp`, Fantasma com flutuação seletiva `1.15f` + blink telegrafado `0.45s` validado em NavMesh, e Zumbi com conversão idempotente de NPC via `ZombieConversionService`.
 - **Teste e verificação R5:** Teste unitário `R5_SpeciesHostilityGarlicOffenseAndZombieConversionIdempotency` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
 
+### R6 — M7: Funcionários Autônomos (Balconista & Pizzaiolo), Isolamento de Ator e Takeover
+- **Correção de contrato em `EmployeeTaskService.cs`:**
+  - `TryReserveTask` passa a comparar `(ReservedByActorId == actorId && IsReservedByHuman == isHuman)` evitando colisão entre `ClientId` humano e `EmployeeId` numérico, e preserva tarefas no estado `EmployeeTaskState.Blocked` reservadas até resolução da pré-condição, expiração do lease ou `HumanTakeoverTask`. Adicionados `TryGetTaskForOrder` e `ClearTaskBlocked`.
+- **Replicação e corpo autônomo (`NetDtos.cs`, `PizzeriaNetworkState.cs`, `EmployeeAgentController.cs` + `.meta`, `PizzeriaRoot.cs`, `PizzeriaCommandHandler.cs`):**
+  - Adicionado `NetEmployeeDto` e `NetworkList<NetEmployeeDto> Employees` sincronizados pelo servidor via `EmployeePopulationDirector.TickAndProjectServer` em `PizzeriaRoot.Update()`.
+  - `EmployeeAgentController` navega via `NavMeshAgent` validado (`SamplePosition` + `CalculatePath`) entre `CustomerCounterStation`, `PrepStation`, `AssemblyStation`, `OvenStation` e `PackagingStation`/`StagingStation`:
+    - **Balconista (`Cashier`):** atende a frente da fila executando `CustomerService.CompleteAttendCustomer`, gerando pedido presencial e enfileirando tarefa para `Pizzaiolo`.
+    - **Pizzaiolo:** dispensa massa/molho/ingredientes do estoque (`TransferService.DispenseFromStorage`), prepara, assa via `OvenService.InsertPizza`/`RemovePizza`, embala/posiciona na bancada e rola erro intencional determinístico (`RollIntentionalSkillError`) uma vez por tarefa. Reporta bloqueios reais (`NoDough`, `MissingIngredient`, `OvenBusy`, `ToolInUse`, `PathBlocked`).
+  - `PizzeriaCommandHandler.ToggleClaimOrderServerRpc` dispara `HumanTakeoverTask` ao assumir comanda em andamento de funcionário e `ReleaseActorTasks` ao liberar.
+- **Teste e verificação R6:** Teste unitário `R6_EmployeeActorIdIsolationAndBlockedTaskPreservation` adicionado em `OvernightExperienceTests.cs`. Build estático (`Domain`, `Tests`, `Assembly-CSharp`) com 0 erros e `git diff --check` limpo.
+
 ## Matriz de Rastreabilidade R0–R8 / M1–M8 / T01–T60
 
 | Etapa | Marco | Casos (`TEST_MATRIX`) | Escopo Principal | Status Código / Estático | Validação Unity Editor (`MANUAL_ONLY`) |
@@ -92,6 +103,6 @@
 | R3 | M4 | T18, T36–T43 | Entrega multi-pizza, receita/reputação unificadas, bounds pizzeria no servidor, fechamento atômico | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R4 | M6 | T49–T53 | `RunProgressionService` único por RUN, `NetRunStateDto`, votos/ready/loja e UI completa | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R5 | M2/M5 | T10, T11, T44–T48 | `Rigidbody` tráfego, guards NavMesh, `MonsterPopulationDirector`, hostilidade/arquétipos e zumbi | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
-| R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | Pendente | Pendente |
+| R6 | M7 | T54–T59 | Identidade ator/bloqueio `EmployeeTaskService`, `EmployeeAgentController` Caixa/Pizzaiolo e takeover | **Concluído** (0 erros; teste domínio adicionado) | Pendente (PlayMode/ParrelSync) |
 | R7 | M3/M8 | T29, T30, T60 | Tutorial Noite 0 opcional, trava clique UI->arma, HUD operacional completo e `CharacterSetupWizard` | Pendente | Pendente |
 | R8 | M1–M8 | T01–T60 | Compilação final, execução runner pure `.NET` de domínio, atualização documental final | Pendente | Pendente |

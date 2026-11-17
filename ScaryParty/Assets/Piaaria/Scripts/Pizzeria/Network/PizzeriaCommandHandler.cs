@@ -1215,9 +1215,22 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            CommitAndReplicate();
             bool claimed = root.DomainState.Orders.TryGetValue(new OrderId(orderIdVal), out var order) &&
                            order.ClaimedByClientId == senderId;
+            if (root.EmployeeTaskService != null)
+            {
+                var oid = new OrderId(orderIdVal);
+                if (claimed && root.EmployeeTaskService.TryGetTaskForOrder(oid, Domain.Services.EmployeeRole.Pizzaiolo, out var empTask))
+                {
+                    root.EmployeeTaskService.HumanTakeoverTask(empTask.TaskId, senderId, root.Clock.Now);
+                }
+                else if (!claimed)
+                {
+                    root.EmployeeTaskService.ReleaseActorTasks(senderId, isHuman: true);
+                }
+            }
+
+            CommitAndReplicate();
             NotifySuccessClientRpc(claimed ? $"Comanda #{orderIdVal} assumida por você." : $"Comanda #{orderIdVal} liberada para a equipe.", targetParams);
         }
 

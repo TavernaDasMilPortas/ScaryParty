@@ -133,6 +133,7 @@ namespace ScaryParty.Pizzeria.Composition
 
         public override void OnDestroy()
         {
+            Presentation.EmployeePopulationDirector.ClearAll();
             if (Instance == this) Instance = null;
             base.OnDestroy();
         }
@@ -546,6 +547,7 @@ namespace ScaryParty.Pizzeria.Composition
                 OrderService?.TickOrders(DomainState, Clock);
                 CallService?.TickCalls(DomainState, (float)Clock.Now);
                 SpeciesHostilityService?.Tick(Time.deltaTime);
+                Presentation.EmployeePopulationDirector.TickAndProjectServer(this, Network.PizzeriaNetworkState.Instance, Time.deltaTime);
                 dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
 
                 int prevHoldCount = DomainState.PlayerHolds.Count;
