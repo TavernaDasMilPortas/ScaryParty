@@ -125,6 +125,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public bool IsVoteResolved { get; private set; }
         public string LastResolvedOptionId { get; private set; }
 
+        // Intermissão 2.1 (urnas duplas sincronizadas por servidor)
+        public IntermissionStage IntermissionStage { get; private set; } = IntermissionStage.None;
+        public bool IsIntermissionLocked => IntermissionStage >= IntermissionStage.Locked;
+        public double RevealStartedAtServerTime { get; private set; }
+        public double CountdownStartsAtServerTime { get; private set; }
+        public double StartNightAtServerTime { get; private set; }
+        public string LastWinningHindranceId { get; private set; }
+        public string LastWinningOpportunityId { get; private set; }
+
         public bool HasModifier(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.ContainsKey(id);
         public bool RemoveModifierForDebug(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.Remove(id);
         public int GetModifierStacks(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.TryGetValue(id, out var m) ? m.Stacks : 0;
@@ -545,12 +554,181 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         public void OnParticipantDisconnected(ulong clientId)
         {
+            if (IsIntermissionLocked)
+            {
+                return;
+            }
+
             _votes.Remove(clientId);
             _readyPlayers.Remove(clientId);
             for (int s = 0; s < _voteStages.Count; s++)
             {
                 _voteStages[s].Votes.Remove(clientId);
             }
+        }
+
+        public void OpenTypedBallots(int targetNight, int hindranceOptionsCount = 3, int opportunityOptionsCount = 3)
+        {
+            var schedule = new NightPreparationScheduleData(
+                targetNight,
+                mandatoryHindranceStages: 1,
+                hindranceAlternatives: hindranceOptionsCount < 1 ? 3 : hindranceOptionsCount,
+                opportunityStages: 1,
+                opportunityAlternatives: opportunityOptionsCount < 1 ? 3 : opportunityOptionsCount,
+                additionalEventStages: 0,
+                eventAlternatives: 0);
+
+            OpenPreparationStages(targetNight, schedule);
+            IntermissionStage = IntermissionStage.Open;
+            RevealStartedAtServerTime = 0d;
+            CountdownStartsAtServerTime = 0d;
+            StartNightAtServerTime = 0d;
+            LastWinningHindranceId = null;
+            LastWinningOpportunityId = null;
+        }
+
+        public bool CastCategoryVote(ulong clientId, RunModifierKind category, string optionId)
+        {
+            if (IsIntermissionLocked) return false;
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                if (_voteStages[s].Category == category)
+                {
+                    return CastStageVote(clientId, s, optionId);
+                }
+            }
+            return false;
+        }
+
+        public bool TryGetPlayerVote(ulong clientId, RunModifierKind category, out string optionId)
+        {
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                if (_voteStages[s].Category == category)
+                {
+                    return _voteStages[s].Votes.TryGetValue(clientId, out optionId);
+                }
+            }
+            optionId = null;
+            return false;
+        }
+
+        public bool HasPlayerVotedAllMandatoryStages(ulong clientId)
+        {
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                var stage = _voteStages[s];
+                if (stage.IsMandatory && !stage.Votes.ContainsKey(clientId))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool TrySetPlayerReady(ulong clientId, bool ready, out string failureReason)
+        {
+            if (IsIntermissionLocked)
+            {
+                failureReason = "Votação já encerrada.";
+                return false;
+            }
+
+            if (ready && !HasPlayerVotedAllMandatoryStages(clientId))
+            {
+                failureReason = "Vote em Imprevistos e Oportunidades antes de ficar pronto.";
+                return false;
+            }
+
+            SetPlayerReady(clientId, ready);
+            failureReason = null;
+            return true;
+        }
+
+        public bool TryLockAndResolveBallotsServer(
+            double serverNow,
+            Func<int, int> nextIntExclusive = null,
+            float revealDuration = 4.5f,
+            float countdownDuration = 3.0f)
+        {
+            if (IsIntermissionLocked || _voteStages.Count == 0)
+            {
+                return false;
+            }
+
+            Func<int, int> rng = nextIntExclusive ?? (Func<int, int>)(max => ChoiceRng.Next(max));
+            IntermissionStage = IntermissionStage.Locked;
+
+            var candidates = new List<BallotCandidate>(4);
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                var stage = _voteStages[s];
+                candidates.Clear();
+
+                for (int o = 0; o < stage.Options.Count; o++)
+                {
+                    string optId = stage.Options[o].Id;
+                    int votes = 0;
+                    foreach (var kv in stage.Votes)
+                    {
+                        if (string.Equals(kv.Value, optId, StringComparison.Ordinal))
+                        {
+                            votes++;
+                        }
+                    }
+                    candidates.Add(new BallotCandidate(optId, votes));
+                }
+
+                var result = RunBallotResolver.ResolveWeighted(candidates, rng);
+                stage.ResolvedOptionId = result.WinningOptionId;
+
+                if (!string.IsNullOrEmpty(result.WinningOptionId) &&
+                    _catalog.TryGetValue(result.WinningOptionId, out var winningDef))
+                {
+                    ApplyModifier(winningDef);
+                    LastResolvedOptionId = result.WinningOptionId;
+                    if (stage.Category == RunModifierKind.Hindrance)
+                    {
+                        LastWinningHindranceId = result.WinningOptionId;
+                    }
+                    else if (stage.Category == RunModifierKind.Opportunity)
+                    {
+                        LastWinningOpportunityId = result.WinningOptionId;
+                    }
+                }
+            }
+
+            IsVoteResolved = true;
+            RevealStartedAtServerTime = serverNow;
+            CountdownStartsAtServerTime = serverNow + Math.Max(0.5f, revealDuration);
+            StartNightAtServerTime = CountdownStartsAtServerTime + Math.Max(0.5f, countdownDuration);
+            IntermissionStage = IntermissionStage.Revealing;
+            return true;
+        }
+
+        public void TickIntermissionServer(double serverNow, out bool shouldStartNight)
+        {
+            shouldStartNight = false;
+            if (IntermissionStage == IntermissionStage.Revealing && serverNow >= CountdownStartsAtServerTime)
+            {
+                IntermissionStage = IntermissionStage.Countdown;
+            }
+
+            if (IntermissionStage == IntermissionStage.Countdown && serverNow >= StartNightAtServerTime)
+            {
+                IntermissionStage = IntermissionStage.Starting;
+                shouldStartNight = true;
+            }
+        }
+
+        public void ResetIntermissionState()
+        {
+            IntermissionStage = IntermissionStage.None;
+            RevealStartedAtServerTime = 0d;
+            CountdownStartsAtServerTime = 0d;
+            StartNightAtServerTime = 0d;
+            LastWinningHindranceId = null;
+            LastWinningOpportunityId = null;
         }
 
         public bool CanStartNight(IReadOnlyCollection<ulong> connectedHumans)
