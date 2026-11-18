@@ -1,0 +1,41 @@
+# P0 — Inventário Técnico e Base de Playtest (ScaryParty)
+
+## 1. Ambiente, Versionamento e Pontos de Entrada Confirmados
+
+- **Branch:** `release/marcos-noturnos`
+- **Commit Base (HEAD inicial):** `bdffe5096163c0bac817a94a1c05e4d22fdf4652`
+- **Versão Unity (`ProjectVersion.txt`):** `6000.3.6f1 (bbb010bdb8a3)`
+- **Unity CLI:** `1.0.1` (`win32-x64`) + `com.unity.pipeline@1.0.0` + `com.unity.multiplayer.playmode@2.0.2`
+- **Fluxo Canônico de Cenas (`EditorBuildSettings.asset`):**
+  1. Entrada / Lobby: `Assets/Piaaria/Scenes/LobbyScene.unity`
+  2. Sala de Espera: `Assets/Piaaria/Scenes/ReadyScene.unity`
+  3. Gameplay Canônica (destino principal): `Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity`
+  4. Gameplay Variante Cel-Shaded: `Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity`
+- **Prefabs e Configs Reais Ativos:**
+  - Jogador: `Assets/ThirdParty/StarterAssets/ThirdPersonController/Prefabs/PlayerArmature.prefab`
+  - Pizzaria: `Assets/Piaaria/Prefabs/Pizzeria/PizzeriaModular_Manual.prefab` (spawnada em runtime por `CityGenerator` via `CityPizzeriaPlacementAdapter`)
+  - Configuração da Pizzaria: `Assets/Piaaria/ScriptableObjects/Pizzeria/PizzeriaConfig_PizzeriaModular_Manual.asset` (`nightConfig = null`)
+  - Configuração da Cidade: `Assets/Piaaria/ScriptableObjects/DefaultCityConfig.asset` (`seed = 13484161`)
+  - UI Toolkit: `Assets/Piaaria/UI/PanelSettings.asset` + `MainGameHUD.uxml` + `LobbySceneContainer.uxml` + `ReadyRoomScreen.uxml`
+  - Catálogo de Rede: `Assets/Piaaria/DefaultNetworkPrefabs.asset` (`PlayerArmature` e `PizzeriaModular_Manual` registrados)
+  - Layers verificadas: `8: MinimapOnly`, `9: LocalPlayerModel`, `10: FirstPersonOnly`
+  - Alterações locais pré-existentes preservadas: 43 arquivos modificados do usuário (Cutscene, animators, StationDefs, etc.) não tocados por este trabalho.
+
+---
+
+## 2. Inventário das Funcionalidades do Plano (Estado Inicial pré-P1..P6)
+
+| Fase | Funcionalidade | Serviço / Domínio | UI / Interação | Prefab / Cena / Config | Representação Host / Cliente | Status Inicial | Lacunas Confirmadas |
+|---|---|---|---|---|---|---|---|
+| **P0** | Instalador & Manifesto de Playtest | N/A | N/A | `LobbyScene`, `ReadyScene`, `GameScene`, `GameScene_CelShaded` | N/A | **Ausente** | Faltavam `PlaytestReferenceManifest`, `BuildVersionInfo`, instalador idempotente único e `UIFeedbackService` na `ReadyScene`. |
+| **P1** | Monstros nos Clientes | `SpeciesHostilityService`, `ZombieConversionService` | Barras/olhos no mundo | `MonsterPopulationDirector` + `MonsterNpcController` | `PizzeriaNetworkState.Monsters` (`NetMonsterDto`) | **Parcial (Quebrado em Cliente)** | `MonsterPopulationDirector.EnsureOn(this)` só é chamado dentro de `if (IsServer)`; `Update()` exige `DomainState != null` antes do caminho cliente; `EnsureClientSubscribed` não checa `ns.IsSpawned`; `NetMonsterDto.Equals` ignora `Yaw`; `0.25s` rep rate; corpos mortos ficam de pé no Host. |
+| **P1** | Funcionários nos Clientes | `EmployeeTaskService` | Resumo no `HudPresenter` | `EmployeePopulationDirector` (`EmployeeAgentController`) | `PizzeriaNetworkState.Employees` (`NetEmployeeDto`) | **Parcial** | Servidor faz `Employees.Clear() + Add()` a cada 10 cm (`ListChanged.Clear`); `NetEmployeeDto` sem `Yaw`/HP/progresso de unidade; falta collider/`IDamageable` e postura de morte no Host; `OnNightEnded()` órfão. |
+| **P2** | Funcionários sem Resultados Forçados | `EmployeeTaskService`, `ProcessingService`, `PizzaAssemblyService`, `TransferService` | Bloqueios no HUD | `EmployeeAgentController` em `PizzeriaRoot` | `NetEmployeeDto` | **Parcial (Falhas Graves)** | `CompleteWork` força `PrepStage = Prepared` (causado por falta de `HeartbeatWork` > 0.75s); montagem força `pizza.AddIngredient` + `return true`; início+fim no mesmo frame; roubo de ferramenta na mão de humano; `bypassReservation: true`; dreno de estoque a 60fps; vazamento na mão virtual; lixeira `[F]` quebrada em `PlayerInteraction`. |
+| **P2** | Identidade Exclusiva de Pizza | `OrderService`, `DeliveryService`, `CustomerService` | `TicketSheetView` / HUD | `PizzeriaState` | `NetItemDto`, `NetOrderDto` | **Ausente** | `CountReadyMatchingPizzasForLine` conta pizzas sem vínculo `ItemId <-> Unidade`; `ItemCategory.Box` quebra `IsPizzaLike` para pizzas embaladas por humanos; falta reconciliação em entrega/descarte/cancelamento. |
+| **P3** | Metas Configuráveis & Init Consistente | `NightCycleService`, `RunProgressionService`, `DemandDirector` | Banner/Resultados | `PizzeriaConfig_PizzeriaModular_Manual`, `NightConfig` (0 assets) | `NetNightStateDto`, `NetRunStateDto` | **Parcial (Sobrescrita)** | `FreezeNightStartParameters` sobrescreve preset/config com `ComputeTabulatedGoal` hardcoded e converte Noite 0 em Noite 1; startup (`InitializeServerDomain`) não congela humanos nem aplica escala; `NightResultsPresenter` ignora `NightNumber == 0`; Reset de Nova RUN não limpa `DemandDirector`, sessões de armazém nem `PlayerState.Money`; salto fantasma de mochila `2->4`. |
+| **P4** | Entrada / Lobby & Ready | `LobbyManager` | `MainMenuPresenter`, `LobbyPresenter`, `ReadyRoomPresenter` | `LobbyScene`, `ReadyScene` | `PlayerState` | **Parcial** | Falta seleção de Preset/Dificuldade/Seed/Tutorial pelo Host, aviso claro para clientes, erro visível no join e retorno ao Lobby se Host cair; falta `UIFeedbackService` na `ReadyScene`. |
+| **P4** | HUD & Interação | `PlayerHoldService`, `WeaponController` | `HudPresenter`, `PlayerInteraction`, `PizzeriaNotifier` | `MainGameHUD.uxml`, `StationProgressBar` | `NetPlayerCombatDto`, `NetNightStateDto` | **Parcial** | `MoneyLabel` exibe dinheiro individual vs Caixa coletivo; bandoleira some quando mãos ocupadas; sem lista de participantes no HUD; `PizzeriaNotifier.OnFeedbackReceived` sem assinante; alcance inconsistente; toast otimista antes do servidor. |
+| **P4** | Pedidos, Reposição, Loja & Funcionários | `OrderService`, `NightCycleService`, `EmployeeTaskService`, `UpgradeService` | `TicketModalPresenter`, `SupplierTerminal`, `RunPreparationPresenter` | `Station_SupplierTerminal` (`0` renderers), `MainGameUI` | `NetOrderDto`, `NetSupplyDto`, `NetRunStateDto`, `NetEmployeeDto` | **Parcial / Ausente** | **Reposição totalmente ausente** (sem `PlaceSupplyOrderServerRpc` nem UI); `NetSupplyDto` não replica conteúdo; Loja só existe embutida inter-noites sem níveis/armas/desabilitação; sem painel de gestão de funcionários; `StoragePresenter` duplica listeners a cada `Open()`. |
+| **P4** | Tutorial, Resultados, Espectador, Mapa, Pausa/Loading | `NightCycleService`, `PlayerHealth` | `ContextualTutorialPresenter`, `NightResultsPresenter`, `MinimapPresenter`, `PauseEscapeMenuPresenter` | `MainGameUI`, `Minimap_WorldImage_Rig` | `NetNightStateDto`, `NetPlayerCombatDto` | **Parcial** | Conflito `[H]` (Tutorial vs Receitas); botões do tutorial inclicáveis sem cursor e sem trava de Host; Resultados sem gastos separados e chamando `RetryNightServerRpc`; Morte/Espectador sem overlay/barra para vítima/nomes; Mapa só mostra rotas de caixas carregadas; 7 modais fora da `UIModalStack`; `WeaponInputHandler` não checa UI Toolkit `IPanel.Pick`; Loading sem UI de erro. |
+| **P5** | Objetos 3D Provisórios | `MonsterPopulationDirector`, `PizzeriaParkingLotBuilder`, `CityGenerator` | `IInteractable`, `EntityVisualAnchorRig` | `PizzeriaModular_Manual.prefab`, `Art/Models/*`, `Prefabs/Weapons/*` | `VisualRoot` local/proxy | **Parcial** | Monstros/funcionários usam `CharacterVisual` apenas com tint (sem acessórios/variantes por espécie/cargo); Moto, Rack e Dummy são primitivas geradas apenas em runtime sem prefabs persistentes/gizmos; `Station_SupplierTerminal` e `Station_Receiving` sem visual 3D (`0` renderers); falta Alho `id=10` com visual/receita; falta anchor explícito de telhado em `CityBuilding`. |
+| **P6** | Presets & Painel de Diagnóstico | `RunProgressionService`, `PizzeriaCommandHandler` | `PlaytestDiagnosticsPresenter` (Ausente) | `Entrega_3Noites`, `Playtest_Integracao`, `Tutorial_Noite0` (Ausentes) | `NetRunStateDto` / `NetDiagnosticsDto` | **Ausente** | Não há `PizzeriaRunPreset`, nem painel de diagnóstico recolhível exclusivo do Host com comandos reais e marcação `IsDebugTaintedRun`; `PizzeriaDebugCommands` antigo não está no prefab modular. |

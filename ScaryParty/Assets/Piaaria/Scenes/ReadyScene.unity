@@ -306,6 +306,7 @@ GameObject:
   - component: {fileID: 300000007}
   - component: {fileID: 300000008}
   - component: {fileID: 300000009}
+  - component: {fileID: 300000010}
   m_Layer: 0
   m_Name: --- UI ---
   m_TagString: Untagged
@@ -427,6 +428,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ScaryParty.UI.Piaria.Presenters::ToastPresenter
   uiDocument: {fileID: 300000003}
+--- !u!114 &300000010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 300000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f246290efb84c7fb3a0933e9cb3f937, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.UI.Piaria.Core.UIFeedbackService
+  audioSource: {fileID: 0}
+  hoverClip: {fileID: 0}
+  clickClip: {fileID: 0}
+  successClip: {fileID: 0}
+  errorClip: {fileID: 0}
+  readyClip: {fileID: 0}
+  hoverPlayer: {fileID: 0}
+  clickPlayer: {fileID: 0}
+  successPlayer: {fileID: 0}
+  errorPlayer: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

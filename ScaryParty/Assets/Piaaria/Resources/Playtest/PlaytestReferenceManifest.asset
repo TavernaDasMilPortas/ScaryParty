@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 926a53f7727517243a14d99bfc6db969, type: 3}
+  m_Name: PlaytestReferenceManifest
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest
+  branchName: release/marcos-noturnos
+  baseCommitSha: bdffe5096163c0bac817a94a1c05e4d22fdf4652
+  unityVersion: 6000.3.6f1
+  lastValidatedUtc: 
+  scenes:
+    lobbyScenePath: Assets/Piaaria/Scenes/LobbyScene.unity
+    readyScenePath: Assets/Piaaria/Scenes/ReadyScene.unity
+    canonicalGameScenePath: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
+    celShadedVariantScenePath: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
+  activePizzeriaConfig: {fileID: 11400000, guid: 5dd786dcdcb30634c8c6bc3b582da4d0, type: 2}
+  activePizzeriaPrefab: {fileID: 3084738830506233021, guid: fc7266d1e4dbc5a46aa1445238583bbe, type: 3}
+  playerPrefab: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
+  networkPrefabsConfigAsset: {fileID: 0}
+  runPresets: []
+  monsterVisualCatalog: {fileID: 0}
+  cashierVisualPrefab: {fileID: 0}
+  pizzaioloVisualPrefab: {fileID: 0}
+  motorcycleVisualPrefab: {fileID: 0}
+  supplierTerminalVisualPrefab: {fileID: 0}
+  receivingZoneVisualPrefab: {fileID: 0}
+  managementBoardVisualPrefab: {fileID: 0}
+  placeholders: []
