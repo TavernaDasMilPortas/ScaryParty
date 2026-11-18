@@ -149,6 +149,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             Ensure<TicketModalPresenter>(hud, ref changes);
             Ensure<OperationsHubPresenter>(hud, ref changes);
             Ensure<LifeAndSpectatorOverlayPresenter>(hud, ref changes);
+            Ensure<PlaytestDiagnosticsPresenter>(hud, ref changes);
             Ensure<ContextualTutorialPresenter>(hud, ref changes);
             Ensure<RunPreparationPresenter>(hud, ref changes);
             Ensure<NightResultsPresenter>(hud, ref changes);

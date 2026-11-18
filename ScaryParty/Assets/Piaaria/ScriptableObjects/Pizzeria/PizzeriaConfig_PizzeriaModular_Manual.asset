@@ -13,8 +13,11 @@ MonoBehaviour:
   m_Name: PizzeriaConfig_PizzeriaModular_Manual
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaConfig
   compositionRules: {fileID: 0}
-  defaultPreset: {fileID: 0}
-  availablePresets: []
+  defaultPreset: {fileID: 11400000, guid: 3078ffee4b86dea469aa299d72297337, type: 2}
+  availablePresets:
+  - {fileID: 11400000, guid: 3078ffee4b86dea469aa299d72297337, type: 2}
+  - {fileID: 11400000, guid: 0b2aa4a0caae99e48a72404a0c6f5135, type: 2}
+  - {fileID: 11400000, guid: 0c6c41f634f4a5a448f7ad5bed1e2ded, type: 2}
   nightConfig: {fileID: 0}
   enableAllPlayersDeadDefeat: 1
   allowDebugNightRetryOnDefeat: 0

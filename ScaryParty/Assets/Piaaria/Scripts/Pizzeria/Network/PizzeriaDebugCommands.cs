@@ -19,7 +19,10 @@ namespace ScaryParty.Pizzeria.Network
             if (!Debug.isDebugBuild && !Application.isEditor) return;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (!PizzeriaCommandHandler.CanExecuteHostDebugMutation(IsServer, rpcParams.Receive.SenderClientId, NetworkManager.ServerClientId, root.DomainState))
+                return;
 
+            root.DomainState.IsDebugTaintedRun = true;
             root.DomainState.RestaurantBudget += amount;
             PizzeriaCommandHandler.Instance?.CommitAndReplicate();
         }
@@ -30,7 +33,10 @@ namespace ScaryParty.Pizzeria.Network
             if (!Debug.isDebugBuild && !Application.isEditor) return;
             var root = PizzeriaRoot.Instance;
             if (root == null || root.DomainState == null) return;
+            if (!PizzeriaCommandHandler.CanExecuteHostDebugMutation(IsServer, rpcParams.Receive.SenderClientId, NetworkManager.ServerClientId, root.DomainState))
+                return;
 
+            root.DomainState.IsDebugTaintedRun = true;
             var lines = new System.Collections.Generic.List<Domain.Models.OrderLineState>
             {
                 new Domain.Models.OrderLineState(root.DomainState.GenerateOrderLineId(), 1, 1)

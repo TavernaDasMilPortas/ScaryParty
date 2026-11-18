@@ -45,6 +45,18 @@ namespace ScaryParty.Combat.Monsters
         public IReadOnlyList<MonsterNpcController> ActiveMonsters => _activeMonsters;
         public IReadOnlyDictionary<ulong, MonsterNpcController> ClientProxies => _clientProxies;
         public int ClientProxyCount => _clientProxies.Count;
+        public static bool ShowTechnicalSpeciesOverlay { get; set; }
+
+        public MonsterNpcController SpawnDebugMonsterServer(PizzeriaRoot root, NpcSpecies species)
+        {
+            if (root == null || !root.IsServer) return null;
+            var buildings = FindObjectsByType<CityBuilding>(FindObjectsSortMode.None);
+            bool perched = species == NpcSpecies.Vampire && buildings != null && buildings.Length > 0;
+            Vector3 pos = ResolveRooftopOrStreetSpawn(buildings, root.transform.position, _activeMonsters.Count + UnityEngine.Random.Range(1, 25), perched);
+            var ctrl = SpawnMonsterServer(root, species, pos, perched);
+            ReplicateMonstersServer();
+            return ctrl;
+        }
 
         private static void DestroyObjectSafe(UnityEngine.Object obj)
         {

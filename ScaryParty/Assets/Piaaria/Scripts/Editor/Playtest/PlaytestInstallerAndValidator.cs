@@ -103,6 +103,7 @@ namespace ScaryParty.Editor.Playtest
             totalChanges += EnsureManifest(sb);
             var manifest = AssetDatabase.LoadAssetAtPath<PlaytestReferenceManifest>(ManifestAssetPath);
             totalChanges += PlaytestPlaceholderAssetBuilder.EnsureAllPlaceholders(manifest, sb);
+            totalChanges += PlaytestPresetBuilder.EnsureAllPresets(manifest, sb);
             totalChanges += EnsureAllScenes(sb);
 
             if (totalChanges > 0)
@@ -126,6 +127,7 @@ namespace ScaryParty.Editor.Playtest
             changes += EnsureManifest(sb);
             var manifest = AssetDatabase.LoadAssetAtPath<PlaytestReferenceManifest>(ManifestAssetPath);
             changes += PlaytestPlaceholderAssetBuilder.EnsureAllPlaceholders(manifest, sb);
+            changes += PlaytestPresetBuilder.EnsureAllPresets(manifest, sb);
             changes += EnsureAllScenes(sb);
             if (changes > 0)
             {
@@ -414,6 +416,7 @@ namespace ScaryParty.Editor.Playtest
                 if (manifest.supplierTerminalVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing supplierTerminalVisualPrefab."); errorCount++; }
                 if (manifest.receivingZoneVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing receivingZoneVisualPrefab."); errorCount++; }
                 if (manifest.managementBoardVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing managementBoardVisualPrefab."); errorCount++; }
+                if (manifest.runPresets == null || manifest.runPresets.Count < 3) { sb.AppendLine("[ERROR] Manifest missing P6 runPresets (expected >= 3)."); errorCount++; }
             }
 
             var cfg = AssetDatabase.LoadAssetAtPath<PizzeriaConfig>(PizzeriaConfigPath);
@@ -465,6 +468,17 @@ namespace ScaryParty.Editor.Playtest
                 if (!hasGarlicSupply)
                 {
                     sb.AppendLine("[ERROR] PizzeriaConfig missing Garlic supply package (id=5).");
+                    errorCount++;
+                }
+
+                if (cfg.defaultPreset == null || cfg.defaultPreset.presetId != "Entrega_3Noites" || cfg.defaultPreset.allowDebugPanel)
+                {
+                    sb.AppendLine("[ERROR] PizzeriaConfig.defaultPreset must point to Entrega_3Noites with allowDebugPanel=false.");
+                    errorCount++;
+                }
+                if (cfg.availablePresets == null || cfg.availablePresets.Count < 3)
+                {
+                    sb.AppendLine("[ERROR] PizzeriaConfig.availablePresets must contain all 3 RUN presets (Entrega_3Noites, Playtest_Integracao, Tutorial_Noite0).");
                     errorCount++;
                 }
             }
@@ -639,6 +653,11 @@ namespace ScaryParty.Editor.Playtest
                         if (mainDoc.GetComponent<LifeAndSpectatorOverlayPresenter>() == null)
                         {
                             sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing LifeAndSpectatorOverlayPresenter.");
+                            errors++;
+                        }
+                        if (mainDoc.GetComponent<PlaytestDiagnosticsPresenter>() == null)
+                        {
+                            sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing PlaytestDiagnosticsPresenter.");
                             errors++;
                         }
                     }

@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51b7d4a0f364a05b148d9f0e23456a7, type: 3}
+  m_Name: Playtest_Integracao
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaRunPreset
+  presetId: Playtest_Integracao
+  displayName: "Playtest R\xE1pido (Integra\xE7\xE3o)"
+  description: "Preset curto exclusivo para integra\xE7\xE3o e diagn\xF3stico r\xE1pido
+    com painel [F8] ativado; nunca altera o preset de entrega."
+  totalNights: 3
+  includeNight0Tutorial: 0
+  allowDebugPanel: 1
+  difficulty: 0
+  startingBudget: 500
+  startingReputation: 100
+  backpackInitialSlots: 2
+  backpackMaxCapacity: 4
+  night0DurationSeconds: 300
+  night0GoalsByHumanCount: 0f0000000f0000000f0000000f000000
+  night0PrepSeconds: 2
+  night0ClosingGraceSeconds: 0
+  night0NonLethalDefeat: 1
+  nights:
+  - nightNumber: 1
+    durationSeconds: 90
+    goalsByHumanCount: 1e000000300000004000000050000000
+    prepSeconds: 3
+    closingGraceSeconds: 8
+    reputationMinGoal: 0
+    pizzasMinGoal: 0
+    useFormulaFallback: 0
+  - nightNumber: 2
+    durationSeconds: 105
+    goalsByHumanCount: 2d000000480000006000000078000000
+    prepSeconds: 3
+    closingGraceSeconds: 8
+    reputationMinGoal: 0
+    pizzasMinGoal: 0
+    useFormulaFallback: 0
+  - nightNumber: 3
+    durationSeconds: 120
+    goalsByHumanCount: 3c00000060000000810000009f000000
+    prepSeconds: 3
+    closingGraceSeconds: 8
+    reputationMinGoal: 0
+    pizzasMinGoal: 0
+    useFormulaFallback: 0

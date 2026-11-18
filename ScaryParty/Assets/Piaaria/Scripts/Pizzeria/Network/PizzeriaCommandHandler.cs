@@ -3401,5 +3401,261 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         #endregion
+
+        #region P6 — Host-Only Playtest Diagnostics Commands
+
+        public static bool CanExecuteHostDebugMutation(bool isServer, ulong senderClientId, ulong hostClientId, PizzeriaState state)
+        {
+            return isServer && senderClientId == hostClientId && state != null && state.AllowDebugPanel;
+        }
+
+        private bool TryBeginHostDebugServer(ulong senderId, out PizzeriaRoot root)
+        {
+            root = PizzeriaRoot.Instance;
+            if (!IsServer || root == null || root.DomainState == null) return false;
+
+            ulong hostId = NetworkManager.Singleton != null ? NetworkManager.ServerClientId : 0UL;
+            if (senderId != hostId)
+            {
+                NotifyErrorClientRpc("Ação de diagnóstico exclusiva do Host.", TargetSender(senderId));
+                return false;
+            }
+
+            if (!CanExecuteHostDebugMutation(IsServer, senderId, hostId, root.DomainState))
+            {
+                NotifyErrorClientRpc("Painel de diagnóstico desativado no preset atual.", TargetSender(senderId));
+                return false;
+            }
+
+            root.DomainState.IsDebugTaintedRun = true;
+            return true;
+        }
+
+        private static AddressId FindAvailableDebugAddressId(PizzeriaRoot root)
+        {
+            var used = new HashSet<int>();
+            foreach (var ord in root.DomainState.Orders.Values)
+            {
+                if (ord != null && ord.Lifecycle == OrderLifecycle.Accepted && !ord.IsDineIn)
+                    used.Add(ord.DestinationId.Value);
+            }
+
+            if (root.AddressRegistry != null)
+            {
+                foreach (var addr in root.AddressRegistry.GetAllIds())
+                {
+                    if (!used.Contains(addr.Value)) return addr;
+                }
+            }
+
+            for (int candidate = 100; candidate < 250; candidate++)
+            {
+                if (!used.Contains(candidate)) return new AddressId(candidate);
+            }
+            return new AddressId(999);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugCreateMultiRecipeOrderServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var specA = PizzaOrderGenerator.GenerateRandomSpecification(root.Catalog);
+            var specB = PizzaOrderGenerator.GenerateRandomSpecification(root.Catalog);
+            if (specB.Equals(specA))
+            {
+                specB = specA.ToppingCount > 0
+                    ? PizzaSpecification.CreateDefaultCheese(18, 12f)
+                    : new PizzaSpecification(
+                        PizzaSpecification.DefaultBaseDoughId,
+                        PizzaSpecification.DefaultSauceId,
+                        new[] { new ToppingRequirement(6, ProcessingStage.Prepared, 1) },
+                        24,
+                        14f);
+            }
+
+            var specs = new List<(PizzaSpecification spec, int qty)> { (specA, 1), (specB, 1) };
+            var dest = FindAvailableDebugAddressId(root);
+            int maxOrders = Mathf.Max(8, root.Config != null ? root.Config.maxActiveOrders : 6);
+            float ttl = root.Config != null ? root.Config.deliveryTimeLimit : 300f;
+            var res = root.OrderService.CreatePhoneOrderBySpecifications(dest, specs, root.DomainState, root.Catalog, root.Clock, maxOrders, ttl);
+            if (res.Success)
+            {
+                CommitAndReplicate();
+                BroadcastNoticeClientRpc($"[DEBUG] Pedido 2 receitas #{res.Value.Value} criado (destino #{dest.Value}).", isError: false);
+            }
+            else
+            {
+                NotifyErrorClientRpc(res.Message, TargetSender(senderId));
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugCreateQuantityThreeOrderServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var spec = PizzaOrderGenerator.GenerateRandomSpecification(root.Catalog);
+            var specs = new List<(PizzaSpecification spec, int qty)> { (spec, 3) };
+            var dest = FindAvailableDebugAddressId(root);
+            int maxOrders = Mathf.Max(8, root.Config != null ? root.Config.maxActiveOrders : 6);
+            float ttl = root.Config != null ? root.Config.deliveryTimeLimit : 300f;
+            var res = root.OrderService.CreatePhoneOrderBySpecifications(dest, specs, root.DomainState, root.Catalog, root.Clock, maxOrders, ttl);
+            if (res.Success)
+            {
+                CommitAndReplicate();
+                BroadcastNoticeClientRpc($"[DEBUG] Pedido Qtd 3 #{res.Value.Value} criado (destino #{dest.Value}).", isError: false);
+            }
+            else
+            {
+                NotifyErrorClientRpc(res.Message, TargetSender(senderId));
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugSpawnEntityServerRpc(byte speciesByte, bool walkInCustomer, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var species = System.Enum.IsDefined(typeof(NpcSpecies), speciesByte) ? (NpcSpecies)speciesByte : NpcSpecies.Human;
+            if (walkInCustomer)
+            {
+                if (root.CustomerService == null) return;
+                var res = root.CustomerService.SpawnWalkInCustomer(root.DomainState, root.Catalog, root.Clock);
+                if (!res.Success)
+                {
+                    NotifyErrorClientRpc(res.Message, TargetSender(senderId));
+                    return;
+                }
+                if (species != NpcSpecies.Human && root.DomainState.Customers.TryGetValue(res.Value, out var cust))
+                {
+                    cust.IsMonsterCustomer = true;
+                    cust.Revision++;
+                }
+                CommitAndReplicate();
+                BroadcastNoticeClientRpc($"[DEBUG] Cliente #{res.Value.Value} ({species}) criado na fila.", isError: false);
+                return;
+            }
+
+            if (species == NpcSpecies.Human) species = NpcSpecies.Vampire;
+            var monster = ScaryParty.Combat.Monsters.MonsterPopulationDirector.EnsureOn(root)?.SpawnDebugMonsterServer(root, species);
+            CommitAndReplicate();
+            if (monster != null)
+                BroadcastNoticeClientRpc($"[DEBUG] Monstro #{monster.MonsterId} ({species}) spawnado no servidor.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugHireEmployeeServerRpc(byte roleByte, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+            if (root.EmployeeTaskService == null) return;
+
+            var role = roleByte == (byte)EmployeeRole.Cashier ? EmployeeRole.Cashier : EmployeeRole.Pizzaiolo;
+            int cost = root.EmployeeTaskService.GetHireCost(role, 1);
+            var emp = root.EmployeeTaskService.TryHireEmployee(root.DomainState, role);
+            if (emp == null)
+            {
+                NotifyErrorClientRpc($"Saldo insuficiente (custo: R$ {cost}, caixa: R$ {root.DomainState.RestaurantBudget}).", TargetSender(senderId));
+                return;
+            }
+
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] {role} #{emp.EmployeeId} contratado (R$ {cost}).", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugAddResourcesServerRpc(int budgetAmount, int restockAmount, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            int addBudget = Mathf.Clamp(budgetAmount, 0, 5000);
+            int addStock = Mathf.Clamp(restockAmount, 0, 50);
+            root.DomainState.RestaurantBudget += addBudget;
+            if (addStock > 0)
+            {
+                foreach (var kvp in root.DomainState.StorageSlots)
+                {
+                    var slot = kvp.Value;
+                    if (slot == null) continue;
+                    slot.Quantity = Mathf.Min(slot.MaxCapacity, slot.Quantity + addStock);
+                    slot.Revision++;
+                }
+            }
+
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] +R$ {addBudget} e +{addStock} un/slot aplicados.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugApplyControlledDamageServerRpc(int damage, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            int amt = Mathf.Clamp(damage, 1, 100);
+            ApplyDamageToPlayerServer(senderId, new ScaryParty.Combat.DamageEvent
+            {
+                Amount = amt,
+                Source = ScaryParty.Combat.DamageSourceType.EnemyTest,
+                InstigatorClientId = senderId,
+                HitPoint = Vector3.zero,
+                HitNormal = Vector3.up
+            }, ResolveAllPlayersDeadDefeatPolicy(root));
+            CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugAdvanceClockServerRpc(float skipSeconds, bool endPhaseNow, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var st = root.DomainState;
+            float delta = Mathf.Max(0f, skipSeconds);
+            switch (st.CurrentNightPhase)
+            {
+                case NightPhase.Preparing:
+                case NightPhase.PreparingNextNight:
+                    st.NightPrepRemainingSeconds = endPhaseNow ? 0.05f : Mathf.Max(0.05f, st.NightPrepRemainingSeconds - delta);
+                    break;
+                case NightPhase.Active:
+                    st.NightRemainingSeconds = endPhaseNow ? 0.05f : Mathf.Max(0.05f, st.NightRemainingSeconds - delta);
+                    break;
+                case NightPhase.Closing:
+                    st.NightGraceRemainingSeconds = endPhaseNow ? 0.05f : Mathf.Max(0.05f, st.NightGraceRemainingSeconds - delta);
+                    break;
+            }
+
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc(endPhaseNow ? "[DEBUG] Fase atual avançada para encerramento." : $"[DEBUG] Relógio acelerado (-{delta:0}s).", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugStartNewRunServerRpc(Unity.Collections.FixedString32Bytes presetIdOverride, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            string pid = presetIdOverride.ToString();
+            if (!string.IsNullOrEmpty(pid))
+            {
+                var preset = root.FindPresetById(pid);
+                if (preset != null) root.SetActiveRunPresetServer(preset);
+            }
+
+            StartNewRunInternalServer();
+            if (root.DomainState != null)
+            {
+                root.DomainState.IsDebugTaintedRun = true;
+                CommitAndReplicate();
+            }
+        }
+
+        #endregion
     }
 }

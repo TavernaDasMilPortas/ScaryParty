@@ -342,7 +342,7 @@ namespace ScaryParty.Pizzeria.Composition
             return _config != null ? _config.defaultPreset : null;
         }
 
-        private Authoring.PizzeriaRunPreset FindPresetById(string presetId)
+        public Authoring.PizzeriaRunPreset FindPresetById(string presetId)
         {
             if (string.IsNullOrEmpty(presetId)) return null;
             if (_config != null)
@@ -646,6 +646,9 @@ namespace ScaryParty.Pizzeria.Composition
 
             if (ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.Instance == null)
                 ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.EnsureInstance();
+
+            if (ScaryParty.UI.Piaria.Presenters.PlaytestDiagnosticsPresenter.Instance == null)
+                ScaryParty.UI.Piaria.Presenters.PlaytestDiagnosticsPresenter.EnsureInstance();
 
             if (ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.Instance == null)
                 ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.EnsureInstance();
