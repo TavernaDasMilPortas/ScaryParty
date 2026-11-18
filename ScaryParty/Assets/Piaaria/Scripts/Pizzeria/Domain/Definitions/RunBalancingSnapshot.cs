@@ -151,9 +151,9 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
             return new NightPreparationScheduleData(
                 targetNight,
                 mandatoryHindranceStages: 1,
-                hindranceAlternatives: 2,
+                hindranceAlternatives: 3,
                 opportunityStages: 1,
-                opportunityAlternatives: 2,
+                opportunityAlternatives: 3,
                 additionalEventStages: targetNight >= 2 ? 1 : 0,
                 eventAlternatives: 2);
         }
@@ -317,11 +317,30 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
                     Value = 0.35f,
                     AllowedSource = RunModifierSource.VoteOnly,
                     Weight = 1f,
-                    IsFallbackReserve = true,
+                    IsFallbackReserve = false,
                     IncompatibleIds = new[] { "express_supply" },
                     Effects = new[]
                     {
                         new RunModifierEffectData(RunEffectTarget.SupplyDeliveryEta, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, 35f, true, 0.3f, 2.5f)
+                    }
+                },
+                new RunModifierDefinition
+                {
+                    Id = "blood_surge",
+                    DisplayName = "Lua sangrenta",
+                    Kind = RunModifierKind.Hindrance,
+                    Duration = RunModifierDuration.OneNight,
+                    Scope = "Global",
+                    MinNight = 1,
+                    MaxStacks = 1,
+                    Value = 0.4f,
+                    AllowedSource = RunModifierSource.VoteOnly,
+                    Weight = 1f,
+                    IsFallbackReserve = false,
+                    IncompatibleIds = new[] { "blood_moon", "quiet_night" },
+                    Effects = new[]
+                    {
+                        new RunModifierEffectData(RunEffectTarget.VampirePopulation, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, 40f, true, 0.5f, 3f)
                     }
                 },
                 new RunModifierDefinition
@@ -344,6 +363,43 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
                 },
                 new RunModifierDefinition
                 {
+                    Id = "calm_shift",
+                    DisplayName = "Movimento tranquilo",
+                    Kind = RunModifierKind.Opportunity,
+                    Duration = RunModifierDuration.OneNight,
+                    Scope = "Global",
+                    MinNight = 1,
+                    MaxStacks = 1,
+                    Value = -0.2f,
+                    AllowedSource = RunModifierSource.VoteOnly,
+                    Weight = 1f,
+                    IsFallbackReserve = false,
+                    IncompatibleIds = new[] { "heavy_rush", "festival_demand" },
+                    Effects = new[]
+                    {
+                        new RunModifierEffectData(RunEffectTarget.OrderArrivalRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -20f, true, 0.5f, 2.5f)
+                    }
+                },
+                new RunModifierDefinition
+                {
+                    Id = "focused_staff",
+                    DisplayName = "Equipe inspirada",
+                    Kind = RunModifierKind.Opportunity,
+                    Duration = RunModifierDuration.OneNight,
+                    Scope = "Global",
+                    MinNight = 1,
+                    MaxStacks = 1,
+                    Value = -0.3f,
+                    AllowedSource = RunModifierSource.VoteOnly,
+                    Weight = 1f,
+                    IsFallbackReserve = false,
+                    Effects = new[]
+                    {
+                        new RunModifierEffectData(RunEffectTarget.EmployeeErrorRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -30f, true, 0.15f, 1.5f)
+                    }
+                },
+                new RunModifierDefinition
+                {
                     Id = "quiet_night",
                     DisplayName = "Noite tranquila",
                     Kind = RunModifierKind.Opportunity,
@@ -353,9 +409,9 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
                     MaxStacks = 1,
                     Value = -0.25f,
                     AllowedSource = RunModifierSource.VoteOnly,
-                    Weight = 0.8f,
-                    IsFallbackReserve = true,
-                    IncompatibleIds = new[] { "blood_moon" },
+                    Weight = 0.9f,
+                    IsFallbackReserve = false,
+                    IncompatibleIds = new[] { "blood_moon", "blood_surge" },
                     Effects = new[]
                     {
                         new RunModifierEffectData(RunEffectTarget.VampirePopulation, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -25f, true, 0.5f, 3f)
@@ -478,10 +534,10 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
 
             var schedules = new List<NightPreparationScheduleData>
             {
-                new NightPreparationScheduleData(1, 1, 2, 1, 2, 0, 2),
-                new NightPreparationScheduleData(2, 1, 2, 1, 2, 1, 2),
-                new NightPreparationScheduleData(3, 1, 2, 1, 2, 1, 2),
-                new NightPreparationScheduleData(4, 1, 2, 1, 2, 1, 2)
+                new NightPreparationScheduleData(1, 1, 3, 1, 3, 0, 2),
+                new NightPreparationScheduleData(2, 1, 3, 1, 3, 1, 2),
+                new NightPreparationScheduleData(3, 1, 3, 1, 3, 1, 2),
+                new NightPreparationScheduleData(4, 1, 3, 1, 3, 1, 2)
             };
 
             return new RunBalancingSnapshot(modifiers, shopOffers, employeeProfiles, schedules);

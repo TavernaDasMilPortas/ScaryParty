@@ -24,6 +24,18 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
             };
         }
 
+        public static string FormatCategoryDisplayTitle(RunModifierKind kind, bool useComplicacoesLabel = false)
+        {
+            return kind switch
+            {
+                RunModifierKind.Hindrance => useComplicacoesLabel ? "Complicações" : "Imprevistos",
+                RunModifierKind.Opportunity => "Oportunidades",
+                RunModifierKind.Event => "Eventos",
+                RunModifierKind.PermanentUpgrade => "Melhorias",
+                _ => kind.ToString()
+            };
+        }
+
         public static string FormatDurationTag(RunModifierDuration duration)
         {
             return duration == RunModifierDuration.Permanent ? "Permanente (RUN)" : "1 Noite";

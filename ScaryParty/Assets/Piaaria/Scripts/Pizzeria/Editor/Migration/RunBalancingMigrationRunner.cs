@@ -461,7 +461,7 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                     maxNight = 0,
                     allowedDifficulties = RunDifficultyFlags.All,
                     weight = 1f,
-                    isFallbackReserve = true,
+                    isFallbackReserve = false,
                     incompatibleIds = new List<string> { "express_supply" },
                     tags = new List<string> { "supply", "eta" },
                     effects = new List<RunModifierEffectEntry>
@@ -475,6 +475,36 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                             useLimits = true,
                             minLimit = 0.3f,
                             maxLimit = 2.5f
+                        }
+                    }
+                },
+                new RunModifierAuthoringEntry
+                {
+                    id = "blood_surge",
+                    displayName = "Lua sangrenta",
+                    kind = RunModifierKind.Hindrance,
+                    enabled = true,
+                    allowedSource = RunModifierSource.VoteOnly,
+                    duration = RunModifierDuration.OneNight,
+                    maxStacks = 1,
+                    minNight = 1,
+                    maxNight = 0,
+                    allowedDifficulties = RunDifficultyFlags.All,
+                    weight = 1f,
+                    isFallbackReserve = false,
+                    incompatibleIds = new List<string> { "blood_moon", "quiet_night" },
+                    tags = new List<string> { "population", "vampire" },
+                    effects = new List<RunModifierEffectEntry>
+                    {
+                        new RunModifierEffectEntry
+                        {
+                            target = RunEffectTarget.VampirePopulation,
+                            operation = RunEffectOperation.PercentDelta,
+                            unit = RunEffectUnit.RelativePercent,
+                            valuePerLevel = 40f,
+                            useLimits = true,
+                            minLimit = 0.5f,
+                            maxLimit = 3.0f
                         }
                     }
                 },
@@ -509,6 +539,65 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                 },
                 new RunModifierAuthoringEntry
                 {
+                    id = "calm_shift",
+                    displayName = "Movimento tranquilo",
+                    kind = RunModifierKind.Opportunity,
+                    enabled = true,
+                    allowedSource = RunModifierSource.VoteOnly,
+                    duration = RunModifierDuration.OneNight,
+                    maxStacks = 1,
+                    minNight = 1,
+                    maxNight = 0,
+                    allowedDifficulties = RunDifficultyFlags.All,
+                    weight = 1f,
+                    isFallbackReserve = false,
+                    incompatibleIds = new List<string> { "heavy_rush", "festival_demand" },
+                    tags = new List<string> { "orders", "demand" },
+                    effects = new List<RunModifierEffectEntry>
+                    {
+                        new RunModifierEffectEntry
+                        {
+                            target = RunEffectTarget.OrderArrivalRate,
+                            operation = RunEffectOperation.PercentDelta,
+                            unit = RunEffectUnit.RelativePercent,
+                            valuePerLevel = -20f,
+                            useLimits = true,
+                            minLimit = 0.5f,
+                            maxLimit = 2.5f
+                        }
+                    }
+                },
+                new RunModifierAuthoringEntry
+                {
+                    id = "focused_staff",
+                    displayName = "Equipe inspirada",
+                    kind = RunModifierKind.Opportunity,
+                    enabled = true,
+                    allowedSource = RunModifierSource.VoteOnly,
+                    duration = RunModifierDuration.OneNight,
+                    maxStacks = 1,
+                    minNight = 1,
+                    maxNight = 0,
+                    allowedDifficulties = RunDifficultyFlags.All,
+                    weight = 1f,
+                    isFallbackReserve = false,
+                    tags = new List<string> { "employees", "training" },
+                    effects = new List<RunModifierEffectEntry>
+                    {
+                        new RunModifierEffectEntry
+                        {
+                            target = RunEffectTarget.EmployeeErrorRate,
+                            operation = RunEffectOperation.PercentDelta,
+                            unit = RunEffectUnit.RelativePercent,
+                            valuePerLevel = -30f,
+                            useLimits = true,
+                            minLimit = 0.15f,
+                            maxLimit = 1.5f
+                        }
+                    }
+                },
+                new RunModifierAuthoringEntry
+                {
                     id = "quiet_night",
                     displayName = "Noite tranquila",
                     kind = RunModifierKind.Opportunity,
@@ -519,9 +608,9 @@ namespace ScaryParty.Pizzeria.Editor.Migration
                     minNight = 1,
                     maxNight = 0,
                     allowedDifficulties = RunDifficultyFlags.All,
-                    weight = 0.8f,
-                    isFallbackReserve = true,
-                    incompatibleIds = new List<string> { "blood_moon" },
+                    weight = 0.9f,
+                    isFallbackReserve = false,
+                    incompatibleIds = new List<string> { "blood_moon", "blood_surge" },
                     tags = new List<string> { "population", "vampire" },
                     effects = new List<RunModifierEffectEntry>
                     {
@@ -824,13 +913,13 @@ namespace ScaryParty.Pizzeria.Editor.Migration
         {
             return new List<NightPreparationScheduleAuthoringEntry>
             {
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 1, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 0, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 2, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 3, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 4, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 5, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 6, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 },
-                new NightPreparationScheduleAuthoringEntry { nightNumber = 7, mandatoryHindranceStages = 1, hindranceAlternatives = 2, opportunityStages = 1, opportunityAlternatives = 2, additionalEventStages = 1, eventAlternatives = 2 }
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 1, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 0, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 2, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 3, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 4, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 5, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 6, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 },
+                new NightPreparationScheduleAuthoringEntry { nightNumber = 7, mandatoryHindranceStages = 1, hindranceAlternatives = 3, opportunityStages = 1, opportunityAlternatives = 3, additionalEventStages = 1, eventAlternatives = 2 }
             };
         }
     }

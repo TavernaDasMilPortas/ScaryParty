@@ -183,6 +183,10 @@ namespace ScaryParty.UI.Piaria.Core
         public UnityEngine.UIElements.VisualTreeAsset templateScoreboardOverlay;
         public UnityEngine.UIElements.VisualTreeAsset templatePlayerReadyCard;
 
+        [Header("Preparação entre Noites 2.1")]
+        public NightIntermissionTheme nightIntermissionTheme;
+        public NightIntermissionIconCatalog nightIntermissionIconCatalog;
+
         [Header("Configurações de UI Toolkit")]
         public UnityEngine.UIElements.PanelSettings panelSettings;
 

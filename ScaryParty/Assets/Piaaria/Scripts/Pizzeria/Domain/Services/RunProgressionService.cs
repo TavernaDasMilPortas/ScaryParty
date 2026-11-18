@@ -870,8 +870,11 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return def.Id switch
             {
                 "blood_moon" => new[] { new RunModifierEffectData(RunEffectTarget.VampirePopulation, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
+                "blood_surge" => new[] { new RunModifierEffectData(RunEffectTarget.VampirePopulation, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
                 "vampire_attack" => new[] { new RunModifierEffectData(RunEffectTarget.VampireAcquisitionRange, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
                 "heavy_rush" => new[] { new RunModifierEffectData(RunEffectTarget.OrderArrivalRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
+                "calm_shift" => new[] { new RunModifierEffectData(RunEffectTarget.OrderArrivalRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -Math.Abs(v) * 100f) },
+                "focused_staff" => new[] { new RunModifierEffectData(RunEffectTarget.EmployeeErrorRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -Math.Abs(v) * 100f) },
                 "express_supply" => new[] { new RunModifierEffectData(RunEffectTarget.SupplyDeliveryEta, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -Math.Abs(v) * 100f) },
                 "oven_timer" => new[] { new RunModifierEffectData(RunEffectTarget.OvenAutoShutoff, RunEffectOperation.EnableCapability, RunEffectUnit.BooleanFlag, 1f) },
                 "reinforced_bag" => new[] { new RunModifierEffectData(RunEffectTarget.BackpackCapacity, RunEffectOperation.AddFlat, RunEffectUnit.FlatUnits, v) },

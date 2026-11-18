@@ -247,7 +247,7 @@ MonoBehaviour:
     maxNight: 0
     allowedDifficulties: 3
     weight: 1
-    isFallbackReserve: 1
+    isFallbackReserve: 0
     prerequisiteIds: []
     incompatibleIds:
     - express_supply
@@ -262,6 +262,35 @@ MonoBehaviour:
       useLimits: 1
       minLimit: 0.3
       maxLimit: 2.5
+  - id: blood_surge
+    displayName: Lua sangrenta
+    descriptionOverride: ""
+    icon: {fileID: 0}
+    kind: 1
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - blood_moon
+    - quiet_night
+    tags:
+    - population
+    - vampire
+    effects:
+    - target: 1
+      operation: 1
+      unit: 1
+      valuePerLevel: 40
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 3
   - id: calm_customers
     displayName: Clientes pacientes
     descriptionOverride: 
@@ -290,6 +319,62 @@ MonoBehaviour:
       useLimits: 1
       minLimit: 0.4
       maxLimit: 2
+  - id: calm_shift
+    displayName: Movimento tranquilo
+    descriptionOverride: ""
+    icon: {fileID: 0}
+    kind: 2
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - heavy_rush
+    - festival_demand
+    tags:
+    - orders
+    - demand
+    effects:
+    - target: 3
+      operation: 1
+      unit: 1
+      valuePerLevel: -20
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 2.5
+  - id: focused_staff
+    displayName: Equipe inspirada
+    descriptionOverride: ""
+    icon: {fileID: 0}
+    kind: 2
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - employees
+    - training
+    effects:
+    - target: 8
+      operation: 1
+      unit: 1
+      valuePerLevel: -30
+      useLimits: 1
+      minLimit: 0.15
+      maxLimit: 1.5
   - id: quiet_night
     displayName: Noite tranquila
     descriptionOverride: 
@@ -302,11 +387,12 @@ MonoBehaviour:
     minNight: 1
     maxNight: 0
     allowedDifficulties: 3
-    weight: 0.8
-    isFallbackReserve: 1
+    weight: 0.9
+    isFallbackReserve: 0
     prerequisiteIds: []
     incompatibleIds:
     - blood_moon
+    - blood_surge
     tags:
     - population
     - vampire
@@ -587,50 +673,50 @@ MonoBehaviour:
   preparationSchedules:
   - nightNumber: 1
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 0
     eventAlternatives: 2
   - nightNumber: 2
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
   - nightNumber: 3
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
   - nightNumber: 4
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
   - nightNumber: 5
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
   - nightNumber: 6
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
   - nightNumber: 7
     mandatoryHindranceStages: 1
-    hindranceAlternatives: 2
+    hindranceAlternatives: 3
     opportunityStages: 1
-    opportunityAlternatives: 2
+    opportunityAlternatives: 3
     additionalEventStages: 1
     eventAlternatives: 2
