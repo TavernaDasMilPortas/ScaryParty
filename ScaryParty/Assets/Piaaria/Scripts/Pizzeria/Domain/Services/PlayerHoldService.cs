@@ -160,7 +160,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             OrderService orderService,
             CustomerService customerService = null,
             IClock clock = null,
-            int maxActiveOrders = 6)
+            int maxActiveOrders = 6,
+            EmployeeTaskService taskService = null)
         {
             var completed = new List<ulong>();
 
@@ -183,6 +184,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         hold.Complete(now);
                         if (hold.Kind == PlayerHoldKind.Discard)
                         {
+                            OrderUnitFulfillmentService.OnItemDestroyedOrBurned(state, hold.TargetItemId, taskService);
+                            TransferService.DestroyItem(state, hold.TargetItemId, taskService);
                             state.Items.Remove(hold.TargetItemId);
                         }
                         else if (hold.Kind == PlayerHoldKind.ArchiveTicket)

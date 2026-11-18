@@ -623,7 +623,7 @@ namespace ScaryParty.Pizzeria.Composition
                 }
 
                 // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais
-                OrderService?.TickOrders(DomainState, Clock);
+                OrderService?.TickOrders(DomainState, Clock, EmployeeTaskService);
                 CallService?.TickCalls(DomainState, (float)Clock.Now);
                 SpeciesHostilityService?.Tick(Time.deltaTime);
                 Presentation.EmployeePopulationDirector.TickAndProjectServer(this, Network.PizzeriaNetworkState.Instance, Time.deltaTime);
@@ -636,7 +636,8 @@ namespace ScaryParty.Pizzeria.Composition
                     OrderService,
                     CustomerService,
                     Clock,
-                    _config != null ? _config.maxActiveOrders : 6);
+                    _config != null ? _config.maxActiveOrders : 6,
+                    EmployeeTaskService);
                 if (DomainState.PlayerHolds.Count != prevHoldCount)
                     dirty = true;
 
@@ -649,7 +650,8 @@ namespace ScaryParty.Pizzeria.Composition
                         Clock,
                         Time.deltaTime,
                         _config != null ? _config.queueStagnationThresholdSeconds : 35f,
-                        _config != null ? _config.queueStagnationDecayMultiplier : 1.35f);
+                        _config != null ? _config.queueStagnationDecayMultiplier : 1.35f,
+                        EmployeeTaskService);
                     dirty |= custDirty;
                 }
 

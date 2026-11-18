@@ -143,7 +143,7 @@ namespace ScaryParty.Pizzeria.Network
             if (RejectIfCannotActServer(sender)) return;
 
             var orderId = new OrderId(orderIdVal);
-            var res = root.OrderService.CancelOrder(orderId, root.DomainState);
+            var res = root.OrderService.CancelOrder(orderId, root.DomainState, root.EmployeeTaskService);
             if (!res.Success)
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);

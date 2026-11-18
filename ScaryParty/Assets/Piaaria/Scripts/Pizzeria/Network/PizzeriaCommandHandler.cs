@@ -1137,7 +1137,8 @@ namespace ScaryParty.Pizzeria.Network
                 root.Config != null ? root.Config.burnedPayoutFactor : 0f,
                 root.Config != null ? root.Config.unbakedPayoutFactor : 0f,
                 root.Config != null ? root.Config.restaurantBaseBonus : 10,
-                root.Config != null ? root.Config.customerEatingDuration : 12f);
+                root.Config != null ? root.Config.customerEatingDuration : 12f,
+                root.EmployeeTaskService);
 
             if (!res.Success)
             {

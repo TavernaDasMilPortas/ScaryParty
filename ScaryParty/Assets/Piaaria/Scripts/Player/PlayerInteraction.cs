@@ -274,6 +274,7 @@ public class PlayerInteraction : NetworkBehaviour
     private int _workStation = -1;
     private int _workSlot;
     private ulong _attendingCustomerId = 0;
+    private ulong _discardItemId = 0;
     private float _nextWorkHeartbeat;
     private ulong _assistingAllyClientId = 0;
     private float _nextAssistHeartbeat;
@@ -287,7 +288,7 @@ public class PlayerInteraction : NetworkBehaviour
     private bool _workSawRunning = false;
     private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
 
-    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _assistingAllyClientId != 0 || _currentInteractable != null;
+    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _discardItemId != 0 || _assistingAllyClientId != 0 || _currentInteractable != null;
 
     private bool IsWorkFKeyHeld()
     {
@@ -385,6 +386,12 @@ public class PlayerInteraction : NetworkBehaviour
             if (IsSpawned && IsOwner)
                 ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CancelAttendCustomerHoldServerRpc();
         }
+        if (_discardItemId != 0)
+        {
+            _discardItemId = 0;
+            if (IsSpawned && IsOwner)
+                ScaryParty.Pizzeria.Network.KitchenCommands.Instance?.CancelDiscardHoldServerRpc();
+        }
         if (_workStation < 0) return;
         int station = _workStation;
         int slot = _workSlot;
@@ -447,6 +454,51 @@ public class PlayerInteraction : NetworkBehaviour
             {
                 _nextWorkHeartbeat = Time.unscaledTime + 0.30f;
                 ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.HeartbeatAttendCustomerHoldServerRpc();
+            }
+            return;
+        }
+
+        if (_discardItemId != 0)
+        {
+            if (!IsWorkFKeyHeld())
+            {
+                _workCompletedAwaitingFRelease = false;
+                StopTrackedWork();
+                return;
+            }
+
+            if (mainCamera == null || !(_currentInteractable is ScaryParty.Pizzeria.Stations.TrashStation))
+            {
+                StopTrackedWork();
+                return;
+            }
+
+            var ns = ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance;
+            bool itemStillExists = false;
+            if (ns != null && ns.Items != null)
+            {
+                for (int i = 0; i < ns.Items.Count; i++)
+                {
+                    if (ns.Items[i].ItemId == _discardItemId)
+                    {
+                        itemStillExists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!itemStillExists)
+            {
+                _workCompletedAwaitingFRelease = true;
+                _discardItemId = 0;
+                ReleaseWorkLockOnly();
+                return;
+            }
+
+            if (Time.unscaledTime >= _nextWorkHeartbeat)
+            {
+                _nextWorkHeartbeat = Time.unscaledTime + 0.30f;
+                ScaryParty.Pizzeria.Network.KitchenCommands.Instance?.HeartbeatDiscardHoldServerRpc();
             }
             return;
         }
@@ -559,7 +611,7 @@ public class PlayerInteraction : NetworkBehaviour
         if (!isFHeld)
         {
             _workCompletedAwaitingFRelease = false;
-            if (_workStation >= 0 || _attendingCustomerId != 0 || _workCameraLock.IsValid)
+            if (_workStation >= 0 || _attendingCustomerId != 0 || _discardItemId != 0 || _workCameraLock.IsValid)
             {
                 StopTrackedWork();
             }
@@ -884,6 +936,39 @@ public class PlayerInteraction : NetworkBehaviour
         if (_currentInteractable is ScaryParty.Pizzeria.Stations.DiningTableStation diningTable)
         {
             diningTable.TryServeTableFromPlayer(gameObject);
+            return;
+        }
+
+        if (_currentInteractable is ScaryParty.Pizzeria.Stations.TrashStation)
+        {
+            if (netState == null || NetworkManager.Singleton == null) return;
+            var kCmd = ScaryParty.Pizzeria.Network.KitchenCommands.Instance;
+            if (kCmd == null) return;
+
+            ulong myId = NetworkManager.Singleton.LocalClientId;
+            ulong targetItemId = 0;
+            for (int i = 0; i < netState.Items.Count; i++)
+            {
+                var it = netState.Items[i];
+                if (it.LocationType == (byte)ScaryParty.Pizzeria.Domain.Types.LocationType.Hand &&
+                    it.HolderId == myId && it.SlotId == hand)
+                {
+                    targetItemId = it.ItemId;
+                    break;
+                }
+            }
+            if (targetItemId == 0)
+            {
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show(
+                    "Segure um item na mão ativa para descartar na lixeira.",
+                    ScaryParty.Pizzeria.Presentation.NotificationType.Info);
+                return;
+            }
+
+            _discardItemId = targetItemId;
+            _nextWorkHeartbeat = Time.unscaledTime + 0.15f;
+            ReleaseWorkLockOnly();
+            kCmd.BeginDiscardHoldServerRpc(targetItemId);
             return;
         }
 

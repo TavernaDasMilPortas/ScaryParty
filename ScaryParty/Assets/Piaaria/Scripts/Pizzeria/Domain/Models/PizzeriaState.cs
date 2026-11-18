@@ -76,6 +76,11 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public readonly Dictionary<int, TableState> Tables = new Dictionary<int, TableState>();
         public readonly Dictionary<int, double> QueueLastAdvanceTime = new Dictionary<int, double>();
 
+        // P2: Vínculo exclusivo Pizza <-> Unidade de Pedido e reservas de slot por funcionário
+        public readonly Dictionary<OrderUnitKey, OrderUnitState> OrderUnits = new Dictionary<OrderUnitKey, OrderUnitState>();
+        public readonly Dictionary<ItemId, OrderUnitKey> ItemToOrderUnit = new Dictionary<ItemId, OrderUnitKey>();
+        public readonly Dictionary<(int stationId, int slotIndex), StationSlotReservation> StationSlotReservations = new Dictionary<(int, int), StationSlotReservation>();
+
         public ItemId GenerateItemId() => new ItemId(_nextItemId++);
         public ToolItemId GenerateToolId() => new ToolItemId(_nextToolId++);
         public OrderId GenerateOrderId() => new OrderId(_nextOrderId++);
@@ -140,6 +145,9 @@ namespace ScaryParty.Pizzeria.Domain.Models
             Customers.Clear();
             Tables.Clear();
             QueueLastAdvanceTime.Clear();
+            OrderUnits.Clear();
+            ItemToOrderUnit.Clear();
+            StationSlotReservations.Clear();
         }
     }
 }

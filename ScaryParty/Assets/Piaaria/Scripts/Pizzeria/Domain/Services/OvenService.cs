@@ -123,6 +123,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         {
                             item.BurnProgress = 1f;
                             item.CookingStage = CookingStage.Burned;
+                            OrderUnitFulfillmentService.OnItemDestroyedOrBurned(state, item.Id);
                         }
 
                         item.Revision++;

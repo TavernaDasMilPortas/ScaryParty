@@ -52,6 +52,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             order.QuotedPotentialReward = totalReward;
             state.Orders[orderId] = order;
+            OrderUnitFulfillmentService.EnsureUnitsForOrder(state, order);
             state.IncrementRevision();
 
             return CommandResult<OrderId>.Ok(orderId);
@@ -110,6 +111,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             order.QuotedPotentialReward = totalReward;
             state.Orders[orderId] = order;
+            OrderUnitFulfillmentService.EnsureUnitsForOrder(state, order);
             state.IncrementRevision();
 
             return CommandResult<OrderId>.Ok(orderId);
@@ -163,7 +165,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return null;
         }
 
-        public void TickOrders(PizzeriaState state, IClock clock)
+        public void TickOrders(PizzeriaState state, IClock clock, EmployeeTaskService taskService = null)
         {
             double now = clock.Now;
             foreach (var kvp in state.Orders)
@@ -175,6 +177,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     order.TaskStage = OrderTaskBoardStage.Failed;
                     state.NightOrdersFailed++;
                     order.Revision++;
+                    OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, order.Id, taskService);
                     NightCycleService.AdjustReputation(state, -15, "Pedido expirou sem entrega");
                     state.IncrementRevision();
                 }
@@ -212,7 +215,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return CommandResult.Ok();
         }
 
-        public CommandResult CancelOrder(OrderId orderId, PizzeriaState state)
+        public CommandResult CancelOrder(OrderId orderId, PizzeriaState state, EmployeeTaskService taskService = null)
         {
             if (!state.Orders.TryGetValue(orderId, out var order))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Pedido não encontrado.");
@@ -224,6 +227,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             order.TaskStage = OrderTaskBoardStage.Failed;
             state.NightOrdersFailed++;
             order.Revision++;
+            OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, orderId, taskService);
             state.IncrementRevision();
             return CommandResult.Ok();
         }

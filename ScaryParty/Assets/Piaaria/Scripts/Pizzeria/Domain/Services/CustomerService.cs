@@ -315,7 +315,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         /// Interrompe um cliente (ex: monstro em papel de cliente entrando em combate),
         /// liberando fila, mesa reservada, atendimento e cancelando o pedido sem travar outros NPCs.
         /// </summary>
-        public bool InterruptCustomerForCombat(PizzeriaState state, CustomerId customerId, double now)
+        public bool InterruptCustomerForCombat(PizzeriaState state, CustomerId customerId, double now, EmployeeTaskService taskService = null)
         {
             if (state == null || !customerId.IsValid) return false;
             if (!state.Customers.TryGetValue(customerId, out var cust)) return false;
@@ -342,6 +342,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 ord.TaskStage = OrderTaskBoardStage.Failed;
                 ord.IsArchivedFromBoard = true;
                 ord.Revision++;
+                OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, ord.Id, taskService);
             }
 
             state.Customers.Remove(customerId);
@@ -383,7 +384,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             float burnedPayoutFactor = 0f,
             float unbakedPayoutFactor = 0f,
             int restaurantBaseBonus = 10,
-            float eatingDuration = 12f)
+            float eatingDuration = 12f,
+            EmployeeTaskService taskService = null)
         {
             if (state == null)
                 return CommandResult<CustomerSatisfactionResult>.Fail(CommandError.InvalidState, "Estado nulo.");
@@ -471,6 +473,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 order.Revision++;
             }
 
+            OrderUnitFulfillmentService.OnItemDeliveredToOrder(
+                state,
+                customer.OrderId,
+                new[] { item.Id },
+                taskService);
+
             state.IncrementRevision();
             return CommandResult<CustomerSatisfactionResult>.Ok(eval);
         }
@@ -489,7 +497,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             IClock clock,
             float dt,
             float stagnationThresholdSeconds = 35f,
-            float stagnationDecayMultiplier = 1.35f)
+            float stagnationDecayMultiplier = 1.35f,
+            EmployeeTaskService taskService = null)
         {
             if (state == null || dt <= 0f) return false;
 
@@ -561,6 +570,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                                 activeOrder.Revision++;
                                 state.NightOrdersFailed++;
                             }
+                            OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, activeOrder.Id, taskService);
                         }
 
                         if (cust.AssignedTableId > 0)

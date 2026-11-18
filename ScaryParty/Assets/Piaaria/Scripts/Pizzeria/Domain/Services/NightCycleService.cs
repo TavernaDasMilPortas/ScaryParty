@@ -103,6 +103,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.PlayerHolds.Clear();
             state.Customers.Clear();
             state.QueueLastAdvanceTime.Clear();
+            state.OrderUnits.Clear();
+            state.ItemToOrderUnit.Clear();
+            state.StationSlotReservations.Clear();
 
             foreach (var tbl in state.Tables.Values)
             {
@@ -314,6 +317,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     order.Lifecycle = OrderLifecycle.Expired;
                     order.TaskStage = OrderTaskBoardStage.Failed;
                     expiredCount++;
+                    OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, order.Id);
                 }
             }
 

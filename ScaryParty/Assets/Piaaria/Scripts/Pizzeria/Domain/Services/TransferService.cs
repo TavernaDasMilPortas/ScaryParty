@@ -28,8 +28,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public CommandResult TransferTool(ToolItemId toolId, LocationRef targetLocation, double now, ulong requesterId = 0, bool enforceRequesterOwnership = false)
             => TransferTool(_state, toolId, targetLocation, requesterId, now, enforceRequesterOwnership);
 
-        public CommandResult DestroyItem(ItemId itemId)
-            => DestroyItem(_state, itemId);
+        public CommandResult DestroyItem(ItemId itemId, EmployeeTaskService taskService = null)
+            => DestroyItem(_state, itemId, taskService);
 
         // --- Static Implementation ---
 
@@ -228,7 +228,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return CommandResult.Ok();
         }
 
-        public static CommandResult DestroyItem(PizzeriaState state, ItemId itemId)
+        public static CommandResult DestroyItem(PizzeriaState state, ItemId itemId, EmployeeTaskService taskService = null)
         {
             if (!state.Items.TryGetValue(itemId, out var item))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
@@ -247,6 +247,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (state.Backpacks.TryGetValue(backpackId, out var backpack))
                     backpack.Remove(itemId);
             }
+
+            OrderUnitFulfillmentService.OnItemDestroyedOrBurned(state, itemId, taskService);
 
             item.Location = LocationRef.Destroyed;
             state.Items.Remove(itemId);

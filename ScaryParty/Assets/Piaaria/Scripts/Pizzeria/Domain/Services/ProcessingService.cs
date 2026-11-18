@@ -85,6 +85,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         return CommandResult.Fail(CommandError.ToolBusy, "Ferramenta em uso.");
                 }
             }
+            else if (kind == OperationKind.Package)
+            {
+                if (!state.Items.TryGetValue(inputItemId, out var pkgItem))
+                    return CommandResult.Fail(CommandError.ItemNotFound, "Pizza não encontrada para embalagem.");
+                if (pkgItem.IsBoxed || (!pkgItem.IsPizzaLike && pkgItem.Category != ItemCategory.Box))
+                    return CommandResult.Fail(CommandError.Incompatible, "Este item não pode ser embalado.");
+                if (pkgItem.ReservedByHold != 0 && pkgItem.ReservedByHold != workerId)
+                    return CommandResult.Fail(CommandError.Busy, "Pizza reservada por outro processo.");
+            }
 
             if (state.Items.TryGetValue(inputItemId, out var item))
             {
@@ -231,6 +240,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                             if (state.Items.TryGetValue(op.InputItemId, out var item))
                             {
                                 item.PackagingState = PackagingState.Boxed;
+                                item.Category = ItemCategory.Box;
                                 item.ReservedByHold = 0;
                                 item.Revision++;
                             }
@@ -306,6 +316,25 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (!state.ActiveOperations.TryGetValue(slotId, out var op))
                 return CommandResult.Fail(CommandError.InvalidOperation, "Nenhuma operação para concluir.");
+
+            if (op.Kind == OperationKind.Package)
+            {
+                if (!state.Items.TryGetValue(op.InputItemId, out var pkgItem))
+                    return CommandResult.Fail(CommandError.ItemNotFound, "Pizza para embalagem não encontrada.");
+
+                if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var pkgTool))
+                {
+                    pkgTool.ReleaseLease(op.WorkerId);
+                }
+
+                pkgItem.PackagingState = PackagingState.Boxed;
+                pkgItem.Category = ItemCategory.Box;
+                pkgItem.ReservedByHold = 0;
+                pkgItem.Revision++;
+                state.ActiveOperations.Remove(slotId);
+                state.IncrementRevision();
+                return CommandResult.Ok();
+            }
 
             if (!catalog.Processes.TryGetValue(op.ProcessId, out var process))
                 return CommandResult.Fail(CommandError.Incompatible, "Processo desconhecido.");
@@ -442,6 +471,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     {
                         pizza.CookingStage = CookingStage.Burned;
                         pizza.Revision++;
+                        OrderUnitFulfillmentService.OnItemDestroyedOrBurned(state, pizza.Id);
                     }
                 }
             }

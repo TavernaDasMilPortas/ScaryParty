@@ -364,7 +364,7 @@ namespace ScaryParty.Pizzeria.Network
 
             var res = deliveryService.SubmitDelivery(
                 root.DomainState, destination, list, attemptId, sender, root.Catalog, root.OrderService,
-                burnedFactor, unbakedFactor, baseBonus, root.Clock?.Now);
+                burnedFactor, unbakedFactor, baseBonus, root.Clock?.Now, root.EmployeeTaskService);
 
             if (!res.Success)
                 return res;

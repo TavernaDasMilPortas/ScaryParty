@@ -189,7 +189,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             float burnedFactor = 0.25f,
             float unbakedFactor = 0f,
             int baseRestaurantBonus = 20,
-            double? nowTime = null)
+            double? nowTime = null,
+            EmployeeTaskService taskService = null)
         {
             if (itemIds == null || itemIds.Count == 0)
                 return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.InvalidOperation, "Nenhum item selecionado.");
@@ -232,8 +233,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 unbakedFactor,
                 baseRestaurantBonus);
 
+            var deliveredItemIds = new List<ItemId>(deliveredItems.Count);
             foreach (var item in deliveredItems)
             {
+                deliveredItemIds.Add(item.Id);
                 state.Items.Remove(item.Id);
                 if (item.Location.Type == LocationType.Backpack)
                 {
@@ -251,6 +254,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 order.FinalEarnedReward = result.PersonalEarned;
                 order.Revision++;
             }
+
+            OrderUnitFulfillmentService.OnItemDeliveredToOrder(
+                state,
+                order != null ? order.Id : OrderId.None,
+                deliveredItemIds,
+                taskService);
 
             NightCycleService.RecordNightRevenue(state, result.RestaurantEarned);
             state.NightPizzasDelivered += result.CorrectBakedCount;
