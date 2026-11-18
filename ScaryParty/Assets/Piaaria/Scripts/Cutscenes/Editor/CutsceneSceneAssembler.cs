@@ -273,7 +273,7 @@ namespace ScaryParty.Cutscenes.Editor
             EditorUtility.SetDirty(existing);
         }
 
-        private static void ApplyMaterialBindings(GameObject root, CutsceneBindingProfile profile)
+        public static void ApplyMaterialBindings(GameObject root, CutsceneBindingProfile profile)
         {
             if (root == null || profile == null || profile.materialBindings == null) return;
 

@@ -15,6 +15,9 @@ MonoBehaviour:
   id: 4
   stationName: Bancada de Preparo
   slotCount: 2
+  defaultSlotLayout: {fileID: 0}
+  defaultStationKind: 0
+  visualPrefab: {fileID: 0}
   acceptedProcesses:
   - {fileID: 11400000, guid: e81cf19f289fefc4b8eefae80cb2671c, type: 2}
   - {fileID: 11400000, guid: 5c4fbb40ee5d58a4b92d813b12ff807b, type: 2}

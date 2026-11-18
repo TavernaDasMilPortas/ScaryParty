@@ -17,7 +17,7 @@ Material:
   - _MULTIPLYBYLIGHTCOLOR_ON
   - _POSTERIZELIGHT_ON
   - _RECEIVESHADOWS_ON
-  - _USERIMLIGHTING_ON
+  - _USECOLORADJUSTMENTS_ON
   - _USESHADOWS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0

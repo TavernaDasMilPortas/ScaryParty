@@ -2,14 +2,8 @@
     "blocks": [
         {
             "blockIndex": 0,
-            "area": 11384.0615234375,
-            "vertexCount": 5,
-            "edges": []
-        },
-        {
-            "blockIndex": 1,
-            "area": 7430.83935546875,
-            "vertexCount": 5,
+            "area": 8148.81640625,
+            "vertexCount": 7,
             "edges": []
         }
     ]

@@ -5971,469 +5971,469 @@ MonoBehaviour:
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.010
-    targetMaterial: {fileID: 2100000, guid: 8c22af9dc018b474c95837c29318b7e8, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.011
-    targetMaterial: {fileID: 2100000, guid: d6d30276deece1541bd29ee45702df91, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.015
-    targetMaterial: {fileID: 2100000, guid: 911cd604cf1b3154c85667a518231560, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 4
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot4
     sourceMaterialName: Material.016
     targetMaterial: {fileID: 2100000, guid: 654c4d22dcff4584698ae36362bacdc5, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 5
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot5
     sourceMaterialName: Material.017
     targetMaterial: {fileID: 2100000, guid: c100e574f795c7f4691e2b3ec82a390c, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5317986f6f
     rendererPath: Plane.003
     slotIndex: 6
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot6
     sourceMaterialName: Material.018
     targetMaterial: {fileID: 2100000, guid: dc969afc76b09684db0eac5646761744, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_b056c42120
     rendererPath: Plane.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.032
-    targetMaterial: {fileID: 2100000, guid: de98a32995a7ef541bf9f53d1a88dddc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_b056c42120
     rendererPath: Plane.002
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.033
-    targetMaterial: {fileID: 2100000, guid: 8077a56e9fe129a4692fd491724b05da, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_b056c42120
     rendererPath: Plane.002
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.034
-    targetMaterial: {fileID: 2100000, guid: 565ec1afa92db194bb6faebc92692002, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_d754a56e22
     rendererPath: Plane.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.076
-    targetMaterial: {fileID: 2100000, guid: a136f1ef56f1a0048a7676c9ac32bb5e, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_d754a56e22
     rendererPath: Plane.001
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.077
-    targetMaterial: {fileID: 2100000, guid: d5070cc0d2fd1ba438d301f5837318dc, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_d754a56e22
     rendererPath: Plane.001
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.078
-    targetMaterial: {fileID: 2100000, guid: 0bff02c34c6098941925d09b2196158d, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e4442aee3d
     rendererPath: Plane.009
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.007
-    targetMaterial: {fileID: 2100000, guid: e51be41eb9c52754f8ba69a8d3a455b7, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e4442aee3d
     rendererPath: Plane.009
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.008
-    targetMaterial: {fileID: 2100000, guid: 3b4672fcaa257524d8e984cb94622a90, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e4442aee3d
     rendererPath: Plane.009
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.009
-    targetMaterial: {fileID: 2100000, guid: 40c3839d57e35b942a369cb9d5734121, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_095568a093
     rendererPath: tabua de cortar.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar
     sourceMaterialName: Material.045
-    targetMaterial: {fileID: 2100000, guid: 47021bb77c1695343ba2da6669ec5bdf, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_90ccf7b5e0
     rendererPath: tabua de cortar.006
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar
     sourceMaterialName: Material.045
-    targetMaterial: {fileID: 2100000, guid: 47021bb77c1695343ba2da6669ec5bdf, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_41e6fb9fc5
     rendererPath: tabua de cortar.007
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar
     sourceMaterialName: Material.045
-    targetMaterial: {fileID: 2100000, guid: 47021bb77c1695343ba2da6669ec5bdf, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5229cd4a03
     rendererPath: tabua de cortar.008
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar
     sourceMaterialName: Material.045
-    targetMaterial: {fileID: 2100000, guid: 47021bb77c1695343ba2da6669ec5bdf, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_7a9cd0070c
     rendererPath: portapequenageldeira.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portapequenageldeira
     sourceMaterialName: Material.046
-    targetMaterial: {fileID: 2100000, guid: 5c7c871db92439c4bb259940d7ca95b3, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_40d569db2f
     rendererPath: portapequenageldeira.004
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portapequenageldeira
     sourceMaterialName: Material.047
-    targetMaterial: {fileID: 2100000, guid: 96e705443b26f624b99185928f2ac63d, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ce9d4baf3c
     rendererPath: portamaiorgeldeira.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portamaiorgeldeira
     sourceMaterialName: Material.048
-    targetMaterial: {fileID: 2100000, guid: b3831ee4d3117b4449b84669afdd6a31, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_3f248ae1bb
     rendererPath: portamaiorgeldeira.004
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portamaiorgeldeira
     sourceMaterialName: Material.049
-    targetMaterial: {fileID: 2100000, guid: ba293d412f7ead54b8fb396adec9f31b, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_6a2a404214
     rendererPath: porta_maior.005
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.050
-    targetMaterial: {fileID: 2100000, guid: f91384c9d7458e94bbed87735fbf93e5, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_90023c7670
     rendererPath: porta_maior.006
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.051
-    targetMaterial: {fileID: 2100000, guid: 88a8ce9127a35c44e86fd932b8d54358, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_72d80583b5
     rendererPath: porta_maior.007
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.052
-    targetMaterial: {fileID: 2100000, guid: 1ef6f72c18f5606488afd5a960fb12eb, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_1dd8f2a2b2
     rendererPath: porta_maior.008
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.053
-    targetMaterial: {fileID: 2100000, guid: 7f90fdbf284be644caa36c209274ae39, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_56a507e824
     rendererPath: Plane.005
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.054
-    targetMaterial: {fileID: 2100000, guid: 3747af6a9aee1fe42bddd8b64accda12, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_56a507e824
     rendererPath: Plane.005
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.055
-    targetMaterial: {fileID: 2100000, guid: 894deb348f8ac2d4ca8a50775a0819f8, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_56a507e824
     rendererPath: Plane.005
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.056
-    targetMaterial: {fileID: 2100000, guid: b5ce7a262403df3499791096929e7298, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.057
-    targetMaterial: {fileID: 2100000, guid: 34cc1201a4e0c8c458ba55140396401d, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.058
-    targetMaterial: {fileID: 2100000, guid: c450c8cef75d790458d2fffed970c92e, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.059
-    targetMaterial: {fileID: 2100000, guid: 979147eff2e4c6f4aaaed9102a8a021b, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 4
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot4
     sourceMaterialName: Material.060
     targetMaterial: {fileID: 2100000, guid: 2b2cbbb2863679e48bcb4bf9f85eda48, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 5
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot5
     sourceMaterialName: Material.061
     targetMaterial: {fileID: 2100000, guid: 0c5823b4e43741b4a9b4ed8838da2412, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_77b79ecc29
     rendererPath: Plane.006
     slotIndex: 6
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot6
     sourceMaterialName: Material.062
     targetMaterial: {fileID: 2100000, guid: 624d855c911a3f841a0d86c8140a65b7, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.063
-    targetMaterial: {fileID: 2100000, guid: eea6a708fde0b68499d91fbc5566fe4b, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.064
-    targetMaterial: {fileID: 2100000, guid: e51adf53c01247248a97fbf370da6416, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.065
-    targetMaterial: {fileID: 2100000, guid: 860347cd652ba9d48a5a4b3bc38ea673, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 4
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot4
     sourceMaterialName: Material.066
     targetMaterial: {fileID: 2100000, guid: a41eac78c8ce218479831adbaccbcfd4, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 5
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot5
     sourceMaterialName: Material.067
     targetMaterial: {fileID: 2100000, guid: 8c3b4dbc1d5d602469c209608af034a5, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_ea14788211
     rendererPath: Plane.007
     slotIndex: 6
-    slotSemanticName: 
+    slotSemanticName: Character:VariationSlot6
     sourceMaterialName: Material.068
     targetMaterial: {fileID: 2100000, guid: 67d4fc91855fdea468f7897dbbcabd44, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_a75bba8855
     rendererPath: Plane.008
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Character:BodyPrimary
     sourceMaterialName: Material.069
-    targetMaterial: {fileID: 2100000, guid: ad1e92093b3de5d48b768e751c7982d9, type: 2}
+    targetMaterial: {fileID: 2100000, guid: beeb4ba15ff31a8408a827eb05d7b2c6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_a75bba8855
     rendererPath: Plane.008
     slotIndex: 2
-    slotSemanticName: 
+    slotSemanticName: Character:EyesWhite
     sourceMaterialName: Material.070
-    targetMaterial: {fileID: 2100000, guid: d8d4d9fde950ce5418bd0b1e85c01dae, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 760b195dd568548458f6c3234b81dad6, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_a75bba8855
     rendererPath: Plane.008
     slotIndex: 3
-    slotSemanticName: 
+    slotSemanticName: Character:Pupils
     sourceMaterialName: Material.071
-    targetMaterial: {fileID: 2100000, guid: d34ae49f2c7773d45a96d8871bb84ee0, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 2ee22869ea5f9144088d977c6e58a357, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_dc0e9a641d
     rendererPath: Geladeira.005
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.072
-    targetMaterial: {fileID: 2100000, guid: de06c1414caa2684daf7e0beb63f1a74, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_d80f838e7b
     rendererPath: Geladeira.006
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.073
-    targetMaterial: {fileID: 2100000, guid: 42291c3d4e3490343b2805e94d45b12e, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_c203dd5327
     rendererPath: Geladeira.007
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.074
-    targetMaterial: {fileID: 2100000, guid: d7539f5ed87d4a94691be0d197491bf7, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_0495982fa8
     rendererPath: Geladeira.008
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.075
-    targetMaterial: {fileID: 2100000, guid: 5b52b1fda55f0394d991d3fe017ef724, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_c0e41d2aae
     rendererPath: porta_maior.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.021
-    targetMaterial: {fileID: 2100000, guid: e240ec000f6de3941b93c720c0b7889c, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_2e4b48ad47
     rendererPath: tabua de cortar.004
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar.004
     sourceMaterialName: Material.031
-    targetMaterial: {fileID: 2100000, guid: 2399ad82922ac0b48904fb762ef7913f, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_5fabd2fd5b
     rendererPath: tabua de cortar.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar.003
     sourceMaterialName: Material.031
-    targetMaterial: {fileID: 2100000, guid: 2399ad82922ac0b48904fb762ef7913f, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_53156efa71
     rendererPath: porta_maior.004
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.025
-    targetMaterial: {fileID: 2100000, guid: 6df3bf2706a74f641b908bb827c911ef, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_92f6e9f9a6
     rendererPath: Geladeira.003
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.022
-    targetMaterial: {fileID: 2100000, guid: 02bc7be3edc5b7e4db4b51c38cfb10e4, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_dd82c11883
     rendererPath: portapequenageldeira.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portapequenageldeira.001
     sourceMaterialName: Material.027
-    targetMaterial: {fileID: 2100000, guid: 209018bc812b2364c9df70f06ac841bf, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_a8731f4c44
     rendererPath: Geladeira.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira
     sourceMaterialName: Material.026
-    targetMaterial: {fileID: 2100000, guid: 3c6777bff6049624989cd74eb7326e36, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_81f34e20fe
     rendererPath: portamaiorgeldeira.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portamaiorgeldeira.001
     sourceMaterialName: Material.028
-    targetMaterial: {fileID: 2100000, guid: 6dce71e4b3145a346b51ba9aac8a2db2, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_a9a49a3b75
     rendererPath: porta_maior.001
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.024
-    targetMaterial: {fileID: 2100000, guid: f7aaca9f4557d084689f370734419b95, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e514d21b01
     rendererPath: porta_maior.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:batentefachada
     sourceMaterialName: Material.014
-    targetMaterial: {fileID: 2100000, guid: 8677db02a6a3bab479cca3313bbdbe05, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 351cf0c6a3ae6614f875abbc1e7c5851, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_419c7ed411
     rendererPath: portamaiorgeldeira.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portamaiorgeldeira.002
     sourceMaterialName: Material.013
-    targetMaterial: {fileID: 2100000, guid: d37e84d1d58b08c49bc8b3e85b74fd48, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e5aadea2f6
     rendererPath: tabua de cortar.005
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar.005
     sourceMaterialName: Material.031
-    targetMaterial: {fileID: 2100000, guid: 2399ad82922ac0b48904fb762ef7913f, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_2b1b9e03fa
     rendererPath: tabua de cortar.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:tabua de cortar.002
     sourceMaterialName: Material.031
-    targetMaterial: {fileID: 2100000, guid: 2399ad82922ac0b48904fb762ef7913f, type: 2}
+    targetMaterial: {fileID: 2100000, guid: efdcc0966704b7a449c5d6bc9df54512, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_bb77f44a98
     rendererPath: Geladeira.004
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira.004
     sourceMaterialName: Material.023
-    targetMaterial: {fileID: 2100000, guid: 6d204ed872261ab40b6e65d42d0f8ef7, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_0358b38c24
     rendererPath: portapequenageldeira.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:portapequenageldeira.002
     sourceMaterialName: Material.012
-    targetMaterial: {fileID: 2100000, guid: c7cf9eb432907aa46ac60899c82ae506, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_40dca0d973
     rendererPath: Geladeira.002
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Pizzeria:Geladeira.002
     sourceMaterialName: Material.029
-    targetMaterial: {fileID: 2100000, guid: 5396fadded171e44bb16588a17c3fbe5, type: 2}
+    targetMaterial: {fileID: 2100000, guid: 0640fb14377c99d4fb73b7f56dba6c30, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_72ab8eca24
     rendererPath: Plane
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Cutscene:FallbackProp
     sourceMaterialName: Material
     targetMaterial: {fileID: 2100000, guid: a0972d8d0d79ea74a980ceff1c0a5e85, type: 2}
     isConfirmed: 1
   - sourceObjectId: mesh_e2f1ea0957
     rendererPath: Plane.010
     slotIndex: 0
-    slotSemanticName: 
+    slotSemanticName: Cutscene:FallbackProp
     sourceMaterialName: Material.035
     targetMaterial: {fileID: 2100000, guid: 79e2e335c80455848b8de9d033bd78bd, type: 2}
     isConfirmed: 1

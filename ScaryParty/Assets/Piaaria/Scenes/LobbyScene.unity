@@ -288,6 +288,10 @@ MonoBehaviour:
   successClip: {fileID: 0}
   errorClip: {fileID: 0}
   readyClip: {fileID: 0}
+  hoverPlayer: {fileID: 0}
+  clickPlayer: {fileID: 0}
+  successPlayer: {fileID: 0}
+  errorPlayer: {fileID: 0}
 --- !u!114 &104864187
 MonoBehaviour:
   m_ObjectHideFlags: 0

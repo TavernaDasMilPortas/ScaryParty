@@ -15,6 +15,7 @@
   <Project Path="Unity.Services.Vivox.Editor.csproj" />
   <Project Path="MoreMountains.Tools.Editor.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetStatsMonitor.Editor.csproj" />
+  <Project Path="Unity.Pipeline.csproj" />
   <Project Path="Unity.VisualScripting.Core.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.Editor.csproj" />
   <Project Path="Unity.Burst.csproj" />
@@ -35,6 +36,7 @@
   <Project Path="unity-websocket-sharp.csproj" />
   <Project Path="Unity.Services.Multiplayer.csproj" />
   <Project Path="Unity.Burst.CodeGen.csproj" />
+  <Project Path="Unity.Pipeline.Editor.csproj" />
   <Project Path="Unity.Services.Authentication.csproj" />
   <Project Path="Unity.Services.Multiplayer.Editor.Shared.csproj" />
   <Project Path="Unity.VisualScripting.Flow.csproj" />
@@ -75,6 +77,7 @@
   <Project Path="MPUIKit.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
   <Project Path="DrawXXL-Editor.csproj" />
+  <Project Path="Unity.Pipeline.IlInterpreter.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetworkSolutionInterface.csproj" />
   <Project Path="Unity.Services.Core.Configuration.csproj" />
   <Project Path="Unity.Multiplayer.Tools.NetVis.Editor.UI.csproj" />
@@ -102,6 +105,7 @@
   <Project Path="Unity.AI.Navigation.csproj" />
   <Project Path="Unity.Mathematics.Editor.csproj" />
   <Project Path="Unity.Services.Core.csproj" />
+  <Project Path="Unity.Pipeline.Attributes.csproj" />
   <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
   <Project Path="Unity.CollabProxy.Editor.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Common.csproj" />
@@ -112,6 +116,7 @@
   <Project Path="Unity.Multiplayer.Widgets.Vivox.csproj" />
   <Project Path="Unity.Multiplayer.Widgets.Core.csproj" />
   <Project Path="Unity.Multiplayer.Widgets.Session.csproj" />
+  <Project Path="Unity.Pipeline.CodeGen.csproj" />
   <Project Path="Unity.Services.Core.Registration.csproj" />
   <Project Path="Unity.Multiplayer.Tools.MetricEvents.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Editor.csproj" />
@@ -130,6 +135,7 @@
   <Project Path="Unity.Services.Core.Networking.csproj" />
   <Project Path="Unity.Collections.Editor.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Adapters.Ngo1WithUtp2.csproj" />
+  <Project Path="Unity.Pipeline.ScenePreview.csproj" />
   <Project Path="Unity.VisualScripting.DocCodeExamples.csproj" />
   <Project Path="Unity.Services.Core.Environments.csproj" />
   <Project Path="Unity.Multiplayer.Tools.Initialization.csproj" />
@@ -137,4 +143,5 @@
   <Project Path="Unity.Services.Core.Threading.csproj" />
   <Project Path="Unity.InputSystem.ForUI.Editor.csproj" />
   <Project Path="Unity.Netcode.PackageChecker.Editor.csproj" />
+  <Project Path="ScaryParty.Pizzeria.PlayModeTests.csproj" />
 </Solution>

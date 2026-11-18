@@ -17,7 +17,7 @@ Material:
   - _MULTIPLYBYLIGHTCOLOR_ON
   - _POSTERIZELIGHT_ON
   - _RECEIVESHADOWS_ON
-  - _USERIMLIGHTING_ON
+  - _USECOLORADJUSTMENTS_ON
   - _USESHADOWS_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -72,11 +72,11 @@ Material:
     - _MinShadowBrightness: 0.28
     - _MultiplyByLightColor: 1
     - _NormalSurfaceOutline: 0
-    - _OutlineWidth: 0.1
+    - _OutlineWidth: 0.135
     - _PosterizeColors: 0
     - _PosterizeLight: 1
     - _ReceiveShadows: 1
-    - _RimLightLitIntensity: 0.35
+    - _RimLightLitIntensity: 0.45
     - _RimLightRampOffset: 0.58
     - _RimLightShadowIntensity: 0.12
     - _RimRamp: 1
@@ -99,7 +99,7 @@ Material:
     - _LightColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainColor: {r: 1, g: 1, b: 1, a: 1}
     - _OutlineColor: {r: 0.13999996, g: 0.11999995, b: 0.15999997, a: 1}
-    - _RimLightColor: {r: 0.85, g: 0.9, b: 1, a: 1}
+    - _RimLightColor: {r: 1, g: 0.96, b: 0.88, a: 1}
     - _ShadowColor: {r: 0.7, g: 0.72, b: 0.78, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

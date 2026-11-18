@@ -15,6 +15,9 @@ MonoBehaviour:
   id: 2
   stationName: Dispensa (Estoque Seco)
   slotCount: 1
+  defaultSlotLayout: {fileID: 0}
+  defaultStationKind: 0
+  visualPrefab: {fileID: 0}
   acceptedProcesses: []
   acceptedProcessIds: 
   durationOverrides: []

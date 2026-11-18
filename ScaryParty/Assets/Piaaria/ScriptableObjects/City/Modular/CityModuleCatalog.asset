@@ -21,6 +21,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -48,6 +53,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -75,6 +85,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -97,11 +112,16 @@ MonoBehaviour:
   - id: 3
     displayName: Parede com Vitrine
     category: 3
-    prefab: {fileID: 919132149155446097, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
+    prefab: {fileID: 919132149155446097, guid: a52add06556f65f4a9f04c9858860cef, type: 3}
     width: 2
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -129,6 +149,11 @@ MonoBehaviour:
     height: 0.2
     depth: 2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -156,6 +181,11 @@ MonoBehaviour:
     height: 0.4
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -178,11 +208,16 @@ MonoBehaviour:
   - id: 6
     displayName: Janela com Venezianas
     category: 6
-    prefab: {fileID: 919132149155446097, guid: 008574761ae35b444b805f56e4538fc7, type: 3}
+    prefab: {fileID: 919132149155446097, guid: 223439a7a6a64a14c8e969d65d86406c, type: 3}
     width: 2
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -210,6 +245,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0.3
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -237,6 +277,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 2
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -264,6 +309,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 2
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0
@@ -286,11 +336,16 @@ MonoBehaviour:
   - id: 10
     displayName: Toldo Separado
     category: 10
-    prefab: {fileID: 3703217395635445596, guid: e3bc31ad048b6ab499bc04d817bd3d0b, type: 3}
+    prefab: {fileID: 919132149155446097, guid: f638a970c196be948a5afe1a3ec44200, type: 3}
     width: 2
     height: 0.4
     depth: 0.8
     occupiedSlots: 1
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0.8
     interiorDepth: 0.2
     minClearanceHeight: 2.2
@@ -308,8 +363,8 @@ MonoBehaviour:
     awningAnchorLocal: {x: 0, y: 0, z: 0}
     movingPartHingeLocal: {x: 0, y: 0, z: 0}
     materialRoles: 0500000004000000
-    visualPositionOffset: {x: 0, y: 0.2, z: 0}
-    visualRotationOffset: {x: 0, y: 0, z: 0}
+    visualPositionOffset: {x: 0, y: 0.2, z: 0.42}
+    visualRotationOffset: {x: 0, y: 90, z: 0}
   - id: 11
     displayName: Pilar de Canto
     category: 11
@@ -318,6 +373,11 @@ MonoBehaviour:
     height: 3
     depth: 0.2
     occupiedSlots: 0
+    supportsNightWindowEmission: 1
+    windowEmissionMask: {fileID: 0}
+    prebakedModuleAoTexture: {fileID: 0}
+    moduleAoStrength: 0.25
+    defaultLocalAnchorOffset: {x: 0, y: 1.8, z: 0.65}
     exteriorProtrusion: 0
     interiorDepth: 0.2
     minClearanceHeight: 0

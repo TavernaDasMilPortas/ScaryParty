@@ -6049,6 +6049,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5334954791090512058
 MonoBehaviour:
@@ -12618,7 +12620,7 @@ Transform:
   m_GameObject: {fileID: 629778428615974974}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: -0.8677001}
+  m_LocalPosition: {x: -0.023554802, y: 1.4395378, z: -0.8677001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15230,7 +15232,7 @@ Transform:
   m_GameObject: {fileID: 911172939111212954}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: -0.8677001}
+  m_LocalPosition: {x: -0.023554802, y: 1.4395378, z: -0.8677001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15688,12 +15690,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 2
   tableName: Mesa 2
-  seatAnchor: {fileID: 2491529776454666555}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4566125213048090086}
   sauceObjects: []
+  associatedChair: {fileID: 2491529776454666555}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6279374042323225904
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -15725,11 +15730,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.48869225}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.5059402}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610991}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029610991}
   m_TimeToStationary: 0.5
 --- !u!1 &954210113300018542
 GameObject:
@@ -17718,6 +17723,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &4701774068834751759
 MonoBehaviour:
@@ -18585,6 +18592,8 @@ MonoBehaviour:
   - {fileID: 2157799563992490451}
   - {fileID: 6688574584450234389}
   - {fileID: 332766594981180898}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &1177405523575450114
 GameObject:
   m_ObjectHideFlags: 0
@@ -19039,6 +19048,8 @@ MonoBehaviour:
   slotsBoundToObjects: 1
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &1212534490535613051
@@ -21731,6 +21742,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &995333035506958858
@@ -24973,6 +24986,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 1439371185496930971}
   smokeParticles: {fileID: 6508843911688136017}
@@ -25487,7 +25502,7 @@ Transform:
   m_GameObject: {fileID: 1749412464042426100}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: 0.8676996}
+  m_LocalPosition: {x: -0.023555279, y: 1.4395378, z: 0.8676996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25857,6 +25872,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &4578269964356474282
@@ -36751,6 +36768,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 3208224669866691414}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &4425886083994835759
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -37020,6 +37038,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &4089423917012803457
 BoxCollider:
@@ -37300,6 +37320,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5899360610066500697
 MonoBehaviour:
@@ -38678,12 +38700,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 6
   tableName: Mesa 6
-  seatAnchor: {fileID: 3757115629894191469}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8329155572478459651}
   sauceObjects: []
+  associatedChair: {fileID: 3757115629894191469}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2955600846492028128
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -38715,11 +38740,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886921}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.50594026}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029609203}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029611588}
   m_TimeToStationary: 0.5
 --- !u!1 &2516251173152380994
 GameObject:
@@ -44081,12 +44106,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 4
   tableName: Mesa 4
-  seatAnchor: {fileID: 7194416090516532674}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1709721005663037161}
   sauceObjects: []
+  associatedChair: {fileID: 7194416090516532674}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &5501608718594646437
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -44118,11 +44146,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886921}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.50594026}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029609203}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029611588}
   m_TimeToStationary: 0.5
 --- !u!1 &2961047674531139802
 GameObject:
@@ -47089,6 +47117,34 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
+  Weapons:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  PlayerCombatStates:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  Monsters:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  Employees:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  NightState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  MotorcycleState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  RunState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
   RestaurantBudget:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -47122,6 +47178,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaCommandHandler
   ShowTopMostFoldoutHeaderGroup: 1
+  motorcycleHitDamage: 40
+  motorcycleRiderFallDamage: 0
 --- !u!114 &7938976426365083480
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55396,6 +55454,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &6627298587396509987
@@ -56032,6 +56092,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 1912973932798767819}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &7239492646011766934
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -56331,6 +56392,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5978236023876083016
 MonoBehaviour:
@@ -56435,6 +56498,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 9069314065766997243}
   smokeParticles: {fileID: 7174531218687728674}
@@ -59745,6 +59810,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 1098706689230346246}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &1229664191349515031
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -62750,6 +62816,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 8009286451662400702}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &5102345576949532865
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -67166,6 +67233,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 4910041378233981957}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &1900252085200036394
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -69882,6 +69950,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 3481673388488982717}
@@ -70513,7 +70583,7 @@ Transform:
   m_GameObject: {fileID: 4933760997864230123}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: 0.8676996}
+  m_LocalPosition: {x: -0.023555279, y: 1.4395378, z: 0.8676996}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -73798,12 +73868,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 5
   tableName: Mesa 5
-  seatAnchor: {fileID: 58284518315903371}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6692367724796428901}
   sauceObjects: []
+  associatedChair: {fileID: 58284518315903371}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &3506996081906353225
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -73835,11 +73908,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886922}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.50594014}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610693}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029610693}
   m_TimeToStationary: 0.5
 --- !u!1 &5310385015925093687
 GameObject:
@@ -74303,6 +74376,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 8720418809891552187}
   smokeParticles: {fileID: 7958976361575360105}
@@ -76215,6 +76290,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 0}
@@ -80921,6 +80998,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   stackId: 16
   capacity: 6
@@ -88583,6 +88662,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &6242523992361040247
@@ -89140,6 +89221,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &6291022634895790565
 GameObject:
@@ -89446,7 +89529,7 @@ Transform:
   m_GameObject: {fileID: 6306908216959270563}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: -0.86770016}
+  m_LocalPosition: {x: -0.023555279, y: 1.4395378, z: -0.86770016}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -90586,6 +90669,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &5345879382196868232
 BoxCollider:
@@ -96302,6 +96387,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 3811816460910929344}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &3047034299620664905
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -100351,6 +100437,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &8530213485500471242
 MonoBehaviour:
@@ -104321,6 +104409,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &863632707237490640
 BoxCollider:
@@ -108825,6 +108915,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ringer: {fileID: 4066358546522567895}
   isRinging: 0
@@ -108958,6 +109050,7 @@ MonoBehaviour:
   customRingClip: {fileID: 0}
   beaconLight: {fileID: 456913138093232806}
   beaconRenderer: {fileID: 4777659656119818684}
+  phoneVisualPivot: {fileID: 0}
   ringingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8290010139796526223
@@ -112329,12 +112422,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 3
   tableName: Mesa 3
-  seatAnchor: {fileID: 4827160033017474931}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 120766039669398856}
   sauceObjects: []
+  associatedChair: {fileID: 4827160033017474931}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6174401072770688705
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -112366,11 +112462,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.48869228}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.50594026}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029611588}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029611588}
   m_TimeToStationary: 0.5
 --- !u!1 &8547605125491956865
 GameObject:
@@ -112809,6 +112905,8 @@ MonoBehaviour:
   - {fileID: 4831316098662619367}
   - {fileID: 2395223046444761099}
   - {fileID: 4753032219648197298}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &8572520339794203336
 GameObject:
   m_ObjectHideFlags: 0
@@ -113728,12 +113826,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 1
   tableName: Mesa 1
-  seatAnchor: {fileID: 3646669888437011331}
+  seatAnchor: {fileID: 0}
   seatSurfaceAnchor: {fileID: 0}
   approachAnchor: {fileID: 0}
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 5338933395741533685}
   sauceObjects: []
+  associatedChair: {fileID: 3646669888437011331}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4574223333244762839
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -113765,11 +113866,11 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.49220148, y: 0.40347955, z: 0.4886922}
+  m_Extents: {x: 0.5095733, y: 0.40347958, z: 0.50594026}
   m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 1
-  m_Center: {x: 0.002781868, y: -0.24346676, z: -0.0029610395}
+  m_Center: {x: 0.002781868, y: -0.24346673, z: -0.0029609203}
   m_TimeToStationary: 0.5
 --- !u!1 &8676658620712714506
 GameObject:
@@ -117476,7 +117577,7 @@ Transform:
   m_GameObject: {fileID: 9062858351660890497}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: 0.8677}
+  m_LocalPosition: {x: -0.023554802, y: 1.4395378, z: 0.8677}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
