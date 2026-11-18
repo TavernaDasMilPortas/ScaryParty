@@ -30,6 +30,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3078ffee4b86dea469aa299d72297337, type: 2}
   - {fileID: 11400000, guid: 0b2aa4a0caae99e48a72404a0c6f5135, type: 2}
   - {fileID: 11400000, guid: 0c6c41f634f4a5a448f7ad5bed1e2ded, type: 2}
+  - {fileID: 11400000, guid: 95c6ce82894d3b74c8c11392567b2270, type: 2}
   monsterVisualCatalog: {fileID: 11400000, guid: 27cb16cb90b9ae14dbfeabf8fd28ad86, type: 2}
   cashierVisualPrefab: {fileID: 8026842986995490835, guid: ea4f7f7ab01f8fd458557cc7b0d77bfb, type: 3}
   pizzaioloVisualPrefab: {fileID: 8705788214351241338, guid: 1ca43dd0ff051944599a1653243feae5, type: 3}

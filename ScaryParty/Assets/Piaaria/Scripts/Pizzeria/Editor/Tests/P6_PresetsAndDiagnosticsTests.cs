@@ -17,10 +17,13 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             var entrega = AssetDatabase.LoadAssetAtPath<PizzeriaRunPreset>(PlaytestPresetBuilder.EntregaPresetPath);
             var playtest = AssetDatabase.LoadAssetAtPath<PizzeriaRunPreset>(PlaytestPresetBuilder.PlaytestPresetPath);
             var tutorial = AssetDatabase.LoadAssetAtPath<PizzeriaRunPreset>(PlaytestPresetBuilder.TutorialPresetPath);
+            var noiteDeTeste = AssetDatabase.LoadAssetAtPath<PizzeriaRunPreset>(PlaytestPresetBuilder.NoiteDeTestePresetPath);
 
             Assert.IsNotNull(entrega, "Entrega_3Noites.asset precisa existir.");
             Assert.IsNotNull(playtest, "Playtest_Integracao.asset precisa existir.");
             Assert.IsNotNull(tutorial, "Tutorial_Noite0.asset precisa existir.");
+            Assert.IsNotNull(noiteDeTeste, "NoiteDeTeste.asset precisa existir.");
+            Assert.IsTrue(noiteDeTeste.unlimitedShiftTime, "NoiteDeTeste deve ter turno sem limite de tempo.");
 
             Assert.AreEqual("Entrega_3Noites", entrega.presetId);
             Assert.AreEqual(3, entrega.totalNights);
@@ -44,14 +47,15 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             var cfg = AssetDatabase.LoadAssetAtPath<PizzeriaConfig>(PlaytestInstallerAndValidator.PizzeriaConfigPath);
             Assert.IsNotNull(cfg);
             Assert.AreSame(entrega, cfg.defaultPreset, "Entrega_3Noites deve ser o preset padrão em PizzeriaConfig.");
-            Assert.GreaterOrEqual(cfg.availablePresets.Count, 3);
+            Assert.GreaterOrEqual(cfg.availablePresets.Count, 4);
             Assert.Contains(entrega, cfg.availablePresets);
             Assert.Contains(playtest, cfg.availablePresets);
             Assert.Contains(tutorial, cfg.availablePresets);
+            Assert.Contains(noiteDeTeste, cfg.availablePresets);
 
             var manifest = AssetDatabase.LoadAssetAtPath<PlaytestReferenceManifest>(PlaytestInstallerAndValidator.ManifestAssetPath);
             Assert.IsNotNull(manifest);
-            Assert.GreaterOrEqual(manifest.runPresets.Count, 3);
+            Assert.GreaterOrEqual(manifest.runPresets.Count, 4);
         }
 
         [Test]
@@ -76,18 +80,19 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         }
 
         [Test]
-        public void HostDebugMutationGuard_EnforcesHostOnlyAndAllowDebugPanel()
+        public void HostDebugMutationGuard_EnforcesHostOnlyAndEditorEnvironment()
         {
             var state = new PizzeriaState { AllowDebugPanel = true };
 
-            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(false, 0UL, 0UL, state), "Não-servidor não pode mutar.");
-            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 2UL, 0UL, state), "Cliente remoto não pode executar comando debug do Host.");
+            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(false, 0UL, 0UL, state, true), "Não-servidor não pode mutar.");
+            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 2UL, 0UL, state, true), "Cliente remoto não pode executar comando debug do Host.");
+            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 0UL, 0UL, state, false), "Build fora do Editor deve bloquear mutações debug.");
 
             state.AllowDebugPanel = false;
-            Assert.IsFalse(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 0UL, 0UL, state), "Preset com AllowDebugPanel=false deve bloquear mutações debug mesmo no Host.");
+            Assert.IsTrue(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 0UL, 0UL, state, true), "No Editor, o Host pode executar controles em qualquer preset (B5.1).");
 
             state.AllowDebugPanel = true;
-            Assert.IsTrue(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 0UL, 0UL, state), "Host com AllowDebugPanel=true deve poder executar comandos de diagnóstico.");
+            Assert.IsTrue(PizzeriaCommandHandler.CanExecuteHostDebugMutation(true, 0UL, 0UL, state, true), "Host no Editor deve poder executar comandos de diagnóstico.");
         }
     }
 }

@@ -661,7 +661,12 @@ namespace ScaryParty.Pizzeria.Composition
             }
         }
 
-        public void ReinitializeForNewRunServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight = 1, bool openPreparation = true)
+        public void ReinitializeForNewRunServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight = 1)
+        {
+            ReinitializeForNewRunWithPolicyServer(newSeed, maxNights, difficulty, startNight, openPreparation: true);
+        }
+
+        public void ReinitializeForNewRunWithPolicyServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight, bool openPreparation)
         {
             if (!IsServer || DomainState == null) return;
 

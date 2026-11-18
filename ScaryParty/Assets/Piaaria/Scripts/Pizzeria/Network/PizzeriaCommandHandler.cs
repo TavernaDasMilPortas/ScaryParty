@@ -1391,7 +1391,7 @@ namespace ScaryParty.Pizzeria.Network
             int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
             var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
 
-            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1, openPreparation: true);
+            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
             CommitAndReplicate();
             BroadcastNoticeClientRpc("Tutorial concluído! Preparação para a Noite 1 aberta: votem, comprem melhorias e marquem Pronto!", isError: false);

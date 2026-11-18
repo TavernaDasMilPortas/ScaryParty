@@ -3,7 +3,7 @@
 **Última Revisão:** 18/11/2026
 **Versão Unity:** Unity 6000.3.6f1
 **Branch Atual:** `release/marcos-noturnos`
-**Commits Recentes:** Base `bdffe509` + fases **P0–P7** (`af9e829f` .. `170bfe62` + fechamento P7: correções de rede/funcionários/metas/UI Toolkit/placeholders 3D/presets/diagnóstico `[F8]`, EditMode `102/102`, PlayMode `6/6` e capturas GameView; multiplayer 2 processos pendente).
+**Commits Recentes:** Base `bdffe509` → `c6163121` + fases **B0–B6** (incluindo **B5.1 Revisada**: catálogo único `RunBalancingCatalog`, Wizard Odin 8 abas, consumidores B3, preparação pré-Noite 1 & votação multi-estágio B4, UI replicada B5, preset `NoiteDeTeste` sem limite de tempo de turno, central Odin `PlaytestDebugController` sem overlays `[F8]`/`[F6]`, EditMode `96/96` + PlayMode `6/6` + `ValidateAll` `0` erros; multiplayer 2 processos pendente).
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
@@ -53,7 +53,11 @@
 - **Iluminação Cartoon e Estilos Visuais (Solução A + Contratos B0–B3):**
   - **Modos A/B/C:** `VisualStyleRuntimeConfig` separa rota (`Original` vs `CelShadedVariant`) de `VisualApplicationMode`; Modo A pré-visualiza em PlayMode sem alterar `GameScene.unity`, Modo B salva padrão com backup e rollback seletivo (`OriginalGameSceneStylePersistence`), Modo C gera variante protegendo alterações locais.
   - **Shaders Próprios e Troca ao Vivo:** `ScaryParty/Illustrate Stylized/*` (incluindo `IllustrateScreenSpaceOutline.shader` plane-invariante `1/Z`, normal cardinal e color edge sem conflito de `#pragma`/keywords) com Forward+ `_CLUSTER_LIGHT_LOOP` Additional Lights, faixas toon completas `[0..1]`, controle de contraste/teto em `StylizedFrag`, zonas (`_InteriorZoneFillColor`/`_Weight`), ganchos B1 e `_SP_DebugLightingView`.
-  - **Dia/Noite, Pizzaria, Cidade e Rede:** `TimeOfDayLightingDirector` (17h/19h/22h/02h) com utilitário in-game de teste `TimeOfDayTestOverlay` (`F6` ou HUD interativo em Play Mode), `PizzeriaLightingController` (zonas e `LightShadows.None` em Point Lights), `CityLightingDirector` + `StylizedLightPool`, `NetworkTimeOfDayState` e `LightingReadyGate`.
+  - **Dia/Noite, Pizzaria, Cidade e Rede:** `TimeOfDayLightingDirector` (17h/19h/22h/02h), `PizzeriaLightingController` (zonas e `LightShadows.None` em Point Lights), `CityLightingDirector` + `StylizedLightPool`, `NetworkTimeOfDayState` e `LightingReadyGate` (controle manual de horário consolidado na aba `Mundo e Iluminacao` do `PlaytestDebugController`).
+- **Eventos, Loja, Balanceamento e Central de Playtest (Fases B0–B6 + B5.1 Revisada):**
+  - **Fonte Única & Wizard Odin:** `RunBalancingCatalog.asset` (`RunBalancingCatalog`, `RunBalancingSnapshot`, `RunDescriptionFormatter`, `RunBalancingValidator`, `RunBalancingMigrationRunner`) e Wizard de 8 abas em `Tools/Scary Party/Wizards/Pizzaria/Eventos, Loja e Balanceamento`.
+  - **Runtime, Preparação Pré-Noite 1 & UI Replicada:** Consumidores reais em `MonsterPopulationDirector` (`blood_moon`), `MonsterNpcController` (`vampire_attack`), `DemandDirector` (`heavy_rush`/paciência), suprimentos base explícitos `1/3/4` com rejeição por estoque cheio, `TargetNightNumber` + votação multi-estágio (`Hindrance`, `Opportunity`, `Event`) e DTOs replicados (`NetRunVoteOptionDto`, `NetRunShopOfferDto`) em `RunPreparationPresenter` / `OperationsHubPresenter`.
+  - **Preset `NoiteDeTeste` e Central Odin no Inspector:** Preset selecionável `NoiteDeTeste.asset` (`UnlimitedShiftTime=true`, HUD `SEM LIMITE`, regras/timers não-relógio ativos); overlays `[F8]` e `[F6]` desativados no GameView; `[Debug] Central de Playtest` (`PlaytestDebugController` com 8 abas Odin) instalado em `GameScene.unity` e `GameScene_CelShaded.unity` (atalho `Tools/Scary Party/Uso Comum/Pizzaria/Selecionar Central de Playtest (Inspector)`), operando apenas para o Host em PlayMode no Editor em qualquer preset, com checkpoints `PrePreparation`/`NightStart`, `RebaseRelativeDeadlines`, expediente separado de iluminação e `IsForcedDebugOutcome`. Relatório completo em `Docs/Release/Reports/WIZARD_EVENTOS_LOJA_BALANCEAMENTO.md`.
 
 ---
 
