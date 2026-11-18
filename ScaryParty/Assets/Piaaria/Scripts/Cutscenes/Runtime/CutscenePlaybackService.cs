@@ -222,6 +222,12 @@ namespace ScaryParty.Cutscenes
 
         private IEnumerator PlayRoutine(CutsceneDefinition def)
         {
+            if (_activeStage == null || _activeStage.director == null)
+            {
+                FinishSession(skipped: true);
+                yield break;
+            }
+
             _state = CutscenePlaybackState.Playing;
 
             _savedCursorVisible = Cursor.visible;
@@ -230,7 +236,7 @@ namespace ScaryParty.Cutscenes
             Cursor.lockState = CursorLockMode.Locked;
 
             // Ensure single AudioListener
-            if (_activeStage.cutsceneAudioListener != null && _activeStage.cutsceneAudioListener.enabled)
+            if (_activeStage != null && _activeStage.cutsceneAudioListener != null && _activeStage.cutsceneAudioListener.enabled)
             {
                 foreach (var listener in FindObjectsByType<AudioListener>(FindObjectsSortMode.None))
                 {
@@ -249,18 +255,25 @@ namespace ScaryParty.Cutscenes
             // Fade in
             float elapsed = 0f;
             float fadeIn = Mathf.Max(0.01f, def.fadeInDuration);
-            while (elapsed < fadeIn && _state == CutscenePlaybackState.Playing)
+            while (elapsed < fadeIn && _state == CutscenePlaybackState.Playing && _activeStage != null && _activeStage.director != null)
             {
                 elapsed += Time.unscaledDeltaTime;
                 overlayPresenter.SetAlpha(elapsed / fadeIn);
                 yield return null;
             }
+
+            if (_activeStage == null || _activeStage.director == null)
+            {
+                FinishSession(skipped: true);
+                yield break;
+            }
+
             overlayPresenter.SetAlpha(1f);
 
             if (def.disableGameplay3DRenderingWhenOpaque)
             {
                 var mainCam = Camera.main;
-                if (mainCam != null && mainCam != _activeStage.outputCamera && mainCam.enabled)
+                if (mainCam != null && _activeStage != null && mainCam != _activeStage.outputCamera && mainCam.enabled)
                 {
                     _disabledGameplayCam = mainCam;
                     _disabledGameplayCam.enabled = false;
@@ -271,14 +284,15 @@ namespace ScaryParty.Cutscenes
             Started?.Invoke(def.cutsceneId);
 
             double duration = def.durationSeconds > 0f ? def.durationSeconds : _activeStage.director.duration;
-            while (_state == CutscenePlaybackState.Playing && _activeStage.director.time < duration)
+            while (_state == CutscenePlaybackState.Playing && _activeStage != null && _activeStage.director != null && _activeStage.director.time < duration)
             {
                 yield return null;
             }
 
             if (_state == CutscenePlaybackState.Playing)
             {
-                FinishSession(skipped: false);
+                bool wasDestroyedMidPlay = _activeStage == null || _activeStage.director == null;
+                FinishSession(skipped: wasDestroyedMidPlay);
             }
         }
 

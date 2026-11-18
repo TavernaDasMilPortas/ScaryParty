@@ -1,6 +1,11 @@
 # Estado das fases
 
-Status atualizado após conclusão das **Etapas 1–6** de fechamento da recuperação M1–M8 (`Docs/Release/Reports/RECUPERACAO_M1_M8.md`) na branch `release/marcos-noturnos`. Os 4 `.csproj` compilam com 0 erros e **37/37** testes unitários puros de domínio passaram em runner `.NET`; **nenhum** teste de Unity Editor (EditMode/PlayMode/ParrelSync/UI/Física/NavMesh) foi executado por política `UNITY_EXECUTION=MANUAL_ONLY`.
+Status atualizado após conclusão das fases **P0–P7** (`Docs/Release/Reports/PLAYTEST_UI_PLACEHOLDERS.md`) na branch `release/marcos-noturnos` a partir de `bdffe509`:
+- **Build `.NET` (`ScaryParty.Pizzeria.Tests.csproj`):** `0` erros, `0` avisos.
+- **Unity Test Runner EditMode (Suíte Segura):** `102/102 Passed` (`Docs/Release/Reports/Evidence/Unity_EditMode_Suite_Summary.json` + XML NUnit3 local).
+- **Unity Test Runner PlayMode (`PlaytestIntegrationPlayModeTests`):** `6/6 Passed` em `503.73s` (`Docs/Release/Reports/Evidence/Unity_PlayMode_Summary.json` + XML NUnit3 local).
+- **Visual GameView (`1920x1080` e `1280x720`):** `LobbyScene` + `GameScene` (HUD, Central `[J]`, Diagnóstico `[F8]`) capturadas e inspecionadas sem shaders quebrados; `ValidateAll` pós-PlayMode com `0` erros/warnings.
+- **Multiplayer em 2 processos reais (`Host + Cliente` separados):** **NÃO EXECUTADO** (`com.unity.multiplayer.playmode@2.0.2` com `0` cenários/clones virtuais; bloqueio de lock `Library/` para 2ª instância).
 
 | Marco | Status | Relatório |
 |---|---|---|
@@ -15,8 +20,8 @@ Status atualizado após conclusão das **Etapas 1–6** de fechamento da recuper
 
 ## Checkpoint ativo
 
-- Fase: Recuperação M1–M8 concluída em código/estática (**R0–R8**). Ver [RECUPERACAO_M1_M8](Reports/RECUPERACAO_M1_M8.md).
-- Próxima ação: Execução manual pelo usuário no Unity Editor aberto (Console, Test Runner EditMode, `CharacterSetupWizard` e bateria PlayMode/ParrelSync T01–T60).
-- Bloqueios: Validações EditMode/PlayMode/ParrelSync, authoring de prefabs/cena/Animator no Editor e build final dependem do usuário no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).
+- Fase: **P0–P7 concluídas** (correções, UI Toolkit navegável, placeholders 3D instalados, presets/diagnóstico `[F8]`, EditMode `102/102`, PlayMode `6/6` e 8 capturas GameView `1920x1080`/`1280x720`). Ver [PLAYTEST_UI_PLACEHOLDERS](Reports/PLAYTEST_UI_PLACEHOLDERS.md).
+- Próxima ação: Execução do roteiro manual de playtest em `LobbyScene.unity` e testes em **2 processos reais (`Host + Cliente` via MPPM ou Build Standalone + Editor)** para `V02`, `V03`, `V10`–`V15` e substituição gradual dos placeholders pelos assets finais.
+- Bloqueios: Multiplayer em 2 processos não pôde rodar em CLI (`0` cenários MPPM configurados + lock em `Library/`); alterações manuais de animators/prefabs finais e builds locais seguem sob demanda do usuário (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 Atualizar depois de blocos importantes e antes de encerrar uma sessão. Não avançar fases nem marcar marcos como concluídos com sistemas desconectados ou sem UI/prefab configurados.

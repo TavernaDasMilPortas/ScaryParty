@@ -1,9 +1,9 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 17/11/2026
+**Última Revisão:** 18/11/2026
 **Versão Unity:** Unity 6000.3.6f1
 **Branch Atual:** `release/marcos-noturnos`
-**Commit Base:** `ff864cc5` + recuperação **R0–R8** (marcos M1–M8 integrados e compilando; validação Unity Editor/PlayMode pendente)
+**Commits Recentes:** Base `bdffe509` + fases **P0–P7** (`af9e829f` .. `170bfe62` + fechamento P7: correções de rede/funcionários/metas/UI Toolkit/placeholders 3D/presets/diagnóstico `[F8]`, EditMode `102/102`, PlayMode `6/6` e capturas GameView; multiplayer 2 processos pendente).
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---

@@ -5,6 +5,13 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-18] — Correções de Playtest, UI Navegável, Placeholders 3D e Validação CLI (`P0–P7`)
+- **Escopo:** Inventário e manifesto (`PlaytestReferenceManifest`, `PlaytestInstallerAndValidator`), sincronização cliente sem `DomainState` (`MonsterPopulationDirector`, `EmployeePopulationDirector`, `NetMonsterDto`/`NetEmployeeDto`), operações reais de funcionários e vínculo exclusivo pizza–unidade (`OrderUnitFulfillmentService`, `PlayerInteraction`), resolução unificada de metas e reset (`PizzeriaRunPreset`, `NightParameterResolver`, `PizzeriaRoot`), fluxo completo UI Toolkit (`SessionLaunchConfig`, `HudPresenter`, `OperationsHubPresenter` `[J]`, `LifeAndSpectatorOverlayPresenter`, `MinimapPresenter`, `GameplayInputGate` + `WeaponInputHandler`), 12 prefabs/16 materiais provisórios URP (`Assets/Piaaria/Playtest/`) + `EntityVisualAnchorRig` + Alho (`id=10`) + anchors de telhado (`CityBuilding`/`CityGenerator`), presets (`Entrega_3Noites`, `Playtest_Integracao`, `Tutorial_Noite0`) + painel `[F8]` (`PlaytestDiagnosticsPresenter`) e correção de `CutscenePlaybackService.PlayRoutine`.
+- **Relatório Completo:** `Docs/Release/Reports/PLAYTEST_UI_PLACEHOLDERS.md`.
+- **Validação:** `dotnet build ScaryParty.Pizzeria.Tests.csproj --no-restore` (`0` erros), Unity CLI EditMode (`102/102 Passed`), Unity CLI PlayMode `PlaytestIntegrationPlayModeTests` (`6/6 Passed` em `503.73s` com XML NUnit3 e JSON preservados), 8 capturas GameView em `1920x1080` e `1280x720`, pós-PlayMode `ValidateAll` (`0` erros, `0` warnings). Multiplayer em 2 processos reais marcado `NÃO EXECUTADO` (`0` cenários MPPM configurados).
+
+---
+
 ## [2026-11-17] — Fechamento de Pendências M1–M8 (Etapas 1–6 pós-`a4d1ab57`)
 - **Escopo:** `MonsterNpcController.cs`, `MonsterPopulationDirector.cs`, `EmployeeAgentController.cs`, `EmployeeTaskService.cs`, `CustomerState.cs`, `CustomerService.cs`, `CustomerSpawner.cs`, `NewModels.cs`, `PizzeriaState.cs`, `RunProgressionService.cs`, `NightCycleService.cs`, `PizzeriaConfig.cs`, `PizzeriaRoot.cs`, `PizzeriaCommandHandler.cs`, `ContextualTutorialPresenter.cs`, `HudPresenter.cs`, `NetDtos.cs`, `ReplicationProjector.cs`, `OvernightExperienceTests.cs`, `Docs/Release/*`.
 - **Resumo:**

@@ -1,6 +1,7 @@
 # Matriz de testes — acompanhamento
 
-O ROADMAP contém a especificação original. Este arquivo registra a execução e não comprova que ela ocorreu. Todos os casos T01–T60 permanecem `NÃO EXECUTADO` no Unity Editor / PlayMode (`UNITY_EXECUTION=MANUAL_ONLY`). Nota R8: os **33 testes unitários puros de domínio** (`OvernightExperienceTests` + `PizzeriaDomainTests`) foram executados via runner `.NET` em scratch com **33/33 aprovados**; testes de runtime, física, UI e rede aguardam validação manual do usuário.
+O ROADMAP contém a especificação original. Este arquivo registra a execução e não comprova que ela ocorreu.
+**Atualização P0–P7 (`18/11/2026`, `release/marcos-noturnos` pós-`bdffe509`):** A suíte Unity EditMode segura (`102/102 Passed` em `52.759s`) e a suíte PlayMode single-process (`PlaytestIntegrationPlayModeTests`: `6/6 Passed` em `503.73s`), além de 8 capturas GameView em `1920x1080` e `1280x720`, foram executadas e documentadas junto à matriz `V01–V16` em [PLAYTEST_UI_PLACEHOLDERS](Reports/PLAYTEST_UI_PLACEHOLDERS.md). Os casos `T01–T60` em **dois processos reais (Host + Cliente)** permanecem `NÃO EXECUTADO` (0 cenários/clones MPPM configurados).
 
 Estados: NÃO EXECUTADO / PASSOU / FALHOU / BLOQUEADO / LACUNA — Mx. Para cada execução registrar data, SHA, preset/seed e host/cliente em evidência ou relatório. Preservar histórico relevante.
 

@@ -1,0 +1,24 @@
+{
+  "mode": "PlayMode",
+  "unityVersion": "6000.3.6f1",
+  "resultState": "Passed",
+  "total": 6,
+  "passed": 6,
+  "failed": 0,
+  "skipped": 0,
+  "inconclusive": 0,
+  "durationSeconds": 503.73,
+  "startTimeUtc": "2026-11-18 06:57:07Z",
+  "endTimeUtc": "2026-11-18 07:05:30Z",
+  "preservedXmlFile": "Unity_PlayMode_Results.xml",
+  "failedTests": [
+  ],
+  "cases": [
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_ClientStartupWithoutDomainState_SpawnsAndSyncsProxiesSafely","status":"Passed","duration":3.1908},
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_CustomPresetGoal_PreservedAfterNightRestart","status":"Passed","duration":0.8812},
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_FailedProcessingOperation_LeavesItemAndStockUnmutated","status":"Passed","duration":0.1312},
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_GameScene_FiveDeterministicCitySeeds_PassConnectivityAndRooftopValidation","status":"Passed","duration":413.6929},
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_GameSceneHost_StartNewRunReconstructsKitchenWithoutDuplicates","status":"Passed","duration":80.5805},
+    {"name":"ScaryParty.Pizzeria.Tests.PlayMode.PlaytestIntegrationPlayModeTests.PlayMode_TwoIdenticalOrders_CompeteForOneReadyPizza_ExclusiveBinding","status":"Passed","duration":2.2376}
+  ]
+}
