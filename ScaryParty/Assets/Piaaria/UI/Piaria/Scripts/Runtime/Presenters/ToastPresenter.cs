@@ -57,15 +57,48 @@ namespace ScaryParty.UI.Piaria.Presenters
         }
 #endif
 
+        private bool _subscribed;
+
         private void Start()
         {
             EnsureInitialized();
+            SubscribeToFeeds();
+        }
+
+        private void OnEnable()
+        {
+            SubscribeToFeeds();
+        }
+
+        private void OnDisable()
+        {
+            UnsubscribeFromFeeds();
+        }
+
+        private void SubscribeToFeeds()
+        {
+            if (_subscribed) return;
+            _subscribed = true;
             NotificationManager.OnNotificationShown += HandleNotification;
+            ScaryParty.Pizzeria.Network.PizzeriaNotifier.OnAnyFeedbackReceived += HandleServerFeedback;
+        }
+
+        private void UnsubscribeFromFeeds()
+        {
+            if (!_subscribed) return;
+            _subscribed = false;
+            NotificationManager.OnNotificationShown -= HandleNotification;
+            ScaryParty.Pizzeria.Network.PizzeriaNotifier.OnAnyFeedbackReceived -= HandleServerFeedback;
+        }
+
+        private void HandleServerFeedback(string message, bool isError)
+        {
+            NotificationManager.Show(message, isError ? NotificationType.Error : NotificationType.Info);
         }
 
         private void OnDestroy()
         {
-            NotificationManager.OnNotificationShown -= HandleNotification;
+            UnsubscribeFromFeeds();
             if (Instance == this) Instance = null;
         }
 

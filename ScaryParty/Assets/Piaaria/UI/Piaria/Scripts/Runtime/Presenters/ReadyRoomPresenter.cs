@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
 using Unity.Netcode;
+using ScaryParty.Pizzeria.Domain.Services;
+using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Presentation;
 using ScaryParty.UI.Piaria.Core;
 
@@ -55,6 +57,17 @@ namespace ScaryParty.UI.Piaria.Presenters
         private bool? _optimisticReadyState = null;
         private readonly HashSet<PlayerState> _observedPlayers = new HashSet<PlayerState>();
 
+        // P4: Configuração da sessão pelo Host
+        private VisualElement _hostConfigPanel;
+        private Button _btnPreset;
+        private Button _btnDifficulty;
+        private Button _btnNights;
+        private Button _btnTutorial;
+        private TextField _seedField;
+        private Label _hostConfigStatusLabel;
+        private int _presetIndex = 0;
+        private static readonly string[] BuiltInPresets = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0" };
+
         private void Awake()
         {
             if (Instance == null)
@@ -100,11 +113,14 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             EnsureInitialized();
             UIScreenRouter.Instance?.RegisterScreen(this);
+            SessionLaunchConfig.OnConfigChanged += OnSessionLaunchConfigChanged;
+            SessionLaunchConfig.EnsureNetworkHooksRegistered();
             Open();
         }
 
         private void OnDestroy()
         {
+            SessionLaunchConfig.OnConfigChanged -= OnSessionLaunchConfigChanged;
             foreach (var ps in _observedPlayers)
             {
                 if (ps != null)
@@ -182,8 +198,184 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             ApplyCatalogAssets();
+            EnsureHostLaunchConfigPanel();
             BindEvents();
             UpdateRoomCodeDisplay();
+            RefreshHostLaunchConfigUi();
+        }
+
+        private void OnSessionLaunchConfigChanged(SessionLaunchConfigData _)
+        {
+            RefreshHostLaunchConfigUi();
+        }
+
+        private void EnsureHostLaunchConfigPanel()
+        {
+            if (RootElement == null || _hostConfigPanel != null) return;
+
+            _hostConfigPanel = new VisualElement { name = "HostLaunchConfigPanel" };
+            _hostConfigPanel.style.flexDirection = FlexDirection.Row;
+            _hostConfigPanel.style.flexWrap = Wrap.Wrap;
+            _hostConfigPanel.style.alignItems = Align.Center;
+            _hostConfigPanel.style.justifyContent = Justify.Center;
+            _hostConfigPanel.style.backgroundColor = new Color(0.09f, 0.10f, 0.14f, 0.90f);
+            _hostConfigPanel.style.borderTopWidth = 1;
+            _hostConfigPanel.style.borderBottomWidth = 1;
+            _hostConfigPanel.style.borderLeftWidth = 1;
+            _hostConfigPanel.style.borderRightWidth = 1;
+            var border = new Color(0.90f, 0.68f, 0.28f, 0.85f);
+            _hostConfigPanel.style.borderTopColor = border;
+            _hostConfigPanel.style.borderBottomColor = border;
+            _hostConfigPanel.style.borderLeftColor = border;
+            _hostConfigPanel.style.borderRightColor = border;
+            _hostConfigPanel.style.borderTopLeftRadius = 8;
+            _hostConfigPanel.style.borderTopRightRadius = 8;
+            _hostConfigPanel.style.borderBottomLeftRadius = 8;
+            _hostConfigPanel.style.borderBottomRightRadius = 8;
+            _hostConfigPanel.style.paddingLeft = 12;
+            _hostConfigPanel.style.paddingRight = 12;
+            _hostConfigPanel.style.paddingTop = 6;
+            _hostConfigPanel.style.paddingBottom = 6;
+            _hostConfigPanel.style.marginTop = 6;
+            _hostConfigPanel.style.marginBottom = 6;
+            _hostConfigPanel.style.alignSelf = Align.Center;
+
+            _hostConfigStatusLabel = new Label("Configuração da RUN:");
+            _hostConfigStatusLabel.style.fontSize = 13;
+            _hostConfigStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _hostConfigStatusLabel.style.color = new Color(0.98f, 0.84f, 0.42f);
+            _hostConfigStatusLabel.style.marginRight = 8;
+            _hostConfigPanel.Add(_hostConfigStatusLabel);
+
+            _btnPreset = CreateConfigButton(CyclePreset);
+            _btnDifficulty = CreateConfigButton(CycleDifficulty);
+            _btnNights = CreateConfigButton(CycleMaxNights);
+            _btnTutorial = CreateConfigButton(ToggleTutorialNight0);
+
+            _seedField = new TextField("Seed:") { value = SessionLaunchConfig.Current.SeedOverride.ToString() };
+            _seedField.style.width = 130;
+            _seedField.style.marginLeft = 6;
+            _seedField.style.color = Color.white;
+            _seedField.RegisterValueChangedCallback(evt =>
+            {
+                if (!IsLocalHostAuthority()) return;
+                if (int.TryParse(evt.newValue, out int parsed))
+                {
+                    var cur = SessionLaunchConfig.Current;
+                    SessionLaunchConfig.ApplyHostSelection(cur.PresetId, cur.Difficulty, cur.MaxNights, parsed, cur.IncludeNight0Tutorial);
+                }
+            });
+            _hostConfigPanel.Add(_seedField);
+
+            var actionsBar = RootElement.Q<VisualElement>(className: "ready-actions-bar");
+            if (actionsBar != null && actionsBar.parent != null)
+            {
+                int idx = actionsBar.parent.IndexOf(actionsBar);
+                actionsBar.parent.Insert(idx, _hostConfigPanel);
+            }
+            else
+            {
+                RootElement.Add(_hostConfigPanel);
+            }
+        }
+
+        private Button CreateConfigButton(Action onClick)
+        {
+            var btn = new Button(onClick);
+            btn.style.height = 28;
+            btn.style.marginLeft = 4;
+            btn.style.marginRight = 4;
+            btn.style.paddingLeft = 10;
+            btn.style.paddingRight = 10;
+            btn.style.fontSize = 12;
+            btn.style.backgroundColor = new Color(0.22f, 0.28f, 0.38f);
+            btn.style.color = Color.white;
+            btn.style.borderTopLeftRadius = 5;
+            btn.style.borderTopRightRadius = 5;
+            btn.style.borderBottomLeftRadius = 5;
+            btn.style.borderBottomRightRadius = 5;
+            _hostConfigPanel.Add(btn);
+            return btn;
+        }
+
+        private static bool IsLocalHostAuthority()
+            => NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+
+        private void CyclePreset()
+        {
+            if (!IsLocalHostAuthority()) return;
+            _presetIndex = (_presetIndex + 1) % BuiltInPresets.Length;
+            string pid = BuiltInPresets[_presetIndex];
+            bool tut = pid == "Tutorial_Noite0";
+            var cur = SessionLaunchConfig.Current;
+            SessionLaunchConfig.ApplyHostSelection(pid, cur.Difficulty, cur.MaxNights, cur.SeedOverride, tut);
+        }
+
+        private void CycleDifficulty()
+        {
+            if (!IsLocalHostAuthority()) return;
+            var cur = SessionLaunchConfig.Current;
+            var next = cur.Difficulty == RunDifficulty.Hard
+                ? RunDifficulty.Normal
+                : RunDifficulty.Hard;
+            SessionLaunchConfig.ApplyHostSelection(cur.PresetId, next, cur.MaxNights, cur.SeedOverride, cur.IncludeNight0Tutorial);
+        }
+
+        private void CycleMaxNights()
+        {
+            if (!IsLocalHostAuthority()) return;
+            var cur = SessionLaunchConfig.Current;
+            int nextNights = cur.MaxNights switch
+            {
+                1 => 2,
+                2 => 3,
+                3 => 5,
+                _ => 1
+            };
+            SessionLaunchConfig.ApplyHostSelection(cur.PresetId, cur.Difficulty, nextNights, cur.SeedOverride, cur.IncludeNight0Tutorial);
+        }
+
+        private void ToggleTutorialNight0()
+        {
+            if (!IsLocalHostAuthority()) return;
+            var cur = SessionLaunchConfig.Current;
+            SessionLaunchConfig.ApplyHostSelection(cur.PresetId, cur.Difficulty, cur.MaxNights, cur.SeedOverride, !cur.IncludeNight0Tutorial);
+        }
+
+        private void RefreshHostLaunchConfigUi()
+        {
+            if (_hostConfigPanel == null) return;
+            bool isHost = IsLocalHostAuthority();
+            var cfg = SessionLaunchConfig.Current;
+
+            if (_hostConfigStatusLabel != null)
+                _hostConfigStatusLabel.text = isHost ? "Configuração (Host):" : "Configuração do Host (somente leitura):";
+            if (_btnPreset != null)
+            {
+                _btnPreset.text = $"Preset: {(string.IsNullOrEmpty(cfg.PresetId) ? "Entrega_3Noites" : cfg.PresetId)}";
+                _btnPreset.SetEnabled(isHost);
+            }
+            if (_btnDifficulty != null)
+            {
+                _btnDifficulty.text = $"Dificuldade: {cfg.Difficulty}";
+                _btnDifficulty.SetEnabled(isHost);
+            }
+            if (_btnNights != null)
+            {
+                _btnNights.text = $"Noites: {Mathf.Clamp(cfg.MaxNights, 1, 7)}";
+                _btnNights.SetEnabled(isHost);
+            }
+            if (_btnTutorial != null)
+            {
+                _btnTutorial.text = $"Tutorial Noite 0: {(cfg.IncludeNight0Tutorial ? "SIM" : "NÃO")}";
+                _btnTutorial.SetEnabled(isHost);
+            }
+            if (_seedField != null)
+            {
+                _seedField.SetEnabled(isHost);
+                string seedTxt = cfg.SeedOverride.ToString();
+                if (_seedField.value != seedTxt) _seedField.SetValueWithoutNotify(seedTxt);
+            }
         }
 
         private void ApplyCatalogAssets()
@@ -637,6 +829,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
             }
 
+            var cfg = SessionLaunchConfig.Current;
+            int initialNight = cfg.HasHostSelection && cfg.IncludeNight0Tutorial ? 0 : 1;
+            var nightPreview = ScaryParty.Pizzeria.Domain.Services.NightCycleService.GetDefaultParameters(Math.Max(1, initialNight));
             var coordinator = PizzeriaSceneLoadingCoordinator.EnsureInstance();
 
             if (isNetworkingActive)
@@ -649,8 +844,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                     return;
                 }
 
-                var night1 = ScaryParty.Pizzeria.Domain.Services.NightCycleService.GetDefaultParameters(1);
-                var status = coordinator.BeginNetworkedTransition(targetScene, night1.NightNumber, night1.RevenueGoal);
+                SessionLaunchConfig.TryBroadcastToAllClients();
+                var status = coordinator.BeginNetworkedTransition(targetScene, initialNight, nightPreview.RevenueGoal);
                 if (status != SceneEventProgressStatus.Started)
                 {
                     Debug.LogError($"[ReadyRoomPresenter] LoadScene em rede falhou com status: {status}");
@@ -660,8 +855,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             else
             {
-                var night1 = ScaryParty.Pizzeria.Domain.Services.NightCycleService.GetDefaultParameters(1);
-                coordinator.SetNightContext(night1.NightNumber, night1.RevenueGoal);
+                coordinator.SetNightContext(initialNight, nightPreview.RevenueGoal);
                 coordinator.TransitionToScene(targetScene);
             }
         }
@@ -757,8 +951,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             State = ScreenState.Opening;
+            SessionLaunchConfig.EnsureNetworkHooksRegistered();
             UpdateRoomCodeDisplay();
             RefreshPlayers();
+            RefreshHostLaunchConfigUi();
 
             UIToolkitTweenService.FadeIn(RootElement, 0.22f, () =>
             {

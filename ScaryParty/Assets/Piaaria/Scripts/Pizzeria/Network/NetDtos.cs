@@ -643,26 +643,43 @@ namespace ScaryParty.Pizzeria.Network
     {
         public ulong SupplyOrderId;
         public byte State;
+        public double OrderedTime;
         public double ExpectedArrivalTime;
         public int TotalCost;
         public int ReceivingSlotIndex;
+        public int PrimaryIngredientDefId;
+        public int TotalOrderedUnits;
+        public Unity.Collections.FixedString64Bytes Summary;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref SupplyOrderId);
             serializer.SerializeValue(ref State);
+            serializer.SerializeValue(ref OrderedTime);
             serializer.SerializeValue(ref ExpectedArrivalTime);
             serializer.SerializeValue(ref TotalCost);
             serializer.SerializeValue(ref ReceivingSlotIndex);
+            serializer.SerializeValue(ref PrimaryIngredientDefId);
+            serializer.SerializeValue(ref TotalOrderedUnits);
+            serializer.SerializeValue(ref Summary);
             serializer.SerializeValue(ref Revision);
         }
 
         public bool Equals(NetSupplyDto other)
-            => SupplyOrderId == other.SupplyOrderId && State == other.State && Revision == other.Revision;
+            => SupplyOrderId == other.SupplyOrderId &&
+               State == other.State &&
+               Math.Abs(OrderedTime - other.OrderedTime) < 0.05 &&
+               Math.Abs(ExpectedArrivalTime - other.ExpectedArrivalTime) < 0.05 &&
+               TotalCost == other.TotalCost &&
+               ReceivingSlotIndex == other.ReceivingSlotIndex &&
+               PrimaryIngredientDefId == other.PrimaryIngredientDefId &&
+               TotalOrderedUnits == other.TotalOrderedUnits &&
+               Summary.Equals(other.Summary) &&
+               Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetSupplyDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(SupplyOrderId, State, Revision);
+        public override int GetHashCode() => HashCode.Combine(SupplyOrderId, State, PrimaryIngredientDefId, TotalOrderedUnits, Revision);
     }
 
     public struct NetUpgradeDto : INetworkSerializable, IEquatable<NetUpgradeDto>

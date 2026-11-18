@@ -235,23 +235,10 @@ namespace ScaryParty.Editor.Playtest
         private static int EnsureAllScenes(StringBuilder sb)
         {
             int changes = 0;
-            var originalScene = SceneManager.GetActiveScene();
-            string originalPath = originalScene.IsValid() ? originalScene.path : string.Empty;
-
             changes += ProcessScene(LobbyScenePath, EnsureLobbyScene, sb);
             changes += ProcessScene(ReadyScenePath, EnsureReadyScene, sb);
             changes += ProcessScene(CanonicalGameScenePath, EnsureGameplayScene, sb);
             changes += ProcessScene(CelShadedGameScenePath, EnsureGameplayScene, sb);
-
-            if (!string.IsNullOrEmpty(originalPath) && File.Exists(originalPath))
-            {
-                var active = SceneManager.GetActiveScene();
-                if (!active.IsValid() || active.path != originalPath)
-                {
-                    EditorSceneManager.OpenScene(originalPath, OpenSceneMode.Single);
-                }
-            }
-
             return changes;
         }
 
@@ -263,17 +250,32 @@ namespace ScaryParty.Editor.Playtest
                 return 0;
             }
 
+            var originalScene = SceneManager.GetActiveScene();
             var opened = SceneManager.GetSceneByPath(scenePath);
             bool alreadyLoaded = opened.isLoaded;
-            var scene = alreadyLoaded ? opened : EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-            int changes = processor(scene, sb);
-            if (changes > 0)
+            var scene = alreadyLoaded ? opened : EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            try
             {
-                EditorSceneManager.MarkSceneDirty(scene);
-                EditorSceneManager.SaveScene(scene);
-                sb.AppendLine($"[Scene] Saved {scenePath} ({changes} change(s)).");
+                int changes = processor(scene, sb);
+                if (changes > 0)
+                {
+                    EditorSceneManager.MarkSceneDirty(scene);
+                    EditorSceneManager.SaveScene(scene);
+                    sb.AppendLine($"[Scene] Saved {scenePath} ({changes} change(s)).");
+                }
+                return changes;
             }
-            return changes;
+            finally
+            {
+                if (!alreadyLoaded && scene.isLoaded)
+                {
+                    EditorSceneManager.CloseScene(scene, true);
+                }
+                if (originalScene.IsValid() && originalScene.isLoaded)
+                {
+                    SceneManager.SetActiveScene(originalScene);
+                }
+            }
         }
 
         private static int EnsureLobbyScene(Scene scene, StringBuilder sb)
@@ -497,13 +499,9 @@ namespace ScaryParty.Editor.Playtest
             ValidateScene(CanonicalGameScenePath, isGameplay: true, isReady: false, sb, ref errorCount, ref warningCount);
             ValidateScene(CelShadedGameScenePath, isGameplay: true, isReady: false, sb, ref errorCount, ref warningCount);
 
-            if (!string.IsNullOrEmpty(originalPath) && File.Exists(originalPath))
+            if (originalScene.IsValid() && originalScene.isLoaded)
             {
-                var active = SceneManager.GetActiveScene();
-                if (!active.IsValid() || active.path != originalPath)
-                {
-                    EditorSceneManager.OpenScene(originalPath, OpenSceneMode.Single);
-                }
+                SceneManager.SetActiveScene(originalScene);
             }
 
             sb.AppendLine($"Validation complete -> Errors: {errorCount}, Warnings: {warningCount}");
@@ -519,96 +517,124 @@ namespace ScaryParty.Editor.Playtest
                 return;
             }
 
+            var originalScene = SceneManager.GetActiveScene();
             var scene = SceneManager.GetSceneByPath(scenePath);
-            if (!scene.isLoaded) scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-
-            int missing = 0;
-            UIDocument mainDoc = null;
-            NetworkManager nm = null;
-            CityGenerator cityGen = null;
-            UIFeedbackService feedback = null;
-
-            foreach (var root in scene.GetRootGameObjects())
+            bool alreadyLoaded = scene.isLoaded;
+            if (!alreadyLoaded) scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
+            try
             {
-                missing += CountMissingScriptsRecursive(root);
-                if (mainDoc == null)
+                int missing = 0;
+                UIDocument mainDoc = null;
+                NetworkManager nm = null;
+                CityGenerator cityGen = null;
+                UIFeedbackService feedback = null;
+
+                foreach (var root in scene.GetRootGameObjects())
                 {
-                    var docs = root.GetComponentsInChildren<UIDocument>(true);
-                    foreach (var d in docs)
+                    missing += CountMissingScriptsRecursive(root);
+                    if (mainDoc == null)
                     {
-                        if (!isGameplay || d.gameObject.name == "MainGameUI")
+                        var docs = root.GetComponentsInChildren<UIDocument>(true);
+                        foreach (var d in docs)
                         {
-                            mainDoc = d;
-                            break;
+                            if (!isGameplay || d.gameObject.name == "MainGameUI")
+                            {
+                                mainDoc = d;
+                                break;
+                            }
                         }
                     }
+                    if (nm == null) nm = root.GetComponentInChildren<NetworkManager>(true);
+                    if (cityGen == null) cityGen = root.GetComponentInChildren<CityGenerator>(true);
+                    if (feedback == null) feedback = root.GetComponentInChildren<UIFeedbackService>(true);
                 }
-                if (nm == null) nm = root.GetComponentInChildren<NetworkManager>(true);
-                if (cityGen == null) cityGen = root.GetComponentInChildren<CityGenerator>(true);
-                if (feedback == null) feedback = root.GetComponentInChildren<UIFeedbackService>(true);
-            }
 
-            if (missing > 0)
-            {
-                sb.AppendLine($"[ERROR] {scenePath} has {missing} Missing Script(s).");
-                errors++;
-            }
-
-            if (mainDoc == null)
-            {
-                sb.AppendLine($"[ERROR] {scenePath} missing expected UIDocument.");
-                errors++;
-            }
-            else
-            {
-                if (mainDoc.panelSettings == null)
+                if (missing > 0)
                 {
-                    sb.AppendLine($"[ERROR] {scenePath} UIDocument missing PanelSettings.");
-                    errors++;
-                }
-                if (mainDoc.visualTreeAsset == null)
-                {
-                    sb.AppendLine($"[ERROR] {scenePath} UIDocument missing VisualTreeAsset.");
-                    errors++;
-                }
-            }
-
-            if (!isGameplay && feedback == null)
-            {
-                sb.AppendLine($"[ERROR] {scenePath} missing UIFeedbackService.");
-                errors++;
-            }
-
-            if (isGameplay)
-            {
-                if (nm == null)
-                {
-                    sb.AppendLine($"[ERROR] {scenePath} missing NetworkManager.");
-                    errors++;
-                }
-                else if (nm.NetworkConfig == null || nm.NetworkConfig.PlayerPrefab == null)
-                {
-                    sb.AppendLine($"[ERROR] {scenePath} NetworkManager missing PlayerPrefab.");
+                    sb.AppendLine($"[ERROR] {scenePath} has {missing} Missing Script(s).");
                     errors++;
                 }
 
-                if (cityGen == null)
+                if (mainDoc == null)
                 {
-                    sb.AppendLine($"[ERROR] {scenePath} missing CityGenerator.");
+                    sb.AppendLine($"[ERROR] {scenePath} missing expected UIDocument.");
                     errors++;
                 }
                 else
                 {
-                    if (cityGen.config == null)
+                    if (mainDoc.panelSettings == null)
                     {
-                        sb.AppendLine($"[ERROR] {scenePath} CityGenerator missing CityConfig.");
+                        sb.AppendLine($"[ERROR] {scenePath} UIDocument missing PanelSettings.");
                         errors++;
                     }
-                    if (cityGen.pizzeriaPrefab == null)
+                    if (mainDoc.visualTreeAsset == null)
                     {
-                        sb.AppendLine($"[ERROR] {scenePath} CityGenerator missing pizzeriaPrefab.");
+                        sb.AppendLine($"[ERROR] {scenePath} UIDocument missing VisualTreeAsset.");
                         errors++;
                     }
+                    if (isGameplay)
+                    {
+                        if (mainDoc.GetComponent<OperationsHubPresenter>() == null)
+                        {
+                            sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing OperationsHubPresenter.");
+                            errors++;
+                        }
+                        if (mainDoc.GetComponent<LifeAndSpectatorOverlayPresenter>() == null)
+                        {
+                            sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing LifeAndSpectatorOverlayPresenter.");
+                            errors++;
+                        }
+                    }
+                }
+
+                if (!isGameplay && feedback == null)
+                {
+                    sb.AppendLine($"[ERROR] {scenePath} missing UIFeedbackService.");
+                    errors++;
+                }
+
+                if (isGameplay)
+                {
+                    if (nm == null)
+                    {
+                        sb.AppendLine($"[ERROR] {scenePath} missing NetworkManager.");
+                        errors++;
+                    }
+                    else if (nm.NetworkConfig == null || nm.NetworkConfig.PlayerPrefab == null)
+                    {
+                        sb.AppendLine($"[ERROR] {scenePath} NetworkManager missing PlayerPrefab.");
+                        errors++;
+                    }
+
+                    if (cityGen == null)
+                    {
+                        sb.AppendLine($"[ERROR] {scenePath} missing CityGenerator.");
+                        errors++;
+                    }
+                    else
+                    {
+                        if (cityGen.config == null)
+                        {
+                            sb.AppendLine($"[ERROR] {scenePath} CityGenerator missing CityConfig.");
+                            errors++;
+                        }
+                        if (cityGen.pizzeriaPrefab == null)
+                        {
+                            sb.AppendLine($"[ERROR] {scenePath} CityGenerator missing pizzeriaPrefab.");
+                            errors++;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (!alreadyLoaded && scene.isLoaded)
+                {
+                    EditorSceneManager.CloseScene(scene, true);
+                }
+                if (originalScene.IsValid() && originalScene.isLoaded)
+                {
+                    SceneManager.SetActiveScene(originalScene);
                 }
             }
         }

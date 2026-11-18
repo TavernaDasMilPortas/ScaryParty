@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlaytestReferenceManifest
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest
   branchName: release/marcos-noturnos
-  baseCommitSha: bdffe5096163c0bac817a94a1c05e4d22fdf4652
+  baseCommitSha: 68a18e49fcb98b9198bf26e2078ea0abd8b9c188
   unityVersion: 6000.3.6f1
   lastValidatedUtc: 
   scenes:

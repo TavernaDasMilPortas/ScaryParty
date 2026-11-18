@@ -732,13 +732,32 @@ namespace ScaryParty.Pizzeria.Network
 
         private NetSupplyDto CreateSupplyDto(SupplyOrderState sup)
         {
+            int primaryIngId = 0;
+            int totalUnits = 0;
+            string summary = string.Empty;
+            if (sup.Lines != null && sup.Lines.Count > 0)
+            {
+                primaryIngId = sup.Lines[0].IngredientDefId;
+                for (int i = 0; i < sup.Lines.Count; i++)
+                {
+                    totalUnits += sup.Lines[i].TotalUnits;
+                }
+                summary = sup.Lines.Count == 1
+                    ? $"Ing #{primaryIngId} (+{totalUnits}un)"
+                    : $"{sup.Lines.Count} itens (+{totalUnits}un)";
+            }
+
             return new NetSupplyDto
             {
                 SupplyOrderId = sup.Id.Value,
                 State = (byte)sup.State,
+                OrderedTime = sup.OrderedTime,
                 ExpectedArrivalTime = sup.ExpectedArrivalTime,
                 TotalCost = sup.TotalCost,
                 ReceivingSlotIndex = sup.ReceivingSlotIndex,
+                PrimaryIngredientDefId = primaryIngId,
+                TotalOrderedUnits = totalUnits,
+                Summary = TruncateFs64(summary),
                 Revision = sup.Revision
             };
         }

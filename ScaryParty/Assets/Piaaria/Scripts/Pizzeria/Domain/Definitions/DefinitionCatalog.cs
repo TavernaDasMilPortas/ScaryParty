@@ -135,14 +135,16 @@ namespace ScaryParty.Pizzeria.Domain.Definitions
         public int UnitsPerPack { get; }
         public int PackPrice { get; }
         public float BaseETA { get; }
+        public string Name { get; }
 
-        public SupplyItemData(int id, int ingredientId, int unitsPerPack, int packPrice, float baseEta)
+        public SupplyItemData(int id, int ingredientId, int unitsPerPack, int packPrice, float baseEta, string name = null)
         {
             Id = id;
             IngredientId = ingredientId;
             UnitsPerPack = unitsPerPack;
             PackPrice = packPrice;
             BaseETA = baseEta;
+            Name = name ?? string.Empty;
         }
     }
 

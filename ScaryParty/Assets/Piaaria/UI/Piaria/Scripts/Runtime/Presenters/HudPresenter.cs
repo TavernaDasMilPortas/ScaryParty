@@ -63,10 +63,13 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Label _nightBannerLabel;
         private VisualElement _combatStatusBox;
         private Label _healthStatusLabel;
+        private Label _participantsStatusLabel;
+        private Label _slingStatusLabel;
         private Label _bagIntegrityLabel;
         private Label _weaponAmmoLabel;
         private Label _claimedOrdersLabel;
         private Label _employeesStatusLabel;
+        private Label _hintsTextLabel;
         private VisualElement _crosshairContainer;
         private float _hudMonitorTimer = 0f;
         private readonly Dictionary<int, float> _lowStockAlertCooldowns = new Dictionary<int, float>();
@@ -185,9 +188,18 @@ namespace ScaryParty.UI.Piaria.Presenters
             SetHandState(true, false, "Vazio");
 
             EnsureExperienceHudWidgets();
+            _hintsTextLabel = _root.Q<Label>(className: "hints-text");
+            if (_hintsTextLabel != null)
+            {
+                _hintsTextLabel.text = "[F1] Tutorial • [J] Operações • [M] Mapa • [B] Mochila • [G] Bandoleira • [H] Receitas • [TAB] Placar • [ESC] Pausa";
+            }
+
             NightResultsPresenter.EnsureInstance();
             ContextualTutorialPresenter.EnsureInstance();
             PauseEscapeMenuPresenter.EnsureInstance();
+            OperationsHubPresenter.EnsureInstance();
+            LifeAndSpectatorOverlayPresenter.EnsureInstance();
+            RunPreparationPresenter.EnsureInstance();
         }
 
         private void EnsureExperienceHudWidgets()
@@ -245,7 +257,20 @@ namespace ScaryParty.UI.Piaria.Presenters
             _healthStatusLabel.style.color = new Color(0.45f, 0.92f, 0.55f);
             _combatStatusBox.Add(_healthStatusLabel);
 
-            _bagIntegrityLabel = new Label("Mochila: Sem mochila");
+            _participantsStatusLabel = new Label("Equipe Online: Local");
+            _participantsStatusLabel.pickingMode = PickingMode.Ignore;
+            _participantsStatusLabel.style.fontSize = 12;
+            _participantsStatusLabel.style.color = new Color(0.84f, 0.90f, 0.96f);
+            _participantsStatusLabel.style.whiteSpace = WhiteSpace.Normal;
+            _combatStatusBox.Add(_participantsStatusLabel);
+
+            _slingStatusLabel = new Label("Bandoleira [G]: Sem espingarda");
+            _slingStatusLabel.pickingMode = PickingMode.Ignore;
+            _slingStatusLabel.style.fontSize = 12;
+            _slingStatusLabel.style.color = new Color(0.95f, 0.85f, 0.52f);
+            _combatStatusBox.Add(_slingStatusLabel);
+
+            _bagIntegrityLabel = new Label("Mochila [B]: Sem mochila");
             _bagIntegrityLabel.pickingMode = PickingMode.Ignore;
             _bagIntegrityLabel.style.fontSize = 13;
             _bagIntegrityLabel.style.color = new Color(0.88f, 0.88f, 0.92f);
@@ -635,6 +660,56 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
+            if (_slingStatusLabel != null)
+            {
+                if (netState.TryGetSlingedWeapon(localClientId, out var slinged))
+                {
+                    _slingStatusLabel.text = $"Bandoleira [G]: Espingarda guardada ({slinged.CurrentMagAmmo}/{slinged.MaxMagAmmo})";
+                    _slingStatusLabel.style.color = new Color(0.55f, 0.95f, 0.62f);
+                }
+                else if (netState.TryGetEquippedWeapon(localClientId, out var eqWep) && eqWep.WeaponType == 2)
+                {
+                    _slingStatusLabel.text = "Bandoleira [G]: Espingarda em punho ([G] p/ guardar)";
+                    _slingStatusLabel.style.color = new Color(0.98f, 0.85f, 0.42f);
+                }
+                else
+                {
+                    _slingStatusLabel.text = "Bandoleira [G]: Livre (sem espingarda)";
+                    _slingStatusLabel.style.color = new Color(0.75f, 0.78f, 0.84f);
+                }
+            }
+
+            if (_participantsStatusLabel != null && netState.PlayerCombatStates != null)
+            {
+                var pSb = new System.Text.StringBuilder("Equipe: ");
+                var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+                int listed = 0;
+                for (int i = 0; i < netState.PlayerCombatStates.Count; i++)
+                {
+                    var pcs = netState.PlayerCombatStates[i];
+                    string pName = null;
+                    for (int p = 0; p < allPlayers.Length; p++)
+                    {
+                        if (allPlayers[p] != null && allPlayers[p].OwnerClientId == pcs.ClientId)
+                        {
+                            string candidateName = allPlayers[p].PlayerName.Value.ToString();
+                            if (!string.IsNullOrWhiteSpace(candidateName)) pName = candidateName;
+                            break;
+                        }
+                    }
+                    if (string.IsNullOrEmpty(pName))
+                        pName = pcs.ClientId == localClientId ? "Você" : $"Jog.#{pcs.ClientId}";
+
+                    string lifeTag = pcs.IsDead
+                        ? "Morto"
+                        : (pcs.IsIncapacitated ? "Nocauteado" : $"{pcs.CurrentHp}HP");
+                    if (listed > 0) pSb.Append(" | ");
+                    pSb.Append($"{pName}: {lifeTag}");
+                    listed++;
+                }
+                _participantsStatusLabel.text = listed > 0 ? pSb.ToString() : "Equipe: Local (1 jogador)";
+            }
+
             if (_claimedOrdersLabel != null && netState.Orders != null)
             {
                 var claimedSb = new System.Text.StringBuilder();

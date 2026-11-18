@@ -185,6 +185,19 @@ namespace ScaryParty.Pizzeria.Presentation
             _nextNightBtn.style.color = Color.white;
             btnRow.Add(_nextNightBtn);
 
+            var menuBtn = new Button(ReturnToMainMenu)
+            {
+                text = "Voltar ao Menu"
+            };
+            menuBtn.style.height = 46;
+            menuBtn.style.minWidth = 150;
+            menuBtn.style.marginLeft = 8;
+            menuBtn.style.fontSize = 15;
+            menuBtn.style.unityFontStyleAndWeight = FontStyle.Bold;
+            menuBtn.style.backgroundColor = new Color(0.32f, 0.34f, 0.42f);
+            menuBtn.style.color = Color.white;
+            btnRow.Add(menuBtn);
+
             _card.Add(btnRow);
             _overlay.Add(_card);
             _root.Add(_overlay);
@@ -333,6 +346,17 @@ namespace ScaryParty.Pizzeria.Presentation
                 GameplayInputGate.PopLock();
                 _hasLock = false;
             }
+        }
+
+        private void ReturnToMainMenu()
+        {
+            Close();
+            if (RoomDiscoveryService.Instance != null)
+                RoomDiscoveryService.Instance.StopHosting();
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                NetworkManager.Singleton.Shutdown();
+            GameplayInputGate.Reset();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
         }
     }
 }

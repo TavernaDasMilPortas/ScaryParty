@@ -599,8 +599,6 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 // Pegar ferramenta da bancada (na mão ativa ou na mão livre)
                 cmd.TransferToolServerRpc(toolOnStation.ToolId, (byte)LocationType.Hand, playerId, pickHand);
-                string tName = toolOnStation.DefinitionId == 1 ? "Ralador" : "Faca";
-                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
             }
             else if (hasItemOnStation)
             {
@@ -630,15 +628,12 @@ namespace ScaryParty.Pizzeria.Stations
                 if (pickHand != -1)
                 {
                     cmd.TransferItemServerRpc(itemOnStation.ItemId, (byte)LocationType.Hand, playerId, pickHand);
-                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
                 }
             }
             else if (stationEmpty && hasToolInHand)
             {
                 // Colocar ferramenta na bancada
                 cmd.TransferToolServerRpc(toolInHand.ToolId, (byte)LocationType.StationSlot, (ulong)stationId, slotIndex);
-                string tName = toolInHand.DefinitionId == 1 ? "Ralador" : "Faca";
-                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} colocado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
                 if (invAdapter != null && !otherHandEmpty)
                 {
                     invAdapter.SetActiveHand((HandSlotIndex)otherHand);
@@ -648,7 +643,6 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 // Colocar item na bancada
                 cmd.TransferItemServerRpc(itemInHand.ItemId, (byte)LocationType.StationSlot, (ulong)stationId, slotIndex);
-                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Item colocado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
                 if (invAdapter != null && !otherHandEmpty)
                 {
                     invAdapter.SetActiveHand((HandSlotIndex)otherHand);

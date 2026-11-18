@@ -21,6 +21,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private Button _closeBtn;
 
         private bool _isOpen = false;
+        private bool _hasModalLock = false;
         public bool IsOpen => _isOpen;
 
         private void Awake()
@@ -249,12 +250,20 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_isOpen)
             {
                 _overlay.style.display = DisplayStyle.Flex;
-                GameplayInputGate.PushModal();
+                if (!_hasModalLock)
+                {
+                    _hasModalLock = true;
+                    GameplayInputGate.PushModal();
+                }
             }
             else
             {
                 _overlay.style.display = DisplayStyle.None;
-                GameplayInputGate.PopModal();
+                if (_hasModalLock)
+                {
+                    _hasModalLock = false;
+                    GameplayInputGate.PopModal();
+                }
             }
         }
 
@@ -265,7 +274,10 @@ namespace ScaryParty.Pizzeria.Presentation
                 var kb = UnityEngine.InputSystem.Keyboard.current;
                 if (kb.hKey.wasPressedThisFrame && !WeaponController.LocalDrivingMotorcycle)
                 {
-                    Toggle();
+                    if (_isOpen || !GameplayInputGate.IsLocked)
+                    {
+                        Toggle();
+                    }
                 }
                 else if (_isOpen && kb.escapeKey.wasPressedThisFrame)
                 {
@@ -276,9 +288,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
-            if (_isOpen)
+            if (_hasModalLock)
             {
-                GameplayInputGate.Reset();
+                _hasModalLock = false;
+                GameplayInputGate.PopModal();
             }
             if (Instance == this) Instance = null;
         }

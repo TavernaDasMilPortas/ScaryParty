@@ -51,24 +51,32 @@ namespace ScaryParty.UI.Piaria.Presenters
             SubscribeNetworkEvents();
         }
 
+        private bool _netSubscribed;
+
         private void OnDestroy()
         {
+            if (_isOpen)
+            {
+                _isOpen = false;
+                UIModalStack.Instance?.PopModal(this);
+            }
             UnsubscribeNetworkEvents();
             if (Instance == this) Instance = null;
         }
 
         private void SubscribeNetworkEvents()
         {
-            if (PizzeriaNetworkState.Instance != null)
-            {
-                PizzeriaNetworkState.Instance.StorageSlots.OnListChanged += OnStorageListChanged;
-                PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsListChanged;
-                PizzeriaNetworkState.Instance.SupplyOrders.OnListChanged += OnSupplyOrdersChanged;
-            }
+            if (_netSubscribed || PizzeriaNetworkState.Instance == null) return;
+            _netSubscribed = true;
+            PizzeriaNetworkState.Instance.StorageSlots.OnListChanged += OnStorageListChanged;
+            PizzeriaNetworkState.Instance.Tools.OnListChanged += OnToolsListChanged;
+            PizzeriaNetworkState.Instance.SupplyOrders.OnListChanged += OnSupplyOrdersChanged;
         }
 
         private void UnsubscribeNetworkEvents()
         {
+            if (!_netSubscribed) return;
+            _netSubscribed = false;
             if (PizzeriaNetworkState.Instance != null)
             {
                 PizzeriaNetworkState.Instance.StorageSlots.OnListChanged -= OnStorageListChanged;
@@ -271,8 +279,6 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             RefreshItems();
 
-            UnityEngine.Cursor.lockState = CursorLockMode.None;
-            UnityEngine.Cursor.visible = true;
             UIModalStack.Instance?.PushModal(this);
             var curr = RootElement;
             while (curr != null && curr != uiDocument?.rootVisualElement)
@@ -301,18 +307,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             _currentStationId = -1;
 
+            UIModalStack.Instance?.PopModal(this);
             UIToolkitTweenService.PopOut(_storageCard != null ? _storageCard : RootElement, 0.15f, 0.95f, () =>
             {
                 RootElement.style.display = DisplayStyle.None;
                 if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
                 {
                     RootElement.parent.style.display = DisplayStyle.None;
-                }
-                UIModalStack.Instance?.PopModal(this);
-                if (UIModalStack.Instance == null || !UIModalStack.Instance.HasActiveModal)
-                {
-                    UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-                    UnityEngine.Cursor.visible = false;
                 }
             });
         }

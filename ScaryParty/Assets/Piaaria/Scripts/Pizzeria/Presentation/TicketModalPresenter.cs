@@ -31,6 +31,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private NetOrderDto _currentOrder;
         private bool _isOpen = false;
+        private bool _hasModalLock = false;
         private int _openedFrame = -1;
         private float _archiveHoldTimer = 0f;
         private const float ArchiveHoldRequired = 1.0f;
@@ -254,7 +255,11 @@ namespace ScaryParty.Pizzeria.Presentation
             _archiveHoldTimer = 0f;
             _modalOverlay.style.display = DisplayStyle.Flex;
 
-            GameplayInputGate.PushLock();
+            if (!_hasModalLock)
+            {
+                _hasModalLock = true;
+                GameplayInputGate.PushLock();
+            }
             PopulateOrderData();
         }
 
@@ -269,7 +274,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 _modalOverlay.style.display = DisplayStyle.None;
             }
 
-            GameplayInputGate.PopLock();
+            if (_hasModalLock)
+            {
+                _hasModalLock = false;
+                GameplayInputGate.PopLock();
+            }
         }
 
         private void PopulateOrderData()
@@ -509,9 +518,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
-            if (_isOpen)
+            if (_hasModalLock)
             {
-                GameplayInputGate.Reset();
+                _hasModalLock = false;
+                GameplayInputGate.PopLock();
             }
             if (Instance == this) Instance = null;
         }

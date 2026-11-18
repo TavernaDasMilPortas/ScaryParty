@@ -139,10 +139,47 @@ public class WeaponInputHandler : MonoBehaviour
             Cursor.visible)
             return true;
 
+        if ((Time.unscaledTime - ScaryParty.Pizzeria.Presentation.GameplayInputGate.LastUnlockUnscaledTime) < 0.12f)
+            return true;
+
         if (UnityEngine.EventSystems.EventSystem.current != null &&
             UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
             return true;
 
+        if (IsPointerOverBlockingUIToolkit())
+            return true;
+
+        return false;
+    }
+
+    private static bool IsPointerOverBlockingUIToolkit()
+    {
+        Vector2 screenPos;
+#if ENABLE_INPUT_SYSTEM
+        screenPos = UnityEngine.InputSystem.Mouse.current != null
+            ? UnityEngine.InputSystem.Mouse.current.position.ReadValue()
+            : (Vector2)Input.mousePosition;
+#else
+        screenPos = Input.mousePosition;
+#endif
+        var docs = Object.FindObjectsByType<UnityEngine.UIElements.UIDocument>(FindObjectsSortMode.None);
+        if (docs == null) return false;
+
+        for (int i = 0; i < docs.Length; i++)
+        {
+            var doc = docs[i];
+            if (doc == null || !doc.isActiveAndEnabled) continue;
+            var root = doc.rootVisualElement;
+            if (root == null || root.panel == null) continue;
+            Vector2 panelPos = UnityEngine.UIElements.RuntimePanelUtils.ScreenToPanel(
+                root.panel,
+                new Vector2(screenPos.x, Screen.height - screenPos.y));
+            var picked = root.panel.Pick(panelPos);
+            if (picked != null && picked != root && picked.pickingMode != UnityEngine.UIElements.PickingMode.Ignore)
+            {
+                return true;
+            }
+        }
         return false;
     }
 }

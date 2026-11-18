@@ -1557,9 +1557,10 @@ namespace ScaryParty.Pizzeria.Network
             var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
-            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight)
+            var phase = root.DomainState.CurrentNightPhase;
+            if (phase != NightPhase.PreparingNextNight && phase != NightPhase.Preparing && phase != NightPhase.Active)
             {
-                NotifyErrorClientRpc("A loja só está disponível durante a preparação inter-noites.", targetParams);
+                NotifyErrorClientRpc("A loja está indisponível após o encerramento do turno.", targetParams);
                 return;
             }
 
@@ -1573,6 +1574,16 @@ namespace ScaryParty.Pizzeria.Network
                 case 1: // Timer do Forno (único)
                 {
                     var item = new RunShopItem { Id = "oven_timer_shop", Name = "Timer do Forno", Cost = 90, IsUnique = true };
+                    if (run.HasModifier("oven_timer"))
+                    {
+                        NotifyErrorClientRpc("Timer do Forno já adquirido nesta RUN.", targetParams);
+                        return;
+                    }
+                    if (state.RestaurantBudget < item.Cost)
+                    {
+                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
+                        return;
+                    }
                     ok = run.TryPurchaseShopItem(state, item);
                     if (ok)
                     {
@@ -1590,6 +1601,11 @@ namespace ScaryParty.Pizzeria.Network
                         return;
                     }
                     var item = new RunShopItem { Id = "reinforced_bag_shop", Name = "Bolsa Reforçada", Cost = 75, IsUnique = false };
+                    if (state.RestaurantBudget < item.Cost)
+                    {
+                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
+                        return;
+                    }
                     if (run.TryPurchaseShopItem(state, item))
                     {
                         var def = run.GetModifierDefinition("reinforced_bag");
@@ -1608,6 +1624,11 @@ namespace ScaryParty.Pizzeria.Network
                         return;
                     }
                     var item = new RunShopItem { Id = "staff_training_shop", Name = "Treinamento Equipe", Cost = 85, IsUnique = false };
+                    if (state.RestaurantBudget < item.Cost)
+                    {
+                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
+                        return;
+                    }
                     if (run.TryPurchaseShopItem(state, item))
                     {
                         var def = run.GetModifierDefinition("staff_training");
@@ -1620,6 +1641,11 @@ namespace ScaryParty.Pizzeria.Network
                 case 4: // Suprimentos Base +5
                 {
                     var item = new RunShopItem { Id = "extra_supplies_shop", Name = "Suprimentos Base +5", Cost = 45, IsUnique = false };
+                    if (state.RestaurantBudget < item.Cost)
+                    {
+                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
+                        return;
+                    }
                     if (run.TryPurchaseShopItem(state, item))
                     {
                         foreach (var kvp in state.StorageSlots)
@@ -1663,6 +1689,109 @@ namespace ScaryParty.Pizzeria.Network
 
             CommitAndReplicate();
             BroadcastNoticeClientRpc(purchasedMsg ?? "Compra concluída!", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void PlaceSupplyOrderServerRpc(int supplyItemId, int packQuantity = 1, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.Catalog == null) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
+
+            double now = root.Clock != null ? root.Clock.Now : Time.timeAsDouble;
+            int maxPending = root.Config != null ? root.Config.maxPendingSupplyOrders : 3;
+            float etaMult = root.RunProgressionService != null
+                ? root.RunProgressionService.RecalculateEffectiveStats().SupplyEtaMultiplier
+                : 1f;
+
+            if (!NightCycleService.TryPlaceSupplyOrder(
+                    root.DomainState,
+                    root.Catalog,
+                    supplyItemId,
+                    packQuantity,
+                    now,
+                    maxPending,
+                    etaMult,
+                    out var order,
+                    out string reason))
+            {
+                NotifyErrorClientRpc(reason ?? "Não foi possível registrar pedido de reposição.", targetParams);
+                return;
+            }
+
+            CommitAndReplicate();
+
+            string itemName = root.Catalog.SupplyItems.TryGetValue(supplyItemId, out var def) && !string.IsNullOrEmpty(def.Name)
+                ? def.Name
+                : (root.Catalog.Ingredients.TryGetValue(order.Lines[0].IngredientDefId, out var ing) ? ing.Name : $"Suprimento #{supplyItemId}");
+            int etaSec = Mathf.Max(1, Mathf.CeilToInt((float)(order.ExpectedArrivalTime - now)));
+            BroadcastNoticeClientRpc($"Reposição encomendada: {itemName} x{packQuantity} (R$ {order.TotalCost}, ETA ~{etaSec}s).", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void HireEmployeeFromHubServerRpc(byte roleByte, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.EmployeeTaskService == null) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: false)) return;
+
+            var phase = root.DomainState.CurrentNightPhase;
+            if (phase != NightPhase.Preparing && phase != NightPhase.Active && phase != NightPhase.PreparingNextNight)
+            {
+                NotifyErrorClientRpc("Contratação disponível apenas durante a preparação ou expediente.", targetParams);
+                return;
+            }
+
+            var role = roleByte == (byte)EmployeeRole.Cashier ? EmployeeRole.Cashier : EmployeeRole.Pizzaiolo;
+            int cost = root.EmployeeTaskService.GetHireCost(role, 1);
+            var emp = root.EmployeeTaskService.TryHireEmployee(root.DomainState, role);
+            if (emp == null)
+            {
+                NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {cost}, caixa: R$ {root.DomainState.RestaurantBudget}).", targetParams);
+                return;
+            }
+
+            CommitAndReplicate();
+            string label = role == EmployeeRole.Cashier ? "Balconista" : "Pizzaiolo";
+            BroadcastNoticeClientRpc($"{label} #{emp.EmployeeId} contratado (R$ {cost})!", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void UpgradeEmployeeFromHubServerRpc(int employeeId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var targetParams = TargetSender(senderId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.EmployeeTaskService == null) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: false)) return;
+
+            var phase = root.DomainState.CurrentNightPhase;
+            if (phase != NightPhase.Preparing && phase != NightPhase.Active && phase != NightPhase.PreparingNextNight)
+            {
+                NotifyErrorClientRpc("Melhoria disponível apenas durante a preparação ou expediente.", targetParams);
+                return;
+            }
+
+            if (!root.EmployeeTaskService.Employees.TryGetValue(employeeId, out var emp))
+            {
+                NotifyErrorClientRpc("Funcionário não encontrado.", targetParams);
+                return;
+            }
+
+            int cost = root.EmployeeTaskService.GetHireCost(emp.Role, emp.Level + 1);
+            if (!root.EmployeeTaskService.TryUpgradeEmployee(root.DomainState, employeeId))
+            {
+                NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {cost}, caixa: R$ {root.DomainState.RestaurantBudget}).", targetParams);
+                return;
+            }
+
+            CommitAndReplicate();
+            string label = emp.Role == EmployeeRole.Cashier ? "Balconista" : "Pizzaiolo";
+            BroadcastNoticeClientRpc($"{label} #{emp.EmployeeId} promovido para Nível {emp.Level} (R$ {cost})!", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]

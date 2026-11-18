@@ -81,7 +81,7 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (scene.name == "GameScene")
+            if (scene.name == "GameScene" || scene.name == "GameScene_CelShaded")
             {
                 _activeScreen = null;
                 _history.Clear();

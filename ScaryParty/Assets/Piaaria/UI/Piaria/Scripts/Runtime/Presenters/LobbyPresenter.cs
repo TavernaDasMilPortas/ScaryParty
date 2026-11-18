@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using ScaryParty.Pizzeria.Domain.Services;
+using ScaryParty.Pizzeria.Network;
 using ScaryParty.UI.Piaria.Core;
 
 namespace ScaryParty.UI.Piaria.Presenters
@@ -45,6 +47,9 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Button _btnCreateLAN;
         private TextField _lanIpInput;
         private Button _btnJoinLAN;
+        private Button _btnLobbyPresetQuick;
+        private int _lobbyPresetIdx = 0;
+        private static readonly string[] LobbyPresetChoices = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0" };
 
         private List<RoomInfo> _latestLANRooms = new List<RoomInfo>();
 
@@ -221,6 +226,49 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 _lanIpInput.value = RoomDiscoveryService.GetLocalIPAddress();
             }
+
+            EnsureSessionPresetQuickSelector();
+        }
+
+        private void EnsureSessionPresetQuickSelector()
+        {
+            if (_colConnect == null || _btnLobbyPresetQuick != null) return;
+
+            _btnLobbyPresetQuick = new Button(CycleLobbyPreset)
+            {
+                name = "BtnLobbySessionPreset"
+            };
+            _btnLobbyPresetQuick.style.height = 30;
+            _btnLobbyPresetQuick.style.marginTop = 6;
+            _btnLobbyPresetQuick.style.marginBottom = 4;
+            _btnLobbyPresetQuick.style.fontSize = 12;
+            _btnLobbyPresetQuick.style.unityFontStyleAndWeight = FontStyle.Bold;
+            _btnLobbyPresetQuick.style.backgroundColor = new Color(0.18f, 0.24f, 0.34f);
+            _btnLobbyPresetQuick.style.color = Color.white;
+            _btnLobbyPresetQuick.style.borderTopLeftRadius = 5;
+            _btnLobbyPresetQuick.style.borderTopRightRadius = 5;
+            _btnLobbyPresetQuick.style.borderBottomLeftRadius = 5;
+            _btnLobbyPresetQuick.style.borderBottomRightRadius = 5;
+            _colConnect.Add(_btnLobbyPresetQuick);
+            RefreshLobbyPresetButton();
+        }
+
+        private void CycleLobbyPreset()
+        {
+            _lobbyPresetIdx = (_lobbyPresetIdx + 1) % LobbyPresetChoices.Length;
+            string pid = LobbyPresetChoices[_lobbyPresetIdx];
+            bool tut = pid == "Tutorial_Noite0";
+            var cur = SessionLaunchConfig.Current;
+            SessionLaunchConfig.ApplyHostSelection(pid, cur.Difficulty, cur.MaxNights, cur.SeedOverride, tut, broadcastToClients: false);
+            RefreshLobbyPresetButton();
+        }
+
+        private void RefreshLobbyPresetButton()
+        {
+            if (_btnLobbyPresetQuick == null) return;
+            var cur = SessionLaunchConfig.Current;
+            string preset = string.IsNullOrEmpty(cur.PresetId) ? "Entrega_3Noites" : cur.PresetId;
+            _btnLobbyPresetQuick.text = $"Preset Host: {preset} ({cur.Difficulty})";
         }
 
         private void ApplyHeader(VisualElement headerEl, Sprite sprite)

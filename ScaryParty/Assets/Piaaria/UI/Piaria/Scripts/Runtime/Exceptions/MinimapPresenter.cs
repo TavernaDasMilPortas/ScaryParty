@@ -62,7 +62,7 @@ namespace ScaryParty.UI.Piaria.Exceptions
             }
         }
 
-        private VisualElement _image, _container, _markers;
+        private VisualElement _image, _container, _markers, _fullscreenControls;
         private MapLines _lines;
         private readonly Dictionary<string, MarkerEntry> _markerCache = new Dictionary<string, MarkerEntry>();
         private readonly Dictionary<int, DeliveryPoint> _points = new Dictionary<int, DeliveryPoint>();
@@ -124,7 +124,8 @@ namespace ScaryParty.UI.Piaria.Exceptions
                 _lines?.RemoveFromHierarchy();
                 _markers?.RemoveFromHierarchy();
             }
-            _image = _container = _markers = null;
+            _fullscreenControls?.RemoveFromHierarchy();
+            _image = _container = _markers = _fullscreenControls = null;
             _lines = null;
             _drag = false;
             _hoveredAddress = -1;
@@ -154,6 +155,20 @@ namespace ScaryParty.UI.Piaria.Exceptions
             _markers.style.position = Position.Absolute;
             _markers.style.left = _markers.style.top = _markers.style.right = _markers.style.bottom = 0;
             _image.Add(_markers);
+
+            _fullscreenControls = new VisualElement { name = "MinimapFullscreenControls" };
+            _fullscreenControls.style.position = Position.Absolute;
+            _fullscreenControls.style.top = 10;
+            _fullscreenControls.style.right = 10;
+            _fullscreenControls.style.flexDirection = FlexDirection.Row;
+            _fullscreenControls.style.display = DisplayStyle.None;
+            AddMapControlButton("Zoom +", () => ZoomStep(-1.5f));
+            AddMapControlButton("Zoom -", () => ZoomStep(1.5f));
+            AddMapControlButton("Jogador", () => routeManager?.CenterOnPlayer());
+            AddMapControlButton("Cidade", () => routeManager?.FitCity());
+            AddMapControlButton("Fechar [M]", Close);
+            _container.Add(_fullscreenControls);
+
             _image.RegisterCallback<PointerDownEvent>(Down);
             _image.RegisterCallback<PointerMoveEvent>(Move);
             _image.RegisterCallback<PointerUpEvent>(Up);
@@ -362,18 +377,45 @@ namespace ScaryParty.UI.Piaria.Exceptions
 
                 foreach (var entry in counts)
                 {
-                    int addrId = entry.Key;
-                    Vector3 targetPos = positions[addrId];
-                    string key = "Cargo_" + localClientId + "_" + addrId;
+                    int capturedAddr = entry.Key;
+                    Vector3 targetPos = positions[capturedAddr];
+                    string key = "Cargo_" + localClientId + "_" + capturedAddr;
                     _activeRoutes.Add(key);
                     var color = routeManager.CreateRoute(key, playerPos, targetPos, localClientId);
                     _cargoRoutes[key] = new RouteView
                     {
-                        Address = addrId,
+                        Address = capturedAddr,
                         Count = entry.Value,
                         Owner = localClientId,
                         Color = color
                     };
+                }
+
+                // P4 Fluxo 10: exibir rotas e endereços também para comandas de delivery ativas/assumidas (mesmo antes de embalar)
+                if (cargo.Orders != null)
+                {
+                    for (int i = 0; i < cargo.Orders.Count; i++)
+                    {
+                        var ord = cargo.Orders[i];
+                        if (ord.Lifecycle != (byte)OrderLifecycle.Accepted || ord.IsDineIn || ord.DestinationId < 0)
+                            continue;
+                        if (!TryResolveAddress(ord.DestinationId, out int resolvedAddr, out Vector3 targetPos))
+                            continue;
+                        if (counts.ContainsKey(resolvedAddr))
+                            continue;
+
+                        string key = "Order_" + ord.OrderId + "_" + resolvedAddr;
+                        _activeRoutes.Add(key);
+                        ulong ownerId = ord.ClaimedByClientId > 0 ? ord.ClaimedByClientId : localClientId;
+                        var color = routeManager.CreateRoute(key, playerPos, targetPos, ownerId);
+                        _cargoRoutes[key] = new RouteView
+                        {
+                            Address = resolvedAddr,
+                            Count = Math.Max(1, ord.Qty_0 + ord.Qty_1 + ord.Qty_2),
+                            Owner = ownerId,
+                            Color = color
+                        };
+                    }
                 }
             }
 
@@ -688,9 +730,37 @@ namespace ScaryParty.UI.Piaria.Exceptions
         {
             EnsureUI();
             HudPresenter.Instance?.ToggleMinimapFullscreen(expanded);
+            if (_fullscreenControls != null)
+                _fullscreenControls.style.display = expanded ? DisplayStyle.Flex : DisplayStyle.None;
             if (!expanded) _hoveredAddress = -1;
             StopDrag();
             _refresh = 0f;
+        }
+
+        private void AddMapControlButton(string label, Action onClick)
+        {
+            if (_fullscreenControls == null) return;
+            var btn = new Button(onClick) { text = label };
+            btn.style.height = 26;
+            btn.style.marginLeft = 4;
+            btn.style.paddingLeft = 8;
+            btn.style.paddingRight = 8;
+            btn.style.fontSize = 11;
+            btn.style.backgroundColor = new Color(0.12f, 0.14f, 0.18f, 0.92f);
+            btn.style.color = Color.white;
+            btn.style.borderTopLeftRadius = 4;
+            btn.style.borderTopRightRadius = 4;
+            btn.style.borderBottomLeftRadius = 4;
+            btn.style.borderBottomRightRadius = 4;
+            _fullscreenControls.Add(btn);
+        }
+
+        private void ZoomStep(float delta)
+        {
+            if (routeManager == null || _image == null) return;
+            var size = new Vector2(_image.resolvedStyle.width, _image.resolvedStyle.height);
+            if (size.x <= 0 || size.y <= 0) return;
+            routeManager.Zoom(delta, size * 0.5f, size);
         }
     }
 }

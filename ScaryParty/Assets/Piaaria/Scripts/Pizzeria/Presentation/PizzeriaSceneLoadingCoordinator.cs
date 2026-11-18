@@ -43,6 +43,10 @@ namespace ScaryParty.Pizzeria.Presentation
         private Label _stageTagLabel;
         private Label _hintLabel;
         private VisualElement _spinnerIcon;
+        private VisualElement _errorBox;
+        private Label _errorReasonLabel;
+        private Button _errorMenuBtn;
+        private Button _errorDismissBtn;
 
         private bool _isLoading;
         private bool _hasInputLock;
@@ -234,6 +238,53 @@ namespace ScaryParty.Pizzeria.Presentation
                 _hintLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
                 card.Add(_hintLabel);
 
+                _errorBox = new VisualElement { name = "LoadingErrorBox" };
+                _errorBox.style.width = Length.Percent(100);
+                _errorBox.style.marginTop = 14;
+                _errorBox.style.paddingTop = 10;
+                _errorBox.style.paddingBottom = 10;
+                _errorBox.style.paddingLeft = 12;
+                _errorBox.style.paddingRight = 12;
+                _errorBox.style.backgroundColor = new Color(0.28f, 0.08f, 0.09f, 0.96f);
+                _errorBox.style.borderTopLeftRadius = 8;
+                _errorBox.style.borderTopRightRadius = 8;
+                _errorBox.style.borderBottomLeftRadius = 8;
+                _errorBox.style.borderBottomRightRadius = 8;
+                _errorBox.style.alignItems = Align.Center;
+                _errorBox.style.display = DisplayStyle.None;
+
+                _errorReasonLabel = new Label();
+                _errorReasonLabel.style.fontSize = 14;
+                _errorReasonLabel.style.color = new Color(1f, 0.72f, 0.72f);
+                _errorReasonLabel.style.whiteSpace = WhiteSpace.Normal;
+                _errorReasonLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
+                _errorReasonLabel.style.marginBottom = 10;
+                _errorBox.Add(_errorReasonLabel);
+
+                var errBtnRow = new VisualElement();
+                errBtnRow.style.flexDirection = FlexDirection.Row;
+                errBtnRow.style.justifyContent = Justify.Center;
+
+                _errorMenuBtn = new Button(ReturnToLobbyFromError) { text = "Voltar ao Menu" };
+                _errorMenuBtn.style.height = 34;
+                _errorMenuBtn.style.paddingLeft = 14;
+                _errorMenuBtn.style.paddingRight = 14;
+                _errorMenuBtn.style.marginRight = 8;
+                _errorMenuBtn.style.backgroundColor = new Color(0.72f, 0.22f, 0.22f);
+                _errorMenuBtn.style.color = Color.white;
+                errBtnRow.Add(_errorMenuBtn);
+
+                _errorDismissBtn = new Button(HideOverlayNow) { text = "Fechar" };
+                _errorDismissBtn.style.height = 34;
+                _errorDismissBtn.style.paddingLeft = 14;
+                _errorDismissBtn.style.paddingRight = 14;
+                _errorDismissBtn.style.backgroundColor = new Color(0.30f, 0.32f, 0.38f);
+                _errorDismissBtn.style.color = Color.white;
+                errBtnRow.Add(_errorDismissBtn);
+
+                _errorBox.Add(errBtnRow);
+                card.Add(_errorBox);
+
                 _overlayRoot.Add(card);
 
                 var root = _loadingUiDocument.rootVisualElement;
@@ -322,19 +373,44 @@ namespace ScaryParty.Pizzeria.Presentation
         public void AbortLoading(string reason = null)
         {
             StopAllCoroutines();
+            _isLoading = false;
             if (!string.IsNullOrEmpty(reason))
             {
                 Debug.LogWarning($"[PizzeriaSceneLoadingCoordinator] Carregamento interrompido: {reason}");
+                EnsureUIOverlay();
+                if (_overlayRoot != null && _errorBox != null && _errorReasonLabel != null)
+                {
+                    _errorReasonLabel.text = reason;
+                    _errorBox.style.display = DisplayStyle.Flex;
+                    _overlayRoot.style.opacity = 1f;
+                    _overlayRoot.style.display = DisplayStyle.Flex;
+                    AcquireInputLock();
+                    return;
+                }
             }
 
+            HideOverlayNow();
+        }
+
+        private void HideOverlayNow()
+        {
+            if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
             if (_overlayRoot != null)
             {
                 _overlayRoot.style.opacity = 0f;
                 _overlayRoot.style.display = DisplayStyle.None;
             }
-
             ReleaseInputLockIfHeld();
             _isLoading = false;
+        }
+
+        private void ReturnToLobbyFromError()
+        {
+            HideOverlayNow();
+            GameplayInputGate.Reset();
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+                NetworkManager.Singleton.Shutdown();
+            SceneManager.LoadScene("LobbyScene");
         }
 
         private void TryHookNetworkSceneEvents()
@@ -403,6 +479,7 @@ namespace ScaryParty.Pizzeria.Presentation
             float maxTimeout = Mathf.Max(10f, _loadingTimeoutSeconds);
 
             // 1. Fade-in do overlay
+            if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
             _overlayRoot.style.display = DisplayStyle.Flex;
             float elapsed = 0f;
             while (elapsed < _fadeDuration)
@@ -507,7 +584,12 @@ namespace ScaryParty.Pizzeria.Presentation
             // Etapa 7: Ready
             if (HasTimedOut(startRealtime, maxTimeout))
             {
-                Debug.LogWarning($"[PizzeriaSceneLoadingCoordinator] Timeout ({maxTimeout:F0}s) ao aguardar prontidão da cena {targetSceneName}. Liberando controle com fallback seguro.");
+                Debug.LogWarning($"[PizzeriaSceneLoadingCoordinator] Timeout ({maxTimeout:F0}s) ao aguardar prontidão da cena {targetSceneName}.");
+                if (!IsPizzeriaReady(networked))
+                {
+                    AbortLoading($"Tempo limite ({maxTimeout:F0}s) ao sincronizar sessão/cena '{targetSceneName}'. Você pode retornar ao Lobby.");
+                    yield break;
+                }
                 SetStage(LoadingStage.Ready, 1.0f, "Tempo limite atingido — liberando partida...");
             }
             else

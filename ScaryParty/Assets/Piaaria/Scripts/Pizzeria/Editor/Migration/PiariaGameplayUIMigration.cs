@@ -147,6 +147,12 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             Ensure<DeliverySelectionPresenter>(hud, ref changes);
             Ensure<DeliveryResultPresenter>(hud, ref changes);
             Ensure<TicketModalPresenter>(hud, ref changes);
+            Ensure<OperationsHubPresenter>(hud, ref changes);
+            Ensure<LifeAndSpectatorOverlayPresenter>(hud, ref changes);
+            Ensure<ContextualTutorialPresenter>(hud, ref changes);
+            Ensure<RunPreparationPresenter>(hud, ref changes);
+            Ensure<NightResultsPresenter>(hud, ref changes);
+            Ensure<PauseEscapeMenuPresenter>(hud, ref changes);
             // Keep the map service as a technical render rig, not a second HUD.
             if (changes > 0) EditorSceneManager.MarkSceneDirty(scene);
             return changes;

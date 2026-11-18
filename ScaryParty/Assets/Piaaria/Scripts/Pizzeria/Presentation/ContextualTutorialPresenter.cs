@@ -130,7 +130,7 @@ namespace ScaryParty.Pizzeria.Presentation
             header.style.alignItems = Align.Center;
             header.style.marginBottom = 6;
 
-            var title = new Label("GUIA OPERACIONAL [H]");
+            var title = new Label("GUIA OPERACIONAL [F1]");
             title.style.fontSize = 14;
             title.style.unityFontStyleAndWeight = FontStyle.Bold;
             title.style.color = new Color(0.98f, 0.82f, 0.42f);
@@ -140,7 +140,7 @@ namespace ScaryParty.Pizzeria.Presentation
             headerBtns.style.flexDirection = FlexDirection.Row;
 
             _skipNight0Btn = new Button(SkipTutorialToNight1);
-            _skipNight0Btn.text = "Ir p/ Noite 1";
+            _skipNight0Btn.text = "[F2] Ir p/ Noite 1 (Host)";
             _skipNight0Btn.style.height = 24;
             _skipNight0Btn.style.marginRight = 4;
             _skipNight0Btn.style.fontSize = 11;
@@ -212,12 +212,16 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void SkipTutorialToNight1()
         {
+            bool isHost = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+            if (!isHost)
+            {
+                NotificationManager.Show("Apenas o Host pode pular o tutorial para a Noite 1.", NotificationType.Warning);
+                return;
+            }
+
             IsTutorialNight0Enabled = false;
             DismissTutorial();
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
-            {
-                PizzeriaCommandHandler.Instance?.SkipTutorialToNight1ServerRpc();
-            }
+            PizzeriaCommandHandler.Instance?.SkipTutorialToNight1ServerRpc();
         }
 
         public static void NotifyContextualTip(string tipKey, string title, string message)
@@ -229,10 +233,21 @@ namespace ScaryParty.Pizzeria.Presentation
         private void Update()
         {
 #if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.hKey.wasPressedThisFrame && !GameplayInputGate.IsLocked)
+            if (Keyboard.current != null && !GameplayInputGate.IsLocked)
             {
-                if (_dismissed) ShowTutorial();
-                else ToggleMinimize();
+                if (Keyboard.current.f1Key.wasPressedThisFrame)
+                {
+                    if (_dismissed) ShowTutorial();
+                    else ToggleMinimize();
+                }
+                else if (Keyboard.current.f2Key.wasPressedThisFrame)
+                {
+                    var netCheckF2 = PizzeriaNetworkState.Instance;
+                    if (netCheckF2 != null && (netCheckF2.NightState.Value.NightNumber == 0 || IsTutorialNight0Enabled))
+                    {
+                        SkipTutorialToNight1();
+                    }
+                }
             }
 #endif
             if (_dismissed || _panel == null) return;

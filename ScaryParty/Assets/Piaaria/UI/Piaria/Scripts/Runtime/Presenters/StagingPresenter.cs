@@ -81,6 +81,11 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void OnDestroy()
         {
+            if (_isOpen)
+            {
+                _isOpen = false;
+                UIModalStack.Instance?.PopModal(this);
+            }
             if (Instance == this) Instance = null;
         }
 
@@ -176,8 +181,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             CollectValidDestinations();
             UpdateDestinationDisplay();
 
-            UnityEngine.Cursor.lockState = CursorLockMode.None;
-            UnityEngine.Cursor.visible = true;
             UIModalStack.Instance?.PushModal(this);
             var curr = RootElement;
             while (curr != null && curr != uiDocument?.rootVisualElement)
@@ -193,18 +196,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (!_isOpen || RootElement == null) return;
             _isOpen = false;
 
+            UIModalStack.Instance?.PopModal(this);
             UIToolkitTweenService.PopOut(_stagingCard != null ? _stagingCard : RootElement, 0.15f, 0.95f, () =>
             {
                 RootElement.style.display = DisplayStyle.None;
                 if (RootElement.parent != null && RootElement.parent != uiDocument?.rootVisualElement)
                 {
                     RootElement.parent.style.display = DisplayStyle.None;
-                }
-                UIModalStack.Instance?.PopModal(this);
-                if (UIModalStack.Instance == null || !UIModalStack.Instance.HasActiveModal)
-                {
-                    UnityEngine.Cursor.lockState = CursorLockMode.Locked;
-                    UnityEngine.Cursor.visible = false;
                 }
             });
         }

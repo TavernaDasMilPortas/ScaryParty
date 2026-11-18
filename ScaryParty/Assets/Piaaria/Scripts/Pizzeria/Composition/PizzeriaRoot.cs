@@ -331,7 +331,49 @@ namespace ScaryParty.Pizzeria.Composition
         }
 
         public Authoring.PizzeriaRunPreset GetEffectiveRunPreset()
-            => ActivePresetOverride != null ? ActivePresetOverride : (_config != null ? _config.defaultPreset : null);
+        {
+            if (ActivePresetOverride != null) return ActivePresetOverride;
+            var launch = Network.SessionLaunchConfig.Current;
+            if (launch.HasHostSelection && !string.IsNullOrEmpty(launch.PresetId))
+            {
+                var fromConfig = FindPresetById(launch.PresetId);
+                if (fromConfig != null) return fromConfig;
+            }
+            return _config != null ? _config.defaultPreset : null;
+        }
+
+        private Authoring.PizzeriaRunPreset FindPresetById(string presetId)
+        {
+            if (string.IsNullOrEmpty(presetId)) return null;
+            if (_config != null)
+            {
+                if (_config.defaultPreset != null && string.Equals(_config.defaultPreset.presetId, presetId, System.StringComparison.OrdinalIgnoreCase))
+                    return _config.defaultPreset;
+                if (_config.availablePresets != null)
+                {
+                    for (int i = 0; i < _config.availablePresets.Count; i++)
+                    {
+                        var p = _config.availablePresets[i];
+                        if (p != null && string.Equals(p.presetId, presetId, System.StringComparison.OrdinalIgnoreCase))
+                            return p;
+                    }
+                }
+            }
+
+            var manifest = Authoring.PlaytestReferenceManifest.LoadDefault();
+            if (manifest != null && manifest.runPresets != null)
+            {
+                for (int i = 0; i < manifest.runPresets.Count; i++)
+                {
+                    if (manifest.runPresets[i] is Authoring.PizzeriaRunPreset p &&
+                        string.Equals(p.presetId, presetId, System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        return p;
+                    }
+                }
+            }
+            return null;
+        }
 
         public static int CountConnectedHumanClientsServer()
         {
@@ -399,16 +441,24 @@ namespace ScaryParty.Pizzeria.Composition
             CustomerService = new CustomerService();
 
             var preset = GetEffectiveRunPreset();
-            int runSeed = (_config != null && _config.runSeedOverride != 0)
-                ? _config.runSeedOverride
-                : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = preset != null
-                ? Mathf.Clamp(preset.totalNights, 1, 7)
-                : (_config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3);
-            var diff = preset != null
-                ? preset.difficulty
-                : (_config != null ? _config.runDifficulty : RunDifficulty.Normal);
-            int initialNight = (preset != null && preset.includeNight0Tutorial) ||
+            var launch = Network.SessionLaunchConfig.Current;
+            int runSeed = (launch.HasHostSelection && launch.SeedOverride != 0)
+                ? launch.SeedOverride
+                : ((_config != null && _config.runSeedOverride != 0)
+                    ? _config.runSeedOverride
+                    : (System.Environment.TickCount ^ GetInstanceID()));
+            int maxNights = launch.HasHostSelection
+                ? Mathf.Clamp(launch.MaxNights, 1, 7)
+                : (preset != null
+                    ? Mathf.Clamp(preset.totalNights, 1, 7)
+                    : (_config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3));
+            var diff = launch.HasHostSelection
+                ? launch.Difficulty
+                : (preset != null
+                    ? preset.difficulty
+                    : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
+            int initialNight = (launch.HasHostSelection && launch.IncludeNight0Tutorial) ||
+                               (preset != null && preset.includeNight0Tutorial) ||
                                (_config != null && _config.enableTutorialNight0ByDefault)
                 ? 0
                 : 1;
@@ -590,6 +640,12 @@ namespace ScaryParty.Pizzeria.Composition
 
             if (ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.Instance == null)
                 ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.EnsureInstance();
+
+            if (ScaryParty.UI.Piaria.Presenters.OperationsHubPresenter.Instance == null)
+                ScaryParty.UI.Piaria.Presenters.OperationsHubPresenter.EnsureInstance();
+
+            if (ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.Instance == null)
+                ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.EnsureInstance();
 
             if (ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.Instance == null)
                 ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.EnsureInstance();

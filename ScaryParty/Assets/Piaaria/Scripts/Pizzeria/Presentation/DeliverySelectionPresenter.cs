@@ -32,6 +32,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private readonly List<NetItemDto> _availableBoxes = new List<NetItemDto>();
         private readonly HashSet<ulong> _selectedItemIds = new HashSet<ulong>();
         private bool _isOpen = false;
+        private bool _hasModalLock = false;
 
         public bool IsOpen => _isOpen;
 
@@ -221,7 +222,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _isOpen = true;
             _overlay.style.display = DisplayStyle.Flex;
-            GameplayInputGate.PushModal();
+            if (!_hasModalLock)
+            {
+                _hasModalLock = true;
+                GameplayInputGate.PushModal();
+            }
         }
 
         private void RefreshBoxList()
@@ -334,7 +339,11 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _overlay.style.display = DisplayStyle.None;
             }
-            GameplayInputGate.PopModal();
+            if (_hasModalLock)
+            {
+                _hasModalLock = false;
+                GameplayInputGate.PopModal();
+            }
         }
 
         private void Update()
@@ -353,9 +362,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
-            if (_isOpen)
+            if (_hasModalLock)
             {
-                GameplayInputGate.Reset();
+                _hasModalLock = false;
+                GameplayInputGate.PopModal();
             }
             if (Instance == this) Instance = null;
         }

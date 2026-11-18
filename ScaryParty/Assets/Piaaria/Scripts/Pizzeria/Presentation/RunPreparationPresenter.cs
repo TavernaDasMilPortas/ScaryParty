@@ -271,8 +271,12 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             var run = ns.RunState.Value;
             int nextNight = Mathf.Min(run.MaxRunNights > 0 ? run.MaxRunNights : 3, run.CurrentRunNight + 1);
+            var cfg = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.Config;
+            float nextDurationSec = cfg != null
+                ? cfg.ResolveEffectiveNightParameters(nextNight, Mathf.Max(1, run.TotalHumans), cfg.runDifficulty, ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetEffectiveRunPreset()).DurationSeconds
+                : 360f;
             if (_headerLabel != null)
-                _headerLabel.text = $"PREPARAÇÃO — NOITE {nextNight} / {(run.MaxRunNights > 0 ? run.MaxRunNights : 3)}";
+                _headerLabel.text = $"PREPARAÇÃO — NOITE {nextNight} / {(run.MaxRunNights > 0 ? run.MaxRunNights : 3)} (Duração: {Mathf.CeilToInt(nextDurationSec)}s)";
 
             if (_budgetLabel != null)
                 _budgetLabel.text = $"Caixa Compartilhado: R$ {ns.RestaurantBudget.Value}";
@@ -291,20 +295,28 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _voteStatusLabel.text = run.IsVoteResolved
                     ? $"Vencedor definido: {run.WinningOptionTitle}"
-                    : "Escolha uma opção; em empate ou ausência, o servidor decide ao iniciar.";
+                    : "Vote na opção desejada; empate entre opções é resolvido deterministicamente pelo servidor ao iniciar.";
             }
 
             if (_modifiersSummaryLabel != null)
             {
+                int bagStacks = Mathf.Clamp(run.ExtraBackpackCapacity, 0, 2);
+                int trainStacks = Mathf.Clamp(Mathf.RoundToInt((1f - run.EmployeeErrorMultiplier) / 0.25f), 0, 2);
                 _modifiersSummaryLabel.text =
-                    $"Efeitos ativos — Timer Forno: {(run.HasOvenTimer ? "SIM" : "Não")} | " +
-                    $"Bolsa Extra: +{run.ExtraBackpackCapacity} | " +
-                    $"Erro Funcionário: x{run.EmployeeErrorMultiplier:F2} | " +
+                    $"Upgrades ativos — Timer Forno: {(run.HasOvenTimer ? "1/1 MAX" : "0/1")} | " +
+                    $"Bolsa Reforçada: {bagStacks}/2 | " +
+                    $"Treinamento: {trainStacks}/2 (Erro x{run.EmployeeErrorMultiplier:F2}) | " +
                     $"Demanda: x{run.DemandMultiplier:F2}";
             }
 
             if (_readyStatusLabel != null)
-                _readyStatusLabel.text = $"Jogadores Prontos: {run.ReadyCount} / {Mathf.Max(1, run.TotalHumans)}";
+            {
+                int connectedCount = NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening
+                    ? Mathf.Max(1, NetworkManager.Singleton.ConnectedClientsIds.Count)
+                    : 1;
+                int totalHumans = Mathf.Max(run.TotalHumans, connectedCount);
+                _readyStatusLabel.text = $"Jogadores Prontos: {run.ReadyCount} / {totalHumans} (resiliente a desconexão)";
+            }
 
             if (_readyBtn != null)
             {

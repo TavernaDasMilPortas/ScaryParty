@@ -299,7 +299,7 @@ namespace ScaryParty.Pizzeria.Authoring
                 foreach (var sup in supplyItems)
                 {
                     if (sup == null) continue;
-                    catalog.RegisterSupplyItem(new SupplyItemData(sup.id, sup.ingredientId, sup.unitsPerPack, sup.packPrice, sup.baseETA));
+                    catalog.RegisterSupplyItem(new SupplyItemData(sup.id, sup.ingredientId, sup.unitsPerPack, sup.packPrice, sup.baseETA, sup.itemName));
                 }
             }
 

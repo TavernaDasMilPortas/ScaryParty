@@ -57,10 +57,15 @@ public class LobbyManager : MonoBehaviour
         if (NetworkManager.Singleton != null && id == NetworkManager.Singleton.LocalClientId)
         {
             string reason = NetworkManager.Singleton.DisconnectReason;
+            string displayMsg = string.IsNullOrEmpty(reason)
+                ? "Conexão com o Host perdida ou recusada."
+                : reason;
             if (!string.IsNullOrEmpty(reason))
             {
                 Debug.LogWarning($"[LobbyManager] Disconnect Reason: {reason}");
             }
+            ScaryParty.Pizzeria.Presentation.NotificationManager.Show(displayMsg, ScaryParty.Pizzeria.Presentation.NotificationType.Error);
+            ScaryParty.UI.Piaria.Presenters.ModalPresenter.Instance?.ShowAlert("Desconectado da Sala", displayMsg);
         }
     }
 

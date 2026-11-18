@@ -9,6 +9,7 @@ namespace ScaryParty.Pizzeria.Network
         public static PizzeriaNotifier Instance { get; private set; }
 
         public event Action<string, bool> OnFeedbackReceived;
+        public static event Action<string, bool> OnAnyFeedbackReceived;
 
         private void Awake()
         {
@@ -51,6 +52,7 @@ namespace ScaryParty.Pizzeria.Network
         public void NotifyFeedbackClientRpc(string message, bool isError, ClientRpcParams clientRpcParams = default)
         {
             OnFeedbackReceived?.Invoke(message, isError);
+            OnAnyFeedbackReceived?.Invoke(message, isError);
             if (isError)
             {
                 Debug.LogWarning($"[Pizzeria Feedback] {message}");

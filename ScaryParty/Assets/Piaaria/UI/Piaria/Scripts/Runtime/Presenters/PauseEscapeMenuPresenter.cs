@@ -193,12 +193,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             var controlsText = new Label(
                 "Movimento: WASD / Shift (Correr)\n" +
                 "Interagir / Montar Moto / Equipar Arma: [E]\n" +
-                "Reparar Mochila (3s) / Arquivar Comanda: [F]\n" +
-                "Abrir Mochila: [B]\n" +
-                "Mirar / Atirar: [Botão Direito] / [Botão Esquerdo]\n" +
-                "Recarregar Arma: [R]\n" +
+                "Descartar no Lixo / Reparar Mochila / Comanda: [F] (segurar)\n" +
+                "Central de Operações (Pedidos/Reposição/Loja/Equipe): [J]\n" +
+                "Abrir Mochila: [B]  |  Bandoleira da Escopeta: [G]\n" +
                 "Guia de Receitas / Buzina na Moto: [H]\n" +
-                "Trocar Mão Ativa: [1] / [2]\n" +
+                "Tutorial Operacional: [F1]  |  Ir p/ Noite 1 (Host): [F2]\n" +
+                "Mirar / Atirar: [Botão Direito] / [Botão Esquerdo] | Recarregar: [R]\n" +
+                "Trocar Mão Ativa: [1] / [2] | Placar: [TAB]\n" +
                 "Minimapa Tela Cheia: [M] | Pausa: [ESC]");
             controlsText.style.fontSize = 15;
             controlsText.style.color = new Color(0.92f, 0.92f, 0.96f);
@@ -303,6 +304,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (DeliveryResultPresenter.Instance != null && DeliveryResultPresenter.Instance.IsOpen)
                 return true;
             if (NightResultsPresenter.Instance != null && NightResultsPresenter.Instance.IsOpen)
+                return true;
+            if (OperationsHubPresenter.Instance != null && OperationsHubPresenter.Instance.IsOpen)
                 return true;
             return false;
         }

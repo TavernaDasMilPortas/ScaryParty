@@ -227,6 +227,77 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (changed) state.IncrementRevision();
         }
 
+        public static bool TryPlaceSupplyOrder(
+            PizzeriaState state,
+            ScaryParty.Pizzeria.Domain.Definitions.DefinitionCatalog catalog,
+            int supplyItemId,
+            int packQuantity,
+            double now,
+            int maxPendingOrders,
+            float etaMultiplier,
+            out SupplyOrderState createdOrder,
+            out string failureReason)
+        {
+            createdOrder = null;
+            failureReason = null;
+
+            if (state == null || catalog == null)
+            {
+                failureReason = "Estado da pizzaria indisponível.";
+                return false;
+            }
+
+            if (packQuantity <= 0 || packQuantity > 10)
+            {
+                failureReason = "Quantidade de pacotes inválida (1 a 10).";
+                return false;
+            }
+
+            if (!catalog.SupplyItems.TryGetValue(supplyItemId, out var def) || def == null)
+            {
+                failureReason = "Item de reposição não encontrado no catálogo.";
+                return false;
+            }
+
+            int activeCount = 0;
+            foreach (var existing in state.SupplyOrders.Values)
+            {
+                if (existing != null && existing.State != SupplyOrderLifecycle.Unloaded)
+                {
+                    activeCount++;
+                }
+            }
+
+            int safeMaxPending = Math.Max(1, maxPendingOrders);
+            if (activeCount >= safeMaxPending)
+            {
+                failureReason = $"Limite de encomendas ativas atingido ({activeCount}/{safeMaxPending}).";
+                return false;
+            }
+
+            int totalCost = def.PackPrice * packQuantity;
+            if (state.RestaurantBudget < totalCost)
+            {
+                failureReason = $"Saldo insuficiente no caixa coletivo (custo: R$ {totalCost}, caixa: R$ {state.RestaurantBudget}).";
+                return false;
+            }
+
+            float safeEtaMult = etaMultiplier > 0.05f ? etaMultiplier : 1f;
+            float duration = Math.Max(2f, def.BaseETA * safeEtaMult);
+            state.RestaurantBudget -= totalCost;
+            state.NightSupplySpent += totalCost;
+
+            var id = state.GenerateSupplyOrderId();
+            var order = new SupplyOrderState(id, now, now + duration, totalCost);
+            order.AddLine(def.Id, def.IngredientId, def.UnitsPerPack, packQuantity);
+            order.ReceivingSlotIndex = 0;
+            state.SupplyOrders[id] = order;
+            state.IncrementRevision();
+
+            createdOrder = order;
+            return true;
+        }
+
         public static bool TickSupplies(PizzeriaState state, double now)
         {
             if (state == null || state.SupplyOrders.Count == 0) return false;

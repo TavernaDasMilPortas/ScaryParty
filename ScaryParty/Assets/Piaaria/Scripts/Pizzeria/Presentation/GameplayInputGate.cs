@@ -6,7 +6,9 @@ namespace ScaryParty.Pizzeria.Presentation
     public static class GameplayInputGate
     {
         private static int _lockCount = 0;
+        private static bool _wasEffectivelyLocked = false;
 
+        public static float LastUnlockUnscaledTime { get; private set; } = -10f;
         public static bool IsLocked => _lockCount > 0;
 
         public static void PushLock()
@@ -71,7 +73,14 @@ namespace ScaryParty.Pizzeria.Presentation
                               (ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
                               (ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden);
 
-            if (locked || isMenuOpen)
+            bool effectiveLocked = locked || isMenuOpen;
+            if (_wasEffectivelyLocked && !effectiveLocked)
+            {
+                LastUnlockUnscaledTime = SafeUnscaledTime();
+            }
+            _wasEffectivelyLocked = effectiveLocked;
+
+            if (effectiveLocked)
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
@@ -81,6 +90,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
+        }
+
+        private static float SafeUnscaledTime()
+        {
+            try { return Time.unscaledTime; }
+            catch { return 0f; }
         }
     }
 }
