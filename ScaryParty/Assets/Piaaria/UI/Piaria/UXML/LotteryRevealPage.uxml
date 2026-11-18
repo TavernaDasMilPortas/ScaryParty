@@ -1,0 +1,26 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ui:VisualElement name="lottery-reveal-root" style="flex-grow: 1; flex-direction: column; justify-content: space-between;">
+        <ui:VisualElement style="align-items: center;">
+            <ui:Label name="reveal-status-label" text="APURANDO URNAS DA NOITE..." class="intermission-title" />
+            <ui:Label text="Sorteio ponderado pelos bilhetes da equipe" class="intermission-subtitle" />
+        </ui:VisualElement>
+
+        <ui:VisualElement style="flex-direction: row; justify-content: space-between; flex-grow: 1; margin-top: 14px; margin-bottom: 14px;">
+            <ui:VisualElement name="reveal-hindrance-card" class="modifier-card" style="width: 48%;">
+                <ui:Label text="IMPREVISTO SORTEADO" class="modifier-card-tag" />
+                <ui:Label name="reveal-hindrance-title" text="..." class="modifier-card-title" />
+                <ui:Label name="reveal-hindrance-desc" text="Apurando..." class="modifier-card-desc" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="reveal-opportunity-card" class="modifier-card" style="width: 48%;">
+                <ui:Label text="OPORTUNIDADE SORTEADA" class="modifier-card-tag" />
+                <ui:Label name="reveal-opportunity-title" text="..." class="modifier-card-title" />
+                <ui:Label name="reveal-opportunity-desc" text="Apurando..." class="modifier-card-desc" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement style="align-items: center; justify-content: center; height: 84px;">
+            <ui:Label name="reveal-countdown-label" text="" style="font-size: 54px; color: #ff741f; -unity-font-style: bold;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

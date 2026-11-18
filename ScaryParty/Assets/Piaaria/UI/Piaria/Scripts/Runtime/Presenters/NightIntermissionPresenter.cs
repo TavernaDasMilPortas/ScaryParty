@@ -51,6 +51,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private NightSummaryPagePresenter _summaryPresenter;
         private ModifierVotePagePresenter _votePresenter;
         private RunShopPagePresenter _shopPresenter;
+        private LotteryRevealPresenter _revealPresenter;
 
         public bool IsOpen => _isOpen;
         public TabPage ActiveTab => _activeTab;
@@ -132,6 +133,11 @@ namespace ScaryParty.UI.Piaria.Presenters
             else if (_isOpen)
             {
                 ScaryParty.Pizzeria.Presentation.GameplayInputGate.MaintainMenuCursorUnlocked();
+                if (_activeTab == TabPage.Reveal && _revealPresenter != null)
+                {
+                    double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
+                    _revealPresenter.Tick(net, serverNow);
+                }
                 if (run.Revision != _lastObservedRevision)
                 {
                     _lastObservedRevision = run.Revision;
@@ -252,6 +258,21 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _shopPresenter = new RunShopPagePresenter(page, tab => SelectTab(tab));
                     if (net != null)
                         _shopPresenter.Bind(_activeTab == TabPage.Prepare, net);
+                }
+            }
+            else if (_activeTab == TabPage.Reveal)
+            {
+                VisualTreeAsset tpl = catalog != null ? catalog.templateLotteryRevealPage : null;
+#if UNITY_EDITOR
+                if (tpl == null)
+                    tpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/LotteryRevealPage.uxml");
+#endif
+                if (tpl != null)
+                {
+                    var page = tpl.Instantiate();
+                    page.style.flexGrow = 1;
+                    _pageHost.Add(page);
+                    _revealPresenter = new LotteryRevealPresenter(page);
                 }
             }
             else
