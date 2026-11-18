@@ -315,6 +315,11 @@ namespace ScaryParty.Combat.Monsters
             return SpawnMonsterServer(root, NpcSpecies.Zombie, worldPos, perchedOnRooftop: false);
         }
 
+        public static int ComputeVampireSpawnCount(int nightNumber, float spawnMultiplier)
+        {
+            return Mathf.Max(1, Mathf.RoundToInt((1 + Mathf.Max(0, nightNumber)) * Mathf.Max(0.1f, spawnMultiplier)));
+        }
+
         private void SpawnPopulationForNightServer(PizzeriaRoot root, int night)
         {
             ClearNightMonstersServer();
@@ -324,7 +329,7 @@ namespace ScaryParty.Combat.Monsters
                 ? root.RunProgressionService.RecalculateEffectiveStats()
                 : new RunEffectiveStats();
 
-            int vampireCount = Mathf.Max(1, Mathf.RoundToInt((1 + night) * stats.VampireSpawnMultiplier));
+            int vampireCount = ComputeVampireSpawnCount(night, stats.VampireSpawnMultiplier);
             int werewolfCount = night >= 1 ? 1 : 0;
             int ghostCount = night >= 2 ? 1 : 0;
             int zombieCount = 1 + (night >= 2 ? 1 : 0);

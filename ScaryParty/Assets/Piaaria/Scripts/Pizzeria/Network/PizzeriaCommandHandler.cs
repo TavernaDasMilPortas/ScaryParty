@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
 using Unity.Netcode;
 using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -1554,141 +1556,109 @@ namespace ScaryParty.Pizzeria.Network
         public void PurchaseRunShopItemServerRpc(byte shopItemId, ServerRpcParams rpcParams = default)
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
-            var targetParams = TargetSender(senderId);
             var root = PizzeriaRoot.Instance;
-            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
-            var phase = root.DomainState.CurrentNightPhase;
-            if (phase != NightPhase.PreparingNextNight && phase != NightPhase.Preparing && phase != NightPhase.Active)
+            if (root == null || !root.IsServer || root.RunProgressionService == null) return;
+
+            var offer = root.RunProgressionService.BalancingSnapshot?.FindShopOfferByLegacyByteId(shopItemId);
+            if (offer == null)
             {
-                NotifyErrorClientRpc("A loja está indisponível após o encerramento do turno.", targetParams);
+                NotifyErrorClientRpc($"Oferta #{shopItemId} nao encontrada no catalogo.", TargetSender(senderId));
                 return;
             }
+
+            ExecuteShopOfferPurchaseServer(offer.OfferId, senderId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void PurchaseRunShopOfferServerRpc(FixedString64Bytes offerId, ServerRpcParams rpcParams = default)
+        {
+            ExecuteShopOfferPurchaseServer(offerId.ToString(), rpcParams.Receive.SenderClientId);
+        }
+
+        private void ExecuteShopOfferPurchaseServer(string offerId, ulong senderClientId)
+        {
+            var targetParams = TargetSender(senderClientId);
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
 
             var run = root.RunProgressionService;
             var state = root.DomainState;
-            bool ok = false;
-            string purchasedMsg = null;
-
-            switch (shopItemId)
+            var offer = run.BalancingSnapshot?.FindShopOfferById(offerId);
+            if (offer == null)
             {
-                case 1: // Timer do Forno (único)
-                {
-                    var item = new RunShopItem { Id = "oven_timer_shop", Name = "Timer do Forno", Cost = 90, IsUnique = true };
-                    if (run.HasModifier("oven_timer"))
-                    {
-                        NotifyErrorClientRpc("Timer do Forno já adquirido nesta RUN.", targetParams);
-                        return;
-                    }
-                    if (state.RestaurantBudget < item.Cost)
-                    {
-                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
-                        return;
-                    }
-                    ok = run.TryPurchaseShopItem(state, item);
-                    if (ok)
-                    {
-                        var def = run.GetModifierDefinition("oven_timer");
-                        if (def != null) run.ApplyModifier(def);
-                        purchasedMsg = "Timer do Forno adquirido (pizzas não queimam)!";
-                    }
-                    break;
-                }
-                case 2: // Bolsa Reforçada (+1 slot, respeitando MaxStacks)
-                {
-                    if (!run.CanApplyModifierStack("reinforced_bag"))
-                    {
-                        NotifyErrorClientRpc("Limite máximo de Bolsa Reforçada atingido nesta RUN.", targetParams);
-                        return;
-                    }
-                    var item = new RunShopItem { Id = "reinforced_bag_shop", Name = "Bolsa Reforçada", Cost = 75, IsUnique = false };
-                    if (state.RestaurantBudget < item.Cost)
-                    {
-                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
-                        return;
-                    }
-                    if (run.TryPurchaseShopItem(state, item))
-                    {
-                        var def = run.GetModifierDefinition("reinforced_bag");
-                        if (def != null) run.ApplyModifier(def);
-                        ApplyRunBackpackCapacityBonusServer(root);
-                        ok = true;
-                        purchasedMsg = "Bolsa Reforçada adquirida (+1 capacidade de carga)!";
-                    }
-                    break;
-                }
-                case 3: // Treinamento de Equipe (respeitando MaxStacks)
-                {
-                    if (!run.CanApplyModifierStack("staff_training"))
-                    {
-                        NotifyErrorClientRpc("Limite máximo de Treinamento de Equipe atingido nesta RUN.", targetParams);
-                        return;
-                    }
-                    var item = new RunShopItem { Id = "staff_training_shop", Name = "Treinamento Equipe", Cost = 85, IsUnique = false };
-                    if (state.RestaurantBudget < item.Cost)
-                    {
-                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
-                        return;
-                    }
-                    if (run.TryPurchaseShopItem(state, item))
-                    {
-                        var def = run.GetModifierDefinition("staff_training");
-                        if (def != null) run.ApplyModifier(def);
-                        ok = true;
-                        purchasedMsg = "Treinamento aplicado (-25% chance de erro dos funcionários)!";
-                    }
-                    break;
-                }
-                case 4: // Suprimentos Base +5
-                {
-                    var item = new RunShopItem { Id = "extra_supplies_shop", Name = "Suprimentos Base +5", Cost = 45, IsUnique = false };
-                    if (state.RestaurantBudget < item.Cost)
-                    {
-                        NotifyErrorClientRpc($"Saldo insuficiente no caixa coletivo (custo: R$ {item.Cost}, caixa: R$ {state.RestaurantBudget}).", targetParams);
-                        return;
-                    }
-                    if (run.TryPurchaseShopItem(state, item))
-                    {
-                        foreach (var kvp in state.StorageSlots)
-                        {
-                            if (kvp.Key.ingredientDefId >= 1 && kvp.Key.ingredientDefId <= 3)
-                            {
-                                kvp.Value.Quantity = Mathf.Min(kvp.Value.MaxCapacity, kvp.Value.Quantity + 5);
-                                kvp.Value.Revision++;
-                            }
-                        }
-                        ok = true;
-                        purchasedMsg = "+5 de Massa, Molho e Queijo adicionados ao estoque!";
-                    }
-                    break;
-                }
-                case 5: // Contratar Caixa
-                {
-                    if (root.EmployeeTaskService != null && root.EmployeeTaskService.TryHireEmployee(state, EmployeeRole.Cashier) != null)
-                    {
-                        ok = true;
-                        purchasedMsg = "Caixa contratado para o atendimento!";
-                    }
-                    break;
-                }
-                case 6: // Contratar Pizzaiolo
-                {
-                    if (root.EmployeeTaskService != null && root.EmployeeTaskService.TryHireEmployee(state, EmployeeRole.Pizzaiolo) != null)
-                    {
-                        ok = true;
-                        purchasedMsg = "Pizzaiolo contratado para a cozinha!";
-                    }
-                    break;
-                }
-            }
-
-            if (!ok)
-            {
-                NotifyErrorClientRpc("Saldo insuficiente no caixa ou item único já adquirido.", targetParams);
+                NotifyErrorClientRpc($"Oferta '{offerId}' inexistente no catalogo.", targetParams);
                 return;
             }
 
+            bool ok = run.TryPurchaseCatalogOffer(
+                state,
+                offerId,
+                root.EmployeeTaskService,
+                lines => ApplySupplyBundleLinesServer(state, lines),
+                out string failureReason,
+                out int appliedCost,
+                out HiredEmployeeState hiredEmployee);
+
+            if (!ok)
+            {
+                NotifyErrorClientRpc(string.IsNullOrEmpty(failureReason) ? "Nao foi possivel concluir a compra." : failureReason, targetParams);
+                return;
+            }
+
+            string purchasedMsg;
+            switch (offer.BenefitKind)
+            {
+                case ShopBenefitKind.GrantModifier:
+                    if (string.Equals(offer.ModifierId, "reinforced_bag", System.StringComparison.Ordinal))
+                    {
+                        ApplyRunBackpackCapacityBonusServer(root);
+                    }
+                    purchasedMsg = $"{offer.DisplayName} adquirido (R$ {appliedCost})!";
+                    break;
+                case ShopBenefitKind.SupplyBundle:
+                    purchasedMsg = $"{offer.DisplayName} entregue ao estoque (R$ {appliedCost})!";
+                    break;
+                case ShopBenefitKind.HireEmployee:
+                    purchasedMsg = $"{offer.DisplayName} contratado para a equipe (R$ {appliedCost})!";
+                    break;
+                default:
+                    purchasedMsg = $"{offer.DisplayName} adquirido!";
+                    break;
+            }
+
             CommitAndReplicate();
-            BroadcastNoticeClientRpc(purchasedMsg ?? "Compra concluída!", isError: false);
+            BroadcastNoticeClientRpc(purchasedMsg, isError: false);
+        }
+
+        public static int ApplySupplyBundleLinesServer(PizzeriaState state, IReadOnlyList<SupplyBundleLineData> lines)
+        {
+            if (state == null || lines == null || lines.Count == 0) return 0;
+
+            int totalAdded = 0;
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                if (line == null || line.IngredientId <= 0 || line.Quantity <= 0) continue;
+
+                foreach (var kvp in state.StorageSlots)
+                {
+                    if (kvp.Key.ingredientDefId == line.IngredientId && kvp.Value != null)
+                    {
+                        int free = Mathf.Max(0, kvp.Value.MaxCapacity - kvp.Value.Quantity);
+                        if (free <= 0) continue;
+                        int add = Mathf.Min(free, line.Quantity);
+                        kvp.Value.Quantity += add;
+                        kvp.Value.Revision++;
+                        totalAdded += add;
+                    }
+                }
+            }
+
+            if (totalAdded > 0)
+            {
+                state.IncrementRevision();
+            }
+            return totalAdded;
         }
 
         [ServerRpc(RequireOwnership = false)]

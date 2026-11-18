@@ -23,6 +23,7 @@ namespace ScaryParty.Combat.Monsters
         [SerializeField] private float attackRange = 1.9f;
         [SerializeField] private float attackCooldown = 1.2f;
         [SerializeField] private float acquisitionRange = 15f;
+        private float _baseAcquisitionRange = -1f;
         [SerializeField] private float disengageDistance = 22f;
         [SerializeField] private float disengageSeconds = 5f;
 
@@ -109,8 +110,29 @@ namespace ScaryParty.Combat.Monsters
         }
         private bool IsAuthoritativeServer => !_isClientProxy && _configuredOnServer && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer);
 
+        public static float ComputeEffectiveAcquisitionRange(float baseRange, float aggressionMultiplier, bool isEligibleAggressiveVampire)
+        {
+            return isEligibleAggressiveVampire
+                ? Mathf.Max(1f, baseRange * Mathf.Max(0.2f, aggressionMultiplier))
+                : baseRange;
+        }
+
+        public float EffectiveAcquisitionRange
+        {
+            get
+            {
+                float baseRange = _baseAcquisitionRange > 0f ? _baseAcquisitionRange : acquisitionRange;
+                bool eligible = species == NpcSpecies.Vampire && !_boundCustomerId.IsValid && (ShouldEnterHostileStateServer() || _localBehaviorState == NpcBehaviorState.Aggressive);
+                float mult = PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.RunProgressionService != null
+                    ? PizzeriaRoot.Instance.RunProgressionService.RecalculateEffectiveStats().VampireAggressionMultiplier
+                    : 1f;
+                return ComputeEffectiveAcquisitionRange(baseRange, mult, eligible);
+            }
+        }
+
         private void Awake()
         {
+            _baseAcquisitionRange = acquisitionRange;
             _agent = GetComponent<NavMeshAgent>();
             _mainCollider = GetComponent<Collider>();
             _visualRoot = transform.Find("VisualRoot") ?? transform;
@@ -186,6 +208,7 @@ namespace ScaryParty.Combat.Monsters
                 attackDamage = Mathf.Max(1, profile.AttackDamage);
                 attackCooldown = Mathf.Max(0.3f, profile.AttackCooldown);
                 acquisitionRange = profile.AcquisitionRange;
+                _baseAcquisitionRange = acquisitionRange;
                 disengageDistance = profile.DisengageDistance;
                 disengageSeconds = profile.DisengageSeconds;
             }
@@ -593,7 +616,8 @@ namespace ScaryParty.Combat.Monsters
         private void TryAcquireNearestTarget()
         {
             if (NetworkManager.Singleton == null) return;
-            float bestDistSq = acquisitionRange * acquisitionRange;
+            float range = EffectiveAcquisitionRange;
+            float bestDistSq = range * range;
             Transform bestTarget = null;
 
             foreach (var kvp in NetworkManager.Singleton.ConnectedClients)

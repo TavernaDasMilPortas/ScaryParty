@@ -140,11 +140,31 @@ namespace ScaryParty.Pizzeria.Composition
 
             _timer = 0f;
             var cfg = root.Config;
-            _nextSpawnInterval = Random.Range(
+            float rawInterval = Random.Range(
                 Mathf.Max(4f, cfg.minOrderInterval * 0.75f),
                 Mathf.Max(8f, cfg.maxOrderInterval * 0.85f));
+            _nextSpawnInterval = ComputeEffectiveSpawnInterval(rawInterval, GetEffectiveDemandMultiplier(root));
 
             TriggerNextDemandEvent(root);
+        }
+
+        public static float ComputeEffectiveSpawnInterval(float baseInterval, float demandMultiplier)
+        {
+            return Mathf.Max(1.5f, baseInterval / Mathf.Max(0.2f, demandMultiplier));
+        }
+
+        private static float GetEffectiveDemandMultiplier(PizzeriaRoot root)
+        {
+            return root != null && root.RunProgressionService != null
+                ? root.RunProgressionService.RecalculateEffectiveStats().DemandMultiplier
+                : 1f;
+        }
+
+        private static float GetEffectivePatienceMultiplier(PizzeriaRoot root)
+        {
+            return root != null && root.RunProgressionService != null
+                ? root.RunProgressionService.RecalculateEffectiveStats().CustomerPatienceMultiplier
+                : 1f;
         }
 
         public bool TriggerNextDemandEvent(PizzeriaRoot root)
@@ -224,6 +244,7 @@ namespace ScaryParty.Pizzeria.Composition
         public bool SpawnWalkInCustomerDemand(PizzeriaRoot root)
         {
             var cfg = root.Config;
+            float patienceMult = GetEffectivePatienceMultiplier(root);
             var res = root.CustomerService.SpawnWalkInCustomer(
                 root.DomainState,
                 root.Catalog,
@@ -231,10 +252,10 @@ namespace ScaryParty.Pizzeria.Composition
                 Mathf.Max(1, cfg.queueCount),
                 Mathf.Max(1, cfg.maxCustomersPerQueue),
                 Mathf.Max(1, cfg.maxActiveDineInCustomers),
-                cfg.customerQueuePatienceMin,
-                cfg.customerQueuePatienceMax,
-                cfg.customerFoodPatienceMin,
-                cfg.customerFoodPatienceMax);
+                Mathf.Max(5f, cfg.customerQueuePatienceMin * patienceMult),
+                Mathf.Max(8f, cfg.customerQueuePatienceMax * patienceMult),
+                Mathf.Max(5f, cfg.customerFoodPatienceMin * patienceMult),
+                Mathf.Max(8f, cfg.customerFoodPatienceMax * patienceMult));
             if (res.Success && root.DomainState.Customers.TryGetValue(res.Value, out var cust))
             {
                 if (CityPopulationDirector.Instance != null)
@@ -304,7 +325,8 @@ namespace ScaryParty.Pizzeria.Composition
             lines.Add(new OrderLineState(root.DomainState.GenerateOrderLineId(), spec, 1));
 
             float now = (float)(root.Clock != null ? root.Clock.Now : Time.time);
-            float expire = root.Config != null && root.Config.callExpireSeconds > 0f ? root.Config.callExpireSeconds : 45f;
+            float baseExpire = root.Config != null && root.Config.callExpireSeconds > 0f ? root.Config.callExpireSeconds : 45f;
+            float expire = Mathf.Max(10f, baseExpire * GetEffectivePatienceMultiplier(root));
             var res = root.CallService.EnqueueCall(root.DomainState, destId, lines, now, expire);
             if (res.Success)
             {

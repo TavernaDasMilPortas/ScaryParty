@@ -463,8 +463,21 @@ namespace ScaryParty.Pizzeria.Composition
                 ? 0
                 : 1;
 
-            RunProgressionService = new RunProgressionService(runSeed, maxNights: maxNights, difficulty: diff);
-            EmployeeTaskService = new EmployeeTaskService();
+            string balancingDiagnostic = string.Empty;
+            var balancingSnapshot = _config != null
+                ? _config.ResolveBalancingSnapshot(out balancingDiagnostic, preset != null ? preset.balancingCatalogOverride : null)
+                : null;
+            if (!string.IsNullOrEmpty(balancingDiagnostic))
+            {
+                Debug.LogWarning($"[PizzeriaRoot] {balancingDiagnostic} Usando snapshot de dominio explicito de contingencia.");
+            }
+            if (balancingSnapshot == null)
+            {
+                balancingSnapshot = RunBalancingSnapshot.CreateForDomainUnitTests();
+            }
+
+            RunProgressionService = new RunProgressionService(runSeed, maxNights: maxNights, difficulty: diff, snapshot: balancingSnapshot);
+            EmployeeTaskService = new EmployeeTaskService(balancingSnapshot);
             SpeciesHostilityService = new SpeciesHostilityService();
             ZombieConversionService = new ZombieConversionService();
 

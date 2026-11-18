@@ -216,8 +216,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             foreach (var kvp in state.StorageSlots)
             {
                 int defId = kvp.Key.ingredientDefId;
-                // Ingredientes base (Massa=1, Molho=2, Queijo=3) recebem piso mínimo para evitar soft-lock
-                if (defId >= 1 && defId <= 3 && kvp.Value.Quantity < minUnitsPerBaseSlot)
+                // Ingredientes base (Massa=1, Molho=3, QueijoInteiro=4) recebem piso mínimo para evitar soft-lock
+                if ((defId == 1 || defId == 3 || defId == 4) && kvp.Value.Quantity < minUnitsPerBaseSlot)
                 {
                     kvp.Value.Quantity = Math.Min(kvp.Value.MaxCapacity, minUnitsPerBaseSlot);
                     kvp.Value.Revision++;
