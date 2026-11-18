@@ -1,0 +1,61 @@
+/* Central de Situação TAB (UI Toolkit — P.I.A.R.I.A) */
+
+.ops-overlay-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(20, 10, 6, 0.55);
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+}
+
+.ops-panel {
+    width: 920px;
+    max-width: 92%;
+    background-color: #f8d5c4;
+    border-top-width: 5px;
+    border-right-width: 5px;
+    border-bottom-width: 8px;
+    border-left-width: 5px;
+    border-color: #402318;
+    border-radius: 20px;
+    padding: 18px 22px;
+    flex-direction: column;
+}
+
+.ops-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.ops-block {
+    width: 48.5%;
+    min-height: 150px;
+    background-color: #fffbf5;
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 5px;
+    border-left-width: 3px;
+    border-color: #402318;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+
+.ops-block-title {
+    font-size: 15px;
+    color: #ff741f;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.ops-block-body {
+    font-size: 14px;
+    color: #402318;
+    white-space: normal;
+}

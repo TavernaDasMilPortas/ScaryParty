@@ -105,4 +105,5 @@ MonoBehaviour:
   templateModifierVotePage: {fileID: 9197481963319205126, guid: c201202600014a1b9c0000000000000f, type: 3}
   templateShopPreparationPage: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000011, type: 3}
   templateLotteryRevealPage: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000013, type: 3}
+  templateOperationsStatusOverlay: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000016, type: 3}
   panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}

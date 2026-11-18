@@ -129,6 +129,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             tabHeld = Input.GetKey(KeyCode.Tab);
 #endif
 
+            bool blockedByOverlay = (NightIntermissionPresenter.Instance != null && NightIntermissionPresenter.Instance.IsOpen) ||
+                                   (Core.UIModalStack.Instance != null && Core.UIModalStack.Instance.HasActiveModal);
+            if (blockedByOverlay) tabHeld = false;
+
             if (tabHeld && !_isOpen)
             {
                 Show();
