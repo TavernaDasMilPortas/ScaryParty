@@ -547,13 +547,23 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else if (isIngredient)
             {
-                if (item.Category == (byte)ItemCategory.Dough && doughPrefab != null)
+                var ingDef = FindConfiguredIngredientDef(item.DefinitionId);
+                if (ingDef != null && ingDef.placeholderPrefab != null)
+                {
+                    go = Instantiate(ingDef.placeholderPrefab);
+                }
+                else if (item.Category == (byte)ItemCategory.Dough && doughPrefab != null)
+                {
                     go = Instantiate(doughPrefab);
+                }
                 else
                 {
                     go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-                    Color ingColor = Color.white;
+                    bool isGarlic = item.DefinitionId == 10;
+                    go.transform.localScale = isGarlic
+                        ? new Vector3(0.16f, 0.12f, 0.16f)
+                        : new Vector3(0.2f, 0.2f, 0.2f);
+                    Color ingColor = ingDef != null ? ingDef.placeholderColor : Color.white;
                     ScaryParty.VisualStyles.VisualSemanticRole ingRole = ScaryParty.VisualStyles.VisualSemanticRole.FoodGeneric;
                     if (item.Category == (byte)ItemCategory.Dough)
                     {
@@ -572,9 +582,16 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                     else if (item.Category == (byte)ItemCategory.Topping)
                     {
-                        bool isMushroom = item.DefinitionId == 8 || item.DefinitionId == 9;
-                        ingColor = isMushroom ? new Color(0.75f, 0.65f, 0.52f) : new Color(0.65f, 0.15f, 0.15f);
-                        ingRole = isMushroom ? ScaryParty.VisualStyles.VisualSemanticRole.PizzaMushroom : ScaryParty.VisualStyles.VisualSemanticRole.PizzaPepperoni;
+                        if (isGarlic)
+                        {
+                            ingColor = new Color(0.92f, 0.94f, 0.76f);
+                        }
+                        else
+                        {
+                            bool isMushroom = item.DefinitionId == 8 || item.DefinitionId == 9;
+                            ingColor = isMushroom ? new Color(0.75f, 0.65f, 0.52f) : new Color(0.65f, 0.15f, 0.15f);
+                            ingRole = isMushroom ? ScaryParty.VisualStyles.VisualSemanticRole.PizzaMushroom : ScaryParty.VisualStyles.VisualSemanticRole.PizzaPepperoni;
+                        }
                     }
 
                     ApplyFallbackPrimitiveStyle(go, ingRole, ingColor);
@@ -846,6 +863,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 ApplyColorToRenderers(renderers, targetColor);
+                UpdatePizzaStageGeometryFeedback(wrapper.VisualInstance, item);
                 UpdatePizzaIngredientLayers(wrapper.VisualInstance, item);
                 UpdatePizzaSmoke(wrapper.VisualInstance, item);
             }
@@ -857,12 +875,41 @@ namespace ScaryParty.Pizzeria.Presentation
                 else if (item.Category == (byte)ItemCategory.Cheese) ApplyColorToRenderers(renderers, new Color(0.98f, 0.88f, 0.35f));
                 else if (item.Category == (byte)ItemCategory.Topping)
                 {
-                    Color topColor = (item.DefinitionId == 8 || item.DefinitionId == 9)
-                        ? new Color(0.75f, 0.65f, 0.52f)
-                        : new Color(0.65f, 0.15f, 0.15f);
+                    Color topColor;
+                    if (item.DefinitionId == 10)
+                        topColor = new Color(0.92f, 0.94f, 0.76f); // Alho
+                    else if (item.DefinitionId == 8 || item.DefinitionId == 9)
+                        topColor = new Color(0.75f, 0.65f, 0.52f);
+                    else
+                        topColor = new Color(0.65f, 0.15f, 0.15f);
                     ApplyColorToRenderers(renderers, topColor);
                 }
             }
+        }
+
+        private static ScaryParty.Pizzeria.Authoring.IngredientDef FindConfiguredIngredientDef(int defId)
+        {
+            var cfg = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.Config;
+            if (cfg == null || cfg.ingredients == null) return null;
+            for (int i = 0; i < cfg.ingredients.Count; i++)
+            {
+                if (cfg.ingredients[i] != null && cfg.ingredients[i].id == defId)
+                    return cfg.ingredients[i];
+            }
+            return null;
+        }
+
+        private static void UpdatePizzaStageGeometryFeedback(GameObject pizzaGo, NetItemDto item)
+        {
+            if (pizzaGo == null) return;
+            // Diferencia sutil e legível entre crua/preparada, assada e queimada mesmo sem zoom
+            Vector3 targetScale = item.CookingStage switch
+            {
+                (byte)CookingStage.Baked => new Vector3(1.04f, 1.18f, 1.04f),
+                (byte)CookingStage.Burned => new Vector3(0.94f, 0.82f, 0.94f),
+                _ => Vector3.one
+            };
+            pizzaGo.transform.localScale = targetScale;
         }
 
         private void ApplyColorToRenderers(Renderer[] renderers, Color color)

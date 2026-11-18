@@ -2075,8 +2075,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static EmployeeAgentController SpawnEmployeeBody(PizzeriaRoot root, HiredEmployeeState emp)
         {
-            Vector3 spawnPos = root.transform.position + new Vector3((emp.EmployeeId % 3 - 1) * 1.3f, 0f, 1.0f);
-            if (NavMesh.SamplePosition(spawnPos, out var hit, 5f, NavMesh.AllAreas))
+            Vector3 desiredOffset = emp.Role == EmployeeRole.Cashier
+                ? new Vector3(-1.4f + (emp.EmployeeId % 2) * 0.9f, 0f, 2.0f)
+                : new Vector3(1.1f + (emp.EmployeeId % 3 - 1) * 1.1f, 0f, -0.8f);
+            Vector3 spawnPos = root.transform.position + desiredOffset;
+            if (NavMesh.SamplePosition(spawnPos, out var hit, 6f, NavMesh.AllAreas))
             {
                 spawnPos = hit.position;
             }
@@ -2120,6 +2123,26 @@ namespace ScaryParty.Pizzeria.Presentation
             visualRoot.transform.localPosition = Vector3.zero;
             visualRoot.transform.localRotation = Quaternion.identity;
 
+            var rig = go.GetComponent<EntityVisualAnchorRig>() ?? go.AddComponent<EntityVisualAnchorRig>();
+            rig.rigRole = EntityVisualAnchorRig.RigRole.CharacterAccessories;
+            rig.placeholderId = role == EmployeeRole.Cashier ? "employee_cashier" : "employee_pizzaiolo";
+
+            var manifest = ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest.LoadDefault();
+            GameObject roleVisualPrefab = manifest != null
+                ? (role == EmployeeRole.Cashier ? manifest.cashierVisualPrefab : manifest.pizzaioloVisualPrefab)
+                : null;
+
+            if (roleVisualPrefab != null)
+            {
+                var inst = UnityEngine.Object.Instantiate(roleVisualPrefab, visualRoot.transform, false);
+                inst.name = "EmployeeRoleVisual";
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+                var cols = inst.GetComponentsInChildren<Collider>(true);
+                for (int i = 0; i < cols.Length; i++) DestroyObjectSafe(cols[i]);
+                return;
+            }
+
             Color tint = role == EmployeeRole.Cashier
                 ? new Color(0.20f, 0.55f, 0.85f)
                 : new Color(0.92f, 0.90f, 0.82f);
@@ -2152,11 +2175,35 @@ namespace ScaryParty.Pizzeria.Presentation
                 var renderer = cap.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    var mpb = new MaterialPropertyBlock();
-                    renderer.GetPropertyBlock(mpb);
-                    mpb.SetColor("_Color", tint);
-                    mpb.SetColor("_BaseColor", tint);
-                    renderer.SetPropertyBlock(mpb);
+                    Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                    if (urp != null)
+                    {
+                        var m = new Material(urp);
+                        m.color = tint;
+                        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", tint);
+                        renderer.sharedMaterial = m;
+                    }
+                }
+            }
+
+            // Acessório distinguível de fallback para Caixa (viseira azul) vs Pizzaiolo (chapéu chef branco)
+            Transform headAnchor = rig.ResolveAnchor(ref rig.headAccessoryAnchor, "HeadAccessoryAnchor", new Vector3(0f, 1.72f, 0f), Vector3.zero);
+            var hat = GameObject.CreatePrimitive(role == EmployeeRole.Cashier ? PrimitiveType.Cube : PrimitiveType.Cylinder);
+            hat.name = role == EmployeeRole.Cashier ? "CashierVisor" : "PizzaioloHat";
+            DestroyObjectSafe(hat.GetComponent<Collider>());
+            hat.transform.SetParent(headAnchor, false);
+            hat.transform.localScale = role == EmployeeRole.Cashier ? new Vector3(0.32f, 0.08f, 0.36f) : new Vector3(0.28f, 0.16f, 0.28f);
+            var hatRend = hat.GetComponent<Renderer>();
+            if (hatRend != null)
+            {
+                Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                if (urp != null)
+                {
+                    var m = new Material(urp);
+                    Color accCol = role == EmployeeRole.Cashier ? new Color(0.12f, 0.42f, 0.85f) : Color.white;
+                    m.color = accCol;
+                    if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", accCol);
+                    hatRend.sharedMaterial = m;
                 }
             }
         }

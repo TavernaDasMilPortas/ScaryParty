@@ -1,5 +1,5 @@
 branch=release/marcos-noturnos
-shortSha=68a18e49
-fullSha=68a18e49fcb98b9198bf26e2078ea0abd8b9c188
+shortSha=0a40e6b9
+fullSha=0a40e6b970fcd658a4204f510231dae2caeee3d3
 unity=6000.3.6f1
 preparedUtc=2026-11-18 01:35:49Z

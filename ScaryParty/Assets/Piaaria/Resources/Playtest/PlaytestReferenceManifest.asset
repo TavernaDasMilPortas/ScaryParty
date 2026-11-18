@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlaytestReferenceManifest
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest
   branchName: release/marcos-noturnos
-  baseCommitSha: 68a18e49fcb98b9198bf26e2078ea0abd8b9c188
+  baseCommitSha: 0a40e6b970fcd658a4204f510231dae2caeee3d3
   unityVersion: 6000.3.6f1
   lastValidatedUtc: 
   scenes:
@@ -26,11 +26,80 @@ MonoBehaviour:
   playerPrefab: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
   networkPrefabsConfigAsset: {fileID: 0}
   runPresets: []
-  monsterVisualCatalog: {fileID: 0}
-  cashierVisualPrefab: {fileID: 0}
-  pizzaioloVisualPrefab: {fileID: 0}
-  motorcycleVisualPrefab: {fileID: 0}
-  supplierTerminalVisualPrefab: {fileID: 0}
-  receivingZoneVisualPrefab: {fileID: 0}
-  managementBoardVisualPrefab: {fileID: 0}
-  placeholders: []
+  monsterVisualCatalog: {fileID: 11400000, guid: 27cb16cb90b9ae14dbfeabf8fd28ad86, type: 2}
+  cashierVisualPrefab: {fileID: 8026842986995490835, guid: ea4f7f7ab01f8fd458557cc7b0d77bfb, type: 3}
+  pizzaioloVisualPrefab: {fileID: 8705788214351241338, guid: 1ca43dd0ff051944599a1653243feae5, type: 3}
+  motorcycleVisualPrefab: {fileID: 7492068385878837313, guid: 782fb09deb1d432438c55dcda882e9ff, type: 3}
+  supplierTerminalVisualPrefab: {fileID: 6797281143036699861, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+  receivingZoneVisualPrefab: {fileID: 3813464192670029700, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+  managementBoardVisualPrefab: {fileID: 2333343384546481851, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+  placeholders:
+  - id: monster_vampire
+    category: Monstro
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Monster_Vampire.prefab
+    replaceWithNote: "Substituir apenas se trocar o FBX/anima\xE7\xE3o mantendo MonsterVisualCatalog
+      + EntityVisualAnchorRig."
+    asset: {fileID: 6002970842962214642, guid: e7c48d32cd0fbd347bfd4fe166b9c634, type: 3}
+  - id: monster_werewolf
+    category: Monstro
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Monster_Werewolf.prefab
+    replaceWithNote: "Substituir apenas se trocar o FBX/anima\xE7\xE3o mantendo MonsterVisualCatalog
+      + EntityVisualAnchorRig."
+    asset: {fileID: 66566963646985060, guid: b79768c9470be90419d3a884c49e5f18, type: 3}
+  - id: monster_ghost
+    category: Monstro
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Monster_Ghost.prefab
+    replaceWithNote: "Substituir apenas se trocar o FBX/anima\xE7\xE3o mantendo MonsterVisualCatalog
+      + EntityVisualAnchorRig."
+    asset: {fileID: 5151350336222653445, guid: c24da406dab56a8449d55f1a1b439f48, type: 3}
+  - id: monster_zombie
+    category: Monstro
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Monster_Zombie.prefab
+    replaceWithNote: "Substituir apenas se trocar o FBX/anima\xE7\xE3o mantendo MonsterVisualCatalog
+      + EntityVisualAnchorRig."
+    asset: {fileID: 3661816648646017673, guid: f138f67e38293a14dacd4778c366c50d, type: 3}
+  - id: employee_cashier
+    category: "Funcion\xE1rio"
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Employee_Cashier.prefab
+    replaceWithNote: "Substituir por modelo human\xF3ide final do Caixa preservando
+      EntityVisualAnchorRig."
+    asset: {fileID: 8026842986995490835, guid: ea4f7f7ab01f8fd458557cc7b0d77bfb, type: 3}
+  - id: employee_pizzaiolo
+    category: "Funcion\xE1rio"
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Employee_Pizzaiolo.prefab
+    replaceWithNote: "Substituir por modelo human\xF3ide final do Pizzaiolo preservando
+      EntityVisualAnchorRig."
+    asset: {fileID: 8705788214351241338, guid: 1ca43dd0ff051944599a1653243feae5, type: 3}
+  - id: motorcycle
+    category: "Ve\xEDculo"
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_DeliveryMotorcycle.prefab
+    replaceWithNote: Substituir por mesh final da moto preservando DeliveryMotorcycleController
+      e EntityVisualAnchorRig.
+    asset: {fileID: 7492068385878837313, guid: 782fb09deb1d432438c55dcda882e9ff, type: 3}
+  - id: supplier_terminal
+    category: Cozinha/Suprimentos
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_SupplierTerminal.prefab
+    replaceWithNote: Substituir por modelo final do computador/terminal sob Station_SupplierTerminal.
+    asset: {fileID: 6797281143036699861, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+  - id: receiving_zone
+    category: Cozinha/Suprimentos
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_ReceivingZone.prefab
+    replaceWithNote: Substituir por palete/doca final sob Station_Receiving mantendo
+      slotAnchor.
+    asset: {fileID: 3813464192670029700, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+  - id: management_board
+    category: "Cozinha/Opera\xE7\xF5es"
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_ManagementBoard.prefab
+    replaceWithNote: Substituir por mural 3D final sob ManagementBoard_Playtest mantendo
+      ManagementBoardStation.
+    asset: {fileID: 2333343384546481851, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+  - id: ingredient_garlic
+    category: Ingrediente
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Ingredient_Garlic.prefab
+    replaceWithNote: Substituir por malha final de Alho em IngredientDef_10_Garlic.placeholderPrefab.
+    asset: {fileID: 2300747637968406141, guid: c462d93aaab24de499dd5684d92febfb, type: 3}
+  - id: ingredient_mushroom
+    category: Ingrediente
+    assetPath: Assets/Piaaria/Playtest/Prefabs/Visual_Ingredient_Mushroom.prefab
+    replaceWithNote: Substituir por malha final de Cogumelo nos IngredientDefs 8/9.
+    asset: {fileID: 8037864083942603945, guid: 5e5075c18025d874e9184870b4ed5fe6, type: 3}

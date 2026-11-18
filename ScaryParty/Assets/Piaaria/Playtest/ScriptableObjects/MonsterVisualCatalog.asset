@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f30b7a6d9e28404d2b6c7f8a9b0c1d2e, type: 3}
+  m_Name: MonsterVisualCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Combat.Monsters.MonsterVisualCatalog
+  entries:
+  - species: 1
+    visualPrefab: {fileID: 6002970842962214642, guid: e7c48d32cd0fbd347bfd4fe166b9c634, type: 3}
+    baseTint: {r: 0.85, g: 0.8, b: 0.84, a: 1}
+    aggressiveTint: {r: 1, g: 0, b: 0, a: 1}
+    visualLocalScale: {x: 1, y: 1, z: 1}
+    visualYOffset: 0
+    colliderHeight: 1.85
+    colliderRadius: 0.38
+  - species: 2
+    visualPrefab: {fileID: 66566963646985060, guid: b79768c9470be90419d3a884c49e5f18, type: 3}
+    baseTint: {r: 0.86, g: 0.82, b: 0.76, a: 1}
+    aggressiveTint: {r: 1, g: 0.45, b: 0.15, a: 1}
+    visualLocalScale: {x: 1, y: 1, z: 1}
+    visualYOffset: 0
+    colliderHeight: 1.9
+    colliderRadius: 0.42
+  - species: 3
+    visualPrefab: {fileID: 5151350336222653445, guid: c24da406dab56a8449d55f1a1b439f48, type: 3}
+    baseTint: {r: 0.82, g: 0.94, b: 1, a: 1}
+    aggressiveTint: {r: 0.45, g: 0.95, b: 1, a: 1}
+    visualLocalScale: {x: 1, y: 1, z: 1}
+    visualYOffset: 0
+    colliderHeight: 1.8
+    colliderRadius: 0.35
+  - species: 4
+    visualPrefab: {fileID: 3661816648646017673, guid: f138f67e38293a14dacd4778c366c50d, type: 3}
+    baseTint: {r: 0.74, g: 0.88, b: 0.72, a: 1}
+    aggressiveTint: {r: 0.85, g: 1, b: 0.35, a: 1}
+    visualLocalScale: {x: 1, y: 1, z: 1}
+    visualYOffset: 0
+    colliderHeight: 1.82
+    colliderRadius: 0.38

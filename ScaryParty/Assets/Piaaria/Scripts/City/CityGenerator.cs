@@ -530,6 +530,7 @@ public class CityGenerator : NetworkBehaviour
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
         if (routeManager != null) routeManager.Initialize(_pathfinder);
 
+        ValidateProceduralAnchorsAndConnectivity(allBuildings, points);
         _enemySpawnGen.GenerateSpawnPoints(CityData, config, rng);
 
         if (Application.isPlaying) InitializeRuntimeSystems(seed, graph);
@@ -545,6 +546,39 @@ public class CityGenerator : NetworkBehaviour
         TeleportPlayersToSpawn();
         OnCityGenerated?.Invoke();
         RequestClosures();
+    }
+
+    public int LastValidatedRooftopCount { get; private set; }
+    public int LastReachableDeliveryCount { get; private set; }
+
+    private void ValidateProceduralAnchorsAndConnectivity(CityBuilding[] allBuildings, List<DeliveryPoint> points)
+    {
+        int roofCount = 0;
+        if (allBuildings != null)
+        {
+            for (int i = 0; i < allBuildings.Length; i++)
+            {
+                var b = allBuildings[i];
+                if (b == null) continue;
+                b.EnsurePortal();
+                if (b.rooftopPerchAnchor != null) roofCount++;
+            }
+        }
+        LastValidatedRooftopCount = roofCount;
+
+        int reachable = 0;
+        if (points != null && _pathfinder != null && CityData != null)
+        {
+            Vector3 origin = CityData.pizzariaPosition;
+            for (int i = 0; i < points.Count; i++)
+            {
+                var dp = points[i];
+                if (dp == null) continue;
+                if (_pathfinder.TryFindPath(origin, dp.transform.position, out var path) && path != null && path.Count > 0)
+                    reachable++;
+            }
+        }
+        LastReachableDeliveryCount = reachable;
     }
 
     private void InitializeRuntimeSystems(int seed, StreetGraph graph)

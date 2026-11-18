@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ScaryParty.Pizzeria.Authoring;
 using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
@@ -349,17 +350,23 @@ namespace ScaryParty.Combat.Monsters
             var go = new GameObject($"Monster_{species}_{monsterId}");
             go.transform.position = pos;
 
-            var capsule = go.AddComponent<CapsuleCollider>();
-            capsule.center = new Vector3(0f, 0.9f, 0f);
-            capsule.height = 1.8f;
-            capsule.radius = 0.38f;
+            var visualCatalog = PlaytestReferenceManifest.LoadDefault()?.monsterVisualCatalog as MonsterVisualCatalog;
+            MonsterSpeciesVisualEntry visualEntry = null;
+            visualCatalog?.TryGetEntry(species, out visualEntry);
 
-            BuildMonsterVisual(go, species, out var eyeRenderers);
+            var capsule = go.AddComponent<CapsuleCollider>();
+            float colH = visualEntry != null && visualEntry.colliderHeight > 0.2f ? visualEntry.colliderHeight : 1.8f;
+            float colR = visualEntry != null && visualEntry.colliderRadius > 0.1f ? visualEntry.colliderRadius : 0.38f;
+            capsule.center = new Vector3(0f, colH * 0.5f, 0f);
+            capsule.height = colH;
+            capsule.radius = colR;
+
+            BuildMonsterVisual(go, species, visualEntry, out var eyeRenderers);
 
             var agent = go.AddComponent<NavMeshAgent>();
             agent.speed = species == NpcSpecies.Werewolf ? 4.8f : (species == NpcSpecies.Zombie ? 2.4f : 3.6f);
-            agent.radius = 0.38f;
-            agent.height = 1.8f;
+            agent.radius = colR;
+            agent.height = colH;
 
             var ctrl = go.AddComponent<MonsterNpcController>();
             var profile = root.SpeciesHostilityService != null
@@ -376,78 +383,131 @@ namespace ScaryParty.Combat.Monsters
             var go = new GameObject($"MonsterProxy_{species}_{dto.MonsterId}");
             go.transform.position = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
 
-            var capsule = go.AddComponent<CapsuleCollider>();
-            capsule.center = new Vector3(0f, 0.9f, 0f);
-            capsule.height = 1.8f;
-            capsule.radius = 0.38f;
+            var visualCatalog = PlaytestReferenceManifest.LoadDefault()?.monsterVisualCatalog as MonsterVisualCatalog;
+            MonsterSpeciesVisualEntry visualEntry = null;
+            visualCatalog?.TryGetEntry(species, out visualEntry);
 
-            BuildMonsterVisual(go, species, out var eyeRenderers);
+            var capsule = go.AddComponent<CapsuleCollider>();
+            float colH = visualEntry != null && visualEntry.colliderHeight > 0.2f ? visualEntry.colliderHeight : 1.8f;
+            float colR = visualEntry != null && visualEntry.colliderRadius > 0.1f ? visualEntry.colliderRadius : 0.38f;
+            capsule.center = new Vector3(0f, colH * 0.5f, 0f);
+            capsule.height = colH;
+            capsule.radius = colR;
+
+            BuildMonsterVisual(go, species, visualEntry, out var eyeRenderers);
 
             var ctrl = go.AddComponent<MonsterNpcController>();
             ctrl.ConfigureClientProxy(dto.MonsterId, species, eyeRenderers, dto);
             return ctrl;
         }
 
-        private static void BuildMonsterVisual(GameObject go, NpcSpecies species, out Renderer[] eyeRenderers)
+        private static void BuildMonsterVisual(
+            GameObject go,
+            NpcSpecies species,
+            MonsterSpeciesVisualEntry visualEntry,
+            out Renderer[] eyeRenderers)
         {
             var visualRoot = new GameObject("VisualRoot");
             visualRoot.transform.SetParent(go.transform, false);
             visualRoot.transform.localPosition = Vector3.zero;
             visualRoot.transform.localRotation = Quaternion.identity;
 
-            Color tint = species switch
-            {
-                NpcSpecies.Vampire => new Color(0.25f, 0.08f, 0.14f),
-                NpcSpecies.Werewolf => new Color(0.32f, 0.24f, 0.18f),
-                NpcSpecies.Ghost => new Color(0.72f, 0.88f, 0.95f),
-                NpcSpecies.Zombie => new Color(0.26f, 0.48f, 0.24f),
-                _ => Color.gray
-            };
+            var rig = go.GetComponent<EntityVisualAnchorRig>() ?? go.AddComponent<EntityVisualAnchorRig>();
+            rig.rigRole = EntityVisualAnchorRig.RigRole.Monster;
+            rig.placeholderId = $"monster_{species}";
 
-            GameObject visualPrefab = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
-            if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
-            if (visualPrefab != null)
-            {
-                var inst = Instantiate(visualPrefab, visualRoot.transform, false);
-                inst.name = "CharacterVisual";
-                inst.transform.localPosition = Vector3.zero;
-                inst.transform.localRotation = Quaternion.identity;
-                var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
-                if (smr != null)
+            Color tint = visualEntry != null
+                ? visualEntry.baseTint
+                : species switch
                 {
-                    var mpb = new MaterialPropertyBlock();
-                    smr.GetPropertyBlock(mpb);
-                    mpb.SetColor("_Color", tint);
-                    mpb.SetColor("_BaseColor", tint);
-                    smr.SetPropertyBlock(mpb);
-                }
+                    NpcSpecies.Vampire => new Color(0.25f, 0.08f, 0.14f),
+                    NpcSpecies.Werewolf => new Color(0.32f, 0.24f, 0.18f),
+                    NpcSpecies.Ghost => new Color(0.72f, 0.88f, 0.95f),
+                    NpcSpecies.Zombie => new Color(0.26f, 0.48f, 0.24f),
+                    _ => Color.gray
+                };
+
+            GameObject eyeObj = null;
+            if (visualEntry != null && visualEntry.visualPrefab != null)
+            {
+                var inst = Instantiate(visualEntry.visualPrefab, visualRoot.transform, false);
+                inst.name = "MonsterModel";
+                inst.transform.localPosition = new Vector3(0f, visualEntry.visualYOffset, 0f);
+                inst.transform.localRotation = Quaternion.identity;
+                if (visualEntry.visualLocalScale.sqrMagnitude > 0.001f)
+                    inst.transform.localScale = visualEntry.visualLocalScale;
+                var cols = inst.GetComponentsInChildren<Collider>(true);
+                for (int i = 0; i < cols.Length; i++) DestroyObjectSafe(cols[i]);
+                Transform foundEyes = inst.transform.Find("Eyes");
+                if (foundEyes != null) eyeObj = foundEyes.gameObject;
             }
             else
             {
-                var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                body.name = "BodyVisual";
-                DestroyObjectSafe(body.GetComponent<Collider>());
-                body.transform.SetParent(visualRoot.transform, false);
-                body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
-                body.transform.localScale = new Vector3(0.75f, 0.9f, 0.75f);
-                var bodyRend = body.GetComponent<Renderer>();
-                if (bodyRend != null)
+                GameObject visualPrefab = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
+                if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
+                if (visualPrefab != null)
                 {
-                    var mpb = new MaterialPropertyBlock();
-                    bodyRend.GetPropertyBlock(mpb);
-                    mpb.SetColor("_Color", tint);
-                    mpb.SetColor("_BaseColor", tint);
-                    bodyRend.SetPropertyBlock(mpb);
+                    var inst = Instantiate(visualPrefab, visualRoot.transform, false);
+                    inst.name = "CharacterVisual";
+                    inst.transform.localPosition = Vector3.zero;
+                    inst.transform.localRotation = Quaternion.identity;
+                    var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
+                    if (smr != null)
+                    {
+                        var mpb = new MaterialPropertyBlock();
+                        smr.GetPropertyBlock(mpb);
+                        mpb.SetColor("_Color", tint);
+                        mpb.SetColor("_BaseColor", tint);
+                        smr.SetPropertyBlock(mpb);
+                    }
+                }
+                else
+                {
+                    var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    body.name = "BodyVisual";
+                    DestroyObjectSafe(body.GetComponent<Collider>());
+                    body.transform.SetParent(visualRoot.transform, false);
+                    body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
+                    body.transform.localScale = new Vector3(0.75f, 0.9f, 0.75f);
+                    var bodyRend = body.GetComponent<Renderer>();
+                    if (bodyRend != null)
+                    {
+                        ApplyUrpMaterialTint(bodyRend, tint);
+                    }
                 }
             }
 
-            var eyeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            eyeObj.name = "Eyes";
-            DestroyObjectSafe(eyeObj.GetComponent<Collider>());
-            eyeObj.transform.SetParent(visualRoot.transform, false);
-            eyeObj.transform.localPosition = new Vector3(0f, 1.52f, 0.34f);
-            eyeObj.transform.localScale = new Vector3(0.42f, 0.10f, 0.12f);
-            eyeRenderers = new[] { eyeObj.GetComponent<Renderer>() };
+            if (eyeObj == null)
+            {
+                eyeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                eyeObj.name = "Eyes";
+                DestroyObjectSafe(eyeObj.GetComponent<Collider>());
+                eyeObj.transform.SetParent(visualRoot.transform, false);
+                eyeObj.transform.localPosition = new Vector3(0f, 1.52f, 0.34f);
+                eyeObj.transform.localScale = new Vector3(0.42f, 0.10f, 0.12f);
+                var eRend = eyeObj.GetComponent<Renderer>();
+                if (eRend != null) ApplyUrpMaterialTint(eRend, Color.white);
+            }
+
+            eyeRenderers = eyeObj != null ? eyeObj.GetComponentsInChildren<Renderer>(true) : System.Array.Empty<Renderer>();
+        }
+
+        private static void ApplyUrpMaterialTint(Renderer rend, Color color)
+        {
+            if (rend == null) return;
+            Shader urpLit = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            if (urpLit != null && (rend.sharedMaterial == null || rend.sharedMaterial.shader.name == "Standard"))
+            {
+                var m = new Material(urpLit);
+                m.color = color;
+                if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", color);
+                rend.sharedMaterial = m;
+            }
+            var mpb = new MaterialPropertyBlock();
+            rend.GetPropertyBlock(mpb);
+            mpb.SetColor("_Color", color);
+            mpb.SetColor("_BaseColor", color);
+            rend.SetPropertyBlock(mpb);
         }
 
         private static Vector3 ResolveRooftopOrStreetSpawn(CityBuilding[] buildings, Vector3 pizzeriaPos, int salt, bool rooftop)
@@ -465,10 +525,15 @@ namespace ScaryParty.Combat.Monsters
 
                     if (rooftop)
                     {
+                        if (b.rooftopPerchAnchor != null)
+                            return b.rooftopPerchAnchor.position;
                         float roofY = center.y + Mathf.Max(4.5f, b.floorCount * 3.5f);
                         return new Vector3(center.x, roofY, center.z);
                     }
-                    if (NavMesh.SamplePosition(b.entrancePosition, out var navHit, 5f, NavMesh.AllAreas))
+                    Vector3 streetTarget = b.rooftopDropAnchor != null
+                        ? b.rooftopDropAnchor.position
+                        : (b.sidewalkApproachAnchor != null ? b.sidewalkApproachAnchor.position : b.entrancePosition);
+                    if (NavMesh.SamplePosition(streetTarget, out var navHit, 5f, NavMesh.AllAreas))
                         return navHit.position;
                 }
             }

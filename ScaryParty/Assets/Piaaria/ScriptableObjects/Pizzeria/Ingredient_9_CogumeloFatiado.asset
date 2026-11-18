@@ -19,4 +19,4 @@ MonoBehaviour:
   preparedIngredient: {fileID: 0}
   preparedIngredientId: 0
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  placeholderPrefab: {fileID: 0}
+  placeholderPrefab: {fileID: 8037864083942603945, guid: 5e5075c18025d874e9184870b4ed5fe6, type: 3}

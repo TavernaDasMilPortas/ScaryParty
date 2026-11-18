@@ -6222,6 +6222,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5334954791090512058
 MonoBehaviour:
@@ -15663,6 +15665,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 4566125213048090086}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6279374042323225904
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17722,6 +17727,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &4701774068834751759
 MonoBehaviour:
@@ -18425,6 +18432,8 @@ MonoBehaviour:
   - {fileID: 2157799563992490451}
   - {fileID: 6688574584450234389}
   - {fileID: 332766594981180898}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &1165021379962168602
 GameObject:
   m_ObjectHideFlags: 0
@@ -18977,6 +18986,8 @@ MonoBehaviour:
   slotsBoundToObjects: 1
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   defaultProcessId: 1
 --- !u!1 &1208092710634264385
@@ -21153,6 +21164,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &995333035506958858
@@ -24585,6 +24598,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 1439371185496930971}
   smokeParticles: {fileID: 6508843911688136017}
@@ -25771,6 +25786,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &4578269964356474282
@@ -35706,6 +35723,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 3208224669866691414}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &4425886083994835759
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -35889,6 +35907,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &4089423917012803457
 BoxCollider:
@@ -36560,6 +36580,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5899360610066500697
 MonoBehaviour:
@@ -38118,6 +38140,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 8329155572478459651}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &2955600846492028128
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -41321,6 +41346,7 @@ Transform:
   - {fileID: 8866472913348131910}
   - {fileID: 6188098139684361759}
   - {fileID: 4957399664273663789}
+  - {fileID: 5818239042667242032}
   m_Father: {fileID: 7011098504545730098}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8953626812038493934
@@ -42470,6 +42496,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 1709721005663037161}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &5501608718594646437
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -43985,6 +44014,7 @@ Transform:
   - {fileID: 6746315067894920792}
   - {fileID: 8124436252562181261}
   - {fileID: 6287266150225301903}
+  - {fileID: 6152670236471056160}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8153139748549486490
@@ -44458,6 +44488,34 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
+  Weapons:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  PlayerCombatStates:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  Monsters:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  Employees:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  NightState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  MotorcycleState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  RunState:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
   RestaurantBudget:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -44491,6 +44549,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Network.PizzeriaCommandHandler
   ShowTopMostFoldoutHeaderGroup: 1
+  motorcycleHitDamage: 40
+  motorcycleRiderFallDamage: 0
 --- !u!114 &7938976426365083480
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51896,6 +51956,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!114 &6627298587396509987
@@ -52207,6 +52269,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 1912973932798767819}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &7239492646011766934
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -52768,6 +52831,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &5978236023876083016
 MonoBehaviour:
@@ -52872,6 +52937,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 9069314065766997243}
   smokeParticles: {fileID: 7174531218687728674}
@@ -56026,6 +56093,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 1098706689230346246}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &1229664191349515031
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -58299,6 +58367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 8009286451662400702}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &5102345576949532865
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -62008,6 +62077,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 4910041378233981957}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &1900252085200036394
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -65951,6 +66021,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 3481673388488982717}
@@ -66925,6 +66997,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &4940517540490606849
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5818239042667242032}
+  m_Layer: 0
+  m_Name: SlotAnchor_3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5818239042667242032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4940517540490606849}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 2.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4978652410230360361}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4957730568758516093
 GameObject:
   m_ObjectHideFlags: 0
@@ -68738,6 +68841,74 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5122561749647002645
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6152670236471056160}
+  - component: {fileID: 2912116112249855248}
+  - component: {fileID: 1089155826402980704}
+  m_Layer: 0
+  m_Name: ManagementBoard_Playtest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6152670236471056160
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122561749647002645}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 19.2, y: -1.4, z: -21.2}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5806631271423622231}
+  m_Father: {fileID: 818478036838337399}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &2912116112249855248
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122561749647002645}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.35, y: 1.45, z: 0.45}
+  m_Center: {x: 0, y: 1.15, z: 0}
+--- !u!114 &1089155826402980704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5122561749647002645}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a41c8b7e0f39415e3c7d8a9b0c1d2e3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.ManagementBoardStation
+  defaultTab: orders
 --- !u!1 &5126291315750407304
 GameObject:
   m_ObjectHideFlags: 0
@@ -70614,6 +70785,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 6692367724796428901}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &3506996081906353225
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -70835,6 +71009,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ovenFireLight: {fileID: 8720418809891552187}
   smokeParticles: {fileID: 7958976361575360105}
@@ -73008,6 +73184,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ticketSlots:
   - {fileID: 0}
@@ -77011,6 +77189,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   stackId: 16
   capacity: 6
@@ -83994,6 +84174,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   acceptedIngredientIds: 
 --- !u!1 &6203888921988875617
@@ -84813,6 +84995,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!1 &6291022634895790565
 GameObject:
@@ -85951,7 +86135,8 @@ Transform:
   m_LocalPosition: {x: 18, y: -1.4, z: -24}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 7287591199651410984}
   m_Father: {fileID: 9078601330760841625}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8452598427261629754
@@ -85975,6 +86160,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &5345879382196868232
 BoxCollider:
@@ -91993,6 +92180,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.TicketSheetView
   textMesh: {fileID: 3811816460910929344}
   paperRenderer: {fileID: 0}
+  sheetVisualPivot: {fileID: 0}
 --- !u!65 &3047034299620664905
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -96455,11 +96643,14 @@ MonoBehaviour:
   - {fileID: 8570948413747738845}
   - {fileID: 8866472913348131910}
   - {fileID: 6188098139684361759}
+  - {fileID: 5818239042667242032}
   slotLayoutAsset: {fileID: 0}
   occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!114 &8530213485500471242
 MonoBehaviour:
@@ -100348,7 +100539,9 @@ Transform:
   m_LocalPosition: {x: 20, y: -1.4, z: -23}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 5095771826937754470}
+  - {fileID: 653576513734207376}
   m_Father: {fileID: 9078601330760841625}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3913904301102585018
@@ -100365,12 +100558,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.SupplierTerminal
   stationId: 20
   stationName: Terminal de Fornecedor
-  slotAnchors: []
+  slotAnchors:
+  - {fileID: 653576513734207376}
   slotLayoutAsset: {fileID: 0}
   occurrenceSlotOverrides: []
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
 --- !u!65 &863632707237490640
 BoxCollider:
@@ -104963,6 +105159,8 @@ MonoBehaviour:
   slotsBoundToObjects: 0
   LastAimWorldPoint: {x: 0, y: 0, z: 0}
   LastAimExplicitSlot: -1
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.25
   _doorPresenter: {fileID: 0}
   ringer: {fileID: 4066358546522567895}
   isRinging: 0
@@ -105096,6 +105294,7 @@ MonoBehaviour:
   customRingClip: {fileID: 0}
   beaconLight: {fileID: 456913138093232806}
   beaconRenderer: {fileID: 4777659656119818684}
+  phoneVisualPivot: {fileID: 0}
   ringingColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   idleColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
 --- !u!1 &8290010139796526223
@@ -107786,6 +107985,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 120766039669398856}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &6174401072770688705
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -108326,6 +108528,8 @@ MonoBehaviour:
   - {fileID: 4831316098662619367}
   - {fileID: 2395223046444761099}
   - {fileID: 4753032219648197298}
+  progressAnchor: {fileID: 0}
+  progressBarMarginMeters: 0.28
 --- !u!1 &8572520339794203336
 GameObject:
   m_ObjectHideFlags: 0
@@ -109358,6 +109562,9 @@ MonoBehaviour:
   exitAnchor: {fileID: 0}
   plateAnchor: {fileID: 5338933395741533685}
   sauceObjects: []
+  associatedChair: {fileID: 0}
+  chairPullOutDistance: 0.18
+  chairAnimSpeed: 6
 --- !u!65 &4574223333244762839
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -110567,6 +110774,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &8744881308259794540
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 653576513734207376}
+  m_Layer: 0
+  m_Name: TerminalAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &653576513734207376
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8744881308259794540}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6678536819102595923}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8753459841841922844
 GameObject:
   m_ObjectHideFlags: 0
@@ -115227,3 +115465,189 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1001 &1100588399068140469
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6152670236471056160}
+    m_Modifications:
+    - target: {fileID: 2333343384546481851, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_Name
+      value: Visual_ManagementBoard
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+--- !u!4 &5806631271423622231 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6904967318699143138, guid: 281b01a736bd00b40ae25128220804dc, type: 3}
+  m_PrefabInstance: {fileID: 1100588399068140469}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &3987829181415535143
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7331382662800550254}
+    m_Modifications:
+    - target: {fileID: 3813464192670029700, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_Name
+      value: Visual_ReceivingZone
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+--- !u!4 &7287591199651410984 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5941694963049399823, guid: 8c8f5e9aa5d5f4b4687fe5bfaaf4f3f3, type: 3}
+  m_PrefabInstance: {fileID: 3987829181415535143}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &5582586476315855711
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 6678536819102595923}
+    m_Modifications:
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6797281143036699861, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+      propertyPath: m_Name
+      value: Visual_SupplierTerminal
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+--- !u!4 &5095771826937754470 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 850764340140554297, guid: ce0f74509ee2ee54897bfea40150ae9c, type: 3}
+  m_PrefabInstance: {fileID: 5582586476315855711}
+  m_PrefabAsset: {fileID: 0}

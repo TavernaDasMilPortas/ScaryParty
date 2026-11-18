@@ -13,6 +13,28 @@ MonoBehaviour:
   m_Name: PizzeriaConfig_PizzeriaModular_Manual
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaConfig
   compositionRules: {fileID: 0}
+  defaultPreset: {fileID: 0}
+  availablePresets: []
+  nightConfig: {fileID: 0}
+  enableAllPlayersDeadDefeat: 1
+  allowDebugNightRetryOnDefeat: 0
+  baseNightDurationSeconds: 360
+  baseQuotaMoney: 60
+  initialReputation: 100
+  repBonusDelivery: 5
+  repPenaltyLate: -8
+  repPenaltyWrong: -10
+  repPenaltyExpiredOrAttack: -15
+  enableTutorialNight0ByDefault: 0
+  tutorialNight0DurationSeconds: 600
+  tutorialNight0RevenueGoal: 15
+  runMaxNights: 3
+  runDifficulty: 0
+  runSeedOverride: 0
+  minimumIngredientFloor: 2
+  cashierAttendBaseSeconds: 2.2
+  pizzaioloStepBaseSeconds: 1.8
+  employeeBaseErrorRate: 0.2
   customerTraits: []
   ingredients:
   - {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
@@ -24,6 +46,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aabad261ce4aa654fbd74b9d4b0d96bb, type: 2}
   - {fileID: 11400000, guid: 69485157e190c6a4c962eaecb8dd3689, type: 2}
   - {fileID: 11400000, guid: bb29ddd994767134eb644c5080459ab5, type: 2}
+  - {fileID: 11400000, guid: e55ceb77aa9b9464983acb1e14c85538, type: 2}
   recipes:
   - {fileID: 11400000, guid: 7f38f2b5aaa2ee647b851896d774669f, type: 2}
   - {fileID: 11400000, guid: c268141a07193cf41a22f627f1e1518c, type: 2}
@@ -168,6 +191,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 686d3429140d2504d8b801f80cdb8893, type: 2}
   - {fileID: 11400000, guid: 1c0cf04e594efc74993067871e185672, type: 2}
   - {fileID: 11400000, guid: 8d8dfa47e53c70b46a21dbccf345a7e0, type: 2}
+  - {fileID: 11400000, guid: 9ec3144604816d243b160b4dfcc87b09, type: 2}
   upgrades:
   - {fileID: 11400000, guid: 9a7bfe5279b4e5042a9b75380a355680, type: 2}
   - {fileID: 11400000, guid: 0f17f1ffb5614a542ade38164846f855, type: 2}
@@ -209,6 +233,11 @@ MonoBehaviour:
   - storageId: 18
     ingredient: {fileID: 11400000, guid: 846a2e739d83d364c85a86cbe520531e, type: 2}
     ingredientId: 4
+    initialStock: 10
+    capacity: 100
+  - storageId: 5
+    ingredient: {fileID: 11400000, guid: e55ceb77aa9b9464983acb1e14c85538, type: 2}
+    ingredientId: 10
     initialStock: 10
     capacity: 100
   workLeaseSeconds: 0.75

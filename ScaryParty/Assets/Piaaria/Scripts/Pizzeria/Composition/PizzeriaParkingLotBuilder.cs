@@ -120,75 +120,98 @@ namespace ScaryParty.Pizzeria.Composition
             rb.useGravity = false;
             rb.interpolation = RigidbodyInterpolation.Interpolate;
 
-            var chassis = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            chassis.name = "Chassis";
-            chassis.transform.SetParent(bike.transform, false);
-            chassis.transform.localPosition = new Vector3(0f, 0.58f, 0f);
-            chassis.transform.localScale = new Vector3(0.45f, 0.42f, 1.65f);
-            DestroyCollider(chassis);
-            TintObject(chassis, new Color(0.82f, 0.14f, 0.14f));
+            var bikeRig = bike.AddComponent<ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig>();
+            bikeRig.rigRole = ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig.RigRole.Motorcycle;
+            bikeRig.placeholderId = "delivery_motorcycle";
 
-            var wheelFront = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            wheelFront.name = "WheelFront";
-            wheelFront.transform.SetParent(bike.transform, false);
-            wheelFront.transform.localPosition = new Vector3(0f, 0.32f, 0.72f);
-            wheelFront.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            wheelFront.transform.localScale = new Vector3(0.62f, 0.09f, 0.62f);
-            DestroyCollider(wheelFront);
-            TintObject(wheelFront, new Color(0.1f, 0.1f, 0.12f));
+            var manifest = ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest.LoadDefault();
+            Transform seat = null;
+            Transform hbLeft = null;
+            Transform hbRight = null;
+            Transform leftExit = null;
+            Transform rightExit = null;
+            Transform cargoRack = null;
 
-            var wheelBack = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            wheelBack.name = "WheelBack";
-            wheelBack.transform.SetParent(bike.transform, false);
-            wheelBack.transform.localPosition = new Vector3(0f, 0.32f, -0.72f);
-            wheelBack.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-            wheelBack.transform.localScale = new Vector3(0.62f, 0.11f, 0.62f);
-            DestroyCollider(wheelBack);
-            TintObject(wheelBack, new Color(0.1f, 0.1f, 0.12f));
+            if (manifest != null && manifest.motorcycleVisualPrefab != null)
+            {
+                var inst = Object.Instantiate(manifest.motorcycleVisualPrefab, bike.transform, false);
+                inst.name = "MotorcycleVisual";
+                inst.transform.localPosition = Vector3.zero;
+                inst.transform.localRotation = Quaternion.identity;
+                foreach (var c in inst.GetComponentsInChildren<Collider>(true)) DestroyCollider(c.gameObject);
 
-            var handlebar = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            handlebar.name = "Handlebar";
-            handlebar.transform.SetParent(bike.transform, false);
-            handlebar.transform.localPosition = new Vector3(0f, 1.02f, 0.56f);
-            handlebar.transform.localScale = new Vector3(0.75f, 0.08f, 0.1f);
-            DestroyCollider(handlebar);
-            TintObject(handlebar, new Color(0.75f, 0.78f, 0.82f));
+                var prefabRig = inst.GetComponentInChildren<ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig>(true);
+                if (prefabRig != null)
+                {
+                    seat = prefabRig.seatAnchor;
+                    hbLeft = prefabRig.handlebarLeftAnchor;
+                    hbRight = prefabRig.handlebarRightAnchor;
+                    leftExit = prefabRig.leftDismountAnchor;
+                    rightExit = prefabRig.rightDismountAnchor;
+                    cargoRack = prefabRig.cargoAnchor;
+                }
+            }
+            else
+            {
+                var chassis = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                chassis.name = "Chassis";
+                chassis.transform.SetParent(bike.transform, false);
+                chassis.transform.localPosition = new Vector3(0f, 0.58f, 0f);
+                chassis.transform.localScale = new Vector3(0.45f, 0.42f, 1.65f);
+                DestroyCollider(chassis);
+                TintObject(chassis, new Color(0.82f, 0.14f, 0.14f));
 
-            var seat = new GameObject("RiderSeatAnchor");
-            seat.transform.SetParent(bike.transform, false);
-            seat.transform.localPosition = new Vector3(0f, 0.78f, -0.1f);
+                var wheelFront = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                wheelFront.name = "WheelFront";
+                wheelFront.transform.SetParent(bike.transform, false);
+                wheelFront.transform.localPosition = new Vector3(0f, 0.32f, 0.72f);
+                wheelFront.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                wheelFront.transform.localScale = new Vector3(0.62f, 0.09f, 0.62f);
+                DestroyCollider(wheelFront);
+                TintObject(wheelFront, new Color(0.1f, 0.1f, 0.12f));
 
-            var hbLeft = new GameObject("HandlebarLeftAnchor");
-            hbLeft.transform.SetParent(bike.transform, false);
-            hbLeft.transform.localPosition = new Vector3(-0.32f, 1.02f, 0.52f);
+                var wheelBack = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                wheelBack.name = "WheelBack";
+                wheelBack.transform.SetParent(bike.transform, false);
+                wheelBack.transform.localPosition = new Vector3(0f, 0.32f, -0.72f);
+                wheelBack.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+                wheelBack.transform.localScale = new Vector3(0.62f, 0.11f, 0.62f);
+                DestroyCollider(wheelBack);
+                TintObject(wheelBack, new Color(0.1f, 0.1f, 0.12f));
 
-            var hbRight = new GameObject("HandlebarRightAnchor");
-            hbRight.transform.SetParent(bike.transform, false);
-            hbRight.transform.localPosition = new Vector3(0.32f, 1.02f, 0.52f);
+                var handlebar = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                handlebar.name = "Handlebar";
+                handlebar.transform.SetParent(bike.transform, false);
+                handlebar.transform.localPosition = new Vector3(0f, 1.02f, 0.56f);
+                handlebar.transform.localScale = new Vector3(0.75f, 0.08f, 0.1f);
+                DestroyCollider(handlebar);
+                TintObject(handlebar, new Color(0.75f, 0.78f, 0.82f));
+            }
 
-            var leftExit = new GameObject("LeftExitAnchor");
-            leftExit.transform.SetParent(bike.transform, false);
-            leftExit.transform.localPosition = new Vector3(-1.35f, 0.05f, 0f);
-
-            var rightExit = new GameObject("RightExitAnchor");
-            rightExit.transform.SetParent(bike.transform, false);
-            rightExit.transform.localPosition = new Vector3(1.35f, 0.05f, 0f);
-
-            var cargoRack = new GameObject("CargoRackAnchor");
-            cargoRack.transform.SetParent(bike.transform, false);
-            cargoRack.transform.localPosition = new Vector3(0f, 0.86f, -0.78f);
+            if (seat == null) seat = bikeRig.ResolveAnchor(ref bikeRig.seatAnchor, "RiderSeatAnchor", new Vector3(0f, 0.78f, -0.1f), Vector3.zero);
+            else bikeRig.seatAnchor = seat;
+            if (hbLeft == null) hbLeft = bikeRig.ResolveAnchor(ref bikeRig.handlebarLeftAnchor, "HandlebarLeftAnchor", new Vector3(-0.32f, 1.02f, 0.52f), Vector3.zero);
+            else bikeRig.handlebarLeftAnchor = hbLeft;
+            if (hbRight == null) hbRight = bikeRig.ResolveAnchor(ref bikeRig.handlebarRightAnchor, "HandlebarRightAnchor", new Vector3(0.32f, 1.02f, 0.52f), Vector3.zero);
+            else bikeRig.handlebarRightAnchor = hbRight;
+            if (leftExit == null) leftExit = bikeRig.ResolveAnchor(ref bikeRig.leftDismountAnchor, "LeftExitAnchor", new Vector3(-1.35f, 0.05f, 0f), Vector3.zero);
+            else bikeRig.leftDismountAnchor = leftExit;
+            if (rightExit == null) rightExit = bikeRig.ResolveAnchor(ref bikeRig.rightDismountAnchor, "RightExitAnchor", new Vector3(1.35f, 0.05f, 0f), Vector3.zero);
+            else bikeRig.rightDismountAnchor = rightExit;
+            if (cargoRack == null) cargoRack = bikeRig.ResolveAnchor(ref bikeRig.cargoAnchor, "CargoRackAnchor", new Vector3(0f, 0.86f, -0.78f), Vector3.zero);
+            else bikeRig.cargoAnchor = cargoRack;
 
             var ctrl = bike.AddComponent<DeliveryMotorcycleController>();
             ctrl.ConfigureParking(
                 worldPos,
                 rot,
                 lotBounds,
-                seat.transform,
-                hbLeft.transform,
-                hbRight.transform,
-                leftExit.transform,
-                rightExit.transform,
-                cargoRack.transform);
+                seat,
+                hbLeft,
+                hbRight,
+                leftExit,
+                rightExit,
+                cargoRack);
         }
 
         private static void BuildWeaponRack(Transform parent, Vector3 localPos)
@@ -225,6 +248,11 @@ namespace ScaryParty.Pizzeria.Composition
             shotgunSlot.transform.localPosition = new Vector3(0.32f, 1.15f, 0.12f);
             shotgunSlot.transform.localScale = new Vector3(0.55f, 0.24f, 0.14f);
             TintObject(shotgunSlot, new Color(0.32f, 0.24f, 0.18f));
+
+            var rackRig = rackGo.AddComponent<ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig>();
+            rackRig.rigRole = ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig.RigRole.Station;
+            rackRig.placeholderId = "weapon_rack";
+            rackRig.stationSlots = new[] { pistolSlot.transform, shotgunSlot.transform };
 
             var rack = rackGo.AddComponent<WeaponRackStation>();
             rack.ConfigureVisuals(pistolSlot, shotgunSlot);
@@ -274,7 +302,17 @@ namespace ScaryParty.Pizzeria.Composition
         private static void TintObject(GameObject go, Color color)
         {
             var rend = go.GetComponent<Renderer>();
-            if (rend == null || rend.material == null) return;
+            if (rend == null) return;
+            Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            if (urp != null && (rend.sharedMaterial == null || rend.sharedMaterial.shader.name == "Standard"))
+            {
+                var mat = new Material(urp);
+                mat.color = color;
+                if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
+                rend.sharedMaterial = mat;
+                return;
+            }
+            if (rend.material == null) return;
             rend.material.color = color;
             if (rend.material.HasProperty("_BaseColor"))
                 rend.material.SetColor("_BaseColor", color);

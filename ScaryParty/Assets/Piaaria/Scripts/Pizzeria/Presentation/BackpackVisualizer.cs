@@ -215,6 +215,20 @@ namespace ScaryParty.Pizzeria.Presentation
                 ? new Color(0.45f, 0.16f, 0.16f, 1f)
                 : Color.Lerp(new Color(0.85f, 0.38f, 0.25f, 1f), Color.white, ratio);
 
+            float fillNorm = bag.Capacity > 0 ? Mathf.Clamp01((float)bag.ItemCount / bag.Capacity) : 0f;
+            Vector3 loadScale = new Vector3(
+                1f + fillNorm * 0.16f,
+                bag.IsTorn ? 0.82f : (1f - (1f - ratio) * 0.08f),
+                1f + fillNorm * 0.22f);
+            if (_cosmeticPivot != null && GameFeelSettings.ReduceMotion)
+            {
+                _cosmeticPivot.transform.localScale = loadScale;
+            }
+            else if (_cosmeticPivot == null)
+            {
+                _visual.transform.localScale = Vector3.Scale(mountScale, loadScale);
+            }
+
             for (int i = 0; i < _bagRenderers.Length; i++)
             {
                 var r = _bagRenderers[i];

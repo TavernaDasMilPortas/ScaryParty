@@ -101,6 +101,8 @@ namespace ScaryParty.Editor.Playtest
             EnsureDirectories();
             totalChanges += EnsureBuildVersionInfo(saveBuildInfoTimestamp, sb);
             totalChanges += EnsureManifest(sb);
+            var manifest = AssetDatabase.LoadAssetAtPath<PlaytestReferenceManifest>(ManifestAssetPath);
+            totalChanges += PlaytestPlaceholderAssetBuilder.EnsureAllPlaceholders(manifest, sb);
             totalChanges += EnsureAllScenes(sb);
 
             if (totalChanges > 0)
@@ -122,6 +124,8 @@ namespace ScaryParty.Editor.Playtest
             EnsureDirectories();
             changes += EnsureBuildVersionInfo(updateTimestamp: false, sb);
             changes += EnsureManifest(sb);
+            var manifest = AssetDatabase.LoadAssetAtPath<PlaytestReferenceManifest>(ManifestAssetPath);
+            changes += PlaytestPlaceholderAssetBuilder.EnsureAllPlaceholders(manifest, sb);
             changes += EnsureAllScenes(sb);
             if (changes > 0)
             {
@@ -401,6 +405,16 @@ namespace ScaryParty.Editor.Playtest
                 sb.AppendLine($"[ERROR] Missing PlaytestReferenceManifest: {ManifestAssetPath}");
                 errorCount++;
             }
+            else
+            {
+                if (manifest.monsterVisualCatalog == null) { sb.AppendLine("[ERROR] Manifest missing monsterVisualCatalog."); errorCount++; }
+                if (manifest.cashierVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing cashierVisualPrefab."); errorCount++; }
+                if (manifest.pizzaioloVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing pizzaioloVisualPrefab."); errorCount++; }
+                if (manifest.motorcycleVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing motorcycleVisualPrefab."); errorCount++; }
+                if (manifest.supplierTerminalVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing supplierTerminalVisualPrefab."); errorCount++; }
+                if (manifest.receivingZoneVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing receivingZoneVisualPrefab."); errorCount++; }
+                if (manifest.managementBoardVisualPrefab == null) { sb.AppendLine("[ERROR] Manifest missing managementBoardVisualPrefab."); errorCount++; }
+            }
 
             var cfg = AssetDatabase.LoadAssetAtPath<PizzeriaConfig>(PizzeriaConfigPath);
             if (cfg == null)
@@ -424,6 +438,34 @@ namespace ScaryParty.Editor.Playtest
                         sb.AppendLine($"[ERROR] StationInstance id={st.instanceId} missing StationDef.");
                         errorCount++;
                     }
+                }
+
+                bool hasGarlic = false;
+                if (cfg.ingredients != null)
+                {
+                    foreach (var ing in cfg.ingredients)
+                    {
+                        if (ing != null && ing.id == 10) { hasGarlic = true; break; }
+                    }
+                }
+                if (!hasGarlic)
+                {
+                    sb.AppendLine("[ERROR] PizzeriaConfig missing Garlic ingredient (id=10).");
+                    errorCount++;
+                }
+
+                bool hasGarlicSupply = false;
+                if (cfg.supplyItems != null)
+                {
+                    foreach (var sup in cfg.supplyItems)
+                    {
+                        if (sup != null && sup.id == 5) { hasGarlicSupply = true; break; }
+                    }
+                }
+                if (!hasGarlicSupply)
+                {
+                    sb.AppendLine("[ERROR] PizzeriaConfig missing Garlic supply package (id=5).");
+                    errorCount++;
                 }
             }
 
@@ -465,9 +507,24 @@ namespace ScaryParty.Editor.Playtest
                     }
                     if (sv.GetComponentsInChildren<Renderer>(true).Length == 0)
                     {
-                        sb.AppendLine($"[WARN] StationView id={sv.stationId} ({sv.name}) has 0 Renderers (P5 target).");
-                        warningCount++;
+                        sb.AppendLine($"[ERROR] StationView id={sv.stationId} ({sv.name}) has 0 Renderers.");
+                        errorCount++;
                     }
+
+                    if (sv.stationId == 9 && sv is ScaryParty.Pizzeria.Stations.PackagingStation pkg)
+                    {
+                        if (pkg.slotAnchors == null || pkg.slotAnchors.Length < 4)
+                        {
+                            sb.AppendLine($"[ERROR] PackagingStation id=9 expected >= 4 slotAnchors, found {pkg.slotAnchors?.Length ?? 0}.");
+                            errorCount++;
+                        }
+                    }
+                }
+
+                if (pizzeriaPrefab.GetComponentInChildren<ScaryParty.Pizzeria.Stations.ManagementBoardStation>(true) == null)
+                {
+                    sb.AppendLine($"[ERROR] {PizzeriaPrefabPath} missing ManagementBoardStation.");
+                    errorCount++;
                 }
             }
 

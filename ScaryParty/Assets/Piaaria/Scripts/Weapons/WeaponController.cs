@@ -154,19 +154,32 @@ public class WeaponController : MonoBehaviour
 
         if (slingBackAttachment == null) slingBackAttachment = transform;
 
-        slungShotgunVisual = new GameObject("SlungShotgun3PVisual");
-        slungShotgunVisual.transform.SetParent(slingBackAttachment, false);
-        slungShotgunVisual.transform.localPosition = new Vector3(-0.08f, 0.04f, -0.15f);
-        slungShotgunVisual.transform.localRotation = Quaternion.Euler(15f, 90f, 38f);
+        if (slungShotgunVisual == null)
+        {
+            slungShotgunVisual = new GameObject("SlungShotgun3PVisual");
+            slungShotgunVisual.transform.SetParent(slingBackAttachment, false);
+            slungShotgunVisual.transform.localPosition = new Vector3(-0.08f, 0.04f, -0.15f);
+            slungShotgunVisual.transform.localRotation = Quaternion.Euler(15f, 90f, 38f);
 
-        var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        body.name = "Mesh";
-        Destroy(body.GetComponent<Collider>());
-        body.transform.SetParent(slungShotgunVisual.transform, false);
-        body.transform.localScale = new Vector3(0.06f, 0.08f, 0.56f);
-        var renderer = body.GetComponent<Renderer>();
-        if (renderer != null && renderer.material != null)
-            renderer.material.color = new Color(0.28f, 0.22f, 0.18f);
+            var slingRig = slungShotgunVisual.AddComponent<ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig>();
+            slingRig.rigRole = ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig.RigRole.Weapon;
+            slingRig.placeholderId = "weapon_shotgun_sling";
+            slingRig.ResolveAnchor(ref slingRig.slingAnchor, "SlingAnchor", Vector3.zero, Vector3.zero);
+
+            var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            body.name = "Mesh";
+            Destroy(body.GetComponent<Collider>());
+            body.transform.SetParent(slungShotgunVisual.transform, false);
+            body.transform.localScale = new Vector3(0.06f, 0.08f, 0.56f);
+            var renderer = body.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+                if (urp != null && (renderer.sharedMaterial == null || renderer.sharedMaterial.shader.name == "Standard"))
+                    renderer.sharedMaterial = new Material(urp);
+                if (renderer.material != null) renderer.material.color = new Color(0.28f, 0.22f, 0.18f);
+            }
+        }
 
         if (isLocal)
         {
@@ -422,6 +435,15 @@ public class WeaponController : MonoBehaviour
         root.transform.localPosition = new Vector3(0.02f, -0.02f, 0.14f);
         root.transform.localRotation = Quaternion.identity;
 
+        var rig = root.AddComponent<ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig>();
+        rig.rigRole = ScaryParty.Pizzeria.Presentation.EntityVisualAnchorRig.RigRole.Weapon;
+        rig.placeholderId = isShotgun ? "weapon_shotgun_fp" : "weapon_pistol_fp";
+        rig.ResolveAnchor(ref rig.gripAnchor, "GripAnchor", Vector3.zero, Vector3.zero);
+        rig.ResolveAnchor(ref rig.aimSightAnchor, "AimSightAnchor", new Vector3(0f, 0.06f, isShotgun ? 0.14f : 0.08f), Vector3.zero);
+        rig.ResolveAnchor(ref rig.muzzleAnchor, "MuzzleAnchor", new Vector3(0f, 0.02f, isShotgun ? 0.46f : 0.21f), Vector3.zero);
+        if (isShotgun)
+            rig.ResolveAnchor(ref rig.slingAnchor, "SlingAnchor", new Vector3(0f, 0f, -0.05f), Vector3.zero);
+
         var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
         body.name = "Mesh";
         Destroy(body.GetComponent<Collider>());
@@ -430,9 +452,13 @@ public class WeaponController : MonoBehaviour
         body.transform.localScale = isShotgun ? new Vector3(0.06f, 0.08f, 0.56f) : new Vector3(0.04f, 0.06f, 0.24f);
 
         var renderer = body.GetComponent<Renderer>();
-        if (renderer != null && renderer.material != null)
+        if (renderer != null)
         {
-            renderer.material.color = isShotgun ? new Color(0.28f, 0.22f, 0.18f) : new Color(0.18f, 0.2f, 0.24f);
+            Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
+            if (urp != null && (renderer.sharedMaterial == null || renderer.sharedMaterial.shader.name == "Standard"))
+                renderer.sharedMaterial = new Material(urp);
+            if (renderer.material != null)
+                renderer.material.color = isShotgun ? new Color(0.28f, 0.22f, 0.18f) : new Color(0.18f, 0.2f, 0.24f);
         }
 
         return root.AddComponent<T>();

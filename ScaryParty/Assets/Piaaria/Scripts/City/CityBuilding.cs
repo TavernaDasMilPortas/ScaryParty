@@ -34,6 +34,8 @@ public class CityBuilding : MonoBehaviour
     public Transform approachAnchor;
     public Transform interiorAnchor;
     public Transform deliveryAnchor;
+    public Transform rooftopPerchAnchor;
+    public Transform rooftopDropAnchor;
     public BuildingPortal portal;
 
     [Header("Visuals")]
@@ -170,6 +172,39 @@ public class CityBuilding : MonoBehaviour
         portal.entranceAnchor = entranceAnchor;
         portal.approachAnchor = sidewalkApproachAnchor;
 
+        float effectiveHeight = floorCount > 1 ? floorCount * 3.0f : Mathf.Max(4.5f, transform.localScale.y);
+        float roofY = transform.position.y + effectiveHeight * 0.5f + 0.15f;
+        if (rooftopPerchAnchor == null)
+        {
+            Transform existing = transform.Find("RooftopPerchAnchor");
+            if (existing != null) rooftopPerchAnchor = existing;
+            else
+            {
+                GameObject ra = new GameObject("RooftopPerchAnchor");
+                ra.transform.SetParent(transform, false);
+                rooftopPerchAnchor = ra.transform;
+            }
+        }
+        rooftopPerchAnchor.position = new Vector3(
+            Mathf.Lerp(transform.position.x, entrancePosition.x, 0.65f),
+            roofY,
+            Mathf.Lerp(transform.position.z, entrancePosition.z, 0.65f));
+
+        if (rooftopDropAnchor == null)
+        {
+            Transform existing = transform.Find("RooftopDropAnchor");
+            if (existing != null) rooftopDropAnchor = existing;
+            else
+            {
+                GameObject rda = new GameObject("RooftopDropAnchor");
+                rda.transform.SetParent(transform, false);
+                rooftopDropAnchor = rda.transform;
+            }
+        }
+        rooftopDropAnchor.position = sidewalkApproachAnchor != null
+            ? sidewalkApproachAnchor.position
+            : entrancePosition + entranceDirection * 1.2f;
+
         return portal;
     }
 
@@ -241,6 +276,17 @@ public class CityBuilding : MonoBehaviour
         {
             Gizmos.color = new Color(1f, 0.5f, 0f);
             Gizmos.DrawSphere(deliveryAnchor.position, 0.25f);
+        }
+
+        if (rooftopPerchAnchor != null)
+        {
+            Gizmos.color = new Color(0.85f, 0.2f, 0.9f);
+            Gizmos.DrawSphere(rooftopPerchAnchor.position, 0.35f);
+            if (rooftopDropAnchor != null)
+            {
+                Gizmos.DrawLine(rooftopPerchAnchor.position, rooftopDropAnchor.position);
+                Gizmos.DrawWireSphere(rooftopDropAnchor.position, 0.35f);
+            }
         }
     }
 }
