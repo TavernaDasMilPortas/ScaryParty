@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ui:VisualElement name="summary-page-root" style="flex-grow: 1; flex-direction: column; justify-content: space-between;">
+        <ui:VisualElement>
+            <ui:Label name="summary-headline" text="META DA NOITE BATIDA!" class="intermission-title" />
+            <ui:Label name="summary-subline" text="Confira o balanço do turno antes de votar nos rumos da próxima noite." class="intermission-subtitle" />
+
+            <ui:VisualElement class="summary-grid">
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Receita Bruta" class="summary-kpi-title" />
+                    <ui:Label name="kpi-revenue" text="R$ 0" class="summary-kpi-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Gastos" class="summary-kpi-title" />
+                    <ui:Label name="kpi-expenses" text="R$ 0" class="summary-kpi-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Lucro Líquido" class="summary-kpi-title" />
+                    <ui:Label name="kpi-profit" text="R$ 0" class="summary-kpi-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Pedidos Entregues" class="summary-kpi-title" />
+                    <ui:Label name="kpi-orders" text="0" class="summary-kpi-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Reputação" class="summary-kpi-title" />
+                    <ui:Label name="kpi-reputation" text="50%" class="summary-kpi-value" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-kpi-card">
+                    <ui:Label text="Caixa Atual" class="summary-kpi-title" />
+                    <ui:Label name="kpi-budget" text="R$ 500" class="summary-kpi-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

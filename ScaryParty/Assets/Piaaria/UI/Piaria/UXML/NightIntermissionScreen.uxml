@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ui:VisualElement name="intermission-root" class="intermission-root">
+        <ui:VisualElement name="intermission-shell" class="intermission-shell">
+            <ui:VisualElement class="intermission-header">
+                <ui:VisualElement>
+                    <ui:Label name="intermission-title" text="NOITE 1 CONCLUÍDA" class="intermission-title" />
+                    <ui:Label name="intermission-subtitle" text="Preparando Noite 2" class="intermission-subtitle" />
+                </ui:VisualElement>
+                <ui:VisualElement class="intermission-budget-pill">
+                    <ui:Label name="intermission-budget-label" text="Caixa: R$ 500" class="intermission-budget-label" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement name="intermission-tabs" class="intermission-tabs">
+                <ui:Button name="tab-summary" text="1. Resumo" class="intermission-tab intermission-tab-active" />
+                <ui:Button name="tab-hindrance" text="2. Imprevistos" class="intermission-tab" />
+                <ui:Button name="tab-opportunity" text="3. Oportunidades" class="intermission-tab" />
+                <ui:Button name="tab-shop" text="4. Loja" class="intermission-tab" />
+                <ui:Button name="tab-prepare" text="5. Preparar" class="intermission-tab" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="intermission-page-host" class="intermission-page-host" />
+
+            <ui:VisualElement class="intermission-footer">
+                <ui:Label name="intermission-status-label" text="Vote nas 2 categorias antes de ficar pronto." class="intermission-status-label" />
+                <ui:Button name="intermission-next-btn" text="Avançar" class="intermission-primary-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -59,7 +59,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         public void OpenTypedBallots_EnforcesTwoMandatoryVotesBeforeReady()
         {
             var snapshot = RunBalancingSnapshot.CreateForDomainUnitTests();
-            var service = new RunProgressionService(snapshot);
+            var service = new RunProgressionService(12345, 3, RunDifficulty.Normal, snapshot);
             service.OpenTypedBallots(2, 3, 3);
 
             Assert.AreEqual(IntermissionStage.Open, service.IntermissionStage);
@@ -84,7 +84,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         public void TryLockAndResolveBallotsServer_RejectsLateVotesAndPreservesStateOnDisconnect()
         {
             var snapshot = RunBalancingSnapshot.CreateForDomainUnitTests();
-            var service = new RunProgressionService(snapshot);
+            var service = new RunProgressionService(12345, 3, RunDifficulty.Normal, snapshot);
             service.OpenTypedBallots(2, 3, 3);
 
             string hOpt = service.CurrentVoteStages[0].Options[0].Id;

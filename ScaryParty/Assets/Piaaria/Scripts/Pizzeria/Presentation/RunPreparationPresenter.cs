@@ -206,7 +206,8 @@ namespace ScaryParty.Pizzeria.Presentation
             if (ns == null) return;
 
             var night = ns.NightState.Value;
-            bool shouldBeOpen = night.Phase == (byte)NightPhase.PreparingNextNight;
+            bool shouldBeOpen = night.Phase == (byte)NightPhase.PreparingNextNight &&
+                                ScaryParty.UI.Piaria.Presenters.NightIntermissionPresenter.Instance == null;
 
             if (shouldBeOpen)
             {
@@ -225,6 +226,7 @@ namespace ScaryParty.Pizzeria.Presentation
                         _hasLock = true;
                     }
                 }
+                GameplayInputGate.MaintainMenuCursorUnlocked();
                 RefreshUI(ns);
             }
             else if (_isOpen)
