@@ -249,7 +249,9 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (_headerLabel != null)
             {
-                string durLabel = $"{Mathf.CeilToInt(resolved.DurationSeconds > 0f ? resolved.DurationSeconds : 360f)}s";
+                bool isUnlimited = resolved.UnlimitedShiftTime || night.UnlimitedShiftTime ||
+                    (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.GetEffectiveRunPreset()?.unlimitedShiftTime == true);
+                string durLabel = isUnlimited ? "SEM LIMITE" : $"{Mathf.CeilToInt(resolved.DurationSeconds > 0f ? resolved.DurationSeconds : 360f)}s";
                 _headerLabel.text = $"PREPARAÇÃO — NOITE {targetNight} / {maxNights} (Duração: {durLabel})";
             }
 

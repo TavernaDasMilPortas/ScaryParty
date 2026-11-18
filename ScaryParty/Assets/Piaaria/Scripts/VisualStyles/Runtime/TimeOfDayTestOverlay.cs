@@ -34,38 +34,13 @@ namespace ScaryParty.Lighting
 
         private void Update()
         {
-            if (Input.GetKeyDown(toggleKey))
-            {
-                isExpanded = !isExpanded;
-            }
+            // B5.1: Overlay [F6] no GameView desativado permanentemente; controles de horario vivem no PlaytestDebugController (Inspector Odin).
+            isExpanded = false;
         }
 
         private void OnGUI()
         {
-            if (!Application.isPlaying) return;
-
-            var director = TimeOfDayLightingDirector.Active;
-            if (director == null) return;
-
-            InitStyles();
-
-            float currentHour = director.currentClockHours;
-            string phaseName = GetPhaseName(currentHour);
-            string timeStr = FormatClock(currentHour);
-
-            // Botao discreto pill no topo da tela para abrir/fechar sem precisar lembrar do atalho
-            if (showOnScreenTrigger && !isExpanded)
-            {
-                if (GUI.Button(new Rect(Screen.width - 200, 10, 185, 28), $"🕒 {timeStr} ({phaseName}) [F6]", _pillStyle))
-                {
-                    isExpanded = true;
-                }
-            }
-
-            if (isExpanded)
-            {
-                _windowRect = GUI.Window(889102, _windowRect, DrawWindowContent, "🕒 Ciclo Dia/Noite (Play Test)");
-            }
+            // Overlay removido na B5.1
         }
 
         private void DrawWindowContent(int windowId)

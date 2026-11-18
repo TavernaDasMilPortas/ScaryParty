@@ -48,15 +48,11 @@ namespace ScaryParty.Lighting
         {
             Active = this;
             EnsureProfileLoaded();
-            EnsureTestOverlay();
         }
 
         private void EnsureTestOverlay()
         {
-            if (Application.isPlaying && GetComponent<TimeOfDayTestOverlay>() == null)
-            {
-                gameObject.AddComponent<TimeOfDayTestOverlay>();
-            }
+            // Removido na B5.1: controles de horario vivem no PlaytestDebugController (Inspector Odin), sem overlay no GameView.
         }
 
         private void OnEnable()

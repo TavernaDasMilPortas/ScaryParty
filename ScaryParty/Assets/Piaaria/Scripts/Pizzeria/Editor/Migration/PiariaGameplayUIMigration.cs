@@ -149,7 +149,20 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             Ensure<TicketModalPresenter>(hud, ref changes);
             Ensure<OperationsHubPresenter>(hud, ref changes);
             Ensure<LifeAndSpectatorOverlayPresenter>(hud, ref changes);
-            Ensure<PlaytestDiagnosticsPresenter>(hud, ref changes);
+            var staleDiag = hud.GetComponent<PlaytestDiagnosticsPresenter>();
+            if (staleDiag != null)
+            {
+                UnityEngine.Object.DestroyImmediate(staleDiag);
+                changes++;
+            }
+
+            if (!HasDebugControllerInScene(scene))
+            {
+                var debugGo = new GameObject("[Debug] Central de Playtest");
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(debugGo, scene);
+                debugGo.AddComponent<ScaryParty.Pizzeria.Presentation.PlaytestDebugController>();
+                changes++;
+            }
             Ensure<ContextualTutorialPresenter>(hud, ref changes);
             Ensure<RunPreparationPresenter>(hud, ref changes);
             Ensure<NightResultsPresenter>(hud, ref changes);
@@ -229,6 +242,16 @@ namespace ScaryParty.Pizzeria.Editor.Migration
             field.SetValue(presenter, doc);
             EditorUtility.SetDirty(presenter);
             changes++;
+        }
+
+        private static bool HasDebugControllerInScene(Scene scene)
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root.GetComponentInChildren<ScaryParty.Pizzeria.Presentation.PlaytestDebugController>(true) != null)
+                    return true;
+            }
+            return false;
         }
 
         private static T Ensure<T>(GameObject obj, ref int changes) where T : Component

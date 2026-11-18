@@ -364,5 +364,28 @@ namespace ScaryParty.Pizzeria.Domain.Services
             _nextEmployeeId = 1;
             _nextTaskId = 1;
         }
+
+        public void RestoreFromCheckpoint(IReadOnlyList<(EmployeeRole Role, int Level, bool IsAlive, float BaseErrorRate)> employees)
+        {
+            _employees.Clear();
+            _tasks.Clear();
+            _nextEmployeeId = 1;
+            _nextTaskId = 1;
+            if (employees == null) return;
+
+            for (int i = 0; i < employees.Count; i++)
+            {
+                var item = employees[i];
+                var emp = new HiredEmployeeState
+                {
+                    EmployeeId = _nextEmployeeId++,
+                    Role = item.Role,
+                    Level = Math.Max(1, item.Level),
+                    IsAlive = item.IsAlive,
+                    BaseErrorRate = item.BaseErrorRate
+                };
+                _employees[emp.EmployeeId] = emp;
+            }
+        }
     }
 }

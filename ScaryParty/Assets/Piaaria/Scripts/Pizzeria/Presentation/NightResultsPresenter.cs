@@ -276,6 +276,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     _titleLabel.text = $"NOITE {dto.NightNumber}/{maxNights} CONCLUÍDA!";
                 else
                     _titleLabel.text = $"DERROTA OPERACIONAL — NOITE {dto.NightNumber}";
+                if (dto.IsForcedDebugOutcome)
+                    _titleLabel.text += " [DEBUG FORÇADO]";
                 _titleLabel.style.color = accent;
             }
 

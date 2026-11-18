@@ -644,7 +644,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 string phaseLabel = phase switch
                 {
                     NightPhase.Preparing => $"PREPARAÇÃO ({Mathf.CeilToInt(n.PrepRemainingSeconds)}s)",
-                    NightPhase.Active => FormatMmSs(n.RemainingSeconds),
+                    NightPhase.Active => n.UnlimitedShiftTime
+                        ? $"SEM LIMITE ({FormatMmSs(n.ElapsedSeconds)})"
+                        : FormatMmSs(n.RemainingSeconds),
                     NightPhase.Closing => $"FECHANDO ({Mathf.CeilToInt(n.GraceRemainingSeconds)}s)",
                     NightPhase.Results => "VITÓRIA!",
                     NightPhase.Defeat => "DERROTA",

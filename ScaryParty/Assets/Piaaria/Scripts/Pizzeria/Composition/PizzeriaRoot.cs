@@ -30,6 +30,9 @@ namespace ScaryParty.Pizzeria.Composition
         public PizzeriaState DomainState { get; private set; }
         public DefinitionCatalog Catalog { get; private set; }
         public IClock Clock { get; private set; }
+#if UNITY_EDITOR
+        public PlaytestCheckpointStore CheckpointStore { get; } = new PlaytestCheckpointStore();
+#endif
 
         // Serviços de Domínio
         public TransferService TransferService { get; private set; }
@@ -417,6 +420,12 @@ namespace ScaryParty.Pizzeria.Composition
                     NightCycleService.StartNight(DomainState, resolved);
                 }
                 RunProgressionService?.FreezeResolvedNightParameters(DomainState, resolved);
+#if UNITY_EDITOR
+                if (!isRetry)
+                {
+                    CheckpointStore.Capture(PlaytestCheckpointKind.NightStart, DomainState, RunProgressionService, EmployeeTaskService, Clock != null ? Clock.Now : Time.timeAsDouble);
+                }
+#endif
             }
 
             Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
@@ -538,6 +547,12 @@ namespace ScaryParty.Pizzeria.Composition
             DomainState.NightRemainingSeconds = preview.DurationSeconds;
 
             RunProgressionService?.OpenPreparationStages(resolvedTarget);
+#if UNITY_EDITOR
+            if (resolvedTarget == 1)
+            {
+                CheckpointStore.Capture(PlaytestCheckpointKind.PrePreparation, DomainState, RunProgressionService, EmployeeTaskService, Clock != null ? Clock.Now : Time.timeAsDouble);
+            }
+#endif
             DomainState.IncrementRevision();
         }
 
@@ -714,8 +729,14 @@ namespace ScaryParty.Pizzeria.Composition
             if (ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.Instance == null)
                 ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.EnsureInstance();
 
-            if (ScaryParty.UI.Piaria.Presenters.PlaytestDiagnosticsPresenter.Instance == null)
-                ScaryParty.UI.Piaria.Presenters.PlaytestDiagnosticsPresenter.EnsureInstance();
+#if UNITY_EDITOR
+            if (Presentation.PlaytestDebugController.Instance == null &&
+                FindFirstObjectByType<Presentation.PlaytestDebugController>(FindObjectsInactive.Include) == null)
+            {
+                var debugGo = new GameObject("[Debug] Central de Playtest");
+                debugGo.AddComponent<Presentation.PlaytestDebugController>();
+            }
+#endif
 
             if (ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.Instance == null)
                 ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.EnsureInstance();

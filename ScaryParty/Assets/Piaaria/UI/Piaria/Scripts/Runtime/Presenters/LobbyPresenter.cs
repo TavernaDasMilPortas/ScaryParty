@@ -49,7 +49,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Button _btnJoinLAN;
         private Button _btnLobbyPresetQuick;
         private int _lobbyPresetIdx = 0;
-        private static readonly string[] LobbyPresetChoices = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0" };
+        private static readonly string[] LobbyPresetChoices = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0", "NoiteDeTeste" };
 
         private List<RoomInfo> _latestLANRooms = new List<RoomInfo>();
 
@@ -268,7 +268,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnLobbyPresetQuick == null) return;
             var cur = SessionLaunchConfig.Current;
             string preset = string.IsNullOrEmpty(cur.PresetId) ? "Entrega_3Noites" : cur.PresetId;
-            _btnLobbyPresetQuick.text = $"Preset Host: {preset} ({cur.Difficulty})";
+            string presetLabel = preset == "NoiteDeTeste" ? "Noite de Teste — sem limite de tempo" : preset;
+            _btnLobbyPresetQuick.text = $"Preset Host: {presetLabel} ({cur.Difficulty})";
         }
 
         private void ApplyHeader(VisualElement headerEl, Sprite sprite)

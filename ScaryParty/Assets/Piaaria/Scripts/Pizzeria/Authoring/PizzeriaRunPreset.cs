@@ -50,6 +50,7 @@ namespace ScaryParty.Pizzeria.Authoring
         [Range(1, 7)]
         public int totalNights = 3;
         public bool includeNight0Tutorial = false;
+        public bool unlimitedShiftTime = false;
         public bool allowDebugPanel = false;
         public RunDifficulty difficulty = RunDifficulty.Normal;
         public int startingBudget = 500;
@@ -129,7 +130,8 @@ namespace ScaryParty.Pizzeria.Authoring
                 night0PrepSeconds,
                 night0ClosingGraceSeconds,
                 night0NonLethalDefeat,
-                rows);
+                rows,
+                unlimitedShiftTime);
         }
     }
 }

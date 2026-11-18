@@ -655,9 +655,9 @@ namespace ScaryParty.Editor.Playtest
                             sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing LifeAndSpectatorOverlayPresenter.");
                             errors++;
                         }
-                        if (mainDoc.GetComponent<PlaytestDiagnosticsPresenter>() == null)
+                        if (FindComponentInScene<ScaryParty.Pizzeria.Presentation.PlaytestDebugController>(scene) == null)
                         {
-                            sb.AppendLine($"[ERROR] {scenePath} MainGameUI missing PlaytestDiagnosticsPresenter.");
+                            sb.AppendLine($"[ERROR] {scenePath} missing [Debug] Central de Playtest (PlaytestDebugController).");
                             errors++;
                         }
                     }
@@ -733,6 +733,16 @@ namespace ScaryParty.Editor.Playtest
                 total += GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(tr.gameObject);
             }
             return total;
+        }
+
+        private static T FindComponentInScene<T>(Scene scene) where T : Component
+        {
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                var found = root.GetComponentInChildren<T>(true);
+                if (found != null) return found;
+            }
+            return null;
         }
 
         private static GameObject FindInScene(Scene scene, string name)

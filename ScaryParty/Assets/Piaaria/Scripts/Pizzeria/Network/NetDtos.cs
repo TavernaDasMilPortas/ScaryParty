@@ -843,8 +843,13 @@ namespace ScaryParty.Pizzeria.Network
         public byte Phase;
         public byte DefeatReason;
         public float RemainingSeconds;
+        public float ElapsedSeconds;
         public float PrepRemainingSeconds;
         public float GraceRemainingSeconds;
+        public bool UnlimitedShiftTime;
+        public bool IsShiftClockPaused;
+        public float ShiftClockSpeedMultiplier;
+        public bool IsForcedDebugOutcome;
         public int EarnedRevenue;
         public int RevenueGoal;
         public int OrdersCompleted;
@@ -870,8 +875,13 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref Phase);
             serializer.SerializeValue(ref DefeatReason);
             serializer.SerializeValue(ref RemainingSeconds);
+            serializer.SerializeValue(ref ElapsedSeconds);
             serializer.SerializeValue(ref PrepRemainingSeconds);
             serializer.SerializeValue(ref GraceRemainingSeconds);
+            serializer.SerializeValue(ref UnlimitedShiftTime);
+            serializer.SerializeValue(ref IsShiftClockPaused);
+            serializer.SerializeValue(ref ShiftClockSpeedMultiplier);
+            serializer.SerializeValue(ref IsForcedDebugOutcome);
             serializer.SerializeValue(ref EarnedRevenue);
             serializer.SerializeValue(ref RevenueGoal);
             serializer.SerializeValue(ref OrdersCompleted);
@@ -896,6 +906,11 @@ namespace ScaryParty.Pizzeria.Network
                TargetNightNumber == other.TargetNightNumber &&
                Phase == other.Phase &&
                DefeatReason == other.DefeatReason &&
+               UnlimitedShiftTime == other.UnlimitedShiftTime &&
+               IsShiftClockPaused == other.IsShiftClockPaused &&
+               IsForcedDebugOutcome == other.IsForcedDebugOutcome &&
+               Math.Abs(ShiftClockSpeedMultiplier - other.ShiftClockSpeedMultiplier) < 0.01f &&
+               Math.Abs(ElapsedSeconds - other.ElapsedSeconds) < 0.9f &&
                EarnedRevenue == other.EarnedRevenue &&
                RevenueGoal == other.RevenueGoal &&
                OrdersCompleted == other.OrdersCompleted &&

@@ -151,44 +151,11 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
-            EnsureUIInitialized();
-            if (_container == null) return;
-
-            bool allowed = IsDebugPanelAllowedNow();
-            if (!allowed)
+            // B5.1: Painel [F8] no GameView desativado permanentemente; todo controle de playtest vive no Odin Inspector (PlaytestDebugController).
+            if (_isExpanded) Close();
+            if (_container != null && _container.style.display != DisplayStyle.None)
             {
-                if (_isExpanded) SetExpanded(false);
-                if (MonsterPopulationDirector.ShowTechnicalSpeciesOverlay)
-                    MonsterPopulationDirector.ShowTechnicalSpeciesOverlay = false;
-                if (_container.style.display != DisplayStyle.None)
-                    _container.style.display = DisplayStyle.None;
-                return;
-            }
-
-            if (_container.style.display != DisplayStyle.Flex)
-                _container.style.display = DisplayStyle.Flex;
-
-#if ENABLE_INPUT_SYSTEM
-            if (Keyboard.current != null && Keyboard.current.f8Key.wasPressedThisFrame)
-            {
-                if (_isExpanded)
-                {
-                    Close();
-                    return;
-                }
-                if (PauseEscapeMenuPresenter.Instance == null || !PauseEscapeMenuPresenter.Instance.IsOpen)
-                {
-                    Toggle();
-                    return;
-                }
-            }
-#endif
-
-            _refreshTimer += Time.unscaledDeltaTime;
-            if (_isExpanded && _refreshTimer >= 0.35f)
-            {
-                _refreshTimer = 0f;
-                RefreshTelemetry();
+                _container.style.display = DisplayStyle.None;
             }
         }
 

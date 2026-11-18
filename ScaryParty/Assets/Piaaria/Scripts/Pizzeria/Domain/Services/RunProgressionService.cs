@@ -126,8 +126,56 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public string LastResolvedOptionId { get; private set; }
 
         public bool HasModifier(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.ContainsKey(id);
+        public bool RemoveModifierForDebug(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.Remove(id);
         public int GetModifierStacks(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.TryGetValue(id, out var m) ? m.Stacks : 0;
         public RunModifierDefinition GetModifierDefinition(string id) => !string.IsNullOrEmpty(id) && _catalog.TryGetValue(id, out var d) ? d : null;
+
+        public void RestoreFromCheckpoint(
+            int maxNights,
+            RunDifficulty difficulty,
+            IReadOnlyList<(string Id, int Stacks)> activeModifiers,
+            IReadOnlyDictionary<string, int> shopRunPurchases)
+        {
+            MaxNights = Math.Clamp(maxNights, 1, 7);
+            Difficulty = difficulty;
+            IsRunCompleted = false;
+            IsRunVictory = false;
+            _activeModifiers.Clear();
+            _voteStages.Clear();
+            _currentVoteOptions.Clear();
+            _votes.Clear();
+            _readyPlayers.Clear();
+            _shopRunPurchases.Clear();
+            _shopNightPurchases.Clear();
+            _purchasedUniqueItems.Clear();
+            IsVoteResolved = false;
+            LastResolvedOptionId = null;
+
+            if (activeModifiers != null)
+            {
+                for (int i = 0; i < activeModifiers.Count; i++)
+                {
+                    var entry = activeModifiers[i];
+                    var def = GetModifierDefinition(entry.Id);
+                    if (def != null)
+                    {
+                        _activeModifiers[entry.Id] = new ActiveRunModifier
+                        {
+                            Definition = def,
+                            Stacks = Math.Clamp(entry.Stacks, 1, def.MaxStacks)
+                        };
+                    }
+                }
+            }
+
+            if (shopRunPurchases != null)
+            {
+                foreach (var kvp in shopRunPurchases)
+                {
+                    _shopRunPurchases[kvp.Key] = kvp.Value;
+                }
+            }
+        }
 
         public RunProgressionService(
             int seed = 12345,

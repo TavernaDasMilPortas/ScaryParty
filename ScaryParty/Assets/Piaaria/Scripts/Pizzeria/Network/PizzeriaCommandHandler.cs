@@ -3406,7 +3406,20 @@ namespace ScaryParty.Pizzeria.Network
 
         public static bool CanExecuteHostDebugMutation(bool isServer, ulong senderClientId, ulong hostClientId, PizzeriaState state)
         {
-            return isServer && senderClientId == hostClientId && state != null && state.AllowDebugPanel;
+#if UNITY_EDITOR
+            return CanExecuteHostDebugMutation(isServer, senderClientId, hostClientId, state, Application.isEditor);
+#else
+            return false;
+#endif
+        }
+
+        public static bool CanExecuteHostDebugMutation(bool isServer, ulong senderClientId, ulong hostClientId, PizzeriaState state, bool isEditorEnvironment)
+        {
+#if UNITY_EDITOR
+            return isEditorEnvironment && isServer && senderClientId == hostClientId && state != null;
+#else
+            return false;
+#endif
         }
 
         private bool TryBeginHostDebugServer(ulong senderId, out PizzeriaRoot root)
@@ -3423,7 +3436,7 @@ namespace ScaryParty.Pizzeria.Network
 
             if (!CanExecuteHostDebugMutation(IsServer, senderId, hostId, root.DomainState))
             {
-                NotifyErrorClientRpc("Painel de diagnóstico desativado no preset atual.", TargetSender(senderId));
+                NotifyErrorClientRpc("Controles de playtest permitidos apenas para o Host no Unity Editor.", TargetSender(senderId));
                 return false;
             }
 
@@ -3652,6 +3665,177 @@ namespace ScaryParty.Pizzeria.Network
             if (root.DomainState != null)
             {
                 root.DomainState.IsDebugTaintedRun = true;
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugOpenPreparationForNightServerRpc(int targetNight, bool preserveCurrentBudget, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            int clampedNight = Mathf.Clamp(targetNight, 1, root.RunProgressionService != null ? root.RunProgressionService.MaxNights : 7);
+            int preservedBudget = root.DomainState.RestaurantBudget;
+
+            root.RunProgressionService?.ExpireTemporaryModifiersAtNightEnd();
+            root.SpeciesHostilityService?.OnNightEnded();
+            root.EmployeeTaskService?.OnNightEnded();
+            root.ZombieConversionService?.Reset();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+            NightCycleService.ClearTransientNightEntities(root.DomainState, repairBackpacks: true);
+
+            if (preserveCurrentBudget)
+            {
+                root.DomainState.RestaurantBudget = preservedBudget;
+            }
+            root.DomainState.IsForcedDebugOutcome = false;
+            root.OpenPreparationBeforeNightServer(clampedNight);
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] Preparação aberta para a Noite {clampedNight}.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugRestoreCheckpointServerRpc(byte checkpointKindByte, bool preserveCurrentBudget, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+#if UNITY_EDITOR
+            double now = root.Clock != null ? root.Clock.Now : Time.timeAsDouble;
+            var kind = (PlaytestCheckpointKind)checkpointKindByte;
+            if (root.CheckpointStore != null &&
+                root.CheckpointStore.TryRestore(kind, root.DomainState, root.RunProgressionService, root.EmployeeTaskService, now, preserveCurrentBudget))
+            {
+                ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+                DemandDirector.Instance?.ResetForNewRun();
+                ApplyRunBackpackCapacityBonusServer(root);
+                if (kind == PlaytestCheckpointKind.PrePreparation && root.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight)
+                {
+                    root.RunProgressionService?.OpenPreparationStages(Mathf.Max(1, root.DomainState.TargetNightNumber));
+                }
+                RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+                CommitAndReplicate();
+                BroadcastNoticeClientRpc($"[DEBUG] Checkpoint '{kind}' restaurado (Noite {root.DomainState.TargetNightNumber}).", isError: false);
+                return;
+            }
+            NotifyErrorClientRpc($"Checkpoint '{kind}' ainda não capturado nesta sessão.", TargetSender(senderId));
+#endif
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugForceNightOutcomeServerRpc(bool victory, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var st = root.DomainState;
+            NightCycleService.SettleOpenOrdersAtNightEnd(st);
+            st.IsForcedDebugOutcome = true;
+            if (victory)
+            {
+                st.NightEarnedRevenue = Mathf.Max(st.NightEarnedRevenue, st.NightRevenueGoal);
+                st.NightDefeatReason = NightDefeatReason.None;
+                st.CurrentNightPhase = NightPhase.Results;
+            }
+            else
+            {
+                st.NightDefeatReason = NightDefeatReason.RevenueBelowGoal;
+                st.CurrentNightPhase = NightPhase.Defeat;
+            }
+            st.IncrementRevision();
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc(victory ? "[DEBUG] Vitória da noite forçada pelo Host." : "[DEBUG] Derrota da noite forçada pelo Host.", isError: !victory);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugSetShiftClockControlServerRpc(bool paused, float speedMultiplier, float remainingSecondsOverride, bool applyRemainingOverride, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var st = root.DomainState;
+            st.IsShiftClockPaused = paused;
+            st.ShiftClockSpeedMultiplier = Mathf.Clamp(speedMultiplier, 0.05f, 10f);
+            if (applyRemainingOverride && remainingSecondsOverride >= 0f)
+            {
+#if UNITY_EDITOR
+                float delta = st.NightRemainingSeconds - remainingSecondsOverride;
+                PlaytestCheckpointStore.RebaseRelativeDeadlines(st, delta);
+#endif
+                st.NightRemainingSeconds = Mathf.Max(0.1f, remainingSecondsOverride);
+            }
+            st.IncrementRevision();
+            CommitAndReplicate();
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugToggleUnlimitedShiftTimeServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            root.DomainState.UnlimitedShiftTime = !root.DomainState.UnlimitedShiftTime;
+            root.DomainState.IncrementRevision();
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] Turno sem limite de tempo: {(root.DomainState.UnlimitedShiftTime ? "ATIVADO" : "DESATIVADO")}.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugSetExactBudgetServerRpc(int exactBudget, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            root.DomainState.RestaurantBudget = Mathf.Max(0, exactBudget);
+            root.DomainState.IncrementRevision();
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] Caixa definido para R$ {root.DomainState.RestaurantBudget}.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugHealAllPlayersServerRpc(ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out _)) return;
+
+            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc("[DEBUG] Vida/status dos jogadores restaurados.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugApplyModifierServerRpc(FixedString64Bytes modifierId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            var def = root.RunProgressionService?.GetModifierDefinition(modifierId.ToString());
+            if (def == null)
+            {
+                NotifyErrorClientRpc($"Modificador '{modifierId}' nao existe no catalogo.", TargetSender(senderId));
+                return;
+            }
+            root.RunProgressionService.ApplyModifier(def);
+            ApplyRunBackpackCapacityBonusServer(root);
+            root.DomainState.IncrementRevision();
+            CommitAndReplicate();
+            BroadcastNoticeClientRpc($"[DEBUG] Modificador aplicado: {def.DisplayName}.", isError: false);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void DebugRemoveModifierServerRpc(FixedString64Bytes modifierId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!TryBeginHostDebugServer(senderId, out var root)) return;
+
+            string id = modifierId.ToString();
+            if (root.RunProgressionService != null && !string.IsNullOrEmpty(id))
+            {
+                root.RunProgressionService.RemoveModifierForDebug(id);
+                ApplyRunBackpackCapacityBonusServer(root);
+                root.DomainState.IncrementRevision();
                 CommitAndReplicate();
             }
         }

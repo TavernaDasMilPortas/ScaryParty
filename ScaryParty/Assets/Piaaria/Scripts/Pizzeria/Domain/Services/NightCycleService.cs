@@ -12,19 +12,22 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public readonly int RevenueGoal;
         public readonly float PrepSeconds;
         public readonly float ClosingGraceSeconds;
+        public readonly bool UnlimitedShiftTime;
 
         public NightGoalParameters(
             int nightNumber,
             float durationSeconds,
             int revenueGoal,
             float prepSeconds = 4f,
-            float closingGraceSeconds = 20f)
+            float closingGraceSeconds = 20f,
+            bool unlimitedShiftTime = false)
         {
             NightNumber = Math.Max(0, nightNumber);
             DurationSeconds = Math.Max(30f, durationSeconds);
             RevenueGoal = Math.Max(1, revenueGoal);
             PrepSeconds = Math.Max(0f, prepSeconds);
             ClosingGraceSeconds = Math.Max(0f, closingGraceSeconds);
+            UnlimitedShiftTime = unlimitedShiftTime;
         }
     }
 
@@ -181,6 +184,11 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.TargetNightNumber = parameters.NightNumber;
             state.NightDurationSeconds = parameters.DurationSeconds;
             state.NightRemainingSeconds = parameters.DurationSeconds;
+            state.NightElapsedSeconds = 0f;
+            state.UnlimitedShiftTime = parameters.UnlimitedShiftTime;
+            state.IsShiftClockPaused = false;
+            state.ShiftClockSpeedMultiplier = 1f;
+            state.IsForcedDebugOutcome = false;
             state.NightPrepRemainingSeconds = parameters.PrepSeconds;
             state.NightGraceRemainingSeconds = parameters.ClosingGraceSeconds;
             state.NightRevenueGoal = parameters.RevenueGoal;
@@ -399,16 +407,24 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     break;
 
                 case NightPhase.Active:
-                    state.NightRemainingSeconds = Math.Max(0f, state.NightRemainingSeconds - dt);
                     dirty |= RefreshOrderTaskStages(state);
-
-                    if (state.NightRemainingSeconds <= 0f)
+                    if (!state.IsShiftClockPaused)
                     {
-                        // A06: ao zerar o relógio, liquidar pedidos abertos uma única vez e avaliar resultado sem prorrogação.
-                        SettleOpenOrdersAtNightEnd(state);
-                        EvaluateNightOutcome(state);
-                        state.IncrementRevision();
-                        dirty = true;
+                        float scaledDt = dt * Math.Max(0.05f, state.ShiftClockSpeedMultiplier);
+                        state.NightElapsedSeconds += scaledDt;
+                        if (!state.UnlimitedShiftTime)
+                        {
+                            state.NightRemainingSeconds = Math.Max(0f, state.NightRemainingSeconds - scaledDt);
+                            if (state.NightRemainingSeconds <= 0f)
+                            {
+                                // A06: ao zerar o relógio, liquidar pedidos abertos uma única vez e avaliar resultado sem prorrogação.
+                                SettleOpenOrdersAtNightEnd(state);
+                                EvaluateNightOutcome(state);
+                                state.IsForcedDebugOutcome = false;
+                                state.IncrementRevision();
+                                dirty = true;
+                            }
+                        }
                     }
                     break;
             }

@@ -20,6 +20,7 @@ namespace ScaryParty.Editor.Playtest
         public const string EntregaPresetPath = PresetsDir + "/Entrega_3Noites.asset";
         public const string PlaytestPresetPath = PresetsDir + "/Playtest_Integracao.asset";
         public const string TutorialPresetPath = PresetsDir + "/Tutorial_Noite0.asset";
+        public const string NoiteDeTestePresetPath = PresetsDir + "/NoiteDeTeste.asset";
 
         public static int EnsureAllPresets(PlaytestReferenceManifest manifest, StringBuilder sb)
         {
@@ -52,6 +53,7 @@ namespace ScaryParty.Editor.Playtest
                 },
                 prepSeconds: 4f,
                 graceSeconds: 15f,
+                unlimitedShiftTime: false,
                 ref changes,
                 sb);
 
@@ -77,6 +79,7 @@ namespace ScaryParty.Editor.Playtest
                 },
                 prepSeconds: 3f,
                 graceSeconds: 8f,
+                unlimitedShiftTime: false,
                 ref changes,
                 sb);
 
@@ -102,6 +105,33 @@ namespace ScaryParty.Editor.Playtest
                 },
                 prepSeconds: 4f,
                 graceSeconds: 15f,
+                unlimitedShiftTime: false,
+                ref changes,
+                sb);
+
+            var noiteDeTeste = EnsurePresetAsset(
+                NoiteDeTestePresetPath,
+                presetId: "NoiteDeTeste",
+                displayName: "Noite de Teste — sem limite de tempo",
+                description: "Preset livre de QA e playtest sem encerramento automatico por relogio de turno. Todas as regras e operacoes continuam normais.",
+                totalNights: 3,
+                includeNight0Tutorial: false,
+                allowDebugPanel: true,
+                difficulty: RunDifficulty.Normal,
+                startingBudget: 500,
+                startingReputation: 100,
+                night0Duration: 420f,
+                night0Goals: new[] { 15, 15, 15, 15 },
+                nightDurations: new[] { 600f, 660f, 720f },
+                nightGoals: new[]
+                {
+                    new[] { 60, 96, 129, 159 },
+                    new[] { 110, 176, 236, 292 },
+                    new[] { 170, 272, 365, 450 }
+                },
+                prepSeconds: 4f,
+                graceSeconds: 15f,
+                unlimitedShiftTime: true,
                 ref changes,
                 sb);
 
@@ -115,7 +145,7 @@ namespace ScaryParty.Editor.Playtest
                     cfgDirty = true;
                 }
 
-                var desiredList = new List<PizzeriaRunPreset> { entrega, playtest, tutorial };
+                var desiredList = new List<PizzeriaRunPreset> { entrega, playtest, tutorial, noiteDeTeste };
                 if (!PresetListsMatch(cfg.availablePresets, desiredList))
                 {
                     cfg.availablePresets = desiredList;
@@ -126,13 +156,13 @@ namespace ScaryParty.Editor.Playtest
                 {
                     EditorUtility.SetDirty(cfg);
                     changes++;
-                    sb.AppendLine("[P6 Presets] Wired Entrega_3Noites (default), Playtest_Integracao and Tutorial_Noite0 in PizzeriaConfig.");
+                    sb.AppendLine("[P6 Presets] Wired Entrega_3Noites (default), Playtest_Integracao, Tutorial_Noite0 and NoiteDeTeste in PizzeriaConfig.");
                 }
             }
 
             if (manifest != null)
             {
-                var desiredSo = new List<ScriptableObject> { entrega, playtest, tutorial };
+                var desiredSo = new List<ScriptableObject> { entrega, playtest, tutorial, noiteDeTeste };
                 if (!ScriptableListsMatch(manifest.runPresets, desiredSo))
                 {
                     manifest.runPresets = desiredSo;
@@ -162,6 +192,7 @@ namespace ScaryParty.Editor.Playtest
             int[][] nightGoals,
             float prepSeconds,
             float graceSeconds,
+            bool unlimitedShiftTime,
             ref int changes,
             StringBuilder sb)
         {
@@ -196,6 +227,7 @@ namespace ScaryParty.Editor.Playtest
             if (asset.description != description) { asset.description = description; dirty = true; }
             if (asset.totalNights != totalNights) { asset.totalNights = totalNights; dirty = true; }
             if (asset.includeNight0Tutorial != includeNight0Tutorial) { asset.includeNight0Tutorial = includeNight0Tutorial; dirty = true; }
+            if (asset.unlimitedShiftTime != unlimitedShiftTime) { asset.unlimitedShiftTime = unlimitedShiftTime; dirty = true; }
             if (asset.allowDebugPanel != allowDebugPanel) { asset.allowDebugPanel = allowDebugPanel; dirty = true; }
             if (asset.difficulty != difficulty) { asset.difficulty = difficulty; dirty = true; }
             if (asset.startingBudget != startingBudget) { asset.startingBudget = startingBudget; dirty = true; }

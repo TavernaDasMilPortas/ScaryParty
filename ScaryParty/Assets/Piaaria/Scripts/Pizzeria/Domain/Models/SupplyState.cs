@@ -45,8 +45,8 @@ namespace ScaryParty.Pizzeria.Domain.Models
     {
         public SupplyOrderId Id { get; }
         public SupplyOrderLifecycle State { get; set; }
-        public double OrderedTime { get; }
-        public double ExpectedArrivalTime { get; }
+        public double OrderedTime { get; set; }
+        public double ExpectedArrivalTime { get; set; }
         public int TotalCost { get; }
         public int ReceivingSlotIndex { get; set; } = -1;
         public uint Revision { get; set; } = 1;

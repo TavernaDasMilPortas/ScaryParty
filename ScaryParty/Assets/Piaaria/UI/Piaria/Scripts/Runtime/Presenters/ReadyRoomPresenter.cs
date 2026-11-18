@@ -66,7 +66,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private TextField _seedField;
         private Label _hostConfigStatusLabel;
         private int _presetIndex = 0;
-        private static readonly string[] BuiltInPresets = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0" };
+        private static readonly string[] BuiltInPresets = { "Entrega_3Noites", "Playtest_Integracao", "Tutorial_Noite0", "NoiteDeTeste" };
 
         private void Awake()
         {
@@ -352,7 +352,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 _hostConfigStatusLabel.text = isHost ? "Configuração (Host):" : "Configuração do Host (somente leitura):";
             if (_btnPreset != null)
             {
-                _btnPreset.text = $"Preset: {(string.IsNullOrEmpty(cfg.PresetId) ? "Entrega_3Noites" : cfg.PresetId)}";
+                string rawPreset = string.IsNullOrEmpty(cfg.PresetId) ? "Entrega_3Noites" : cfg.PresetId;
+                string label = rawPreset == "NoiteDeTeste" ? "Noite de Teste — sem limite de tempo" : rawPreset;
+                _btnPreset.text = $"Preset: {label}";
                 _btnPreset.SetEnabled(isHost);
             }
             if (_btnDifficulty != null)

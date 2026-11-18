@@ -48,6 +48,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public string PresetId { get; }
         public int TotalNights { get; }
         public bool IncludeNight0Tutorial { get; }
+        public bool UnlimitedShiftTime { get; }
         public bool AllowDebugPanel { get; }
         public RunDifficulty Difficulty { get; }
         public int StartingBudget { get; }
@@ -72,11 +73,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
             float night0PrepSeconds,
             float night0ClosingGraceSeconds,
             bool night0NonLethalDefeat,
-            IReadOnlyList<NightPresetRowData> nights)
+            IReadOnlyList<NightPresetRowData> nights,
+            bool unlimitedShiftTime = false)
         {
             PresetId = string.IsNullOrEmpty(presetId) ? "Custom" : presetId;
             TotalNights = Math.Clamp(totalNights, 1, 7);
             IncludeNight0Tutorial = includeNight0Tutorial;
+            UnlimitedShiftTime = unlimitedShiftTime;
             AllowDebugPanel = allowDebugPanel;
             Difficulty = difficulty;
             StartingBudget = Math.Max(0, startingBudget);
@@ -106,6 +109,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public readonly bool NonLethalDefeat;
         public readonly GoalResolutionSource GoalSource;
         public readonly string PresetId;
+        public readonly bool UnlimitedShiftTime;
 
         public ResolvedNightParameters(
             int nightNumber,
@@ -121,7 +125,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             int pizzasMinGoal,
             bool nonLethalDefeat,
             GoalResolutionSource goalSource,
-            string presetId)
+            string presetId,
+            bool unlimitedShiftTime = false)
         {
             NightNumber = Math.Max(0, nightNumber);
             FrozenHumanCount = Math.Clamp(frozenHumanCount, 1, 4);
@@ -137,10 +142,11 @@ namespace ScaryParty.Pizzeria.Domain.Services
             NonLethalDefeat = nonLethalDefeat;
             GoalSource = goalSource;
             PresetId = string.IsNullOrEmpty(presetId) ? "Default" : presetId;
+            UnlimitedShiftTime = unlimitedShiftTime;
         }
 
         public NightGoalParameters ToNightGoalParameters()
-            => new NightGoalParameters(NightNumber, DurationSeconds, FinalGoal, PrepSeconds, ClosingGraceSeconds);
+            => new NightGoalParameters(NightNumber, DurationSeconds, FinalGoal, PrepSeconds, ClosingGraceSeconds, UnlimitedShiftTime);
     }
 
     /// <summary>
@@ -238,7 +244,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                                 row.PizzasMinGoal,
                                 false,
                                 GoalResolutionSource.PresetTable,
-                                presetId);
+                                presetId,
+                                preset != null && preset.UnlimitedShiftTime);
                         }
                     }
                 }
@@ -263,7 +270,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         cfgRow.PizzasMinGoal,
                         false,
                         GoalResolutionSource.NightConfigTable,
-                        presetId);
+                        presetId,
+                        preset != null && preset.UnlimitedShiftTime);
                 }
             }
 
@@ -299,7 +307,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 0,
                 false,
                 GoalResolutionSource.ExplicitFormulaFallback,
-                presetId);
+                presetId,
+                preset != null && preset.UnlimitedShiftTime);
         }
 
         private static bool TryResolveRowGoal(

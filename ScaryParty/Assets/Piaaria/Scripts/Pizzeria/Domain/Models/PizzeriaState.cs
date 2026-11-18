@@ -30,8 +30,13 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public NightDefeatReason NightDefeatReason { get; set; } = NightDefeatReason.None;
         public float NightDurationSeconds { get; set; } = 360f;
         public float NightRemainingSeconds { get; set; } = 360f;
+        public float NightElapsedSeconds { get; set; } = 0f;
         public float NightGraceRemainingSeconds { get; set; } = 0f;
         public float NightPrepRemainingSeconds { get; set; } = 4f;
+        public bool UnlimitedShiftTime { get; set; } = false;
+        public bool IsShiftClockPaused { get; set; } = false;
+        public float ShiftClockSpeedMultiplier { get; set; } = 1f;
+        public bool IsForcedDebugOutcome { get; set; } = false;
         public int NightEarnedRevenue { get; set; } = 0;
         public int RunTotalRevenue { get; set; } = 0;
         public int NightRevenueGoal { get; set; } = 60;
@@ -125,8 +130,13 @@ namespace ScaryParty.Pizzeria.Domain.Models
             NightDefeatReason = NightDefeatReason.None;
             NightDurationSeconds = 360f;
             NightRemainingSeconds = 360f;
+            NightElapsedSeconds = 0f;
             NightGraceRemainingSeconds = 0f;
             NightPrepRemainingSeconds = 4f;
+            UnlimitedShiftTime = false;
+            IsShiftClockPaused = false;
+            ShiftClockSpeedMultiplier = 1f;
+            IsForcedDebugOutcome = false;
             NightEarnedRevenue = 0;
             NightRevenueGoal = 60;
             NightOrdersCompleted = 0;
