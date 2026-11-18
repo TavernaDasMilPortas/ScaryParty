@@ -1259,6 +1259,8 @@ namespace ScaryParty.Pizzeria.Network
                 ? root.DomainState.CurrentSnapshot.NightNumber
                 : root.DomainState.CurrentNightNumber;
 
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+            root.EmployeeTaskService?.OnNightEnded();
             var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nightNum) : (NightGoalParameters?)null;
             NightCycleService.RetryCurrentNight(root.DomainState, nightParams);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
@@ -1404,6 +1406,7 @@ namespace ScaryParty.Pizzeria.Network
 
             run?.ExpireTemporaryModifiersAtNightEnd();
             root.SpeciesHostilityService?.OnNightEnded();
+            root.EmployeeTaskService?.OnNightEnded();
             root.ZombieConversionService?.Reset();
             ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
             int nextNight = root.DomainState.CurrentNightNumber + 1;

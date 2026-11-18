@@ -131,9 +131,17 @@ namespace ScaryParty.Pizzeria.Composition
             return null;
         }
 
+        public override void OnNetworkDespawn()
+        {
+            Presentation.EmployeePopulationDirector.ClearAll();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearOnSessionEnd();
+            base.OnNetworkDespawn();
+        }
+
         public override void OnDestroy()
         {
             Presentation.EmployeePopulationDirector.ClearAll();
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearOnSessionEnd();
             if (Instance == this) Instance = null;
             base.OnDestroy();
         }
@@ -157,6 +165,9 @@ namespace ScaryParty.Pizzeria.Composition
                 InitializeServerDomain();
                 ReplicateInitialState();
             }
+
+            // Diretor de monstros instalado tanto no servidor quanto nos clientes remotos (P1)
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.EnsureOn(this);
 
             // Garantir que o visualizador de clientes presenciais e HUD de paciência existam
             if (GetComponent<ScaryParty.Pizzeria.Presentation.CustomerSpawner>() == null)
@@ -332,7 +343,6 @@ namespace ScaryParty.Pizzeria.Composition
             EmployeeTaskService = new EmployeeTaskService();
             SpeciesHostilityService = new SpeciesHostilityService();
             ZombieConversionService = new ZombieConversionService();
-            ScaryParty.Combat.Monsters.MonsterPopulationDirector.EnsureOn(this);
 
             DomainState.RestaurantBudget = _config != null ? _config.startingBudget : 500;
             DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
@@ -670,7 +680,7 @@ namespace ScaryParty.Pizzeria.Composition
             }
             else if (IsSpawned && !IsServer)
             {
-                Presentation.EmployeePopulationDirector.TickClientProxies(Network.PizzeriaNetworkState.Instance);
+                Presentation.EmployeePopulationDirector.EnsureClientSubscribedAndTick(Network.PizzeriaNetworkState.Instance);
             }
         }
 

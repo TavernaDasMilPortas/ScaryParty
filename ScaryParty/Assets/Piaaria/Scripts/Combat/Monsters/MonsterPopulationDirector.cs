@@ -34,36 +34,98 @@ namespace ScaryParty.Combat.Monsters
 
         private readonly List<MonsterNpcController> _activeMonsters = new List<MonsterNpcController>();
         private readonly Dictionary<ulong, MonsterNpcController> _clientProxies = new Dictionary<ulong, MonsterNpcController>();
+        private readonly List<NetMonsterDto> _clientSyncBuffer = new List<NetMonsterDto>();
         private PizzeriaNetworkState _subscribedNetState;
         private int _spawnedForNight = -1;
         private ulong _nextMonsterId = 1;
         private float _syncTimer;
+        private bool _isShuttingDown;
 
         public IReadOnlyList<MonsterNpcController> ActiveMonsters => _activeMonsters;
         public IReadOnlyDictionary<ulong, MonsterNpcController> ClientProxies => _clientProxies;
+        public int ClientProxyCount => _clientProxies.Count;
+
+        private static void DestroyObjectSafe(UnityEngine.Object obj)
+        {
+            if (obj == null) return;
+            if (Application.isPlaying)
+                Destroy(obj);
+            else
+                DestroyImmediate(obj);
+        }
 
         private void Awake()
         {
             Instance = this;
+            _isShuttingDown = false;
+        }
+
+        private void OnEnable()
+        {
+            _isShuttingDown = false;
+            PizzeriaNetworkState.OnNetworkStateSpawned += HandleNetworkStateSpawned;
+            PizzeriaNetworkState.OnNetworkStateDespawning += HandleNetworkStateDespawning;
+        }
+
+        private void OnDisable()
+        {
+            PizzeriaNetworkState.OnNetworkStateSpawned -= HandleNetworkStateSpawned;
+            PizzeriaNetworkState.OnNetworkStateDespawning -= HandleNetworkStateDespawning;
+            UnsubscribeClientMonsters();
         }
 
         private void OnDestroy()
         {
-            UnsubscribeClientMonsters();
-            ClearAllClientProxies();
+            ClearOnSessionEnd();
             if (Instance == this) Instance = null;
+        }
+
+        public void ClearOnSessionEnd()
+        {
+            _isShuttingDown = true;
+            UnsubscribeClientMonsters();
+            for (int i = _activeMonsters.Count - 1; i >= 0; i--)
+            {
+                if (_activeMonsters[i] != null)
+                    DestroyObjectSafe(_activeMonsters[i].gameObject);
+            }
+            _activeMonsters.Clear();
+            _spawnedForNight = -1;
+            ClearAllClientProxies();
+        }
+
+        private void HandleNetworkStateSpawned(PizzeriaNetworkState ns)
+        {
+            if (_isShuttingDown || ns == null || !ns.IsSpawned) return;
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsSpawned && !root.IsServer)
+            {
+                EnsureClientSubscribed();
+            }
+        }
+
+        private void HandleNetworkStateDespawning(PizzeriaNetworkState ns)
+        {
+            if (ns == _subscribedNetState)
+            {
+                UnsubscribeClientMonsters();
+                ClearAllClientProxies();
+            }
         }
 
         private void Update()
         {
+            if (_isShuttingDown) return;
             var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) return;
+            if (root == null || !root.IsSpawned) return;
 
             if (!root.IsServer)
             {
                 EnsureClientSubscribed();
                 return;
             }
+
+            if (root.DomainState == null) return;
 
             var phase = root.DomainState.CurrentNightPhase;
             int night = root.DomainState.CurrentNightNumber;
@@ -72,16 +134,16 @@ namespace ScaryParty.Combat.Monsters
             {
                 SpawnPopulationForNightServer(root, night);
             }
-            else if (phase == NightPhase.PreparingNextNight || phase == NightPhase.Defeat)
+            else if (phase == NightPhase.Results || phase == NightPhase.PreparingNextNight || phase == NightPhase.Defeat)
             {
-                if (_activeMonsters.Count > 0)
+                if (_activeMonsters.Count > 0 || (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.Monsters != null && PizzeriaNetworkState.Instance.Monsters.Count > 0))
                 {
                     ClearNightMonstersServer();
                 }
             }
 
             _syncTimer += Time.deltaTime;
-            if (_syncTimer >= 0.25f)
+            if (_syncTimer >= 0.08f)
             {
                 _syncTimer = 0f;
                 ReplicateMonstersServer();
@@ -93,13 +155,13 @@ namespace ScaryParty.Combat.Monsters
             for (int i = _activeMonsters.Count - 1; i >= 0; i--)
             {
                 if (_activeMonsters[i] != null)
-                    Destroy(_activeMonsters[i].gameObject);
+                    DestroyObjectSafe(_activeMonsters[i].gameObject);
             }
             _activeMonsters.Clear();
             _spawnedForNight = -1;
 
             var ns = PizzeriaNetworkState.Instance;
-            if (ns != null && ns.Monsters != null && NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
+            if (ns != null && ns.IsSpawned && ns.Monsters != null && NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
             {
                 ns.Monsters.Clear();
             }
@@ -109,15 +171,19 @@ namespace ScaryParty.Combat.Monsters
         {
             foreach (var kvp in _clientProxies)
             {
-                if (kvp.Value != null) Destroy(kvp.Value.gameObject);
+                if (kvp.Value != null) DestroyObjectSafe(kvp.Value.gameObject);
             }
             _clientProxies.Clear();
         }
 
         private void EnsureClientSubscribed()
         {
+            if (_isShuttingDown) return;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsSpawned || root.IsServer) return;
+
             var ns = PizzeriaNetworkState.Instance;
-            if (ns == null || ns.Monsters == null) return;
+            if (ns == null || !ns.IsSpawned || ns.Monsters == null) return;
             if (_subscribedNetState == ns) return;
 
             UnsubscribeClientMonsters();
@@ -137,18 +203,61 @@ namespace ScaryParty.Combat.Monsters
 
         private void OnClientMonstersListChanged(NetworkListEvent<NetMonsterDto> changeEvent)
         {
+            if (_isShuttingDown) return;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsSpawned || root.IsServer) return;
             SyncClientProxiesFromNetworkList();
         }
 
         public void SyncClientProxiesFromNetworkList()
         {
-            var ns = PizzeriaNetworkState.Instance;
-            if (ns == null || ns.Monsters == null) return;
+            if (_isShuttingDown) return;
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                // Nunca duplicar corpos no Host: o servidor já possui _activeMonsters.
+                ClearAllClientProxies();
+                return;
+            }
 
-            var aliveIds = new HashSet<ulong>();
+            var ns = PizzeriaNetworkState.Instance;
+            if (ns == null || !ns.IsSpawned || ns.Monsters == null)
+            {
+                ClearAllClientProxies();
+                return;
+            }
+
+            _clientSyncBuffer.Clear();
             for (int i = 0; i < ns.Monsters.Count; i++)
             {
-                var dto = ns.Monsters[i];
+                _clientSyncBuffer.Add(ns.Monsters[i]);
+            }
+            SyncClientProxiesFromSnapshot(_clientSyncBuffer);
+        }
+
+        /// <summary>
+        /// Sincroniza proxies client-side a partir de um snapshot replicado (NetworkList ou teste unitário).
+        /// </summary>
+        public void SyncClientProxiesFromSnapshot(IReadOnlyList<NetMonsterDto> snapshot)
+        {
+            if (_isShuttingDown) return;
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                ClearAllClientProxies();
+                return;
+            }
+
+            if (snapshot == null || snapshot.Count == 0)
+            {
+                ClearAllClientProxies();
+                return;
+            }
+
+            var aliveIds = new HashSet<ulong>();
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var dto = snapshot[i];
                 aliveIds.Add(dto.MonsterId);
                 if (_clientProxies.TryGetValue(dto.MonsterId, out var proxy) && proxy != null)
                 {
@@ -169,7 +278,7 @@ namespace ScaryParty.Combat.Monsters
             for (int i = 0; i < toRemove.Count; i++)
             {
                 if (_clientProxies.TryGetValue(toRemove[i], out var p) && p != null)
-                    Destroy(p.gameObject);
+                    DestroyObjectSafe(p.gameObject);
                 _clientProxies.Remove(toRemove[i]);
             }
         }
@@ -281,6 +390,11 @@ namespace ScaryParty.Combat.Monsters
 
         private static void BuildMonsterVisual(GameObject go, NpcSpecies species, out Renderer[] eyeRenderers)
         {
+            var visualRoot = new GameObject("VisualRoot");
+            visualRoot.transform.SetParent(go.transform, false);
+            visualRoot.transform.localPosition = Vector3.zero;
+            visualRoot.transform.localRotation = Quaternion.identity;
+
             Color tint = species switch
             {
                 NpcSpecies.Vampire => new Color(0.25f, 0.08f, 0.14f),
@@ -294,7 +408,7 @@ namespace ScaryParty.Combat.Monsters
             if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
             if (visualPrefab != null)
             {
-                var inst = Instantiate(visualPrefab, go.transform, false);
+                var inst = Instantiate(visualPrefab, visualRoot.transform, false);
                 inst.name = "CharacterVisual";
                 inst.transform.localPosition = Vector3.zero;
                 inst.transform.localRotation = Quaternion.identity;
@@ -312,21 +426,25 @@ namespace ScaryParty.Combat.Monsters
             {
                 var body = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 body.name = "BodyVisual";
-                Destroy(body.GetComponent<Collider>());
-                body.transform.SetParent(go.transform, false);
+                DestroyObjectSafe(body.GetComponent<Collider>());
+                body.transform.SetParent(visualRoot.transform, false);
                 body.transform.localPosition = new Vector3(0f, 0.9f, 0f);
                 body.transform.localScale = new Vector3(0.75f, 0.9f, 0.75f);
                 var bodyRend = body.GetComponent<Renderer>();
-                if (bodyRend != null && bodyRend.material != null)
+                if (bodyRend != null)
                 {
-                    bodyRend.material.color = tint;
+                    var mpb = new MaterialPropertyBlock();
+                    bodyRend.GetPropertyBlock(mpb);
+                    mpb.SetColor("_Color", tint);
+                    mpb.SetColor("_BaseColor", tint);
+                    bodyRend.SetPropertyBlock(mpb);
                 }
             }
 
             var eyeObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             eyeObj.name = "Eyes";
-            Destroy(eyeObj.GetComponent<Collider>());
-            eyeObj.transform.SetParent(go.transform, false);
+            DestroyObjectSafe(eyeObj.GetComponent<Collider>());
+            eyeObj.transform.SetParent(visualRoot.transform, false);
             eyeObj.transform.localPosition = new Vector3(0f, 1.52f, 0.34f);
             eyeObj.transform.localScale = new Vector3(0.42f, 0.10f, 0.12f);
             eyeRenderers = new[] { eyeObj.GetComponent<Renderer>() };
@@ -379,6 +497,7 @@ namespace ScaryParty.Combat.Monsters
                     MonsterId = m.MonsterId,
                     Species = (byte)m.Species,
                     BehaviorState = (byte)m.CurrentBehaviorState,
+                    TelegraphKind = m.CurrentTelegraphKind,
                     CurrentHp = m.CurrentHealth,
                     MaxHp = m.MaxHealth,
                     PosX = m.transform.position.x,

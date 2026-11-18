@@ -1,3 +1,4 @@
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace ScaryParty.Pizzeria.Network
     public class PizzeriaNetworkState : NetworkBehaviour
     {
         public static PizzeriaNetworkState Instance { get; private set; }
+        public static event Action<PizzeriaNetworkState> OnNetworkStateSpawned;
+        public static event Action<PizzeriaNetworkState> OnNetworkStateDespawning;
 
         public NetworkList<NetItemDto> Items;
         public NetworkList<NetToolDto> Tools;
@@ -49,7 +52,10 @@ namespace ScaryParty.Pizzeria.Network
 
         private void Awake()
         {
-            Instance = this;
+            if (Instance == null || !Instance.IsSpawned)
+            {
+                Instance = this;
+            }
             Items = new NetworkList<NetItemDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Tools = new NetworkList<NetToolDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             StorageSlots = new NetworkList<NetStorageDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -169,6 +175,20 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             return false;
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            Instance = this;
+            OnNetworkStateSpawned?.Invoke(this);
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            OnNetworkStateDespawning?.Invoke(this);
+            if (Instance == this) Instance = null;
+            base.OnNetworkDespawn();
         }
 
         public override void OnDestroy()

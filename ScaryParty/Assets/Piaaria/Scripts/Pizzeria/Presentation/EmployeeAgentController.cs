@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
+using ScaryParty.Combat;
 using ScaryParty.Pizzeria.Composition;
 using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
@@ -16,21 +18,33 @@ namespace ScaryParty.Pizzeria.Presentation
     /// Controlador autoritativo no servidor para funcionários contratados (Balconista e Pizzaiolo).
     /// Navega via NavMesh pelas estações reais, executa serviços de domínio e respeita reservas/takeover de humanos.
     /// </summary>
-    public class EmployeeAgentController : MonoBehaviour
+    public class EmployeeAgentController : MonoBehaviour, IDamageable
     {
         public const ulong EmployeeActorOffset = 1_000_000UL;
 
         public int EmployeeId { get; private set; }
         public EmployeeRole Role { get; private set; }
+        public bool IsAlive => _isClientProxy ? _clientIsAlive : _serverIsAlive;
+        public int CurrentHpInt => Mathf.CeilToInt(_hp);
+        public int MaxHpInt => 100;
+        public uint Revision { get; private set; } = 1;
 
         private NavMeshAgent _agent;
         private Animator _animator;
+        private Collider _mainCollider;
+        private Transform _visualRoot;
+        private Renderer[] _bodyRenderers;
+        private MaterialPropertyBlock _flashMpb;
+        private float _damageFlashTimer;
         private readonly System.Random _fallbackRng = new System.Random();
 
         private bool _isClientProxy;
+        private bool _serverIsAlive = true;
         private Vector3 _clientTargetPos;
+        private float _clientTargetYaw;
         private bool _hasClientTarget;
         private bool _clientIsAlive = true;
+        private int _clientLastHp = 100;
 
         private float _hp = 100f;
         private int _activeTaskId = -1;
@@ -60,7 +74,14 @@ namespace ScaryParty.Pizzeria.Presentation
             EmployeeId = employeeId;
             Role = role;
             _isClientProxy = isClientProxy;
+            _serverIsAlive = true;
+            _clientIsAlive = true;
+            _hp = 100f;
+            _clientLastHp = 100;
+            _mainCollider = GetComponent<Collider>();
+            _visualRoot = transform.Find("VisualRoot") ?? transform;
             _animator = GetComponentInChildren<Animator>(true);
+            _bodyRenderers = _visualRoot.GetComponentsInChildren<Renderer>(true);
             if (!isClientProxy)
             {
                 _agent = GetComponent<NavMeshAgent>();
@@ -78,23 +99,40 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void ApplyReplicatedDto(NetEmployeeDto dto, bool snapImmediately = false)
         {
+            if (_hasClientTarget && dto.CurrentHp < _clientLastHp)
+            {
+                _damageFlashTimer = 0.18f;
+            }
+            _clientLastHp = dto.CurrentHp;
             _clientIsAlive = dto.IsAlive;
             _clientTargetPos = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+            _clientTargetYaw = dto.Yaw;
+            Revision = dto.Revision;
             if (snapImmediately || !_hasClientTarget || (_clientTargetPos - transform.position).sqrMagnitude > 36f)
             {
                 transform.position = _clientTargetPos;
+                transform.rotation = Quaternion.Euler(0f, _clientTargetYaw, 0f);
             }
             _hasClientTarget = true;
+            if (_mainCollider != null && _mainCollider.enabled != _clientIsAlive)
+            {
+                _mainCollider.enabled = _clientIsAlive;
+            }
         }
 
         private void Update()
         {
-            if (!_isClientProxy || !_hasClientTarget) return;
             float dt = Time.deltaTime;
+            UpdateVisualFeedback(dt, IsAlive);
+
+            if (!_isClientProxy || !_hasClientTarget) return;
             if (!_clientIsAlive)
             {
                 DriveAnimatorLocomotion(0f);
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, transform.eulerAngles.y, 0f), Mathf.Clamp01(dt * 8f));
+                if (_visualRoot == transform)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 8f));
+                }
                 return;
             }
 
@@ -107,8 +145,41 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(delta.normalized, Vector3.up), Mathf.Clamp01(dt * 12f));
             }
+            else
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 10f));
+            }
             float estSpeed = dt > 0.0001f ? delta.magnitude / dt : 0f;
             DriveAnimatorLocomotion(estSpeed);
+        }
+
+        private void UpdateVisualFeedback(float dt, bool alive)
+        {
+            if (_visualRoot != null && _visualRoot != transform)
+            {
+                float targetPitch = !alive ? -90f : 0f;
+                Vector3 targetLocalPos = !alive ? new Vector3(0f, 0.25f, 0f) : Vector3.zero;
+                _visualRoot.localRotation = Quaternion.Slerp(_visualRoot.localRotation, Quaternion.Euler(targetPitch, 0f, 0f), Mathf.Clamp01(dt * 10f));
+                _visualRoot.localPosition = Vector3.Lerp(_visualRoot.localPosition, targetLocalPos, Mathf.Clamp01(dt * 14f));
+            }
+
+            if (_damageFlashTimer > 0f)
+            {
+                _damageFlashTimer = Mathf.Max(0f, _damageFlashTimer - dt);
+                if (_bodyRenderers != null)
+                {
+                    _flashMpb ??= new MaterialPropertyBlock();
+                    Color emit = _damageFlashTimer > 0f ? new Color(0.85f, 0.15f, 0.15f, 1f) : Color.black;
+                    for (int i = 0; i < _bodyRenderers.Length; i++)
+                    {
+                        var r = _bodyRenderers[i];
+                        if (r == null) continue;
+                        r.GetPropertyBlock(_flashMpb);
+                        _flashMpb.SetColor("_EmissionColor", emit);
+                        r.SetPropertyBlock(_flashMpb);
+                    }
+                }
+            }
         }
 
         private void DriveAnimatorLocomotion(float speed)
@@ -120,21 +191,34 @@ namespace ScaryParty.Pizzeria.Presentation
             _animator.SetBool("IsMoving", speed > 0.15f);
         }
 
+        public void ApplyDamageServer(DamageEvent evt)
+        {
+            TakeDamageServer(evt.Amount);
+        }
+
         public void TakeDamageServer(float damage)
         {
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.EmployeeTaskService == null) return;
             if (!root.EmployeeTaskService.Employees.TryGetValue(EmployeeId, out var emp) || !emp.IsAlive) return;
 
-            _hp -= Mathf.Max(0f, damage);
+            _hp = Mathf.Max(0f, _hp - Mathf.Max(0f, damage));
+            _damageFlashTimer = 0.18f;
+            Revision++;
             if (_hp <= 0f)
             {
                 _hp = 0f;
                 emp.IsAlive = false;
+                _serverIsAlive = false;
                 emp.AssignedTaskId = -1;
                 root.EmployeeTaskService.ReleaseActorTasks((ulong)EmployeeId, isHuman: false);
                 ResetWorkState();
-                if (_agent != null && _agent.enabled) _agent.isStopped = true;
+                if (_mainCollider != null) _mainCollider.enabled = false;
+                if (_agent != null && _agent.enabled)
+                {
+                    if (_agent.isOnNavMesh) _agent.isStopped = true;
+                    _agent.enabled = false;
+                }
             }
         }
 
@@ -143,14 +227,22 @@ namespace ScaryParty.Pizzeria.Presentation
             if (root == null || !root.IsServer || root.DomainState == null || root.EmployeeTaskService == null) return;
             if (!root.EmployeeTaskService.Employees.TryGetValue(EmployeeId, out var emp)) return;
 
+            _serverIsAlive = emp.IsAlive;
             if (!emp.IsAlive)
             {
-                if (_agent != null && _agent.enabled) _agent.isStopped = true;
+                if (_mainCollider != null && _mainCollider.enabled) _mainCollider.enabled = false;
+                if (_agent != null && _agent.enabled) _agent.enabled = false;
                 DriveAnimatorLocomotion(0f);
+                if (_visualRoot == transform)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, transform.eulerAngles.y, 0f), Mathf.Clamp01(dt * 8f));
+                }
                 return;
             }
 
             if (_hp <= 0f) _hp = 100f;
+            if (_mainCollider != null && !_mainCollider.enabled) _mainCollider.enabled = true;
+            if (_agent != null && !_agent.enabled) _agent.enabled = true;
             if (_agent != null && _agent.enabled && _agent.isStopped) _agent.isStopped = false;
             DriveAnimatorLocomotion(_agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f);
 
@@ -906,6 +998,22 @@ namespace ScaryParty.Pizzeria.Presentation
     {
         private static readonly Dictionary<int, EmployeeAgentController> _spawned = new Dictionary<int, EmployeeAgentController>();
         private static readonly Dictionary<int, EmployeeAgentController> _clientProxies = new Dictionary<int, EmployeeAgentController>();
+        private static readonly List<NetEmployeeDto> _clientSyncBuffer = new List<NetEmployeeDto>();
+        private static PizzeriaNetworkState _subscribedNetState;
+        private static bool _hooksRegistered;
+
+        public static int ServerSpawnedCount => _spawned.Count;
+        public static int ClientProxyCount => _clientProxies.Count;
+        public static bool TryGetClientProxy(int employeeId, out EmployeeAgentController proxy) => _clientProxies.TryGetValue(employeeId, out proxy);
+
+        private static void DestroyObjectSafe(UnityEngine.Object obj)
+        {
+            if (obj == null) return;
+            if (Application.isPlaying)
+                UnityEngine.Object.Destroy(obj);
+            else
+                UnityEngine.Object.DestroyImmediate(obj);
+        }
 
         public static void TickAndProjectServer(PizzeriaRoot root, PizzeriaNetworkState netState, float dt)
         {
@@ -918,7 +1026,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 if (kvp.Value == null || !root.EmployeeTaskService.Employees.ContainsKey(kvp.Key))
                 {
-                    if (kvp.Value != null) UnityEngine.Object.Destroy(kvp.Value.gameObject);
+                    if (kvp.Value != null) DestroyObjectSafe(kvp.Value.gameObject);
                     deadKeys.Add(kvp.Key);
                 }
             }
@@ -935,86 +1043,214 @@ namespace ScaryParty.Pizzeria.Presentation
                 ctrl.TickServer(root, dt);
             }
 
-            if (netState != null && netState.Employees != null)
+            if (netState != null && netState.IsSpawned && netState.Employees != null)
             {
-                var desired = new List<NetEmployeeDto>();
+                var runStats = root.RunProgressionService != null ? root.RunProgressionService.RecalculateEffectiveStats() : new RunEffectiveStats();
+                var activeIds = new HashSet<int>();
                 foreach (var kvp in root.EmployeeTaskService.Employees)
                 {
                     var emp = kvp.Value;
+                    activeIds.Add(emp.EmployeeId);
                     SharedEmployeeTask task = null;
                     if (emp.AssignedTaskId > 0)
                     {
                         root.EmployeeTaskService.Tasks.TryGetValue(emp.AssignedTaskId, out task);
                     }
-                    Vector3 pos = _spawned.TryGetValue(emp.EmployeeId, out var ctrl) && ctrl != null
-                        ? ctrl.transform.position
-                        : root.transform.position;
+                    bool hasCtrl = _spawned.TryGetValue(emp.EmployeeId, out var ctrl) && ctrl != null;
+                    Vector3 pos = hasCtrl ? ctrl.transform.position : root.transform.position;
+                    float yaw = hasCtrl ? ctrl.transform.eulerAngles.y : 0f;
+                    int curHp = hasCtrl ? ctrl.CurrentHpInt : (emp.IsAlive ? 100 : 0);
+                    int maxHp = hasCtrl ? ctrl.MaxHpInt : 100;
+                    uint rev = hasCtrl ? ctrl.Revision : 1u;
 
-                    desired.Add(new NetEmployeeDto
+                    float errProb = root.EmployeeTaskService.ComputeEffectiveErrorProbability(emp, runStats.EmployeeErrorMultiplier);
+                    var dto = new NetEmployeeDto
                     {
                         EmployeeId = emp.EmployeeId,
                         Role = (byte)emp.Role,
                         Level = (byte)Mathf.Clamp(emp.Level, 1, 255),
                         IsAlive = emp.IsAlive,
+                        CurrentHp = curHp,
+                        MaxHp = maxHp,
                         TaskState = task != null ? (byte)task.State : (byte)EmployeeTaskState.Available,
                         BlockReason = task != null ? (byte)task.BlockReason : (byte)EmployeeBlockReason.None,
                         AssignedTaskId = emp.AssignedTaskId,
                         TargetOrderId = task != null ? (int)task.TargetOrderId.Value : 0,
+                        CurrentLineIndex = task != null ? (byte)Mathf.Clamp(task.CurrentLineIndex, 0, 255) : (byte)0,
+                        UnitsCompleted = task != null ? (byte)Mathf.Clamp(task.TotalUnitsCompleted, 0, 255) : (byte)0,
+                        UnitsRequired = task != null ? (byte)Mathf.Clamp(task.TotalUnitsRequired, 0, 255) : (byte)0,
+                        SkillErrorPercent = (byte)Mathf.Clamp(Mathf.RoundToInt(errProb * 100f), 0, 100),
                         IntentionalErrorTriggered = task != null && task.IntentionalErrorTriggered,
                         PosX = pos.x,
                         PosY = pos.y,
-                        PosZ = pos.z
-                    });
-                }
+                        PosZ = pos.z,
+                        Yaw = yaw,
+                        Revision = rev
+                    };
 
-                bool differs = netState.Employees.Count != desired.Count;
-                if (!differs)
-                {
-                    for (int i = 0; i < desired.Count; i++)
+                    int idx = -1;
+                    for (int j = 0; j < netState.Employees.Count; j++)
                     {
-                        if (!netState.Employees[i].Equals(desired[i]))
+                        if (netState.Employees[j].EmployeeId == dto.EmployeeId)
                         {
-                            differs = true;
+                            idx = j;
                             break;
                         }
                     }
+                    if (idx >= 0)
+                    {
+                        if (!netState.Employees[idx].Equals(dto))
+                        {
+                            netState.Employees[idx] = dto;
+                        }
+                    }
+                    else
+                    {
+                        netState.Employees.Add(dto);
+                    }
                 }
-                if (differs)
+
+                for (int j = netState.Employees.Count - 1; j >= 0; j--)
                 {
-                    netState.Employees.Clear();
-                    for (int i = 0; i < desired.Count; i++) netState.Employees.Add(desired[i]);
+                    if (!activeIds.Contains(netState.Employees[j].EmployeeId))
+                    {
+                        netState.Employees.RemoveAt(j);
+                    }
                 }
             }
         }
 
         public static void ClearAll()
         {
+            UnsubscribeClient();
             foreach (var kvp in _spawned)
             {
-                if (kvp.Value != null) UnityEngine.Object.Destroy(kvp.Value.gameObject);
+                if (kvp.Value != null) DestroyObjectSafe(kvp.Value.gameObject);
             }
             _spawned.Clear();
-            foreach (var kvp in _clientProxies)
-            {
-                if (kvp.Value != null) UnityEngine.Object.Destroy(kvp.Value.gameObject);
-            }
-            _clientProxies.Clear();
+            ClearClientProxiesOnly();
 
             var ns = PizzeriaNetworkState.Instance;
-            if (ns != null && ns.Employees != null && Unity.Netcode.NetworkManager.Singleton != null && Unity.Netcode.NetworkManager.Singleton.IsServer)
+            if (ns != null && ns.IsSpawned && ns.Employees != null && NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer)
             {
                 ns.Employees.Clear();
             }
         }
 
+        private static void ClearClientProxiesOnly()
+        {
+            foreach (var kvp in _clientProxies)
+            {
+                if (kvp.Value != null) DestroyObjectSafe(kvp.Value.gameObject);
+            }
+            _clientProxies.Clear();
+        }
+
+        public static void EnsureClientSubscribedAndTick(PizzeriaNetworkState netState)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                ClearClientProxiesOnly();
+                return;
+            }
+
+            if (netState == null || !netState.IsSpawned || netState.Employees == null) return;
+            if (_subscribedNetState != netState)
+            {
+                UnsubscribeClient();
+                _subscribedNetState = netState;
+                _subscribedNetState.Employees.OnListChanged += OnClientEmployeesListChanged;
+                if (!_hooksRegistered)
+                {
+                    _hooksRegistered = true;
+                    PizzeriaNetworkState.OnNetworkStateDespawning += HandleNetStateDespawning;
+                }
+                SyncClientProxiesFromList(netState);
+            }
+        }
+
         public static void TickClientProxies(PizzeriaNetworkState netState)
         {
-            if (netState == null || netState.Employees == null) return;
+            EnsureClientSubscribedAndTick(netState);
+        }
 
-            var aliveIds = new HashSet<int>();
+        private static void UnsubscribeClient()
+        {
+            if (_subscribedNetState != null && _subscribedNetState.Employees != null)
+            {
+                _subscribedNetState.Employees.OnListChanged -= OnClientEmployeesListChanged;
+            }
+            _subscribedNetState = null;
+            if (_hooksRegistered)
+            {
+                _hooksRegistered = false;
+                PizzeriaNetworkState.OnNetworkStateDespawning -= HandleNetStateDespawning;
+            }
+        }
+
+        private static void HandleNetStateDespawning(PizzeriaNetworkState ns)
+        {
+            if (ns == _subscribedNetState)
+            {
+                UnsubscribeClient();
+                ClearClientProxiesOnly();
+            }
+        }
+
+        private static void OnClientEmployeesListChanged(NetworkListEvent<NetEmployeeDto> changeEvent)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer) return;
+            if (_subscribedNetState != null && _subscribedNetState.IsSpawned)
+            {
+                SyncClientProxiesFromList(_subscribedNetState);
+            }
+        }
+
+        public static void SyncClientProxiesFromList(PizzeriaNetworkState netState)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                ClearClientProxiesOnly();
+                return;
+            }
+            if (netState == null || !netState.IsSpawned || netState.Employees == null)
+            {
+                ClearClientProxiesOnly();
+                return;
+            }
+
+            _clientSyncBuffer.Clear();
             for (int i = 0; i < netState.Employees.Count; i++)
             {
-                var dto = netState.Employees[i];
+                _clientSyncBuffer.Add(netState.Employees[i]);
+            }
+            SyncClientProxiesFromSnapshot(_clientSyncBuffer);
+        }
+
+        /// <summary>
+        /// Sincroniza proxies client-side de funcionários a partir de um snapshot replicado.
+        /// </summary>
+        public static void SyncClientProxiesFromSnapshot(IReadOnlyList<NetEmployeeDto> snapshot)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                ClearClientProxiesOnly();
+                return;
+            }
+            if (snapshot == null || snapshot.Count == 0)
+            {
+                ClearClientProxiesOnly();
+                return;
+            }
+
+            var aliveIds = new HashSet<int>();
+            for (int i = 0; i < snapshot.Count; i++)
+            {
+                var dto = snapshot[i];
                 aliveIds.Add(dto.EmployeeId);
                 if (_clientProxies.TryGetValue(dto.EmployeeId, out var proxy) && proxy != null)
                 {
@@ -1035,7 +1271,7 @@ namespace ScaryParty.Pizzeria.Presentation
             for (int i = 0; i < toRemove.Count; i++)
             {
                 if (_clientProxies.TryGetValue(toRemove[i], out var p) && p != null)
-                    UnityEngine.Object.Destroy(p.gameObject);
+                    DestroyObjectSafe(p.gameObject);
                 _clientProxies.Remove(toRemove[i]);
             }
         }
@@ -1077,6 +1313,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var go = new GameObject($"Employee_{emp.Role}_{emp.EmployeeId}");
             go.transform.position = spawnPos;
+            var capsule = go.AddComponent<CapsuleCollider>();
+            capsule.center = new Vector3(0f, 0.9f, 0f);
+            capsule.height = 1.8f;
+            capsule.radius = 0.35f;
+
             BuildEmployeeVisual(go, emp.Role);
 
             var ctrl = go.AddComponent<EmployeeAgentController>();
@@ -1089,6 +1330,11 @@ namespace ScaryParty.Pizzeria.Presentation
             var role = (EmployeeRole)dto.Role;
             var go = new GameObject($"EmployeeProxy_{role}_{dto.EmployeeId}");
             go.transform.position = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
+            var capsule = go.AddComponent<CapsuleCollider>();
+            capsule.center = new Vector3(0f, 0.9f, 0f);
+            capsule.height = 1.8f;
+            capsule.radius = 0.35f;
+
             BuildEmployeeVisual(go, role);
 
             var ctrl = go.AddComponent<EmployeeAgentController>();
@@ -1099,6 +1345,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static void BuildEmployeeVisual(GameObject go, EmployeeRole role)
         {
+            var visualRoot = new GameObject("VisualRoot");
+            visualRoot.transform.SetParent(go.transform, false);
+            visualRoot.transform.localPosition = Vector3.zero;
+            visualRoot.transform.localRotation = Quaternion.identity;
+
             Color tint = role == EmployeeRole.Cashier
                 ? new Color(0.20f, 0.55f, 0.85f)
                 : new Color(0.92f, 0.90f, 0.82f);
@@ -1107,7 +1358,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
             if (visualPrefab != null)
             {
-                var inst = UnityEngine.Object.Instantiate(visualPrefab, go.transform, false);
+                var inst = UnityEngine.Object.Instantiate(visualPrefab, visualRoot.transform, false);
                 inst.name = "CharacterVisual";
                 inst.transform.localPosition = Vector3.zero;
                 inst.transform.localRotation = Quaternion.identity;
@@ -1125,13 +1376,17 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 cap.name = "BodyVisual";
-                UnityEngine.Object.Destroy(cap.GetComponent<Collider>());
-                cap.transform.SetParent(go.transform, false);
+                DestroyObjectSafe(cap.GetComponent<Collider>());
+                cap.transform.SetParent(visualRoot.transform, false);
                 cap.transform.localPosition = new Vector3(0f, 0.9f, 0f);
                 var renderer = cap.GetComponent<Renderer>();
-                if (renderer != null && renderer.material != null)
+                if (renderer != null)
                 {
-                    renderer.material.color = tint;
+                    var mpb = new MaterialPropertyBlock();
+                    renderer.GetPropertyBlock(mpb);
+                    mpb.SetColor("_Color", tint);
+                    mpb.SetColor("_BaseColor", tint);
+                    renderer.SetPropertyBlock(mpb);
                 }
             }
         }

@@ -46,6 +46,12 @@ namespace ScaryParty.Combat.Monsters
 
         private Animator _animator;
         private NavMeshAgent _agent;
+        private Collider _mainCollider;
+        private Transform _visualRoot;
+        private Renderer[] _bodyRenderers;
+        private MaterialPropertyBlock _flashMpb;
+        private float _damageFlashTimer;
+        private byte _clientTelegraphKind;
         private Transform _currentTarget;
         private float _outOfRangeTimer;
         private float _attackCooldownTimer;
@@ -83,12 +89,46 @@ namespace ScaryParty.Combat.Monsters
         public int CurrentHealth => _localHealth;
         public NpcBehaviorState CurrentBehaviorState => _localBehaviorState;
         public bool IsAlive => CurrentHealth > 0 && CurrentBehaviorState != NpcBehaviorState.Dead;
+        public byte CurrentTelegraphKind
+        {
+            get
+            {
+                if (_isClientProxy) return _clientTelegraphKind;
+                if (_dropTelegraphTimer > 0f) return 1;
+                if (_localBehaviorState == NpcBehaviorState.Attacking && _lungePrepTimer > 0f) return 2;
+                if (_hasPendingBlink && _blinkTelegraphTimer > 0f) return 3;
+                if (_localBehaviorState == NpcBehaviorState.Customer && _boundCustomerId.IsValid &&
+                    PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.DomainState != null &&
+                    PizzeriaRoot.Instance.DomainState.Customers.TryGetValue(_boundCustomerId, out var cust) &&
+                    (cust.Phase == CustomerPhase.SeatedWaitingFood || cust.Phase == CustomerPhase.Eating))
+                {
+                    return 4;
+                }
+                return 0;
+            }
+        }
         private bool IsAuthoritativeServer => !_isClientProxy && _configuredOnServer && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer);
 
         private void Awake()
         {
             _agent = GetComponent<NavMeshAgent>();
+            _mainCollider = GetComponent<Collider>();
+            _visualRoot = transform.Find("VisualRoot") ?? transform;
             _animator = GetComponentInChildren<Animator>(true);
+            CacheBodyRenderers();
+        }
+
+        private void CacheBodyRenderers()
+        {
+            _visualRoot = transform.Find("VisualRoot") ?? transform;
+            var all = _visualRoot.GetComponentsInChildren<Renderer>(true);
+            var list = new System.Collections.Generic.List<Renderer>(all.Length);
+            for (int i = 0; i < all.Length; i++)
+            {
+                if (all[i] != null && all[i].name != "Eyes")
+                    list.Add(all[i]);
+            }
+            _bodyRenderers = list.ToArray();
         }
 
         public void ConfigureClientProxy(ulong monsterId, NpcSpecies npcSpecies, Renderer[] eyes, NetMonsterDto initialDto)
@@ -97,25 +137,37 @@ namespace ScaryParty.Combat.Monsters
             species = npcSpecies;
             _isClientProxy = true;
             _configuredOnServer = false;
+            _mainCollider = GetComponent<Collider>();
             if (eyes != null && eyes.Length > 0) eyeRenderers = eyes;
             _animator = GetComponentInChildren<Animator>(true);
+            CacheBodyRenderers();
             ApplyReplicatedDto(initialDto, snapImmediately: true);
         }
 
         public void ApplyReplicatedDto(NetMonsterDto dto, bool snapImmediately = false)
         {
+            int previousHp = _localHealth;
             maxHealth = Mathf.Max(1, dto.MaxHp);
             _localHealth = Mathf.Max(0, dto.CurrentHp);
             _localBehaviorState = (NpcBehaviorState)dto.BehaviorState;
+            _clientTelegraphKind = dto.TelegraphKind;
             Revision = dto.Revision;
             _clientTargetPos = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
             _clientTargetYaw = dto.Yaw;
+            if (_hasClientTarget && _localHealth < previousHp)
+            {
+                TriggerDamageFlash();
+            }
             if (snapImmediately || !_hasClientTarget || (_clientTargetPos - transform.position).sqrMagnitude > 36f)
             {
                 transform.position = _clientTargetPos;
                 transform.rotation = Quaternion.Euler(0f, _clientTargetYaw, 0f);
             }
             _hasClientTarget = true;
+            if (!IsAlive && _mainCollider != null && _mainCollider.enabled)
+            {
+                _mainCollider.enabled = false;
+            }
             UpdateEyePresentation();
         }
 
@@ -142,7 +194,9 @@ namespace ScaryParty.Combat.Monsters
             _configuredOnServer = true;
             _isClientProxy = false;
             _localHealth = maxHealth;
+            _mainCollider = GetComponent<Collider>();
             _animator = GetComponentInChildren<Animator>(true);
+            CacheBodyRenderers();
             SetBehaviorStateInternal(NpcBehaviorState.Routine);
             if (_agent != null && _isPerchedOnRooftop)
                 _agent.enabled = false;
@@ -161,6 +215,59 @@ namespace ScaryParty.Combat.Monsters
             Revision++;
         }
 
+        private void TriggerDamageFlash()
+        {
+            _damageFlashTimer = 0.18f;
+        }
+
+        private void UpdateVisualFeedback(float dt)
+        {
+            if (_visualRoot != null && _visualRoot != transform)
+            {
+                float targetPitch = !IsAlive ? -90f : 0f;
+                Vector3 targetLocalPos = !IsAlive ? new Vector3(0f, 0.25f, 0f) : Vector3.zero;
+                byte tg = CurrentTelegraphKind;
+                if (IsAlive && tg == 1) targetLocalPos.y += Mathf.Sin(Time.time * 18f) * 0.08f; // Roof drop telegraph
+                else if (IsAlive && tg == 2) targetLocalPos.z -= 0.18f; // Lunge prep crouch
+                else if (IsAlive && tg == 3) targetLocalPos.y += 0.22f + Mathf.Sin(Time.time * 24f) * 0.10f; // Ghost blink
+
+                _visualRoot.localRotation = Quaternion.Slerp(_visualRoot.localRotation, Quaternion.Euler(targetPitch, 0f, 0f), Mathf.Clamp01(dt * 10f));
+                _visualRoot.localPosition = Vector3.Lerp(_visualRoot.localPosition, targetLocalPos, Mathf.Clamp01(dt * 14f));
+            }
+
+            if (_animator != null)
+            {
+                _animator.SetBool("IsSitting", IsAlive && CurrentTelegraphKind == 4);
+            }
+
+            if (_damageFlashTimer > 0f)
+            {
+                _damageFlashTimer = Mathf.Max(0f, _damageFlashTimer - dt);
+                ApplyDamageTint(_damageFlashTimer > 0f);
+            }
+        }
+
+        private void ApplyDamageTint(bool flashing)
+        {
+            if (_bodyRenderers == null || _bodyRenderers.Length == 0) return;
+            _flashMpb ??= new MaterialPropertyBlock();
+            for (int i = 0; i < _bodyRenderers.Length; i++)
+            {
+                var r = _bodyRenderers[i];
+                if (r == null) continue;
+                r.GetPropertyBlock(_flashMpb);
+                if (flashing)
+                {
+                    _flashMpb.SetColor("_EmissionColor", new Color(0.85f, 0.12f, 0.12f, 1f));
+                }
+                else
+                {
+                    _flashMpb.SetColor("_EmissionColor", Color.black);
+                }
+                r.SetPropertyBlock(_flashMpb);
+            }
+        }
+
         private void Update()
         {
             var curState = CurrentBehaviorState;
@@ -170,21 +277,26 @@ namespace ScaryParty.Combat.Monsters
                 UpdateEyePresentation();
             }
 
+            float dt = Time.deltaTime;
+            UpdateVisualFeedback(dt);
+
             if (_isClientProxy)
             {
-                float cdt = Time.deltaTime;
                 if (_hasClientTarget && IsAlive)
                 {
                     Vector3 prev = transform.position;
-                    transform.position = Vector3.Lerp(prev, _clientTargetPos, Mathf.Clamp01(cdt * 12f));
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, _clientTargetYaw, 0f), Mathf.Clamp01(cdt * 12f));
-                    float estSpeed = cdt > 0.0001f ? (transform.position - prev).magnitude / cdt : 0f;
+                    transform.position = Vector3.Lerp(prev, _clientTargetPos, Mathf.Clamp01(dt * 12f));
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 12f));
+                    float estSpeed = dt > 0.0001f ? (transform.position - prev).magnitude / dt : 0f;
                     DriveAnimatorLocomotion(estSpeed);
                 }
                 else if (!IsAlive)
                 {
                     DriveAnimatorLocomotion(0f);
-                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, _clientTargetYaw, 0f), Mathf.Clamp01(cdt * 8f));
+                    if (_visualRoot == transform)
+                    {
+                        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 8f));
+                    }
                 }
                 return;
             }
@@ -194,13 +306,17 @@ namespace ScaryParty.Combat.Monsters
             if (!IsAlive)
             {
                 DriveAnimatorLocomotion(0f);
-                _deadHideTimer += Time.deltaTime;
+                if (_mainCollider != null && _mainCollider.enabled) _mainCollider.enabled = false;
+                if (_agent != null && _agent.enabled) _agent.enabled = false;
+                if (_visualRoot == transform)
+                {
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, transform.eulerAngles.y, 0f), Mathf.Clamp01(dt * 8f));
+                }
+                _deadHideTimer += dt;
                 return;
             }
 
             DriveAnimatorLocomotion(_agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f);
-
-            float dt = Time.deltaTime;
             if (_attackCooldownTimer > 0f) _attackCooldownTimer -= dt;
             if (_blinkTimer > 0f) _blinkTimer -= dt;
 
@@ -445,6 +561,7 @@ namespace ScaryParty.Combat.Monsters
             InterruptBoundCustomerServer();
             _isDirectlyProvoked = true;
             SetHealthInternal(CurrentHealth - Mathf.Max(1, evt.Amount));
+            TriggerDamageFlash();
 
             if (wasCustomer && PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.DomainState != null &&
                 PizzeriaRoot.Instance.IsWorldPositionInsidePizzeria(transform.position))
@@ -456,9 +573,11 @@ namespace ScaryParty.Combat.Monsters
             if (CurrentHealth <= 0)
             {
                 SetBehaviorStateInternal(NpcBehaviorState.Dead);
-                if (_agent != null && _agent.enabled && _agent.isOnNavMesh)
+                if (_mainCollider != null) _mainCollider.enabled = false;
+                if (_agent != null && _agent.enabled)
                 {
-                    _agent.isStopped = true;
+                    if (_agent.isOnNavMesh) _agent.isStopped = true;
+                    _agent.enabled = false;
                 }
                 return;
             }
@@ -503,6 +622,22 @@ namespace ScaryParty.Combat.Monsters
                     {
                         bestDistSq = dSq;
                         bestTarget = peds[i].transform;
+                    }
+                }
+            }
+
+            if (bestTarget == null)
+            {
+                var employees = FindObjectsByType<EmployeeAgentController>(FindObjectsSortMode.None);
+                for (int i = 0; i < employees.Length; i++)
+                {
+                    var emp = employees[i];
+                    if (emp == null || !emp.IsAlive) continue;
+                    float dSq = (emp.transform.position - transform.position).sqrMagnitude;
+                    if (dSq <= bestDistSq)
+                    {
+                        bestDistSq = dSq;
+                        bestTarget = emp.transform;
                     }
                 }
             }

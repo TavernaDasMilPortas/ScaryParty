@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Netcode;
+using UnityEngine;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -1091,6 +1092,7 @@ namespace ScaryParty.Pizzeria.Network
         public ulong MonsterId;
         public byte Species;
         public byte BehaviorState;
+        public byte TelegraphKind; // 0=None, 1=RoofDrop, 2=WerewolfLunge, 3=GhostBlink, 4=SeatedCustomer
         public int CurrentHp;
         public int MaxHp;
         public float PosX;
@@ -1105,6 +1107,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref MonsterId);
             serializer.SerializeValue(ref Species);
             serializer.SerializeValue(ref BehaviorState);
+            serializer.SerializeValue(ref TelegraphKind);
             serializer.SerializeValue(ref CurrentHp);
             serializer.SerializeValue(ref MaxHp);
             serializer.SerializeValue(ref PosX);
@@ -1119,16 +1122,18 @@ namespace ScaryParty.Pizzeria.Network
             => MonsterId == other.MonsterId &&
                Species == other.Species &&
                BehaviorState == other.BehaviorState &&
+               TelegraphKind == other.TelegraphKind &&
                CurrentHp == other.CurrentHp &&
                MaxHp == other.MaxHp &&
                IsAlerted == other.IsAlerted &&
-               Math.Abs(PosX - other.PosX) < 0.05f &&
-               Math.Abs(PosY - other.PosY) < 0.05f &&
-               Math.Abs(PosZ - other.PosZ) < 0.05f &&
+               Math.Abs(PosX - other.PosX) < 0.04f &&
+               Math.Abs(PosY - other.PosY) < 0.04f &&
+               Math.Abs(PosZ - other.PosZ) < 0.04f &&
+               Math.Abs(Mathf.DeltaAngle(Yaw, other.Yaw)) < 2.0f &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetMonsterDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(MonsterId, Species, BehaviorState, CurrentHp, IsAlerted, Revision);
+        public override int GetHashCode() => HashCode.Combine(MonsterId, Species, BehaviorState, TelegraphKind, CurrentHp, IsAlerted, Revision);
     }
 
     public struct NetEmployeeDto : INetworkSerializable, IEquatable<NetEmployeeDto>
@@ -1137,14 +1142,22 @@ namespace ScaryParty.Pizzeria.Network
         public byte Role; // 0=Cashier, 1=Pizzaiolo
         public byte Level;
         public bool IsAlive;
+        public int CurrentHp;
+        public int MaxHp;
         public byte TaskState; // EmployeeTaskState
         public byte BlockReason; // EmployeeBlockReason
         public int AssignedTaskId;
         public int TargetOrderId;
+        public byte CurrentLineIndex;
+        public byte UnitsCompleted;
+        public byte UnitsRequired;
+        public byte SkillErrorPercent;
         public bool IntentionalErrorTriggered;
         public float PosX;
         public float PosY;
         public float PosZ;
+        public float Yaw;
+        public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
@@ -1152,14 +1165,22 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref Role);
             serializer.SerializeValue(ref Level);
             serializer.SerializeValue(ref IsAlive);
+            serializer.SerializeValue(ref CurrentHp);
+            serializer.SerializeValue(ref MaxHp);
             serializer.SerializeValue(ref TaskState);
             serializer.SerializeValue(ref BlockReason);
             serializer.SerializeValue(ref AssignedTaskId);
             serializer.SerializeValue(ref TargetOrderId);
+            serializer.SerializeValue(ref CurrentLineIndex);
+            serializer.SerializeValue(ref UnitsCompleted);
+            serializer.SerializeValue(ref UnitsRequired);
+            serializer.SerializeValue(ref SkillErrorPercent);
             serializer.SerializeValue(ref IntentionalErrorTriggered);
             serializer.SerializeValue(ref PosX);
             serializer.SerializeValue(ref PosY);
             serializer.SerializeValue(ref PosZ);
+            serializer.SerializeValue(ref Yaw);
+            serializer.SerializeValue(ref Revision);
         }
 
         public bool Equals(NetEmployeeDto other)
@@ -1167,16 +1188,24 @@ namespace ScaryParty.Pizzeria.Network
                Role == other.Role &&
                Level == other.Level &&
                IsAlive == other.IsAlive &&
+               CurrentHp == other.CurrentHp &&
+               MaxHp == other.MaxHp &&
                TaskState == other.TaskState &&
                BlockReason == other.BlockReason &&
                AssignedTaskId == other.AssignedTaskId &&
                TargetOrderId == other.TargetOrderId &&
+               CurrentLineIndex == other.CurrentLineIndex &&
+               UnitsCompleted == other.UnitsCompleted &&
+               UnitsRequired == other.UnitsRequired &&
+               SkillErrorPercent == other.SkillErrorPercent &&
                IntentionalErrorTriggered == other.IntentionalErrorTriggered &&
-               Math.Abs(PosX - other.PosX) < 0.1f &&
-               Math.Abs(PosY - other.PosY) < 0.1f &&
-               Math.Abs(PosZ - other.PosZ) < 0.1f;
+               Math.Abs(PosX - other.PosX) < 0.05f &&
+               Math.Abs(PosY - other.PosY) < 0.05f &&
+               Math.Abs(PosZ - other.PosZ) < 0.05f &&
+               Math.Abs(Mathf.DeltaAngle(Yaw, other.Yaw)) < 2.0f &&
+               Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetEmployeeDto other && Equals(other);
-        public override int GetHashCode() => HashCode.Combine(EmployeeId, Role, Level, IsAlive, TaskState, BlockReason, AssignedTaskId, TargetOrderId);
+        public override int GetHashCode() => HashCode.Combine(EmployeeId, Role, Level, IsAlive, CurrentHp, TaskState, AssignedTaskId, Revision);
     }
 }
