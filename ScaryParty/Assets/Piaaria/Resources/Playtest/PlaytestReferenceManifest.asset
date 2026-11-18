@@ -22,6 +22,7 @@ MonoBehaviour:
     canonicalGameScenePath: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
     celShadedVariantScenePath: Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity
   activePizzeriaConfig: {fileID: 11400000, guid: 5dd786dcdcb30634c8c6bc3b582da4d0, type: 2}
+  activeBalancingCatalog: {fileID: 11400000, guid: 27b28e28620513e4e86aa508a713ce24, type: 2}
   activePizzeriaPrefab: {fileID: 3084738830506233021, guid: fc7266d1e4dbc5a46aa1445238583bbe, type: 3}
   playerPrefab: {fileID: 4416926081852918481, guid: 64dce48905ffd9b4293e595fa6941544, type: 3}
   networkPrefabsConfigAsset: {fileID: 0}

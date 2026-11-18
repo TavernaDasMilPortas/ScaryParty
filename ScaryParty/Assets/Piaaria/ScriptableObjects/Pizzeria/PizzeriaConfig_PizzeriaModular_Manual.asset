@@ -18,6 +18,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3078ffee4b86dea469aa299d72297337, type: 2}
   - {fileID: 11400000, guid: 0b2aa4a0caae99e48a72404a0c6f5135, type: 2}
   - {fileID: 11400000, guid: 0c6c41f634f4a5a448f7ad5bed1e2ded, type: 2}
+  balancingCatalog: {fileID: 11400000, guid: 27b28e28620513e4e86aa508a713ce24, type: 2}
   nightConfig: {fileID: 0}
   enableAllPlayersDeadDefeat: 1
   allowDebugNightRetryOnDefeat: 0

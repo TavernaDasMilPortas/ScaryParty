@@ -43,6 +43,7 @@ namespace ScaryParty.Pizzeria.Authoring
 
         [Header("Configurações e Prefabs Principais")]
         public PizzeriaConfig activePizzeriaConfig;
+        public RunBalancingCatalog activeBalancingCatalog;
         public GameObject activePizzeriaPrefab;
         public GameObject playerPrefab;
         public GameObject networkPrefabsConfigAsset;

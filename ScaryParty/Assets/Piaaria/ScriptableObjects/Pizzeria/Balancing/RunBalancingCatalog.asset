@@ -1,0 +1,636 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1c2b92f6be7c394e93eff3c72a44e20, type: 3}
+  m_Name: RunBalancingCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.RunBalancingCatalog
+  catalogSchemaVersion: 1
+  modifiers:
+  - id: blood_moon
+    displayName: Lua vermelha
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - population
+    - vampire
+    effects:
+    - target: 1
+      operation: 1
+      unit: 1
+      valuePerLevel: 50
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 3
+  - id: vampire_attack
+    displayName: Ataque dos vampiros
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 1
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - combat
+    - vampire
+    effects:
+    - target: 2
+      operation: 1
+      unit: 1
+      valuePerLevel: 35
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 2.5
+  - id: heavy_rush
+    displayName: Movimento intenso
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 1
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - festival_demand
+    tags:
+    - orders
+    - demand
+    effects:
+    - target: 3
+      operation: 1
+      unit: 1
+      valuePerLevel: 30
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 2.5
+  - id: express_supply
+    displayName: Fornecimento expresso
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 2
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - slow_supply
+    - storm_logistics
+    tags:
+    - supply
+    - eta
+    effects:
+    - target: 4
+      operation: 1
+      unit: 1
+      valuePerLevel: -40
+      useLimits: 1
+      minLimit: 0.3
+      maxLimit: 2.5
+  - id: oven_timer
+    displayName: Timer do forno
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 3
+    enabled: 1
+    allowedSource: 2
+    duration: 1
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - kitchen
+    - oven
+    effects:
+    - target: 5
+      operation: 3
+      unit: 3
+      valuePerLevel: 1
+      useLimits: 0
+      minLimit: 0.2
+      maxLimit: 3
+  - id: reinforced_bag
+    displayName: Bolsa reforcada
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 3
+    enabled: 1
+    allowedSource: 2
+    duration: 1
+    maxStacks: 2
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - delivery
+    - backpack
+    effects:
+    - target: 6
+      operation: 0
+      unit: 0
+      valuePerLevel: 1
+      useLimits: 1
+      minLimit: 0
+      maxLimit: 2
+  - id: staff_training
+    displayName: Treinamento
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 3
+    enabled: 1
+    allowedSource: 2
+    duration: 1
+    maxStacks: 2
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds: []
+    tags:
+    - employees
+    - training
+    effects:
+    - target: 8
+      operation: 1
+      unit: 1
+      valuePerLevel: -25
+      useLimits: 1
+      minLimit: 0.2
+      maxLimit: 1.5
+  - id: impatient_customers
+    displayName: Clientes impacientes
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 1
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - calm_customers
+    tags:
+    - customers
+    - patience
+    effects:
+    - target: 9
+      operation: 1
+      unit: 1
+      valuePerLevel: -25
+      useLimits: 1
+      minLimit: 0.4
+      maxLimit: 2
+  - id: slow_supply
+    displayName: Entrega demorada
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 1
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 1
+    prerequisiteIds: []
+    incompatibleIds:
+    - express_supply
+    tags:
+    - supply
+    - eta
+    effects:
+    - target: 4
+      operation: 1
+      unit: 1
+      valuePerLevel: 35
+      useLimits: 1
+      minLimit: 0.3
+      maxLimit: 2.5
+  - id: calm_customers
+    displayName: Clientes pacientes
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 2
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - impatient_customers
+    tags:
+    - customers
+    - patience
+    effects:
+    - target: 9
+      operation: 1
+      unit: 1
+      valuePerLevel: 25
+      useLimits: 1
+      minLimit: 0.4
+      maxLimit: 2
+  - id: quiet_night
+    displayName: Noite tranquila
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 2
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 0.8
+    isFallbackReserve: 1
+    prerequisiteIds: []
+    incompatibleIds:
+    - blood_moon
+    tags:
+    - population
+    - vampire
+    effects:
+    - target: 1
+      operation: 1
+      unit: 1
+      valuePerLevel: -25
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 3
+  - id: festival_demand
+    displayName: Festival na cidade
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - heavy_rush
+    tags:
+    - orders
+    - event
+    effects:
+    - target: 3
+      operation: 1
+      unit: 1
+      valuePerLevel: 25
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 2.5
+  - id: vampire_prowl
+    displayName: Ronda dos vampiros
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 1
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - vampire_attack
+    tags:
+    - combat
+    - vampire
+    - event
+    effects:
+    - target: 2
+      operation: 1
+      unit: 1
+      valuePerLevel: 25
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 2.5
+  - id: storm_logistics
+    displayName: Tempestade nas vias
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 0.9
+    isFallbackReserve: 0
+    prerequisiteIds: []
+    incompatibleIds:
+    - express_supply
+    - slow_supply
+    tags:
+    - supply
+    - event
+    effects:
+    - target: 4
+      operation: 1
+      unit: 1
+      valuePerLevel: 25
+      useLimits: 1
+      minLimit: 0.3
+      maxLimit: 2.5
+  - id: midnight_surge
+    displayName: Madrugada agitada
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 0.8
+    isFallbackReserve: 1
+    prerequisiteIds: []
+    incompatibleIds:
+    - blood_moon
+    - quiet_night
+    tags:
+    - population
+    - vampire
+    - event
+    effects:
+    - target: 1
+      operation: 1
+      unit: 1
+      valuePerLevel: 35
+      useLimits: 1
+      minLimit: 0.5
+      maxLimit: 3
+  - id: restless_patrons
+    displayName: Freguesia inquieta
+    descriptionOverride: 
+    icon: {fileID: 0}
+    kind: 0
+    enabled: 1
+    allowedSource: 0
+    duration: 0
+    maxStacks: 1
+    minNight: 1
+    maxNight: 0
+    allowedDifficulties: 3
+    weight: 0.8
+    isFallbackReserve: 1
+    prerequisiteIds: []
+    incompatibleIds:
+    - impatient_customers
+    - calm_customers
+    tags:
+    - customers
+    - event
+    effects:
+    - target: 9
+      operation: 1
+      unit: 1
+      valuePerLevel: -15
+      useLimits: 1
+      minLimit: 0.4
+      maxLimit: 2
+  shopOffers:
+  - offerId: oven_timer_offer
+    displayName: Timer do Forno
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 0
+    modifierId: oven_timer
+    employeeRole: 0
+    supplyBundleLines: []
+    baseCost: 90
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 1
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 1
+  - offerId: reinforced_bag_offer
+    displayName: Bolsa Reforcada
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 0
+    modifierId: reinforced_bag
+    employeeRole: 0
+    supplyBundleLines: []
+    baseCost: 75
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 2
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 2
+  - offerId: staff_training_offer
+    displayName: Treinamento de Equipe
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 0
+    modifierId: staff_training
+    employeeRole: 0
+    supplyBundleLines: []
+    baseCost: 85
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 2
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 3
+  - offerId: base_supplies_offer
+    displayName: Suprimentos Base +5
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 1
+    modifierId: 
+    employeeRole: 0
+    supplyBundleLines:
+    - ingredient: {fileID: 11400000, guid: b1af795fe5fa5c24482cf234d4cf07b9, type: 2}
+      ingredientIdFallback: 1
+      quantity: 5
+    - ingredient: {fileID: 11400000, guid: 29fb612360a74b14f9a100967765464c, type: 2}
+      ingredientIdFallback: 3
+      quantity: 5
+    - ingredient: {fileID: 11400000, guid: 846a2e739d83d364c85a86cbe520531e, type: 2}
+      ingredientIdFallback: 4
+      quantity: 5
+    baseCost: 45
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 0
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 4
+  - offerId: hire_cashier_offer
+    displayName: Contratar Balconista
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 2
+    modifierId: 
+    employeeRole: 0
+    supplyBundleLines: []
+    baseCost: 180
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 0
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 5
+  - offerId: hire_pizzaiolo_offer
+    displayName: Contratar Pizzaiolo
+    customDescription: 
+    icon: {fileID: 0}
+    enabled: 1
+    benefitKind: 2
+    modifierId: 
+    employeeRole: 1
+    supplyBundleLines: []
+    baseCost: 120
+    costIncreasePerLevel: 0
+    maxPurchasesPerRun: 0
+    maxPurchasesPerNight: 0
+    phaseAvailability: 2
+    legacyByteId: 6
+  employeeProfiles:
+  - role: 0
+    displayName: Balconista
+    hireCost: 180
+    maxLevel: 5
+    promotionCostMultiplier: 1
+    promotionFlatStepCost: 0
+    baseErrorRatePercent: 5
+    levelErrorReductionPercent: 15
+    minErrorRatePercent: 2
+    baseActionSeconds: 2.2
+  - role: 1
+    displayName: Pizzaiolo
+    hireCost: 120
+    maxLevel: 5
+    promotionCostMultiplier: 1
+    promotionFlatStepCost: 0
+    baseErrorRatePercent: 20
+    levelErrorReductionPercent: 15
+    minErrorRatePercent: 2
+    baseActionSeconds: 1.8
+  preparationSchedules:
+  - nightNumber: 1
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 0
+    eventAlternatives: 2
+  - nightNumber: 2
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2
+  - nightNumber: 3
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2
+  - nightNumber: 4
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2
+  - nightNumber: 5
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2
+  - nightNumber: 6
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2
+  - nightNumber: 7
+    mandatoryHindranceStages: 1
+    hindranceAlternatives: 2
+    opportunityStages: 1
+    opportunityAlternatives: 2
+    additionalEventStages: 1
+    eventAlternatives: 2

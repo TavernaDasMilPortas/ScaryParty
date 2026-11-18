@@ -50,6 +50,7 @@ namespace ScaryParty.Pizzeria.Authoring
         [Header("Ciclo de Noites e Metas")]
         public PizzeriaRunPreset defaultPreset;
         public List<PizzeriaRunPreset> availablePresets = new List<PizzeriaRunPreset>();
+        public RunBalancingCatalog balancingCatalog;
         public NightConfig nightConfig;
         public bool enableAllPlayersDeadDefeat = true;
         public bool allowDebugNightRetryOnDefeat = false;

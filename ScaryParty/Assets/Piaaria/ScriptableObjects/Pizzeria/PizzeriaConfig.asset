@@ -13,6 +13,29 @@ MonoBehaviour:
   m_Name: PizzeriaConfig
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Authoring.PizzeriaConfig
   compositionRules: {fileID: 11400000, guid: 9176cd37f22a9cf45bff392a584fb468, type: 2}
+  defaultPreset: {fileID: 0}
+  availablePresets: []
+  balancingCatalog: {fileID: 11400000, guid: 27b28e28620513e4e86aa508a713ce24, type: 2}
+  nightConfig: {fileID: 0}
+  enableAllPlayersDeadDefeat: 1
+  allowDebugNightRetryOnDefeat: 0
+  baseNightDurationSeconds: 360
+  baseQuotaMoney: 60
+  initialReputation: 100
+  repBonusDelivery: 5
+  repPenaltyLate: -8
+  repPenaltyWrong: -10
+  repPenaltyExpiredOrAttack: -15
+  enableTutorialNight0ByDefault: 0
+  tutorialNight0DurationSeconds: 600
+  tutorialNight0RevenueGoal: 15
+  runMaxNights: 3
+  runDifficulty: 0
+  runSeedOverride: 0
+  minimumIngredientFloor: 2
+  cashierAttendBaseSeconds: 2.2
+  pizzaioloStepBaseSeconds: 1.8
+  employeeBaseErrorRate: 0.2
   customerTraits:
   - {fileID: 11400000, guid: 02f3b16b2b4548d448156e5b30784763, type: 2}
   - {fileID: 11400000, guid: 85a3f01208aa9c345a137b71b17fe851, type: 2}

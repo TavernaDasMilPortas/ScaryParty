@@ -44,6 +44,7 @@ namespace ScaryParty.Pizzeria.Authoring
         public string displayName = "Entrega (3 Noites)";
         [TextArea(2, 4)]
         public string description = "RUN padrão de 3 noites para entrega (30-45 minutos), sem painel de diagnóstico.";
+        public RunBalancingCatalog balancingCatalogOverride;
 
         [Header("Política da RUN")]
         [Range(1, 7)]
