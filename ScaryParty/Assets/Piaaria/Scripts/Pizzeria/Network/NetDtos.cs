@@ -1096,6 +1096,12 @@ namespace ScaryParty.Pizzeria.Network
         public Unity.Collections.FixedString32Bytes ActivePresetId;
         public bool AllowDebugPanel;
         public bool IsDebugTaintedRun;
+        public byte IntermissionStage;
+        public double RevealStartedAtServerTime;
+        public double CountdownStartsAtServerTime;
+        public double StartNightAtServerTime;
+        public Unity.Collections.FixedString64Bytes WinningHindranceId;
+        public Unity.Collections.FixedString64Bytes WinningOpportunityId;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -1126,6 +1132,12 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref ActivePresetId);
             serializer.SerializeValue(ref AllowDebugPanel);
             serializer.SerializeValue(ref IsDebugTaintedRun);
+            serializer.SerializeValue(ref IntermissionStage);
+            serializer.SerializeValue(ref RevealStartedAtServerTime);
+            serializer.SerializeValue(ref CountdownStartsAtServerTime);
+            serializer.SerializeValue(ref StartNightAtServerTime);
+            serializer.SerializeValue(ref WinningHindranceId);
+            serializer.SerializeValue(ref WinningOpportunityId);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -1149,6 +1161,12 @@ namespace ScaryParty.Pizzeria.Network
                ActivePresetId.Equals(other.ActivePresetId) &&
                AllowDebugPanel == other.AllowDebugPanel &&
                IsDebugTaintedRun == other.IsDebugTaintedRun &&
+               IntermissionStage == other.IntermissionStage &&
+               Math.Abs(RevealStartedAtServerTime - other.RevealStartedAtServerTime) < 0.001 &&
+               Math.Abs(CountdownStartsAtServerTime - other.CountdownStartsAtServerTime) < 0.001 &&
+               Math.Abs(StartNightAtServerTime - other.StartNightAtServerTime) < 0.001 &&
+               WinningHindranceId.Equals(other.WinningHindranceId) &&
+               WinningOpportunityId.Equals(other.WinningOpportunityId) &&
                Math.Abs(EmployeeErrorMultiplier - other.EmployeeErrorMultiplier) < 0.01f &&
                Revision == other.Revision;
 
@@ -1222,6 +1240,8 @@ namespace ScaryParty.Pizzeria.Network
         public byte UnitsRequired;
         public byte SkillErrorPercent;
         public bool IntentionalErrorTriggered;
+        public byte WorkStep;
+        public byte ActionProgressPercent;
         public float PosX;
         public float PosY;
         public float PosZ;
@@ -1245,6 +1265,8 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref UnitsRequired);
             serializer.SerializeValue(ref SkillErrorPercent);
             serializer.SerializeValue(ref IntentionalErrorTriggered);
+            serializer.SerializeValue(ref WorkStep);
+            serializer.SerializeValue(ref ActionProgressPercent);
             serializer.SerializeValue(ref PosX);
             serializer.SerializeValue(ref PosY);
             serializer.SerializeValue(ref PosZ);
@@ -1268,6 +1290,8 @@ namespace ScaryParty.Pizzeria.Network
                UnitsRequired == other.UnitsRequired &&
                SkillErrorPercent == other.SkillErrorPercent &&
                IntentionalErrorTriggered == other.IntentionalErrorTriggered &&
+               WorkStep == other.WorkStep &&
+               Math.Abs(ActionProgressPercent - other.ActionProgressPercent) <= 2 &&
                Math.Abs(PosX - other.PosX) < 0.05f &&
                Math.Abs(PosY - other.PosY) < 0.05f &&
                Math.Abs(PosZ - other.PosZ) < 0.05f &&
@@ -1319,6 +1343,40 @@ namespace ScaryParty.Pizzeria.Network
 
         public override bool Equals(object obj) => obj is NetRunVoteOptionDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(StageIndex, OptionIndex, OptionId, VoteCount, IsResolvedWinner);
+    }
+
+    public struct NetPlayerIntermissionDto : INetworkSerializable, IEquatable<NetPlayerIntermissionDto>
+    {
+        public ulong ClientId;
+        public Unity.Collections.FixedString32Bytes PlayerName;
+        public bool HasVotedHindrance;
+        public bool HasVotedOpportunity;
+        public bool IsReady;
+        public Unity.Collections.FixedString64Bytes VotedHindranceId;
+        public Unity.Collections.FixedString64Bytes VotedOpportunityId;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref ClientId);
+            serializer.SerializeValue(ref PlayerName);
+            serializer.SerializeValue(ref HasVotedHindrance);
+            serializer.SerializeValue(ref HasVotedOpportunity);
+            serializer.SerializeValue(ref IsReady);
+            serializer.SerializeValue(ref VotedHindranceId);
+            serializer.SerializeValue(ref VotedOpportunityId);
+        }
+
+        public bool Equals(NetPlayerIntermissionDto other)
+            => ClientId == other.ClientId &&
+               PlayerName.Equals(other.PlayerName) &&
+               HasVotedHindrance == other.HasVotedHindrance &&
+               HasVotedOpportunity == other.HasVotedOpportunity &&
+               IsReady == other.IsReady &&
+               VotedHindranceId.Equals(other.VotedHindranceId) &&
+               VotedOpportunityId.Equals(other.VotedOpportunityId);
+
+        public override bool Equals(object obj) => obj is NetPlayerIntermissionDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(ClientId, HasVotedHindrance, HasVotedOpportunity, IsReady);
     }
 
     public struct NetRunShopOfferDto : INetworkSerializable, IEquatable<NetRunShopOfferDto>

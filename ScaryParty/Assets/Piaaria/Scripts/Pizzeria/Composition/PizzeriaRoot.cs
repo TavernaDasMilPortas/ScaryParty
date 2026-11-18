@@ -546,7 +546,7 @@ namespace ScaryParty.Pizzeria.Composition
             DomainState.NightDurationSeconds = preview.DurationSeconds;
             DomainState.NightRemainingSeconds = preview.DurationSeconds;
 
-            RunProgressionService?.OpenPreparationStages(resolvedTarget);
+            RunProgressionService?.OpenTypedBallots(resolvedTarget, 3, 3);
 #if UNITY_EDITOR
             if (resolvedTarget == 1)
             {

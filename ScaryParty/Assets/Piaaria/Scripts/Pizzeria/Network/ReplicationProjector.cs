@@ -57,6 +57,7 @@ namespace ScaryParty.Pizzeria.Network
             anyChanged |= ProjectTablesDelta(domainState);
             anyChanged |= ProjectRunVoteOptionsDelta(domainState);
             anyChanged |= ProjectRunShopOffersDelta(domainState);
+            anyChanged |= ProjectRunPlayerStatesDelta(domainState);
 
             if (anyChanged || _netState.PublishedRevision.Value == 0)
             {
@@ -993,8 +994,86 @@ namespace ScaryParty.Pizzeria.Network
                 ActivePresetId = TruncateFs32(domainState.ActivePresetId),
                 AllowDebugPanel = domainState.AllowDebugPanel,
                 IsDebugTaintedRun = domainState.IsDebugTaintedRun,
+                IntermissionStage = run != null ? (byte)run.IntermissionStage : (byte)0,
+                RevealStartedAtServerTime = run != null ? run.RevealStartedAtServerTime : 0d,
+                CountdownStartsAtServerTime = run != null ? run.CountdownStartsAtServerTime : 0d,
+                StartNightAtServerTime = run != null ? run.StartNightAtServerTime : 0d,
+                WinningHindranceId = TruncateFs64(run?.LastWinningHindranceId),
+                WinningOpportunityId = TruncateFs64(run?.LastWinningOpportunityId),
                 Revision = domainState.Revision
             };
+        }
+
+        private bool ProjectRunPlayerStatesDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.RunPlayerStates;
+            var run = Composition.PizzeriaRoot.Instance != null ? Composition.PizzeriaRoot.Instance.RunProgressionService : null;
+            var nm = Unity.Netcode.NetworkManager.Singleton;
+
+            if (run == null || nm == null || !nm.IsListening ||
+                domainState.CurrentNightPhase != Domain.Types.NightPhase.PreparingNextNight)
+            {
+                if (networkList.Count > 0)
+                {
+                    networkList.Clear();
+                    return true;
+                }
+                return false;
+            }
+
+            var desired = new List<NetPlayerIntermissionDto>(nm.ConnectedClientsList.Count);
+            var readySet = run.ReadyPlayers;
+            for (int i = 0; i < nm.ConnectedClientsList.Count; i++)
+            {
+                var client = nm.ConnectedClientsList[i];
+                ulong clientId = client.ClientId;
+                string playerName = $"Jogador {clientId}";
+                if (client.PlayerObject != null &&
+                    client.PlayerObject.TryGetComponent<PlayerState>(out var ps))
+                {
+                    string rawName = ps.PlayerName.Value.ToString();
+                    if (!string.IsNullOrWhiteSpace(rawName))
+                    {
+                        playerName = rawName;
+                    }
+                }
+
+                bool hasH = run.TryGetPlayerVote(clientId, Domain.Services.RunModifierKind.Hindrance, out var hId);
+                bool hasO = run.TryGetPlayerVote(clientId, Domain.Services.RunModifierKind.Opportunity, out var oId);
+                bool isReady = readySet != null && System.Linq.Enumerable.Contains(readySet, clientId);
+
+                desired.Add(new NetPlayerIntermissionDto
+                {
+                    ClientId = clientId,
+                    PlayerName = TruncateFs32(playerName),
+                    HasVotedHindrance = hasH,
+                    HasVotedOpportunity = hasO,
+                    IsReady = isReady,
+                    VotedHindranceId = TruncateFs64(hId),
+                    VotedOpportunityId = TruncateFs64(oId)
+                });
+            }
+
+            if (networkList.Count == desired.Count)
+            {
+                bool identical = true;
+                for (int i = 0; i < desired.Count; i++)
+                {
+                    if (!networkList[i].Equals(desired[i]))
+                    {
+                        identical = false;
+                        break;
+                    }
+                }
+                if (identical) return false;
+            }
+
+            networkList.Clear();
+            for (int i = 0; i < desired.Count; i++)
+            {
+                networkList.Add(desired[i]);
+            }
+            return true;
         }
 
         private bool ProjectRunVoteOptionsDelta(PizzeriaState domainState)

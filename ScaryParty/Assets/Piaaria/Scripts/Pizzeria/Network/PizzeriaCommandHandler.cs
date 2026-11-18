@@ -56,6 +56,7 @@ namespace ScaryParty.Pizzeria.Network
             if (IsServer && IsSpawned)
             {
                 TickServerCombat(Time.deltaTime);
+                TickServerIntermissionLifecycle();
             }
         }
 
@@ -1489,6 +1490,64 @@ namespace ScaryParty.Pizzeria.Network
             CommitAndReplicate();
         }
 
+        public event System.Action<bool, string, string> OnIntermissionActionResultReceived;
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CastRunCategoryVoteServerRpc(byte category, FixedString64Bytes optionId, ServerRpcParams rpcParams = default)
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var kind = (Domain.Services.RunModifierKind)category;
+            if (!root.RunProgressionService.CastCategoryVote(senderId, kind, optionId.ToString()))
+            {
+                NotifyIntermissionActionResultClientRpc(false, new FixedString64Bytes("vote"), new FixedString128Bytes("Votacao encerrada ou opcao invalida."), TargetSender(senderId));
+                return;
+            }
+
+            root.DomainState.Revision++;
+            CommitAndReplicate();
+            NotifyIntermissionActionResultClientRpc(true, new FixedString64Bytes("vote"), new FixedString128Bytes(optionId.ToString()), TargetSender(senderId));
+        }
+
+        [ClientRpc]
+        private void NotifyIntermissionActionResultClientRpc(bool success, FixedString64Bytes actionKey, FixedString128Bytes message, ClientRpcParams clientRpcParams = default)
+        {
+            OnIntermissionActionResultReceived?.Invoke(success, actionKey.ToString(), message.ToString());
+        }
+
+        private void TickServerIntermissionLifecycle()
+        {
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            var run = root.RunProgressionService;
+            if (run.IntermissionStage < Domain.Services.IntermissionStage.Revealing ||
+                run.IntermissionStage >= Domain.Services.IntermissionStage.Starting)
+            {
+                return;
+            }
+
+            double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
+            var prevStage = run.IntermissionStage;
+            run.TickIntermissionServer(serverNow, out bool shouldStartNight);
+
+            if (run.IntermissionStage != prevStage && !shouldStartNight)
+            {
+                root.DomainState.Revision++;
+                CommitAndReplicate();
+            }
+
+            if (shouldStartNight)
+            {
+                run.ResetIntermissionState();
+                ResolveAndStartPreparedNightIfReadyServer();
+            }
+        }
+
         public void ResolveAndStartPreparedNightIfReadyServer(ulong? triggeringClientId = null)
         {
             var root = PizzeriaRoot.Instance;
@@ -1517,6 +1576,32 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             if (!allReady) return;
+
+            if (run.IntermissionStage == Domain.Services.IntermissionStage.Open)
+            {
+                if (!run.AreAllMandatoryStagesVoted())
+                {
+                    if (triggeringClientId.HasValue)
+                    {
+                        NotifyErrorClientRpc("Complete o voto nas categorias obrigatorias antes de iniciar a noite.", TargetSender(triggeringClientId.Value));
+                    }
+                    return;
+                }
+
+                double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
+                if (run.TryLockAndResolveBallotsServer(serverNow))
+                {
+                    root.DomainState.Revision++;
+                    CommitAndReplicate();
+                }
+                return;
+            }
+
+            if (run.IntermissionStage >= Domain.Services.IntermissionStage.Locked &&
+                run.IntermissionStage < Domain.Services.IntermissionStage.Starting)
+            {
+                return;
+            }
 
             if (run.CurrentVoteStages.Count > 0)
             {
