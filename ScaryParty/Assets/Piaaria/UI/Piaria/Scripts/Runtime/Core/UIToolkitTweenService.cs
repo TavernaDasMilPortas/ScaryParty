@@ -420,5 +420,135 @@ namespace ScaryParty.UI.Piaria.Core
             RegisterTween(target, seq);
             return seq;
         }
+
+        public static void DropInCard(VisualElement card, float distance = 90f, float duration = 0.45f, float delay = 0f)
+        {
+            if (card == null) return;
+            if (ReduceMotion)
+            {
+                card.style.opacity = 1f;
+                card.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                return;
+            }
+
+            KillTweens(card);
+            card.style.opacity = 0f;
+            card.style.translate = new StyleTranslate(new Translate(0f, -Mathf.Abs(distance), 0f));
+
+            float y = -Mathf.Abs(distance);
+            var seq = DOTween.Sequence().SetUpdate(true);
+            if (delay > 0f) seq.AppendInterval(delay);
+            seq.Append(DOTween.To(() => 0f, a =>
+            {
+                if (card != null) card.style.opacity = a;
+            }, 1f, Mathf.Max(0.05f, duration * 0.6f)).SetEase(Ease.OutQuad));
+            seq.Join(DOTween.To(() => y, v =>
+            {
+                if (card != null) card.style.translate = new StyleTranslate(new Translate(0f, v, 0f));
+            }, 0f, Mathf.Max(0.05f, duration)).SetEase(Ease.OutBack, 1.35f));
+            seq.OnComplete(() =>
+            {
+                if (card != null)
+                {
+                    card.style.opacity = 1f;
+                    card.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                }
+            });
+            RegisterTween(card, seq);
+        }
+
+        public static void StaggerDropCards(IReadOnlyList<VisualElement> cards, float stagger = 0.20f, float distance = 90f, float duration = 0.45f)
+        {
+            if (cards == null) return;
+            for (int i = 0; i < cards.Count; i++)
+            {
+                DropInCard(cards[i], distance, duration, i * stagger);
+            }
+        }
+
+        public static void HoverCardLift(VisualElement card, float scale = 1.015f)
+        {
+            if (card == null || ReduceMotion) return;
+            ScaleTo(card, scale, 0.12f, Ease.OutQuad);
+        }
+
+        public static void HoverCardReset(VisualElement card)
+        {
+            if (card == null) return;
+            ScaleTo(card, 1f, 0.12f, Ease.OutQuad);
+        }
+
+        public static void PressCard(VisualElement card, float scale = 0.97f)
+        {
+            if (card == null || ReduceMotion) return;
+            ScaleTo(card, scale, 0.08f, Ease.OutQuad);
+        }
+
+        public static void SelectCardPulse(VisualElement card, float impactScale = 1.04f)
+        {
+            if (card == null || ReduceMotion) return;
+            PulseScale(card, impactScale, 0.10f, 0.16f);
+        }
+
+        public static void PulseBadge(VisualElement badge)
+        {
+            if (badge == null || ReduceMotion) return;
+            PulseScale(badge, 1.12f, 0.10f, 0.14f);
+        }
+
+        public static void ShakeReject(VisualElement target, float pixels = 6f)
+        {
+            if (target == null) return;
+            Shake(target, pixels, 0.26f);
+        }
+
+        public static void HighlightLotterySweep(VisualElement card, float duration = 0.14f)
+        {
+            if (card == null || ReduceMotion) return;
+            PulseScale(card, 1.03f, duration * 0.45f, duration * 0.55f);
+        }
+
+        public static void RevealWinnerStamp(VisualElement card, float impactScale = 1.06f)
+        {
+            if (card == null) return;
+            if (ReduceMotion)
+            {
+                card.style.opacity = 1f;
+                return;
+            }
+            PulseScale(card, impactScale, 0.12f, 0.22f);
+        }
+
+        public static void DimNonWinner(VisualElement card, float targetOpacity = 0.45f)
+        {
+            if (card == null) return;
+            if (ReduceMotion)
+            {
+                card.style.opacity = targetOpacity;
+                return;
+            }
+            var tween = DOTween.To(() => card.resolvedStyle.opacity, a =>
+            {
+                if (card != null) card.style.opacity = a;
+            }, targetOpacity, 0.25f).SetEase(Ease.OutQuad).SetUpdate(true);
+            RegisterTween(card, tween);
+        }
+
+        public static void PunchCountdownNumber(Label label)
+        {
+            if (label == null || ReduceMotion) return;
+            PulseScale(label, 1.24f, 0.10f, 0.22f);
+        }
+
+        public static void CrossFadePage(VisualElement page)
+        {
+            if (page == null) return;
+            if (ReduceMotion)
+            {
+                page.style.opacity = 1f;
+                return;
+            }
+            FadeIn(page, 0.22f);
+        }
     }
 }

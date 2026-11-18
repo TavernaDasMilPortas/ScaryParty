@@ -1,0 +1,115 @@
+/* Cards de Votação de Imprevistos & Oportunidades (UI Toolkit) */
+
+.vote-page-root {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.vote-page-header {
+    margin-bottom: 12px;
+}
+
+.vote-cards-row {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.modifier-card {
+    width: 32%;
+    background-color: #fffbf5;
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 7px;
+    border-left-width: 4px;
+    border-color: #402318;
+    border-radius: 18px;
+    padding: 16px;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.modifier-card-selected {
+    border-color: #ff741f;
+    background-color: #fff2e2;
+}
+
+.modifier-card-winner {
+    border-color: #f8c045;
+    background-color: #fff8dc;
+}
+
+.modifier-card-top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.modifier-card-icon {
+    font-size: 32px;
+    color: #402318;
+}
+
+.modifier-card-tag {
+    background-color: #f8d5c4;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 3px;
+    border-left-width: 2px;
+    border-color: #402318;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: #402318;
+    -unity-font-style: bold;
+}
+
+.modifier-card-title {
+    font-size: 20px;
+    color: #402318;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+    white-space: normal;
+}
+
+.modifier-card-desc {
+    font-size: 14px;
+    color: #5b3828;
+    white-space: normal;
+    flex-grow: 1;
+}
+
+.modifier-card-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+}
+
+.modifier-card-tickets {
+    font-size: 14px;
+    color: #402318;
+    -unity-font-style: bold;
+}
+
+.modifier-card-btn {
+    height: 36px;
+    padding: 0 14px;
+    background-color: #ff741f;
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 4px;
+    border-left-width: 2px;
+    border-color: #402318;
+    border-radius: 10px;
+    color: #fffbf5;
+    font-size: 14px;
+    -unity-font-style: bold;
+}
+
+.modifier-card-btn-selected {
+    background-color: #3ca34d;
+}

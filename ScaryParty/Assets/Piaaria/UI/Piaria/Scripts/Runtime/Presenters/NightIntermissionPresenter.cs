@@ -49,6 +49,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private uint _lastObservedRevision;
         private NightIntermissionTheme _theme;
         private NightSummaryPagePresenter _summaryPresenter;
+        private ModifierVotePagePresenter _votePresenter;
 
         public bool IsOpen => _isOpen;
         public TabPage ActiveTab => _activeTab;
@@ -164,6 +165,11 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 _summaryPresenter.Bind(night, run, budget, animate: false);
             }
+            else if ((_activeTab == TabPage.Hindrance || _activeTab == TabPage.Opportunity) && _votePresenter != null)
+            {
+                var kind = _activeTab == TabPage.Hindrance ? RunModifierKind.Hindrance : RunModifierKind.Opportunity;
+                _votePresenter.Bind(kind, net, animateDrop: false);
+            }
         }
 
         private void UpdateTabVisuals()
@@ -205,6 +211,24 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _summaryPresenter = new NightSummaryPagePresenter(page);
                     if (net != null)
                         _summaryPresenter.Bind(net.NightState.Value, net.RunState.Value, net.RestaurantBudget.Value, animate);
+                }
+            }
+            else if (_activeTab == TabPage.Hindrance || _activeTab == TabPage.Opportunity)
+            {
+                VisualTreeAsset tpl = catalog != null ? catalog.templateModifierVotePage : null;
+#if UNITY_EDITOR
+                if (tpl == null)
+                    tpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ModifierVotePage.uxml");
+#endif
+                if (tpl != null)
+                {
+                    var page = tpl.Instantiate();
+                    page.style.flexGrow = 1;
+                    _pageHost.Add(page);
+                    _votePresenter = new ModifierVotePagePresenter(page);
+                    var kind = _activeTab == TabPage.Hindrance ? RunModifierKind.Hindrance : RunModifierKind.Opportunity;
+                    if (net != null)
+                        _votePresenter.Bind(kind, net, animate);
                 }
             }
             else
@@ -262,6 +286,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             var uss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightIntermission.uss");
             if (uss != null && !_root.styleSheets.Contains(uss))
                 _root.styleSheets.Add(uss);
+            var cardsUss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightModifierCards.uss");
+            if (cardsUss != null && !_root.styleSheets.Contains(cardsUss))
+                _root.styleSheets.Add(cardsUss);
 #endif
 
             _shell = _root.Q<VisualElement>("intermission-shell");

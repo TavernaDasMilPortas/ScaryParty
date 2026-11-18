@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ui:VisualElement name="vote-page-root" class="vote-page-root">
+        <ui:VisualElement class="vote-page-header">
+            <ui:Label name="vote-category-title" text="IMPREVISTOS" class="intermission-title" />
+            <ui:Label name="vote-category-subtitle" text="Cada voto adiciona 1 bilhete na urna ponderada desta categoria." class="intermission-subtitle" />
+        </ui:VisualElement>
+        <ui:VisualElement name="vote-cards-row" class="vote-cards-row" />
+    </ui:VisualElement>
+</ui:UXML>

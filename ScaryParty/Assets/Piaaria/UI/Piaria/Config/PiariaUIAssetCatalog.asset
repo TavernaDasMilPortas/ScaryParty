@@ -102,4 +102,5 @@ MonoBehaviour:
   nightIntermissionIconCatalog: {fileID: 11400000, guid: c201202600014a1b9c00000000000004, type: 2}
   templateNightIntermissionScreen: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000009, type: 3}
   templateNightSummaryPage: {fileID: 9197481963319205126, guid: c201202600014a1b9c0000000000000a, type: 3}
+  templateModifierVotePage: {fileID: 9197481963319205126, guid: c201202600014a1b9c0000000000000f, type: 3}
   panelSettings: {fileID: 11400000, guid: 2765e16aef4af4a4abee6e8c05677b3c, type: 2}
