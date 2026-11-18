@@ -25,6 +25,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
         // Estado autoritativo do ciclo de noites (O5 / N1)
         public int CurrentNightNumber { get; set; } = 1;
+        public int TargetNightNumber { get; set; } = 1;
         public NightPhase CurrentNightPhase { get; set; } = NightPhase.Preparing;
         public NightDefeatReason NightDefeatReason { get; set; } = NightDefeatReason.None;
         public float NightDurationSeconds { get; set; } = 360f;
@@ -119,6 +120,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
             NightPizzasDelivered = 0;
             NightPizzasMinGoal = 0;
             CurrentNightNumber = 1;
+            TargetNightNumber = 1;
             CurrentNightPhase = NightPhase.Preparing;
             NightDefeatReason = NightDefeatReason.None;
             NightDurationSeconds = 360f;

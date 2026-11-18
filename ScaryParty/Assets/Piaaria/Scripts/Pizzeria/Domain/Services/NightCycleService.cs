@@ -178,6 +178,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             var parameters = customParams ?? GetDefaultParameters(nightNumber);
             state.CurrentNightNumber = parameters.NightNumber;
+            state.TargetNightNumber = parameters.NightNumber;
             state.NightDurationSeconds = parameters.DurationSeconds;
             state.NightRemainingSeconds = parameters.DurationSeconds;
             state.NightPrepRemainingSeconds = parameters.PrepSeconds;

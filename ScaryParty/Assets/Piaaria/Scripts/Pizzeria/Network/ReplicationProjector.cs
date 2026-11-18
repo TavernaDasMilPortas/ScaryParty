@@ -883,6 +883,7 @@ namespace ScaryParty.Pizzeria.Network
             return new NetNightStateDto
             {
                 NightNumber = domainState.CurrentNightNumber,
+                TargetNightNumber = domainState.TargetNightNumber > 0 ? domainState.TargetNightNumber : domainState.CurrentNightNumber,
                 Phase = (byte)domainState.CurrentNightPhase,
                 DefeatReason = (byte)domainState.NightDefeatReason,
                 RemainingSeconds = domainState.NightRemainingSeconds,
@@ -958,6 +959,7 @@ namespace ScaryParty.Pizzeria.Network
             return new NetRunStateDto
             {
                 CurrentRunNight = domainState.CurrentNightNumber,
+                TargetNightNumber = domainState.TargetNightNumber > 0 ? domainState.TargetNightNumber : Math.Max(1, domainState.CurrentNightNumber),
                 MaxRunNights = run != null ? run.MaxNights : 3,
                 IsRunCompleted = run != null && run.IsRunCompleted,
                 IsRunVictory = run != null && run.IsRunVictory,

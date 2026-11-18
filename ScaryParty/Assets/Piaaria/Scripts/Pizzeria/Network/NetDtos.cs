@@ -839,6 +839,7 @@ namespace ScaryParty.Pizzeria.Network
     public struct NetNightStateDto : INetworkSerializable, IEquatable<NetNightStateDto>
     {
         public int NightNumber;
+        public int TargetNightNumber;
         public byte Phase;
         public byte DefeatReason;
         public float RemainingSeconds;
@@ -865,6 +866,7 @@ namespace ScaryParty.Pizzeria.Network
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref NightNumber);
+            serializer.SerializeValue(ref TargetNightNumber);
             serializer.SerializeValue(ref Phase);
             serializer.SerializeValue(ref DefeatReason);
             serializer.SerializeValue(ref RemainingSeconds);
@@ -891,6 +893,7 @@ namespace ScaryParty.Pizzeria.Network
 
         public bool Equals(NetNightStateDto other)
             => NightNumber == other.NightNumber &&
+               TargetNightNumber == other.TargetNightNumber &&
                Phase == other.Phase &&
                DefeatReason == other.DefeatReason &&
                EarnedRevenue == other.EarnedRevenue &&
@@ -1053,6 +1056,7 @@ namespace ScaryParty.Pizzeria.Network
     public struct NetRunStateDto : INetworkSerializable, IEquatable<NetRunStateDto>
     {
         public int CurrentRunNight;
+        public int TargetNightNumber;
         public int MaxRunNights;
         public bool IsRunCompleted;
         public bool IsRunVictory;
@@ -1082,6 +1086,7 @@ namespace ScaryParty.Pizzeria.Network
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref CurrentRunNight);
+            serializer.SerializeValue(ref TargetNightNumber);
             serializer.SerializeValue(ref MaxRunNights);
             serializer.SerializeValue(ref IsRunCompleted);
             serializer.SerializeValue(ref IsRunVictory);
@@ -1111,6 +1116,7 @@ namespace ScaryParty.Pizzeria.Network
 
         public bool Equals(NetRunStateDto other)
             => CurrentRunNight == other.CurrentRunNight &&
+               TargetNightNumber == other.TargetNightNumber &&
                MaxRunNights == other.MaxRunNights &&
                IsRunCompleted == other.IsRunCompleted &&
                IsRunVictory == other.IsRunVictory &&

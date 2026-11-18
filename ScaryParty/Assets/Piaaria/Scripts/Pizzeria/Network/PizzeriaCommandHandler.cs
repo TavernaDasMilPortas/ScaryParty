@@ -1391,10 +1391,10 @@ namespace ScaryParty.Pizzeria.Network
             int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
             var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
 
-            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1);
+            root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1, openPreparation: true);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
             CommitAndReplicate();
-            BroadcastNoticeClientRpc($"Tutorial concluído! Noite 1 iniciada — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+            BroadcastNoticeClientRpc("Tutorial concluído! Preparação para a Noite 1 aberta: votem, comprem melhorias e marquem Pronto!", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1439,9 +1439,7 @@ namespace ScaryParty.Pizzeria.Network
             ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
             int nextNight = root.DomainState.CurrentNightNumber + 1;
             NightCycleService.ClearTransientNightEntities(root.DomainState, repairBackpacks: true);
-            root.DomainState.CurrentNightPhase = NightPhase.PreparingNextNight;
-            root.DomainState.IncrementRevision();
-            run?.OpenChoiceVote(nextNight, 2);
+            root.OpenPreparationBeforeNightServer(nextNight);
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
             CommitAndReplicate();
@@ -1464,6 +1462,21 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         [ServerRpc(RequireOwnership = false)]
+        public void CastRunStageVoteServerRpc(byte stageIndex, FixedString64Bytes optionId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+
+            if (root.RunProgressionService.CastStageVote(senderId, stageIndex, optionId.ToString()))
+            {
+                root.DomainState.IncrementRevision();
+                CommitAndReplicate();
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
         public void SetRunReadyServerRpc(bool ready, ServerRpcParams rpcParams = default)
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
@@ -1472,11 +1485,11 @@ namespace ScaryParty.Pizzeria.Network
             if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
 
             root.RunProgressionService.SetPlayerReady(senderId, ready);
-            ResolveAndStartPreparedNightIfReadyServer();
+            ResolveAndStartPreparedNightIfReadyServer(senderId);
             CommitAndReplicate();
         }
 
-        public void ResolveAndStartPreparedNightIfReadyServer()
+        public void ResolveAndStartPreparedNightIfReadyServer(ulong? triggeringClientId = null)
         {
             var root = PizzeriaRoot.Instance;
             if (root == null || !IsServer || root.DomainState == null || root.RunProgressionService == null) return;
@@ -1505,14 +1518,31 @@ namespace ScaryParty.Pizzeria.Network
 
             if (!allReady) return;
 
-            if (!run.IsVoteResolved)
+            if (run.CurrentVoteStages.Count > 0)
+            {
+                if (!run.AreAllMandatoryStagesVoted())
+                {
+                    if (triggeringClientId.HasValue)
+                    {
+                        NotifyErrorClientRpc("Complete o voto nas categorias obrigatorias antes de iniciar a noite.", TargetSender(triggeringClientId.Value));
+                    }
+                    return;
+                }
+                if (!run.IsVoteResolved)
+                {
+                    run.ResolveAllStagesServer();
+                }
+            }
+            else if (!run.IsVoteResolved)
             {
                 run.ResolveVoteServer();
             }
 
             if (!run.CanStartNight(connected)) return;
 
-            int nextNight = root.DomainState.CurrentNightNumber + 1;
+            int nextNight = root.DomainState.TargetNightNumber > 0
+                ? root.DomainState.TargetNightNumber
+                : root.DomainState.CurrentNightNumber + 1;
             root.ResolveAndApplyNightStartParametersServer(nextNight, isRetry: false);
             ApplyRunBackpackCapacityBonusServer(root);
 

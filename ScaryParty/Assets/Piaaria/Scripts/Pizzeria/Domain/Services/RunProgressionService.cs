@@ -78,6 +78,17 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public bool IsUnique;
     }
 
+    public sealed class RunVoteStageState
+    {
+        public int StageIndex;
+        public RunModifierKind Category;
+        public bool IsMandatory;
+        public List<RunModifierDefinition> Options = new List<RunModifierDefinition>();
+        public Dictionary<ulong, string> Votes = new Dictionary<ulong, string>();
+        public string ResolvedOptionId = string.Empty;
+        public bool IsResolved => !string.IsNullOrEmpty(ResolvedOptionId);
+    }
+
     /// <summary>
     /// Gerencia RUN de N noites (padrão 3, extensível até 7), escala congelada por noite,
     /// streams RNG separados, votação com desempate no servidor, modificadores e loja atômica.
@@ -97,6 +108,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         private readonly Dictionary<string, RunModifierDefinition> _catalog = new Dictionary<string, RunModifierDefinition>(StringComparer.Ordinal);
         private readonly Dictionary<string, ActiveRunModifier> _activeModifiers = new Dictionary<string, ActiveRunModifier>(StringComparer.Ordinal);
+        private readonly List<RunVoteStageState> _voteStages = new List<RunVoteStageState>();
         private readonly List<RunModifierDefinition> _currentVoteOptions = new List<RunModifierDefinition>();
         private readonly Dictionary<ulong, string> _votes = new Dictionary<ulong, string>();
         private readonly HashSet<ulong> _readyPlayers = new HashSet<ulong>();
@@ -104,6 +116,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
         private readonly Dictionary<string, int> _shopRunPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> _shopNightPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
 
+        public IReadOnlyList<RunVoteStageState> CurrentVoteStages => _voteStages;
+        public int PreparationTargetNight { get; private set; } = 1;
         public IReadOnlyList<RunModifierDefinition> CurrentVoteOptions => _currentVoteOptions;
         public IReadOnlyDictionary<string, ActiveRunModifier> ActiveModifiers => _activeModifiers;
         public IReadOnlyDictionary<ulong, string> Votes => _votes;
@@ -167,12 +181,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
             IsRunVictory = false;
             FrozenHumanCount = 1;
             _activeModifiers.Clear();
+            _voteStages.Clear();
             _currentVoteOptions.Clear();
             _votes.Clear();
             _readyPlayers.Clear();
             _purchasedUniqueItems.Clear();
             _shopRunPurchases.Clear();
             _shopNightPurchases.Clear();
+            PreparationTargetNight = 1;
             IsVoteResolved = false;
             LastResolvedOptionId = null;
             InitializeStreams(seed);
@@ -247,44 +263,183 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         public IReadOnlyList<RunModifierDefinition> OpenChoiceVote(int nightNumber, int optionCount = 2)
         {
+            _voteStages.Clear();
             _currentVoteOptions.Clear();
             _votes.Clear();
             IsVoteResolved = false;
             LastResolvedOptionId = null;
+            PreparationTargetNight = Math.Max(1, nightNumber);
 
-            var eligible = new List<RunModifierDefinition>();
-            foreach (var def in _catalog.Values)
+            var eligible = CollectVotePoolForKind(nightNumber, categoryFilter: null, excludeIds: null, includeReserveFallback: false);
+            if (eligible.Count < Math.Max(2, optionCount))
             {
-                if (def.MinNight > nightNumber) continue;
-                if (_activeModifiers.TryGetValue(def.Id, out var existing) && existing.Stacks >= def.MaxStacks) continue;
-                if (HasIncompatibility(def)) continue;
-                eligible.Add(def);
+                eligible = CollectVotePoolForKind(nightNumber, categoryFilter: null, excludeIds: null, includeReserveFallback: true);
             }
 
-            // Fallback garantido caso o pool se esgote
+            // Fallback garantido caso o pool se esgote em testes ad-hoc
             if (eligible.Count < 2)
             {
                 foreach (var def in _catalog.Values)
                 {
-                    if (!eligible.Contains(def) && def.Duration == RunModifierDuration.OneNight)
+                    if (!eligible.Contains(def) && def.Enabled && def.AllowedSource != RunModifierSource.ShopOnly && def.Duration == RunModifierDuration.OneNight)
                         eligible.Add(def);
                 }
             }
 
-            int targetCount = Math.Min(Math.Max(2, optionCount), eligible.Count);
-            for (int i = 0; i < targetCount; i++)
+            DrawWeightedOptionsWithoutReplacement(eligible, Math.Max(2, optionCount), _currentVoteOptions);
+            return _currentVoteOptions;
+        }
+
+        public IReadOnlyList<RunVoteStageState> OpenPreparationStages(int targetNight, NightPreparationScheduleData scheduleOverride = null)
+        {
+            _voteStages.Clear();
+            _currentVoteOptions.Clear();
+            _votes.Clear();
+            _readyPlayers.Clear();
+            IsVoteResolved = false;
+            LastResolvedOptionId = null;
+            PreparationTargetNight = Math.Max(1, targetNight);
+
+            var schedule = scheduleOverride ?? (BalancingSnapshot != null
+                ? BalancingSnapshot.GetScheduleForNight(PreparationTargetNight)
+                : new NightPreparationScheduleData(PreparationTargetNight, 1, 2, 1, 2, PreparationTargetNight >= 2 ? 1 : 0, 2));
+
+            var usedInSession = new HashSet<string>(StringComparer.Ordinal);
+            int stageIndex = 0;
+
+            AppendStagesForCategory(RunModifierKind.Hindrance, isMandatory: true, schedule.MandatoryHindranceStages, schedule.HindranceAlternatives, usedInSession, ref stageIndex);
+            AppendStagesForCategory(RunModifierKind.Opportunity, isMandatory: false, schedule.OpportunityStages, schedule.OpportunityAlternatives, usedInSession, ref stageIndex);
+            AppendStagesForCategory(RunModifierKind.Event, isMandatory: false, schedule.AdditionalEventStages, schedule.EventAlternatives, usedInSession, ref stageIndex);
+
+            if (_voteStages.Count > 0 && _voteStages[0].Options.Count > 0)
             {
-                int pick = ChoiceRng.Next(0, eligible.Count);
-                _currentVoteOptions.Add(eligible[pick]);
-                eligible.RemoveAt(pick);
+                _currentVoteOptions.AddRange(_voteStages[0].Options);
             }
 
-            return _currentVoteOptions;
+            return _voteStages;
+        }
+
+        private void AppendStagesForCategory(
+            RunModifierKind kind,
+            bool isMandatory,
+            int stageCount,
+            int alternativesCount,
+            HashSet<string> usedInSession,
+            ref int stageIndex)
+        {
+            for (int s = 0; s < stageCount; s++)
+            {
+                int targetAlts = Math.Max(2, alternativesCount);
+                var pool = CollectVotePoolForKind(PreparationTargetNight, kind, usedInSession, includeReserveFallback: false);
+                if (pool.Count < targetAlts)
+                {
+                    pool = CollectVotePoolForKind(PreparationTargetNight, kind, usedInSession, includeReserveFallback: true);
+                }
+                if (pool.Count < targetAlts)
+                {
+                    // Permite reutilizar itens nao exauridos caso multiplas etapas na mesma noite superem opcoes ineditas
+                    pool = CollectVotePoolForKind(PreparationTargetNight, kind, excludeIds: null, includeReserveFallback: true);
+                }
+
+                if (pool.Count == 0) continue;
+
+                var stage = new RunVoteStageState
+                {
+                    StageIndex = stageIndex++,
+                    Category = kind,
+                    IsMandatory = isMandatory
+                };
+
+                DrawWeightedOptionsWithoutReplacement(pool, targetAlts, stage.Options);
+                for (int i = 0; i < stage.Options.Count; i++)
+                {
+                    usedInSession.Add(stage.Options[i].Id);
+                }
+                _voteStages.Add(stage);
+            }
+        }
+
+        private List<RunModifierDefinition> CollectVotePoolForKind(
+            int nightNumber,
+            RunModifierKind? categoryFilter,
+            HashSet<string> excludeIds,
+            bool includeReserveFallback)
+        {
+            var eligible = new List<RunModifierDefinition>();
+            foreach (var def in _catalog.Values)
+            {
+                if (def == null || !def.Enabled) continue;
+                if (def.AllowedSource == RunModifierSource.ShopOnly) continue;
+                if (categoryFilter.HasValue && def.Kind != categoryFilter.Value) continue;
+                if (!def.AllowedDifficulties.Includes(Difficulty)) continue;
+                if (def.MinNight > nightNumber || (def.MaxNight > 0 && def.MaxNight < nightNumber)) continue;
+                if (!CanApplyModifierStack(def.Id)) continue;
+                if (HasIncompatibility(def)) continue;
+                if (!HasAllPrerequisites(def)) continue;
+                if (excludeIds != null && excludeIds.Contains(def.Id)) continue;
+                if (def.IsFallbackReserve && !includeReserveFallback) continue;
+                if (!def.IsFallbackReserve && def.Weight <= 0f) continue;
+
+                eligible.Add(def);
+            }
+            return eligible;
+        }
+
+        private void DrawWeightedOptionsWithoutReplacement(List<RunModifierDefinition> pool, int count, List<RunModifierDefinition> destination)
+        {
+            int targetCount = Math.Min(count, pool.Count);
+            for (int i = 0; i < targetCount; i++)
+            {
+                float totalWeight = 0f;
+                for (int k = 0; k < pool.Count; k++)
+                {
+                    totalWeight += Math.Max(0.0001f, pool[k].Weight);
+                }
+
+                double roll = ChoiceRng.NextDouble() * totalWeight;
+                double acc = 0d;
+                int pickedIdx = pool.Count - 1;
+                for (int k = 0; k < pool.Count; k++)
+                {
+                    acc += Math.Max(0.0001f, pool[k].Weight);
+                    if (roll <= acc)
+                    {
+                        pickedIdx = k;
+                        break;
+                    }
+                }
+
+                destination.Add(pool[pickedIdx]);
+                pool.RemoveAt(pickedIdx);
+            }
+        }
+
+        private bool HasAllPrerequisites(RunModifierDefinition def)
+        {
+            if (def.PrerequisiteIds == null || def.PrerequisiteIds.Length == 0) return true;
+            for (int i = 0; i < def.PrerequisiteIds.Length; i++)
+            {
+                string pre = def.PrerequisiteIds[i];
+                if (!string.IsNullOrWhiteSpace(pre) && !HasModifier(pre)) return false;
+            }
+            return true;
         }
 
         public bool CastVote(ulong clientId, string optionId)
         {
             if (IsVoteResolved || string.IsNullOrEmpty(optionId)) return false;
+            if (_voteStages.Count > 0)
+            {
+                for (int s = 0; s < _voteStages.Count; s++)
+                {
+                    if (CastStageVote(clientId, _voteStages[s].StageIndex, optionId))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             for (int i = 0; i < _currentVoteOptions.Count; i++)
             {
                 if (_currentVoteOptions[i].Id == optionId)
@@ -294,6 +449,44 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 }
             }
             return false;
+        }
+
+        public bool CastStageVote(ulong clientId, int stageIndex, string optionId)
+        {
+            if (IsVoteResolved || string.IsNullOrEmpty(optionId)) return false;
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                var stage = _voteStages[s];
+                if (stage.StageIndex != stageIndex) continue;
+
+                for (int o = 0; o < stage.Options.Count; o++)
+                {
+                    if (stage.Options[o].Id == optionId)
+                    {
+                        stage.Votes[clientId] = optionId;
+                        if (stage.StageIndex == _voteStages[0].StageIndex)
+                        {
+                            _votes[clientId] = optionId;
+                        }
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public bool AreAllMandatoryStagesVoted()
+        {
+            if (_voteStages.Count == 0) return true;
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                var stage = _voteStages[s];
+                if (stage.IsMandatory && stage.Votes.Count == 0)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void SetPlayerReady(ulong clientId, bool ready)
@@ -306,11 +499,16 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             _votes.Remove(clientId);
             _readyPlayers.Remove(clientId);
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                _voteStages[s].Votes.Remove(clientId);
+            }
         }
 
         public bool CanStartNight(IReadOnlyCollection<ulong> connectedHumans)
         {
             if (!IsVoteResolved || connectedHumans == null || connectedHumans.Count == 0) return false;
+            if (_voteStages.Count > 0 && !AreAllMandatoryStagesVoted()) return false;
             foreach (var id in connectedHumans)
             {
                 if (!_readyPlayers.Contains(id)) return false;
@@ -318,8 +516,98 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return true;
         }
 
+        public IReadOnlyList<RunModifierDefinition> ResolveAllStagesServer()
+        {
+            var winners = new List<RunModifierDefinition>();
+            if (_voteStages.Count == 0)
+            {
+                var single = ResolveVoteServer();
+                if (single != null) winners.Add(single);
+                return winners;
+            }
+
+            if (IsVoteResolved)
+            {
+                for (int s = 0; s < _voteStages.Count; s++)
+                {
+                    if (!string.IsNullOrEmpty(_voteStages[s].ResolvedOptionId))
+                    {
+                        var def = GetModifierDefinition(_voteStages[s].ResolvedOptionId);
+                        if (def != null) winners.Add(def);
+                    }
+                }
+                return winners;
+            }
+
+            for (int s = 0; s < _voteStages.Count; s++)
+            {
+                var stage = _voteStages[s];
+                if (stage.Options.Count == 0) continue;
+
+                // Beneficio livre (Opportunity) sem votos nao e aplicado automaticamente;
+                // Entraves obrigatorios e Eventos da noite resolvem vencedor (ou empate por ChoiceRng).
+                if (!stage.IsMandatory && stage.Category == RunModifierKind.Opportunity && stage.Votes.Count == 0)
+                {
+                    continue;
+                }
+
+                var eligibleStageOpts = new List<RunModifierDefinition>();
+                for (int o = 0; o < stage.Options.Count; o++)
+                {
+                    var opt = stage.Options[o];
+                    if (CanApplyModifierStack(opt.Id) && !HasIncompatibility(opt))
+                    {
+                        eligibleStageOpts.Add(opt);
+                    }
+                }
+                if (eligibleStageOpts.Count == 0) eligibleStageOpts.AddRange(stage.Options);
+
+                var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+                foreach (var opt in eligibleStageOpts) counts[opt.Id] = 0;
+                foreach (var v in stage.Votes.Values)
+                {
+                    if (counts.ContainsKey(v)) counts[v]++;
+                }
+
+                int bestScore = -1;
+                var tied = new List<RunModifierDefinition>();
+                foreach (var opt in eligibleStageOpts)
+                {
+                    int score = counts[opt.Id];
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        tied.Clear();
+                        tied.Add(opt);
+                    }
+                    else if (score == bestScore)
+                    {
+                        tied.Add(opt);
+                    }
+                }
+
+                var winner = tied[ChoiceRng.Next(0, tied.Count)];
+                stage.ResolvedOptionId = winner.Id;
+                ApplyModifier(winner);
+                winners.Add(winner);
+                if (string.IsNullOrEmpty(LastResolvedOptionId))
+                {
+                    LastResolvedOptionId = winner.Id;
+                }
+            }
+
+            IsVoteResolved = true;
+            return winners;
+        }
+
         public RunModifierDefinition ResolveVoteServer()
         {
+            if (_voteStages.Count > 0)
+            {
+                var list = ResolveAllStagesServer();
+                return list.Count > 0 ? list[0] : null;
+            }
+
             if (IsVoteResolved && !string.IsNullOrEmpty(LastResolvedOptionId) && _catalog.TryGetValue(LastResolvedOptionId, out var cached))
                 return cached;
 
@@ -382,6 +670,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 _activeModifiers.Remove(toRemove[i]);
             }
             _shopNightPurchases.Clear();
+            _voteStages.Clear();
+            _currentVoteOptions.Clear();
+            _votes.Clear();
             _readyPlayers.Clear();
             IsVoteResolved = false;
         }

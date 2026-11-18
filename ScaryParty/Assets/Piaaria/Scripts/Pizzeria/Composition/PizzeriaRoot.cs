@@ -395,7 +395,9 @@ namespace ScaryParty.Pizzeria.Composition
                 ? RunProgressionService.Difficulty
                 : (preset != null ? preset.difficulty : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
             int humanCount = CountConnectedHumanClientsServer();
-            float modMult = 1.0f;
+            float modMult = RunProgressionService != null
+                ? RunProgressionService.RecalculateEffectiveStats().NightGoalMultiplier
+                : 1.0f;
 
             var resolved = _config != null
                 ? _config.ResolveEffectiveNightParameters(nightNumber, humanCount, diff, preset, modMult)
@@ -486,13 +488,57 @@ namespace ScaryParty.Pizzeria.Composition
             DomainState.AllowDebugPanel = preset == null || preset.allowDebugPanel;
             RebuildSceneDomainStateForNewRunServer();
 
-            ResolveAndApplyNightStartParametersServer(initialNight, isRetry: false);
             if (initialNight == 0)
             {
+                ResolveAndApplyNightStartParametersServer(initialNight, isRetry: false);
                 SeedPredictableTutorialOrderServer();
             }
+            else
+            {
+                OpenPreparationBeforeNightServer(initialNight);
+            }
 
-            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Preset: {DomainState.ActivePresetId}, HumanosCongelados: {DomainState.FrozenHumanCount}, Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal} (Fonte={(GoalResolutionSource)DomainState.ResolvedGoalSource}).");
+            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Preset: {DomainState.ActivePresetId}, HumanosCongelados: {DomainState.FrozenHumanCount}, Budget: R${DomainState.RestaurantBudget}, NoiteAlvo {DomainState.TargetNightNumber}, Meta: R${DomainState.NightRevenueGoal} (Fonte={(GoalResolutionSource)DomainState.ResolvedGoalSource}).");
+        }
+
+        public void OpenPreparationBeforeNightServer(int targetNight)
+        {
+            if (!IsServer || DomainState == null) return;
+            int resolvedTarget = Mathf.Max(1, targetNight);
+
+            var preset = GetEffectiveRunPreset();
+            var diff = RunProgressionService != null
+                ? RunProgressionService.Difficulty
+                : (preset != null ? preset.difficulty : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
+            int humanCount = CountConnectedHumanClientsServer();
+            float modMult = RunProgressionService != null
+                ? RunProgressionService.RecalculateEffectiveStats().NightGoalMultiplier
+                : 1.0f;
+
+            var preview = _config != null
+                ? _config.ResolveEffectiveNightParameters(resolvedTarget, humanCount, diff, preset, modMult)
+                : NightParameterResolver.ResolveEffectiveParameters(
+                    resolvedTarget, humanCount, diff, preset != null ? preset.ToDomainData() : null, null, 600f, 60, modMult);
+
+            DomainState.CurrentNightPhase = NightPhase.PreparingNextNight;
+            DomainState.CurrentNightNumber = Mathf.Max(0, resolvedTarget - 1);
+            DomainState.TargetNightNumber = resolvedTarget;
+            DomainState.AllowDebugPanel = true;
+            DomainState.FrozenHumanCount = preview.FrozenHumanCount;
+            DomainState.ResolvedBaseGoal = preview.BaseGoal;
+            DomainState.ResolvedHumanScaleFactor = preview.HumanScaleFactor;
+            DomainState.ResolvedModifierMultiplier = preview.ModifierGoalMultiplier;
+            DomainState.ResolvedGoalSource = (byte)preview.GoalSource;
+            DomainState.ActivePresetId = preview.PresetId;
+            DomainState.NightRevenueGoal = preview.FinalGoal;
+            DomainState.NightReputationMinGoal = preview.ReputationMinGoal;
+            DomainState.NightPizzasMinGoal = preview.PizzasMinGoal;
+            DomainState.IsNonLethalTutorialNight = preview.NonLethalDefeat;
+            DomainState.NightDurationSeconds = preview.DurationSeconds;
+            DomainState.NightRemainingSeconds = preview.DurationSeconds;
+
+            RunProgressionService?.OpenPreparationStages(resolvedTarget);
+            DomainState.IncrementRevision();
         }
 
         /// <summary>
@@ -600,7 +646,7 @@ namespace ScaryParty.Pizzeria.Composition
             }
         }
 
-        public void ReinitializeForNewRunServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight = 1)
+        public void ReinitializeForNewRunServer(int newSeed, int maxNights, RunDifficulty difficulty, int startNight = 1, bool openPreparation = true)
         {
             if (!IsServer || DomainState == null) return;
 
@@ -619,10 +665,18 @@ namespace ScaryParty.Pizzeria.Composition
 
             RebuildSceneDomainStateForNewRunServer();
 
-            ResolveAndApplyNightStartParametersServer(startNight, isRetry: false);
             if (startNight == 0)
             {
+                ResolveAndApplyNightStartParametersServer(startNight, isRetry: false);
                 SeedPredictableTutorialOrderServer();
+            }
+            else if (openPreparation)
+            {
+                OpenPreparationBeforeNightServer(startNight);
+            }
+            else
+            {
+                ResolveAndApplyNightStartParametersServer(startNight, isRetry: false);
             }
         }
 
