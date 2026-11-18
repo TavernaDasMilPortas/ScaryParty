@@ -1,0 +1,21 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ui:VisualElement name="shop-prep-root" style="flex-grow: 1; flex-direction: column; justify-content: space-between;">
+        <ui:VisualElement name="shop-section" style="flex-grow: 1; flex-direction: column;">
+            <ui:Label name="shop-section-title" text="LOJA DA EQUIPE" class="intermission-title" />
+            <ui:Label name="shop-active-upgrades" text="Upgrades ativos: nenhum" class="intermission-subtitle" style="margin-bottom: 10px;" />
+            <ui:VisualElement name="shop-items-grid" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="prepare-section" style="flex-grow: 1; flex-direction: column; justify-content: space-between;">
+            <ui:VisualElement>
+                <ui:Label text="CONFIRMAÇÃO DA EQUIPE" class="intermission-title" />
+                <ui:Label name="prepare-votes-summary" text="Seus votos: Imprevisto (-) | Oportunidade (-)" class="intermission-subtitle" style="margin-bottom: 12px;" />
+                <ui:VisualElement name="prepare-shortcuts-row" style="flex-direction: row; margin-bottom: 12px;" />
+                <ui:VisualElement name="prepare-team-cards" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between;" />
+            </ui:VisualElement>
+            <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-top: 10px;">
+                <ui:Button name="prepare-ready-btn" text="MARCAR COMO PRONTO" class="intermission-primary-btn" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

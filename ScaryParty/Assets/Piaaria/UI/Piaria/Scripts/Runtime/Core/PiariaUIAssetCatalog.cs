@@ -189,6 +189,7 @@ namespace ScaryParty.UI.Piaria.Core
         public UnityEngine.UIElements.VisualTreeAsset templateNightIntermissionScreen;
         public UnityEngine.UIElements.VisualTreeAsset templateNightSummaryPage;
         public UnityEngine.UIElements.VisualTreeAsset templateModifierVotePage;
+        public UnityEngine.UIElements.VisualTreeAsset templateShopPreparationPage;
 
         [Header("Configurações de UI Toolkit")]
         public UnityEngine.UIElements.PanelSettings panelSettings;

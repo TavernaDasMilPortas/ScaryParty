@@ -50,6 +50,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private NightIntermissionTheme _theme;
         private NightSummaryPagePresenter _summaryPresenter;
         private ModifierVotePagePresenter _votePresenter;
+        private RunShopPagePresenter _shopPresenter;
 
         public bool IsOpen => _isOpen;
         public TabPage ActiveTab => _activeTab;
@@ -170,6 +171,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 var kind = _activeTab == TabPage.Hindrance ? RunModifierKind.Hindrance : RunModifierKind.Opportunity;
                 _votePresenter.Bind(kind, net, animateDrop: false);
             }
+            else if ((_activeTab == TabPage.Shop || _activeTab == TabPage.Prepare) && _shopPresenter != null)
+            {
+                _shopPresenter.ClearPendingPurchase();
+                _shopPresenter.Bind(_activeTab == TabPage.Prepare, net);
+            }
         }
 
         private void UpdateTabVisuals()
@@ -229,6 +235,23 @@ namespace ScaryParty.UI.Piaria.Presenters
                     var kind = _activeTab == TabPage.Hindrance ? RunModifierKind.Hindrance : RunModifierKind.Opportunity;
                     if (net != null)
                         _votePresenter.Bind(kind, net, animate);
+                }
+            }
+            else if (_activeTab == TabPage.Shop || _activeTab == TabPage.Prepare)
+            {
+                VisualTreeAsset tpl = catalog != null ? catalog.templateShopPreparationPage : null;
+#if UNITY_EDITOR
+                if (tpl == null)
+                    tpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ShopPreparationPage.uxml");
+#endif
+                if (tpl != null)
+                {
+                    var page = tpl.Instantiate();
+                    page.style.flexGrow = 1;
+                    _pageHost.Add(page);
+                    _shopPresenter = new RunShopPagePresenter(page, tab => SelectTab(tab));
+                    if (net != null)
+                        _shopPresenter.Bind(_activeTab == TabPage.Prepare, net);
                 }
             }
             else
