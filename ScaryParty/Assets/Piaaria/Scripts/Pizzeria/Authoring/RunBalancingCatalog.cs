@@ -382,5 +382,137 @@ namespace ScaryParty.Pizzeria.Authoring
             }
             return null;
         }
+
+        public RunBalancingSnapshot BuildDomainSnapshot()
+        {
+            var domainModifiers = new List<RunModifierDefinition>();
+            if (modifiers != null)
+            {
+                for (int i = 0; i < modifiers.Count; i++)
+                {
+                    var m = modifiers[i];
+                    if (m == null || string.IsNullOrWhiteSpace(m.id)) continue;
+
+                    var effectList = new List<RunModifierEffectData>();
+                    if (m.effects != null)
+                    {
+                        for (int j = 0; j < m.effects.Count; j++)
+                        {
+                            if (m.effects[j] != null && m.effects[j].target != RunEffectTarget.None)
+                            {
+                                effectList.Add(m.effects[j].ToDomainData());
+                            }
+                        }
+                    }
+
+                    var def = new RunModifierDefinition
+                    {
+                        Id = m.id.Trim(),
+                        DisplayName = string.IsNullOrWhiteSpace(m.displayName) ? m.id.Trim() : m.displayName.Trim(),
+                        Kind = m.kind,
+                        Duration = m.duration,
+                        Scope = "Global",
+                        MinNight = Mathf.Max(1, m.minNight),
+                        MaxNight = Mathf.Max(0, m.maxNight),
+                        MaxStacks = Mathf.Max(1, m.maxStacks),
+                        Value = effectList.Count > 0 ? effectList[0].ToDomainValuePerLevel() : 0f,
+                        DescriptionOverride = m.descriptionOverride ?? string.Empty,
+                        Enabled = m.enabled,
+                        AllowedSource = m.allowedSource,
+                        AllowedDifficulties = m.allowedDifficulties,
+                        Weight = Mathf.Max(0f, m.weight),
+                        IsFallbackReserve = m.isFallbackReserve,
+                        PrerequisiteIds = m.prerequisiteIds != null ? m.prerequisiteIds.ToArray() : Array.Empty<string>(),
+                        IncompatibleIds = m.incompatibleIds != null ? m.incompatibleIds.ToArray() : Array.Empty<string>(),
+                        Tags = m.tags != null ? m.tags.ToArray() : Array.Empty<string>(),
+                        Effects = effectList
+                    };
+                    def.Description = RunDescriptionFormatter.FormatModifierDescription(def, 1);
+                    domainModifiers.Add(def);
+                }
+            }
+
+            var domainOffers = new List<RunShopOfferData>();
+            if (shopOffers != null)
+            {
+                for (int i = 0; i < shopOffers.Count; i++)
+                {
+                    var o = shopOffers[i];
+                    if (o == null || string.IsNullOrWhiteSpace(o.offerId)) continue;
+
+                    var lines = new List<SupplyBundleLineData>();
+                    if (o.supplyBundleLines != null)
+                    {
+                        for (int j = 0; j < o.supplyBundleLines.Count; j++)
+                        {
+                            var line = o.supplyBundleLines[j];
+                            if (line == null) continue;
+                            int ingId = line.EffectiveIngredientId;
+                            if (ingId > 0)
+                            {
+                                lines.Add(new SupplyBundleLineData(ingId, line.quantity));
+                            }
+                        }
+                    }
+
+                    domainOffers.Add(new RunShopOfferData(
+                        o.offerId.Trim(),
+                        string.IsNullOrWhiteSpace(o.displayName) ? o.offerId.Trim() : o.displayName.Trim(),
+                        o.customDescription ?? string.Empty,
+                        o.enabled,
+                        o.benefitKind,
+                        o.modifierId ?? string.Empty,
+                        o.employeeRole,
+                        lines,
+                        o.baseCost,
+                        o.costIncreasePerLevel,
+                        o.maxPurchasesPerRun,
+                        o.maxPurchasesPerNight,
+                        o.phaseAvailability,
+                        o.legacyByteId));
+                }
+            }
+
+            var domainProfiles = new List<EmployeeRoleProfileData>();
+            if (employeeProfiles != null)
+            {
+                for (int i = 0; i < employeeProfiles.Count; i++)
+                {
+                    var p = employeeProfiles[i];
+                    if (p == null) continue;
+                    domainProfiles.Add(new EmployeeRoleProfileData(
+                        p.role,
+                        string.IsNullOrWhiteSpace(p.displayName) ? p.role.ToString() : p.displayName.Trim(),
+                        p.hireCost,
+                        p.maxLevel,
+                        p.promotionCostMultiplier,
+                        p.promotionFlatStepCost,
+                        p.baseErrorRatePercent / 100f,
+                        p.levelErrorReductionPercent / 100f,
+                        p.minErrorRatePercent / 100f,
+                        p.baseActionSeconds));
+                }
+            }
+
+            var domainSchedules = new List<NightPreparationScheduleData>();
+            if (preparationSchedules != null)
+            {
+                for (int i = 0; i < preparationSchedules.Count; i++)
+                {
+                    var s = preparationSchedules[i];
+                    if (s == null) continue;
+                    domainSchedules.Add(new NightPreparationScheduleData(
+                        s.nightNumber,
+                        s.mandatoryHindranceStages,
+                        s.hindranceAlternatives,
+                        s.opportunityStages,
+                        s.opportunityAlternatives,
+                        s.additionalEventStages,
+                        s.eventAlternatives));
+                }
+            }
+
+            return new RunBalancingSnapshot(domainModifiers, domainOffers, domainProfiles, domainSchedules);
+        }
     }
 }

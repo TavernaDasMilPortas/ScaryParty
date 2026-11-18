@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -31,12 +32,22 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public string DisplayName;
         public RunModifierKind Kind;
         public RunModifierDuration Duration;
-        public string Scope;
+        public string Scope = "Global";
         public int MinNight = 1;
+        public int MaxNight = 0;
         public int MaxStacks = 1;
         public float Value;
         public string Description;
+        public string DescriptionOverride;
+        public bool Enabled = true;
+        public RunModifierSource AllowedSource = RunModifierSource.VoteOnly;
+        public RunDifficultyFlags AllowedDifficulties = RunDifficultyFlags.All;
+        public float Weight = 1f;
+        public bool IsFallbackReserve;
+        public string[] PrerequisiteIds = Array.Empty<string>();
         public string[] IncompatibleIds = Array.Empty<string>();
+        public string[] Tags = Array.Empty<string>();
+        public IReadOnlyList<RunModifierEffectData> Effects = Array.Empty<RunModifierEffectData>();
     }
 
     public sealed class ActiveRunModifier
@@ -54,6 +65,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public float EmployeeErrorMultiplier = 1f;
         public int ExtraBackpackCapacity = 0;
         public bool OvenAutoShutoffEnabled = false;
+        public float BackpackResistanceMultiplier = 1f;
+        public float CustomerPatienceMultiplier = 1f;
+        public float NightGoalMultiplier = 1f;
     }
 
     public sealed class RunShopItem
@@ -75,17 +89,20 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public int FrozenHumanCount { get; private set; } = 1;
         public bool IsRunCompleted { get; private set; }
         public bool IsRunVictory { get; private set; }
+        public RunBalancingSnapshot BalancingSnapshot { get; private set; }
 
         public Random MapRng { get; private set; }
         public Random ChoiceRng { get; private set; }
         public Random EmployeeErrorRng { get; private set; }
 
-        private readonly Dictionary<string, RunModifierDefinition> _catalog = new Dictionary<string, RunModifierDefinition>();
-        private readonly Dictionary<string, ActiveRunModifier> _activeModifiers = new Dictionary<string, ActiveRunModifier>();
+        private readonly Dictionary<string, RunModifierDefinition> _catalog = new Dictionary<string, RunModifierDefinition>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ActiveRunModifier> _activeModifiers = new Dictionary<string, ActiveRunModifier>(StringComparer.Ordinal);
         private readonly List<RunModifierDefinition> _currentVoteOptions = new List<RunModifierDefinition>();
         private readonly Dictionary<ulong, string> _votes = new Dictionary<ulong, string>();
         private readonly HashSet<ulong> _readyPlayers = new HashSet<ulong>();
-        private readonly HashSet<string> _purchasedUniqueItems = new HashSet<string>();
+        private readonly HashSet<string> _purchasedUniqueItems = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> _shopRunPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> _shopNightPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
 
         public IReadOnlyList<RunModifierDefinition> CurrentVoteOptions => _currentVoteOptions;
         public IReadOnlyDictionary<string, ActiveRunModifier> ActiveModifiers => _activeModifiers;
@@ -95,14 +112,38 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public string LastResolvedOptionId { get; private set; }
 
         public bool HasModifier(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.ContainsKey(id);
+        public int GetModifierStacks(string id) => !string.IsNullOrEmpty(id) && _activeModifiers.TryGetValue(id, out var m) ? m.Stacks : 0;
         public RunModifierDefinition GetModifierDefinition(string id) => !string.IsNullOrEmpty(id) && _catalog.TryGetValue(id, out var d) ? d : null;
 
-        public RunProgressionService(int seed = 12345, int maxNights = 3, RunDifficulty difficulty = RunDifficulty.Normal)
+        public RunProgressionService(
+            int seed = 12345,
+            int maxNights = 3,
+            RunDifficulty difficulty = RunDifficulty.Normal,
+            RunBalancingSnapshot snapshot = null)
         {
             MaxNights = Math.Clamp(maxNights, 1, 7);
             Difficulty = difficulty;
             InitializeStreams(seed);
-            RegisterDefaultCatalog();
+            ApplyBalancingSnapshot(snapshot ?? RunBalancingSnapshot.CreateForDomainUnitTests());
+        }
+
+        public void ApplyBalancingSnapshot(RunBalancingSnapshot snapshot)
+        {
+            if (snapshot == null)
+            {
+                throw new ArgumentNullException(nameof(snapshot));
+            }
+
+            BalancingSnapshot = snapshot;
+            _catalog.Clear();
+            for (int i = 0; i < snapshot.Modifiers.Count; i++)
+            {
+                var mod = snapshot.Modifiers[i];
+                if (mod != null && !string.IsNullOrWhiteSpace(mod.Id))
+                {
+                    _catalog[mod.Id] = mod;
+                }
+            }
         }
 
         public void InitializeStreams(int seed)
@@ -130,6 +171,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             _votes.Clear();
             _readyPlayers.Clear();
             _purchasedUniqueItems.Clear();
+            _shopRunPurchases.Clear();
+            _shopNightPurchases.Clear();
             IsVoteResolved = false;
             LastResolvedOptionId = null;
             InitializeStreams(seed);
@@ -338,6 +381,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 _activeModifiers.Remove(toRemove[i]);
             }
+            _shopNightPurchases.Clear();
             _readyPlayers.Clear();
             IsVoteResolved = false;
         }
@@ -345,27 +389,350 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public RunEffectiveStats RecalculateEffectiveStats()
         {
             var stats = new RunEffectiveStats();
+
+            var accumulators = new Dictionary<RunEffectTarget, TargetEffectAccumulator>();
             if (Difficulty == RunDifficulty.Hard)
             {
-                stats.DemandMultiplier *= 1.15f;
-                stats.VampireAggressionMultiplier *= 1.2f;
+                AccumulateEffect(accumulators, new RunModifierEffectData(RunEffectTarget.OrderArrivalRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, 15f), 1);
+                AccumulateEffect(accumulators, new RunModifierEffectData(RunEffectTarget.VampireAcquisitionRange, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, 20f), 1);
             }
 
             foreach (var mod in _activeModifiers.Values)
             {
-                float v = mod.Definition.Value * mod.Stacks;
-                switch (mod.Definition.Id)
+                if (mod == null || mod.Definition == null) continue;
+                int stacks = Math.Max(1, mod.Stacks);
+                var effects = ResolveEffectiveEffects(mod.Definition);
+                for (int i = 0; i < effects.Count; i++)
                 {
-                    case "blood_moon": stats.VampireSpawnMultiplier += v; break;
-                    case "vampire_attack": stats.VampireAggressionMultiplier += v; break;
-                    case "oven_timer": stats.OvenAutoShutoffEnabled = true; break;
-                    case "reinforced_bag": stats.ExtraBackpackCapacity += (int)Math.Round(v); break;
-                    case "heavy_rush": stats.DemandMultiplier += v; break;
-                    case "express_supply": stats.SupplyEtaMultiplier = Math.Max(0.3f, stats.SupplyEtaMultiplier - v); break;
-                    case "staff_training": stats.EmployeeErrorMultiplier = Math.Max(0.2f, stats.EmployeeErrorMultiplier - v); break;
+                    AccumulateEffect(accumulators, effects[i], stacks);
                 }
             }
+
+            stats.DemandMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.OrderArrivalRate, 0.3f, 3.0f);
+            stats.VampireSpawnMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.VampirePopulation, 0.3f, 4.0f);
+            stats.VampireAggressionMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.VampireAcquisitionRange, 0.3f, 3.0f);
+            stats.SupplyEtaMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.SupplyDeliveryEta, 0.25f, 3.0f);
+            stats.EmployeeErrorMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.EmployeeErrorRate, 0.1f, 2.0f);
+            stats.BackpackResistanceMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.BackpackResistance, 0.2f, 2.0f);
+            stats.CustomerPatienceMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.CustomerPatience, 0.3f, 2.5f);
+            stats.NightGoalMultiplier = ResolveMultiplierTarget(accumulators, RunEffectTarget.NightRevenueGoal, 0.4f, 3.0f);
+            stats.ExtraBackpackCapacity = Math.Max(0, (int)Math.Round(ResolveFlatTarget(accumulators, RunEffectTarget.BackpackCapacity, 0f, 10f)));
+            stats.OvenAutoShutoffEnabled = ResolveCapabilityTarget(accumulators, RunEffectTarget.OvenAutoShutoff);
+
             return stats;
+        }
+
+        private struct TargetEffectAccumulator
+        {
+            public float FlatAdd;
+            public float PercentDeltaSum;
+            public float MultiplierProduct;
+            public bool InitializedMultiplier;
+            public bool CapabilityEnabled;
+            public bool HasCustomLimits;
+            public float MinLimit;
+            public float MaxLimit;
+        }
+
+        private static void AccumulateEffect(
+            Dictionary<RunEffectTarget, TargetEffectAccumulator> map,
+            RunModifierEffectData effect,
+            int stacks)
+        {
+            if (effect == null || effect.Target == RunEffectTarget.None) return;
+
+            if (!map.TryGetValue(effect.Target, out var acc))
+            {
+                acc = new TargetEffectAccumulator { MultiplierProduct = 1f, InitializedMultiplier = true };
+            }
+            if (!acc.InitializedMultiplier)
+            {
+                acc.MultiplierProduct = 1f;
+                acc.InitializedMultiplier = true;
+            }
+
+            float domainPerLevel = effect.ToDomainValuePerLevel();
+            switch (effect.Operation)
+            {
+                case RunEffectOperation.AddFlat:
+                    acc.FlatAdd += domainPerLevel * stacks;
+                    break;
+                case RunEffectOperation.PercentDelta:
+                    acc.PercentDeltaSum += domainPerLevel * stacks;
+                    break;
+                case RunEffectOperation.Multiply:
+                    acc.MultiplierProduct *= MathF.Pow(Math.Max(0.01f, domainPerLevel), stacks);
+                    break;
+                case RunEffectOperation.EnableCapability:
+                    if (domainPerLevel * stacks > 0f) acc.CapabilityEnabled = true;
+                    break;
+            }
+
+            if (effect.HasLimits)
+            {
+                if (!acc.HasCustomLimits)
+                {
+                    acc.HasCustomLimits = true;
+                    acc.MinLimit = effect.MinLimit;
+                    acc.MaxLimit = effect.MaxLimit;
+                }
+                else
+                {
+                    acc.MinLimit = Math.Max(acc.MinLimit, effect.MinLimit);
+                    acc.MaxLimit = Math.Min(acc.MaxLimit, effect.MaxLimit);
+                }
+            }
+
+            map[effect.Target] = acc;
+        }
+
+        private static float ResolveMultiplierTarget(
+            Dictionary<RunEffectTarget, TargetEffectAccumulator> map,
+            RunEffectTarget target,
+            float defaultMin,
+            float defaultMax)
+        {
+            if (!map.TryGetValue(target, out var acc)) return 1f;
+
+            // Ordem unica deterministica: base (1.0) -> adicoes planas -> deltas percentuais relativos -> multiplicadores -> clamp
+            float value = (1f + acc.FlatAdd) * Math.Max(0.05f, 1f + acc.PercentDeltaSum) * acc.MultiplierProduct;
+            float min = acc.HasCustomLimits ? acc.MinLimit : defaultMin;
+            float max = acc.HasCustomLimits ? Math.Max(min, acc.MaxLimit) : defaultMax;
+            return Math.Clamp(value, min, max);
+        }
+
+        private static float ResolveFlatTarget(
+            Dictionary<RunEffectTarget, TargetEffectAccumulator> map,
+            RunEffectTarget target,
+            float defaultMin,
+            float defaultMax)
+        {
+            if (!map.TryGetValue(target, out var acc)) return 0f;
+            float value = (0f + acc.FlatAdd) * Math.Max(0f, 1f + acc.PercentDeltaSum) * acc.MultiplierProduct;
+            float min = acc.HasCustomLimits ? acc.MinLimit : defaultMin;
+            float max = acc.HasCustomLimits ? Math.Max(min, acc.MaxLimit) : defaultMax;
+            return Math.Clamp(value, min, max);
+        }
+
+        private static bool ResolveCapabilityTarget(Dictionary<RunEffectTarget, TargetEffectAccumulator> map, RunEffectTarget target)
+        {
+            return map.TryGetValue(target, out var acc) && acc.CapabilityEnabled;
+        }
+
+        private static IReadOnlyList<RunModifierEffectData> ResolveEffectiveEffects(RunModifierDefinition def)
+        {
+            if (def.Effects != null && def.Effects.Count > 0)
+            {
+                return def.Effects;
+            }
+
+            // Compatibilidade explicita para instancias ad-hoc em testes unitarios legados que preenchem apenas Id + Value
+            float v = def.Value;
+            return def.Id switch
+            {
+                "blood_moon" => new[] { new RunModifierEffectData(RunEffectTarget.VampirePopulation, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
+                "vampire_attack" => new[] { new RunModifierEffectData(RunEffectTarget.VampireAcquisitionRange, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
+                "heavy_rush" => new[] { new RunModifierEffectData(RunEffectTarget.OrderArrivalRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, v * 100f) },
+                "express_supply" => new[] { new RunModifierEffectData(RunEffectTarget.SupplyDeliveryEta, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -Math.Abs(v) * 100f) },
+                "oven_timer" => new[] { new RunModifierEffectData(RunEffectTarget.OvenAutoShutoff, RunEffectOperation.EnableCapability, RunEffectUnit.BooleanFlag, 1f) },
+                "reinforced_bag" => new[] { new RunModifierEffectData(RunEffectTarget.BackpackCapacity, RunEffectOperation.AddFlat, RunEffectUnit.FlatUnits, v) },
+                "staff_training" => new[] { new RunModifierEffectData(RunEffectTarget.EmployeeErrorRate, RunEffectOperation.PercentDelta, RunEffectUnit.RelativePercent, -Math.Abs(v) * 100f) },
+                _ => Array.Empty<RunModifierEffectData>()
+            };
+        }
+
+        public bool TryEvaluateShopOffer(
+            PizzeriaState state,
+            RunShopOfferData offer,
+            EmployeeTaskService employees,
+            out int effectiveCost,
+            out string lockReason)
+        {
+            effectiveCost = 0;
+            lockReason = string.Empty;
+            if (offer == null || !offer.Enabled)
+            {
+                lockReason = "Oferta indisponivel no catalogo.";
+                return false;
+            }
+
+            if (state == null)
+            {
+                lockReason = "Estado da pizzaria indisponivel.";
+                return false;
+            }
+
+            if (state.CurrentNightPhase == NightPhase.Results || state.CurrentNightPhase == NightPhase.Defeat)
+            {
+                lockReason = "Loja fechada fora da preparacao e do turno.";
+                return false;
+            }
+
+            bool inPrep = state.CurrentNightPhase == NightPhase.PreparingNextNight || state.CurrentNightPhase == NightPhase.Preparing;
+            if (offer.PhaseAvailability == ShopPhaseAvailability.PreparationOnly && !inPrep)
+            {
+                lockReason = "Disponivel apenas na preparacao.";
+                return false;
+            }
+
+            if (offer.PhaseAvailability == ShopPhaseAvailability.ActiveShiftOnly && inPrep)
+            {
+                lockReason = "Disponivel apenas durante a noite ativa.";
+                return false;
+            }
+
+            int runPurchases = _shopRunPurchases.TryGetValue(offer.OfferId, out var rp) ? rp : 0;
+            int nightPurchases = _shopNightPurchases.TryGetValue(offer.OfferId, out var np) ? np : 0;
+
+            if (offer.MaxPurchasesPerRun > 0 && runPurchases >= offer.MaxPurchasesPerRun)
+            {
+                lockReason = $"Limite por RUN atingido ({runPurchases}/{offer.MaxPurchasesPerRun}).";
+                return false;
+            }
+
+            if (offer.MaxPurchasesPerNight > 0 && nightPurchases >= offer.MaxPurchasesPerNight)
+            {
+                lockReason = $"Limite por noite atingido ({nightPurchases}/{offer.MaxPurchasesPerNight}).";
+                return false;
+            }
+
+            switch (offer.BenefitKind)
+            {
+                case ShopBenefitKind.GrantModifier:
+                {
+                    var modDef = GetModifierDefinition(offer.ModifierId);
+                    if (modDef == null)
+                    {
+                        lockReason = "Modificador associado ausente no catalogo.";
+                        return false;
+                    }
+
+                    int stacks = GetModifierStacks(offer.ModifierId);
+                    if (stacks >= modDef.MaxStacks)
+                    {
+                        lockReason = $"Nivel maximo atingido ({stacks}/{modDef.MaxStacks}).";
+                        return false;
+                    }
+
+                    effectiveCost = offer.ComputeEffectiveCost(stacks);
+                    break;
+                }
+                case ShopBenefitKind.HireEmployee:
+                {
+                    int hiredCount = 0;
+                    if (employees != null)
+                    {
+                        foreach (var emp in employees.Employees.Values)
+                        {
+                            if (emp.Role == offer.EmployeeRole) hiredCount++;
+                        }
+                    }
+
+                    var profile = employees?.GetRoleProfile(offer.EmployeeRole) ?? BalancingSnapshot?.FindEmployeeProfile(offer.EmployeeRole);
+                    int baseRoleCost = profile != null ? profile.HireCost : offer.BaseCost;
+                    effectiveCost = offer.CostIncreasePerLevel > 0
+                        ? baseRoleCost + offer.CostIncreasePerLevel * hiredCount
+                        : baseRoleCost;
+                    break;
+                }
+                default:
+                    effectiveCost = offer.ComputeEffectiveCost(runPurchases);
+                    break;
+            }
+
+            if (state.RestaurantBudget < effectiveCost)
+            {
+                lockReason = $"Caixa insuficiente (precisa R$ {effectiveCost}).";
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool TryPurchaseCatalogOffer(
+            PizzeriaState state,
+            string offerId,
+            EmployeeTaskService employees,
+            Func<IReadOnlyList<SupplyBundleLineData>, int> applySupplyBundle,
+            out string failureReason,
+            out int appliedCost,
+            out HiredEmployeeState hiredEmployee)
+        {
+            failureReason = string.Empty;
+            appliedCost = 0;
+            hiredEmployee = null;
+
+            var offer = BalancingSnapshot?.FindShopOfferById(offerId);
+            if (!TryEvaluateShopOffer(state, offer, employees, out appliedCost, out failureReason))
+            {
+                return false;
+            }
+
+            switch (offer.BenefitKind)
+            {
+                case ShopBenefitKind.GrantModifier:
+                {
+                    var modDef = GetModifierDefinition(offer.ModifierId);
+                    if (modDef == null || !CanApplyModifierStack(offer.ModifierId))
+                    {
+                        failureReason = "Nao foi possivel aplicar o modificador.";
+                        return false;
+                    }
+
+                    state.RestaurantBudget -= appliedCost;
+                    state.NightShopSpent += appliedCost;
+                    ApplyModifier(modDef);
+                    break;
+                }
+                case ShopBenefitKind.SupplyBundle:
+                {
+                    if (applySupplyBundle == null)
+                    {
+                        failureReason = "Aplicador de suprimentos ausente.";
+                        return false;
+                    }
+
+                    int added = applySupplyBundle(offer.SupplyBundleLines);
+                    if (added <= 0)
+                    {
+                        failureReason = "Armazenamento cheio para todos os itens deste pacote.";
+                        return false;
+                    }
+
+                    state.RestaurantBudget -= appliedCost;
+                    state.NightShopSpent += appliedCost;
+                    break;
+                }
+                case ShopBenefitKind.HireEmployee:
+                {
+                    if (employees == null)
+                    {
+                        failureReason = "Servico de funcionarios indisponivel.";
+                        return false;
+                    }
+
+                    hiredEmployee = employees.TryHireEmployeeWithExplicitCost(state, offer.EmployeeRole, appliedCost);
+                    if (hiredEmployee == null)
+                    {
+                        failureReason = "Falha ao contratar funcionario.";
+                        return false;
+                    }
+                    break;
+                }
+                default:
+                    failureReason = "Tipo de oferta desconhecido.";
+                    return false;
+            }
+
+            _shopRunPurchases[offer.OfferId] = (_shopRunPurchases.TryGetValue(offer.OfferId, out var rp) ? rp : 0) + 1;
+            _shopNightPurchases[offer.OfferId] = (_shopNightPurchases.TryGetValue(offer.OfferId, out var np) ? np : 0) + 1;
+            if (offer.MaxPurchasesPerRun == 1)
+            {
+                _purchasedUniqueItems.Add(offer.OfferId);
+            }
+
+            state.IncrementRevision();
+            return true;
         }
 
         public bool TryPurchaseShopItem(PizzeriaState state, RunShopItem item)
@@ -396,6 +763,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return NightCycleService.AdvanceToNextNight(state);
         }
 
+        public int GetShopOfferRunPurchases(string offerId) => !string.IsNullOrEmpty(offerId) && _shopRunPurchases.TryGetValue(offerId, out var c) ? c : 0;
+        public int GetShopOfferNightPurchases(string offerId) => !string.IsNullOrEmpty(offerId) && _shopNightPurchases.TryGetValue(offerId, out var c) ? c : 0;
+
         private bool HasIncompatibility(RunModifierDefinition def)
         {
             if (def.IncompatibleIds == null) return false;
@@ -404,18 +774,6 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (_activeModifiers.ContainsKey(def.IncompatibleIds[i])) return true;
             }
             return false;
-        }
-
-        private void RegisterDefaultCatalog()
-        {
-            void Add(RunModifierDefinition d) => _catalog[d.Id] = d;
-            Add(new RunModifierDefinition { Id = "blood_moon", DisplayName = "Lua vermelha", Kind = RunModifierKind.Event, Duration = RunModifierDuration.OneNight, Scope = "Population", Value = 0.5f, Description = "Mais vampiros na população." });
-            Add(new RunModifierDefinition { Id = "vampire_attack", DisplayName = "Ataque dos vampiros", Kind = RunModifierKind.Hindrance, Duration = RunModifierDuration.OneNight, Scope = "Combat", Value = 0.35f, Description = "Vampiros mais agressivos." });
-            Add(new RunModifierDefinition { Id = "oven_timer", DisplayName = "Timer do forno", Kind = RunModifierKind.PermanentUpgrade, Duration = RunModifierDuration.Permanent, Scope = "Kitchen", Value = 1f, Description = "Desliga o forno ao atingir o ponto correto." });
-            Add(new RunModifierDefinition { Id = "reinforced_bag", DisplayName = "Bolsa reforçada", Kind = RunModifierKind.PermanentUpgrade, Duration = RunModifierDuration.Permanent, Scope = "Delivery", MaxStacks = 2, Value = 1f, Description = "Aumenta capacidade/resistência da mochila." });
-            Add(new RunModifierDefinition { Id = "heavy_rush", DisplayName = "Movimento intenso", Kind = RunModifierKind.Hindrance, Duration = RunModifierDuration.OneNight, Scope = "Orders", Value = 0.3f, Description = "Mais pedidos simultâneos." });
-            Add(new RunModifierDefinition { Id = "express_supply", DisplayName = "Fornecimento expresso", Kind = RunModifierKind.Opportunity, Duration = RunModifierDuration.OneNight, Scope = "Supply", Value = 0.4f, Description = "Menor ETA de reposição." });
-            Add(new RunModifierDefinition { Id = "staff_training", DisplayName = "Treinamento", Kind = RunModifierKind.PermanentUpgrade, Duration = RunModifierDuration.Permanent, Scope = "Employees", MaxStacks = 2, Value = 0.25f, Description = "Menor chance de erro do pizzaiolo." });
         }
     }
 }

@@ -51,6 +51,26 @@ namespace ScaryParty.Pizzeria.Authoring
         public PizzeriaRunPreset defaultPreset;
         public List<PizzeriaRunPreset> availablePresets = new List<PizzeriaRunPreset>();
         public RunBalancingCatalog balancingCatalog;
+
+        public RunBalancingSnapshot ResolveBalancingSnapshot(out string diagnosticError, RunBalancingCatalog overrideCatalog = null)
+        {
+            var source = overrideCatalog != null ? overrideCatalog : balancingCatalog;
+            if (source == null)
+            {
+                diagnosticError = $"[PizzeriaConfig:{name}] balancingCatalog nao esta atribuido. Execute o Wizard ou o migrador B0.";
+                return null;
+            }
+
+            var snapshot = source.BuildDomainSnapshot();
+            if (snapshot.Modifiers.Count == 0 || snapshot.ShopOffers.Count == 0)
+            {
+                diagnosticError = $"[PizzeriaConfig:{name}] RunBalancingCatalog '{source.name}' esta incompleto (Modificadores={snapshot.Modifiers.Count}, Ofertas={snapshot.ShopOffers.Count}).";
+                return snapshot;
+            }
+
+            diagnosticError = string.Empty;
+            return snapshot;
+        }
         public NightConfig nightConfig;
         public bool enableAllPlayersDeadDefeat = true;
         public bool allowDebugNightRetryOnDefeat = false;

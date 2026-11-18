@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
 using ScaryParty.Pizzeria.Domain.Types;
 
@@ -70,33 +71,58 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         private readonly Dictionary<int, HiredEmployeeState> _employees = new Dictionary<int, HiredEmployeeState>();
         private readonly Dictionary<int, SharedEmployeeTask> _tasks = new Dictionary<int, SharedEmployeeTask>();
+        private RunBalancingSnapshot _balancingSnapshot;
         private int _nextEmployeeId = 1;
         private int _nextTaskId = 1;
+
+        public EmployeeTaskService(RunBalancingSnapshot balancingSnapshot = null)
+        {
+            _balancingSnapshot = balancingSnapshot;
+        }
+
+        public void SetBalancingSnapshot(RunBalancingSnapshot balancingSnapshot)
+        {
+            _balancingSnapshot = balancingSnapshot;
+        }
+
+        public EmployeeRoleProfileData GetRoleProfile(EmployeeRole role)
+        {
+            var found = _balancingSnapshot?.FindEmployeeProfile(role);
+            if (found != null) return found;
+
+            return role == EmployeeRole.Cashier
+                ? new EmployeeRoleProfileData(EmployeeRole.Cashier, "Balconista", 180, 5, 1.0f, 0, 0.05f, 0.15f, 0.02f, 2.2f)
+                : new EmployeeRoleProfileData(EmployeeRole.Pizzaiolo, "Pizzaiolo", 120, 5, 1.0f, 0, 0.20f, 0.15f, 0.02f, 1.8f);
+        }
 
         public IReadOnlyDictionary<int, HiredEmployeeState> Employees => _employees;
         public IReadOnlyDictionary<int, SharedEmployeeTask> Tasks => _tasks;
 
         public int GetHireCost(EmployeeRole role, int level = 1)
         {
-            int baseCost = role == EmployeeRole.Cashier ? 180 : 120;
-            return baseCost * Math.Max(1, level);
+            return GetRoleProfile(role).ComputeCostForLevel(level);
         }
 
         public HiredEmployeeState TryHireEmployee(PizzeriaState state, EmployeeRole role)
         {
-            if (state == null) return null;
-            int cost = GetHireCost(role, 1);
-            if (state.RestaurantBudget < cost) return null;
+            return TryHireEmployeeWithExplicitCost(state, role, GetHireCost(role, 1));
+        }
 
-            state.RestaurantBudget -= cost;
-            state.NightWagesSpent += cost;
+        public HiredEmployeeState TryHireEmployeeWithExplicitCost(PizzeriaState state, EmployeeRole role, int explicitCost)
+        {
+            if (state == null || explicitCost < 0) return null;
+            if (state.RestaurantBudget < explicitCost) return null;
+
+            var profile = GetRoleProfile(role);
+            state.RestaurantBudget -= explicitCost;
+            state.NightWagesSpent += explicitCost;
             var emp = new HiredEmployeeState
             {
                 EmployeeId = _nextEmployeeId++,
                 Role = role,
                 Level = 1,
                 IsAlive = true,
-                BaseErrorRate = role == EmployeeRole.Pizzaiolo ? 0.20f : 0.05f
+                BaseErrorRate = profile.BaseErrorRate
             };
             _employees[emp.EmployeeId] = emp;
             state.IncrementRevision();
@@ -106,6 +132,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public bool TryUpgradeEmployee(PizzeriaState state, int employeeId)
         {
             if (state == null || !_employees.TryGetValue(employeeId, out var emp)) return false;
+            var profile = GetRoleProfile(emp.Role);
+            if (emp.Level >= profile.MaxLevel) return false;
             int cost = GetHireCost(emp.Role, emp.Level + 1);
             if (state.RestaurantBudget < cost) return false;
 
@@ -303,8 +331,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public float ComputeEffectiveErrorProbability(HiredEmployeeState emp, float trainingErrorMultiplier = 1f)
         {
             if (emp == null) return 0f;
-            float levelFactor = Math.Max(0.25f, 1f - (emp.Level - 1) * 0.15f);
-            return Math.Clamp(emp.BaseErrorRate * levelFactor * trainingErrorMultiplier, MinSkillErrorRate, 0.9f);
+            var profile = GetRoleProfile(emp.Role);
+            float levelFactor = Math.Max(0.25f, 1f - (emp.Level - 1) * profile.LevelErrorReduction);
+            float minRate = Math.Max(MinSkillErrorRate, profile.MinErrorRate);
+            return Math.Clamp(emp.BaseErrorRate * levelFactor * trainingErrorMultiplier, minRate, 0.9f);
         }
 
         public bool RollIntentionalSkillError(int employeeId, Random employeeErrorRng, float trainingErrorMultiplier = 1f)
