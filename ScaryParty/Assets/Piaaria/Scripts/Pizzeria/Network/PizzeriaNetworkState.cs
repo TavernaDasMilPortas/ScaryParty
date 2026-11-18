@@ -28,6 +28,8 @@ namespace ScaryParty.Pizzeria.Network
         public NetworkList<NetPlayerCombatDto> PlayerCombatStates;
         public NetworkList<NetMonsterDto> Monsters;
         public NetworkList<NetEmployeeDto> Employees;
+        public NetworkList<NetRunVoteOptionDto> RunVoteOptions;
+        public NetworkList<NetRunShopOfferDto> RunShopOffers;
 
         public NetworkVariable<NetNightStateDto> NightState = new NetworkVariable<NetNightStateDto>(
             default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -73,6 +75,8 @@ namespace ScaryParty.Pizzeria.Network
             PlayerCombatStates = new NetworkList<NetPlayerCombatDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Monsters = new NetworkList<NetMonsterDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
             Employees = new NetworkList<NetEmployeeDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            RunVoteOptions = new NetworkList<NetRunVoteOptionDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+            RunShopOffers = new NetworkList<NetRunShopOfferDto>(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         }
 
         public bool IsHandOccupiedByWeapon(ulong playerId, int slotId)

@@ -1262,4 +1262,90 @@ namespace ScaryParty.Pizzeria.Network
         public override bool Equals(object obj) => obj is NetEmployeeDto other && Equals(other);
         public override int GetHashCode() => HashCode.Combine(EmployeeId, Role, Level, IsAlive, CurrentHp, TaskState, AssignedTaskId, Revision);
     }
+
+    public struct NetRunVoteOptionDto : INetworkSerializable, IEquatable<NetRunVoteOptionDto>
+    {
+        public byte StageIndex;
+        public byte OptionIndex;
+        public byte Category;
+        public bool IsMandatory;
+        public bool IsResolvedWinner;
+        public int VoteCount;
+        public Unity.Collections.FixedString64Bytes OptionId;
+        public Unity.Collections.FixedString64Bytes Title;
+        public Unity.Collections.FixedString128Bytes Description;
+        public Unity.Collections.FixedString32Bytes DurationTag;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref StageIndex);
+            serializer.SerializeValue(ref OptionIndex);
+            serializer.SerializeValue(ref Category);
+            serializer.SerializeValue(ref IsMandatory);
+            serializer.SerializeValue(ref IsResolvedWinner);
+            serializer.SerializeValue(ref VoteCount);
+            serializer.SerializeValue(ref OptionId);
+            serializer.SerializeValue(ref Title);
+            serializer.SerializeValue(ref Description);
+            serializer.SerializeValue(ref DurationTag);
+        }
+
+        public bool Equals(NetRunVoteOptionDto other)
+            => StageIndex == other.StageIndex &&
+               OptionIndex == other.OptionIndex &&
+               Category == other.Category &&
+               IsMandatory == other.IsMandatory &&
+               IsResolvedWinner == other.IsResolvedWinner &&
+               VoteCount == other.VoteCount &&
+               OptionId.Equals(other.OptionId) &&
+               Title.Equals(other.Title) &&
+               Description.Equals(other.Description) &&
+               DurationTag.Equals(other.DurationTag);
+
+        public override bool Equals(object obj) => obj is NetRunVoteOptionDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(StageIndex, OptionIndex, OptionId, VoteCount, IsResolvedWinner);
+    }
+
+    public struct NetRunShopOfferDto : INetworkSerializable, IEquatable<NetRunShopOfferDto>
+    {
+        public Unity.Collections.FixedString64Bytes OfferId;
+        public byte LegacyByteId;
+        public byte BenefitKind;
+        public Unity.Collections.FixedString64Bytes DisplayName;
+        public Unity.Collections.FixedString128Bytes Description;
+        public int EffectiveCost;
+        public int CurrentLevel;
+        public int MaxLevel;
+        public bool CanPurchase;
+        public Unity.Collections.FixedString64Bytes LockReason;
+
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+        {
+            serializer.SerializeValue(ref OfferId);
+            serializer.SerializeValue(ref LegacyByteId);
+            serializer.SerializeValue(ref BenefitKind);
+            serializer.SerializeValue(ref DisplayName);
+            serializer.SerializeValue(ref Description);
+            serializer.SerializeValue(ref EffectiveCost);
+            serializer.SerializeValue(ref CurrentLevel);
+            serializer.SerializeValue(ref MaxLevel);
+            serializer.SerializeValue(ref CanPurchase);
+            serializer.SerializeValue(ref LockReason);
+        }
+
+        public bool Equals(NetRunShopOfferDto other)
+            => OfferId.Equals(other.OfferId) &&
+               LegacyByteId == other.LegacyByteId &&
+               BenefitKind == other.BenefitKind &&
+               DisplayName.Equals(other.DisplayName) &&
+               Description.Equals(other.Description) &&
+               EffectiveCost == other.EffectiveCost &&
+               CurrentLevel == other.CurrentLevel &&
+               MaxLevel == other.MaxLevel &&
+               CanPurchase == other.CanPurchase &&
+               LockReason.Equals(other.LockReason);
+
+        public override bool Equals(object obj) => obj is NetRunShopOfferDto other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(OfferId, EffectiveCost, CurrentLevel, CanPurchase, LockReason);
+    }
 }

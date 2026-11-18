@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using ScaryParty.Pizzeria.Domain.Definitions;
 using ScaryParty.Pizzeria.Domain.Models;
+using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Network
@@ -53,6 +55,8 @@ namespace ScaryParty.Pizzeria.Network
             anyChanged |= ProjectUpgradesDelta(domainState);
             anyChanged |= ProjectCustomersDelta(domainState);
             anyChanged |= ProjectTablesDelta(domainState);
+            anyChanged |= ProjectRunVoteOptionsDelta(domainState);
+            anyChanged |= ProjectRunShopOffersDelta(domainState);
 
             if (anyChanged || _netState.PublishedRevision.Value == 0)
             {
@@ -934,13 +938,13 @@ namespace ScaryParty.Pizzeria.Network
                 {
                     optAId = run.CurrentVoteOptions[0].Id ?? string.Empty;
                     optATitle = run.CurrentVoteOptions[0].DisplayName ?? optAId;
-                    optADesc = run.CurrentVoteOptions[0].Description ?? string.Empty;
+                    optADesc = RunDescriptionFormatter.FormatModifierDescription(run.CurrentVoteOptions[0]);
                 }
                 if (run.CurrentVoteOptions.Count > 1)
                 {
                     optBId = run.CurrentVoteOptions[1].Id ?? string.Empty;
                     optBTitle = run.CurrentVoteOptions[1].DisplayName ?? optBId;
-                    optBDesc = run.CurrentVoteOptions[1].Description ?? string.Empty;
+                    optBDesc = RunDescriptionFormatter.FormatModifierDescription(run.CurrentVoteOptions[1]);
                 }
                 foreach (var v in run.Votes.Values)
                 {
@@ -988,13 +992,185 @@ namespace ScaryParty.Pizzeria.Network
             };
         }
 
+        private bool ProjectRunVoteOptionsDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.RunVoteOptions;
+            var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance;
+            var run = root != null ? root.RunProgressionService : null;
+            var desired = new List<NetRunVoteOptionDto>();
+
+            if (run != null && domainState.CurrentNightPhase == NightPhase.PreparingNextNight)
+            {
+                if (run.CurrentVoteStages != null && run.CurrentVoteStages.Count > 0)
+                {
+                    for (int s = 0; s < run.CurrentVoteStages.Count; s++)
+                    {
+                        var stage = run.CurrentVoteStages[s];
+                        var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+                        foreach (var v in stage.Votes.Values)
+                        {
+                            counts[v] = (counts.TryGetValue(v, out var c) ? c : 0) + 1;
+                        }
+
+                        for (int o = 0; o < stage.Options.Count; o++)
+                        {
+                            var opt = stage.Options[o];
+                            desired.Add(new NetRunVoteOptionDto
+                            {
+                                StageIndex = (byte)stage.StageIndex,
+                                OptionIndex = (byte)o,
+                                Category = (byte)stage.Category,
+                                IsMandatory = stage.IsMandatory,
+                                IsResolvedWinner = !string.IsNullOrEmpty(stage.ResolvedOptionId) && string.Equals(stage.ResolvedOptionId, opt.Id, StringComparison.Ordinal),
+                                VoteCount = counts.TryGetValue(opt.Id, out var vc) ? vc : 0,
+                                OptionId = TruncateFs64(opt.Id),
+                                Title = TruncateFs64(opt.DisplayName),
+                                Description = TruncateFs128(RunDescriptionFormatter.FormatModifierDescription(opt)),
+                                DurationTag = TruncateFs32(RunDescriptionFormatter.FormatDurationTag(opt.Duration))
+                            });
+                        }
+                    }
+                }
+                else if (run.CurrentVoteOptions != null && run.CurrentVoteOptions.Count > 0)
+                {
+                    for (int o = 0; o < run.CurrentVoteOptions.Count; o++)
+                    {
+                        var opt = run.CurrentVoteOptions[o];
+                        int vc = 0;
+                        foreach (var v in run.Votes.Values)
+                        {
+                            if (v == opt.Id) vc++;
+                        }
+                        desired.Add(new NetRunVoteOptionDto
+                        {
+                            StageIndex = 0,
+                            OptionIndex = (byte)o,
+                            Category = (byte)opt.Kind,
+                            IsMandatory = true,
+                            IsResolvedWinner = run.IsVoteResolved && run.LastResolvedOptionId == opt.Id,
+                            VoteCount = vc,
+                            OptionId = TruncateFs64(opt.Id),
+                            Title = TruncateFs64(opt.DisplayName),
+                            Description = TruncateFs128(RunDescriptionFormatter.FormatModifierDescription(opt)),
+                            DurationTag = TruncateFs32(RunDescriptionFormatter.FormatDurationTag(opt.Duration))
+                        });
+                    }
+                }
+            }
+
+            return SyncNetworkListExact(networkList, desired);
+        }
+
+        private bool ProjectRunShopOffersDelta(PizzeriaState domainState)
+        {
+            var networkList = _netState.RunShopOffers;
+            var root = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance;
+            var run = root != null ? root.RunProgressionService : null;
+            var snap = run != null ? run.BalancingSnapshot : null;
+            var employees = root != null ? root.EmployeeTaskService : null;
+            var desired = new List<NetRunShopOfferDto>();
+
+            if (run != null && snap != null)
+            {
+                for (int i = 0; i < snap.ShopOffers.Count; i++)
+                {
+                    var offer = snap.ShopOffers[i];
+                    if (offer == null || !offer.Enabled) continue;
+
+                    bool canBuy = run.TryEvaluateShopOffer(domainState, offer, employees, out int effCost, out string lockReason);
+                    int curLevel = 0;
+                    int maxLevel = offer.MaxPurchasesPerRun;
+                    if (offer.BenefitKind == ShopBenefitKind.GrantModifier)
+                    {
+                        var mod = snap.FindModifierById(offer.ModifierId);
+                        curLevel = run.GetModifierStacks(offer.ModifierId);
+                        if (mod != null) maxLevel = mod.MaxStacks;
+                    }
+                    else
+                    {
+                        curLevel = run.GetShopOfferRunPurchases(offer.OfferId);
+                    }
+
+                    string desc = RunDescriptionFormatter.FormatShopOfferDescription(offer, snap, id => ResolveIngredientName(root, id), curLevel);
+                    desired.Add(new NetRunShopOfferDto
+                    {
+                        OfferId = TruncateFs64(offer.OfferId),
+                        LegacyByteId = offer.LegacyByteId,
+                        BenefitKind = (byte)offer.BenefitKind,
+                        DisplayName = TruncateFs64(offer.DisplayName),
+                        Description = TruncateFs128(desc),
+                        EffectiveCost = effCost,
+                        CurrentLevel = curLevel,
+                        MaxLevel = maxLevel,
+                        CanPurchase = canBuy,
+                        LockReason = TruncateFs64(lockReason)
+                    });
+                }
+            }
+
+            return SyncNetworkListExact(networkList, desired);
+        }
+
+        private static string ResolveIngredientName(ScaryParty.Pizzeria.Composition.PizzeriaRoot root, int ingredientId)
+        {
+            var ings = root != null && root.Config != null ? root.Config.ingredients : null;
+            if (ings != null)
+            {
+                for (int i = 0; i < ings.Count; i++)
+                {
+                    if (ings[i] != null && ings[i].id == ingredientId && !string.IsNullOrEmpty(ings[i].ingredientName))
+                        return ings[i].ingredientName;
+                }
+            }
+            return RunDescriptionFormatter.DefaultIngredientName(ingredientId);
+        }
+
+        private static bool SyncNetworkListExact<T>(Unity.Netcode.NetworkList<T> networkList, List<T> desired)
+            where T : unmanaged, IEquatable<T>
+        {
+            bool changed = false;
+            if (networkList.Count != desired.Count)
+            {
+                networkList.Clear();
+                for (int i = 0; i < desired.Count; i++)
+                {
+                    networkList.Add(desired[i]);
+                }
+                return true;
+            }
+
+            for (int i = 0; i < desired.Count; i++)
+            {
+                if (!networkList[i].Equals(desired[i]))
+                {
+                    networkList[i] = desired[i];
+                    changed = true;
+                }
+            }
+            return changed;
+        }
+
         private static Unity.Collections.FixedString32Bytes TruncateFs32(string s)
-            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString32Bytes(s.Length > 28 ? s.Substring(0, 28) : s);
+            => new Unity.Collections.FixedString32Bytes(TruncateUtf8(s, 29));
 
         private static Unity.Collections.FixedString64Bytes TruncateFs64(string s)
-            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString64Bytes(s.Length > 60 ? s.Substring(0, 60) : s);
+            => new Unity.Collections.FixedString64Bytes(TruncateUtf8(s, 61));
 
         private static Unity.Collections.FixedString128Bytes TruncateFs128(string s)
-            => string.IsNullOrEmpty(s) ? default : new Unity.Collections.FixedString128Bytes(s.Length > 120 ? s.Substring(0, 120) : s);
+            => new Unity.Collections.FixedString128Bytes(TruncateUtf8(s, 125));
+
+        private static string TruncateUtf8(string s, int maxBytes)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            int byteCount = System.Text.Encoding.UTF8.GetByteCount(s);
+            if (byteCount <= maxBytes) return s;
+
+            int len = Math.Min(s.Length, maxBytes);
+            while (len > 0 && System.Text.Encoding.UTF8.GetByteCount(s, 0, len) > maxBytes)
+            {
+                len--;
+            }
+            return s.Substring(0, len);
+        }
     }
 }

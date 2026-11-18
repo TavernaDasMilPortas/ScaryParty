@@ -589,61 +589,78 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void PopulateShopTab(PizzeriaNetworkState net)
         {
-            var run = net.RunState.Value;
             int budget = net.RestaurantBudget.Value;
-
             _contentScroll.Add(CreateSectionHeader("Loja da Pizzaria & Upgrades da RUN (Caixa Coletivo)"));
 
-            int ovenStacks = run.HasOvenTimer ? 1 : 0;
-            int bagStacks = Mathf.Clamp(run.ExtraBackpackCapacity, 0, 2);
-            int trainStacks = Mathf.Clamp(Mathf.RoundToInt((1f - run.EmployeeErrorMultiplier) / 0.25f), 0, 2);
-
-            AddShopRow("Timer do Forno", "Desliga o forno automaticamente ao assar (pizzas não queimam).", 90, ovenStacks, 1, budget, 1);
-            AddShopRow("Bolsa Reforçada", "Aumenta capacidade/resistência das mochilas em +1.", 75, bagStacks, 2, budget, 2);
-            AddShopRow("Treinamento de Equipe", "Reduz erro dos funcionários em -25%.", 85, trainStacks, 2, budget, 3);
-            AddShopRow("Suprimentos Base +5", "Adiciona +5 unidades imediatas em Massa, Molho e Queijo.", 45, 0, 0, budget, 4);
+            if (net.RunShopOffers != null && net.RunShopOffers.Count > 0)
+            {
+                for (int i = 0; i < net.RunShopOffers.Count; i++)
+                {
+                    var offer = net.RunShopOffers[i];
+                    if ((ShopBenefitKind)offer.BenefitKind == ShopBenefitKind.HireEmployee) continue;
+                    AddDynamicShopRow(offer, budget);
+                }
+            }
+            else
+            {
+                var infoLbl = new Label("Catalogo de ofertas da loja aguardando replicacao do servidor.");
+                infoLbl.style.color = new Color(0.85f, 0.72f, 0.45f);
+                _contentScroll.Add(infoLbl);
+            }
         }
 
-        private void AddShopRow(string title, string desc, int cost, int currentStacks, int maxStacks, int budget, byte shopId)
+        private void AddDynamicShopRow(NetRunShopOfferDto offer, int budget)
         {
-            bool hasCap = maxStacks > 0;
-            bool maxed = hasCap && currentStacks >= maxStacks;
-            bool affordable = budget >= cost;
+            bool hasCap = offer.MaxLevel > 0;
+            bool maxed = hasCap && offer.CurrentLevel >= offer.MaxLevel;
+            bool affordable = budget >= offer.EffectiveCost;
+            bool canBuy = offer.CanPurchase && !maxed && affordable;
 
             var row = CreateCardRow();
             row.style.flexDirection = FlexDirection.Row;
             row.style.justifyContent = Justify.SpaceBetween;
             row.style.alignItems = Align.Center;
+            row.style.flexWrap = Wrap.Wrap;
 
             var textCol = new VisualElement();
+            textCol.style.flexGrow = 1;
             textCol.style.flexShrink = 1;
-            string stackLabel = hasCap ? $"[{currentStacks}/{maxStacks}]" : "[Consumível]";
-            var tLbl = new Label($"{title} {stackLabel} — R$ {cost}");
+            string stackLabel = hasCap ? $"[{offer.CurrentLevel}/{offer.MaxLevel}]" : "[Consumível]";
+            var tLbl = new Label($"{offer.DisplayName} {stackLabel} — R$ {offer.EffectiveCost}");
             tLbl.style.fontSize = 14;
             tLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             tLbl.style.color = maxed ? new Color(0.55f, 0.90f, 0.58f) : Color.white;
             textCol.Add(tLbl);
 
-            var dLbl = new Label(desc);
+            var dLbl = new Label(offer.Description.ToString());
             dLbl.style.fontSize = 12;
             dLbl.style.color = new Color(0.76f, 0.80f, 0.86f);
             dLbl.style.whiteSpace = WhiteSpace.Normal;
             textCol.Add(dLbl);
+
+            if (!canBuy && offer.LockReason.Length > 0)
+            {
+                var lockLbl = new Label(offer.LockReason.ToString());
+                lockLbl.style.fontSize = 11;
+                lockLbl.style.color = new Color(0.92f, 0.56f, 0.48f);
+                textCol.Add(lockLbl);
+            }
             row.Add(textCol);
 
+            string offerIdStr = offer.OfferId.ToString();
             var buyBtn = new Button(() =>
             {
-                PizzeriaCommandHandler.Instance?.PurchaseRunShopItemServerRpc(shopId);
+                PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(offerIdStr));
             })
             {
-                text = maxed ? "MAXIMIZADO" : (affordable ? $"Comprar (R$ {cost})" : "Saldo Insuficiente")
+                text = maxed ? "MAXIMIZADO" : (canBuy ? $"Comprar (R$ {offer.EffectiveCost})" : $"Indisp. (R$ {offer.EffectiveCost})")
             };
-            buyBtn.SetEnabled(!maxed && affordable);
+            buyBtn.SetEnabled(canBuy);
             buyBtn.style.height = 34;
             buyBtn.style.minWidth = 150;
             buyBtn.style.backgroundColor = maxed
                 ? new Color(0.24f, 0.42f, 0.28f)
-                : (affordable ? new Color(0.20f, 0.52f, 0.72f) : new Color(0.45f, 0.22f, 0.22f));
+                : (canBuy ? new Color(0.20f, 0.52f, 0.72f) : new Color(0.45f, 0.22f, 0.22f));
             buyBtn.style.color = Color.white;
             row.Add(buyBtn);
 
@@ -655,36 +672,100 @@ namespace ScaryParty.UI.Piaria.Presenters
             int budget = net.RestaurantBudget.Value;
             _contentScroll.Add(CreateSectionHeader("Contratação de Equipe"));
 
+            int cashierCost = 0;
+            bool hasCashierOffer = false;
+            string cashierName = "Balconista";
+            string cashierOfferId = string.Empty;
+
+            int pizzaioloCost = 0;
+            bool hasPizzaioloOffer = false;
+            string pizzaioloName = "Pizzaiolo";
+            string pizzaioloOfferId = string.Empty;
+
+            if (net.RunShopOffers != null)
+            {
+                for (int i = 0; i < net.RunShopOffers.Count; i++)
+                {
+                    var o = net.RunShopOffers[i];
+                    if ((ShopBenefitKind)o.BenefitKind != ShopBenefitKind.HireEmployee) continue;
+                    string id = o.OfferId.ToString();
+                    if (o.LegacyByteId == 5 || id.IndexOf("cashier", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        hasCashierOffer = true;
+                        cashierCost = o.EffectiveCost;
+                        cashierName = o.DisplayName.ToString();
+                        cashierOfferId = id;
+                    }
+                    else if (o.LegacyByteId == 6 || id.IndexOf("pizzaiolo", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        hasPizzaioloOffer = true;
+                        pizzaioloCost = o.EffectiveCost;
+                        pizzaioloName = o.DisplayName.ToString();
+                        pizzaioloOfferId = id;
+                    }
+                }
+            }
+
+            if (!hasCashierOffer && !hasPizzaioloOffer)
+            {
+                var snap = PizzeriaRoot.Instance?.RunProgressionService?.BalancingSnapshot;
+                var cashierProf = snap?.FindEmployeeProfile(EmployeeRole.Cashier);
+                var pizzaioloProf = snap?.FindEmployeeProfile(EmployeeRole.Pizzaiolo);
+                if (cashierProf != null)
+                {
+                    hasCashierOffer = true;
+                    cashierCost = cashierProf.HireCost;
+                    cashierName = cashierProf.DisplayName;
+                }
+                if (pizzaioloProf != null)
+                {
+                    hasPizzaioloOffer = true;
+                    pizzaioloCost = pizzaioloProf.HireCost;
+                    pizzaioloName = pizzaioloProf.DisplayName;
+                }
+            }
+
             var hireRow = new VisualElement();
             hireRow.style.flexDirection = FlexDirection.Row;
+            hireRow.style.flexWrap = Wrap.Wrap;
             hireRow.style.marginBottom = 10;
 
             var hireCashierBtn = new Button(() =>
             {
-                PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Cashier);
+                if (!string.IsNullOrEmpty(cashierOfferId))
+                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(cashierOfferId));
+                else
+                    PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Cashier);
             })
             {
-                text = budget >= 180 ? "Contratar Balconista (R$ 180)" : "Balconista R$ 180 (Saldo Insuficiente)"
+                text = hasCashierOffer
+                    ? (budget >= cashierCost ? $"{cashierName} (R$ {cashierCost})" : $"{cashierName} R$ {cashierCost} (Saldo Insuf.)")
+                    : "Balconista indisponivel"
             };
-            hireCashierBtn.SetEnabled(budget >= 180);
+            hireCashierBtn.SetEnabled(hasCashierOffer && budget >= cashierCost);
             hireCashierBtn.style.flexGrow = 1;
             hireCashierBtn.style.height = 38;
             hireCashierBtn.style.marginRight = 8;
-            hireCashierBtn.style.backgroundColor = budget >= 180 ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
+            hireCashierBtn.style.backgroundColor = (hasCashierOffer && budget >= cashierCost) ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
             hireCashierBtn.style.color = Color.white;
             hireRow.Add(hireCashierBtn);
 
             var hirePizzaioloBtn = new Button(() =>
             {
-                PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Pizzaiolo);
+                if (!string.IsNullOrEmpty(pizzaioloOfferId))
+                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(pizzaioloOfferId));
+                else
+                    PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Pizzaiolo);
             })
             {
-                text = budget >= 120 ? "Contratar Pizzaiolo (R$ 120)" : "Pizzaiolo R$ 120 (Saldo Insuficiente)"
+                text = hasPizzaioloOffer
+                    ? (budget >= pizzaioloCost ? $"{pizzaioloName} (R$ {pizzaioloCost})" : $"{pizzaioloName} R$ {pizzaioloCost} (Saldo Insuf.)")
+                    : "Pizzaiolo indisponivel"
             };
-            hirePizzaioloBtn.SetEnabled(budget >= 120);
+            hirePizzaioloBtn.SetEnabled(hasPizzaioloOffer && budget >= pizzaioloCost);
             hirePizzaioloBtn.style.flexGrow = 1;
             hirePizzaioloBtn.style.height = 38;
-            hirePizzaioloBtn.style.backgroundColor = budget >= 120 ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
+            hirePizzaioloBtn.style.backgroundColor = (hasPizzaioloOffer && budget >= pizzaioloCost) ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
             hirePizzaioloBtn.style.color = Color.white;
             hireRow.Add(hirePizzaioloBtn);
             _contentScroll.Add(hireRow);
@@ -708,8 +789,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                     ? FormatBlockReason(emp.BlockReason)
                     : ((EmployeeTaskState)emp.TaskState).ToString();
 
-                int nextCost = (emp.Role == 0 ? 180 : 120) * (emp.Level + 1);
-                bool canUpgrade = budget >= nextCost;
+                var empRole = (EmployeeRole)emp.Role;
+                var empService = PizzeriaRoot.Instance?.EmployeeTaskService;
+                var profile = empService?.GetRoleProfile(empRole);
+                int maxLevel = profile != null ? profile.MaxLevel : 5;
+                int nextCost = profile != null
+                    ? profile.ComputeCostForLevel(emp.Level + 1)
+                    : ((emp.Role == 0 ? cashierCost : pizzaioloCost) * (emp.Level + 1));
+                bool atMaxLevel = emp.Level >= maxLevel;
+                bool canUpgrade = !atMaxLevel && budget >= nextCost;
 
                 var row = CreateCardRow();
                 row.style.flexDirection = FlexDirection.Row;
