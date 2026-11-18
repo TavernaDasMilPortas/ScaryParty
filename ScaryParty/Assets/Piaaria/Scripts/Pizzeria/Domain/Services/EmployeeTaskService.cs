@@ -89,6 +89,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (state.RestaurantBudget < cost) return null;
 
             state.RestaurantBudget -= cost;
+            state.NightWagesSpent += cost;
             var emp = new HiredEmployeeState
             {
                 EmployeeId = _nextEmployeeId++,
@@ -109,6 +110,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (state.RestaurantBudget < cost) return false;
 
             state.RestaurantBudget -= cost;
+            state.NightWagesSpent += cost;
             emp.Level++;
             state.IncrementRevision();
             return true;

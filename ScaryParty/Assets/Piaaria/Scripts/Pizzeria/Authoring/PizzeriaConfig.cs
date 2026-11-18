@@ -48,6 +48,8 @@ namespace ScaryParty.Pizzeria.Authoring
         public PizzaCompositionRules compositionRules;
 
         [Header("Ciclo de Noites e Metas")]
+        public PizzeriaRunPreset defaultPreset;
+        public List<PizzeriaRunPreset> availablePresets = new List<PizzeriaRunPreset>();
         public NightConfig nightConfig;
         public bool enableAllPlayersDeadDefeat = true;
         public bool allowDebugNightRetryOnDefeat = false;
@@ -75,13 +77,38 @@ namespace ScaryParty.Pizzeria.Authoring
 
         public NightGoalParameters ResolveNightParameters(int nightNumber)
         {
-            if (nightNumber == 0)
+            return ResolveEffectiveNightParameters(nightNumber, 1, runDifficulty, defaultPreset, 1f).ToNightGoalParameters();
+        }
+
+        public ResolvedNightParameters ResolveEffectiveNightParameters(
+            int nightNumber,
+            int connectedHumanCount,
+            RunDifficulty difficulty,
+            PizzeriaRunPreset activePresetOverride = null,
+            float goalModifierMultiplier = 1f)
+        {
+            var preset = activePresetOverride != null ? activePresetOverride : defaultPreset;
+            if (nightConfig != null)
             {
-                return new NightGoalParameters(0, tutorialNight0DurationSeconds, tutorialNight0RevenueGoal, 2f, 0f);
+                return nightConfig.ResolveEffectiveParameters(
+                    nightNumber,
+                    connectedHumanCount,
+                    difficulty,
+                    preset,
+                    goalModifierMultiplier,
+                    tutorialNight0DurationSeconds,
+                    tutorialNight0RevenueGoal);
             }
-            return nightConfig != null
-                ? nightConfig.ResolveParameters(nightNumber)
-                : NightCycleService.GetDefaultParameters(nightNumber);
+
+            return NightParameterResolver.ResolveEffectiveParameters(
+                nightNumber,
+                connectedHumanCount,
+                difficulty,
+                preset != null ? preset.ToDomainData() : null,
+                null,
+                tutorialNight0DurationSeconds,
+                tutorialNight0RevenueGoal,
+                goalModifierMultiplier);
         }
 
         [Header("Traços de Clientes Presenciais (10 padrão se vazio)")]

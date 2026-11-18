@@ -37,6 +37,15 @@ namespace ScaryParty.Pizzeria.Composition
             if (Instance == this) Instance = null;
         }
 
+        public void ResetForNewRun()
+        {
+            _timer = 0f;
+            _nextSpawnInterval = 6f;
+            _initialized = false;
+            _lastChannel = OrderOrigin.DeliveryCall;
+            _consecutiveSameChannelCount = 0;
+        }
+
         /// <summary>
         /// Seleciona de forma determinística/testável o próximo canal (WalkInCustomer vs DeliveryCall)
         /// respeitando os pesos configurados, a disponibilidade de cada canal e o limite maxConsecutiveSameChannel.

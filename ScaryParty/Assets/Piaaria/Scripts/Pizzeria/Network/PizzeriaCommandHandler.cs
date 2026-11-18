@@ -1262,13 +1262,8 @@ namespace ScaryParty.Pizzeria.Network
 
             ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
             root.EmployeeTaskService?.OnNightEnded();
-            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nightNum) : (NightGoalParameters?)null;
-            NightCycleService.RetryCurrentNight(root.DomainState, nightParams);
+            root.ResolveAndApplyNightStartParametersServer(nightNum, isRetry: true);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
-
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
-                root.DomainState.CurrentNightNumber,
-                root.DomainState.NightRevenueGoal);
 
             CommitAndReplicate();
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} reiniciada (modo debug) pelo Host!", isError: false);
@@ -1295,14 +1290,44 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
+            var preset = root.GetEffectiveRunPreset();
             int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
                 ? root.Config.runSeedOverride
                 : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
-            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
-            int startNight = (root.Config != null && root.Config.enableTutorialNight0ByDefault) ? 0 : 1;
+            int maxNights = preset != null
+                ? Mathf.Clamp(preset.totalNights, 1, 7)
+                : (root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3);
+            var diff = preset != null
+                ? preset.difficulty
+                : (root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal);
+            int startNight = ((preset != null && preset.includeNight0Tutorial) ||
+                              (root.Config != null && root.Config.enableTutorialNight0ByDefault))
+                ? 0
+                : 1;
+
+            _storageSessions.Clear();
+            _activeOvenTransfers.Clear();
+            _lastPlayerRecoverTime.Clear();
+            _lastMotoRecoverTime.Clear();
 
             root.ReinitializeForNewRunServer(newSeed, maxNights: maxNights, difficulty: diff, startNight: startNight);
+            ApplyRunBackpackCapacityBonusServer(root);
+
+            if (NetworkManager.Singleton != null)
+            {
+                int idx = 0;
+                foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
+                {
+                    var po = kvp.Value != null ? kvp.Value.PlayerObject : null;
+                    if (po != null)
+                    {
+                        var pState = po.GetComponent<PlayerState>();
+                        if (pState != null) pState.Money.Value = 0;
+                        TeleportRiderSafelyServer(kvp.Key, root.GetPlayerSpawnPosition(idx), root.GetPlayerSpawnRotation(idx));
+                    }
+                    idx++;
+                }
+            }
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
 
@@ -1486,15 +1511,10 @@ namespace ScaryParty.Pizzeria.Network
             if (!run.CanStartNight(connected)) return;
 
             int nextNight = root.DomainState.CurrentNightNumber + 1;
-            var nightParams = root.Config != null ? root.Config.ResolveNightParameters(nextNight) : (NightGoalParameters?)null;
-            NightCycleService.StartNight(root.DomainState, nextNight, nightParams);
-            run.FreezeNightStartParameters(root.DomainState, connected.Count);
+            root.ResolveAndApplyNightStartParametersServer(nextNight, isRetry: false);
             ApplyRunBackpackCapacityBonusServer(root);
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
-                root.DomainState.CurrentNightNumber,
-                root.DomainState.NightRevenueGoal);
 
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} iniciada! Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
@@ -1511,12 +1531,18 @@ namespace ScaryParty.Pizzeria.Network
         private static void ApplyRunBackpackCapacityBonusServer(PizzeriaRoot root)
         {
             if (root == null || root.DomainState == null || root.RunProgressionService == null) return;
-            int baseCap = root.Config != null ? Mathf.Max(2, root.Config.backpackCapacity) : 4;
+            var preset = root.GetEffectiveRunPreset();
+            int initialCap = preset != null && preset.backpackInitialSlots > 0
+                ? preset.backpackInitialSlots
+                : (root.Config != null && root.Config.backpackInitialSlots > 0 ? root.Config.backpackInitialSlots : 2);
+            int maxCap = preset != null && preset.backpackMaxCapacity > 0
+                ? Mathf.Max(initialCap, preset.backpackMaxCapacity)
+                : (root.Config != null && root.Config.backpackCapacity > 0 ? Mathf.Max(initialCap, root.Config.backpackCapacity) : 4);
             int bonus = root.RunProgressionService.RecalculateEffectiveStats().ExtraBackpackCapacity;
-            int targetCap = baseCap + Mathf.Max(0, bonus);
+            int targetCap = Mathf.Clamp(initialCap + Mathf.Max(0, bonus), initialCap, maxCap);
             foreach (var bp in root.DomainState.Backpacks.Values)
             {
-                if (bp.Capacity < targetCap)
+                if (bp.Capacity != targetCap)
                 {
                     bp.Capacity = targetCap;
                     bp.Revision++;
@@ -1556,8 +1582,13 @@ namespace ScaryParty.Pizzeria.Network
                     }
                     break;
                 }
-                case 2: // Bolsa Reforçada (+1 slot)
+                case 2: // Bolsa Reforçada (+1 slot, respeitando MaxStacks)
                 {
+                    if (!run.CanApplyModifierStack("reinforced_bag"))
+                    {
+                        NotifyErrorClientRpc("Limite máximo de Bolsa Reforçada atingido nesta RUN.", targetParams);
+                        return;
+                    }
                     var item = new RunShopItem { Id = "reinforced_bag_shop", Name = "Bolsa Reforçada", Cost = 75, IsUnique = false };
                     if (run.TryPurchaseShopItem(state, item))
                     {
@@ -1569,8 +1600,13 @@ namespace ScaryParty.Pizzeria.Network
                     }
                     break;
                 }
-                case 3: // Treinamento de Equipe
+                case 3: // Treinamento de Equipe (respeitando MaxStacks)
                 {
+                    if (!run.CanApplyModifierStack("staff_training"))
+                    {
+                        NotifyErrorClientRpc("Limite máximo de Treinamento de Equipe atingido nesta RUN.", targetParams);
+                        return;
+                    }
                     var item = new RunShopItem { Id = "staff_training_shop", Name = "Treinamento Equipe", Cost = 85, IsUnique = false };
                     if (run.TryPurchaseShopItem(state, item))
                     {
@@ -2237,6 +2273,11 @@ namespace ScaryParty.Pizzeria.Network
 
         private static bool ResolveAllPlayersDeadDefeatPolicy(PizzeriaRoot root)
         {
+            if (root != null && root.DomainState != null &&
+                (root.DomainState.CurrentNightNumber <= 0 || root.DomainState.IsNonLethalTutorialNight))
+            {
+                return false;
+            }
             if (root != null && root.Config != null)
             {
                 if (!root.Config.enableAllPlayersDeadDefeat) return false;
@@ -2520,10 +2561,19 @@ namespace ScaryParty.Pizzeria.Network
                 ForceEjectClientFromMotorcycleServer(targetClientId);
                 BroadcastNoticeClientRpc("Jogador nocauteado! Um aliado precisa segurar [E] por 3s para reanimá-lo.", isError: true);
 
-                if ((enableAllPlayersDeadDefeat || ResolveAllPlayersDeadDefeatPolicy(root)) && root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
+                if (root != null && root.DomainState != null && AreAllPlayersIncapacitatedServer())
                 {
-                    NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
-                    CommitAndReplicate();
+                    if (root.DomainState.CurrentNightNumber <= 0 || root.DomainState.IsNonLethalTutorialNight)
+                    {
+                        RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+                        BroadcastNoticeClientRpc("Modo Tutorial (Noite 0): derrota não-letal — equipe recuperada!", isError: false);
+                        CommitAndReplicate();
+                    }
+                    else if (enableAllPlayersDeadDefeat || ResolveAllPlayersDeadDefeatPolicy(root))
+                    {
+                        NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
+                        CommitAndReplicate();
+                    }
                 }
             }
 

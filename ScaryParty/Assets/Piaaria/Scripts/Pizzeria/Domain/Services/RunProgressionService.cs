@@ -163,13 +163,43 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return (int)Math.Round(basePerNight * humanMult * diffMult);
         }
 
+        /// <summary>Compatibilidade legado para testes T52; o runtime usa FreezeResolvedNightParameters via NightParameterResolver.</summary>
         public void FreezeNightStartParameters(PizzeriaState state, int connectedHumanCount)
         {
             FrozenHumanCount = Math.Clamp(connectedHumanCount, 1, 4);
             if (state != null)
             {
+                state.FrozenHumanCount = FrozenHumanCount;
                 state.NightRevenueGoal = ComputeTabulatedGoal(state.CurrentNightNumber, FrozenHumanCount);
             }
+        }
+
+        public void FreezeResolvedNightParameters(PizzeriaState state, ResolvedNightParameters resolved)
+        {
+            FrozenHumanCount = resolved.FrozenHumanCount;
+            if (state != null)
+            {
+                state.FrozenHumanCount = resolved.FrozenHumanCount;
+                state.ResolvedBaseGoal = resolved.BaseGoal;
+                state.ResolvedHumanScaleFactor = resolved.HumanScaleFactor;
+                state.ResolvedModifierMultiplier = resolved.ModifierGoalMultiplier;
+                state.ResolvedGoalSource = (byte)resolved.GoalSource;
+                state.ActivePresetId = resolved.PresetId;
+                state.NightRevenueGoal = resolved.FinalGoal;
+                state.NightReputationMinGoal = resolved.ReputationMinGoal;
+                state.NightPizzasMinGoal = resolved.PizzasMinGoal;
+                state.IsNonLethalTutorialNight = resolved.NonLethalDefeat;
+                state.IncrementRevision();
+            }
+        }
+
+        public bool CanApplyModifierStack(string modifierId)
+        {
+            if (string.IsNullOrEmpty(modifierId) || !_catalog.TryGetValue(modifierId, out var def))
+                return false;
+            if (_activeModifiers.TryGetValue(modifierId, out var existing))
+                return existing.Stacks < def.MaxStacks;
+            return true;
         }
 
         public IReadOnlyList<RunModifierDefinition> OpenChoiceVote(int nightNumber, int optionCount = 2)
@@ -345,6 +375,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (state.RestaurantBudget < item.Cost) return false;
 
             state.RestaurantBudget -= item.Cost;
+            state.NightShopSpent += item.Cost;
             if (item.IsUnique) _purchasedUniqueItems.Add(item.Id);
             state.IncrementRevision();
             return true;

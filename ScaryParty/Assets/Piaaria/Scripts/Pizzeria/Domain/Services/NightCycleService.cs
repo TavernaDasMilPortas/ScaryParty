@@ -22,7 +22,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             NightNumber = Math.Max(0, nightNumber);
             DurationSeconds = Math.Max(30f, durationSeconds);
-            RevenueGoal = Math.Max(10, revenueGoal);
+            RevenueGoal = Math.Max(1, revenueGoal);
             PrepSeconds = Math.Max(0f, prepSeconds);
             ClosingGraceSeconds = Math.Max(0f, closingGraceSeconds);
         }
@@ -157,6 +157,21 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
         }
 
+        public static void StartNight(PizzeriaState state, ResolvedNightParameters resolved)
+        {
+            if (state == null) return;
+            state.FrozenHumanCount = resolved.FrozenHumanCount;
+            state.ResolvedBaseGoal = resolved.BaseGoal;
+            state.ResolvedHumanScaleFactor = resolved.HumanScaleFactor;
+            state.ResolvedModifierMultiplier = resolved.ModifierGoalMultiplier;
+            state.ResolvedGoalSource = (byte)resolved.GoalSource;
+            state.ActivePresetId = resolved.PresetId;
+            state.IsNonLethalTutorialNight = resolved.NonLethalDefeat;
+            state.NightReputationMinGoal = resolved.ReputationMinGoal;
+            state.NightPizzasMinGoal = resolved.PizzasMinGoal;
+            StartNight(state, resolved.NightNumber, resolved.ToNightGoalParameters());
+        }
+
         public static void StartNight(PizzeriaState state, int nightNumber, NightGoalParameters? customParams = null)
         {
             if (state == null) return;
@@ -169,9 +184,22 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.NightGraceRemainingSeconds = parameters.ClosingGraceSeconds;
             state.NightRevenueGoal = parameters.RevenueGoal;
             state.NightEarnedRevenue = 0;
+            state.NightSupplySpent = 0;
+            state.NightShopSpent = 0;
+            state.NightWagesSpent = 0;
             state.NightOrdersCompleted = 0;
             state.NightOrdersFailed = 0;
             state.NightLostCustomers = 0;
+            if (parameters.NightNumber <= 0)
+            {
+                state.IsNonLethalTutorialNight = true;
+            }
+            if (state.ResolvedBaseGoal <= 0)
+            {
+                state.ResolvedBaseGoal = parameters.RevenueGoal;
+                state.ResolvedHumanScaleFactor = 1f;
+                state.ResolvedModifierMultiplier = 1f;
+            }
             state.NightDefeatReason = NightDefeatReason.None;
             state.CurrentNightPhase = parameters.PrepSeconds > 0f ? NightPhase.Preparing : NightPhase.Active;
 
@@ -259,6 +287,18 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (state == null) return false;
             if (state.CurrentNightPhase == NightPhase.Defeat) return false;
+
+            // Política própria da Noite 0 (Tutorial): não-letal, não encerra nem consome RUN
+            if (state.CurrentNightNumber <= 0 || state.IsNonLethalTutorialNight)
+            {
+                if (state.Reputation <= 0)
+                {
+                    state.Reputation = 25;
+                    state.LastReputationReason = "Tutorial protegido contra derrota.";
+                }
+                state.IncrementRevision();
+                return false;
+            }
 
             state.CurrentNightPhase = NightPhase.Defeat;
             state.NightDefeatReason = reason == NightDefeatReason.None
@@ -354,6 +394,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (state == null) return;
             if (state.CurrentNightPhase == NightPhase.Defeat) return;
+
+            // Tutorial (Noite 0) é não-letal e conclui para tela de resultados/transição para Noite 1
+            if (state.CurrentNightNumber <= 0 || state.IsNonLethalTutorialNight)
+            {
+                if (state.Reputation <= 0) state.Reputation = 25;
+                state.CurrentNightPhase = NightPhase.Results;
+                state.NightDefeatReason = NightDefeatReason.None;
+                return;
+            }
 
             if (state.Reputation <= 0)
             {

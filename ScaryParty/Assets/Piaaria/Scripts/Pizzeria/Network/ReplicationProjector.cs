@@ -880,6 +880,14 @@ namespace ScaryParty.Pizzeria.Network
                     string.IsNullOrEmpty(domainState.LastReputationReason)
                         ? string.Empty
                         : (domainState.LastReputationReason.Length > 60 ? domainState.LastReputationReason.Substring(0, 60) : domainState.LastReputationReason)),
+                FrozenHumanCount = domainState.FrozenHumanCount,
+                BaseGoal = domainState.ResolvedBaseGoal,
+                HumanScaleFactor = domainState.ResolvedHumanScaleFactor,
+                ModifierMultiplier = domainState.ResolvedModifierMultiplier,
+                GoalSource = domainState.ResolvedGoalSource,
+                NightSupplySpent = domainState.NightSupplySpent,
+                NightShopSpent = domainState.NightShopSpent,
+                NightWagesSpent = domainState.NightWagesSpent,
                 Revision = domainState.Revision
             };
         }
@@ -952,6 +960,9 @@ namespace ScaryParty.Pizzeria.Network
                 EmployeeErrorMultiplier = stats.EmployeeErrorMultiplier,
                 VampireSpawnMultiplier = stats.VampireSpawnMultiplier,
                 DemandMultiplier = stats.DemandMultiplier,
+                ActivePresetId = TruncateFs32(domainState.ActivePresetId),
+                AllowDebugPanel = domainState.AllowDebugPanel,
+                IsDebugTaintedRun = domainState.IsDebugTaintedRun,
                 Revision = domainState.Revision
             };
         }

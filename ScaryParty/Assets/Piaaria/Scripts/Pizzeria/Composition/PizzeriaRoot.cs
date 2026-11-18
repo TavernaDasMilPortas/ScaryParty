@@ -317,6 +317,71 @@ namespace ScaryParty.Pizzeria.Composition
             }
         }
 
+        public Authoring.PizzeriaRunPreset ActivePresetOverride { get; private set; }
+
+        public void SetActiveRunPresetServer(Authoring.PizzeriaRunPreset preset)
+        {
+            ActivePresetOverride = preset;
+            if (DomainState != null)
+            {
+                var effPreset = GetEffectiveRunPreset();
+                DomainState.ActivePresetId = effPreset != null ? effPreset.presetId : "Default";
+                DomainState.AllowDebugPanel = effPreset == null || effPreset.allowDebugPanel;
+            }
+        }
+
+        public Authoring.PizzeriaRunPreset GetEffectiveRunPreset()
+            => ActivePresetOverride != null ? ActivePresetOverride : (_config != null ? _config.defaultPreset : null);
+
+        public static int CountConnectedHumanClientsServer()
+        {
+            var nm = Unity.Netcode.NetworkManager.Singleton;
+            if (nm != null && nm.ConnectedClientsIds != null && nm.ConnectedClientsIds.Count > 0)
+            {
+                return Mathf.Clamp(nm.ConnectedClientsIds.Count, 1, 4);
+            }
+            return 1;
+        }
+
+        /// <summary>
+        /// Caminho único e autoritativo para resolver parâmetros e iniciar/reiniciar qualquer noite (P3).
+        /// </summary>
+        public ResolvedNightParameters ResolveAndApplyNightStartParametersServer(int nightNumber, bool isRetry = false)
+        {
+            var preset = GetEffectiveRunPreset();
+            var diff = RunProgressionService != null
+                ? RunProgressionService.Difficulty
+                : (preset != null ? preset.difficulty : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
+            int humanCount = CountConnectedHumanClientsServer();
+            float modMult = 1.0f;
+
+            var resolved = _config != null
+                ? _config.ResolveEffectiveNightParameters(nightNumber, humanCount, diff, preset, modMult)
+                : NightParameterResolver.ResolveEffectiveParameters(
+                    nightNumber, humanCount, diff, preset != null ? preset.ToDomainData() : null, null, 600f, 15, modMult);
+
+            if (DomainState != null)
+            {
+                DomainState.AllowDebugPanel = preset == null || preset.allowDebugPanel;
+                if (isRetry)
+                {
+                    NightCycleService.RetryCurrentNight(DomainState, resolved.ToNightGoalParameters());
+                    NightCycleService.StartNight(DomainState, resolved);
+                }
+                else
+                {
+                    NightCycleService.StartNight(DomainState, resolved);
+                }
+                RunProgressionService?.FreezeResolvedNightParameters(DomainState, resolved);
+            }
+
+            Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
+                DomainState != null ? DomainState.CurrentNightNumber : resolved.NightNumber,
+                DomainState != null ? DomainState.NightRevenueGoal : resolved.FinalGoal);
+
+            return resolved;
+        }
+
         private void InitializeServerDomain()
         {
             DomainState = new PizzeriaState();
@@ -332,32 +397,39 @@ namespace ScaryParty.Pizzeria.Composition
             CallService = new CallService();
             PlayerHoldService = new PlayerHoldService();
             CustomerService = new CustomerService();
+
+            var preset = GetEffectiveRunPreset();
             int runSeed = (_config != null && _config.runSeedOverride != 0)
                 ? _config.runSeedOverride
                 : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = _config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3;
-            var diff = _config != null ? _config.runDifficulty : RunDifficulty.Normal;
-            int initialNight = (_config != null && _config.enableTutorialNight0ByDefault) ? 0 : 1;
+            int maxNights = preset != null
+                ? Mathf.Clamp(preset.totalNights, 1, 7)
+                : (_config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3);
+            var diff = preset != null
+                ? preset.difficulty
+                : (_config != null ? _config.runDifficulty : RunDifficulty.Normal);
+            int initialNight = (preset != null && preset.includeNight0Tutorial) ||
+                               (_config != null && _config.enableTutorialNight0ByDefault)
+                ? 0
+                : 1;
 
             RunProgressionService = new RunProgressionService(runSeed, maxNights: maxNights, difficulty: diff);
             EmployeeTaskService = new EmployeeTaskService();
             SpeciesHostilityService = new SpeciesHostilityService();
             ZombieConversionService = new ZombieConversionService();
 
-            DomainState.RestaurantBudget = _config != null ? _config.startingBudget : 500;
-            DomainState.Reputation = Mathf.Clamp(_config != null ? _config.initialReputation : 100, 0, 100);
+            DomainState.RestaurantBudget = preset != null ? preset.startingBudget : (_config != null ? _config.startingBudget : 500);
+            DomainState.Reputation = Mathf.Clamp(preset != null ? preset.startingReputation : (_config != null ? _config.initialReputation : 100), 0, 100);
+            DomainState.AllowDebugPanel = preset == null || preset.allowDebugPanel;
             RebuildSceneDomainStateForNewRunServer();
 
-            NightCycleService.StartNight(DomainState, initialNight, _config.ResolveNightParameters(initialNight));
+            ResolveAndApplyNightStartParametersServer(initialNight, isRetry: false);
             if (initialNight == 0)
             {
                 SeedPredictableTutorialOrderServer();
             }
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
-                DomainState.CurrentNightNumber,
-                DomainState.NightRevenueGoal);
 
-            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal}, {DomainState.Tools.Count} utensílios, {DomainState.Backpacks.Count} mochilas, {DomainState.Tables.Count} mesas.");
+            Debug.Log($"[PizzeriaRoot] Servidor inicializou Domínio com sucesso. Preset: {DomainState.ActivePresetId}, HumanosCongelados: {DomainState.FrozenHumanCount}, Budget: R${DomainState.RestaurantBudget}, Meta Noite {DomainState.CurrentNightNumber}: R${DomainState.NightRevenueGoal} (Fonte={(GoalResolutionSource)DomainState.ResolvedGoalSource}).");
         }
 
         /// <summary>
@@ -445,7 +517,10 @@ namespace ScaryParty.Pizzeria.Composition
             }
 
             DomainState.Backpacks.Clear();
-            int bpCap = _config != null && _config.backpackInitialSlots > 0 ? _config.backpackInitialSlots : 3;
+            var bpPreset = GetEffectiveRunPreset();
+            int bpCap = bpPreset != null && bpPreset.backpackInitialSlots > 0
+                ? bpPreset.backpackInitialSlots
+                : (_config != null && _config.backpackInitialSlots > 0 ? _config.backpackInitialSlots : 2);
             var bags = GetComponentsInChildren<DeliveryBagAuthoring>(true);
             foreach (var bag in bags)
             {
@@ -471,28 +546,21 @@ namespace ScaryParty.Pizzeria.Composition
             SpeciesHostilityService?.ResetForNewRun();
             ZombieConversionService?.Reset();
             ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+            DemandDirector.Instance?.ResetForNewRun();
 
-            int startBudget = _config != null ? _config.startingBudget : 500;
-            int startRep = _config != null ? _config.initialReputation : 100;
-            RunProgressionService?.ResetRun(DomainState, newSeed, maxNights, difficulty, startBudget, startRep);
+            var preset = GetEffectiveRunPreset();
+            int resolvedMaxNights = maxNights > 0 ? Mathf.Clamp(maxNights, 1, 7) : (preset != null ? preset.totalNights : 3);
+            int startBudget = preset != null ? preset.startingBudget : (_config != null ? _config.startingBudget : 500);
+            int startRep = preset != null ? preset.startingReputation : (_config != null ? _config.initialReputation : 100);
+            RunProgressionService?.ResetRun(DomainState, newSeed, resolvedMaxNights, difficulty, startBudget, startRep);
 
             RebuildSceneDomainStateForNewRunServer();
 
-            var nightParams = _config != null ? _config.ResolveNightParameters(startNight) : (NightGoalParameters?)null;
-            NightCycleService.StartNight(DomainState, startNight, nightParams);
+            ResolveAndApplyNightStartParametersServer(startNight, isRetry: false);
             if (startNight == 0)
             {
                 SeedPredictableTutorialOrderServer();
             }
-
-            int humanCount = Unity.Netcode.NetworkManager.Singleton != null
-                ? Mathf.Max(1, Unity.Netcode.NetworkManager.Singleton.ConnectedClientsIds.Count)
-                : 1;
-            RunProgressionService?.FreezeNightStartParameters(DomainState, humanCount);
-
-            Presentation.PizzeriaSceneLoadingCoordinator.Instance?.SetNightContext(
-                DomainState.CurrentNightNumber,
-                DomainState.NightRevenueGoal);
         }
 
         private void SeedPredictableTutorialOrderServer()
@@ -657,7 +725,15 @@ namespace ScaryParty.Pizzeria.Composition
 
                 if (!ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused)
                 {
-                    var nightParams = _config != null ? _config.ResolveNightParameters(DomainState.CurrentNightNumber) : (NightGoalParameters?)null;
+                    var closingDiff = RunProgressionService != null ? RunProgressionService.Difficulty : (_config != null ? _config.runDifficulty : RunDifficulty.Normal);
+                    var nightParams = _config != null
+                        ? _config.ResolveEffectiveNightParameters(
+                            DomainState.CurrentNightNumber,
+                            Mathf.Max(1, DomainState.FrozenHumanCount),
+                            closingDiff,
+                            GetEffectiveRunPreset(),
+                            DomainState.ResolvedModifierMultiplier > 0.01f ? DomainState.ResolvedModifierMultiplier : 1f).ToNightGoalParameters()
+                        : (NightGoalParameters?)null;
                     if (NightCycleService.TickNight(DomainState, Time.deltaTime, nightParams))
                     {
                         dirty = true;

@@ -835,6 +835,14 @@ namespace ScaryParty.Pizzeria.Network
         public int Reputation;
         public int LastReputationDelta;
         public Unity.Collections.FixedString64Bytes LastReputationReason;
+        public int FrozenHumanCount;
+        public int BaseGoal;
+        public float HumanScaleFactor;
+        public float ModifierMultiplier;
+        public byte GoalSource;
+        public int NightSupplySpent;
+        public int NightShopSpent;
+        public int NightWagesSpent;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -853,6 +861,14 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref Reputation);
             serializer.SerializeValue(ref LastReputationDelta);
             serializer.SerializeValue(ref LastReputationReason);
+            serializer.SerializeValue(ref FrozenHumanCount);
+            serializer.SerializeValue(ref BaseGoal);
+            serializer.SerializeValue(ref HumanScaleFactor);
+            serializer.SerializeValue(ref ModifierMultiplier);
+            serializer.SerializeValue(ref GoalSource);
+            serializer.SerializeValue(ref NightSupplySpent);
+            serializer.SerializeValue(ref NightShopSpent);
+            serializer.SerializeValue(ref NightWagesSpent);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -868,6 +884,12 @@ namespace ScaryParty.Pizzeria.Network
                Reputation == other.Reputation &&
                LastReputationDelta == other.LastReputationDelta &&
                LastReputationReason.Equals(other.LastReputationReason) &&
+               FrozenHumanCount == other.FrozenHumanCount &&
+               BaseGoal == other.BaseGoal &&
+               GoalSource == other.GoalSource &&
+               NightSupplySpent == other.NightSupplySpent &&
+               NightShopSpent == other.NightShopSpent &&
+               NightWagesSpent == other.NightWagesSpent &&
                Math.Abs(RemainingSeconds - other.RemainingSeconds) < 0.9f &&
                Math.Abs(PrepRemainingSeconds - other.PrepRemainingSeconds) < 0.9f &&
                Math.Abs(GraceRemainingSeconds - other.GraceRemainingSeconds) < 0.9f;
@@ -1035,6 +1057,9 @@ namespace ScaryParty.Pizzeria.Network
         public float EmployeeErrorMultiplier;
         public float VampireSpawnMultiplier;
         public float DemandMultiplier;
+        public Unity.Collections.FixedString32Bytes ActivePresetId;
+        public bool AllowDebugPanel;
+        public bool IsDebugTaintedRun;
         public uint Revision;
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -1061,6 +1086,9 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref EmployeeErrorMultiplier);
             serializer.SerializeValue(ref VampireSpawnMultiplier);
             serializer.SerializeValue(ref DemandMultiplier);
+            serializer.SerializeValue(ref ActivePresetId);
+            serializer.SerializeValue(ref AllowDebugPanel);
+            serializer.SerializeValue(ref IsDebugTaintedRun);
             serializer.SerializeValue(ref Revision);
         }
 
@@ -1080,6 +1108,9 @@ namespace ScaryParty.Pizzeria.Network
                TotalHumans == other.TotalHumans &&
                HasOvenTimer == other.HasOvenTimer &&
                ExtraBackpackCapacity == other.ExtraBackpackCapacity &&
+               ActivePresetId.Equals(other.ActivePresetId) &&
+               AllowDebugPanel == other.AllowDebugPanel &&
+               IsDebugTaintedRun == other.IsDebugTaintedRun &&
                Math.Abs(EmployeeErrorMultiplier - other.EmployeeErrorMultiplier) < 0.01f &&
                Revision == other.Revision;
 

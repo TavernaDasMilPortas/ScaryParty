@@ -43,6 +43,18 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int NightOrdersCompleted { get; set; } = 0;
         public int NightOrdersFailed { get; set; } = 0;
         public int NightLostCustomers { get; set; } = 0;
+        public bool IsNonLethalTutorialNight { get; set; } = false;
+        public int FrozenHumanCount { get; set; } = 1;
+        public int ResolvedBaseGoal { get; set; } = 60;
+        public float ResolvedHumanScaleFactor { get; set; } = 1f;
+        public float ResolvedModifierMultiplier { get; set; } = 1f;
+        public byte ResolvedGoalSource { get; set; } = 0;
+        public string ActivePresetId { get; set; } = "Default";
+        public bool AllowDebugPanel { get; set; } = true;
+        public bool IsDebugTaintedRun { get; set; } = false;
+        public int NightSupplySpent { get; set; } = 0;
+        public int NightShopSpent { get; set; } = 0;
+        public int NightWagesSpent { get; set; } = 0;
         public int ToolRackStationId { get; set; } = 3;
         public NightStartSnapshot CurrentSnapshot { get; set; }
 
@@ -118,6 +130,18 @@ namespace ScaryParty.Pizzeria.Domain.Models
             NightOrdersCompleted = 0;
             NightOrdersFailed = 0;
             NightLostCustomers = 0;
+            IsNonLethalTutorialNight = false;
+            FrozenHumanCount = 1;
+            ResolvedBaseGoal = 60;
+            ResolvedHumanScaleFactor = 1f;
+            ResolvedModifierMultiplier = 1f;
+            ResolvedGoalSource = 0;
+            ActivePresetId = "Default";
+            AllowDebugPanel = true;
+            IsDebugTaintedRun = false;
+            NightSupplySpent = 0;
+            NightShopSpent = 0;
+            NightWagesSpent = 0;
             CurrentSnapshot = null;
             _nextItemId = 1;
             _nextToolId = 1;
