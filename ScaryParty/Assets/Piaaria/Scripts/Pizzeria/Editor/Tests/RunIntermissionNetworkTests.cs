@@ -50,5 +50,14 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             p2.IsReady = false;
             Assert.IsFalse(p1.Equals(p2));
         }
+
+        [Test]
+        public void UIToolkitTweenService_KillTweens_ClearsActiveTweens()
+        {
+            var el = new UnityEngine.UIElements.VisualElement();
+            ScaryParty.UI.Piaria.Core.UIToolkitTweenService.DropInCard(el, 60f, 0.2f);
+            ScaryParty.UI.Piaria.Core.UIToolkitTweenService.KillTweens(el);
+            Assert.AreEqual(0, ScaryParty.UI.Piaria.Core.UIToolkitTweenService.GetActiveTweenCount(el));
+        }
     }
 }
