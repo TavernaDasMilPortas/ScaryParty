@@ -3136,11 +3136,17 @@ namespace ScaryParty.Pizzeria.Network
             NotifySuccessClientRpc("Escopeta sacada da bandoleira (2 mãos).", targetParams);
         }
 
+        private static readonly RaycastHit[] _sharedWeaponHits = new RaycastHit[32];
+        private readonly Dictionary<ScaryParty.Combat.IDamageable, int> _sharedAccumulatedDamage = new Dictionary<ScaryParty.Combat.IDamageable, int>(16);
+        private readonly Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)> _sharedFirstHitPoints = new Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)>(16);
+        private double _lastMotorcycleServerTime;
+
         [ServerRpc(RequireOwnership = false)]
         public void FireWeaponServerRpc(Vector3 rayOrigin, Vector3 rayDir, ServerRpcParams rpcParams = default)
         {
             ulong senderId = rpcParams.Receive.SenderClientId;
-            if (!IsServer || rayDir.sqrMagnitude < 0.001f) return;
+            if (!IsServer) return;
+            if (!IsFiniteVec3(rayOrigin) || !IsFiniteVec3(rayDir) || rayDir.sqrMagnitude < 0.001f) return;
             if (!CanPlayerPerformGameplayActionServer(senderId, out _)) return;
 
             var netState = PizzeriaNetworkState.Instance;
@@ -3166,11 +3172,6 @@ namespace ScaryParty.Pizzeria.Network
             if (_lastWeaponFireServerTime.TryGetValue(weaponKey, out double lastTime) && now - lastTime < minCooldown)
                 return;
 
-            _lastWeaponFireServerTime[weaponKey] = now;
-            weapon.CurrentMagAmmo--;
-            weapon.Revision++;
-            netState.Weapons[weaponIdx] = weapon;
-
             Transform shooterRoot = null;
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var client) && client.PlayerObject != null)
             {
@@ -3178,6 +3179,26 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             Vector3 dir = rayDir.normalized;
+            if (shooterRoot != null)
+            {
+                Vector3 chestOrigin = shooterRoot.position + Vector3.up * 1.45f;
+                Vector3 originDelta = rayOrigin - chestOrigin;
+                float originDistSq = originDelta.sqrMagnitude;
+                if (originDistSq > 4.0f * 4.0f)
+                {
+                    return; // Origem fisicamente impossível; rejeita antes de debitar munição
+                }
+                if (originDistSq > 1.6f * 1.6f)
+                {
+                    rayOrigin = chestOrigin + originDelta.normalized * 1.6f;
+                }
+            }
+
+            _lastWeaponFireServerTime[weaponKey] = now;
+            weapon.CurrentMagAmmo--;
+            weapon.Revision++;
+            netState.Weapons[weaponIdx] = weapon;
+
             if (shooterRoot != null)
             {
                 Vector3 chestOrigin = shooterRoot.position + Vector3.up * 1.45f;
@@ -3194,8 +3215,10 @@ namespace ScaryParty.Pizzeria.Network
             int rayCount = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? ShotgunPelletOffsetsDeg.Length : 1;
             int perRayDmg = weapon.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 10 : 25;
 
-            var accumulatedDamage = new Dictionary<ScaryParty.Combat.IDamageable, int>();
-            var firstHitPoints = new Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)>();
+            _sharedAccumulatedDamage.Clear();
+            _sharedFirstHitPoints.Clear();
+            var accumulatedDamage = _sharedAccumulatedDamage;
+            var firstHitPoints = _sharedFirstHitPoints;
             Vector3 fxEndPoint = rayOrigin + dir * Mathf.Min(range, 25f);
             bool anyFxHit = false;
 
@@ -3209,12 +3232,15 @@ namespace ScaryParty.Pizzeria.Network
                     pelletDir = (rot * Quaternion.Euler(off.y, off.x, 0f)) * Vector3.forward;
                 }
 
-                RaycastHit[] hits = Physics.RaycastAll(rayOrigin, pelletDir, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
-                System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-                for (int h = 0; h < hits.Length; h++)
+                int hitCount = Physics.RaycastNonAlloc(rayOrigin, pelletDir, _sharedWeaponHits, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
+                if (hitCount > 1)
                 {
-                    var hit = hits[h];
+                    System.Array.Sort(_sharedWeaponHits, 0, hitCount, RaycastHitDistanceComparer.Instance);
+                }
+
+                for (int h = 0; h < hitCount; h++)
+                {
+                    var hit = _sharedWeaponHits[h];
                     if (hit.collider == null) continue;
                     if (shooterRoot != null && hit.collider.transform.IsChildOf(shooterRoot)) continue;
 
@@ -3550,6 +3576,18 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        private sealed class RaycastHitDistanceComparer : IComparer<RaycastHit>
+        {
+            public static readonly RaycastHitDistanceComparer Instance = new RaycastHitDistanceComparer();
+            public int Compare(RaycastHit a, RaycastHit b) => a.distance.CompareTo(b.distance);
+        }
+
+        private static bool IsFiniteVec3(Vector3 v)
+            => float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z);
+
+        private static bool IsFiniteQuat(Quaternion q)
+            => float.IsFinite(q.x) && float.IsFinite(q.y) && float.IsFinite(q.z) && float.IsFinite(q.w);
+
         [ServerRpc(RequireOwnership = false, Delivery = RpcDelivery.Unreliable)]
         public void UpdateMotorcyclePoseServerRpc(Vector3 clientPos, Quaternion clientRot, float speed, ServerRpcParams rpcParams = default)
         {
@@ -3562,14 +3600,17 @@ namespace ScaryParty.Pizzeria.Network
             var st = net.MotorcycleState.Value;
             if (!st.IsActive || !st.IsMounted || st.RiderClientId != senderId) return;
 
-            if (float.IsNaN(clientPos.x) || float.IsNaN(clientPos.y) || float.IsNaN(clientPos.z) ||
-                float.IsInfinity(clientPos.x) || float.IsInfinity(clientPos.y) || float.IsInfinity(clientPos.z) ||
-                float.IsNaN(speed) || float.IsInfinity(speed))
+            if (!IsFiniteVec3(clientPos) || !IsFiniteQuat(clientRot) || !float.IsFinite(speed))
                 return;
+
+            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
+            float dt = _lastMotorcycleServerTime > 0.0 ? Mathf.Clamp((float)(now - _lastMotorcycleServerTime), 0.01f, 0.25f) : 0.05f;
+            _lastMotorcycleServerTime = now;
 
             Vector3 prevPos = new Vector3(st.PosX, st.PosY, st.PosZ);
             Vector3 clamped = bike.ClampToAllowedSurface(prevPos, clientPos, out _);
-            Vector3 safePos = Vector3.MoveTowards(prevPos, clamped, 3.5f);
+            float maxStep = Mathf.Clamp(22f * dt + 0.35f, 0.35f, 3.5f);
+            Vector3 safePos = Vector3.MoveTowards(prevPos, clamped, maxStep);
             safePos.y = Mathf.Clamp(safePos.y, bike.ParkingSpawnPos.y - 1.5f, bike.ParkingSpawnPos.y + 4.0f);
 
             Quaternion flatRot = Quaternion.Euler(0f, clientRot.eulerAngles.y, 0f);
