@@ -61,6 +61,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private Button _errorMenuBtn;
 
         private LoadingTransitionStateMachine _stateMachine;
+        private readonly StageTimingRecorder _stageTimings = new StageTimingRecorder();
         private Action _retryCallback;
         private bool _hasInputLock;
         private bool _hookedNetworkEvents;
@@ -953,39 +954,34 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
                 RefreshNightBannerText();
 
-                // Etapa 6: Jogador, Câmera e Iluminação (95% -> 100%)
-                SetStage(LoadingStage.SpawningPlayers, 0.95f, "Posicionando equipe e iluminação...");
-                while ((!IsLocalPlayerSpawned() || Camera.main == null || (LightingReadyGate.Active != null && !LightingReadyGate.Active.IsReady)) &&
-                       !HasTimedOut(startRealtime, maxTimeout))
+                // Etapa 6: Jogador, Câmera, HUD e Iluminação (95% -> 100%)
+                SetStage(LoadingStage.SpawningPlayers, 0.95f, "Posicionando equipe, HUD e iluminação...");
+                var contract = BuildReadinessContract(targetSceneName, readiness, networked, cityGen);
+                while (!contract.Evaluate(null, null) && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
                 }
 
-                if (HasTimedOut(startRealtime, maxTimeout) ||
-                    !IsPizzeriaReady(networked) ||
-                    !IsLocalPlayerSpawned() ||
-                    Camera.main == null ||
-                    (LightingReadyGate.Active != null && !LightingReadyGate.Active.IsReady))
+                if (HasTimedOut(startRealtime, maxTimeout) || !contract.Evaluate(null, null))
                 {
-                    AbortLoading($"Tempo limite ({maxTimeout:F0}s) ao aguardar prontidão de '{targetSceneName}'. Retorne ao menu.");
+                    AbortLoadingWithToken(myTransitionId, contract.BuildDiagnosticSummary());
                     yield break;
                 }
             }
             else if (readiness == SceneReadinessProfile.ReadyRoom)
             {
                 SetStage(LoadingStage.SpawningPlayers, 0.92f, "Sincronizando sala de espera...");
-                while ((!HasActiveSceneUIDocument() || Camera.main == null || (networked && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening))) &&
-                       !HasTimedOut(startRealtime, maxTimeout))
+                var contract = BuildReadinessContract(targetSceneName, readiness, networked, null);
+                while (!contract.Evaluate(null, null) && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
                 }
 
-                if (HasTimedOut(startRealtime, maxTimeout) || Camera.main == null || !HasActiveSceneUIDocument() ||
-                    (networked && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)))
+                if (HasTimedOut(startRealtime, maxTimeout) || !contract.Evaluate(null, null))
                 {
-                    AbortLoading($"Sala de espera '{targetSceneName}' não ficou pronta a tempo (câmera, UI ou rede ausente).");
+                    AbortLoadingWithToken(myTransitionId, contract.BuildDiagnosticSummary());
                     yield break;
                 }
             }
@@ -993,15 +989,16 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 // Menu / Lobby: exige câmera e UIDocument da cena prontos
                 SetStage(LoadingStage.SpawningPlayers, 0.92f, "Finalizando interface...");
-                while ((Camera.main == null || !HasActiveSceneUIDocument()) && !HasTimedOut(startRealtime, maxTimeout))
+                var contract = BuildReadinessContract(targetSceneName, readiness, networked, null);
+                while (!contract.Evaluate(null, null) && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
                 }
 
-                if (HasTimedOut(startRealtime, maxTimeout) || Camera.main == null || !HasActiveSceneUIDocument())
+                if (HasTimedOut(startRealtime, maxTimeout) || !contract.Evaluate(null, null))
                 {
-                    AbortLoading($"Interface de '{targetSceneName}' não ficou pronta a tempo (câmera ou UI ausente).");
+                    AbortLoadingWithToken(myTransitionId, contract.BuildDiagnosticSummary());
                     yield break;
                 }
             }
@@ -1033,7 +1030,54 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _overlayRoot.style.opacity = 0f;
             _overlayRoot.style.display = DisplayStyle.None;
+            _stageTimings.EndActiveStage(Time.realtimeSinceStartup);
+            Debug.Log($"[LoadingCoordinator] Transição para '{targetSceneName}' concluída ({_stageTimings.BuildSummary()}).");
             sm.Complete(myTransitionId);
+        }
+
+        private SceneReadinessContract BuildReadinessContract(string targetSceneName, SceneReadinessProfile profile, bool networked, CityGenerator cityGen)
+        {
+            var contract = new SceneReadinessContract(targetSceneName)
+                .Add(new DelegateReadinessRequirement(
+                    "ActiveScene",
+                    true,
+                    () => IsTargetActiveScene(SceneManager.GetActiveScene().name, targetSceneName),
+                    $"Cena ativa difere de '{targetSceneName}'"))
+                .Add(new DelegateReadinessRequirement(
+                    "LocalCamera",
+                    true,
+                    () => Camera.main != null,
+                    "Camera.main ausente"))
+                .Add(new DelegateReadinessRequirement(
+                    "MainUI",
+                    true,
+                    HasActiveSceneUIDocument,
+                    "UIDocument principal inativo/vazio"));
+
+            if (profile == SceneReadinessProfile.ReadyRoom && networked)
+            {
+                contract.Add(new DelegateReadinessRequirement(
+                    "NetworkListening",
+                    true,
+                    () => NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening,
+                    "NetworkManager não está escutando"));
+            }
+            else if (profile == SceneReadinessProfile.Gameplay)
+            {
+                contract
+                    .Add(new DelegateReadinessRequirement("CityGenerator", true, () => cityGen != null && cityGen.CityData != null, "CityData não gerado"))
+                    .Add(new DelegateReadinessRequirement("ClosuresSynchronized", true, () => cityGen != null && cityGen.ClosuresSynchronized, "Fechamentos urbanos pendentes"))
+                    .Add(new DelegateReadinessRequirement("NavigationWorldManager", true, () => NavigationWorldManager.Instance != null && NavigationWorldManager.Instance.IsReady, "NavMesh não pronto"))
+                    .Add(new DelegateReadinessRequirement("PizzeriaDomain", true, () => IsPizzeriaReady(networked), "PizzeriaRoot/Snapshot não pronto"))
+                    .Add(new DelegateReadinessRequirement("LocalPlayer", true, IsLocalPlayerSpawned, "Player local não spawnado"))
+                    .Add(new DelegateReadinessRequirement(
+                        "LightingReadyGate",
+                        LightingReadyGate.Active != null,
+                        () => LightingReadyGate.Active == null || LightingReadyGate.Active.IsReady,
+                        "Iluminação não pronta"));
+            }
+
+            return contract;
         }
 
         private bool HasTimedOut(float startRealtime, float maxTimeout)
@@ -1111,6 +1155,8 @@ namespace ScaryParty.Pizzeria.Presentation
         private void SetStage(LoadingStage stage, float progress01, string statusText)
         {
             _currentStage = stage;
+            if (stage == LoadingStage.ConnectingSession) _stageTimings.Reset();
+            _stageTimings.BeginStage(stage.ToString(), Time.realtimeSinceStartup);
             var sm = EnsureStateMachine();
             var opState = stage switch
             {
