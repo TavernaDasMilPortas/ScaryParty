@@ -224,6 +224,48 @@ namespace ScaryParty.Pizzeria.Presentation
             Transform leftHand = _visualController != null && _visualController.LeftHandBone != null ? _visualController.LeftHandBone : transform;
             Transform rightHand = _visualController != null && _visualController.RightHandBone != null ? _visualController.RightHandBone : transform;
             EmployeeHandAnchorRegistry.Register(EmployeeActorOffset + (ulong)employeeId, leftHand, rightHand);
+
+            Feedback.GameFeelPresenter.Instance?.TriggerAtPosition(
+                Feedback.GameFeelEventId.EmployeeSpawned,
+                transform.position,
+                transform,
+                (ulong)employeeId,
+                0,
+                0,
+                Feedback.GameFeelMaterialFamily.CharacterBody,
+                0.9f,
+                isLocal: false);
+        }
+
+        private byte _feelLastWorkStep;
+        private EmployeeBlockReason _feelLastBlockReason = EmployeeBlockReason.None;
+        private int _feelLastUnitsCompleted;
+
+        private void EmitEmployeeStateTransitionFeel(byte workStep, EmployeeBlockReason blockReason, int unitsCompleted)
+        {
+            var feel = Feedback.GameFeelPresenter.Instance;
+            if (feel == null) return;
+
+            bool wasWorking = _feelLastWorkStep != 0;
+            bool isWorking = workStep != 0;
+            if (!wasWorking && isWorking)
+            {
+                feel.TriggerAtPosition(Feedback.GameFeelEventId.EmployeeWorkStart, transform.position, transform, (ulong)EmployeeId, 0, 0, Feedback.GameFeelMaterialFamily.CharacterBody, 0.75f, isLocal: false);
+            }
+
+            if (unitsCompleted > _feelLastUnitsCompleted || (wasWorking && !isWorking && blockReason == EmployeeBlockReason.None))
+            {
+                feel.TriggerAtPosition(Feedback.GameFeelEventId.EmployeeWorkComplete, transform.position, transform, (ulong)EmployeeId, 0, 0, Feedback.GameFeelMaterialFamily.CharacterBody, 0.9f, isLocal: false);
+            }
+
+            if (blockReason != EmployeeBlockReason.None && _feelLastBlockReason == EmployeeBlockReason.None)
+            {
+                feel.TriggerAtPosition(Feedback.GameFeelEventId.EmployeeBlocked, transform.position, transform, (ulong)EmployeeId, 0, 0, Feedback.GameFeelMaterialFamily.CharacterBody, 0.85f, isLocal: false);
+            }
+
+            _feelLastWorkStep = workStep;
+            _feelLastBlockReason = blockReason;
+            _feelLastUnitsCompleted = unitsCompleted;
         }
 
         public void ApplyReplicatedDto(NetEmployeeDto dto, bool snapImmediately = false)
@@ -254,6 +296,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _mainCollider.enabled = _clientIsAlive;
             }
+            EmitEmployeeStateTransitionFeel(_clientWorkStep, _clientBlockReason, _clientUnitsCompleted);
         }
 
         private void Update()
@@ -563,6 +606,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
                 return;
             }
+
+            int completedUnits = 0;
+            if (emp.AssignedTaskId > 0 && root.EmployeeTaskService.Tasks.TryGetValue(emp.AssignedTaskId, out var activeTask) && activeTask != null)
+            {
+                completedUnits = activeTask.TotalUnitsCompleted;
+            }
+            EmitEmployeeStateTransitionFeel(CurrentWorkStepByte, _lastBlockReason, completedUnits);
 
             if (_hp <= 0f) _hp = 100f;
             if (_mainCollider != null && !_mainCollider.enabled) _mainCollider.enabled = true;
@@ -2542,6 +2592,7 @@ namespace ScaryParty.Pizzeria.Presentation
     {
         private static readonly Dictionary<int, EmployeeAgentController> _spawned = new Dictionary<int, EmployeeAgentController>();
         private static readonly Dictionary<int, EmployeeAgentController> _clientProxies = new Dictionary<int, EmployeeAgentController>();
+        private static readonly Dictionary<int, float> _spawnRetryAfter = new Dictionary<int, float>();
         private static readonly List<NetEmployeeDto> _clientSyncBuffer = new List<NetEmployeeDto>();
         private static PizzeriaNetworkState _subscribedNetState;
         private static bool _hooksRegistered;
@@ -2574,14 +2625,31 @@ namespace ScaryParty.Pizzeria.Presentation
                     deadKeys.Add(kvp.Key);
                 }
             }
-            for (int i = 0; i < deadKeys.Count; i++) _spawned.Remove(deadKeys[i]);
+            for (int i = 0; i < deadKeys.Count; i++)
+            {
+                _spawned.Remove(deadKeys[i]);
+                root.ReleaseEmployeeSpawnReservation(deadKeys[i]);
+            }
+
+            var navMgr = ScaryParty.Navigation.Core.NavigationWorldManager.Instance;
+            bool navReady = navMgr == null || navMgr.IsReady;
 
             foreach (var kvp in root.EmployeeTaskService.Employees)
             {
                 var emp = kvp.Value;
                 if (!_spawned.TryGetValue(emp.EmployeeId, out var ctrl) || ctrl == null)
                 {
+                    if (!navReady) continue;
+                    if (_spawnRetryAfter.TryGetValue(emp.EmployeeId, out float retryAt) && Time.realtimeSinceStartup < retryAt)
+                        continue;
+
                     ctrl = SpawnEmployeeBody(root, emp);
+                    if (ctrl == null)
+                    {
+                        _spawnRetryAfter[emp.EmployeeId] = Time.realtimeSinceStartup + 1.5f;
+                        continue;
+                    }
+                    _spawnRetryAfter.Remove(emp.EmployeeId);
                     _spawned[emp.EmployeeId] = ctrl;
                 }
                 ctrl.TickServer(root, dt);
@@ -2676,6 +2744,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 if (kvp.Value != null) DestroyObjectSafe(kvp.Value.gameObject);
             }
             _spawned.Clear();
+            PizzeriaRoot.Instance?.ClearSpawnReservations();
             ClearClientProxiesOnly();
 
             var ns = PizzeriaNetworkState.Instance;
@@ -2855,7 +2924,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static EmployeeAgentController SpawnEmployeeBody(PizzeriaRoot root, HiredEmployeeState emp)
         {
-            root.GetEmployeeSpawnPose(emp.Role, emp.EmployeeId, out Vector3 spawnPos, out Quaternion spawnRot);
+            if (!root.GetEmployeeSpawnPose(emp.Role, emp.EmployeeId, out Vector3 spawnPos, out Quaternion spawnRot))
+            {
+                return null;
+            }
 
             var go = new GameObject($"Employee_{emp.Role}_{emp.EmployeeId}");
             go.transform.SetPositionAndRotation(spawnPos, spawnRot);

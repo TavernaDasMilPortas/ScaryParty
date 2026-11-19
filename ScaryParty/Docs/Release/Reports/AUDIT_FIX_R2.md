@@ -13,8 +13,8 @@
 | Achado | Bloco | Status | Commit | Teste Automatizado | Teste Manual | Evidência | Pendência |
 |---|---|---|---|---|---|---|---|
 | **R01** Loading preso | P1 | Código integrado (validação Editor pendente) | P1 | `LoadingTransitionStateMachineTests` (EditMode pendente no Editor) | Testar Relay inválido, LAN indisponível, cancelar e retry | `LoadingTransitionStateMachine` + `LobbyManager` + `PizzeriaSceneLoadingCoordinator` (botão Cancelar, Retry, tokens e liberação única de input) | Rodar `LoadingTransitionStateMachineTests` e bateria manual no Unity Editor |
-| **R02** Spawn bloqueado aceito | P3 | Pendente | — | Não executado | Pendente | — | Implementar `TryResolveSpawn` + fila aguardando NavMesh |
-| **R03** Reserva/âncoras | P3 / P7 | Pendente | — | Não executado | Pendente | — | `SpawnReservationService` + âncoras autoradas no prefab |
+| **R02** Spawn bloqueado aceito | P3 | Código integrado (validação Editor pendente) | P3 | `SpawnReservationTests` (EditMode pendente no Editor) | Testar obstáculo sobre anchor, bake atrasado e contratação durante rebuild | `SpawnResolver.TryResolveCandidate` + `ValidateUnityCandidate` + fila/backoff em `EmployeePopulationDirector` + gate `NavigationWorldManager.IsReady` | Rodar `SpawnReservationTests` e bateria manual no Editor |
+| **R03** Reserva/âncoras | P3 / P7 | Parcial (serviço P3 integrado; prefab P7 pendente) | P3 | `SpawnReservationTests` (EditMode pendente no Editor) | Testar entrada/saída repetida e contratar/remover/recontratar | `SpawnReservationService` com reserva por dono, capacidade explícita e release em remoção | Autorar âncoras no prefab (P7) e validar no Editor |
 | **R04** Carro sem collider cliente | P5 | Pendente | — | Não executado | Pendente | — | Proxy físico sólido no cliente + impacto autoritativo único |
 | **R05** Carro invade calçada | P5 | Pendente | — | Não executado | Pendente | — | Trajetória derivada da geometria da rua + envelope |
 | **R06** Muralha sobre rua | P6 | Pendente | — | Não executado | Pendente | — | Rejeição de OBB real sobre rua/calçada |

@@ -525,6 +525,8 @@ public class CityGenerator : NetworkBehaviour
 
 
         _navWorldManager = _cityRoot.GetComponent<ScaryParty.Navigation.Core.NavigationWorldManager>() ?? _cityRoot.AddComponent<ScaryParty.Navigation.Core.NavigationWorldManager>();
+        _navWorldManager.OnNavigationReady -= HandleCityNavMeshReadyForSpawns;
+        _navWorldManager.OnNavigationReady += HandleCityNavMeshReadyForSpawns;
         _navWorldManager.BuildCityNavMesh();
 
         MinimapRouteManager routeManager = FindObjectOfType<MinimapRouteManager>();
@@ -543,9 +545,21 @@ public class CityGenerator : NetworkBehaviour
         }
 #endif
 
-        TeleportPlayersToSpawn();
+        if (_navWorldManager.IsReady)
+        {
+            TeleportPlayersToSpawn();
+        }
         OnCityGenerated?.Invoke();
         RequestClosures();
+    }
+
+    private void HandleCityNavMeshReadyForSpawns()
+    {
+        if (_navWorldManager != null)
+        {
+            _navWorldManager.OnNavigationReady -= HandleCityNavMeshReadyForSpawns;
+        }
+        TeleportPlayersToSpawn();
     }
 
     public int LastValidatedRooftopCount { get; private set; }
