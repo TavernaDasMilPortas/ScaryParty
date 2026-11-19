@@ -41,8 +41,9 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         [ReadOnly, MultiLineProperty(8)]
         public string lastValidationReport = "Clique em 'Validar Setup' para inspecionar o pátio e as âncoras.";
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             if (modularPrefab == null)
             {
                 modularPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(
@@ -153,21 +154,91 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 return;
             }
 
-            Undo.RecordObject(root.gameObject, "Apply Pizzeria Patio & Anchors");
+            Undo.RegisterFullObjectHierarchyUndo(root.gameObject, "Apply Pizzeria Patio & Anchors");
+
+            Rect targetPatio = previewVariant == PizzeriaLayoutVariant.T_PatioLateral
+                ? (profile != null ? profile.patioRectT : Rect.MinMaxRect(-16.4f, -27.6f, 0f, -9.2f))
+                : (profile != null ? profile.patioRectL : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f));
+
             var fp = root.GetComponent<PizzeriaFootprint>();
             if (fp != null)
             {
                 Undo.RecordObject(fp, "Update PizzeriaFootprint Exterior");
-                Rect targetPatio = previewVariant == PizzeriaLayoutVariant.T_PatioLateral
-                    ? Rect.MinMaxRect(-16.4f, -27.6f, 0f, -9.2f)
-                    : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f);
                 fp.exteriorRegions = new[] { targetPatio };
                 EditorUtility.SetDirty(fp);
             }
 
-            PizzeriaParkingLotBuilder.EnsureBuilt(root);
+            if (profile != null)
+            {
+                Undo.RecordObject(profile, "Sync PizzeriaLayoutProfile Variant");
+                profile.variant = previewVariant;
+                EditorUtility.SetDirty(profile);
+            }
+
+            var anchors = root.GetComponent<PizzeriaExteriorAnchors>() ?? root.gameObject.AddComponent<PizzeriaExteriorAnchors>();
+            Undo.RecordObject(anchors, "Update PizzeriaExteriorAnchors");
+            anchors.layoutVariant = previewVariant;
+
+            PizzeriaParkingLotBuilder.EnsureBuilt(root, profile);
             EditorUtility.SetDirty(root.gameObject);
             ValidateCurrentSetup();
+        }
+
+        [TabGroup("Pátio")]
+        [Button("Aplicar e Persistir no Prefab Selecionado", ButtonSizes.Large)]
+        public void ApplyToSelectedPrefab()
+        {
+            if (modularPrefab == null)
+            {
+                lastValidationReport = "Prefab modular não atribuído.";
+                return;
+            }
+
+            string assetPath = AssetDatabase.GetAssetPath(modularPrefab);
+            if (string.IsNullOrEmpty(assetPath))
+            {
+                lastValidationReport = "O objeto selecionado não é um asset de Prefab salvo no projeto.";
+                return;
+            }
+
+            GameObject contents = PrefabUtility.LoadPrefabContents(assetPath);
+            try
+            {
+                var root = contents.GetComponentInChildren<PizzeriaRoot>(true);
+                if (root == null)
+                {
+                    lastValidationReport = $"Nenhum PizzeriaRoot encontrado dentro de '{modularPrefab.name}'.";
+                    return;
+                }
+
+                Rect targetPatio = previewVariant == PizzeriaLayoutVariant.T_PatioLateral
+                    ? (profile != null ? profile.patioRectT : Rect.MinMaxRect(-16.4f, -27.6f, 0f, -9.2f))
+                    : (profile != null ? profile.patioRectL : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f));
+
+                var fp = root.GetComponent<PizzeriaFootprint>();
+                if (fp != null) fp.exteriorRegions = new[] { targetPatio };
+
+                if (profile != null)
+                {
+                    Undo.RecordObject(profile, "Sync PizzeriaLayoutProfile Variant");
+                    profile.variant = previewVariant;
+                    EditorUtility.SetDirty(profile);
+                }
+
+                var anchors = root.GetComponent<PizzeriaExteriorAnchors>() ?? root.gameObject.AddComponent<PizzeriaExteriorAnchors>();
+                anchors.layoutVariant = previewVariant;
+
+                PizzeriaParkingLotBuilder.EnsureBuilt(root, profile);
+                PrefabUtility.SaveAsPrefabAsset(contents, assetPath, out bool savedOk);
+                AssetDatabase.SaveAssets();
+                lastValidationReport = savedOk
+                    ? $"Prefab '{modularPrefab.name}' atualizado e persistido na variante {previewVariant} com âncoras completas."
+                    : $"Falha ao salvar prefab '{modularPrefab.name}'.";
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(contents);
+            }
         }
 
         [TabGroup("Validação")]
@@ -195,26 +266,69 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             if (anchors == null || !anchors.HasCompleteExteriorAnchors())
             {
-                sb.AppendLine("• [AVISO] PizzeriaExteriorAnchors incompleto (execute Aplicar Pátio).");
+                sb.AppendLine("• [ERRO] PizzeriaExteriorAnchors externo incompleto (execute Aplicar Pátio).");
+                issues++;
+            }
+            else if (!anchors.HasCompleteSpawnAnchors())
+            {
+                sb.AppendLine("• [ERRO] Âncoras de spawn (playerSpawns/employees) incompletas.");
+                issues++;
+            }
+            else if (anchors.layoutVariant != previewVariant)
+            {
+                sb.AppendLine($"• [ERRO] Variante divergente: cena={anchors.layoutVariant}, wizard={previewVariant}.");
                 issues++;
             }
             else
             {
-                sb.AppendLine("• [OK] Todas as âncoras externas obrigatórias estão conectadas.");
+                sb.AppendLine($"• [OK] Âncoras externas e de spawn completas ({anchors.layoutVariant}).");
             }
 
             var pad = root.transform.Find("__PizzeriaExteriorFacilities/ParkingLotPad");
             if (pad == null || pad.GetComponent<Collider>() == null)
             {
-                sb.AppendLine("• [AVISO] Piso do pátio sem colisor físico.");
+                sb.AppendLine("• [ERRO] Piso do pátio sem colisor físico.");
                 issues++;
             }
-            else
+            else if (fp != null && fp.GetExteriorRegions().Length > 0)
             {
-                sb.AppendLine("• [OK] Piso do pátio possui BoxCollider ativo.");
+                Rect extRect = fp.GetExteriorRegions()[0];
+                Vector3 padCenterLocal = root.transform.InverseTransformPoint(pad.position);
+                Vector3 halfScale = pad.localScale * 0.5f;
+                Rect padRect = Rect.MinMaxRect(
+                    padCenterLocal.x - halfScale.x,
+                    padCenterLocal.z - halfScale.z,
+                    padCenterLocal.x + halfScale.x,
+                    padCenterLocal.z + halfScale.z);
+
+                bool insideExt = padRect.xMin >= extRect.xMin - 0.1f &&
+                                 padRect.xMax <= extRect.xMax + 0.1f &&
+                                 padRect.yMin >= extRect.yMin - 0.1f &&
+                                 padRect.yMax <= extRect.yMax + 0.1f;
+
+                bool overlapsStructural = false;
+                var structRegions = fp.GetStructuralRegions();
+                for (int i = 0; i < structRegions.Length; i++)
+                {
+                    if (padRect.Overlaps(structRegions[i]))
+                    {
+                        overlapsStructural = true;
+                        break;
+                    }
+                }
+
+                if (!insideExt || overlapsStructural)
+                {
+                    sb.AppendLine($"• [ERRO] Piso do pátio fora da reserva ou invadindo região estrutural (inside={insideExt}, overlap={overlapsStructural}).");
+                    issues++;
+                }
+                else
+                {
+                    sb.AppendLine("• [OK] Piso do pátio dentro da reserva e sem invasão estrutural.");
+                }
             }
 
-            sb.AppendLine(issues == 0 ? "Status: APROVADO" : $"Status: {issues} pendência(s).");
+            sb.AppendLine(issues == 0 ? "Status: APROVADO" : $"Status: REPROVADO ({issues} pendência(s)).");
             lastValidationReport = sb.ToString();
         }
 

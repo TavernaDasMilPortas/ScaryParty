@@ -15,7 +15,7 @@ namespace ScaryParty.Pizzeria.Composition
         private const string ContainerName = "__PizzeriaExteriorFacilities";
         private static readonly MaterialPropertyBlock _sharedPropBlock = new MaterialPropertyBlock();
 
-        public static void EnsureBuilt(PizzeriaRoot root)
+        public static void EnsureBuilt(PizzeriaRoot root, PizzeriaLayoutProfile profile = null)
         {
             if (root == null) return;
 
@@ -23,13 +23,30 @@ namespace ScaryParty.Pizzeria.Composition
             var anchors = root.GetComponent<PizzeriaExteriorAnchors>();
             if (anchors == null) anchors = root.gameObject.AddComponent<PizzeriaExteriorAnchors>();
 
+            // Determinístico a partir do recuo do L/T em PizzeriaFootprint ou profile
+            Rect patioRect = profile != null
+                ? profile.GetActivePatioRect()
+                : (footprint != null && footprint.GetExteriorRegions().Length > 0
+                    ? footprint.GetExteriorRegions()[0]
+                    : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f));
+            float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : -1.6f;
+
+            PizzeriaLayoutVariant targetVariant = profile != null ? profile.variant : anchors.layoutVariant;
+            int targetVersion = profile != null ? profile.profileVersion : anchors.authoredVersion;
+
+            Vector3 localPatioCenter = new Vector3(patioRect.center.x, floorLocalY, patioRect.center.y);
+            Vector3 worldPatioCenter = root.transform.TransformPoint(localPatioCenter);
+
             Transform existing = root.transform.Find(ContainerName);
             if (existing != null)
             {
-                // Se já existe e está válido com controlador de moto e rack, preserva idempotentemente
                 var existingBike = existing.GetComponentInChildren<DeliveryMotorcycleController>(true);
                 var existingRack = existing.GetComponentInChildren<WeaponRackStation>(true);
-                if (existingBike != null && existingRack != null && anchors.HasCompleteExteriorAnchors())
+                bool variantMatches = anchors.layoutVariant == targetVariant && anchors.authoredVersion == targetVersion;
+                bool centerMatches = Vector3.Distance(existing.localPosition, localPatioCenter) < 0.25f;
+                if (existingBike != null && existingRack != null &&
+                    anchors.HasCompleteExteriorAnchors() && anchors.HasCompleteSpawnAnchors() &&
+                    variantMatches && centerMatches)
                 {
                     return;
                 }
@@ -38,49 +55,53 @@ namespace ScaryParty.Pizzeria.Composition
                 else Object.DestroyImmediate(existing.gameObject);
             }
 
-            // Determinístico a partir do recuo do L em PizzeriaFootprint (X: 0..16.4, Z: -27.6..-13.2)
-            Rect patioRect = footprint != null
-                ? footprint.GetExteriorRegions()[0]
-                : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f);
-            float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : -1.6f;
-
-            Vector3 localPatioCenter = new Vector3(patioRect.center.x, floorLocalY, patioRect.center.y);
-            Vector3 worldPatioCenter = root.transform.TransformPoint(localPatioCenter);
+            anchors.layoutVariant = targetVariant;
+            anchors.authoredVersion = targetVersion;
 
             Vector3 streetOutwardLocal = footprint != null
                 ? footprint.GetEntranceDirectionLocal3D()
                 : Vector3.left;
             Vector3 streetOutwardWorld = root.transform.TransformDirection(streetOutwardLocal).normalized;
             if (streetOutwardWorld.sqrMagnitude < 0.01f) streetOutwardWorld = root.transform.forward;
-            Quaternion lotRot = Quaternion.LookRotation(streetOutwardWorld, Vector3.up);
+            Quaternion exitRot = Quaternion.LookRotation(streetOutwardWorld, Vector3.up);
 
+            // R08: Container do piso usa a rotação local do footprint (root.transform.rotation)
+            // para que width (X) e height (Z) permaneçam estritamente dentro de patioRect!
             var container = new GameObject(ContainerName);
             container.transform.SetParent(root.transform, false);
-            container.transform.SetPositionAndRotation(worldPatioCenter, lotRot);
+            container.transform.SetPositionAndRotation(worldPatioCenter, root.transform.rotation);
 
-            // 1. Piso sólido do pátio com colisor real (apoiado no chão da quadra) + faixas de vaga
+            // 1. Piso sólido do pátio alinhado ao footprint
             BuildAsphaltPad(container.transform, patioRect.width, patioRect.height);
+
+            // Sub-frame orientado para a saída da rua (moto, faixas de vaga e saída)
+            var exitFrame = new GameObject("ExteriorExitFrame");
+            exitFrame.transform.SetParent(container.transform, false);
+            exitFrame.transform.SetPositionAndRotation(worldPatioCenter, exitRot);
 
             // Âncoras explícitas dos setores do pátio
             anchors.exteriorGround = ResolveOrCreateAnchor(container.transform, "ExteriorGround", Vector3.zero, Quaternion.identity);
-            anchors.streetExit = ResolveOrCreateAnchor(container.transform, "StreetExit", new Vector3(0f, 0.05f, patioRect.width * 0.45f), Quaternion.identity);
+            float exitForwardDist = Mathf.Min(patioRect.width, patioRect.height) * 0.42f;
+            anchors.streetExit = ResolveOrCreateAnchor(exitFrame.transform, "StreetExit", new Vector3(0f, 0.05f, exitForwardDist), Quaternion.identity);
 
-            // 2. Garagem + Moto (lado frontal do recuo voltado para a saída da rua)
+            // 2. Garagem + Moto (no frame orientado para a rua)
             Vector3 bikeLocalOffset = new Vector3(-2.6f, 0.05f, 1.8f);
-            Vector3 bikeWorldPos = container.transform.TransformPoint(bikeLocalOffset);
-            anchors.motorcycleSpawn_01 = ResolveOrCreateAnchor(container.transform, "MotorcycleSpawn_01", bikeLocalOffset, Quaternion.identity);
-            anchors.motorcycleRecovery = ResolveOrCreateAnchor(container.transform, "MotorcycleRecovery", bikeLocalOffset + new Vector3(0f, 0.05f, -0.5f), Quaternion.identity);
-            anchors.dismountLeft = ResolveOrCreateAnchor(container.transform, "DismountLeft", bikeLocalOffset + new Vector3(-1.35f, 0.05f, 0f), Quaternion.identity);
-            anchors.dismountRight = ResolveOrCreateAnchor(container.transform, "DismountRight", bikeLocalOffset + new Vector3(1.35f, 0.05f, 0f), Quaternion.identity);
+            Vector3 bikeWorldPos = exitFrame.transform.TransformPoint(bikeLocalOffset);
+            anchors.motorcycleSpawn_01 = ResolveOrCreateAnchor(exitFrame.transform, "MotorcycleSpawn_01", bikeLocalOffset, Quaternion.identity);
+            anchors.motorcycleRecovery = ResolveOrCreateAnchor(exitFrame.transform, "MotorcycleRecovery", bikeLocalOffset + new Vector3(0f, 0.05f, -0.5f), Quaternion.identity);
+            anchors.dismountLeft = ResolveOrCreateAnchor(exitFrame.transform, "DismountLeft", bikeLocalOffset + new Vector3(-1.35f, 0.05f, 0f), Quaternion.identity);
+            anchors.dismountRight = ResolveOrCreateAnchor(exitFrame.transform, "DismountRight", bikeLocalOffset + new Vector3(1.35f, 0.05f, 0f), Quaternion.identity);
+            BuildParkingStripes(exitFrame.transform, bikeLocalOffset);
 
-            Bounds lotBounds = new Bounds(worldPatioCenter, new Vector3(patioRect.width, 4f, patioRect.height));
-            BuildMotorcycle(container.transform, bikeWorldPos, lotRot, lotBounds);
+            // R08: Bounds mundiais computados pelos 4 cantos transformados do patioRect (suporta 0°, 90°, 180°, 270°)
+            Bounds lotBounds = ComputeWorldBoundsFromLocalRect(root.transform, patioRect, floorLocalY, 4f);
+            BuildMotorcycle(exitFrame.transform, bikeWorldPos, exitRot, lotBounds);
 
-            // 3. Expedição e Recebimento (separados da manobra da moto e do treino)
+            // 3. Expedição e Recebimento
             anchors.dispatch = ResolveOrCreateAnchor(container.transform, "Dispatch", new Vector3(-3.8f, 0.05f, -3.5f), Quaternion.identity);
             anchors.supplierReceiving = ResolveOrCreateAnchor(container.transform, "SupplierReceiving", new Vector3(3.8f, 0.05f, -4.5f), Quaternion.identity);
 
-            // 4. Setor de Treino isolado por anteparo (Rack de Armas + Posição de Tiro + Boneco)
+            // 4. Setor de Treino isolado por anteparo
             BuildTrainingBackstop(container.transform, new Vector3(3.6f, 0f, 1.5f));
             Vector3 rackLocalPos = new Vector3(1.8f, 0f, 3.6f);
             Vector3 shooterLocalPos = new Vector3(2.2f, 0.05f, 1.8f);
@@ -91,6 +112,80 @@ namespace ScaryParty.Pizzeria.Composition
 
             BuildWeaponRack(container.transform, rackLocalPos);
             BuildPracticeDummy(container.transform, dummyLocalPos);
+
+            // 5. R03: Instalar âncoras de spawn de jogadores e funcionários a partir do profile/padrões
+            InstallSpawnAnchors(root, anchors, profile, floorLocalY);
+        }
+
+        private static Bounds ComputeWorldBoundsFromLocalRect(Transform rootTransform, Rect localRect, float floorLocalY, float height)
+        {
+            Vector3[] corners =
+            {
+                rootTransform.TransformPoint(new Vector3(localRect.xMin, floorLocalY, localRect.yMin)),
+                rootTransform.TransformPoint(new Vector3(localRect.xMax, floorLocalY, localRect.yMin)),
+                rootTransform.TransformPoint(new Vector3(localRect.xMin, floorLocalY, localRect.yMax)),
+                rootTransform.TransformPoint(new Vector3(localRect.xMax, floorLocalY, localRect.yMax))
+            };
+            Bounds b = new Bounds(corners[0], Vector3.zero);
+            for (int i = 1; i < corners.Length; i++) b.Encapsulate(corners[i]);
+            b.Encapsulate(b.center + Vector3.up * height);
+            return b;
+        }
+
+        private static void InstallSpawnAnchors(PizzeriaRoot root, PizzeriaExteriorAnchors anchors, PizzeriaLayoutProfile profile, float floorLocalY)
+        {
+            var spawnParent = root.transform.Find("Anchors") ?? root.transform;
+
+            Vector3[] playerOffsets = profile != null && profile.playerSpawnLocalOffsets != null && profile.playerSpawnLocalOffsets.Length >= 4
+                ? profile.playerSpawnLocalOffsets
+                : new[]
+                {
+                    new Vector3(4.5f, 0.05f, -2.5f),
+                    new Vector3(6.5f, 0.05f, -2.5f),
+                    new Vector3(4.5f, 0.05f, -4.5f),
+                    new Vector3(6.5f, 0.05f, -4.5f)
+                };
+
+            if (anchors.playerSpawns == null || anchors.playerSpawns.Length < 4)
+                anchors.playerSpawns = new Transform[4];
+
+            for (int i = 0; i < 4; i++)
+            {
+                Vector3 localPos = new Vector3(playerOffsets[i].x, floorLocalY + 0.05f, playerOffsets[i].z);
+                anchors.playerSpawns[i] = ResolveOrCreateRootAnchor(root.transform, spawnParent, $"PlayerSpawn_{i}", localPos);
+            }
+
+            Vector3 recOff = profile != null ? profile.playerRecoveryLocalOffset : new Vector3(5.5f, 0.05f, -6.5f);
+            anchors.playerRecovery = ResolveOrCreateRootAnchor(root.transform, spawnParent, "RecoveryAnchor", new Vector3(recOff.x, floorLocalY + 0.05f, recOff.z));
+
+            Vector3 empArr = profile != null ? profile.employeeArrivalLocalOffset : new Vector3(2.0f, 0.05f, -15.5f);
+            anchors.employeeArrival = ResolveOrCreateRootAnchor(root.transform, spawnParent, "EmployeeArrival", new Vector3(empArr.x, floorLocalY + 0.05f, empArr.z));
+
+            Vector3 empCashier = profile != null ? profile.employeeCashierSpawnLocalOffset : new Vector3(6.0f, 0.05f, -1.5f);
+            anchors.employeeSpawnCashier = ResolveOrCreateRootAnchor(root.transform, spawnParent, "EmployeeSpawnCashier", new Vector3(empCashier.x, floorLocalY + 0.05f, empCashier.z));
+
+            Vector3 empCook = profile != null ? profile.employeeCookSpawnLocalOffset : new Vector3(20.0f, 0.05f, -18.0f);
+            anchors.employeeSpawnCook = ResolveOrCreateRootAnchor(root.transform, spawnParent, "EmployeeSpawnCook", new Vector3(empCook.x, floorLocalY + 0.05f, empCook.z));
+
+            Vector3 empWait = profile != null ? profile.employeeWaitingLocalOffset : new Vector3(4.0f, 0.05f, -16.5f);
+            anchors.employeeWaiting = ResolveOrCreateRootAnchor(root.transform, spawnParent, "EmployeeWaiting", new Vector3(empWait.x, floorLocalY + 0.05f, empWait.z));
+
+            Vector3 empRec = profile != null ? profile.employeeRecoveryLocalOffset : new Vector3(6.0f, 0.05f, -16.5f);
+            anchors.employeeRecovery = ResolveOrCreateRootAnchor(root.transform, spawnParent, "EmployeeRecovery", new Vector3(empRec.x, floorLocalY + 0.05f, empRec.z));
+
+            root.playerSpawnAnchors = anchors.playerSpawns;
+            root.recoveryAnchor = anchors.playerRecovery;
+        }
+
+        private static Transform ResolveOrCreateRootAnchor(Transform rootTransform, Transform defaultParent, string name, Vector3 rootLocalPos)
+        {
+            var existing = defaultParent.Find(name) ?? rootTransform.Find(name);
+            if (existing != null) return existing;
+            var go = new GameObject(name);
+            go.transform.SetParent(defaultParent, false);
+            go.transform.position = rootTransform.TransformPoint(rootLocalPos);
+            go.transform.rotation = rootTransform.rotation;
+            return go.transform;
         }
 
         private static Transform ResolveOrCreateAnchor(Transform parent, string name, Vector3 localPos, Quaternion localRot)
@@ -106,8 +201,8 @@ namespace ScaryParty.Pizzeria.Composition
 
         private static void BuildAsphaltPad(Transform parent, float width, float depth)
         {
-            float padW = Mathf.Clamp(width - 0.6f, 6f, 15.8f);
-            float padD = Mathf.Clamp(depth - 0.6f, 6f, 13.8f);
+            float padW = Mathf.Max(4f, width - 0.6f);
+            float padD = Mathf.Max(4f, depth - 0.6f);
 
             var pad = GameObject.CreatePrimitive(PrimitiveType.Cube);
             pad.name = "ParkingLotPad";
@@ -116,13 +211,16 @@ namespace ScaryParty.Pizzeria.Composition
             pad.transform.localScale = new Vector3(padW, 0.06f, padD);
             // Mantém o BoxCollider no piso para apoio real de jogadores, NPCs e moto!
             TintObject(pad, new Color(0.16f, 0.17f, 0.19f));
+        }
 
+        private static void BuildParkingStripes(Transform exitFrameParent, Vector3 bikeLocalOffset)
+        {
             for (int side = -1; side <= 1; side += 2)
             {
                 var stripe = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 stripe.name = side < 0 ? "StripeLeft" : "StripeRight";
-                stripe.transform.SetParent(parent, false);
-                stripe.transform.localPosition = new Vector3(-2.6f + side * 1.15f, 0.02f, 1.8f);
+                stripe.transform.SetParent(exitFrameParent, false);
+                stripe.transform.localPosition = new Vector3(bikeLocalOffset.x + side * 1.15f, 0.02f, bikeLocalOffset.z);
                 stripe.transform.localScale = new Vector3(0.12f, 0.01f, 3.6f);
                 DestroyCollider(stripe);
                 TintObject(stripe, new Color(0.95f, 0.78f, 0.15f));
