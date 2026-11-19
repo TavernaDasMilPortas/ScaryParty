@@ -283,6 +283,176 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             presenter.SetDoors(new[] { doorView });
             return true;
         }
+
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/Pizzaria/Gerar Pontos de Trabalho de NPC (Prefab Manual)", false, 245)]
+        public static void GenerateNpcWorkPointsManualPrefabMenu()
+        {
+            if (!EditorUtility.DisplayDialog("Gerar Pontos de Trabalho de NPC",
+                    $"Deseja gerar/atualizar os NpcWorkPoints no prefab '{ManualPrefabPath}'?",
+                    "Gerar", "Cancelar")) return;
+
+            GenerateNpcWorkPointsInPrefab(ManualPrefabPath);
+        }
+
+        public static bool GenerateNpcWorkPointsInPrefab(string prefabPath)
+        {
+            GameObject root = null;
+            try
+            {
+                root = PrefabUtility.LoadPrefabContents(prefabPath);
+                if (root == null)
+                {
+                    Debug.LogError($"[NpcWorkPointAuthoring] Falha ao carregar prefab '{prefabPath}'.");
+                    return false;
+                }
+
+                int created = 0;
+                int updated = 0;
+                float floorY = EstimatePizzeriaFloorY(root.transform);
+
+                var stations = root.GetComponentsInChildren<StationView>(true);
+                for (int i = 0; i < stations.Length; i++)
+                {
+                    var st = stations[i];
+                    if (st == null) continue;
+                    NpcWorkPointRole role = ResolveRoleForStation(st);
+
+                    if (st.slotAnchors != null && st.slotAnchors.Length > 0)
+                    {
+                        for (int s = 0; s < st.slotAnchors.Length; s++)
+                        {
+                            var anchor = st.slotAnchors[s];
+                            if (anchor == null) continue;
+                            Vector3 targetPos = anchor.position;
+                            Vector3 dirOut = ResolveOutwardDirection(st.transform, targetPos);
+                            Vector3 workPos = new Vector3(targetPos.x + dirOut.x * 0.65f, floorY, targetPos.z + dirOut.z * 0.65f);
+                            UpsertWorkPoint(st.transform, st, s, role, $"NpcWorkPoint_Slot{s}", workPos, targetPos, ref created, ref updated);
+                        }
+                    }
+                    else
+                    {
+                        Vector3 targetPos = st.transform.position;
+                        Vector3 dirOut = ResolveOutwardDirection(st.transform, targetPos);
+                        Vector3 workPos = new Vector3(targetPos.x + dirOut.x * 0.75f, floorY, targetPos.z + dirOut.z * 0.75f);
+                        UpsertWorkPoint(st.transform, st, -1, role, "NpcWorkPoint_Main", workPos, targetPos, ref created, ref updated);
+                    }
+                }
+
+                var counters = root.GetComponentsInChildren<CustomerCounterStation>(true);
+                for (int i = 0; i < counters.Length; i++)
+                {
+                    var counter = counters[i];
+                    if (counter == null) continue;
+                    // Fila fica em -forward; lado de dentro do balcão fica em +forward
+                    Vector3 targetPos = counter.transform.position;
+                    Vector3 insidePos = targetPos + counter.transform.forward * 0.85f;
+                    insidePos.y = floorY;
+                    UpsertWorkPoint(counter.transform, counter, -1, NpcWorkPointRole.CounterInside, "NpcWorkPoint_CounterInside", insidePos, targetPos, ref created, ref updated);
+                }
+
+                var tables = root.GetComponentsInChildren<DiningTableStation>(true);
+                for (int i = 0; i < tables.Length; i++)
+                {
+                    var table = tables[i];
+                    if (table == null) continue;
+                    Vector3 targetPos = table.transform.position;
+                    Vector3 servePos = table.GetApproachPosition();
+                    servePos.y = floorY;
+                    UpsertWorkPoint(table.transform, table, -1, NpcWorkPointRole.TableServe, "NpcWorkPoint_TableServe", servePos, targetPos, ref created, ref updated);
+                }
+
+                PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
+                Debug.Log($"[NpcWorkPointAuthoring] Pontos de trabalho atualizados em '{prefabPath}': {created} criado(s), {updated} atualizado(s).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[NpcWorkPointAuthoring] Erro ao gerar NpcWorkPoints: {ex}");
+                return false;
+            }
+            finally
+            {
+                if (root != null)
+                {
+                    PrefabUtility.UnloadPrefabContents(root);
+                }
+            }
+        }
+
+        private static NpcWorkPointRole ResolveRoleForStation(StationView st)
+        {
+            if (st is PhoneStation) return NpcWorkPointRole.PhoneUse;
+            if (st is TicketBoardStation) return NpcWorkPointRole.TicketBoard;
+            if (st is StorageStation) return NpcWorkPointRole.StorageAccess;
+            if (st is OvenStation) return NpcWorkPointRole.OvenFront;
+            return NpcWorkPointRole.Generic;
+        }
+
+        private static float EstimatePizzeriaFloorY(Transform root)
+        {
+            var renderers = root.GetComponentsInChildren<MeshRenderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var r = renderers[i];
+                if (r == null) continue;
+                string lower = r.gameObject.name.ToLowerInvariant();
+                if (lower.Contains("floor") || lower.Contains("piso") || lower.Contains("chao"))
+                {
+                    return r.bounds.max.y;
+                }
+            }
+            return root.position.y - 1.60f;
+        }
+
+        private static Vector3 ResolveOutwardDirection(Transform stationTransform, Vector3 anchorPos)
+        {
+            Vector3 fwd = stationTransform != null ? stationTransform.forward : Vector3.forward;
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+            return fwd.normalized;
+        }
+
+        private static void UpsertWorkPoint(
+            Transform parent,
+            Component targetStation,
+            int slotIndex,
+            NpcWorkPointRole role,
+            string childName,
+            Vector3 worldPos,
+            Vector3 lookAtWorldPos,
+            ref int created,
+            ref int updated)
+        {
+            Transform existingT = parent.Find(childName);
+            NpcWorkPoint wp;
+            if (existingT == null)
+            {
+                var go = new GameObject(childName);
+                go.transform.SetParent(parent, false);
+                wp = go.AddComponent<NpcWorkPoint>();
+                created++;
+            }
+            else
+            {
+                GameObjectUtility.RemoveMonoBehavioursWithMissingScript(existingT.gameObject);
+                wp = existingT.GetComponent<NpcWorkPoint>() ?? existingT.gameObject.AddComponent<NpcWorkPoint>();
+                if (wp.manualLocked) return;
+                updated++;
+            }
+
+            wp.targetStation = targetStation;
+            wp.slotIndex = slotIndex;
+            wp.role = role;
+            wp.standRadius = 0.25f;
+
+            wp.transform.position = worldPos;
+            Vector3 lookDir = lookAtWorldPos - worldPos;
+            lookDir.y = 0f;
+            if (lookDir.sqrMagnitude > 0.001f)
+            {
+                wp.transform.rotation = Quaternion.LookRotation(lookDir.normalized, Vector3.up);
+            }
+        }
     }
 }
 #endif

@@ -38,6 +38,25 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public bool IsOpen => _isOpen;
 
+        public static TicketModalPresenter EnsureInstance()
+        {
+            if (Instance != null) return Instance;
+            var found = FindFirstObjectByType<TicketModalPresenter>();
+            if (found != null)
+            {
+                Instance = found;
+                return Instance;
+            }
+            if (UIManager.Instance != null)
+            {
+                Instance = UIManager.Instance.gameObject.AddComponent<TicketModalPresenter>();
+                return Instance;
+            }
+            var go = new GameObject("TicketModalPresenter");
+            Instance = go.AddComponent<TicketModalPresenter>();
+            return Instance;
+        }
+
         private void Awake()
         {
             if (Instance == null)
@@ -480,7 +499,9 @@ namespace ScaryParty.Pizzeria.Presentation
         private void RefreshTeamClaimUi()
         {
             string stageText = TicketSheetView.FormatTaskStageBadge(_currentOrder.TaskStage);
-            string ownerText = TicketSheetView.FormatClaimedOwner(_currentOrder.ClaimedByClientId);
+            string ownerText = TicketBoardStation.IsOrderClaimedByActivePizzaiolo(PizzeriaNetworkState.Instance, _currentOrder.OrderId, out int pizzaioloId)
+                ? $"Pizzaiolo #{pizzaioloId}"
+                : TicketSheetView.FormatClaimedOwner(_currentOrder.ClaimedByClientId);
             if (_teamStatusLabel != null)
             {
                 _teamStatusLabel.text = $"ETAPA: {stageText}  |  Responsável: {ownerText}";

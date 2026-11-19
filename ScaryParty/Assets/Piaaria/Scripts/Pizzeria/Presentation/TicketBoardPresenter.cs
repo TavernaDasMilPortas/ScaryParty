@@ -49,6 +49,10 @@ namespace ScaryParty.Pizzeria.Presentation
                 var order = netState.Orders[i];
                 if (order.Lifecycle == (byte)OrderLifecycle.Accepted && !order.TicketArchived)
                 {
+                    if (TicketBoardStation.IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _))
+                    {
+                        continue;
+                    }
                     activeCount++;
                     string destHeader = TicketSheetView.FormatOrderDestinationHeader(order);
                     double rem = order.DeadlineTime - now;

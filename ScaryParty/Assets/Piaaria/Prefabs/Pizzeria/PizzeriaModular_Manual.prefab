@@ -6095,6 +6095,10 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4439970650518418673}
+  - {fileID: 2509341841368382662}
+  - {fileID: 5677856984452997613}
+  - {fileID: 6885812139219421409}
+  - {fileID: 3725875668629672739}
   m_Father: {fileID: 3567286184108467835}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &5823079428842344014
@@ -7240,6 +7244,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &190547323222690603
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6927712311854652804}
+  - component: {fileID: 3346709010671669178}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6927712311854652804
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190547323222690603}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.25659823, z: 0.6499996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1276125722060821012}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3346709010671669178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 190547323222690603}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 4421844071322604337}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &209019826514423967
 GameObject:
   m_ObjectHideFlags: 0
@@ -8389,6 +8442,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &327011761430621418
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4743590487936816541}
+  - component: {fileID: 7531325689982668695}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4743590487936816541
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 327011761430621418}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.29195833, z: 3.2078192}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7011098504545730098}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7531325689982668695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 327011761430621418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 1495091486572530744}
+  slotIndex: 3
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &332307769423058357
 GameObject:
   m_ObjectHideFlags: 0
@@ -9011,6 +9113,37 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.3, y: 4, z: 2}
   m_Center: {x: 0, y: 0.13780701, z: 0}
+--- !u!1 &378921047232804940
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3848050511737212610}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3848050511737212610
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 378921047232804940}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.01356966, z: -0, w: 0.999908}
+  m_LocalPosition: {x: 0.30867672, y: 0.87211585, z: 1.5269585}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2658263234021813087}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &380083930899889314
 GameObject:
   m_ObjectHideFlags: 0
@@ -13624,6 +13757,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &714924265686786210
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2440804911322098126}
+  - component: {fileID: 1024097950592447605}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2440804911322098126
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714924265686786210}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.01356935, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.042550087, y: -0.5778842, z: -1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1121013557265293502}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1024097950592447605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 714924265686786210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6073369155437468520}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &721486599891772396
 GameObject:
   m_ObjectHideFlags: 0
@@ -15174,6 +15356,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &908000871258449688
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8274129385039155492}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8274129385039155492
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 908000871258449688}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3900673835856207695}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &911172939111212954
 GameObject:
   m_ObjectHideFlags: 0
@@ -15563,6 +15776,10 @@ Transform:
   - {fileID: 2491529776454666555}
   - {fileID: 4860186278352092072}
   - {fileID: 4566125213048090086}
+  - {fileID: 2864136289955676400}
+  - {fileID: 2663601934196826190}
+  - {fileID: 2542905561567324437}
+  - {fileID: 4089132934788489214}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1107185887678207075
@@ -15659,13 +15876,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 2
   tableName: Mesa 2
-  seatAnchor: {fileID: 2491529776454666555}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 2864136289955676400}
+  seatSurfaceAnchor: {fileID: 2886004525038615202}
+  approachAnchor: {fileID: 2663601934196826190}
+  exitAnchor: {fileID: 2542905561567324437}
   plateAnchor: {fileID: 4566125213048090086}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 2491529776454666555}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &6279374042323225904
@@ -15865,6 +16082,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &969529850271479151
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3635875124587461613}
+  - component: {fileID: 1655331882497365070}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3635875124587461613
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969529850271479151}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.083135605, y: -2.7502065, z: 1.4000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 282542543211238615}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1655331882497365070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 969529850271479151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6613367701856128826}
+  slotIndex: 0
+  role: 5
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &976538079087076017
 GameObject:
   m_ObjectHideFlags: 0
@@ -15896,6 +16162,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3924550760549324784}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &977364036884515311
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4089132934788489214}
+  - component: {fileID: 8144365801341102502}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4089132934788489214
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977364036884515311}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.0135693485}
+  m_LocalPosition: {x: -0.042550087, y: -0.5778842, z: 1.5674422}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7701412037245141125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8144365801341102502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 977364036884515311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 5926445003002473590}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &979716131863783031
 GameObject:
   m_ObjectHideFlags: 0
@@ -16416,6 +16731,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &1028664214988019669
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8478981769866942917}
+  - component: {fileID: 2339251094252498829}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8478981769866942917
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028664214988019669}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.6994438, y: -0.29195833, z: 2.3203123}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2744957415286569145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2339251094252498829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1028664214988019669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8217300519632342195}
+  slotIndex: 2
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &1028753501555623513
 GameObject:
   m_ObjectHideFlags: 0
@@ -17356,6 +17720,68 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &1067860898556936403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7928537842221070423}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7928537842221070423
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1067860898556936403}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: -0.013569376}
+  m_LocalPosition: {x: -0.3910637, y: 0.87211585, z: -1.5079632}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1121013557265293502}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1080031629817305224
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2594887907828007710}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2594887907828007710
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1080031629817305224}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: -0.013569376}
+  m_LocalPosition: {x: -0.3910637, y: 0.87211585, z: -1.5079631}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8328757703429664962}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1082366667037561888
 GameObject:
   m_ObjectHideFlags: 0
@@ -17646,6 +18072,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &1102726375349682769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3895497919115251286}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3895497919115251286
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1102726375349682769}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3956405308154431656}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1106625588160498038
 GameObject:
   m_ObjectHideFlags: 0
@@ -17681,6 +18138,7 @@ Transform:
   - {fileID: 4068942491444360366}
   - {fileID: 2246998744654772149}
   - {fileID: 172073070265712223}
+  - {fileID: 5803045007194113550}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2492433933692480488
@@ -18049,6 +18507,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &1131029589948306565
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4777668781901141442}
+  - component: {fileID: 8559315688404371281}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4777668781901141442
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131029589948306565}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.6072464, y: -0.29195833, z: -4.0475817}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4200645265631435396}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8559315688404371281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1131029589948306565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6115678377341899978}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &1138326047036749572
 GameObject:
   m_ObjectHideFlags: 0
@@ -18391,6 +18898,7 @@ Transform:
   - {fileID: 2157799563992490451}
   - {fileID: 6688574584450234389}
   - {fileID: 332766594981180898}
+  - {fileID: 744094929769480680}
   m_Father: {fileID: 818478036838337399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &4493723973170986868
@@ -18842,6 +19350,10 @@ Transform:
   - {fileID: 2378549757062333507}
   - {fileID: 101935993949176511}
   - {fileID: 4587560047472978444}
+  - {fileID: 4777668781901141442}
+  - {fileID: 4869537545730922939}
+  - {fileID: 8121848133499437227}
+  - {fileID: 2691328285665505416}
   m_Father: {fileID: 7180449526908357892}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3716838020293896655
@@ -21118,6 +21630,7 @@ Transform:
   - {fileID: 1609094420169555147}
   - {fileID: 4105211758190700722}
   - {fileID: 311102847203707278}
+  - {fileID: 711368229765058829}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5416363717453503418
@@ -21290,6 +21803,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &1412217471321539642
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1177795756036428228}
+  - component: {fileID: 4993294856380528033}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1177795756036428228
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1412217471321539642}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.013569656}
+  m_LocalPosition: {x: -0.04255104, y: -0.5778842, z: 1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1113719534747675106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4993294856380528033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1412217471321539642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 1137404529285654218}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &1434907258813300054
 GameObject:
   m_ObjectHideFlags: 0
@@ -24552,6 +25114,7 @@ Transform:
   - {fileID: 4315309726920248298}
   - {fileID: 2311832973648846168}
   - {fileID: 1272493282620859330}
+  - {fileID: 8131502326448548635}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &143098095256365689
@@ -25740,6 +26303,7 @@ Transform:
   m_Children:
   - {fileID: 6042184909226512364}
   - {fileID: 5894846809503439897}
+  - {fileID: 5056907909146753651}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2501531074858642800
@@ -34477,6 +35041,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2229408019509536791
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1318437351452289362}
+  - component: {fileID: 1590637569640193105}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1318437351452289362
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2229408019509536791}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.27999973, y: -0.12989247, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1314372874077996248}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1590637569640193105
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2229408019509536791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 7292184135953630091}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2235612079634336745
 GameObject:
   m_ObjectHideFlags: 0
@@ -35803,6 +36416,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 744336356752481253}
+  - {fileID: 6174017016830733445}
+  - {fileID: 1318437351452289362}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3519518984836844979
@@ -36453,6 +37068,10 @@ Transform:
   - {fileID: 6094729012645409843}
   - {fileID: 9097375501491377540}
   - {fileID: 3652324090830405741}
+  - {fileID: 3146581079893962620}
+  - {fileID: 2292070180446276075}
+  - {fileID: 8478981769866942917}
+  - {fileID: 458415442848479018}
   m_Father: {fileID: 7180449526908357892}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7669193159345429409
@@ -37221,6 +37840,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7701412037245141125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2441112763853582158
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2172778186227672119}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2172778186227672119
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2441112763853582158}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3132251074165317644}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2444872406438051026
 GameObject:
@@ -38000,6 +38650,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &2509404191918130915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6174017016830733445}
+  - component: {fileID: 129599386086067044}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6174017016830733445
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2509404191918130915}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.27999973, y: -0.12989247, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1314372874077996248}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &129599386086067044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2509404191918130915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 7292184135953630091}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2511639022440513962
 GameObject:
   m_ObjectHideFlags: 0
@@ -38038,6 +38737,10 @@ Transform:
   - {fileID: 3757115629894191469}
   - {fileID: 8327140032992024086}
   - {fileID: 8329155572478459651}
+  - {fileID: 3132251074165317644}
+  - {fileID: 5121742639224467906}
+  - {fileID: 3848050511737212610}
+  - {fileID: 7576051861524932031}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4353302867219595538
@@ -38134,13 +38837,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 6
   tableName: Mesa 6
-  seatAnchor: {fileID: 3757115629894191469}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 3132251074165317644}
+  seatSurfaceAnchor: {fileID: 2172778186227672119}
+  approachAnchor: {fileID: 5121742639224467906}
+  exitAnchor: {fileID: 3848050511737212610}
   plateAnchor: {fileID: 8329155572478459651}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 3757115629894191469}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &2955600846492028128
@@ -38916,6 +39619,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2595662987293969295
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2691328285665505416}
+  - component: {fileID: 3683536497601988602}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2691328285665505416
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2595662987293969295}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.6072445, y: -0.29195833, z: 5.8873672}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4200645265631435396}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3683536497601988602
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2595662987293969295}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6115678377341899978}
+  slotIndex: 3
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2606203489842927591
 GameObject:
   m_ObjectHideFlags: 0
@@ -39227,6 +39979,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2632815839884237044
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4826807382354978808}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4826807382354978808
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2632815839884237044}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3507666224350491304}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2637044874572169068
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7734611763635281596}
+  - component: {fileID: 163206755423800960}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7734611763635281596
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2637044874572169068}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.083135605, y: -2.7502065, z: 1.4000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6320952379302696938}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &163206755423800960
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2637044874572169068}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3079012132098214287}
+  slotIndex: 0
+  role: 5
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2654534437218208231
 GameObject:
   m_ObjectHideFlags: 0
@@ -39427,6 +40259,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2680631209647050826
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2509341841368382662}
+  - component: {fileID: 5019557898499416879}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2509341841368382662
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2680631209647050826}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.25, y: -0.16307926, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 938570343210469197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5019557898499416879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2680631209647050826}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3952921712924210122}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2700329665815889492
 GameObject:
   m_ObjectHideFlags: 0
@@ -40200,6 +41081,86 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &2753861532031201763
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5803045007194113550}
+  - component: {fileID: 543666457707640212}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5803045007194113550
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2753861532031201763}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.25659823, z: 0.6499996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6876929289962310661}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &543666457707640212
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2753861532031201763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 2062293210167718143}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
+--- !u!1 &2762164825632751539
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6066385070975230663}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6066385070975230663
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2762164825632751539}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569651, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.04255104, y: 0.87211585, z: -1.5674424}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6768528093274208313}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2773146852629456104
 GameObject:
   m_ObjectHideFlags: 0
@@ -41776,6 +42737,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &2890140749083108336
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3254454523229312979}
+  - component: {fileID: 7715840697613915771}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3254454523229312979
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2890140749083108336}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.20000005, z: 0.6499996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6678536819102595923}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7715840697613915771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2890140749083108336}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3913904301102585018}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &2897369898127168866
 GameObject:
   m_ObjectHideFlags: 0
@@ -42394,6 +43404,10 @@ Transform:
   - {fileID: 7194416090516532674}
   - {fileID: 5172473866843990570}
   - {fileID: 1709721005663037161}
+  - {fileID: 3956405308154431656}
+  - {fileID: 3153520657352111236}
+  - {fileID: 610637223414828750}
+  - {fileID: 1177795756036428228}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6010984153474454253
@@ -42490,13 +43504,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 4
   tableName: Mesa 4
-  seatAnchor: {fileID: 7194416090516532674}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 3956405308154431656}
+  seatSurfaceAnchor: {fileID: 3895497919115251286}
+  approachAnchor: {fileID: 3153520657352111236}
+  exitAnchor: {fileID: 610637223414828750}
   plateAnchor: {fileID: 1709721005663037161}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 7194416090516532674}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &5501608718594646437
@@ -43174,6 +44188,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &3021775968831466878
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3146581079893962620}
+  - component: {fileID: 5908599211006802331}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3146581079893962620
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3021775968831466878}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.56625557, y: -0.29195833, z: -4.001964}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2744957415286569145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5908599211006802331
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3021775968831466878}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8217300519632342195}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &3022645225074463803
 GameObject:
   m_ObjectHideFlags: 0
@@ -44504,6 +45567,18 @@ MonoBehaviour:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
+  RunVoteOptions:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  RunShopOffers:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  RunPlayerStates:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
   NightState:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
@@ -44794,6 +45869,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3101390980257479730
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8131502326448548635}
+  - component: {fileID: 5698757123704592586}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8131502326448548635
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101390980257479730}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.083135605, y: -2.7502065, z: 1.4000001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4074574491688362083}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5698757123704592586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3101390980257479730}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8216507907869709354}
+  slotIndex: 0
+  role: 5
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &3115348601419635814
 GameObject:
   m_ObjectHideFlags: 0
@@ -45996,6 +47120,55 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &3190919114250372894
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 320434672615496000}
+  - component: {fileID: 1799017128258210320}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &320434672615496000
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3190919114250372894}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569348, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.042550087, y: -0.5778842, z: -1.5674423}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8328757703429664962}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1799017128258210320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3190919114250372894}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 7581180107115453096}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &3194824021958392501
 GameObject:
   m_ObjectHideFlags: 0
@@ -46430,6 +47603,104 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &3232012336512665085
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5159055514615845949}
+  - component: {fileID: 3882142925241541278}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5159055514615845949
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232012336512665085}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.6939972, z: 0.56257534}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6373480860524007853}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3882142925241541278
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3232012336512665085}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6224278178943848532}
+  slotIndex: 0
+  role: 4
+  standRadius: 0.25
+  manualLocked: 0
+--- !u!1 &3244449393052629074
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8121848133499437227}
+  - component: {fileID: 2061728699983501401}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8121848133499437227
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244449393052629074}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.6072445, y: -0.29195833, z: 2.3295093}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4200645265631435396}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2061728699983501401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3244449393052629074}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6115678377341899978}
+  slotIndex: 2
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &3250151626638145912
 GameObject:
   m_ObjectHideFlags: 0
@@ -51910,6 +53181,7 @@ Transform:
   - {fileID: 7575346790462468939}
   - {fileID: 4390635610328379454}
   - {fileID: 5691555698924843551}
+  - {fileID: 5159055514615845949}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5246733962111327702
@@ -51992,6 +53264,37 @@ MonoBehaviour:
   _doors:
   - {fileID: 2756027645017843880}
   - {fileID: 5412050399675888358}
+--- !u!1 &3827510863056317294
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 217870662279963275}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &217870662279963275
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3827510863056317294}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: -0.013569651}
+  m_LocalPosition: {x: -0.39106512, y: 0.87211585, z: -1.507963}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6768528093274208313}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3836249424920061068
 GameObject:
   m_ObjectHideFlags: 0
@@ -52785,6 +54088,7 @@ Transform:
   - {fileID: 4363524670448727496}
   - {fileID: 1894609262302643879}
   - {fileID: 2406431329808970591}
+  - {fileID: 6927712311854652804}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5233599676921983843
@@ -52891,6 +54195,7 @@ Transform:
   - {fileID: 831997137777007638}
   - {fileID: 2220521182232301692}
   - {fileID: 2838751401859105012}
+  - {fileID: 3635875124587461613}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8171628482812876317
@@ -53446,6 +54751,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &3908811520952835960
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5455615059199680703}
+  - component: {fileID: 1216988705047405829}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5455615059199680703
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3908811520952835960}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.0000037580396, y: -0.29195833, z: -0.45781925}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7011098504545730098}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1216988705047405829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3908811520952835960}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 1495091486572530744}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &3943894127769143069
 GameObject:
   m_ObjectHideFlags: 0
@@ -54847,6 +56201,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4075086131270944062
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5121742639224467906}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5121742639224467906
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4075086131270944062}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.01356966}
+  m_LocalPosition: {x: -0.04255104, y: 0.87211585, z: 1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2658263234021813087}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4075784449252608478
 GameObject:
   m_ObjectHideFlags: 0
@@ -56138,6 +57523,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4156248060818554502
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6885812139219421409}
+  - component: {fileID: 7246199277093401980}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6885812139219421409
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4156248060818554502}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.08333397, y: -0.16307926, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 938570343210469197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7246199277093401980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4156248060818554502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3952921712924210122}
+  slotIndex: 2
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &4156412240449624322
 GameObject:
   m_ObjectHideFlags: 0
@@ -57660,6 +59094,55 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.6682377, y: 1.9068285, z: 0.82070494}
   m_Center: {x: 0.020234108, y: 0.06886524, z: 0.056445837}
+--- !u!1 &4257614205836062173
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4334837776891065186}
+  - component: {fileID: 2642139302860021056}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4334837776891065186
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4257614205836062173}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.20000005, z: 0.6499996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7331382662800550254}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2642139302860021056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4257614205836062173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8452598427261629754}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &4262143411938981371
 GameObject:
   m_ObjectHideFlags: 0
@@ -60107,6 +61590,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4490851796707907323
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3153520657352111236}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3153520657352111236
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4490851796707907323}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.01356966}
+  m_LocalPosition: {x: -0.04255104, y: 0.87211585, z: 1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1113719534747675106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4498715588017493911
 GameObject:
   m_ObjectHideFlags: 0
@@ -62212,6 +63726,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &4661106401675352547
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 744094929769480680}
+  - component: {fileID: 4632738155113937138}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_CounterInside
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &744094929769480680
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4661106401675352547}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.8499999}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8124436252562181261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4632738155113937138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4661106401675352547}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 2121059794482463137}
+  slotIndex: -1
+  role: 1
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &4666138838485666987
 GameObject:
   m_ObjectHideFlags: 0
@@ -62534,6 +64097,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4691784022027079933
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 441366515165454766}
+  - component: {fileID: 5335137667426896575}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &441366515165454766
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4691784022027079933}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.01433754, y: -0.70664895, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9018991667524332195}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5335137667426896575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4691784022027079933}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3419848690701814122}
+  slotIndex: 0
+  role: 2
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &4695488400452818690
 GameObject:
   m_ObjectHideFlags: 0
@@ -64203,6 +65815,38 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &4807839645167883241
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7721189707471844849}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7721189707471844849
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4807839645167883241}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569376, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: -0.8677001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 953551060958191752}
+  m_Father: {fileID: 1121013557265293502}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4812062041011341955
 GameObject:
   m_ObjectHideFlags: 0
@@ -65918,6 +67562,7 @@ Transform:
   m_Children:
   - {fileID: 3808788607775624342}
   - {fileID: 5404851390480165696}
+  - {fileID: 400740266831009954}
   m_Father: {fileID: 8834499623025844802}
   m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!33 &473142292860284947
@@ -68281,6 +69926,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &5080659758457807812
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 610637223414828750}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &610637223414828750
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5080659758457807812}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.01356966, z: -0, w: 0.999908}
+  m_LocalPosition: {x: 0.30867672, y: 0.87211585, z: 1.5269582}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1113719534747675106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5097372098770797847
 GameObject:
   m_ObjectHideFlags: 0
@@ -70386,6 +72062,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &5274597790847066002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8654183007213003388}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8654183007213003388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5274597790847066002}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569376, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.042550087, y: 0.87211585, z: -1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1121013557265293502}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5280719396443094101
 GameObject:
   m_ObjectHideFlags: 0
@@ -70683,6 +72390,10 @@ Transform:
   - {fileID: 58284518315903371}
   - {fileID: 6293435013869089958}
   - {fileID: 6692367724796428901}
+  - {fileID: 3900673835856207695}
+  - {fileID: 6066385070975230663}
+  - {fileID: 217870662279963275}
+  - {fileID: 8457631315951867781}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8493949297411855543
@@ -70779,13 +72490,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 5
   tableName: Mesa 5
-  seatAnchor: {fileID: 58284518315903371}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 3900673835856207695}
+  seatSurfaceAnchor: {fileID: 8274129385039155492}
+  approachAnchor: {fileID: 6066385070975230663}
+  exitAnchor: {fileID: 217870662279963275}
   plateAnchor: {fileID: 6692367724796428901}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 58284518315903371}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &3506996081906353225
@@ -70923,6 +72634,69 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &5314263169354983942
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7212840925587123271}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7212840925587123271
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5314263169354983942}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569376, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.042550087, y: 0.87211585, z: -1.5674423}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8328757703429664962}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5330234796048711947
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3132251074165317644}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3132251074165317644
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5330234796048711947}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.01356966}
+  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: 0.8676996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2172778186227672119}
+  m_Father: {fileID: 2658263234021813087}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5337955902204362351
 GameObject:
   m_ObjectHideFlags: 0
@@ -70963,6 +72737,7 @@ Transform:
   - {fileID: 447207154202597740}
   - {fileID: 4267873809452007271}
   - {fileID: 2730680996155876881}
+  - {fileID: 7734611763635281596}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1284742931462775536
@@ -73139,6 +74914,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7026541906191179817}
+  - {fileID: 4371517814617157921}
   m_Father: {fileID: 9064623253904122052}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3688982845445870015
@@ -73275,6 +75051,55 @@ MonoBehaviour:
   _hasCustomClosedPose: 1
   _closedPosition: {x: 0.412, y: 0.6693616, z: -0.338}
   _closedRotation: {x: -0, y: -0, z: -0, w: 1}
+--- !u!1 &5553096203256429956
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8457631315951867781}
+  - component: {fileID: 7047868126436653544}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8457631315951867781
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5553096203256429956}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569651, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.04255104, y: -0.5778842, z: -1.5674424}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6768528093274208313}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7047868126436653544
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5553096203256429956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 589477984128624899}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &5597291979415775813
 GameObject:
   m_ObjectHideFlags: 0
@@ -76228,6 +78053,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &5817611742147387705
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6659063471110869874}
+  - component: {fileID: 5754715284624926632}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6659063471110869874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5817611742147387705}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.000000014679842, y: -0.29195833, z: -0.18837377}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4929042738217157206}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5754715284624926632
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5817611742147387705}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 443902017405247680}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &5827872193908930518
 GameObject:
   m_ObjectHideFlags: 0
@@ -77047,6 +78921,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2938577307435967085}
+  - {fileID: 8020614290313734934}
+  - {fileID: 8002342804767864840}
   m_Father: {fileID: 1750207975914986911}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &5720164205065994638
@@ -82685,6 +84561,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &5952725099438510340
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2663601934196826190}
+  m_Layer: 0
+  m_Name: ApproachAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2663601934196826190
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5952725099438510340}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.013569378}
+  m_LocalPosition: {x: -0.042550087, y: 0.87211585, z: 1.5674422}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7701412037245141125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &5997714590398851569
 GameObject:
   m_ObjectHideFlags: 0
@@ -84111,6 +86018,7 @@ Transform:
   m_Children:
   - {fileID: 4994551926261481290}
   - {fileID: 305058431374842400}
+  - {fileID: 5367291078471000351}
   m_Father: {fileID: 6753522617274645306}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4155395933032805540
@@ -84853,6 +86761,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 180407442270151890}
+  - {fileID: 6659063471110869874}
+  - {fileID: 8684543515083126781}
   m_Father: {fileID: 1750207975914986911}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!33 &1250326387037407755
@@ -85189,6 +87099,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &6299217625056846864
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2292070180446276075}
+  - component: {fileID: 2560340454756963464}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2292070180446276075
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6299217625056846864}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.5860367, y: -0.29195833, z: -0.9006554}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2744957415286569145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2560340454756963464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6299217625056846864}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8217300519632342195}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &6306908216959270563
 GameObject:
   m_ObjectHideFlags: 0
@@ -85773,6 +87732,37 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6375649491741557075
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 953551060958191752}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &953551060958191752
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6375649491741557075}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7721189707471844849}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &6377365534657614060
 GameObject:
   m_ObjectHideFlags: 0
@@ -86137,6 +88127,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7287591199651410984}
+  - {fileID: 4334837776891065186}
   m_Father: {fileID: 9078601330760841625}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &8452598427261629754
@@ -87463,6 +89454,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6513127519272910398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5677856984452997613}
+  - component: {fileID: 8486531048501536812}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5677856984452997613
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6513127519272910398}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.08333397, y: -0.16307926, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 938570343210469197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8486531048501536812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6513127519272910398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3952921712924210122}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &6517104216444222775
 GameObject:
   m_ObjectHideFlags: 0
@@ -90199,6 +92239,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &6727096193108342993
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6971091723251442450}
+  - component: {fileID: 6767057831112743890}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6971091723251442450
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6727096193108342993}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.0000037580396, y: -0.29195833, z: -2.2890975}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7011098504545730098}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6767057831112743890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6727096193108342993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 1495091486572530744}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &6730216055581875553
 GameObject:
   m_ObjectHideFlags: 0
@@ -91494,6 +93583,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &6853641111348012357
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3725875668629672739}
+  - component: {fileID: 9106941615666420814}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3725875668629672739
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6853641111348012357}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.25, y: -0.16307926, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 938570343210469197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9106941615666420814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6853641111348012357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 3952921712924210122}
+  slotIndex: 3
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &6865322155838579397
 GameObject:
   m_ObjectHideFlags: 0
@@ -91744,6 +93882,104 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.9536933, y: 1.9999999, z: 2}
   m_Center: {x: -0.05200346, y: -0.10335356, z: 0}
+--- !u!1 &6907788268888218309
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4371517814617157921}
+  - component: {fileID: 428029699177905584}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Main
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4371517814617157921
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6907788268888218309}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -1.4496894, z: 0.75}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8834499623025844802}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &428029699177905584
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6907788268888218309}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 4217981724176054402}
+  slotIndex: -1
+  role: 3
+  standRadius: 0.25
+  manualLocked: 0
+--- !u!1 &6909707200017388203
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 711368229765058829}
+  - component: {fileID: 6603601092823456554}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &711368229765058829
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6909707200017388203}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: -0.6939972, z: 0.56257534}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4778739611837859111}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6603601092823456554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6909707200017388203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 7949382206466533371}
+  slotIndex: 0
+  role: 4
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &6918255825717481019
 GameObject:
   m_ObjectHideFlags: 0
@@ -92737,6 +94973,55 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.3, y: 4, z: 2}
   m_Center: {x: 0, y: 0.13780731, z: 0}
+--- !u!1 &7032614481916436859
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7576051861524932031}
+  - component: {fileID: 6640351325769570241}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_TableServe
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7576051861524932031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7032614481916436859}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.013569656}
+  m_LocalPosition: {x: -0.04255104, y: -0.5778842, z: 1.5674419}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2658263234021813087}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6640351325769570241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7032614481916436859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6668366756165185252}
+  slotIndex: -1
+  role: 6
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7034363127290202482
 GameObject:
   m_ObjectHideFlags: 0
@@ -93231,6 +95516,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7072327869655923850
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5367291078471000351}
+  - component: {fileID: 6118140099506785680}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5367291078471000351
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7072327869655923850}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.22011375, y: -0.6939972, z: 0.504158}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5151836394373819879}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6118140099506785680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7072327869655923850}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 211333191437565109}
+  slotIndex: 0
+  role: 4
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7109455336128126667
 GameObject:
   m_ObjectHideFlags: 0
@@ -95865,6 +98199,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &7275973494760993172
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1564332761478283524}
+  - component: {fileID: 469056067221146191}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_CounterInside
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1564332761478283524
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7275973494760993172}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.85}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6746315067894920792}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &469056067221146191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7275973494760993172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 9176518183261420590}
+  slotIndex: -1
+  role: 1
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7282234636500099239
 GameObject:
   m_ObjectHideFlags: 0
@@ -96506,6 +98889,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7328195172214062367
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4869537545730922939}
+  - component: {fileID: 8638086937825437820}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4869537545730922939
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7328195172214062367}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.6072445, y: -0.29195833, z: -0.85903656}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4200645265631435396}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8638086937825437820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7328195172214062367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 6115678377341899978}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7370694930279501622
 GameObject:
   m_ObjectHideFlags: 0
@@ -96543,6 +98975,10 @@ Transform:
   m_Children:
   - {fileID: 4757203451449399605}
   - {fileID: 4978652410230360361}
+  - {fileID: 6971091723251442450}
+  - {fileID: 5455615059199680703}
+  - {fileID: 132752376889561532}
+  - {fileID: 4743590487936816541}
   m_Father: {fileID: 1750207975914986911}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &2407049544528841067
@@ -97318,6 +99754,55 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &7394517493501801582
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5056907909146753651}
+  - component: {fileID: 3123200253219430046}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5056907909146753651
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7394517493501801582}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.22011375, y: -0.6939972, z: 0.504158}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3781107699176543088}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3123200253219430046
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7394517493501801582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 4216352780021860528}
+  slotIndex: 0
+  role: 4
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7399714959444682394
 GameObject:
   m_ObjectHideFlags: 0
@@ -98032,6 +100517,38 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7426777838943504271
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3900673835856207695}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3900673835856207695
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7426777838943504271}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569651, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: -0.86770016}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8274129385039155492}
+  m_Father: {fileID: 6768528093274208313}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7427920118247536835
 GameObject:
   m_ObjectHideFlags: 0
@@ -99616,6 +102133,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &7611827882843237170
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 132752376889561532}
+  - component: {fileID: 1343583559197989165}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot2
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &132752376889561532
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7611827882843237170}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.0000037580396, y: -0.29195833, z: 1.3734578}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7011098504545730098}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1343583559197989165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7611827882843237170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 1495091486572530744}
+  slotIndex: 2
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &7612090788016859869
 GameObject:
   m_ObjectHideFlags: 0
@@ -100542,6 +103108,7 @@ Transform:
   m_Children:
   - {fileID: 5095771826937754470}
   - {fileID: 653576513734207376}
+  - {fileID: 3254454523229312979}
   m_Father: {fileID: 9078601330760841625}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3913904301102585018
@@ -102798,6 +105365,55 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6746315067894920792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8007877757095592017
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 400740266831009954}
+  - component: {fileID: 2589913273877012933}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400740266831009954
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8007877757095592017}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.006679535, y: -1.4496894, z: 0.6500001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7026541906191179817}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2589913273877012933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8007877757095592017}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 811710179974227926}
+  slotIndex: 0
+  role: 3
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &8010468669118965847
 GameObject:
   m_ObjectHideFlags: 0
@@ -102884,6 +105500,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8024176280976262646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8002342804767864840}
+  - component: {fileID: 6917860756668425033}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8002342804767864840
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8024176280976262646}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.00000046975495, y: -0.29195833, z: 4.674824}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7003420461405556197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6917860756668425033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8024176280976262646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 4674208282552311298}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &8044559279907030600
 GameObject:
   m_ObjectHideFlags: 0
@@ -103326,6 +105991,87 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8073501715759843452
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 458415442848479018}
+  - component: {fileID: 1402714306374113864}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot3
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &458415442848479018
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073501715759843452}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.5244484, y: -0.29195833, z: 5.876916}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2744957415286569145}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1402714306374113864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073501715759843452}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 8217300519632342195}
+  slotIndex: 3
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
+--- !u!1 &8074165632308023395
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3507666224350491304}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3507666224350491304
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8074165632308023395}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.013569376, z: -0, w: 0.999908}
+  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: -0.8677001}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4826807382354978808}
+  m_Father: {fileID: 8328757703429664962}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8077042281081959798
 GameObject:
   m_ObjectHideFlags: 0
@@ -104985,6 +107731,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8273380993697083073
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2886004525038615202}
+  m_Layer: 0
+  m_Name: SeatSurfaceAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2886004525038615202
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8273380993697083073}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.52, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2864136289955676400}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8277145471327863223
 GameObject:
   m_ObjectHideFlags: 0
@@ -105113,6 +107890,7 @@ Transform:
   - {fileID: 6960351484362816151}
   - {fileID: 6507310750581475176}
   - {fileID: 7434830973343974674}
+  - {fileID: 441366515165454766}
   m_Father: {fileID: 8502334928983655135}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7064493015289392786
@@ -105414,6 +108192,38 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8312730731991001788
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2864136289955676400}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2864136289955676400
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8312730731991001788}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.013569378}
+  m_LocalPosition: {x: -0.023554802, y: 0.87211585, z: 0.8677}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2886004525038615202}
+  m_Father: {fileID: 7701412037245141125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8314134125965681833
 GameObject:
   m_ObjectHideFlags: 0
@@ -107883,6 +110693,10 @@ Transform:
   - {fileID: 4827160033017474931}
   - {fileID: 1471531906811318040}
   - {fileID: 120766039669398856}
+  - {fileID: 7721189707471844849}
+  - {fileID: 8654183007213003388}
+  - {fileID: 7928537842221070423}
+  - {fileID: 2440804911322098126}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &6488796885277574244
@@ -107979,13 +110793,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 3
   tableName: Mesa 3
-  seatAnchor: {fileID: 4827160033017474931}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 7721189707471844849}
+  seatSurfaceAnchor: {fileID: 953551060958191752}
+  approachAnchor: {fileID: 8654183007213003388}
+  exitAnchor: {fileID: 7928537842221070423}
   plateAnchor: {fileID: 120766039669398856}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 4827160033017474931}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &6174401072770688705
@@ -108453,6 +111267,37 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8569128216701115102
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2542905561567324437}
+  m_Layer: 0
+  m_Name: ExitAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2542905561567324437
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8569128216701115102}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.013569378, z: -0, w: 0.999908}
+  m_LocalPosition: {x: 0.30867767, y: 0.87211585, z: 1.5269582}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7701412037245141125}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8571331100441643042
 GameObject:
   m_ObjectHideFlags: 0
@@ -108487,6 +111332,7 @@ Transform:
   - {fileID: 4831316098662619367}
   - {fileID: 2395223046444761099}
   - {fileID: 4753032219648197298}
+  - {fileID: 1564332761478283524}
   m_Father: {fileID: 818478036838337399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &7044264520480985408
@@ -108988,6 +111834,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &8614621265659446581
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8020614290313734934}
+  - component: {fileID: 6263262031690995696}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot0
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8020614290313734934
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8614621265659446581}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: 0.000000014679842, y: -0.29195833, z: -0.18837377}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7003420461405556197}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6263262031690995696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8614621265659446581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 4674208282552311298}
+  slotIndex: 0
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &8624433723242365617
 GameObject:
   m_ObjectHideFlags: 0
@@ -109460,6 +112355,10 @@ Transform:
   - {fileID: 3646669888437011331}
   - {fileID: 486783929448252574}
   - {fileID: 5338933395741533685}
+  - {fileID: 3507666224350491304}
+  - {fileID: 7212840925587123271}
+  - {fileID: 2594887907828007710}
+  - {fileID: 320434672615496000}
   m_Father: {fileID: 8653890201530913776}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &8911503265301582916
@@ -109556,13 +112455,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.DiningTableStation
   tableId: 1
   tableName: Mesa 1
-  seatAnchor: {fileID: 3646669888437011331}
-  seatSurfaceAnchor: {fileID: 0}
-  approachAnchor: {fileID: 0}
-  exitAnchor: {fileID: 0}
+  seatAnchor: {fileID: 3507666224350491304}
+  seatSurfaceAnchor: {fileID: 4826807382354978808}
+  approachAnchor: {fileID: 7212840925587123271}
+  exitAnchor: {fileID: 2594887907828007710}
   plateAnchor: {fileID: 5338933395741533685}
   sauceObjects: []
-  associatedChair: {fileID: 0}
+  associatedChair: {fileID: 3646669888437011331}
   chairPullOutDistance: 0.18
   chairAnimSpeed: 6
 --- !u!65 &4574223333244762839
@@ -113087,6 +115986,55 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &9021754067283420433
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8684543515083126781}
+  - component: {fileID: 1043429705749244902}
+  m_Layer: 0
+  m_Name: NpcWorkPoint_Slot1
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8684543515083126781
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9021754067283420433}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0}
+  m_LocalPosition: {x: -0.00000046975495, y: -0.29195833, z: 4.674824}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4929042738217157206}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1043429705749244902
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9021754067283420433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632e727505b18524f99e2b674b692ca1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ScaryParty.Pizzeria.Stations.NpcWorkPoint
+  targetStation: {fileID: 443902017405247680}
+  slotIndex: 1
+  role: 0
+  standRadius: 0.25
+  manualLocked: 0
 --- !u!1 &9028458843528252744
 GameObject:
   m_ObjectHideFlags: 0
@@ -114707,6 +117655,38 @@ MonoBehaviour:
   visualRole: 0
   boundDefinitionId: 0
   candidates: []
+--- !u!1 &9164966784386279690
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3956405308154431656}
+  m_Layer: 0
+  m_Name: SeatAnchor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3956405308154431656
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9164966784386279690}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: 0.999908, z: -0, w: 0.01356966}
+  m_LocalPosition: {x: -0.023555279, y: 0.87211585, z: 0.8676996}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3895497919115251286}
+  m_Father: {fileID: 1113719534747675106}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9179668046124662815
 GameObject:
   m_ObjectHideFlags: 0

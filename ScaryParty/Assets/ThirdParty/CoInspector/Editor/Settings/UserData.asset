@@ -179,38 +179,11 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked:
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
-        count: 3
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_0_-16[0]/Facades[0]/Front_A_F0_S2[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
+      mostClicked: []
       recentlyClicked:
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+      - paths: []
         count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_0_-16[0]/Facades[0]/Front_A_F0_S2[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]"}'
-        count: 1
-        gameObjects:
-        - {fileID: 0}
+        gameObjects: []
       - paths: []
         count: 1
         gameObjects: []
@@ -236,10 +209,10 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 09:11 AM (November 18, 2026)
+    lastSaveTimePrint: 12:22 AM (November 19, 2026)
     gracePeriod: 3
     activeIndex: 0
-    checkingToLoad: 0
+    checkingToLoad: 1
     assetsCollapsed: 0
     lockedAsset: 0
     maximizedAssetView: 0
@@ -250,16 +223,16 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 108
+    lastValidTabWidth: 91
     alreadyCalculatedHeight: 0
-    lastKnownHeight: 1
+    lastKnownHeight: 0
     tabs:
-    - path: '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
+    - path: '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Arquitetura[0]/Pisos[0]/PisosGerados[0]/Floor_Salao[0]"}'
       paths: []
-      tabWidth: 105
-      name: --- CITY ---
-      icon: {fileID: 148978298399363526, guid: 0000000000000000d000000000000000, type: 0}
-      shortName: Front_A_F0_S2
+      tabWidth: 88
+      name: Floor_Salao
+      icon: {fileID: 2244882685325231567, guid: 0000000000000000d000000000000000, type: 0}
+      shortName: Floor_Salao
       filterString: 
       newTab: 0
       scrollPosition: 0
@@ -268,17 +241,17 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: --- CITY ---
+        m_Text: Floor_Salao
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "--- CITY ---\u200B"
+        m_TextWithWhitespace: "Floor_Salao\u200B"
       multiEditMode: 0
       locked: 0
       hasPreview: 0
       previewHeight: 150
       debug: 0
       filtering: 0
-      prefab: 0
+      prefab: 1
       multiFoldout: 1
       target: {fileID: 0}
       targets: []
@@ -329,22 +302,70 @@ MonoBehaviour:
         focusAfter: 0
         awaitingScroll: 0
         hidden: 0
-        componentName: citymoduleinstance
-        niceComponentName: city module instance
+        componentName: meshfilter
+        niceComponentName: mesh filter
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: boxcollider
+        niceComponentName: box collider
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: meshrenderer
+        niceComponentName: mesh renderer
+      - index: 0
+        component: {fileID: 0}
+        missingComponentID:
+          m_Data: 0
+        foldout: 1
+        focusAfter: 0
+        awaitingScroll: 0
+        hidden: 0
+        componentName: pizzerianodeidentity
+        niceComponentName: pizzeria node identity
       historyPaths:
       - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Arquitetura[0]/Pisos[0]/PisosGerados[0]/Floor_Salao[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]/Comodo_02_Cozinha[0]/Mobiliario[0]/mesa
+          media.001[0]"}'
+        prefab: 1
+      - paths:
+        - '{"sceneGUID":"fc7266d1e4dbc5a46aa1445238583bbe","path":"PizzeriaModular_Manual[0]"}'
+        prefab: 1
+      - paths:
         - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- CITY ---[0]"}'
-        prefab: 0
+        prefab: 1
       - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"__City__[0]/Streets[0]/CityBorders[0]/BorderBuilding_0_-16[0]/Facades[0]/Front_A_F0_S2[0]"}'
-        prefab: 0
-      - paths:
-        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"--- GAMEPLAY ---[0]"}'
-        prefab: 0
+        - '{"sceneGUID":"e9017d5f96b9f09489b4b37e1d6eb914","path":"[Debug] Central
+          de Playtest[0]"}'
+        prefab: 1
       owner: {fileID: 0}
     closedTabs: []
     playModeTransforms: []
     historyAssets:
+    - assetGUIDs:
+      - c201202600014a1b9c00000000000016
+    - assetGUIDs:
+      - c201202600014a1b9c00000000000015
+    - assetGUIDs:
+      - fc7266d1e4dbc5a46aa1445238583bbe
+    - assetGUIDs:
+      - 0c8a048dd86f58743ac42cebb5451918
+    - assetGUIDs:
+      - f41c1a5c11441dc458d5fb3728a59962
     - assetGUIDs:
       - f638a970c196be948a5afe1a3ec44200
     - assetGUIDs:
@@ -357,19 +378,9 @@ MonoBehaviour:
       - 07c425133fd577e489b94798f1f2e6f4
     - assetGUIDs:
       - 1c927cedb95ed7947987714271636d25
-    - assetGUIDs:
-      - ca262d56cfb48de41a2cb77750cc9f21
-    - assetGUIDs:
-      - 8369d6bcbd3560d4db4f819cd5973888
-    - assetGUIDs:
-      - a52add06556f65f4a9f04c9858860cef
-    - assetGUIDs:
-      - 315f6e0d3c24f2a4cb55abf6faaa989d
-    - assetGUIDs:
-      - 83c8f8700f87a0441b26f4730e1c3608
-    targetObject: {fileID: 919132149155446097, guid: f638a970c196be948a5afe1a3ec44200, type: 3}
+    targetObject: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000016, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Prefabs/City/Modules/toldo.fbx
+    lastSelectedAsset: Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -379,7 +390,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 08:58 AM (November 18, 2026)
+    lastSaveTimePrint: 12:25 AM (November 19, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -460,30 +471,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
+      - c201202600014a1b9c00000000000016
     - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
+      - c201202600014a1b9c00000000000015
     - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
+      - fc7266d1e4dbc5a46aa1445238583bbe
     - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
+      - 0c8a048dd86f58743ac42cebb5451918
     - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
+      - f41c1a5c11441dc458d5fb3728a59962
     - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
+      - f638a970c196be948a5afe1a3ec44200
     - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
+      - b3dbc9e268c65f547a0f38f9f6452733
     - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
+      - 008574761ae35b444b805f56e4538fc7
     - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
+      - 223439a7a6a64a14c8e969d65d86406c
     - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
+      - 07c425133fd577e489b94798f1f2e6f4
     - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 102900000, guid: e9017d5f96b9f09489b4b37e1d6eb914, type: 3}
+      - 1c927cedb95ed7947987714271636d25
+    targetObject: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000016, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/ThirdParty/StarterAssets/ThirdPersonController/Scenes/GameScene.unity
+    lastSelectedAsset: Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -493,7 +504,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 10:41 PM (November 17, 2026)
+    lastSaveTimePrint: 12:25 AM (November 19, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -507,13 +518,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 65
+    lastValidTabWidth: 61
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 62
+      tabWidth: 58
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -574,30 +585,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
+      - c201202600014a1b9c00000000000016
     - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
+      - c201202600014a1b9c00000000000015
     - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
+      - fc7266d1e4dbc5a46aa1445238583bbe
     - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
+      - 0c8a048dd86f58743ac42cebb5451918
     - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
+      - f41c1a5c11441dc458d5fb3728a59962
     - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
+      - f638a970c196be948a5afe1a3ec44200
     - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
+      - b3dbc9e268c65f547a0f38f9f6452733
     - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
+      - 008574761ae35b444b805f56e4538fc7
     - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
+      - 223439a7a6a64a14c8e969d65d86406c
     - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
+      - 07c425133fd577e489b94798f1f2e6f4
     - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 11400000, guid: 357b167ccdf3d774ea7cd00e48a29976, type: 2}
+      - 1c927cedb95ed7947987714271636d25
+    targetObject: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000016, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
+    lastSelectedAsset: Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -929,29 +940,19 @@ MonoBehaviour:
     lastClickedTab: -1
     previousTab: 0
   - tracker:
-      mostClicked:
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
-      - paths:
-        - 
-        count: 1
-        gameObjects: []
+      mostClicked: []
       recentlyClicked:
-      - paths:
-        - 
+      - paths: []
         count: 1
         gameObjects: []
-      - paths:
-        - 
+      - paths: []
         count: 1
         gameObjects: []
       mostClickedContents: []
       recentlyClickedContents: []
     sceneGUID: bca06e45c99909c4babf383b55cdc4ba
     sceneName: GameScene_CelShaded
-    lastSaveTimePrint: 10:41 PM (November 17, 2026)
+    lastSaveTimePrint: 11:55 AM (November 18, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -1032,30 +1033,30 @@ MonoBehaviour:
     playModeTransforms: []
     historyAssets:
     - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
+      - f638a970c196be948a5afe1a3ec44200
     - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
+      - b3dbc9e268c65f547a0f38f9f6452733
     - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
+      - 008574761ae35b444b805f56e4538fc7
     - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
+      - 223439a7a6a64a14c8e969d65d86406c
     - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
+      - 07c425133fd577e489b94798f1f2e6f4
     - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
+      - 1c927cedb95ed7947987714271636d25
     - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
+      - ca262d56cfb48de41a2cb77750cc9f21
     - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
+      - 8369d6bcbd3560d4db4f819cd5973888
     - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
+      - a52add06556f65f4a9f04c9858860cef
     - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
+      - 315f6e0d3c24f2a4cb55abf6faaa989d
     - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 11400000, guid: 357b167ccdf3d774ea7cd00e48a29976, type: 2}
+      - 83c8f8700f87a0441b26f4730e1c3608
+    targetObject: {fileID: 919132149155446097, guid: f638a970c196be948a5afe1a3ec44200, type: 3}
     targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
+    lastSelectedAsset: Assets/Piaaria/Prefabs/City/Modules/toldo.fbx
     lastClickedTab: -1
     previousTab: 0
   - tracker:
@@ -1480,348 +1481,6 @@ MonoBehaviour:
     lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
     lastClickedTab: -1
     previousTab: 0
-  - tracker:
-      mostClicked: []
-      recentlyClicked: []
-      mostClickedContents: []
-      recentlyClickedContents: []
-    sceneGUID: cce67e9d8fbe60440b6a3bf9de6d22c7
-    sceneName: InitTestScenecf862f6e-33ea-4469-a8d4-ae542e319adf
-    lastSaveTimePrint: 03:14 AM (November 18, 2026)
-    gracePeriod: 3
-    activeIndex: 0
-    checkingToLoad: 0
-    assetsCollapsed: 0
-    lockedAsset: 0
-    maximizedAssetView: 0
-    showImportSettings: 0
-    suggestedHeight: 0
-    userAssetViewSize: -1
-    previewHeight: 0
-    scrollPosition: {x: 0, y: 0}
-    toolbarScrollPosition: {x: 0, y: 0}
-    rawUserHeight: 0
-    lastValidTabWidth: 65
-    alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
-    tabs:
-    - path: 
-      paths: []
-      tabWidth: 62
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
-      filterString: 
-      newTab: 1
-      scrollPosition: 0
-      isSelected: 0
-      allCollapsed: 0
-      runtimeFoldouts: 
-      runtimeMultiComponents: []
-      tabTextContent:
-        m_Text: New Tab
-        m_Image: {fileID: 0}
-        m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
-      multiEditMode: 0
-      locked: 0
-      hasPreview: 0
-      previewHeight: 150
-      debug: 0
-      filtering: 0
-      prefab: 0
-      multiFoldout: 1
-      target: {fileID: 0}
-      targets: []
-      linkedPrefabs: []
-      trackMultiTarget: {fileID: 0}
-      serializedTransform:
-        owner: {fileID: 0}
-        localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
-        localScale: {x: 0, y: 0, z: 0}
-        originalPosition: {x: 0, y: 0, z: 0}
-        originalRotation: {x: 0, y: 0, z: 0, w: 0}
-        originalLocalScale: {x: 0, y: 0, z: 0}
-        anchorMin: {x: 0, y: 0}
-        anchorMax: {x: 0, y: 0}
-        anchoredPosition: {x: 0, y: 0}
-        sizeDelta: {x: 0, y: 0}
-        pivot: {x: 0, y: 0}
-        originalAnchorMin: {x: 0, y: 0}
-        originalAnchorMax: {x: 0, y: 0}
-        originalAnchoredPosition: {x: 0, y: 0}
-        originalSizeDelta: {x: 0, y: 0}
-        originalPivot: {x: 0, y: 0}
-        isRectTransform: 0
-        appliedTransform: 0
-        undidTransform: 0
-        autoSave: 0
-      serializedTransforms: []
-      savePlayModeTransform: 0
-      index: 0
-      historyPosition: 0
-      componentMaps: []
-      historyPaths: []
-      owner: {fileID: 0}
-    closedTabs: []
-    playModeTransforms: []
-    historyAssets:
-    - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
-    - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
-    - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
-    - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
-    - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
-    - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
-    - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
-    - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
-    - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
-    - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
-    - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 11400000, guid: 357b167ccdf3d774ea7cd00e48a29976, type: 2}
-    targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
-    lastClickedTab: -1
-    previousTab: 0
-  - tracker:
-      mostClicked: []
-      recentlyClicked: []
-      mostClickedContents: []
-      recentlyClickedContents: []
-    sceneGUID: 774ce30f07927684a859aad2cff28be4
-    sceneName: InitTestScene189ac353-4ac7-47aa-8c4f-fb3f925a7297
-    lastSaveTimePrint: 03:28 AM (November 18, 2026)
-    gracePeriod: 3
-    activeIndex: 0
-    checkingToLoad: 0
-    assetsCollapsed: 0
-    lockedAsset: 0
-    maximizedAssetView: 0
-    showImportSettings: 0
-    suggestedHeight: 0
-    userAssetViewSize: -1
-    previewHeight: 0
-    scrollPosition: {x: 0, y: 0}
-    toolbarScrollPosition: {x: 0, y: 0}
-    rawUserHeight: 0
-    lastValidTabWidth: 65
-    alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
-    tabs:
-    - path: 
-      paths: []
-      tabWidth: 62
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
-      filterString: 
-      newTab: 1
-      scrollPosition: 0
-      isSelected: 0
-      allCollapsed: 0
-      runtimeFoldouts: 
-      runtimeMultiComponents: []
-      tabTextContent:
-        m_Text: New Tab
-        m_Image: {fileID: 0}
-        m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
-      multiEditMode: 0
-      locked: 0
-      hasPreview: 0
-      previewHeight: 150
-      debug: 0
-      filtering: 0
-      prefab: 0
-      multiFoldout: 1
-      target: {fileID: 0}
-      targets: []
-      linkedPrefabs: []
-      trackMultiTarget: {fileID: 0}
-      serializedTransform:
-        owner: {fileID: 0}
-        localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
-        localScale: {x: 0, y: 0, z: 0}
-        originalPosition: {x: 0, y: 0, z: 0}
-        originalRotation: {x: 0, y: 0, z: 0, w: 0}
-        originalLocalScale: {x: 0, y: 0, z: 0}
-        anchorMin: {x: 0, y: 0}
-        anchorMax: {x: 0, y: 0}
-        anchoredPosition: {x: 0, y: 0}
-        sizeDelta: {x: 0, y: 0}
-        pivot: {x: 0, y: 0}
-        originalAnchorMin: {x: 0, y: 0}
-        originalAnchorMax: {x: 0, y: 0}
-        originalAnchoredPosition: {x: 0, y: 0}
-        originalSizeDelta: {x: 0, y: 0}
-        originalPivot: {x: 0, y: 0}
-        isRectTransform: 0
-        appliedTransform: 0
-        undidTransform: 0
-        autoSave: 0
-      serializedTransforms: []
-      savePlayModeTransform: 0
-      index: 0
-      historyPosition: 0
-      componentMaps: []
-      historyPaths: []
-      owner: {fileID: 0}
-    closedTabs: []
-    playModeTransforms: []
-    historyAssets:
-    - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
-    - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
-    - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
-    - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
-    - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
-    - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
-    - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
-    - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
-    - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
-    - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
-    - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 11400000, guid: 357b167ccdf3d774ea7cd00e48a29976, type: 2}
-    targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
-    lastClickedTab: -1
-    previousTab: 0
-  - tracker:
-      mostClicked: []
-      recentlyClicked: []
-      mostClickedContents: []
-      recentlyClickedContents: []
-    sceneGUID: e4e74ac6ee3842944aa872b510ae0c82
-    sceneName: InitTestScene41e4f110-22fa-4dff-afe4-2a704112c093
-    lastSaveTimePrint: 04:10 AM (November 18, 2026)
-    gracePeriod: 3
-    activeIndex: 0
-    checkingToLoad: 0
-    assetsCollapsed: 0
-    lockedAsset: 0
-    maximizedAssetView: 0
-    showImportSettings: 0
-    suggestedHeight: 0
-    userAssetViewSize: -1
-    previewHeight: 0
-    scrollPosition: {x: 0, y: 0}
-    toolbarScrollPosition: {x: 0, y: 0}
-    rawUserHeight: 0
-    lastValidTabWidth: 65
-    alreadyCalculatedHeight: 0
-    lastKnownHeight: 0
-    tabs:
-    - path: 
-      paths: []
-      tabWidth: 62
-      name: 
-      icon: {fileID: 0}
-      shortName: New Tab
-      filterString: 
-      newTab: 1
-      scrollPosition: 0
-      isSelected: 0
-      allCollapsed: 0
-      runtimeFoldouts: 
-      runtimeMultiComponents: []
-      tabTextContent:
-        m_Text: New Tab
-        m_Image: {fileID: 0}
-        m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
-      multiEditMode: 0
-      locked: 0
-      hasPreview: 0
-      previewHeight: 150
-      debug: 0
-      filtering: 0
-      prefab: 0
-      multiFoldout: 1
-      target: {fileID: 0}
-      targets: []
-      linkedPrefabs: []
-      trackMultiTarget: {fileID: 0}
-      serializedTransform:
-        owner: {fileID: 0}
-        localPosition: {x: 0, y: 0, z: 0}
-        localRotation: {x: 0, y: 0, z: 0, w: 0}
-        localScale: {x: 0, y: 0, z: 0}
-        originalPosition: {x: 0, y: 0, z: 0}
-        originalRotation: {x: 0, y: 0, z: 0, w: 0}
-        originalLocalScale: {x: 0, y: 0, z: 0}
-        anchorMin: {x: 0, y: 0}
-        anchorMax: {x: 0, y: 0}
-        anchoredPosition: {x: 0, y: 0}
-        sizeDelta: {x: 0, y: 0}
-        pivot: {x: 0, y: 0}
-        originalAnchorMin: {x: 0, y: 0}
-        originalAnchorMax: {x: 0, y: 0}
-        originalAnchoredPosition: {x: 0, y: 0}
-        originalSizeDelta: {x: 0, y: 0}
-        originalPivot: {x: 0, y: 0}
-        isRectTransform: 0
-        appliedTransform: 0
-        undidTransform: 0
-        autoSave: 0
-      serializedTransforms: []
-      savePlayModeTransform: 0
-      index: 0
-      historyPosition: 0
-      componentMaps: []
-      historyPaths: []
-      owner: {fileID: 0}
-    closedTabs: []
-    playModeTransforms: []
-    historyAssets:
-    - assetGUIDs:
-      - 357b167ccdf3d774ea7cd00e48a29976
-    - assetGUIDs:
-      - 3163e3bb6f22a16459b453afe705395d
-    - assetGUIDs:
-      - db12c02d2623c4645822da1e7c718723
-    - assetGUIDs:
-      - 3b8f7fa03d063a14fadc3f47582a36ce
-    - assetGUIDs:
-      - 6ddd763b760530a44a09531a0d5907d5
-    - assetGUIDs:
-      - 3fc1d67861edf2a4bb24e766ed3c1292
-    - assetGUIDs:
-      - 3138cfde02f8a3c48bd02db333d04874
-    - assetGUIDs:
-      - bca06e45c99909c4babf383b55cdc4ba
-    - assetGUIDs:
-      - e9017d5f96b9f09489b4b37e1d6eb914
-    - assetGUIDs:
-      - c06a3bc951e685f43806fb4592c4bc4c
-    - assetGUIDs:
-      - 1e0f622e4c063a943ba959d5c91faabf
-    targetObject: {fileID: 11400000, guid: 357b167ccdf3d774ea7cd00e48a29976, type: 2}
-    targetObjects: []
-    lastSelectedAsset: Assets/Piaaria/Scenes/Cutscenes/CutScene.playable
-    lastClickedTab: -1
-    previousTab: 0
-  tipsShown: 01000000000000000000000000000000010000000000000001000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000001000000010000000000000001000000010000000000000001000000010000000000000000000000000000000100000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  tipsShown: 01000000000000000100000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000010000000000000000000000010000000000000000000000000000000000000001000000000000000000000000000000000000000000000001000000000000000000000000000000000000000100000000000000000000000000000000000000
   playModeStartScene: {}
   enteringPlayMode: 0

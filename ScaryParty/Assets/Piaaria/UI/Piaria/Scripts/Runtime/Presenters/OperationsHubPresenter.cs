@@ -162,6 +162,10 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
+            if (_isOpen)
+            {
+                GameplayInputGate.MaintainMenuCursorUnlocked();
+            }
 #if ENABLE_INPUT_SYSTEM
             if (Keyboard.current != null && Keyboard.current.jKey.wasPressedThisFrame)
             {

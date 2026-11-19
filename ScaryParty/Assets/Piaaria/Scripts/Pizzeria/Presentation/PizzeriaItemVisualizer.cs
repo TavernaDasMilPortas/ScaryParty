@@ -382,6 +382,20 @@ namespace ScaryParty.Pizzeria.Presentation
                         wrapper.AttachTo(socket, pose, fpLayer);
                     }
                 }
+                else if (tool.LocationType == (byte)LocationType.Hand &&
+                         tool.HolderId >= EmployeeAgentController.EmployeeActorOffset &&
+                         EmployeeHandAnchorRegistry.TryGetHands(tool.HolderId, out var empLeft, out var empRight))
+                {
+                    Transform socket = tool.SlotId == 0 ? empLeft : empRight;
+                    if (socket != null)
+                    {
+                        var pose = tool.SlotId == 0
+                            ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, 0);
+                    }
+                }
                 else if (_playerHandCache.TryGetValue(tool.HolderId, out var hands))
                 {
                     Transform socket = tool.SlotId == 0 ? hands.left : hands.right;
@@ -701,6 +715,20 @@ namespace ScaryParty.Pizzeria.Presentation
                             : (profile != null ? profile.fpRightHandPose : ItemPoseOffset.Identity);
 
                         wrapper.AttachTo(socket, pose, fpLayer, useSupportPoint: false);
+                    }
+                }
+                else if (item.LocationType == (byte)LocationType.Hand &&
+                         item.HolderId >= EmployeeAgentController.EmployeeActorOffset &&
+                         EmployeeHandAnchorRegistry.TryGetHands(item.HolderId, out var empLeft, out var empRight))
+                {
+                    Transform socket = item.SlotId == 0 ? empLeft : empRight;
+                    if (socket != null)
+                    {
+                        var pose = item.SlotId == 0
+                            ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
+                            : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        wrapper.AttachTo(socket, pose, 0, useSupportPoint: false);
                     }
                 }
                 else if (_playerHandCache.TryGetValue(item.HolderId, out var hands))

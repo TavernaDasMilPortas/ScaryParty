@@ -258,14 +258,31 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
-            // Garantir que todos os balcões e bancadas da pizzaria possuam NavMeshObstacle com carving ativo
+            // Garantir que todos os balcões, bancadas e equipamentos da pizzaria possuam NavMeshObstacle com carving ativo
+            // (preservando livre a portinhola de passagem "abertura" / "balcaopabertura")
             var allSceneTransforms = root.GetComponentsInChildren<Transform>(true);
             for (int i = 0; i < allSceneTransforms.Length; i++)
             {
                 var t = allSceneTransforms[i];
                 if (t == null || t == root) continue;
                 string lower = t.name.ToLowerInvariant();
-                if (lower.Contains("balcao") || lower.Contains("counter"))
+                if (lower.Contains("abertura"))
+                {
+                    var existingObs = t.GetComponent<NavMeshObstacle>();
+                    if (existingObs != null) Destroy(existingObs);
+                    continue;
+                }
+
+                bool isBlockingFurniture = lower.Contains("balcao") ||
+                                           lower.Contains("counter") ||
+                                           lower.StartsWith("mesacomum") ||
+                                           lower.StartsWith("mesamedia") ||
+                                           lower.StartsWith("mesaempacotamento") ||
+                                           lower.StartsWith("forno") ||
+                                           lower.StartsWith("geladeira") ||
+                                           lower.StartsWith("armario") ||
+                                           lower.StartsWith("prateleira");
+                if (isBlockingFurniture)
                 {
                     var obs = t.GetComponent<NavMeshObstacle>();
                     if (obs == null)
@@ -276,7 +293,11 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (rend != null)
                     {
                         obs.center = t.InverseTransformPoint(rend.bounds.center);
-                        obs.size = rend.bounds.size;
+                        Vector3 ls = t.lossyScale;
+                        obs.size = new Vector3(
+                            Mathf.Abs(ls.x) > 0.001f ? rend.bounds.size.x / Mathf.Abs(ls.x) : rend.bounds.size.x,
+                            Mathf.Abs(ls.y) > 0.001f ? rend.bounds.size.y / Mathf.Abs(ls.y) : rend.bounds.size.y,
+                            Mathf.Abs(ls.z) > 0.001f ? rend.bounds.size.z / Mathf.Abs(ls.z) : rend.bounds.size.z);
                     }
                     else
                     {
@@ -288,6 +309,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     obs.carveOnlyStationary = true;
                 }
             }
+
+            CounterPassageDoorController.EnsureCounterPassageDoorsConfigured(root);
         }
 
         private void TrySubscribeNetworkState()

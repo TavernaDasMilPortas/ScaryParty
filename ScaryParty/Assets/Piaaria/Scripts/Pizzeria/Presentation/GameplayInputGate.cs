@@ -38,6 +38,20 @@ namespace ScaryParty.Pizzeria.Presentation
             ApplyState();
         }
 
+        /// <summary>
+        /// Garante que o cursor permaneça destravado e visível enquanto um menu/modal estiver aberto,
+        /// mesmo se um player spawnar depois ou o foco da janela retornar.
+        /// </summary>
+        public static void MaintainMenuCursorUnlocked()
+        {
+            if (Cursor.lockState != CursorLockMode.None || !Cursor.visible)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                if (IsLocked) ApplyState();
+            }
+        }
+
         private static void ApplyState()
         {
             bool locked = IsLocked;

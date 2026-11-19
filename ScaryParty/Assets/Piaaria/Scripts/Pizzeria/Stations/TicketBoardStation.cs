@@ -138,6 +138,58 @@ namespace ScaryParty.Pizzeria.Stations
             return sheetView;
         }
 
+        public static bool IsOrderClaimedByActivePizzaiolo(PizzeriaNetworkState netState, ulong orderId, out int employeeId)
+        {
+            employeeId = 0;
+            if (orderId == 0) return false;
+
+            if (netState != null && netState.Employees != null)
+            {
+                for (int i = 0; i < netState.Employees.Count; i++)
+                {
+                    var emp = netState.Employees[i];
+                    if (emp.Role == (byte)ScaryParty.Pizzeria.Domain.Services.EmployeeRole.Pizzaiolo &&
+                        emp.IsAlive &&
+                        emp.AssignedTaskId > 0 &&
+                        emp.TargetOrderId == (int)orderId &&
+                        emp.TaskState != (byte)ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Completed &&
+                        emp.TaskState != (byte)ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Cancelled)
+                    {
+                        employeeId = emp.EmployeeId;
+                        return true;
+                    }
+                }
+            }
+
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer && root.EmployeeTaskService != null)
+            {
+                foreach (var kvp in root.EmployeeTaskService.Employees)
+                {
+                    var emp = kvp.Value;
+                    if (emp == null ||
+                        emp.Role != ScaryParty.Pizzeria.Domain.Services.EmployeeRole.Pizzaiolo ||
+                        !emp.IsAlive ||
+                        emp.AssignedTaskId <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (root.EmployeeTaskService.Tasks.TryGetValue(emp.AssignedTaskId, out var task) &&
+                        task != null &&
+                        task.TargetOrderId.Value == orderId &&
+                        task.State != ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Completed &&
+                        task.State != ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Cancelled)
+                    {
+                        employeeId = emp.EmployeeId;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
         protected override void Update()
         {
             base.Update();
@@ -155,6 +207,7 @@ namespace ScaryParty.Pizzeria.Stations
             {
                 var order = netState.Orders[i];
                 if (order.TicketArchived) continue;
+                if (IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _)) continue;
 
                 if (sheetIndex < _sheets.Count)
                 {
@@ -183,7 +236,7 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < netState.Orders.Count; i++)
             {
                 var order = netState.Orders[i];
-                if (!order.TicketArchived)
+                if (!order.TicketArchived && !IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _))
                 {
                     if (TicketModalPresenter.Instance != null)
                     {
@@ -193,7 +246,7 @@ namespace ScaryParty.Pizzeria.Stations
                 }
             }
 
-            NotificationManager.Show("Todas as comandas foram arquivadas.", NotificationType.Success);
+            NotificationManager.Show("Todas as comandas disponíveis estão com os pizzaiolos ou foram arquivadas.", NotificationType.Info);
         }
     }
 }

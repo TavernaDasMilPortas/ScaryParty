@@ -11,6 +11,7 @@ using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Domain.Types;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Stations;
+using ScaryParty.Player;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
@@ -18,9 +19,13 @@ namespace ScaryParty.Pizzeria.Presentation
     /// Controlador autoritativo no servidor para funcionários contratados (Balconista e Pizzaiolo).
     /// Navega via NavMesh pelas estações reais, executa serviços de domínio e respeita reservas/takeover de humanos.
     /// </summary>
-    public class EmployeeAgentController : MonoBehaviour, IDamageable
+    public class EmployeeAgentController : MonoBehaviour, IDamageable, IInteractable
     {
         public const ulong EmployeeActorOffset = 1_000_000UL;
+
+        private static readonly HashSet<EmployeeAgentController> _activeInstances = new HashSet<EmployeeAgentController>();
+        private static PlayerInteraction[] _cachedPlayers;
+        private static float _nextPlayerCacheTime;
 
         public int EmployeeId { get; private set; }
         public EmployeeRole Role { get; private set; }
@@ -29,9 +34,13 @@ namespace ScaryParty.Pizzeria.Presentation
         public int MaxHpInt => 100;
         public uint Revision { get; private set; } = 1;
         public EmployeeBlockReason LastBlockReason => _lastBlockReason;
+        public byte CurrentWorkStepByte => (byte)Mathf.Clamp(_stepIndex, 0, 255);
+        public byte CurrentActionProgressPercentByte => (byte)Mathf.Clamp(Mathf.RoundToInt(_actionProgressNormalized * 100f), 0, 100);
 
         private NavMeshAgent _agent;
         private Animator _animator;
+        private CharacterVisualController _visualController;
+        private StationProgressBar _overheadBar;
         private Collider _mainCollider;
         private Transform _visualRoot;
         private Renderer[] _bodyRenderers;
@@ -41,11 +50,19 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private bool _isClientProxy;
         private bool _serverIsAlive = true;
+        private int _serverLevel = 1;
         private Vector3 _clientTargetPos;
         private float _clientTargetYaw;
         private bool _hasClientTarget;
         private bool _clientIsAlive = true;
         private int _clientLastHp = 100;
+        private byte _clientWorkStep;
+        private byte _clientActionProgressPercent;
+        private int _clientTargetOrderId;
+        private EmployeeBlockReason _clientBlockReason = EmployeeBlockReason.None;
+        private int _clientLevel = 1;
+        private byte _clientUnitsCompleted;
+        private byte _clientUnitsRequired;
 
         private float _hp = 100f;
         private int _activeTaskId = -1;
@@ -53,6 +70,11 @@ namespace ScaryParty.Pizzeria.Presentation
         private OrderUnitKey _rolledUnitKey;
         private int _stepIndex;
         private float _stepTimer;
+        private float _cashierCooldownRemaining;
+        private float _cashierCooldownTotal;
+        private float _cashierInteractTotal;
+        private float _actionProgressNormalized;
+        private CallId _activePhoneCallId;
         private float _retryBackoffUntil;
         private EmployeeBlockReason _lastBlockReason = EmployeeBlockReason.None;
         private float _lastBlockLogAt = -999f;
@@ -72,7 +94,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private ToolItemId _leasedToolId = ToolItemId.None;
         private int _expectedIngredientCountBeforeAsm;
 
-        private enum WorkStep
+        private enum WorkStep : byte
         {
             Idle = 0,
             CashierMoveToCounter = 1,
@@ -81,7 +103,60 @@ namespace ScaryParty.Pizzeria.Presentation
             PizzaioloAssembleToppings = 4,
             PizzaioloInsertOven = 5,
             PizzaioloWaitBake = 6,
-            PizzaioloPackageAndStage = 7
+            PizzaioloPackageAndStage = 7,
+            CashierMoveToPhone = 8,
+            CashierAnswerPhoneWait = 9,
+            CashierCooldown = 10,
+            PizzaioloClaimTicket = 11,
+            PizzaioloServeTable = 12
+        }
+
+        private void OnEnable()
+        {
+            _activeInstances.Add(this);
+        }
+
+        private void OnDisable()
+        {
+            _activeInstances.Remove(this);
+            ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
+            EmployeeHandAnchorRegistry.Unregister(actorKey);
+            NpcWorkPointRegistry.ReleaseAllForActor(actorKey);
+        }
+
+        public static bool IsAnyActorNear(Vector3 worldPos, float radius, float maxVerticalDelta = 2.2f)
+        {
+            float rSqr = radius * radius;
+
+            foreach (var emp in _activeInstances)
+            {
+                if (emp == null || !emp.IsAlive) continue;
+                Vector3 p = emp.transform.position;
+                if (Mathf.Abs(p.y - worldPos.y) > maxVerticalDelta) continue;
+                if (HorizontalDistanceSqr(p, worldPos) <= rSqr)
+                    return true;
+            }
+
+            if (Time.unscaledTime >= _nextPlayerCacheTime || _cachedPlayers == null)
+            {
+                _nextPlayerCacheTime = Time.unscaledTime + 0.5f;
+                _cachedPlayers = FindObjectsByType<PlayerInteraction>(FindObjectsSortMode.None);
+            }
+
+            if (_cachedPlayers != null)
+            {
+                for (int i = 0; i < _cachedPlayers.Length; i++)
+                {
+                    var player = _cachedPlayers[i];
+                    if (player == null || !player.gameObject.activeInHierarchy) continue;
+                    Vector3 p = player.transform.position;
+                    if (Mathf.Abs(p.y - worldPos.y) > maxVerticalDelta) continue;
+                    if (HorizontalDistanceSqr(p, worldPos) <= rSqr)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public void Initialize(int employeeId, EmployeeRole role, bool isClientProxy = false)
@@ -95,8 +170,36 @@ namespace ScaryParty.Pizzeria.Presentation
             _clientLastHp = 100;
             _mainCollider = GetComponent<Collider>();
             _visualRoot = transform.Find("VisualRoot") ?? transform;
-            _animator = GetComponentInChildren<Animator>(true);
+            _visualController = GetComponentInChildren<CharacterVisualController>(true);
+            if (_visualController != null)
+            {
+                _visualController.ResolveReferences();
+                _visualController.EnsureAnimatorControllerAssigned();
+                _visualController.SetPreparing(false);
+                _visualController.SetSitting(false, false);
+                _visualController.SetLocomotion(0f, 1f, true, false, false);
+                _visualController.EnsureFeelPivot();
+                _visualController.DesynchronizeIdleCycle((ulong)employeeId);
+                _animator = _visualController.Animator;
+            }
+            else
+            {
+                _animator = GetComponentInChildren<Animator>(true);
+            }
             _bodyRenderers = _visualRoot.GetComponentsInChildren<Renderer>(true);
+
+            if (GetComponent<ScaryParty.Interaction.OutlineTarget>() == null)
+            {
+                gameObject.AddComponent<ScaryParty.Interaction.OutlineTarget>();
+            }
+
+            if (_overheadBar == null)
+            {
+                _overheadBar = StationProgressBar.Create(transform);
+                _overheadBar.transform.localPosition = new Vector3(0f, 2.15f, 0f);
+                _overheadBar.Hide();
+            }
+
             if (!isClientProxy)
             {
                 _agent = GetComponent<NavMeshAgent>();
@@ -105,11 +208,22 @@ namespace ScaryParty.Pizzeria.Presentation
                     _agent = gameObject.AddComponent<NavMeshAgent>();
                     _agent.radius = 0.35f;
                     _agent.height = 1.75f;
-                    _agent.speed = 3.6f;
+                    _agent.speed = 4.5f; // +25% em relação ao jogador padrão (3.6f)
                     _agent.angularSpeed = 540f;
-                    _agent.stoppingDistance = 0.9f;
+                    _agent.stoppingDistance = 0.25f;
                 }
+                else
+                {
+                    _agent.speed = 4.5f;
+                    _agent.stoppingDistance = 0.25f;
+                }
+                _agent.autoTraverseOffMeshLink = false;
+                _agent.baseOffset = 0f;
             }
+
+            Transform leftHand = _visualController != null && _visualController.LeftHandBone != null ? _visualController.LeftHandBone : transform;
+            Transform rightHand = _visualController != null && _visualController.RightHandBone != null ? _visualController.RightHandBone : transform;
+            EmployeeHandAnchorRegistry.Register(EmployeeActorOffset + (ulong)employeeId, leftHand, rightHand);
         }
 
         public void ApplyReplicatedDto(NetEmployeeDto dto, bool snapImmediately = false)
@@ -120,6 +234,13 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             _clientLastHp = dto.CurrentHp;
             _clientIsAlive = dto.IsAlive;
+            _clientWorkStep = dto.WorkStep;
+            _clientActionProgressPercent = dto.ActionProgressPercent;
+            _clientTargetOrderId = dto.TargetOrderId;
+            _clientBlockReason = (EmployeeBlockReason)dto.BlockReason;
+            _clientLevel = Math.Max(1, (int)dto.Level);
+            _clientUnitsCompleted = dto.UnitsCompleted;
+            _clientUnitsRequired = dto.UnitsRequired;
             _clientTargetPos = new Vector3(dto.PosX, dto.PosY, dto.PosZ);
             _clientTargetYaw = dto.Yaw;
             Revision = dto.Revision;
@@ -143,7 +264,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (!_isClientProxy || !_hasClientTarget) return;
             if (!_clientIsAlive)
             {
-                DriveAnimatorLocomotion(0f);
+                DriveAnimatorLocomotion(0f, false);
                 if (_visualRoot == transform)
                 {
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 8f));
@@ -165,7 +286,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0f, _clientTargetYaw, 0f), Mathf.Clamp01(dt * 10f));
             }
             float estSpeed = dt > 0.0001f ? delta.magnitude / dt : 0f;
-            DriveAnimatorLocomotion(estSpeed);
+            var clientStep = (WorkStep)_clientWorkStep;
+            bool isPrepPose = estSpeed <= 0.25f && IsWorkingPoseStep(clientStep);
+            DriveAnimatorLocomotion(estSpeed, isPrepPose);
         }
 
         private void UpdateVisualFeedback(float dt, bool alive)
@@ -195,16 +318,200 @@ namespace ScaryParty.Pizzeria.Presentation
                     }
                 }
             }
+
+            UpdateOverheadStatusBar(alive);
         }
 
-        private void DriveAnimatorLocomotion(float speed)
+        private void UpdateOverheadStatusBar(bool alive)
         {
+            if (_overheadBar == null) return;
+            if (!alive)
+            {
+                _overheadBar.Hide();
+                return;
+            }
+
+            WorkStep step = ResolveCurrentWorkStep();
+            float prog = _isClientProxy ? (_clientActionProgressPercent / 100f) : Mathf.Clamp01(_actionProgressNormalized);
+            int targetOrderId = ResolveCurrentTargetOrderId();
+            EmployeeBlockReason blockReason = _isClientProxy ? _clientBlockReason : _lastBlockReason;
+            int level = _isClientProxy ? _clientLevel : _serverLevel;
+
+            if (Role == EmployeeRole.Cashier)
+            {
+                switch (step)
+                {
+                    case WorkStep.CashierAttendWait:
+                        _overheadBar.SetHeaderText("Atendendo Cliente...", Color.white);
+                        _overheadBar.SetProgress(prog, new Color(0.18f, 0.88f, 0.48f));
+                        return;
+                    case WorkStep.CashierAnswerPhoneWait:
+                        _overheadBar.SetHeaderText("Atendendo Telefone...", Color.white);
+                        _overheadBar.SetProgress(prog, new Color(0.20f, 0.78f, 0.95f));
+                        return;
+                    case WorkStep.CashierCooldown:
+                        _overheadBar.SetHeaderText($"Cooldown Balconista (Nv.{level})", new Color(1f, 0.92f, 0.65f));
+                        _overheadBar.SetProgress(prog, new Color(0.95f, 0.68f, 0.18f));
+                        return;
+                    case WorkStep.CashierMoveToCounter:
+                        _overheadBar.ShowHeaderOnly("Indo ao Balcão", new Color(0.85f, 0.92f, 1f));
+                        return;
+                    case WorkStep.CashierMoveToPhone:
+                        _overheadBar.ShowHeaderOnly("Indo ao Telefone", new Color(0.75f, 0.92f, 1f));
+                        return;
+                    default:
+                        _overheadBar.Hide();
+                        return;
+                }
+            }
+
+            if (blockReason != EmployeeBlockReason.None)
+            {
+                _overheadBar.ShowHeaderOnly($"⚠ {FormatBlockReason(blockReason)}", new Color(1f, 0.45f, 0.35f));
+                return;
+            }
+
+            if (targetOrderId > 0)
+            {
+                string label = $"Pedido #{targetOrderId} • {FormatWorkStepLabel(step)}";
+                if (prog > 0.01f)
+                {
+                    _overheadBar.SetHeaderText(label, Color.white);
+                    Color barColor = step == WorkStep.PizzaioloWaitBake
+                        ? new Color(0.95f, 0.58f, 0.18f)
+                        : new Color(0.22f, 0.85f, 0.45f);
+                    _overheadBar.SetProgress(prog, barColor);
+                }
+                else
+                {
+                    _overheadBar.ShowHeaderOnly(label, new Color(0.95f, 0.95f, 0.85f));
+                }
+                return;
+            }
+
+            _overheadBar.Hide();
+        }
+
+        private static bool IsWorkingPoseStep(WorkStep step)
+        {
+            return step == WorkStep.CashierAttendWait ||
+                   step == WorkStep.CashierAnswerPhoneWait ||
+                   step == WorkStep.PizzaioloPrepareDough ||
+                   step == WorkStep.PizzaioloAssembleToppings ||
+                   step == WorkStep.PizzaioloPackageAndStage;
+        }
+
+        private void DriveAnimatorLocomotion(float speed, bool isPreparing)
+        {
+            if (_visualController != null)
+            {
+                _visualController.SetLocomotion(speed, speed > 0.1f ? 1f : 0f, grounded: true, jump: false, freeFall: false);
+                _visualController.SetPreparing(isPreparing && speed <= 0.25f);
+                return;
+            }
+
             if (_animator == null) return;
             _animator.SetFloat("Speed", speed);
             _animator.SetFloat("MotionSpeed", speed > 0.1f ? 1f : 0f);
             _animator.SetBool("Grounded", true);
             _animator.SetBool("IsMoving", speed > 0.15f);
+            _animator.SetBool("IsPreparing", isPreparing && speed <= 0.25f);
         }
+
+        private WorkStep ResolveCurrentWorkStep()
+        {
+            return (WorkStep)(_isClientProxy ? _clientWorkStep : (byte)_stepIndex);
+        }
+
+        private int ResolveCurrentTargetOrderId()
+        {
+            if (_isClientProxy) return _clientTargetOrderId;
+            if (_activeTaskId > 0 &&
+                PizzeriaRoot.Instance != null &&
+                PizzeriaRoot.Instance.EmployeeTaskService != null &&
+                PizzeriaRoot.Instance.EmployeeTaskService.Tasks.TryGetValue(_activeTaskId, out var task) &&
+                task != null)
+            {
+                return (int)task.TargetOrderId.Value;
+            }
+            return 0;
+        }
+
+        private static string FormatWorkStepLabel(WorkStep step)
+        {
+            return step switch
+            {
+                WorkStep.PizzaioloPrepareDough => "Abrindo Massa",
+                WorkStep.PizzaioloAssembleToppings => "Montando Pizza",
+                WorkStep.PizzaioloInsertOven => "Levando ao Forno",
+                WorkStep.PizzaioloWaitBake => "Assando no Forno",
+                WorkStep.PizzaioloPackageAndStage => "Embalando Pizza",
+                WorkStep.PizzaioloClaimTicket => "Pegando Comanda",
+                WorkStep.PizzaioloServeTable => "Servindo Mesa",
+                WorkStep.CashierMoveToCounter => "Indo ao Balcão",
+                WorkStep.CashierAttendWait => "Atendendo Cliente",
+                WorkStep.CashierMoveToPhone => "Indo ao Telefone",
+                WorkStep.CashierAnswerPhoneWait => "Atendendo Telefone",
+                WorkStep.CashierCooldown => "Em Cooldown",
+                _ => "Aguardando"
+            };
+        }
+
+        private static string FormatBlockReason(EmployeeBlockReason reason)
+        {
+            return reason switch
+            {
+                EmployeeBlockReason.NoDough => "Sem Massa",
+                EmployeeBlockReason.MissingIngredient => "Falta Ingrediente",
+                EmployeeBlockReason.OvenBusy => "Forno/Bancada Ocupada",
+                EmployeeBlockReason.ToolInUse => "Ferramenta/Slot Ocupado",
+                EmployeeBlockReason.PathBlocked => "Caminho Bloqueado",
+                _ => "Aguardando"
+            };
+        }
+
+        public string InteractPrompt
+        {
+            get
+            {
+                if (Role != EmployeeRole.Pizzaiolo || !IsAlive) return string.Empty;
+                int orderId = ResolveCurrentTargetOrderId();
+                if (orderId > 0)
+                {
+                    return $"[E] Ver Pedido #{orderId} do Pizzaiolo ({FormatWorkStepLabel(ResolveCurrentWorkStep())})";
+                }
+                return "[E] Pizzaiolo (Aguardando pedido)";
+            }
+        }
+
+        public void OnInteract(GameObject player)
+        {
+            if (Role != EmployeeRole.Pizzaiolo || !IsAlive) return;
+            int orderId = ResolveCurrentTargetOrderId();
+            if (orderId <= 0)
+            {
+                NotificationManager.Show("Este pizzaiolo não está preparando nenhum pedido no momento.", NotificationType.Info);
+                return;
+            }
+
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState == null || netState.Orders == null) return;
+
+            for (int i = 0; i < netState.Orders.Count; i++)
+            {
+                var ord = netState.Orders[i];
+                if (ord.OrderId == (ulong)orderId)
+                {
+                    TicketModalPresenter.EnsureInstance()?.Open(ord);
+                    return;
+                }
+            }
+
+            NotificationManager.Show($"Pedido #{orderId} não encontrado no estado sincronizado.", NotificationType.Warning);
+        }
+
+        public void OnFocus() { }
+        public void OnLoseFocus() { }
 
         public void ApplyDamageServer(DamageEvent evt)
         {
@@ -244,11 +551,12 @@ namespace ScaryParty.Pizzeria.Presentation
             if (!root.EmployeeTaskService.Employees.TryGetValue(EmployeeId, out var emp)) return;
 
             _serverIsAlive = emp.IsAlive;
+            _serverLevel = Math.Max(1, emp.Level);
             if (!emp.IsAlive)
             {
                 if (_mainCollider != null && _mainCollider.enabled) _mainCollider.enabled = false;
                 if (_agent != null && _agent.enabled) _agent.enabled = false;
-                DriveAnimatorLocomotion(0f);
+                DriveAnimatorLocomotion(0f, false);
                 if (_visualRoot == transform)
                 {
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(-90f, transform.eulerAngles.y, 0f), Mathf.Clamp01(dt * 8f));
@@ -259,8 +567,26 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_hp <= 0f) _hp = 100f;
             if (_mainCollider != null && !_mainCollider.enabled) _mainCollider.enabled = true;
             if (_agent != null && !_agent.enabled) _agent.enabled = true;
-            if (_agent != null && _agent.enabled && _agent.isStopped) _agent.isStopped = false;
-            DriveAnimatorLocomotion(_agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f);
+            if (_agent != null && _agent.enabled)
+            {
+                _agent.autoTraverseOffMeshLink = false;
+                _agent.baseOffset = 0f;
+                if (_agent.isStopped) _agent.isStopped = false;
+
+                float floorY = CustomerSpawner.SnapToFloor(transform.position).y;
+                if (transform.position.y > floorY + 0.35f || _agent.isOnOffMeshLink)
+                {
+                    if (_agent.isOnOffMeshLink) _agent.CompleteOffMeshLink();
+                    if (TrySampleFloorNavMesh(transform.position, 6f, out var floorPos))
+                    {
+                        _agent.Warp(floorPos);
+                    }
+                    else
+                    {
+                        transform.position = new Vector3(transform.position.x, floorY, transform.position.z);
+                    }
+                }
+            }
 
             if (root.DomainState.CurrentNightPhase != NightPhase.Active)
             {
@@ -268,7 +594,11 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     ReleaseEmployeeActiveWorkAndHandsServer(root, keepWorkingPizzaOnStation: false);
                 }
+                _cashierCooldownRemaining = 0f;
+                _actionProgressNormalized = 0f;
+                _activePhoneCallId = default;
                 ResetWorkState();
+                DriveAnimatorLocomotion(0f, false);
                 return;
             }
 
@@ -280,10 +610,59 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 TickPizzaiolo(root, emp, dt);
             }
+
+            float curSpeed = _agent != null && _agent.enabled ? _agent.velocity.magnitude : 0f;
+            bool isPrepPose = curSpeed <= 0.25f && IsWorkingPoseStep((WorkStep)_stepIndex);
+            DriveAnimatorLocomotion(curSpeed, isPrepPose);
+        }
+
+        private static float ComputeCashierFastInteractSeconds(HiredEmployeeState emp)
+        {
+            return Mathf.Max(0.30f, 0.55f - (Math.Max(1, emp.Level) - 1) * 0.05f);
+        }
+
+        private static float ComputeCashierCooldownSeconds(PizzeriaRoot root, HiredEmployeeState emp)
+        {
+            float baseCooldown = root.Config != null ? Mathf.Max(2.0f, root.Config.cashierAttendBaseSeconds * 2.7f) : 6.0f;
+            return Mathf.Max(1.4f, baseCooldown - (Math.Max(1, emp.Level) - 1) * 1.05f);
+        }
+
+        private static Vector3 ResolveCounterPositionForQueue(int queueIndex, Vector3 fallback)
+        {
+            var counters = FindObjectsByType<CustomerCounterStation>(FindObjectsSortMode.None);
+            CustomerCounterStation anyCounter = null;
+            for (int i = 0; i < counters.Length; i++)
+            {
+                var c = counters[i];
+                if (c == null) continue;
+                anyCounter ??= c;
+                if (c.queueIndex == queueIndex)
+                    return c.transform.position;
+            }
+            return anyCounter != null ? anyCounter.transform.position : fallback;
         }
 
         private void TickCashier(PizzeriaRoot root, HiredEmployeeState emp, float dt)
         {
+            CounterPassageDoorController.EnsureCounterPassageDoorsConfigured(root.transform);
+
+            if (_cashierCooldownRemaining > 0f)
+            {
+                _stepIndex = (int)WorkStep.CashierCooldown;
+                _cashierCooldownRemaining = Mathf.Max(0f, _cashierCooldownRemaining - dt);
+                _actionProgressNormalized = Mathf.Clamp01(_cashierCooldownRemaining / Mathf.Max(0.01f, _cashierCooldownTotal));
+                if (_cashierCooldownRemaining > 0f)
+                {
+                    if (_agent != null && _agent.enabled && _agent.isOnNavMesh && _agent.hasPath)
+                        _agent.ResetPath();
+                    return;
+                }
+                _stepIndex = (int)WorkStep.Idle;
+                _actionProgressNormalized = 0f;
+            }
+
+            double now = root.Clock != null ? root.Clock.Now : Time.timeAsDouble;
+
             CustomerState targetCustomer = null;
             foreach (var kvp in root.DomainState.Customers)
             {
@@ -295,37 +674,133 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
+            PendingCall targetCall = null;
+            if (root.DomainState.Calls != null && root.DomainState.Calls.Count > 0)
+            {
+                if (_activePhoneCallId.IsValid && root.DomainState.Calls.TryGetValue(_activePhoneCallId, out var activeCall) && activeCall != null)
+                {
+                    targetCall = activeCall;
+                }
+                else
+                {
+                    foreach (var kvp in root.DomainState.Calls)
+                    {
+                        if (kvp.Value != null)
+                        {
+                            targetCall = kvp.Value;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            bool wasHandlingPhone = (_stepIndex == (int)WorkStep.CashierMoveToPhone || _stepIndex == (int)WorkStep.CashierAnswerPhoneWait) &&
+                                    targetCall != null &&
+                                    _activePhoneCallId.IsValid &&
+                                    targetCall.Id.Equals(_activePhoneCallId);
+
+            bool callUrgent = targetCall != null && (targetCall.ExpiresAt - now) < 10.0;
+            bool handlePhone = targetCall != null && (wasHandlingPhone || targetCustomer == null || callUrgent);
+
+            if (handlePhone)
+            {
+                _activePhoneCallId = targetCall.Id;
+                ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
+                var phoneStation = FindFirstObjectByType<PhoneStation>();
+                if (!MoveToWorkPointAndFace(phoneStation, -1, actorKey, now, dt, out bool pathBlocked, out _))
+                {
+                    if (pathBlocked && _activeTaskId > 0)
+                    {
+                        root.EmployeeTaskService.MarkTaskBlocked(_activeTaskId, EmployeeBlockReason.PathBlocked);
+                    }
+                    _stepIndex = (int)WorkStep.CashierMoveToPhone;
+                    _actionProgressNormalized = 0f;
+                    return;
+                }
+
+                if (_stepIndex != (int)WorkStep.CashierAnswerPhoneWait)
+                {
+                    _stepIndex = (int)WorkStep.CashierAnswerPhoneWait;
+                    _cashierInteractTotal = ComputeCashierFastInteractSeconds(emp);
+                    _stepTimer = _cashierInteractTotal;
+                }
+
+                _stepTimer -= dt;
+                _actionProgressNormalized = Mathf.Clamp01(1f - (_stepTimer / Mathf.Max(0.01f, _cashierInteractTotal)));
+                if (_stepTimer > 0f) return;
+
+                var callRes = root.CallService.AnswerCall(
+                    root.DomainState,
+                    targetCall.Id,
+                    root.OrderService,
+                    root.Catalog,
+                    root.Clock,
+                    root.Config != null ? root.Config.maxActiveOrders : 6,
+                    root.Config != null ? root.Config.deliveryTimeLimit : 300.0);
+
+                _activePhoneCallId = default;
+                if (callRes.Success)
+                {
+                    root.EmployeeTaskService.EnqueueOrderTask(callRes.Value, EmployeeRole.Pizzaiolo);
+                    _cashierCooldownTotal = ComputeCashierCooldownSeconds(root, emp);
+                    _cashierCooldownRemaining = _cashierCooldownTotal;
+                    _stepIndex = (int)WorkStep.CashierCooldown;
+                    _actionProgressNormalized = 1f;
+                    _stepTimer = 0f;
+                    PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                    return;
+                }
+
+                _stepIndex = (int)WorkStep.Idle;
+                _stepTimer = 0f;
+                _actionProgressNormalized = 0f;
+                return;
+            }
+
+            _activePhoneCallId = default;
+
             if (targetCustomer == null)
             {
                 _stepIndex = (int)WorkStep.Idle;
                 _stepTimer = 0f;
+                _actionProgressNormalized = 0f;
                 return;
             }
 
-            Vector3 counterPos = ResolveStationPosition<CustomerCounterStation>(root.transform.position);
-            if (!MoveToValidated(counterPos, out bool pathBlocked))
+            ulong cashierActorKey = EmployeeActorOffset + (ulong)EmployeeId;
+            CustomerCounterStation targetCounter = null;
+            var allCounters = FindObjectsByType<CustomerCounterStation>(FindObjectsSortMode.None);
+            for (int i = 0; i < allCounters.Length; i++)
             {
-                if (pathBlocked && _activeTaskId > 0)
+                if (allCounters[i] == null) continue;
+                targetCounter ??= allCounters[i];
+                if (allCounters[i].queueIndex == targetCustomer.QueueIndex)
+                {
+                    targetCounter = allCounters[i];
+                    break;
+                }
+            }
+
+            if (!MoveToWorkPointAndFace(targetCounter, -1, cashierActorKey, now, dt, out bool counterPathBlocked, out _))
+            {
+                if (counterPathBlocked && _activeTaskId > 0)
                 {
                     root.EmployeeTaskService.MarkTaskBlocked(_activeTaskId, EmployeeBlockReason.PathBlocked);
                 }
-                return;
-            }
-
-            if ((transform.position - counterPos).sqrMagnitude > 2.4f * 2.4f)
-            {
                 _stepIndex = (int)WorkStep.CashierMoveToCounter;
+                _actionProgressNormalized = 0f;
                 return;
             }
 
             if (_stepIndex != (int)WorkStep.CashierAttendWait)
             {
                 _stepIndex = (int)WorkStep.CashierAttendWait;
-                float baseAttend = root.Config != null ? root.Config.cashierAttendBaseSeconds : 2.2f;
-                _stepTimer = Mathf.Max(0.8f, baseAttend - (emp.Level - 1) * 0.35f);
+                _cashierInteractTotal = ComputeCashierFastInteractSeconds(emp);
+                _stepTimer = _cashierInteractTotal;
             }
 
             _stepTimer -= dt;
+            _actionProgressNormalized = Mathf.Clamp01(1f - (_stepTimer / Mathf.Max(0.01f, _cashierInteractTotal)));
             if (_stepTimer > 0f) return;
 
             var res = root.CustomerService.CompleteAttendCustomer(
@@ -338,11 +813,18 @@ namespace ScaryParty.Pizzeria.Presentation
             if (res.Success)
             {
                 root.EmployeeTaskService.EnqueueOrderTask(res.Value, EmployeeRole.Pizzaiolo);
+                _cashierCooldownTotal = ComputeCashierCooldownSeconds(root, emp);
+                _cashierCooldownRemaining = _cashierCooldownTotal;
+                _stepIndex = (int)WorkStep.CashierCooldown;
+                _actionProgressNormalized = 1f;
+                _stepTimer = 0f;
                 PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                return;
             }
 
             _stepIndex = (int)WorkStep.Idle;
             _stepTimer = 0f;
+            _actionProgressNormalized = 0f;
         }
 
         private void TickPizzaiolo(PizzeriaRoot root, HiredEmployeeState emp, float dt)
@@ -400,14 +882,19 @@ namespace ScaryParty.Pizzeria.Presentation
                         _activeTaskId = t.TaskId;
                         emp.AssignedTaskId = t.TaskId;
                         currentTask = t;
-                        _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
-                        _stepTimer = 0f;
+                        _stepIndex = (int)WorkStep.PizzaioloClaimTicket;
+                        _stepTimer = 0.35f;
                         break;
                     }
                 }
             }
 
-            if (currentTask == null) return;
+            if (currentTask == null)
+            {
+                _stepIndex = (int)WorkStep.Idle;
+                _actionProgressNormalized = 0f;
+                return;
+            }
 
             if (!root.DomainState.Orders.TryGetValue(currentTask.TargetOrderId, out var order) ||
                 order.Lifecycle != OrderLifecycle.Accepted ||
@@ -460,17 +947,39 @@ namespace ScaryParty.Pizzeria.Presentation
 
             var spec = activeUnit.Spec ?? PizzaSpecification.CreateDefaultCheese();
 
+            // Etapa 0: Ir até o Quadro de Comandas pegar o pedido fisicamente
+            if (_stepIndex == (int)WorkStep.PizzaioloClaimTicket)
+            {
+                var board = FindFirstObjectByType<TicketBoardStation>();
+                if (board != null && !MoveToWorkPointAndFace(board, -1, actorKey, now, dt, out bool boardBlocked, out _))
+                {
+                    _actionProgressNormalized = 0f;
+                    if (boardBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Quadro de Comandas bloqueado.");
+                    return;
+                }
+
+                _stepTimer -= dt;
+                _actionProgressNormalized = Mathf.Clamp01(1f - (_stepTimer / 0.35f));
+                if (_stepTimer > 0f) return;
+
+                ClearBlock(root, currentTask);
+                _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
+                _stepTimer = 0f;
+                _actionProgressNormalized = 0f;
+                return;
+            }
+
             // Etapa A: Adquirir e abrir massa na Bancada de Preparo usando ProcessingService real (sem atalhos)
             if (_stepIndex == (int)WorkStep.PizzaioloPrepareDough || _stepIndex == (int)WorkStep.Idle)
             {
                 _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
-                Vector3 prepPos = ResolveStationPosition<PrepStation>(root.transform.position);
-                if (!MoveToValidated(prepPos, out bool pathBlocked))
+                var prepStation = FindFirstObjectByType<PrepStation>();
+                if (!MoveToWorkPointAndFace(prepStation, _prepSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
                 {
+                    _actionProgressNormalized = 0f;
                     if (pathBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Bancada de Preparo bloqueado.");
                     return;
                 }
-                if ((transform.position - prepPos).sqrMagnitude > 2.6f * 2.6f) return;
 
                 if (!_workingPizzaId.IsValid || !root.DomainState.Items.ContainsKey(_workingPizzaId))
                 {
@@ -539,7 +1048,9 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (root.DomainState.ActiveOperations.TryGetValue(prepSlot, out var prepOp))
                     {
                         root.ProcessingService.Heartbeat(root.DomainState, prepSlot, actorKey, (float)now, ProcessingService.DefaultLeaseDuration);
-                        if (prepOp.ComputeCurrentProgress(now) < 1f)
+                        float p = prepOp.ComputeCurrentProgress(now);
+                        _actionProgressNormalized = Mathf.Clamp01(p);
+                        if (p < 1f)
                         {
                             return;
                         }
@@ -567,6 +1078,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 _hasStartedIngProcessOp = false;
                 _hasStartedAssembleOp = false;
                 _stepIndex = (int)WorkStep.PizzaioloAssembleToppings;
+                _actionProgressNormalized = 0f;
                 PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 return;
             }
@@ -581,13 +1093,14 @@ namespace ScaryParty.Pizzeria.Presentation
                     return;
                 }
 
-                Vector3 asmPos = ResolveStationPosition<AssemblyStation>(ResolveStationPosition<PrepStation>(root.transform.position));
-                if (!MoveToValidated(asmPos, out bool pathBlocked))
+                Component asmStation = (Component)FindFirstObjectByType<AssemblyStation>() ?? FindFirstObjectByType<PrepStation>();
+                int asmSlot = pizza.Location.Type == LocationType.StationSlot ? pizza.Location.SlotId : -1;
+                if (!MoveToWorkPointAndFace(asmStation, asmSlot, actorKey, now, dt, out bool pathBlocked, out _))
                 {
+                    _actionProgressNormalized = 0f;
                     if (pathBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Bancada de Montagem bloqueado.");
                     return;
                 }
-                if ((transform.position - asmPos).sqrMagnitude > 2.6f * 2.6f) return;
 
                 if (pizza.Location.Type == LocationType.StationSlot)
                 {
@@ -596,6 +1109,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 var assembleResult = StepAssembleNextIngredientReal(root, pizza, spec, actorKey, now, currentTask.IntentionalErrorTriggered, out var missingReason, out string blockMsg);
+                _actionProgressNormalized = ComputeAssemblyProgress(root.DomainState, pizza, spec, now);
                 if (assembleResult == AssembleStepStatus.Blocked)
                 {
                     RecordBlock(root, currentTask, missingReason, blockMsg);
@@ -609,6 +1123,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 ClearBlock(root, currentTask);
                 _stepIndex = (int)WorkStep.PizzaioloInsertOven;
+                _actionProgressNormalized = 0f;
                 PizzeriaCommandHandler.Instance?.CommitAndReplicate();
                 return;
             }
@@ -616,19 +1131,19 @@ namespace ScaryParty.Pizzeria.Presentation
             // Etapa C: Inserir no forno respeitando capacidade real
             if (_stepIndex == (int)WorkStep.PizzaioloInsertOven)
             {
+                _actionProgressNormalized = 0f;
                 if (!root.DomainState.Items.TryGetValue(_workingPizzaId, out _))
                 {
                     ResetUnitState();
                     return;
                 }
 
-                Vector3 ovenPos = ResolveStationPosition<OvenStation>(root.transform.position);
-                if (!MoveToValidated(ovenPos, out bool pathBlocked))
+                var ovenStation = FindFirstObjectByType<OvenStation>();
+                if (!MoveToWorkPointAndFace(ovenStation, _ovenSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
                 {
                     if (pathBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Forno bloqueado.");
                     return;
                 }
-                if ((transform.position - ovenPos).sqrMagnitude > 2.6f * 2.6f) return;
 
                 if (!TryFindFreeOvenSlot(root, actorKey, now, out int ovenId, out int slotIdx))
                 {
@@ -684,8 +1199,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 if (bakingPizza.CookingStage != CookingStage.Baked)
+                {
+                    _actionProgressNormalized = Mathf.Clamp01(bakingPizza.CookProgress);
                     return;
+                }
 
+                _actionProgressNormalized = 1f;
                 var ovenSlot = new StationSlotId(_ovenStationId, _ovenSlotIndex);
                 var handLoc = LocationRef.InHand(actorKey, HandSlotIndex.Right);
                 var remRes = root.OvenService.RemovePizza(root.DomainState, ovenSlot, handLoc, actorKey);
@@ -717,16 +1236,47 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 bool requiresBox = !order.IsDineIn;
-                Vector3 pkgOrStagePos = requiresBox && !_hasStartedPackageOp && !finishedPizza.IsBoxed
-                    ? ResolveStationPosition<PackagingStation>(ResolveStationPosition<StagingStation>(root.transform.position))
-                    : ResolveStationPosition<StagingStation>(ResolveStationPosition<PackagingStation>(root.transform.position));
-
-                if (!MoveToValidated(pkgOrStagePos, out bool pathBlocked))
+                if (!requiresBox && order.TableId > 0 && DiningTableStation.TryGetTable(order.TableId, out var targetTable) && targetTable != null)
                 {
+                    if (!MoveToWorkPointAndFace(targetTable, -1, actorKey, now, dt, out bool tableBlocked, out _))
+                    {
+                        _actionProgressNormalized = 0f;
+                        if (tableBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, $"Caminho até Mesa {order.TableId} bloqueado.");
+                        return;
+                    }
+
+                    if (TryServeTableFromEmployee(root, order.TableId, finishedPizza.Id, actorKey))
+                    {
+                        OrderUnitFulfillmentService.ReleaseActorSlotReservations(root.DomainState, actorKey);
+                        NpcWorkPointRegistry.ReleaseAllForActor(actorKey);
+                        ClearBlock(root, currentTask);
+                        if (OrderUnitFulfillmentService.TryClaimNextPendingUnitForEmployee(
+                            root.DomainState, order, EmployeeId, root.EmployeeTaskService, now, out var nextUnitTable))
+                        {
+                            _activeUnitKey = nextUnitTable.Key;
+                            ResetUnitState();
+                        }
+                        else
+                        {
+                            root.EmployeeTaskService.ReleaseActorTasks((ulong)EmployeeId, isHuman: false);
+                            emp.AssignedTaskId = -1;
+                            ResetWorkState();
+                        }
+                        PizzeriaCommandHandler.Instance?.CommitAndReplicate();
+                        return;
+                    }
+                }
+
+                Component pkgOrStageStation = requiresBox && !_hasStartedPackageOp && !finishedPizza.IsBoxed
+                    ? (Component)FindFirstObjectByType<PackagingStation>() ?? FindFirstObjectByType<StagingStation>()
+                    : (Component)FindFirstObjectByType<StagingStation>() ?? FindFirstObjectByType<PackagingStation>();
+
+                if (!MoveToWorkPointAndFace(pkgOrStageStation, _packagingSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
+                {
+                    _actionProgressNormalized = 0f;
                     if (pathBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Embalagem/Expedição bloqueado.");
                     return;
                 }
-                if ((transform.position - pkgOrStagePos).sqrMagnitude > 2.6f * 2.6f) return;
 
                 if (requiresBox && !finishedPizza.IsBoxed)
                 {
@@ -790,7 +1340,9 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (root.DomainState.ActiveOperations.TryGetValue(pkgSlot, out var pkgOp))
                     {
                         root.ProcessingService.Heartbeat(root.DomainState, pkgSlot, actorKey, (float)now, ProcessingService.DefaultLeaseDuration);
-                        if (pkgOp.ComputeCurrentProgress(now) < 1f)
+                        float p = pkgOp.ComputeCurrentProgress(now);
+                        _actionProgressNormalized = Mathf.Clamp01(p);
+                        if (p < 1f)
                         {
                             return;
                         }
@@ -811,7 +1363,7 @@ namespace ScaryParty.Pizzeria.Presentation
                         return;
                     }
 
-                    finishedPizza.LabelAddress = activeUnit.LabelAddress;
+                    finishedPizza.LabelAddress = ResolveDeliveryLabelAddress(root.DomainState, activeUnit.LabelAddress, currentTask.IntentionalErrorTriggered);
                     finishedPizza.Revision++;
                 }
 
@@ -1595,22 +2147,241 @@ namespace ScaryParty.Pizzeria.Presentation
             return false;
         }
 
+        private static float HorizontalDistanceSqr(Vector3 a, Vector3 b)
+        {
+            float dx = a.x - b.x;
+            float dz = a.z - b.z;
+            return dx * dx + dz * dz;
+        }
+
+        private float ComputeAssemblyProgress(PizzeriaState state, ItemState pizza, PizzaSpecification spec, double now)
+        {
+            if (state != null && pizza != null && pizza.Location.Type == LocationType.StationSlot)
+            {
+                var pizzaSlot = new StationSlotId((int)pizza.Location.HolderId, pizza.Location.SlotId);
+                if (state.ActiveOperations.TryGetValue(pizzaSlot, out var asmOp))
+                {
+                    return Mathf.Clamp01(asmOp.ComputeCurrentProgress(now));
+                }
+            }
+
+            if (state != null && _hasStartedIngProcessOp && _processStationId > 0 && _processSlotIndex >= 0)
+            {
+                var procSlot = new StationSlotId(_processStationId, _processSlotIndex);
+                if (state.ActiveOperations.TryGetValue(procSlot, out var ingOp))
+                {
+                    return Mathf.Clamp01(ingOp.ComputeCurrentProgress(now));
+                }
+            }
+
+            if (pizza == null || spec == null) return 0f;
+
+            int requiredTotal = 0;
+            int currentTotal = 0;
+
+            if (spec.RequiresSauce && spec.SauceId > 0)
+            {
+                int req = Math.Max(1, spec.SaucePortions);
+                requiredTotal += req;
+                currentTotal += Math.Min(req, GetIngredientCount(pizza, spec.SauceId));
+            }
+
+            if (spec.Toppings != null)
+            {
+                for (int i = 0; i < spec.Toppings.Count; i++)
+                {
+                    var top = spec.Toppings[i];
+                    int req = Math.Max(1, top.PortionCount);
+                    requiredTotal += req;
+                    currentTotal += Math.Min(req, GetIngredientCount(pizza, top.IngredientDefId));
+                }
+            }
+
+            return requiredTotal > 0 ? Mathf.Clamp01((float)currentTotal / requiredTotal) : 1f;
+        }
+
+        internal static bool TrySampleFloorNavMesh(Vector3 rawPos, float maxRadius, out Vector3 floorNavPos)
+        {
+            Vector3 snapped = CustomerSpawner.SnapToFloor(rawPos);
+            float floorY = snapped.y;
+
+            if (NavMesh.SamplePosition(snapped, out var directHit, Mathf.Min(1.2f, maxRadius), NavMesh.AllAreas) &&
+                Mathf.Abs(directHit.position.y - floorY) <= 0.35f)
+            {
+                floorNavPos = directHit.position;
+                return true;
+            }
+
+            float[] radii = { 0.75f, 1.15f, 1.55f, Mathf.Max(2.0f, maxRadius * 0.6f) };
+            float bestDistSqr = float.MaxValue;
+            floorNavPos = snapped;
+            bool found = false;
+
+            for (int r = 0; r < radii.Length; r++)
+            {
+                float radius = radii[r];
+                for (int a = 0; a < 8; a++)
+                {
+                    float angle = a * (Mathf.PI * 0.25f);
+                    Vector3 probe = new Vector3(
+                        snapped.x + Mathf.Cos(angle) * radius,
+                        floorY,
+                        snapped.z + Mathf.Sin(angle) * radius);
+
+                    if (NavMesh.SamplePosition(probe, out var cand, 0.65f, NavMesh.AllAreas) &&
+                        Mathf.Abs(cand.position.y - floorY) <= 0.35f)
+                    {
+                        float dSqr = HorizontalDistanceSqr(cand.position, snapped);
+                        if (dSqr < bestDistSqr)
+                        {
+                            bestDistSqr = dSqr;
+                            floorNavPos = cand.position;
+                            found = true;
+                        }
+                    }
+                }
+                if (found) return true;
+            }
+
+            return false;
+        }
+
+        private void FaceDirection(Vector3 forwardDir, float dt)
+        {
+            forwardDir.y = 0f;
+            if (forwardDir.sqrMagnitude < 0.0001f) return;
+            Quaternion targetRot = Quaternion.LookRotation(forwardDir.normalized, Vector3.up);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Mathf.Clamp01(dt * 10f));
+        }
+
+        private bool MoveToWorkPointAndFace(
+            Component station,
+            int slotIndex,
+            ulong actorKey,
+            double now,
+            float dt,
+            out bool pathBlocked,
+            out Vector3 workForward)
+        {
+            Vector3 targetPos;
+            if (station != null && NpcWorkPointRegistry.TryResolve(station, slotIndex, actorKey, now, out var wp) && wp != null)
+            {
+                wp.TryReserve(actorKey, now, 8.0);
+                targetPos = wp.transform.position;
+                workForward = wp.transform.forward;
+            }
+            else
+            {
+                Vector3 anchorPos = station != null ? station.transform.position : transform.position;
+                if (station is StationView sv && sv.slotAnchors != null && slotIndex >= 0 && slotIndex < sv.slotAnchors.Length && sv.slotAnchors[slotIndex] != null)
+                {
+                    anchorPos = sv.slotAnchors[slotIndex].position;
+                }
+                else if (station is DiningTableStation dtStation)
+                {
+                    anchorPos = dtStation.GetApproachPosition();
+                }
+
+                Vector3 dirOut = station != null ? station.transform.forward : Vector3.forward;
+                dirOut.y = 0f;
+                if (dirOut.sqrMagnitude < 0.001f) dirOut = Vector3.forward;
+                dirOut.Normalize();
+
+                targetPos = anchorPos + dirOut * 0.65f;
+                workForward = (anchorPos - targetPos);
+                workForward.y = 0f;
+                if (workForward.sqrMagnitude < 0.001f) workForward = -dirOut;
+                workForward.Normalize();
+            }
+
+            if (!MoveToValidated(targetPos, out pathBlocked))
+            {
+                return false;
+            }
+
+            if (HorizontalDistanceSqr(transform.position, targetPos) > 0.55f * 0.55f)
+            {
+                return false;
+            }
+
+            FaceDirection(workForward, dt);
+            return true;
+        }
+
+        private static StorageStation FindStorageStationWithIngredient(PizzeriaRoot root, int ingredientDefId)
+        {
+            if (root == null || root.DomainState == null) return null;
+            int targetStorageId = -1;
+            foreach (var kvp in root.DomainState.StorageSlots)
+            {
+                if (kvp.Key.ingredientDefId == ingredientDefId && kvp.Value != null && kvp.Value.Quantity > 0)
+                {
+                    targetStorageId = kvp.Key.storageId;
+                    break;
+                }
+            }
+            if (targetStorageId < 0) return null;
+
+            var storages = FindObjectsByType<StorageStation>(FindObjectsSortMode.None);
+            for (int i = 0; i < storages.Length; i++)
+            {
+                if (storages[i] != null && storages[i].stationId == targetStorageId)
+                    return storages[i];
+            }
+            return storages.Length > 0 ? storages[0] : null;
+        }
+
+        private static AddressId ResolveDeliveryLabelAddress(PizzeriaState state, AddressId expectedAddress, bool intentionalError)
+        {
+            if (!intentionalError || state == null) return expectedAddress;
+            foreach (var kvp in state.Orders)
+            {
+                var ord = kvp.Value;
+                if (ord != null && !ord.IsDineIn && ord.DestinationId.Value > 0 && !ord.DestinationId.Equals(expectedAddress))
+                {
+                    return ord.DestinationId;
+                }
+            }
+            int alt = expectedAddress.Value > 1 ? expectedAddress.Value - 1 : expectedAddress.Value + 1;
+            return new AddressId(alt);
+        }
+
+        private static bool TryServeTableFromEmployee(PizzeriaRoot root, int tableId, ItemId pizzaId, ulong actorKey)
+        {
+            if (root == null || root.DomainState == null || root.CustomerService == null) return false;
+            var res = root.CustomerService.ServeTableUnboxedPizza(
+                root.DomainState,
+                tableId,
+                pizzaId,
+                actorKey,
+                root.Catalog,
+                root.OrderService,
+                root.Config != null ? root.Config.burnedPayoutFactor : 0f,
+                root.Config != null ? root.Config.unbakedPayoutFactor : 0f,
+                root.Config != null ? root.Config.restaurantBaseBonus : 10,
+                root.Config != null ? root.Config.customerEatingDuration : 12f,
+                root.EmployeeTaskService);
+            return res.Success;
+        }
+
         private bool MoveToValidated(Vector3 destination, out bool pathBlocked)
         {
             pathBlocked = false;
             if (_agent == null || !_agent.enabled) return true;
 
-            if (!NavMesh.SamplePosition(destination, out var hit, 4.0f, NavMesh.AllAreas))
+            _agent.autoTraverseOffMeshLink = false;
+
+            if (!TrySampleFloorNavMesh(destination, 4.0f, out var targetNavPos))
             {
                 pathBlocked = true;
                 return false;
             }
 
-            if (!_agent.isOnNavMesh)
+            if (!_agent.isOnNavMesh || _agent.isOnOffMeshLink)
             {
-                if (NavMesh.SamplePosition(transform.position, out var selfHit, 6.0f, NavMesh.AllAreas))
+                if (TrySampleFloorNavMesh(transform.position, 6.0f, out var selfFloorPos))
                 {
-                    _agent.Warp(selfHit.position);
+                    _agent.Warp(selfFloorPos);
                 }
                 else
                 {
@@ -1620,14 +2391,14 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             var path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(_agent.transform.position, hit.position, NavMesh.AllAreas, path) ||
+            if (!NavMesh.CalculatePath(_agent.transform.position, targetNavPos, NavMesh.AllAreas, path) ||
                 path.status != NavMeshPathStatus.PathComplete)
             {
                 pathBlocked = true;
                 return false;
             }
 
-            _agent.SetDestination(hit.position);
+            _agent.SetDestination(targetNavPos);
             return true;
         }
 
@@ -1638,12 +2409,14 @@ namespace ScaryParty.Pizzeria.Presentation
             _lastBlockReason = EmployeeBlockReason.None;
             _retryBackoffUntil = 0f;
             ResetUnitState();
+            _stepIndex = (int)WorkStep.Idle;
         }
 
         private void ResetUnitState()
         {
             _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
             _stepTimer = 0f;
+            _actionProgressNormalized = 0f;
             _workingPizzaId = ItemId.None;
             _ovenStationId = -1;
             _ovenSlotIndex = -1;
@@ -1849,6 +2622,8 @@ namespace ScaryParty.Pizzeria.Presentation
                         UnitsRequired = task != null ? (byte)Mathf.Clamp(task.TotalUnitsRequired, 0, 255) : (byte)0,
                         SkillErrorPercent = (byte)Mathf.Clamp(Mathf.RoundToInt(errProb * 100f), 0, 100),
                         IntentionalErrorTriggered = task != null && task.IntentionalErrorTriggered,
+                        WorkStep = hasCtrl ? ctrl.CurrentWorkStepByte : (byte)0,
+                        ActionProgressPercent = hasCtrl ? ctrl.CurrentActionProgressPercentByte : (byte)0,
                         PosX = pos.x,
                         PosY = pos.y,
                         PosZ = pos.z,
@@ -2078,10 +2853,10 @@ namespace ScaryParty.Pizzeria.Presentation
             Vector3 desiredOffset = emp.Role == EmployeeRole.Cashier
                 ? new Vector3(-1.4f + (emp.EmployeeId % 2) * 0.9f, 0f, 2.0f)
                 : new Vector3(1.1f + (emp.EmployeeId % 3 - 1) * 1.1f, 0f, -0.8f);
-            Vector3 spawnPos = root.transform.position + desiredOffset;
-            if (NavMesh.SamplePosition(spawnPos, out var hit, 6f, NavMesh.AllAreas))
+            Vector3 spawnPos = CustomerSpawner.SnapToFloor(root.transform.position + desiredOffset);
+            if (EmployeeAgentController.TrySampleFloorNavMesh(spawnPos, 6f, out var navFloor))
             {
-                spawnPos = hit.position;
+                spawnPos = navFloor;
             }
 
             var go = new GameObject($"Employee_{emp.Role}_{emp.EmployeeId}");
@@ -2127,42 +2902,76 @@ namespace ScaryParty.Pizzeria.Presentation
             rig.rigRole = EntityVisualAnchorRig.RigRole.CharacterAccessories;
             rig.placeholderId = role == EmployeeRole.Cashier ? "employee_cashier" : "employee_pizzaiolo";
 
-            var manifest = ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest.LoadDefault();
-            GameObject roleVisualPrefab = manifest != null
-                ? (role == EmployeeRole.Cashier ? manifest.cashierVisualPrefab : manifest.pizzaioloVisualPrefab)
-                : null;
-
-            if (roleVisualPrefab != null)
-            {
-                var inst = UnityEngine.Object.Instantiate(roleVisualPrefab, visualRoot.transform, false);
-                inst.name = "EmployeeRoleVisual";
-                inst.transform.localPosition = Vector3.zero;
-                inst.transform.localRotation = Quaternion.identity;
-                var cols = inst.GetComponentsInChildren<Collider>(true);
-                for (int i = 0; i < cols.Length; i++) DestroyObjectSafe(cols[i]);
-                return;
-            }
-
             Color tint = role == EmployeeRole.Cashier
-                ? new Color(0.20f, 0.55f, 0.85f)
-                : new Color(0.92f, 0.90f, 0.82f);
+                ? new Color(0.18f, 0.48f, 0.82f)
+                : new Color(0.92f, 0.89f, 0.80f);
 
             GameObject visualPrefab = ScaryParty.VisualStyles.VisualStyleManager.Active?.activeLibrary?.styledCharacterVariantPrefab;
-            if (visualPrefab == null) visualPrefab = Resources.Load<GameObject>("CharacterVisual");
+            if (visualPrefab == null && CustomerSpawner.Instance != null && CustomerSpawner.Instance.characterVisualPrefab != null)
+            {
+                visualPrefab = CustomerSpawner.Instance.characterVisualPrefab;
+            }
+            if (visualPrefab == null)
+            {
+                visualPrefab = Resources.Load<GameObject>("CharacterVisual");
+            }
+#if UNITY_EDITOR
+            if (visualPrefab == null)
+            {
+                visualPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Characters/CharacterVisual.prefab");
+            }
+#endif
+            if (visualPrefab == null)
+            {
+                var manifest = ScaryParty.Pizzeria.Authoring.PlaytestReferenceManifest.LoadDefault();
+                GameObject roleVisualPrefab = manifest != null
+                    ? (role == EmployeeRole.Cashier ? manifest.cashierVisualPrefab : manifest.pizzaioloVisualPrefab)
+                    : null;
+                if (roleVisualPrefab != null &&
+                    (roleVisualPrefab.GetComponentInChildren<SkinnedMeshRenderer>(true) != null ||
+                     roleVisualPrefab.GetComponentInChildren<CharacterVisualController>(true) != null))
+                {
+                    visualPrefab = roleVisualPrefab;
+                }
+            }
+
+            Transform headAttachTarget = null;
+            Vector3 headAttachOffset = Vector3.zero;
+
             if (visualPrefab != null)
             {
                 var inst = UnityEngine.Object.Instantiate(visualPrefab, visualRoot.transform, false);
                 inst.name = "CharacterVisual";
+                inst.SetActive(true);
                 inst.transform.localPosition = Vector3.zero;
                 inst.transform.localRotation = Quaternion.identity;
-                var smr = inst.GetComponentInChildren<SkinnedMeshRenderer>(true);
-                if (smr != null)
+
+                var cols = inst.GetComponentsInChildren<Collider>(true);
+                for (int i = 0; i < cols.Length; i++) DestroyObjectSafe(cols[i]);
+
+                var visualCtrl = inst.GetComponent<CharacterVisualController>() ?? inst.AddComponent<CharacterVisualController>();
+                var appearance = inst.GetComponent<CharacterAppearance>() ?? inst.AddComponent<CharacterAppearance>();
+                visualCtrl.ResolveReferences();
+                visualCtrl.EnsureAnimatorControllerAssigned();
+                visualCtrl.SetPreparing(false);
+                visualCtrl.SetSitting(false, false);
+                visualCtrl.SetLocomotion(0f, 1f, true, false, false);
+                visualCtrl.EnsureFeelPivot();
+
+                ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
+                    inst,
+                    ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                    ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                    "character_visual");
+                ScaryParty.Lighting.PizzeriaLightingController.Active?.ApplyZoneFillToHierarchy(inst);
+
+                visualCtrl.SetColor(tint);
+                appearance.ApplyPrimaryColor(tint);
+
+                if (visualCtrl.HeadBone != null)
                 {
-                    var mpb = new MaterialPropertyBlock();
-                    smr.GetPropertyBlock(mpb);
-                    mpb.SetColor("_Color", tint);
-                    mpb.SetColor("_BaseColor", tint);
-                    smr.SetPropertyBlock(mpb);
+                    headAttachTarget = visualCtrl.HeadBone;
+                    headAttachOffset = new Vector3(0f, 0.22f, 0f);
                 }
             }
             else
@@ -2186,12 +2995,19 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
-            // Acessório distinguível de fallback para Caixa (viseira azul) vs Pizzaiolo (chapéu chef branco)
-            Transform headAnchor = rig.ResolveAnchor(ref rig.headAccessoryAnchor, "HeadAccessoryAnchor", new Vector3(0f, 1.72f, 0f), Vector3.zero);
+            if (headAttachTarget == null)
+            {
+                headAttachTarget = rig.ResolveAnchor(ref rig.headAccessoryAnchor, "HeadAccessoryAnchor", new Vector3(0f, 1.72f, 0f), Vector3.zero);
+                headAttachOffset = Vector3.zero;
+            }
+
+            // Acessório distinguível para Caixa (viseira azul) vs Pizzaiolo (chapéu chef branco)
             var hat = GameObject.CreatePrimitive(role == EmployeeRole.Cashier ? PrimitiveType.Cube : PrimitiveType.Cylinder);
             hat.name = role == EmployeeRole.Cashier ? "CashierVisor" : "PizzaioloHat";
             DestroyObjectSafe(hat.GetComponent<Collider>());
-            hat.transform.SetParent(headAnchor, false);
+            hat.transform.SetParent(headAttachTarget, false);
+            hat.transform.localPosition = headAttachOffset;
+            hat.transform.localRotation = Quaternion.identity;
             hat.transform.localScale = role == EmployeeRole.Cashier ? new Vector3(0.32f, 0.08f, 0.36f) : new Vector3(0.28f, 0.16f, 0.28f);
             var hatRend = hat.GetComponent<Renderer>();
             if (hatRend != null)
@@ -2206,6 +3022,44 @@ namespace ScaryParty.Pizzeria.Presentation
                     hatRend.sharedMaterial = m;
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Registro estático das âncoras de mão (esquerda/direita) dos funcionários contratados,
+    /// consultado por PizzeriaItemVisualizer para exibir itens/ferramentas na mão do NPC em Host e Clientes.
+    /// </summary>
+    public static class EmployeeHandAnchorRegistry
+    {
+        private struct HandPair
+        {
+            public Transform Left;
+            public Transform Right;
+        }
+
+        private static readonly Dictionary<ulong, HandPair> _hands = new Dictionary<ulong, HandPair>();
+
+        public static void Register(ulong actorKey, Transform left, Transform right)
+        {
+            _hands[actorKey] = new HandPair { Left = left, Right = right };
+        }
+
+        public static void Unregister(ulong actorKey)
+        {
+            _hands.Remove(actorKey);
+        }
+
+        public static bool TryGetHands(ulong actorKey, out Transform left, out Transform right)
+        {
+            if (_hands.TryGetValue(actorKey, out var pair))
+            {
+                left = pair.Left;
+                right = pair.Right;
+                return left != null || right != null;
+            }
+            left = null;
+            right = null;
+            return false;
         }
     }
 }

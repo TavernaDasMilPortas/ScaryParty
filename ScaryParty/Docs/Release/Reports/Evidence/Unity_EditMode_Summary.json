@@ -1,0 +1,21 @@
+{
+  "mode": "EditMode",
+  "unityVersion": "6000.3.6f1",
+  "resultState": "Passed",
+  "total": 3,
+  "passed": 3,
+  "failed": 0,
+  "skipped": 0,
+  "inconclusive": 0,
+  "durationSeconds": 1.603,
+  "startTimeUtc": "2026-11-18 15:01:15Z",
+  "endTimeUtc": "2026-11-18 15:01:17Z",
+  "preservedXmlFile": "Unity_EditMode_Results.xml",
+  "failedTests": [
+  ],
+  "cases": [
+    {"name":"ScaryParty.Pizzeria.Editor.Tests.P4_UiInputAndNetworkFlowTests.GameplayInputGate_StackedModals_StayLockedUntilLastPop_WithoutResettingOthers","status":"Passed","duration":0.4903},
+    {"name":"ScaryParty.Pizzeria.Editor.Tests.P4_UiInputAndNetworkFlowTests.NetSupplyDto_NetworkSerialization_RoundTripsSummaryAndUnits","status":"Passed","duration":0.4852},
+    {"name":"ScaryParty.Pizzeria.Editor.Tests.P4_UiInputAndNetworkFlowTests.SessionLaunchConfig_PayloadRoundTrip_PreservesHostSelection","status":"Passed","duration":0.0839}
+  ]
+}

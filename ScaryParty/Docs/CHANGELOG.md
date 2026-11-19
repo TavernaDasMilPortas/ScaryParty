@@ -5,6 +5,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-18] — NPCs Contratados (Modelo/Animação, Telefone/Cooldown, Barra/Quadro/`[E]`) e Porta do Balcão
+- **Escopo:** `NetDtos.cs`, `StationProgressBar.cs`, `StationDoorPresenter.cs`, `CustomerSpawner.cs`, `EmployeeAgentController.cs`, `TicketBoardStation.cs`, `TicketBoardPresenter.cs`, `TicketModalPresenter.cs`.
+- **Resumo:**
+  - `EmployeePopulationDirector.BuildEmployeeVisual` alinhado ao `CharacterVisual` + `CharacterVisualController` + `CharacterAppearance` do personagem (com acessório do cargo no `HeadBone`), e `DriveAnimatorLocomotion` acionando `IsPreparing`/locomoção.
+  - Navegação dos funcionários blindada contra saltos e subidas em móveis (`autoTraverseOffMeshLink = false`, amostragem radial no piso em `TrySampleFloorNavMesh`, checagens horizontais XZ e `NavMeshObstacle` com `carving` em balcões/mesas/fornos/geladeiras).
+  - Adicionado `CounterPassageDoorController` para abrir/fechar automaticamente a portinhola do balcão (`abertura*`) quando players ou funcionários contratados passam.
+  - `TickCashier` atualizado para atender fila e `PhoneStation` (`CallService.AnswerCall`) com interação rápida + cooldown pós-atendimento escalado por nível, exibido em barra 3D sobre o NPC.
+  - Pizzaiolos exibem progresso e etapa acima da cabeça; pedidos atribuídos a um pizzaiolo ativo são ocultados do quadro (`TicketBoardStation` / `TicketBoardPresenter`) e abertos no `TicketModalPresenter` ao mirar no pizzaiolo e pressionar `[E]`.
+
+---
+
 ## [2026-11-18] — Wizard de Eventos, Loja, Balanceamento e Central de Playtest (`B0–B6`, `B5.1 Revisada`)
 - **Escopo:** Fonte única (`RunBalancingCatalog` / `RunBalancingCatalog.asset`, `RunBalancingSnapshot`, `RunDescriptionFormatter`, `RunBalancingValidator`, `RunBalancingMigrationRunner`), Wizard Odin de 8 abas (`PizzeriaEventsShopBalancingWizard` em `Tools/Scary Party/Wizards/Pizzaria/Eventos, Loja e Balanceamento`), consumidores de runtime (`MonsterPopulationDirector`, `MonsterNpcController`, `DemandDirector`, `NightCycleService`, `EmployeeTaskService`, `PizzeriaCommandHandler`), preparação pré-Noite 1 & votação multi-estágio (`RunProgressionService`, `NetRunVoteOptionDto`, `NetRunShopOfferDto`, `RunPreparationPresenter`, `OperationsHubPresenter`), preset selecionável `NoiteDeTeste.asset` (`UnlimitedShiftTime=true`, HUD `SEM LIMITE`), remoção dos overlays `[F8]`/`[F6]` e centralização em 8 abas Odin Inspector (`PlaytestDebugController` em `[Debug] Central de Playtest`, `PlaytestDebugMenu`, `PlaytestCheckpointService` + `RebaseRelativeDeadlines` + `IsForcedDebugOutcome`).
 - **Relatório Completo:** `Docs/Release/Reports/WIZARD_EVENTOS_LOJA_BALANCEAMENTO.md` e `Docs/Release/Reports/Evidence/B6_TEST_SUMMARY.md`.

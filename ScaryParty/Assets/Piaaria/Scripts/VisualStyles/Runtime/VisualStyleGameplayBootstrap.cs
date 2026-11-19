@@ -41,6 +41,7 @@ namespace ScaryParty.VisualStyles
         private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (!Application.isPlaying) return;
+            if (mode == LoadSceneMode.Additive) return;
             EvaluateScene(scene);
         }
 

@@ -60,6 +60,7 @@ namespace ScaryParty.Pizzeria.Presentation
         [SerializeField] private Image _fillImage;
         [SerializeField] private Image _glossImage;
         [SerializeField] private Text _percentText;
+        [SerializeField] private Text _headerText;
 
         private Transform _mainCamera;
         private float _targetProgress = 0f;
@@ -279,6 +280,33 @@ namespace ScaryParty.Pizzeria.Presentation
             textRt.sizeDelta = Vector2.zero;
             textObj.SetActive(showPercentageText);
 
+            // Texto de Cabeçalho acima da barra
+            GameObject headerObj = new GameObject("HeaderText");
+            headerObj.transform.SetParent(transform, false);
+            _headerText = headerObj.AddComponent<Text>();
+            if (font != null)
+            {
+                _headerText.font = font;
+            }
+            _headerText.alignment = TextAnchor.LowerCenter;
+            _headerText.fontSize = 13;
+            _headerText.color = Color.white;
+            _headerText.raycastTarget = false;
+            _headerText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            _headerText.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var headerOutline = headerObj.AddComponent<Outline>();
+            headerOutline.effectColor = new Color(0f, 0f, 0f, 0.95f);
+            headerOutline.effectDistance = new Vector2(1f, -1f);
+
+            var headerRt = _headerText.rectTransform;
+            headerRt.anchorMin = new Vector2(0.5f, 1f);
+            headerRt.anchorMax = new Vector2(0.5f, 1f);
+            headerRt.pivot = new Vector2(0.5f, 0f);
+            headerRt.anchoredPosition = new Vector2(0f, 4f);
+            headerRt.sizeDelta = new Vector2(280f, 24f);
+            headerObj.SetActive(false);
+
             if (Camera.main != null)
                 _mainCamera = Camera.main.transform;
         }
@@ -341,8 +369,38 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        public void SetHeaderText(string text, Color? color = null)
+        {
+            if (!_isInitialized) BuildProceduralUI();
+            if (_headerText == null) return;
+            bool hasText = !string.IsNullOrEmpty(text);
+            if (_headerText.gameObject.activeSelf != hasText)
+                _headerText.gameObject.SetActive(hasText);
+            if (hasText)
+            {
+                _headerText.text = text;
+                _headerText.color = color ?? Color.white;
+            }
+        }
+
+        public void SetBarTrackVisible(bool visible)
+        {
+            if (!_isInitialized) BuildProceduralUI();
+            if (_borderImage != null && _borderImage.gameObject.activeSelf != visible)
+                _borderImage.gameObject.SetActive(visible);
+        }
+
+        public void ShowHeaderOnly(string text, Color? textColor = null)
+        {
+            if (!_isInitialized) BuildProceduralUI();
+            if (_canvas != null && !_canvas.enabled) _canvas.enabled = true;
+            SetBarTrackVisible(false);
+            SetHeaderText(text, textColor);
+        }
+
         public void SetProgress(float normalizedProgress, Color color)
         {
+            SetBarTrackVisible(true);
             if (_canvas != null && !_canvas.enabled)
             {
                 _canvas.enabled = true;
@@ -365,6 +423,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void Hide()
         {
+            SetHeaderText(string.Empty);
+            SetBarTrackVisible(true);
             if (_canvas != null && _canvas.enabled)
             {
                 _canvas.enabled = false;
