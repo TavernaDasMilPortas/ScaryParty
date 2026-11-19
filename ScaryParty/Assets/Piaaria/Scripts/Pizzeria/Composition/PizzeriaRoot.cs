@@ -734,6 +734,12 @@ namespace ScaryParty.Pizzeria.Composition
             if (ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.Instance == null)
                 ScaryParty.UI.Piaria.Presenters.LifeAndSpectatorOverlayPresenter.EnsureInstance();
 
+            if (ScaryParty.UI.Piaria.Core.NightIntermissionFeelBridge.Instance == null)
+                ScaryParty.UI.Piaria.Core.NightIntermissionFeelBridge.EnsureInstance();
+
+            if (ScaryParty.UI.Piaria.Presenters.NightIntermissionPresenter.Instance == null)
+                ScaryParty.UI.Piaria.Presenters.NightIntermissionPresenter.EnsureInstance();
+
 #if UNITY_EDITOR
             if (Presentation.PlaytestDebugController.Instance == null &&
                 FindFirstObjectByType<Presentation.PlaytestDebugController>(FindObjectsInactive.Include) == null)

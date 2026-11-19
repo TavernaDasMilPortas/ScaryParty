@@ -56,6 +56,15 @@ namespace ScaryParty.UI.Piaria.Presenters
         public bool IsOpen => _isOpen;
         public TabPage ActiveTab => _activeTab;
 
+        public static NightIntermissionPresenter EnsureInstance()
+        {
+            if (Instance != null) return Instance;
+            var existing = FindFirstObjectByType<NightIntermissionPresenter>(FindObjectsInactive.Include);
+            if (existing != null) return existing;
+            var go = new GameObject("NightIntermissionPresenter (UI Toolkit)");
+            return go.AddComponent<NightIntermissionPresenter>();
+        }
+
         private void Awake()
         {
             if (Instance != null && Instance != this)

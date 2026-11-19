@@ -62,6 +62,15 @@ namespace ScaryParty.UI.Piaria.Core
     {
         public static NightIntermissionFeelBridge Instance { get; private set; }
 
+        public static NightIntermissionFeelBridge EnsureInstance()
+        {
+            if (Instance != null) return Instance;
+            var existing = FindFirstObjectByType<NightIntermissionFeelBridge>(FindObjectsInactive.Include);
+            if (existing != null) return existing;
+            var go = new GameObject("NightIntermissionFeelBridge");
+            return go.AddComponent<NightIntermissionFeelBridge>();
+        }
+
         [Serializable]
         public class FeedbackBinding
         {
