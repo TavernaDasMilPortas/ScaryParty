@@ -3178,13 +3178,12 @@ namespace ScaryParty.Pizzeria.Network
         private static readonly RaycastHit[] _sharedWeaponHits = new RaycastHit[32];
         private readonly Dictionary<ScaryParty.Combat.IDamageable, int> _sharedAccumulatedDamage = new Dictionary<ScaryParty.Combat.IDamageable, int>(16);
         private readonly Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)> _sharedFirstHitPoints = new Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)>(16);
-        private double _lastMotorcycleServerTime;
-        private float _motorcycleDistanceBudget = 1.2f;
+        public static int WeaponRaycastOverflowCount { get; private set; }
+        private readonly ScaryParty.City.MotorcycleMovementBudget _motorcycleBudget = new ScaryParty.City.MotorcycleMovementBudget(22f, 1.5f);
 
         private void ResetMotorcycleMovementBudget()
         {
-            _lastMotorcycleServerTime = 0.0;
-            _motorcycleDistanceBudget = 1.2f;
+            _motorcycleBudget.Reset();
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -3282,6 +3281,7 @@ namespace ScaryParty.Pizzeria.Network
                 RaycastHit[] hitsBuffer = _sharedWeaponHits;
                 if (hitCount >= _sharedWeaponHits.Length)
                 {
+                    WeaponRaycastOverflowCount++;
                     hitsBuffer = Physics.RaycastAll(rayOrigin, pelletDir, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
                     hitCount = hitsBuffer.Length;
                 }
@@ -3701,19 +3701,9 @@ namespace ScaryParty.Pizzeria.Network
                 return;
 
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
-            float realDt = _lastMotorcycleServerTime > 0.0 ? Mathf.Clamp((float)(now - _lastMotorcycleServerTime), 0f, 0.25f) : 0.05f;
-            _lastMotorcycleServerTime = now;
-
-            const float maxBikeSpeedMps = 22f;
-            const float maxBurstBudgetMeters = 1.5f;
-            _motorcycleDistanceBudget = Mathf.Min(maxBurstBudgetMeters, _motorcycleDistanceBudget + maxBikeSpeedMps * realDt);
-
             Vector3 prevPos = new Vector3(st.PosX, st.PosY, st.PosZ);
             Vector3 clamped = bike.ClampToAllowedSurface(prevPos, clientPos, out _);
-            float requestedDist = Vector3.Distance(prevPos, clamped);
-            float allowedDist = Mathf.Min(requestedDist, _motorcycleDistanceBudget);
-            Vector3 safePos = Vector3.MoveTowards(prevPos, clamped, allowedDist);
-            _motorcycleDistanceBudget = Mathf.Max(0f, _motorcycleDistanceBudget - Vector3.Distance(prevPos, safePos));
+            Vector3 safePos = _motorcycleBudget.ConsumeStep(now, prevPos, clamped, out _);
             safePos.y = Mathf.Clamp(safePos.y, bike.ParkingSpawnPos.y - 1.5f, bike.ParkingSpawnPos.y + 4.0f);
 
             Quaternion flatRot = Quaternion.Euler(0f, clientRot.eulerAngles.y, 0f);
