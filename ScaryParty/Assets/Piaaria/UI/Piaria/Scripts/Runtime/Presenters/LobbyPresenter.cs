@@ -552,7 +552,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                         }
                         else
                         {
-                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("ReadyScene");
                         }
                     });
                 }
@@ -577,7 +577,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                         }
                         else
                         {
-                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("ReadyScene");
                         }
                     });
                 }
@@ -626,7 +626,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
-                ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().ShowImmediateIntentOverlay("Criando sala...");
                 lobbyManager.CreateRelayRoom(roomName);
             }
             else
@@ -650,7 +649,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
-                ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().ShowImmediateIntentOverlay("Entrando na sala...");
                 lobbyManager.JoinRelayRoom(code);
             }
             else
@@ -670,7 +668,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
-                ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().ShowImmediateIntentOverlay("Iniciando sala LAN...");
                 lobbyManager.StartLANHost(roomName);
             }
             else
@@ -694,7 +691,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             CharacterPreviewRig.Instance?.SetActive(false);
             if (lobbyManager != null)
             {
-                ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().ShowImmediateIntentOverlay("Conectando ao host LAN...");
                 lobbyManager.JoinLANClient(ip);
             }
             else

@@ -100,15 +100,24 @@ public class LobbyManager : MonoBehaviour
 
     public async void CreateRelayRoom(string roomName)
     {
-        if (NetworkManager.Singleton == null) return;
+        var coord = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance();
+        int opToken = coord.BeginConnectionOperation("Criando sala Relay...", 18f, () => CreateRelayRoom(roomName));
+
+        if (NetworkManager.Singleton == null)
+        {
+            coord.FailConnectionOperation(opToken, "NetworkManager não encontrado para criar a sala.");
+            return;
+        }
 
         Debug.Log("[LobbyManager] Tentando criar sala Relay (WSS)...");
 
         try
         {
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(3);
+            if (!coord.IsOperationActive(opToken)) return;
 
             string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+            if (!coord.IsOperationActive(opToken)) return;
             CurrentJoinCode = joinCode;
             Debug.Log($"[LobbyManager] ✅ Sala Relay Criada! JOIN CODE: {joinCode}");
 
@@ -192,6 +201,7 @@ public class LobbyManager : MonoBehaviour
                 if (status != SceneEventProgressStatus.Started)
                 {
                     Debug.LogWarning($"[LobbyManager] Falha ao iniciar transição de rede para ReadyScene ({status}).");
+                    coord.FailConnectionOperation(opToken, $"Falha ao iniciar transição de rede para ReadyScene ({status}).");
                 }
             }
             else
@@ -209,8 +219,14 @@ public class LobbyManager : MonoBehaviour
 
     public async void JoinRelayRoom(string joinCode)
     {
-        if (NetworkManager.Singleton == null) return;
-        if (string.IsNullOrEmpty(joinCode)) return;
+        var coord = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance();
+        int opToken = coord.BeginConnectionOperation("Entrando na sala Relay...", 15f, () => JoinRelayRoom(joinCode));
+
+        if (NetworkManager.Singleton == null || string.IsNullOrWhiteSpace(joinCode))
+        {
+            coord.FailConnectionOperation(opToken, "Código de sala inválido ou rede indisponível.");
+            return;
+        }
 
         Debug.Log($"[LobbyManager] Tentando entrar na sala com o código: {joinCode} (WSS)...");
         CurrentJoinCode = joinCode;
@@ -218,6 +234,7 @@ public class LobbyManager : MonoBehaviour
         try
         {
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+            if (!coord.IsOperationActive(opToken)) return;
 
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             string host = joinAllocation.RelayServer.IpV4;
@@ -277,17 +294,31 @@ public class LobbyManager : MonoBehaviour
             else
             {
                 Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente.");
+                coord.FailConnectionOperation(opToken, "Falha ao iniciar conexão com a sala Relay.");
             }
         }
         catch (RelayServiceException e)
         {
             Debug.LogError($"[LobbyManager] Código inválido ou falha ao conectar: {e.Message}");
+            coord.FailConnectionOperation(opToken, $"Código inválido ou sala indisponível: {e.Message}");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"[LobbyManager] Erro inesperado ao entrar na sala Relay: {e.Message}");
+            coord.FailConnectionOperation(opToken, $"Erro ao conectar na sala: {e.Message}");
         }
     }
 
     public async void StartLANHost(string roomName)
     {
-        if (NetworkManager.Singleton == null) return;
+        var coord = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance();
+        int opToken = coord.BeginConnectionOperation("Iniciando sala LAN...", 15f, () => StartLANHost(roomName));
+
+        if (NetworkManager.Singleton == null)
+        {
+            coord.FailConnectionOperation(opToken, "NetworkManager não encontrado para iniciar servidor LAN.");
+            return;
+        }
         CurrentJoinCode = null;
         Debug.Log("[LobbyManager] Tentando iniciar Host (LAN)...");
 
@@ -296,6 +327,7 @@ public class LobbyManager : MonoBehaviour
             Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
             NetworkManager.Singleton.Shutdown();
             await Task.Delay(500);
+            if (!coord.IsOperationActive(opToken)) return;
         }
 
         var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
@@ -316,54 +348,70 @@ public class LobbyManager : MonoBehaviour
                 RoomDiscoveryService.Instance.StartHosting(roomName, 7777, 4);
             }
 
-            var status = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
-                .BeginNetworkedTransition("ReadyScene");
+            var status = coord.BeginNetworkedTransition("ReadyScene");
             if (status != SceneEventProgressStatus.Started)
             {
                 Debug.LogWarning($"[LobbyManager] Falha ao iniciar transição LAN para ReadyScene ({status}).");
+                coord.FailConnectionOperation(opToken, $"Falha ao iniciar transição LAN para ReadyScene ({status}).");
             }
         }
         else
         {
             Debug.LogWarning("[LobbyManager] Falha ao iniciar Host LAN via Netcode.");
-            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
-                .AbortLoading("Não foi possível iniciar o servidor LAN.");
+            coord.FailConnectionOperation(opToken, "Não foi possível iniciar o servidor LAN.");
         }
     }
 
     public async void JoinLANClient(string ipAddress)
     {
-        if (NetworkManager.Singleton == null) return;
+        var coord = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance();
+        int opToken = coord.BeginConnectionOperation("Conectando ao host LAN...", 12f, () => JoinLANClient(ipAddress));
+
+        if (NetworkManager.Singleton == null || string.IsNullOrWhiteSpace(ipAddress))
+        {
+            coord.FailConnectionOperation(opToken, "Endereço IP inválido ou NetworkManager indisponível.");
+            return;
+        }
         CurrentJoinCode = null;
         Debug.Log($"[LobbyManager] Tentando entrar em Host LAN no IP: {ipAddress}...");
 
-        if (NetworkManager.Singleton.IsListening)
+        try
         {
-            Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
-            NetworkManager.Singleton.Shutdown();
-            await Task.Delay(500);
-        }
+            if (NetworkManager.Singleton.IsListening)
+            {
+                Debug.LogWarning("[LobbyManager] NetworkManager ativo. Fazendo Shutdown...");
+                NetworkManager.Singleton.Shutdown();
+                await Task.Delay(500);
+                if (!coord.IsOperationActive(opToken)) return;
+            }
 
-        if (RoomDiscoveryService.Instance != null)
-        {
-            RoomDiscoveryService.Instance.StopHosting();
-        }
+            if (RoomDiscoveryService.Instance != null)
+            {
+                RoomDiscoveryService.Instance.StopHosting();
+            }
 
-        var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        ConfigureTransportCapacity(transport);
-        // Remove relay data
-        transport.SetRelayServerData(default);
-        // Configure connection for LAN (connect to target IP)
-        transport.UseWebSockets = false;
-        transport.SetConnectionData(ipAddress, 7777);
+            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+            ConfigureTransportCapacity(transport);
+            // Remove relay data
+            transport.SetRelayServerData(default);
+            // Configure connection for LAN (connect to target IP)
+            transport.UseWebSockets = false;
+            transport.SetConnectionData(ipAddress, 7777);
 
-        if (NetworkManager.Singleton.StartClient())
-        {
-            Debug.Log("[LobbyManager] ✅ StartClient LAN executado! Aguardando o Host...");
+            if (NetworkManager.Singleton.StartClient())
+            {
+                Debug.Log("[LobbyManager] ✅ StartClient LAN executado! Aguardando o Host...");
+            }
+            else
+            {
+                Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente LAN.");
+                coord.FailConnectionOperation(opToken, $"Não foi possível conectar ao host LAN ({ipAddress}).");
+            }
         }
-        else
+        catch (System.Exception e)
         {
-            Debug.LogError("[LobbyManager] ❌ Falha ao tentar iniciar o Cliente LAN.");
+            Debug.LogError($"[LobbyManager] Erro ao conectar em LAN ({ipAddress}): {e.Message}");
+            coord.FailConnectionOperation(opToken, $"Erro ao conectar ao host LAN: {e.Message}");
         }
     }
 

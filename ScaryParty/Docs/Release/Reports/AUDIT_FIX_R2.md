@@ -12,7 +12,7 @@
 
 | Achado | Bloco | Status | Commit | Teste Automatizado | Teste Manual | Evidência | Pendência |
 |---|---|---|---|---|---|---|---|
-| **R01** Loading preso | P1 | Pendente | — | Não executado | Pendente | — | Implementar máquina de estados explícita + recuperação |
+| **R01** Loading preso | P1 | Código integrado (validação Editor pendente) | P1 | `LoadingTransitionStateMachineTests` (EditMode pendente no Editor) | Testar Relay inválido, LAN indisponível, cancelar e retry | `LoadingTransitionStateMachine` + `LobbyManager` + `PizzeriaSceneLoadingCoordinator` (botão Cancelar, Retry, tokens e liberação única de input) | Rodar `LoadingTransitionStateMachineTests` e bateria manual no Unity Editor |
 | **R02** Spawn bloqueado aceito | P3 | Pendente | — | Não executado | Pendente | — | Implementar `TryResolveSpawn` + fila aguardando NavMesh |
 | **R03** Reserva/âncoras | P3 / P7 | Pendente | — | Não executado | Pendente | — | `SpawnReservationService` + âncoras autoradas no prefab |
 | **R04** Carro sem collider cliente | P5 | Pendente | — | Não executado | Pendente | — | Proxy físico sólido no cliente + impacto autoritativo único |

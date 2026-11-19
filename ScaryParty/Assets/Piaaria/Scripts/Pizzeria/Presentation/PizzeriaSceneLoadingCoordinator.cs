@@ -6,6 +6,7 @@ using UnityEngine.UIElements;
 using Unity.Netcode;
 using ScaryParty.Navigation.Core;
 using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Lighting;
 using ScaryParty.VisualStyles;
 
 namespace ScaryParty.Pizzeria.Presentation
@@ -53,18 +54,25 @@ namespace ScaryParty.Pizzeria.Presentation
         private Label _stageTagLabel;
         private Label _hintLabel;
         private VisualElement _spinnerIcon;
+        private Button _cancelBtn;
         private VisualElement _errorBox;
         private Label _errorReasonLabel;
+        private Button _errorRetryBtn;
         private Button _errorMenuBtn;
 
-        private bool _isLoading;
+        private LoadingTransitionStateMachine _stateMachine;
+        private Action _retryCallback;
         private bool _hasInputLock;
         private bool _hookedNetworkEvents;
-        private float _currentProgress;
-        private float _displayedProgress;
+        private bool _hookedDisconnectEvent;
         private float _hintTimer;
         private int _hintIndex;
-        private int _transitionId;
+
+        private bool _isLoading => _stateMachine != null && _stateMachine.IsActiveState;
+        private bool _awaitingConnection => _stateMachine != null && _stateMachine.State == LoadingOperationState.Connecting;
+        private int _transitionId => _stateMachine != null ? _stateMachine.OperationToken : 0;
+        private float _currentProgress => _stateMachine != null ? _stateMachine.ConfirmedProgress : 0f;
+        private float _displayedProgress => _stateMachine != null ? _stateMachine.DisplayedProgress : 0f;
 
         private LoadingStage _currentStage = LoadingStage.ConnectingSession;
         private int _displayNightNumber = 1;
@@ -102,6 +110,21 @@ namespace ScaryParty.Pizzeria.Presentation
         public LoadingStage CurrentStage => _currentStage;
         public float CurrentProgress => _currentProgress;
         public bool IsLoading => _isLoading;
+        public LoadingOperationState OperationState => _stateMachine != null ? _stateMachine.State : LoadingOperationState.Idle;
+
+        private LoadingTransitionStateMachine EnsureStateMachine()
+        {
+            if (_stateMachine == null)
+            {
+                _stateMachine = new LoadingTransitionStateMachine(AcquireInputLock, ReleaseInputLockIfHeld);
+            }
+            return _stateMachine;
+        }
+
+        public bool IsOperationActive(int token)
+        {
+            return _stateMachine != null && _stateMachine.IsTokenActive(token);
+        }
 
         public void SetNightContext(int nightNumber, int revenueGoal)
         {
@@ -132,6 +155,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private void OnDisable()
         {
             UnhookNetworkSceneEvents();
+            _stateMachine?.ForceReleaseOnDestroy();
             ReleaseInputLockIfHeld();
         }
 
@@ -139,6 +163,7 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (Instance == this) Instance = null;
             UnhookNetworkSceneEvents();
+            _stateMachine?.ForceReleaseOnDestroy();
             ReleaseInputLockIfHeld();
         }
 
@@ -292,6 +317,16 @@ namespace ScaryParty.Pizzeria.Presentation
                 _hintLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
                 _card.Add(_hintLabel);
 
+                _cancelBtn = new Button(CancelCurrentOperation) { text = "Cancelar Conexão" };
+                _cancelBtn.style.marginTop = 12;
+                _cancelBtn.style.height = 32;
+                _cancelBtn.style.paddingLeft = 14;
+                _cancelBtn.style.paddingRight = 14;
+                _cancelBtn.style.backgroundColor = new Color(0.32f, 0.28f, 0.36f);
+                _cancelBtn.style.color = Color.white;
+                _cancelBtn.style.display = DisplayStyle.None;
+                _card.Add(_cancelBtn);
+
                 _errorBox = new VisualElement { name = "LoadingErrorBox" };
                 _errorBox.style.width = Length.Percent(100);
                 _errorBox.style.marginTop = 14;
@@ -318,6 +353,16 @@ namespace ScaryParty.Pizzeria.Presentation
                 var errBtnRow = new VisualElement();
                 errBtnRow.style.flexDirection = FlexDirection.Row;
                 errBtnRow.style.justifyContent = Justify.Center;
+
+                _errorRetryBtn = new Button(RetryFailedOperation) { text = "Tentar Novamente" };
+                _errorRetryBtn.style.height = 34;
+                _errorRetryBtn.style.paddingLeft = 14;
+                _errorRetryBtn.style.paddingRight = 14;
+                _errorRetryBtn.style.marginRight = 8;
+                _errorRetryBtn.style.backgroundColor = new Color(0.85f, 0.45f, 0.16f);
+                _errorRetryBtn.style.color = Color.white;
+                _errorRetryBtn.style.display = DisplayStyle.None;
+                errBtnRow.Add(_errorRetryBtn);
 
                 _errorMenuBtn = new Button(ReturnToLobbyFromError) { text = "Voltar ao Menu" };
                 _errorMenuBtn.style.height = 34;
@@ -350,11 +395,11 @@ namespace ScaryParty.Pizzeria.Presentation
             if (!_isLoading) return;
 
             // Suavização monotônica do progresso exibido (sempre <= progresso confirmado)
-            if (_displayedProgress < _currentProgress)
+            if (_stateMachine != null && _stateMachine.DisplayedProgress < _stateMachine.ConfirmedProgress)
             {
-                _displayedProgress = Mathf.MoveTowards(_displayedProgress, _currentProgress, Time.unscaledDeltaTime * 0.9f);
-                if (_progressBar != null) _progressBar.value = Mathf.Clamp01(_displayedProgress) * 100f;
-                if (_percentLabel != null) _percentLabel.text = $"{Mathf.RoundToInt(Mathf.Clamp01(_displayedProgress) * 100f)}%";
+                float shown = _stateMachine.StepDisplayedProgress(Time.unscaledDeltaTime * 0.9f);
+                if (_progressBar != null) _progressBar.value = Mathf.Clamp01(shown) * 100f;
+                if (_percentLabel != null) _percentLabel.text = $"{Mathf.RoundToInt(Mathf.Clamp01(shown) * 100f)}%";
             }
 
             if (_spinnerIcon != null)
@@ -396,20 +441,121 @@ namespace ScaryParty.Pizzeria.Presentation
 
         public void ShowImmediateIntentOverlay(string statusText = "Preparando transição...")
         {
+            BeginConnectionOperation(statusText, 15f);
+        }
+
+        /// <summary>
+        /// Inicia uma operação de conexão/entrada com token, animação ativa e timeout garantido.
+        /// </summary>
+        public int BeginConnectionOperation(string statusText = "Conectando sessão...", float timeoutSeconds = 15f, Action retryAction = null)
+        {
+            var sm = EnsureStateMachine();
+            if (sm.IsActiveState)
+            {
+                return sm.OperationToken;
+            }
+
+            StopAllCoroutines();
             EnsureUIOverlay();
-            AcquireInputLock();
+            TryHookNetworkSceneEvents();
+
+            _retryCallback = retryAction;
+            if (!sm.TryBeginConnecting(null, SceneReadinessProfile.MenuOrLobby.ToString(), Time.realtimeSinceStartup, timeoutSeconds, out int opToken))
+            {
+                return opToken;
+            }
+
+            _expectedTargetScene = null;
+            _trackedNetworkAsyncOp = null;
+            _networkSceneLoadCompleted = false;
+
             if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
+            if (_nightBannerLabel != null) _nightBannerLabel.style.display = DisplayStyle.None;
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.Flex;
             if (_overlayRoot != null)
             {
                 _overlayRoot.style.display = DisplayStyle.Flex;
                 _overlayRoot.style.opacity = 1f;
             }
-            _currentProgress = 0.02f;
-            _displayedProgress = 0.02f;
+
             if (_progressBar != null) _progressBar.value = 2f;
             if (_percentLabel != null) _percentLabel.text = "2%";
-            if (_statusLabel != null) _statusLabel.text = statusText;
-            if (_stageTagLabel != null) _stageTagLabel.text = "Iniciando";
+            SetStage(LoadingStage.ConnectingSession, 0.02f, statusText);
+
+            StartCoroutine(RoutineWaitForConnection(opToken, Mathf.Max(4f, timeoutSeconds)));
+            return opToken;
+        }
+
+        public void CompleteConnection(int token)
+        {
+            var sm = EnsureStateMachine();
+            if (!sm.IsTokenActive(token)) return;
+            sm.AdvanceConfirmedProgress(token, LoadingOperationState.Connecting, 0.06f);
+        }
+
+        public void FailConnectionOperation(int token, string reason)
+        {
+            var sm = EnsureStateMachine();
+            if (!sm.IsTokenActive(token)) return;
+            AbortLoadingWithToken(token, string.IsNullOrWhiteSpace(reason) ? "Falha ao conectar à sessão." : reason);
+        }
+
+        public void CancelConnectionOperation(int token)
+        {
+            var sm = EnsureStateMachine();
+            if (!sm.Cancel(token)) return;
+
+            StopAllCoroutines();
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening && !NetworkManager.Singleton.IsServer)
+            {
+                NetworkManager.Singleton.Shutdown();
+            }
+            HideOverlayNow();
+        }
+
+        public void CancelCurrentOperation()
+        {
+            if (_stateMachine == null) return;
+            CancelConnectionOperation(_stateMachine.OperationToken);
+        }
+
+        private void RetryFailedOperation()
+        {
+            var retry = _retryCallback;
+            if (retry == null)
+            {
+                ReturnToLobbyFromError();
+                return;
+            }
+
+            var sm = EnsureStateMachine();
+            if (!sm.Retry(Time.realtimeSinceStartup, 15f, out _))
+            {
+                sm.DismissErrorToIdle();
+            }
+            HideOverlayNow();
+            retry.Invoke();
+        }
+
+        private IEnumerator RoutineWaitForConnection(int opToken, float timeoutSeconds)
+        {
+            var sm = EnsureStateMachine();
+            float startRealtime = Time.realtimeSinceStartup;
+            while (sm.IsTokenActive(opToken) && sm.State == LoadingOperationState.Connecting)
+            {
+                float now = Time.realtimeSinceStartup;
+                if (sm.IsTimedOut(now))
+                {
+                    AbortLoadingWithToken(opToken, "Tempo limite ao conectar à sala. Verifique o código, IP ou disponibilidade do host.");
+                    yield break;
+                }
+
+                // Progresso visual suave entre 2% e 6% durante negociação de conexão
+                float t = Mathf.Clamp01((now - startRealtime) / timeoutSeconds);
+                sm.AdvanceConfirmedProgress(opToken, LoadingOperationState.Connecting, Mathf.Lerp(0.02f, 0.06f, t));
+                yield return null;
+            }
         }
 
         /// <summary>
@@ -417,14 +563,22 @@ namespace ScaryParty.Pizzeria.Presentation
         /// </summary>
         public void TransitionToScene(string targetSceneName, Action onReadyCallback = null)
         {
-            if (_isLoading) return;
-            _transitionId++;
+            var sm = EnsureStateMachine();
+            if (sm.IsActiveState && sm.State != LoadingOperationState.Connecting) return;
+
+            StopAllCoroutines();
+            _retryCallback = null;
+            int token = sm.BeginSceneTransition(
+                targetSceneName,
+                ResolveReadinessProfile(targetSceneName).ToString(),
+                Time.realtimeSinceStartup,
+                Mathf.Max(10f, _loadingTimeoutSeconds));
+
             _expectedTargetScene = targetSceneName;
             _trackedNetworkAsyncOp = null;
             _networkSceneLoadCompleted = false;
-            _currentProgress = 0f;
-            _displayedProgress = 0f;
-            StartCoroutine(RoutineTransition(_transitionId, targetSceneName, false, startNetworkLoadAfterFirstFrame: false, onReadyCallback));
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
+            StartCoroutine(RoutineTransition(token, targetSceneName, false, startNetworkLoadAfterFirstFrame: false, onReadyCallback));
         }
 
         /// <summary>
@@ -436,7 +590,8 @@ namespace ScaryParty.Pizzeria.Presentation
             int revenueGoal = 150,
             Action onReadyCallback = null)
         {
-            if (_isLoading) return SceneEventProgressStatus.SceneEventInProgress;
+            var sm = EnsureStateMachine();
+            if (sm.IsActiveState && sm.State != LoadingOperationState.Connecting) return SceneEventProgressStatus.SceneEventInProgress;
 
             SetNightContext(nightNumber, revenueGoal);
 
@@ -448,31 +603,58 @@ namespace ScaryParty.Pizzeria.Presentation
                 return SceneEventProgressStatus.InternalNetcodeError;
             }
 
+            StopAllCoroutines();
             TryHookNetworkSceneEvents();
-            _transitionId++;
+            _retryCallback = null;
+            int token = sm.BeginSceneTransition(
+                targetSceneName,
+                ResolveReadinessProfile(targetSceneName).ToString(),
+                Time.realtimeSinceStartup,
+                Mathf.Max(10f, _loadingTimeoutSeconds));
+
             _expectedTargetScene = targetSceneName;
             _trackedNetworkAsyncOp = null;
             _networkSceneLoadCompleted = false;
-            _currentProgress = 0f;
-            _displayedProgress = 0f;
 
-            ShowImmediateIntentOverlay("Conectando sessão...");
-            StartCoroutine(RoutineTransition(_transitionId, targetSceneName, true, startNetworkLoadAfterFirstFrame: true, onReadyCallback));
+            EnsureUIOverlay();
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
+            if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
+            if (_overlayRoot != null)
+            {
+                _overlayRoot.style.display = DisplayStyle.Flex;
+                _overlayRoot.style.opacity = 1f;
+            }
+            SetStage(LoadingStage.ConnectingSession, 0.02f, "Conectando sessão...");
+            StartCoroutine(RoutineTransition(token, targetSceneName, true, startNetworkLoadAfterFirstFrame: true, onReadyCallback));
             return SceneEventProgressStatus.Started;
         }
 
         public void AbortLoading(string reason = null)
         {
-            _transitionId++;
+            var sm = EnsureStateMachine();
+            AbortLoadingWithToken(sm.OperationToken, reason);
+        }
+
+        private void AbortLoadingWithToken(int token, string reason)
+        {
+            var sm = EnsureStateMachine();
+            if (sm.IsActiveState && token != sm.OperationToken) return;
+
             StopAllCoroutines();
-            _isLoading = false;
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
+
             if (!string.IsNullOrEmpty(reason))
             {
+                sm.Fail(token, reason);
                 Debug.LogWarning($"[PizzeriaSceneLoadingCoordinator] Carregamento interrompido: {reason}");
                 EnsureUIOverlay();
                 if (_overlayRoot != null && _errorBox != null && _errorReasonLabel != null)
                 {
                     _errorReasonLabel.text = reason;
+                    if (_errorRetryBtn != null)
+                    {
+                        _errorRetryBtn.style.display = _retryCallback != null ? DisplayStyle.Flex : DisplayStyle.None;
+                    }
                     _errorBox.style.display = DisplayStyle.Flex;
                     _overlayRoot.style.opacity = 1f;
                     _overlayRoot.style.display = DisplayStyle.Flex;
@@ -482,11 +664,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
+            sm.DismissErrorToIdle();
             HideOverlayNow();
         }
 
         private void HideOverlayNow()
         {
+            if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
             if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
             if (_overlayRoot != null)
             {
@@ -494,25 +678,43 @@ namespace ScaryParty.Pizzeria.Presentation
                 _overlayRoot.style.display = DisplayStyle.None;
             }
             ReleaseInputLockIfHeld();
-            _isLoading = false;
         }
 
         private void ReturnToLobbyFromError()
         {
-            _isLoading = false;
+            _retryCallback = null;
+            _stateMachine?.DismissErrorToIdle();
             GameplayInputGate.Reset();
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();
-            TransitionToScene("LobbyScene");
+
+            var activeScene = SceneManager.GetActiveScene().name;
+            if (string.Equals(activeScene, "LobbyScene", StringComparison.OrdinalIgnoreCase))
+            {
+                HideOverlayNow();
+            }
+            else
+            {
+                TransitionToScene("LobbyScene");
+            }
         }
 
         private void TryHookNetworkSceneEvents()
         {
             var nm = NetworkManager.Singleton;
-            if (nm == null || nm.SceneManager == null || _hookedNetworkEvents) return;
+            if (nm == null) return;
 
-            nm.SceneManager.OnSceneEvent += OnNetworkSceneEvent;
-            _hookedNetworkEvents = true;
+            if (nm.SceneManager != null && !_hookedNetworkEvents)
+            {
+                nm.SceneManager.OnSceneEvent += OnNetworkSceneEvent;
+                _hookedNetworkEvents = true;
+            }
+
+            if (!_hookedDisconnectEvent)
+            {
+                nm.OnClientDisconnectCallback += OnLocalClientDisconnected;
+                _hookedDisconnectEvent = true;
+            }
         }
 
         private void UnhookNetworkSceneEvents()
@@ -523,6 +725,22 @@ namespace ScaryParty.Pizzeria.Presentation
                 nm.SceneManager.OnSceneEvent -= OnNetworkSceneEvent;
             }
             _hookedNetworkEvents = false;
+
+            if (_hookedDisconnectEvent && nm != null)
+            {
+                nm.OnClientDisconnectCallback -= OnLocalClientDisconnected;
+            }
+            _hookedDisconnectEvent = false;
+        }
+
+        private void OnLocalClientDisconnected(ulong clientId)
+        {
+            var nm = NetworkManager.Singleton;
+            if (!_awaitingConnection) return;
+            if (nm != null && !nm.IsServer && (clientId == nm.LocalClientId || clientId == NetworkManager.ServerClientId))
+            {
+                AbortLoading("Conexão recusada ou encerrada pelo host.");
+            }
         }
 
         private void OnNetworkSceneEvent(SceneEvent sceneEvent)
@@ -530,16 +748,30 @@ namespace ScaryParty.Pizzeria.Presentation
             switch (sceneEvent.SceneEventType)
             {
                 case SceneEventType.Load:
+                case SceneEventType.Synchronize:
                     if (string.IsNullOrWhiteSpace(sceneEvent.SceneName)) return;
                     _expectedTargetScene = sceneEvent.SceneName;
                     _trackedNetworkAsyncOp = sceneEvent.AsyncOperation;
-                    _networkSceneLoadCompleted = false;
-                    if (!_isLoading)
+                    _networkSceneLoadCompleted = sceneEvent.SceneEventType == SceneEventType.Synchronize;
+                    if (!_isLoading || _awaitingConnection)
                     {
-                        _transitionId++;
-                        _currentProgress = 0f;
-                        _displayedProgress = 0f;
-                        StartCoroutine(RoutineTransition(_transitionId, sceneEvent.SceneName, true, startNetworkLoadAfterFirstFrame: false, null));
+                        StopAllCoroutines();
+                        var sm = EnsureStateMachine();
+                        _retryCallback = null;
+                        int token = _awaitingConnection && sm.PromoteConnectingToSceneLoad(
+                            sm.OperationToken,
+                            sceneEvent.SceneName,
+                            ResolveReadinessProfile(sceneEvent.SceneName).ToString(),
+                            Time.realtimeSinceStartup,
+                            Mathf.Max(10f, _loadingTimeoutSeconds))
+                            ? sm.OperationToken
+                            : sm.BeginSceneTransition(
+                                sceneEvent.SceneName,
+                                ResolveReadinessProfile(sceneEvent.SceneName).ToString(),
+                                Time.realtimeSinceStartup,
+                                Mathf.Max(10f, _loadingTimeoutSeconds));
+                        if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
+                        StartCoroutine(RoutineTransition(token, sceneEvent.SceneName, true, startNetworkLoadAfterFirstFrame: false, null));
                     }
                     break;
 
@@ -566,7 +798,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private IEnumerator RoutineTransition(int myTransitionId, string targetSceneName, bool networked, bool startNetworkLoadAfterFirstFrame, Action onReadyCallback)
         {
-            _isLoading = true;
+            var sm = EnsureStateMachine();
             AcquireInputLock();
             EnsureUIOverlay();
             RefreshNightBannerText();
@@ -671,29 +903,45 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 // Etapa 3: Cidade/Pátio (40% -> 70%)
                 SetStage(LoadingStage.GeneratingCity, 0.45f, "Construindo cidade e pátio...");
-                float cityWait = 0f;
                 CityGenerator cityGen = FindFirstObjectByType<CityGenerator>();
-                while (cityGen == null && cityWait < 2.5f && !HasTimedOut(startRealtime, maxTimeout))
+                while (cityGen == null && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
-                    cityWait += Time.unscaledDeltaTime;
                     cityGen = FindFirstObjectByType<CityGenerator>();
                     yield return null;
                 }
 
-                while (cityGen != null && (cityGen.CityData == null || !cityGen.ClosuresSynchronized) && !HasTimedOut(startRealtime, maxTimeout))
+                if (cityGen == null)
+                {
+                    AbortLoading($"Dependência obrigatória ausente em '{targetSceneName}': CityGenerator.");
+                    yield break;
+                }
+
+                while ((cityGen.CityData == null || !cityGen.ClosuresSynchronized) && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     SetStage(LoadingStage.GeneratingCity, 0.60f, "Finalizando quarteirões, muralhas e vias...");
                     yield return null;
                 }
 
+                if (HasTimedOut(startRealtime, maxTimeout))
+                {
+                    AbortLoading($"Tempo limite ao gerar cidade em '{targetSceneName}'.");
+                    yield break;
+                }
+
                 // Etapa 4: Navegação (70% -> 85%)
                 SetStage(LoadingStage.BakingNavigation, 0.75f, "Preparando rotas e navegação...");
-                while (NavigationWorldManager.Instance != null && !NavigationWorldManager.Instance.IsReady && !HasTimedOut(startRealtime, maxTimeout))
+                while ((NavigationWorldManager.Instance == null || !NavigationWorldManager.Instance.IsReady) && !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
+                }
+
+                if (NavigationWorldManager.Instance == null || !NavigationWorldManager.Instance.IsReady)
+                {
+                    AbortLoading($"Sistema de navegação (NavMesh) não ficou pronto em '{targetSceneName}'.");
+                    yield break;
                 }
 
                 // Etapa 5: Pizzaria e Replicação (85% -> 95%)
@@ -707,26 +955,54 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 // Etapa 6: Jogador, Câmera e Iluminação (95% -> 100%)
                 SetStage(LoadingStage.SpawningPlayers, 0.95f, "Posicionando equipe e iluminação...");
-                while ((!IsLocalPlayerSpawned() || Camera.main == null) && !HasTimedOut(startRealtime, maxTimeout))
+                while ((!IsLocalPlayerSpawned() || Camera.main == null || (LightingReadyGate.Active != null && !LightingReadyGate.Active.IsReady)) &&
+                       !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
                 }
 
-                if (HasTimedOut(startRealtime, maxTimeout) || !IsPizzeriaReady(networked) || !IsLocalPlayerSpawned())
+                if (HasTimedOut(startRealtime, maxTimeout) ||
+                    !IsPizzeriaReady(networked) ||
+                    !IsLocalPlayerSpawned() ||
+                    Camera.main == null ||
+                    (LightingReadyGate.Active != null && !LightingReadyGate.Active.IsReady))
                 {
                     AbortLoading($"Tempo limite ({maxTimeout:F0}s) ao aguardar prontidão de '{targetSceneName}'. Retorne ao menu.");
                     yield break;
                 }
             }
-            else
+            else if (readiness == SceneReadinessProfile.ReadyRoom)
             {
-                // Menu / Lobby / ReadyRoom: valida câmera e UI pronta
-                SetStage(LoadingStage.SpawningPlayers, 0.92f, "Finalizando interface...");
-                while (Camera.main == null && !HasTimedOut(startRealtime, maxTimeout))
+                SetStage(LoadingStage.SpawningPlayers, 0.92f, "Sincronizando sala de espera...");
+                while ((!HasActiveSceneUIDocument() || Camera.main == null || (networked && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening))) &&
+                       !HasTimedOut(startRealtime, maxTimeout))
                 {
                     if (myTransitionId != _transitionId) yield break;
                     yield return null;
+                }
+
+                if (HasTimedOut(startRealtime, maxTimeout) || Camera.main == null || !HasActiveSceneUIDocument() ||
+                    (networked && (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)))
+                {
+                    AbortLoading($"Sala de espera '{targetSceneName}' não ficou pronta a tempo (câmera, UI ou rede ausente).");
+                    yield break;
+                }
+            }
+            else
+            {
+                // Menu / Lobby: exige câmera e UIDocument da cena prontos
+                SetStage(LoadingStage.SpawningPlayers, 0.92f, "Finalizando interface...");
+                while ((Camera.main == null || !HasActiveSceneUIDocument()) && !HasTimedOut(startRealtime, maxTimeout))
+                {
+                    if (myTransitionId != _transitionId) yield break;
+                    yield return null;
+                }
+
+                if (HasTimedOut(startRealtime, maxTimeout) || Camera.main == null || !HasActiveSceneUIDocument())
+                {
+                    AbortLoading($"Interface de '{targetSceneName}' não ficou pronta a tempo (câmera ou UI ausente).");
+                    yield break;
                 }
             }
 
@@ -735,7 +1011,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (myTransitionId != _transitionId) yield break;
 
             SetStage(LoadingStage.Ready, 1.0f, "Tudo pronto!");
-            _displayedProgress = 1.0f;
+            sm.MarkReady(myTransitionId);
             if (_progressBar != null) _progressBar.value = 100f;
             if (_percentLabel != null) _percentLabel.text = "100%";
             ScaryParty.UI.Piaria.Core.UIFeedbackService.Instance?.PlaySuccess();
@@ -745,6 +1021,7 @@ namespace ScaryParty.Pizzeria.Presentation
             onReadyCallback?.Invoke();
 
             // Fade-out e liberação segura do input
+            sm.BeginFadeOut(myTransitionId);
             elapsed = 0f;
             while (elapsed < fadeDur)
             {
@@ -756,8 +1033,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _overlayRoot.style.opacity = 0f;
             _overlayRoot.style.display = DisplayStyle.None;
-            ReleaseInputLockIfHeld();
-            _isLoading = false;
+            sm.Complete(myTransitionId);
         }
 
         private bool HasTimedOut(float startRealtime, float maxTimeout)
@@ -770,6 +1046,19 @@ namespace ScaryParty.Pizzeria.Presentation
             if (string.IsNullOrEmpty(targetSceneName)) return true;
             if (string.Equals(activeSceneName, targetSceneName, StringComparison.OrdinalIgnoreCase)) return true;
             return IsGameplaySceneName(activeSceneName) && IsGameplaySceneName(targetSceneName);
+        }
+
+        private bool HasActiveSceneUIDocument()
+        {
+            var docs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            for (int i = 0; i < docs.Length; i++)
+            {
+                var doc = docs[i];
+                if (doc == null || doc == _loadingUiDocument) continue;
+                if (doc.isActiveAndEnabled && doc.rootVisualElement != null && doc.rootVisualElement.childCount > 0)
+                    return true;
+            }
+            return false;
         }
 
         private static bool IsPizzeriaReady(bool networked)
@@ -822,7 +1111,19 @@ namespace ScaryParty.Pizzeria.Presentation
         private void SetStage(LoadingStage stage, float progress01, string statusText)
         {
             _currentStage = stage;
-            _currentProgress = Mathf.Max(_currentProgress, Mathf.Clamp01(progress01));
+            var sm = EnsureStateMachine();
+            var opState = stage switch
+            {
+                LoadingStage.ConnectingSession => LoadingOperationState.Connecting,
+                LoadingStage.LoadingScene => LoadingOperationState.LoadingScene,
+                LoadingStage.GeneratingCity => LoadingOperationState.WaitingReadiness,
+                LoadingStage.BakingNavigation => LoadingOperationState.WaitingReadiness,
+                LoadingStage.SpawningPizzeria => LoadingOperationState.WaitingReadiness,
+                LoadingStage.SpawningPlayers => LoadingOperationState.WaitingReadiness,
+                LoadingStage.Ready => LoadingOperationState.Ready,
+                _ => LoadingOperationState.LoadingScene
+            };
+            sm.AdvanceConfirmedProgress(sm.OperationToken, opState, progress01);
             if (_stageTagLabel != null)
             {
                 _stageTagLabel.text = stage switch
