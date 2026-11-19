@@ -1483,9 +1483,28 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderId = rpcParams.Receive.SenderClientId;
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
-            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
+            if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight)
+            {
+                const string msg = "Preparacao nao esta ativa.";
+                NotifyErrorClientRpc(msg, TargetSender(senderId));
+                NotifyIntermissionActionResultClientRpc(false, new FixedString64Bytes("ready"), new FixedString128Bytes(msg), TargetSender(senderId));
+                return;
+            }
 
-            root.RunProgressionService.SetPlayerReady(senderId, ready);
+            if (!root.RunProgressionService.TrySetPlayerReady(senderId, ready, out string failureReason))
+            {
+                string msg = string.IsNullOrEmpty(failureReason) ? "Nao foi possivel atualizar estado de pronto." : failureReason;
+                NotifyErrorClientRpc(msg, TargetSender(senderId));
+                NotifyIntermissionActionResultClientRpc(false, new FixedString64Bytes("ready"), new FixedString128Bytes(msg), TargetSender(senderId));
+                return;
+            }
+
+            root.DomainState.IncrementRevision();
+            NotifyIntermissionActionResultClientRpc(
+                true,
+                new FixedString64Bytes("ready"),
+                new FixedString128Bytes(ready ? "Pronto confirmado." : "Pronto cancelado."),
+                TargetSender(senderId));
             ResolveAndStartPreparedNightIfReadyServer(senderId);
             CommitAndReplicate();
         }
@@ -1543,8 +1562,12 @@ namespace ScaryParty.Pizzeria.Network
 
             if (shouldStartNight)
             {
-                run.ResetIntermissionState();
                 ResolveAndStartPreparedNightIfReadyServer();
+                if (root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight)
+                {
+                    run.ResetIntermissionState();
+                    CommitAndReplicate();
+                }
             }
         }
 
@@ -1565,31 +1588,31 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             var run = root.RunProgressionService;
-            bool allReady = true;
-            for (int i = 0; i < connected.Count; i++)
-            {
-                if (!ContainsClientId(run.ReadyPlayers, connected[i]))
-                {
-                    allReady = false;
-                    break;
-                }
-            }
-
-            if (!allReady) return;
-
             if (run.IntermissionStage == Domain.Services.IntermissionStage.Open)
             {
-                if (!run.AreAllMandatoryStagesVoted())
+                bool allReady = true;
+                for (int i = 0; i < connected.Count; i++)
+                {
+                    if (!ContainsClientId(run.ReadyPlayers, connected[i]))
+                    {
+                        allReady = false;
+                        break;
+                    }
+                }
+
+                if (!allReady) return;
+
+                if (!run.HasAllParticipantsVotedMandatoryStages(connected))
                 {
                     if (triggeringClientId.HasValue)
                     {
-                        NotifyErrorClientRpc("Complete o voto nas categorias obrigatorias antes de iniciar a noite.", TargetSender(triggeringClientId.Value));
+                        NotifyErrorClientRpc("Todos os jogadores devem votar nas categorias obrigatorias antes de iniciar a noite.", TargetSender(triggeringClientId.Value));
                     }
                     return;
                 }
 
                 double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
-                if (run.TryLockAndResolveBallotsServer(serverNow))
+                if (run.TryLockAndResolveBallotsServer(serverNow, participants: connected))
                 {
                     root.DomainState.Revision++;
                     CommitAndReplicate();
@@ -1601,6 +1624,21 @@ namespace ScaryParty.Pizzeria.Network
                 run.IntermissionStage < Domain.Services.IntermissionStage.Starting)
             {
                 return;
+            }
+
+            if (run.IntermissionStage != Domain.Services.IntermissionStage.Starting)
+            {
+                bool allReady = true;
+                for (int i = 0; i < connected.Count; i++)
+                {
+                    if (!ContainsClientId(run.ReadyPlayers, connected[i]))
+                    {
+                        allReady = false;
+                        break;
+                    }
+                }
+
+                if (!allReady) return;
             }
 
             if (run.CurrentVoteStages.Count > 0)
@@ -1632,6 +1670,7 @@ namespace ScaryParty.Pizzeria.Network
             ApplyRunBackpackCapacityBonusServer(root);
 
             RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+            run.ResetIntermissionState();
 
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} iniciada! Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
@@ -1667,6 +1706,11 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        public event System.Action<bool, string, string, string> OnShopPurchaseResultReceived;
+
+        private readonly HashSet<string> _processedShopRequestKeys = new HashSet<string>(System.StringComparer.Ordinal);
+        private readonly Queue<string> _processedShopRequestOrder = new Queue<string>();
+
         [ServerRpc(RequireOwnership = false)]
         public void PurchaseRunShopItemServerRpc(byte shopItemId, ServerRpcParams rpcParams = default)
         {
@@ -1681,27 +1725,67 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            ExecuteShopOfferPurchaseServer(offer.OfferId, senderId);
+            ExecuteShopOfferPurchaseServer(offer.OfferId, senderId, string.Empty);
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void PurchaseRunShopOfferServerRpc(FixedString64Bytes offerId, ServerRpcParams rpcParams = default)
         {
-            ExecuteShopOfferPurchaseServer(offerId.ToString(), rpcParams.Receive.SenderClientId);
+            ExecuteShopOfferPurchaseServer(offerId.ToString(), rpcParams.Receive.SenderClientId, string.Empty);
         }
 
-        private void ExecuteShopOfferPurchaseServer(string offerId, ulong senderClientId)
+        [ServerRpc(RequireOwnership = false)]
+        public void PurchaseRunShopOfferCorrelatedServerRpc(FixedString64Bytes offerId, FixedString64Bytes requestId, ServerRpcParams rpcParams = default)
+        {
+            ExecuteShopOfferPurchaseServer(offerId.ToString(), rpcParams.Receive.SenderClientId, requestId.ToString());
+        }
+
+        [ClientRpc]
+        private void NotifyShopPurchaseResultClientRpc(bool success, FixedString64Bytes offerId, FixedString64Bytes requestId, FixedString128Bytes message, ClientRpcParams clientRpcParams = default)
+        {
+            OnShopPurchaseResultReceived?.Invoke(success, offerId.ToString(), requestId.ToString(), message.ToString());
+        }
+
+        private void ExecuteShopOfferPurchaseServer(string offerId, ulong senderClientId, string requestId)
         {
             var targetParams = TargetSender(senderClientId);
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null || root.RunProgressionService == null) return;
+
+            if (!string.IsNullOrEmpty(requestId))
+            {
+                string dedupKey = $"{senderClientId}:{requestId}";
+                if (_processedShopRequestKeys.Contains(dedupKey))
+                {
+                    NotifyShopPurchaseResultClientRpc(
+                        false,
+                        new FixedString64Bytes(offerId ?? string.Empty),
+                        new FixedString64Bytes(requestId),
+                        new FixedString128Bytes("Solicitacao duplicada ignorada."),
+                        targetParams);
+                    return;
+                }
+                _processedShopRequestKeys.Add(dedupKey);
+                _processedShopRequestOrder.Enqueue(dedupKey);
+                while (_processedShopRequestOrder.Count > 128)
+                {
+                    _processedShopRequestKeys.Remove(_processedShopRequestOrder.Dequeue());
+                }
+            }
 
             var run = root.RunProgressionService;
             var state = root.DomainState;
             var offer = run.BalancingSnapshot?.FindShopOfferById(offerId);
             if (offer == null)
             {
-                NotifyErrorClientRpc($"Oferta '{offerId}' inexistente no catalogo.", targetParams);
+                string notFoundMsg = $"Oferta '{offerId}' inexistente no catalogo.";
+                NotifyErrorClientRpc(notFoundMsg, targetParams);
+                NotifyShopPurchaseResultClientRpc(
+                    false,
+                    new FixedString64Bytes(offerId ?? string.Empty),
+                    new FixedString64Bytes(requestId ?? string.Empty),
+                    new FixedString128Bytes(notFoundMsg),
+                    targetParams);
                 return;
             }
 
@@ -1710,13 +1794,21 @@ namespace ScaryParty.Pizzeria.Network
                 offerId,
                 root.EmployeeTaskService,
                 lines => ApplySupplyBundleLinesServer(state, lines),
+                (IReadOnlyList<SupplyBundleLineData> lines, out string fitReason) => CanFitFullSupplyBundleServer(state, lines, out fitReason),
                 out string failureReason,
                 out int appliedCost,
                 out HiredEmployeeState hiredEmployee);
 
             if (!ok)
             {
-                NotifyErrorClientRpc(string.IsNullOrEmpty(failureReason) ? "Nao foi possivel concluir a compra." : failureReason, targetParams);
+                string errMsg = string.IsNullOrEmpty(failureReason) ? "Nao foi possivel concluir a compra." : failureReason;
+                NotifyErrorClientRpc(errMsg, targetParams);
+                NotifyShopPurchaseResultClientRpc(
+                    false,
+                    new FixedString64Bytes(offerId ?? string.Empty),
+                    new FixedString64Bytes(requestId ?? string.Empty),
+                    new FixedString128Bytes(errMsg),
+                    targetParams);
                 return;
             }
 
@@ -1742,7 +1834,46 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             CommitAndReplicate();
+            NotifyShopPurchaseResultClientRpc(
+                true,
+                new FixedString64Bytes(offerId ?? string.Empty),
+                new FixedString64Bytes(requestId ?? string.Empty),
+                new FixedString128Bytes(purchasedMsg),
+                targetParams);
             BroadcastNoticeClientRpc(purchasedMsg, isError: false);
+        }
+
+        public static bool CanFitFullSupplyBundleServer(PizzeriaState state, IReadOnlyList<SupplyBundleLineData> lines, out string failureReason)
+        {
+            failureReason = string.Empty;
+            if (state == null || lines == null || lines.Count == 0)
+            {
+                failureReason = "Pacote de suprimentos invalido.";
+                return false;
+            }
+
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                if (line == null || line.IngredientId <= 0 || line.Quantity <= 0) continue;
+
+                int totalFree = 0;
+                foreach (var kvp in state.StorageSlots)
+                {
+                    if (kvp.Key.ingredientDefId == line.IngredientId && kvp.Value != null)
+                    {
+                        totalFree += Mathf.Max(0, kvp.Value.MaxCapacity - kvp.Value.Quantity);
+                    }
+                }
+
+                if (totalFree < line.Quantity)
+                {
+                    failureReason = $"Estoque insuficiente para pacote completo (falta espaco para {line.Quantity - totalFree} un.).";
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public static int ApplySupplyBundleLinesServer(PizzeriaState state, IReadOnlyList<SupplyBundleLineData> lines)
@@ -1755,16 +1886,19 @@ namespace ScaryParty.Pizzeria.Network
                 var line = lines[i];
                 if (line == null || line.IngredientId <= 0 || line.Quantity <= 0) continue;
 
+                int remaining = line.Quantity;
                 foreach (var kvp in state.StorageSlots)
                 {
                     if (kvp.Key.ingredientDefId == line.IngredientId && kvp.Value != null)
                     {
                         int free = Mathf.Max(0, kvp.Value.MaxCapacity - kvp.Value.Quantity);
                         if (free <= 0) continue;
-                        int add = Mathf.Min(free, line.Quantity);
+                        int add = Mathf.Min(free, remaining);
                         kvp.Value.Quantity += add;
                         kvp.Value.Revision++;
                         totalAdded += add;
+                        remaining -= add;
+                        if (remaining <= 0) break;
                     }
                 }
             }

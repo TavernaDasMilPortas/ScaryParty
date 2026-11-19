@@ -112,6 +112,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         private readonly List<RunModifierDefinition> _currentVoteOptions = new List<RunModifierDefinition>();
         private readonly Dictionary<ulong, string> _votes = new Dictionary<ulong, string>();
         private readonly HashSet<ulong> _readyPlayers = new HashSet<ulong>();
+        private readonly HashSet<ulong> _lockedParticipants = new HashSet<ulong>();
         private readonly HashSet<string> _purchasedUniqueItems = new HashSet<string>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> _shopRunPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly Dictionary<string, int> _shopNightPurchases = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -122,6 +123,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         public IReadOnlyDictionary<string, ActiveRunModifier> ActiveModifiers => _activeModifiers;
         public IReadOnlyDictionary<ulong, string> Votes => _votes;
         public IReadOnlyCollection<ulong> ReadyPlayers => _readyPlayers;
+        public IReadOnlyCollection<ulong> LockedParticipants => _lockedParticipants;
         public bool IsVoteResolved { get; private set; }
         public string LastResolvedOptionId { get; private set; }
 
@@ -347,12 +349,13 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return _currentVoteOptions;
         }
 
-        public IReadOnlyList<RunVoteStageState> OpenPreparationStages(int targetNight, NightPreparationScheduleData scheduleOverride = null)
+        public IReadOnlyList<RunVoteStageState> OpenPreparationStages(int targetNight, NightPreparationScheduleData scheduleOverride = null, bool opportunityMandatory = false)
         {
             _voteStages.Clear();
             _currentVoteOptions.Clear();
             _votes.Clear();
             _readyPlayers.Clear();
+            _lockedParticipants.Clear();
             IsVoteResolved = false;
             LastResolvedOptionId = null;
             PreparationTargetNight = Math.Max(1, targetNight);
@@ -365,7 +368,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             int stageIndex = 0;
 
             AppendStagesForCategory(RunModifierKind.Hindrance, isMandatory: true, schedule.MandatoryHindranceStages, schedule.HindranceAlternatives, usedInSession, ref stageIndex);
-            AppendStagesForCategory(RunModifierKind.Opportunity, isMandatory: false, schedule.OpportunityStages, schedule.OpportunityAlternatives, usedInSession, ref stageIndex);
+            AppendStagesForCategory(RunModifierKind.Opportunity, isMandatory: opportunityMandatory, schedule.OpportunityStages, schedule.OpportunityAlternatives, usedInSession, ref stageIndex);
             AppendStagesForCategory(RunModifierKind.Event, isMandatory: false, schedule.AdditionalEventStages, schedule.EventAlternatives, usedInSession, ref stageIndex);
 
             if (_voteStages.Count > 0 && _voteStages[0].Options.Count > 0)
@@ -546,6 +549,19 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return true;
         }
 
+        public bool HasAllParticipantsVotedMandatoryStages(IReadOnlyCollection<ulong> participants)
+        {
+            if (participants == null || participants.Count == 0) return false;
+            foreach (var cid in participants)
+            {
+                if (!HasPlayerVotedAllMandatoryStages(cid))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public void SetPlayerReady(ulong clientId, bool ready)
         {
             if (ready) _readyPlayers.Add(clientId);
@@ -567,18 +583,34 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
         }
 
-        public void OpenTypedBallots(int targetNight, int hindranceOptionsCount = 3, int opportunityOptionsCount = 3)
+        public void OpenTypedBallots(int targetNight, int hindranceOptionsCount = 3, int opportunityOptionsCount = 3, bool respectCatalogSchedule = false)
         {
-            var schedule = new NightPreparationScheduleData(
-                targetNight,
-                mandatoryHindranceStages: 1,
-                hindranceAlternatives: hindranceOptionsCount < 1 ? 3 : hindranceOptionsCount,
-                opportunityStages: 1,
-                opportunityAlternatives: opportunityOptionsCount < 1 ? 3 : opportunityOptionsCount,
-                additionalEventStages: 0,
-                eventAlternatives: 0);
+            NightPreparationScheduleData schedule;
+            if (respectCatalogSchedule && BalancingSnapshot != null)
+            {
+                var catSched = BalancingSnapshot.GetScheduleForNight(targetNight);
+                schedule = new NightPreparationScheduleData(
+                    targetNight,
+                    mandatoryHindranceStages: Math.Max(1, catSched.MandatoryHindranceStages),
+                    hindranceAlternatives: catSched.HindranceAlternatives >= 2 ? catSched.HindranceAlternatives : (hindranceOptionsCount < 1 ? 3 : hindranceOptionsCount),
+                    opportunityStages: Math.Max(1, catSched.OpportunityStages),
+                    opportunityAlternatives: catSched.OpportunityAlternatives >= 2 ? catSched.OpportunityAlternatives : (opportunityOptionsCount < 1 ? 3 : opportunityOptionsCount),
+                    additionalEventStages: catSched.AdditionalEventStages,
+                    eventAlternatives: catSched.EventAlternatives);
+            }
+            else
+            {
+                schedule = new NightPreparationScheduleData(
+                    targetNight,
+                    mandatoryHindranceStages: 1,
+                    hindranceAlternatives: hindranceOptionsCount < 1 ? 3 : hindranceOptionsCount,
+                    opportunityStages: 1,
+                    opportunityAlternatives: opportunityOptionsCount < 1 ? 3 : opportunityOptionsCount,
+                    additionalEventStages: 0,
+                    eventAlternatives: 0);
+            }
 
-            OpenPreparationStages(targetNight, schedule);
+            OpenPreparationStages(targetNight, schedule, opportunityMandatory: true);
             IntermissionStage = IntermissionStage.Open;
             RevealStartedAtServerTime = 0d;
             CountdownStartsAtServerTime = 0d;
@@ -649,7 +681,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             double serverNow,
             Func<int, int> nextIntExclusive = null,
             float revealDuration = 4.5f,
-            float countdownDuration = 3.0f)
+            float countdownDuration = 3.0f,
+            IReadOnlyCollection<ulong> participants = null)
         {
             if (IsIntermissionLocked || _voteStages.Count == 0)
             {
@@ -658,6 +691,15 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             Func<int, int> rng = nextIntExclusive ?? (Func<int, int>)(max => ChoiceRng.Next(max));
             IntermissionStage = IntermissionStage.Locked;
+            _lockedParticipants.Clear();
+            var sourceParticipants = participants ?? (IReadOnlyCollection<ulong>)_readyPlayers;
+            if (sourceParticipants != null)
+            {
+                foreach (var pid in sourceParticipants)
+                {
+                    _lockedParticipants.Add(pid);
+                }
+            }
 
             var candidates = new List<BallotCandidate>(4);
             for (int s = 0; s < _voteStages.Count; s++)
@@ -729,12 +771,27 @@ namespace ScaryParty.Pizzeria.Domain.Services
             StartNightAtServerTime = 0d;
             LastWinningHindranceId = null;
             LastWinningOpportunityId = null;
+            _lockedParticipants.Clear();
         }
 
         public bool CanStartNight(IReadOnlyCollection<ulong> connectedHumans)
         {
             if (!IsVoteResolved || connectedHumans == null || connectedHumans.Count == 0) return false;
             if (_voteStages.Count > 0 && !AreAllMandatoryStagesVoted()) return false;
+
+            if (IntermissionStage >= IntermissionStage.Locked && _lockedParticipants.Count > 0)
+            {
+                // Participantes congelados no lock: entrada tardia nao bloqueia o inicio da noite.
+                foreach (var id in connectedHumans)
+                {
+                    if (_lockedParticipants.Contains(id) && !_readyPlayers.Contains(id))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             foreach (var id in connectedHumans)
             {
                 if (!_readyPlayers.Contains(id)) return false;
@@ -1088,6 +1145,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 return false;
             }
 
+            if (state.CurrentNightPhase == NightPhase.PreparingNextNight && IsIntermissionLocked)
+            {
+                lockReason = "Loja bloqueada durante a revelacao e contagem.";
+                return false;
+            }
+
             bool inPrep = state.CurrentNightPhase == NightPhase.PreparingNextNight || state.CurrentNightPhase == NightPhase.Preparing;
             if (offer.PhaseAvailability == ShopPhaseAvailability.PreparationOnly && !inPrep)
             {
@@ -1169,11 +1232,34 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return true;
         }
 
+        public delegate bool ValidateSupplyBundleFitDelegate(IReadOnlyList<SupplyBundleLineData> lines, out string failureReason);
+
         public bool TryPurchaseCatalogOffer(
             PizzeriaState state,
             string offerId,
             EmployeeTaskService employees,
             Func<IReadOnlyList<SupplyBundleLineData>, int> applySupplyBundle,
+            out string failureReason,
+            out int appliedCost,
+            out HiredEmployeeState hiredEmployee)
+        {
+            return TryPurchaseCatalogOffer(
+                state,
+                offerId,
+                employees,
+                applySupplyBundle,
+                validateFullSupplyBundle: null,
+                out failureReason,
+                out appliedCost,
+                out hiredEmployee);
+        }
+
+        public bool TryPurchaseCatalogOffer(
+            PizzeriaState state,
+            string offerId,
+            EmployeeTaskService employees,
+            Func<IReadOnlyList<SupplyBundleLineData>, int> applySupplyBundle,
+            ValidateSupplyBundleFitDelegate validateFullSupplyBundle,
             out string failureReason,
             out int appliedCost,
             out HiredEmployeeState hiredEmployee)
@@ -1209,6 +1295,14 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     if (applySupplyBundle == null)
                     {
                         failureReason = "Aplicador de suprimentos ausente.";
+                        return false;
+                    }
+
+                    if (validateFullSupplyBundle != null && !validateFullSupplyBundle(offer.SupplyBundleLines, out string fitReason))
+                    {
+                        failureReason = string.IsNullOrEmpty(fitReason)
+                            ? "Espaco insuficiente no armazenamento para o pacote completo."
+                            : fitReason;
                         return false;
                     }
 
