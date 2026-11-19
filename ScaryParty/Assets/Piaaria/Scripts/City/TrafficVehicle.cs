@@ -92,6 +92,32 @@ public class TrafficVehicle : MonoBehaviour
         if (toTarget.sqrMagnitude > 0.0025f)
         {
             Vector3 dir = toTarget.normalized;
+            bool severeDrift = false;
+            // Recuperação se empurrado para fora do corredor da faixa
+            if (currentWaypointIndex > 0 && currentWaypointIndex < waypoints.Count)
+            {
+                Vector3 prevWp = waypoints[currentWaypointIndex - 1];
+                prevWp.y = currentPos.y;
+                Vector3 seg = target - prevWp;
+                seg.y = 0f;
+                float segLenSq = seg.sqrMagnitude;
+                if (segLenSq > 0.01f)
+                {
+                    float projT = Mathf.Clamp01(Vector3.Dot(currentPos - prevWp, seg) / segLenSq);
+                    Vector3 onSeg = prevWp + seg * projT;
+                    Vector3 drift = onSeg - currentPos;
+                    drift.y = 0f;
+                    severeDrift = drift.magnitude > 3.5f;
+                    if (drift.magnitude > 1.8f)
+                    {
+                        dir = (dir + drift.normalized * 0.85f).normalized;
+                    }
+                }
+            }
+            float turnAngle = Vector3.Angle(transform.forward, dir);
+            float curveSpeedFactor = Mathf.Lerp(1f, 0.45f, Mathf.Clamp01(turnAngle / 60f));
+            float effectiveTargetSpeed = speed * curveSpeedFactor * (severeDrift ? 0.65f : 1f);
+
             bool stoppedByLight = CheckTrafficLight();
             isWaitingAtLight = stoppedByLight;
 
@@ -107,8 +133,10 @@ public class TrafficVehicle : MonoBehaviour
 
             if (stoppedByLight || blockedAhead)
                 _currentSpeed = Mathf.Max(0f, _currentSpeed - (speed * 2.8f * deltaTime));
+            else if (_currentSpeed > effectiveTargetSpeed)
+                _currentSpeed = Mathf.Max(effectiveTargetSpeed, _currentSpeed - (speed * 2.0f * deltaTime));
             else
-                _currentSpeed = Mathf.Min(speed, _currentSpeed + (speed * 1.2f * deltaTime));
+                _currentSpeed = Mathf.Min(effectiveTargetSpeed, _currentSpeed + (speed * 1.2f * deltaTime));
 
             if (_rb != null && !_rb.isKinematic)
             {
@@ -182,8 +210,10 @@ public class TrafficVehicle : MonoBehaviour
     private bool CheckObstacleAhead(Vector3 forwardDir, out TrafficStopReason reason)
     {
         reason = TrafficStopReason.None;
-        Vector3 origin = transform.position + Vector3.up * 0.6f;
-        int hitCount = Physics.RaycastNonAlloc(origin, forwardDir, _rayHits, _raycastDist, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
+        Vector3 origin = transform.position + Vector3.up * 0.65f + forwardDir * 2.1f;
+        Vector3 halfExtents = new Vector3(TrafficManager.VehicleDimensions.x * 0.46f, 0.42f, 0.35f);
+        Quaternion boxRot = Quaternion.LookRotation(forwardDir, Vector3.up);
+        int hitCount = Physics.BoxCastNonAlloc(origin, halfExtents, forwardDir, _rayHits, boxRot, _raycastDist, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
 
         float closestDist = float.MaxValue;
         for (int i = 0; i < hitCount; i++)
@@ -295,15 +325,29 @@ public class TrafficVehicle : MonoBehaviour
                 HitNormal = pushDir
             });
 
-            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
-                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.VehicleImpact,
-                null,
-                (ulong)VehicleId,
-                0,
-                0,
-                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
-                Mathf.Clamp01(impactSpeed / 12f),
-                isLocal: false);
+            if (ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance != null &&
+                ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance.IsServer)
+            {
+                ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance.BroadcastTransversalFeelClientRpc(
+                    (ushort)ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.VehicleImpact,
+                    hitPt,
+                    (ulong)VehicleId,
+                    Mathf.Clamp01(impactSpeed / 12f),
+                    (byte)ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal);
+            }
+            else
+            {
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerAtPosition(
+                    ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.VehicleImpact,
+                    hitPt,
+                    transform,
+                    (ulong)VehicleId,
+                    0,
+                    0,
+                    ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
+                    Mathf.Clamp01(impactSpeed / 12f),
+                    isLocal: false);
+            }
         }
     }
 }

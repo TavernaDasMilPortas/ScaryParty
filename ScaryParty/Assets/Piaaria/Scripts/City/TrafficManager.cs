@@ -69,8 +69,11 @@ public class TrafficManager : NetworkBehaviour
         }
     }
 
+    public static readonly Vector3 VehicleDimensions = new Vector3(2.35f, 1.2f, 4.4f);
+
     private List<VehicleState> _vehicleStates = new List<VehicleState>();
     private readonly Dictionary<int, GameObject> _clientVisuals = new Dictionary<int, GameObject>();
+    private readonly Dictionary<int, Rigidbody> _clientProxyBodies = new Dictionary<int, Rigidbody>();
 
     public void SetNetworkRelay(CityGenerator relay)
     {
@@ -191,8 +194,17 @@ public class TrafficManager : NetworkBehaviour
                 }
                 else
                 {
-                    visual.transform.position = Vector3.Lerp(visual.transform.position, st.position, Time.deltaTime * 10f);
-                    visual.transform.rotation = Quaternion.Slerp(visual.transform.rotation, st.rotation, Time.deltaTime * 10f);
+                    Vector3 nextPos = Vector3.Lerp(visual.transform.position, st.position, Time.deltaTime * 12f);
+                    Quaternion nextRot = Quaternion.Slerp(visual.transform.rotation, st.rotation, Time.deltaTime * 12f);
+                    if (_clientProxyBodies.TryGetValue(st.vehicleId, out var proxyRb) && proxyRb != null)
+                    {
+                        proxyRb.MovePosition(nextPos);
+                        proxyRb.MoveRotation(nextRot);
+                    }
+                    else
+                    {
+                        visual.transform.SetPositionAndRotation(nextPos, nextRot);
+                    }
                 }
             }
             else if (visual.activeSelf)
@@ -209,7 +221,7 @@ public class TrafficManager : NetworkBehaviour
         GameObject vehicleObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
         vehicleObj.SetActive(false);
         vehicleObj.name = $"TrafficVehicle_{_nextVehicleId}";
-        vehicleObj.transform.localScale = new Vector3(2.35f, 1.2f, 4.4f);
+        vehicleObj.transform.localScale = VehicleDimensions;
         vehicleObj.transform.SetParent(_vehicleRoot.transform);
 
         // Corpo físico sólido (não-trigger) para colisão real
@@ -335,15 +347,71 @@ public class TrafficManager : NetworkBehaviour
         vehicle.CurrentEndNode = chosenEndIndex;
         if (vehicle.CurrentEdgeId < 0 && path.Count >= 2)
             vehicle.CurrentEdgeId = ResolveClosestEdgeId(path[0], path[1]);
-        vehicle.waypoints = BuildLaneAndCornerWaypoints(path, laneOffset: 1.85f);
+        float streetWidth = (_networkRelay != null && _networkRelay.config != null && _networkRelay.config.streetWidth > 1f)
+            ? _networkRelay.config.streetWidth
+            : 6.0f;
+        vehicle.waypoints = BuildLaneAndCornerWaypoints(path, streetWidth, VehicleDimensions.x);
         vehicle.currentWaypointIndex = 0;
         return true;
     }
 
-    private static List<Vector3> BuildLaneAndCornerWaypoints(List<Vector3> centerPath, float laneOffset)
+    public static float ComputeSafeLaneOffset(float streetWidth, float vehicleWidth)
+    {
+        float halfStreet = Mathf.Max(2.0f, streetWidth * 0.5f);
+        float halfVehicle = vehicleWidth * 0.5f;
+        float maxSafeOffset = Mathf.Max(0f, halfStreet - halfVehicle - 0.20f);
+        return Mathf.Min(halfStreet * 0.5f, maxSafeOffset);
+    }
+
+    public static bool IsEnvelopeContainedInCorridor(
+        IReadOnlyList<Vector3> waypoints,
+        IReadOnlyList<Vector3> centerPath,
+        float streetWidth,
+        float vehicleWidth)
+    {
+        if (waypoints == null || centerPath == null || centerPath.Count < 2) return false;
+        float halfStreet = Mathf.Max(2.0f, streetWidth * 0.5f);
+        float halfVehicle = vehicleWidth * 0.5f;
+        float maxCenterOffset = Mathf.Max(0f, halfStreet - halfVehicle - 0.10f);
+
+        for (int w = 0; w < waypoints.Count; w++)
+        {
+            Vector3 pt = waypoints[w];
+            float minDistSq = float.MaxValue;
+            for (int s = 0; s < centerPath.Count - 1; s++)
+            {
+                Vector3 a = centerPath[s];
+                Vector3 b = centerPath[s + 1];
+                Vector3 ab = b - a;
+                ab.y = 0f;
+                float lenSq = ab.sqrMagnitude;
+                if (lenSq < 0.0001f) continue;
+                Vector3 ap = pt - a;
+                ap.y = 0f;
+                float t = Mathf.Clamp01(Vector3.Dot(ap, ab) / lenSq);
+                Vector3 proj = a + ab * t;
+                Vector3 d = pt - proj;
+                d.y = 0f;
+                if (d.sqrMagnitude < minDistSq) minDistSq = d.sqrMagnitude;
+            }
+            if (Mathf.Sqrt(minDistSq) > maxCenterOffset + 0.02f)
+                return false;
+        }
+        return true;
+    }
+
+    public static List<Vector3> BuildLaneAndCornerWaypoints(List<Vector3> centerPath, float streetWidth, float vehicleWidth)
     {
         if (centerPath == null || centerPath.Count < 2) return centerPath;
-        var result = new List<Vector3>(centerPath.Count * 2);
+
+        float halfStreet = Mathf.Max(2.0f, streetWidth * 0.5f);
+        float halfVehicle = vehicleWidth * 0.5f;
+        // Margem de segurança de 0.20m da guia da calçada
+        float maxSafeOffset = Mathf.Max(0f, halfStreet - halfVehicle - 0.20f);
+        float laneOffset = ComputeSafeLaneOffset(streetWidth, vehicleWidth);
+        float trimBase = Mathf.Clamp(halfStreet * 0.85f, 1.4f, 3.2f);
+
+        var result = new List<Vector3>(centerPath.Count * 4);
 
         for (int i = 0; i < centerPath.Count - 1; i++)
         {
@@ -356,18 +424,28 @@ public class TrafficManager : NetworkBehaviour
             dir /= len;
 
             Vector3 rightLane = Vector3.Cross(Vector3.up, dir).normalized * laneOffset;
-            float trim = Mathf.Min(2.4f, len * 0.22f);
+            float trim = Mathf.Min(trimBase, len * 0.28f);
             Vector3 entry = a + dir * trim + rightLane;
             Vector3 exit = b - dir * trim + rightLane;
 
             if (result.Count > 0)
             {
-                // Arco suave dentro do cruzamento sem invadir calçada
+                // Arco quadrático dentro do cruzamento usando o vértice da interseção deslocado pela faixa segura
                 Vector3 prev = result[result.Count - 1];
-                Vector3 midCorner = Vector3.Lerp(prev, entry, 0.5f);
-                Vector3 cornerApex = b * 0f + a + rightLane * 0.5f;
-                midCorner = Vector3.Lerp(midCorner, new Vector3(a.x, prev.y, a.z), 0.35f);
-                result.Add(midCorner);
+                Vector3 prevToA = a - prev;
+                prevToA.y = 0f;
+                Vector3 control = a + (entry - a) * 0.45f + (prev - a) * 0.45f;
+                control.y = prev.y;
+
+                // Amostra 2 pontos intermediários na curva de Bézier quadrática e garante contenção na rua
+                for (int s = 1; s <= 2; s++)
+                {
+                    float t = s / 3f;
+                    float omt = 1f - t;
+                    Vector3 arcPt = (omt * omt * prev) + (2f * omt * t * control) + (t * t * entry);
+                    arcPt = ClampPointToStreetCorridor(arcPt, a, b, maxSafeOffset);
+                    result.Add(arcPt);
+                }
             }
 
             result.Add(entry);
@@ -376,6 +454,28 @@ public class TrafficManager : NetworkBehaviour
 
         if (result.Count < 2) return centerPath;
         return result;
+    }
+
+    private static Vector3 ClampPointToStreetCorridor(Vector3 pt, Vector3 segA, Vector3 segB, float maxLateralOffset)
+    {
+        Vector3 ab = segB - segA;
+        ab.y = 0f;
+        float lenSq = ab.sqrMagnitude;
+        if (lenSq < 0.001f) return pt;
+
+        Vector3 ap = pt - segA;
+        ap.y = 0f;
+        float proj = Mathf.Clamp01(Vector3.Dot(ap, ab) / lenSq);
+        Vector3 closest = segA + ab * proj;
+        closest.y = pt.y;
+        Vector3 lateral = pt - closest;
+        lateral.y = 0f;
+        float latMag = lateral.magnitude;
+        if (latMag > maxLateralOffset && latMag > 0.001f)
+        {
+            return closest + (lateral / latMag) * maxLateralOffset;
+        }
+        return pt;
     }
 
     private int ResolveClosestEdgeId(Vector3 a, Vector3 b)
@@ -475,7 +575,8 @@ public class TrafficManager : NetworkBehaviour
             {
                 visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 visual.SetActive(false);
-                visual.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
+                visual.name = $"TrafficVehicleProxy_{st.vehicleId}";
+                visual.transform.localScale = VehicleDimensions;
 
                 Renderer rend = visual.GetComponent<Renderer>();
                 if (rend != null)
@@ -495,8 +596,15 @@ public class TrafficManager : NetworkBehaviour
                 }
                 visual.transform.SetParent(_vehicleRoot.transform);
 
-                Collider col = visual.GetComponent<Collider>();
-                if (col != null) Destroy(col);
+                // R04: manter colisor sólido no cliente com dimensões idênticas ao servidor e Rigidbody cinemático (sem dano duplicado)
+                BoxCollider proxyCol = visual.GetComponent<BoxCollider>();
+                if (proxyCol != null) proxyCol.isTrigger = false;
+
+                var proxyRb = visual.AddComponent<Rigidbody>();
+                proxyRb.isKinematic = true;
+                proxyRb.useGravity = false;
+                proxyRb.interpolation = RigidbodyInterpolation.Interpolate;
+                _clientProxyBodies[st.vehicleId] = proxyRb;
 
                 // A13: definir pose inicial ANTES de ativar o objeto no cliente
                 visual.transform.SetPositionAndRotation(st.position, st.rotation);
@@ -517,6 +625,7 @@ public class TrafficManager : NetworkBehaviour
             if (_clientVisuals.TryGetValue(toRemove[i], out var dead) && dead != null)
                 Destroy(dead);
             _clientVisuals.Remove(toRemove[i]);
+            _clientProxyBodies.Remove(toRemove[i]);
         }
     }
 
