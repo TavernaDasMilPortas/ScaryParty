@@ -2305,6 +2305,11 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             FaceDirection(workForward, dt);
+            Vector3 curFwd = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+            if (curFwd.sqrMagnitude > 0.001f && Vector3.Dot(curFwd.normalized, workForward) < 0.85f)
+            {
+                return false; // Aguarda alinhar frente ao posto antes de iniciar a operação
+            }
             return true;
         }
 
@@ -2850,17 +2855,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static EmployeeAgentController SpawnEmployeeBody(PizzeriaRoot root, HiredEmployeeState emp)
         {
-            Vector3 desiredOffset = emp.Role == EmployeeRole.Cashier
-                ? new Vector3(-1.4f + (emp.EmployeeId % 2) * 0.9f, 0f, 2.0f)
-                : new Vector3(1.1f + (emp.EmployeeId % 3 - 1) * 1.1f, 0f, -0.8f);
-            Vector3 spawnPos = CustomerSpawner.SnapToFloor(root.transform.position + desiredOffset);
-            if (EmployeeAgentController.TrySampleFloorNavMesh(spawnPos, 6f, out var navFloor))
-            {
-                spawnPos = navFloor;
-            }
+            root.GetEmployeeSpawnPose(emp.Role, emp.EmployeeId, out Vector3 spawnPos, out Quaternion spawnRot);
 
             var go = new GameObject($"Employee_{emp.Role}_{emp.EmployeeId}");
-            go.transform.position = spawnPos;
+            go.transform.SetPositionAndRotation(spawnPos, spawnRot);
             var capsule = go.AddComponent<CapsuleCollider>();
             capsule.center = new Vector3(0f, 0.9f, 0f);
             capsule.height = 1.8f;
@@ -2984,14 +2982,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 var renderer = cap.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-                    if (urp != null)
-                    {
-                        var m = new Material(urp);
-                        m.color = tint;
-                        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", tint);
-                        renderer.sharedMaterial = m;
-                    }
+                    var fallbackMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                        renderer.sharedMaterial,
+                        ScaryParty.VisualStyles.VisualSemanticRole.NpcBody,
+                        ScaryParty.VisualStyles.VisualCategoryIds.Characters,
+                        () => renderer.sharedMaterial);
+                    if (fallbackMat != null) renderer.sharedMaterial = fallbackMat;
+                    ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(renderer, 0, tint);
                 }
             }
 

@@ -920,21 +920,46 @@ namespace ScaryParty.Pizzeria.Composition
             }
         }
 
+        private readonly HashSet<int> _reservedEmployeeSpawnSlots = new HashSet<int>();
+
+        public void ClearSpawnReservations()
+        {
+            _reservedEmployeeSpawnSlots.Clear();
+        }
+
         public Vector3 GetPlayerSpawnPosition(int index)
         {
             EnsureAnchorsResolved();
+            var ext = GetComponent<PizzeriaExteriorAnchors>();
+            if (ext != null && ext.playerSpawns != null && ext.playerSpawns.Length > 0)
+            {
+                int safeIdx = Mathf.Clamp(index, 0, ext.playerSpawns.Length - 1);
+                if (ext.playerSpawns[safeIdx] != null)
+                {
+                    return ValidateSafeFloorPosition(ext.playerSpawns[safeIdx].position);
+                }
+            }
             if (playerSpawnAnchors != null && playerSpawnAnchors.Length > 0)
             {
                 int safeIdx = Mathf.Clamp(index, 0, playerSpawnAnchors.Length - 1);
                 if (playerSpawnAnchors[safeIdx] != null)
-                    return playerSpawnAnchors[safeIdx].position;
+                    return ValidateSafeFloorPosition(playerSpawnAnchors[safeIdx].position);
             }
-            return transform.position + Vector3.up * 0.1f;
+            var fp = GetComponent<PizzeriaFootprint>();
+            Vector3 fallbackLocal = new Vector3(4.5f + (index % 4) * 1.4f, fp != null ? fp.floorSurfaceLocalY + 0.05f : 0.05f, -2.5f);
+            return ValidateSafeFloorPosition(transform.TransformPoint(fallbackLocal));
         }
 
         public Quaternion GetPlayerSpawnRotation(int index)
         {
             EnsureAnchorsResolved();
+            var ext = GetComponent<PizzeriaExteriorAnchors>();
+            if (ext != null && ext.playerSpawns != null && ext.playerSpawns.Length > 0)
+            {
+                int safeIdx = Mathf.Clamp(index, 0, ext.playerSpawns.Length - 1);
+                if (ext.playerSpawns[safeIdx] != null)
+                    return ext.playerSpawns[safeIdx].rotation;
+            }
             if (playerSpawnAnchors != null && playerSpawnAnchors.Length > 0)
             {
                 int safeIdx = Mathf.Clamp(index, 0, playerSpawnAnchors.Length - 1);
@@ -942,6 +967,61 @@ namespace ScaryParty.Pizzeria.Composition
                     return playerSpawnAnchors[safeIdx].rotation;
             }
             return transform.rotation;
+        }
+
+        public bool GetEmployeeSpawnPose(EmployeeRole role, int employeeId, out Vector3 spawnPos, out Quaternion spawnRot)
+        {
+            EnsureAnchorsResolved();
+            var ext = GetComponent<PizzeriaExteriorAnchors>();
+            Transform preferred = null;
+            if (ext != null)
+            {
+                preferred = role == EmployeeRole.Cashier
+                    ? (ext.employeeSpawnCashier != null ? ext.employeeSpawnCashier : ext.employeeArrival)
+                    : (ext.employeeSpawnCook != null ? ext.employeeSpawnCook : ext.employeeArrival);
+            }
+
+            Vector3 basePos;
+            if (preferred != null)
+            {
+                basePos = preferred.position;
+                spawnRot = preferred.rotation;
+            }
+            else
+            {
+                var fp = GetComponent<PizzeriaFootprint>();
+                float floorY = fp != null ? fp.floorSurfaceLocalY : -1.6f;
+                Vector3 localPos = role == EmployeeRole.Cashier
+                    ? new Vector3(6.0f, floorY + 0.05f, -1.5f)
+                    : new Vector3(20.0f, floorY + 0.05f, -18.0f);
+                basePos = transform.TransformPoint(localPos);
+                spawnRot = transform.rotation;
+            }
+
+            int slot = Mathf.Abs(employeeId) % 4;
+            while (_reservedEmployeeSpawnSlots.Contains(slot) && slot < 12)
+            {
+                slot++;
+            }
+            _reservedEmployeeSpawnSlots.Add(slot);
+
+            Vector3 spread = transform.right * ((slot % 3 - 1) * 1.15f) + transform.forward * ((slot / 3) * 1.15f);
+            spawnPos = ValidateSafeFloorPosition(basePos + spread);
+            return true;
+        }
+
+        private static Vector3 ValidateSafeFloorPosition(Vector3 candidate)
+        {
+            if (UnityEngine.AI.NavMesh.SamplePosition(candidate, out var navHit, 4.0f, UnityEngine.AI.NavMesh.AllAreas))
+            {
+                Vector3 p = navHit.position;
+                if (!Physics.CheckCapsule(p + Vector3.up * 0.45f, p + Vector3.up * 1.55f, 0.32f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                {
+                    return p;
+                }
+                return navHit.position;
+            }
+            return candidate;
         }
 
         public Bounds GetPizzeriaInteriorBounds()
