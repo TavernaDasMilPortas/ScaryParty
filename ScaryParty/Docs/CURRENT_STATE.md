@@ -1,9 +1,9 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 18/11/2026
+**Última Revisão:** 19/11/2026
 **Versão Unity:** Unity 6000.3.6f1
-**Branch Atual:** `release/marcos-noturnos`
-**Commits Recentes:** Base `bdffe509` → `c6163121` + fases **B0–B6** (incluindo **B5.1 Revisada**: catálogo único `RunBalancingCatalog`, Wizard Odin 8 abas, consumidores B3, preparação pré-Noite 1 & votação multi-estágio B4, UI replicada B5, preset `NoiteDeTeste` sem limite de tempo de turno, central Odin `PlaytestDebugController` sem overlays `[F8]`/`[F6]`, EditMode `96/96` + PlayMode `6/6` + `ValidateAll` `0` erros; multiplayer 2 processos pendente).
+**Branch Atual:** `fix/auditoria-marcos-noturnos` (derivada de `release/marcos-noturnos` @ `2dacefe6`)
+**Último Bloco Concluído:** **C01–C17 implementados; C18 documentação & validação estática (`dotnet build` `0` erros) concluída; validação L2/L3 no Unity Editor (`T01–T44`) pendente.**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---

@@ -5,6 +5,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-18] — NPCs Contratados (Modelo/Animação, Telefone/Cooldown, Barra/Quadro/`[E]`) e Porta do Balcão
 - **Escopo:** `NetDtos.cs`, `StationProgressBar.cs`, `StationDoorPresenter.cs`, `CustomerSpawner.cs`, `EmployeeAgentController.cs`, `TicketBoardStation.cs`, `TicketBoardPresenter.cs`, `TicketModalPresenter.cs`.
 - **Resumo:**
@@ -16,6 +27,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-18] — Wizard de Eventos, Loja, Balanceamento e Central de Playtest (`B0–B6`, `B5.1 Revisada`)
 - **Escopo:** Fonte única (`RunBalancingCatalog` / `RunBalancingCatalog.asset`, `RunBalancingSnapshot`, `RunDescriptionFormatter`, `RunBalancingValidator`, `RunBalancingMigrationRunner`), Wizard Odin de 8 abas (`PizzeriaEventsShopBalancingWizard` em `Tools/Scary Party/Wizards/Pizzaria/Eventos, Loja e Balanceamento`), consumidores de runtime (`MonsterPopulationDirector`, `MonsterNpcController`, `DemandDirector`, `NightCycleService`, `EmployeeTaskService`, `PizzeriaCommandHandler`), preparação pré-Noite 1 & votação multi-estágio (`RunProgressionService`, `NetRunVoteOptionDto`, `NetRunShopOfferDto`, `RunPreparationPresenter`, `OperationsHubPresenter`), preset selecionável `NoiteDeTeste.asset` (`UnlimitedShiftTime=true`, HUD `SEM LIMITE`), remoção dos overlays `[F8]`/`[F6]` e centralização em 8 abas Odin Inspector (`PlaytestDebugController` em `[Debug] Central de Playtest`, `PlaytestDebugMenu`, `PlaytestCheckpointService` + `RebaseRelativeDeadlines` + `IsForcedDebugOutcome`).
 - **Relatório Completo:** `Docs/Release/Reports/WIZARD_EVENTOS_LOJA_BALANCEAMENTO.md` e `Docs/Release/Reports/Evidence/B6_TEST_SUMMARY.md`.
@@ -23,10 +45,32 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-18] — Correções de Playtest, UI Navegável, Placeholders 3D e Validação CLI (`P0–P7`)
 - **Escopo:** Inventário e manifesto (`PlaytestReferenceManifest`, `PlaytestInstallerAndValidator`), sincronização cliente sem `DomainState` (`MonsterPopulationDirector`, `EmployeePopulationDirector`, `NetMonsterDto`/`NetEmployeeDto`), operações reais de funcionários e vínculo exclusivo pizza–unidade (`OrderUnitFulfillmentService`, `PlayerInteraction`), resolução unificada de metas e reset (`PizzeriaRunPreset`, `NightParameterResolver`, `PizzeriaRoot`), fluxo completo UI Toolkit (`SessionLaunchConfig`, `HudPresenter`, `OperationsHubPresenter` `[J]`, `LifeAndSpectatorOverlayPresenter`, `MinimapPresenter`, `GameplayInputGate` + `WeaponInputHandler`), 12 prefabs/16 materiais provisórios URP (`Assets/Piaaria/Playtest/`) + `EntityVisualAnchorRig` + Alho (`id=10`) + anchors de telhado (`CityBuilding`/`CityGenerator`), presets (`Entrega_3Noites`, `Playtest_Integracao`, `Tutorial_Noite0`) + painel `[F8]` (`PlaytestDiagnosticsPresenter`) e correção de `CutscenePlaybackService.PlayRoutine`.
 - **Relatório Completo:** `Docs/Release/Reports/PLAYTEST_UI_PLACEHOLDERS.md`.
 - **Validação:** `dotnet build ScaryParty.Pizzeria.Tests.csproj --no-restore` (`0` erros), Unity CLI EditMode (`102/102 Passed`), Unity CLI PlayMode `PlaytestIntegrationPlayModeTests` (`6/6 Passed` em `503.73s` com XML NUnit3 e JSON preservados), 8 capturas GameView em `1920x1080` e `1280x720`, pós-PlayMode `ValidateAll` (`0` erros, `0` warnings). Multiplayer em 2 processos reais marcado `NÃO EXECUTADO` (`0` cenários MPPM configurados).
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -39,6 +83,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
   - **Etapa 4 (`20c4752d`):** rotinas pacíficas e papel de cliente em `MonsterNpcController` com `InterruptCustomerForCombat` liberando fila/mesa/pedido ao entrar em combate.
   - **Etapa 5 (`b047d541`):** Noite 0 funcional com transição segura para Noite 1 sem consumir noites da RUN e parâmetros de RUN/tutorial/funcionários expostos em `PizzeriaConfig`.
   - **Etapa 6:** 4 novos testes de regressão em `OvernightExperienceTests.cs` (**37/37** aprovados no runner `.NET`), 4 `.csproj` com 0 erros e checklist Host + Cliente registrado em `RECUPERACAO_M1_M8.md`.
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -58,10 +113,32 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-16] — Marcos M2–M8 na branch `release/marcos-noturnos`
 - **Escopo:** `City/{TrafficVehicle,TrafficManager,CityGenerator}.cs`, `City/Editor/CityGraphPathfinderTests.cs`, `Weapons/{WeaponBase,WeaponController,WeaponInputHandler}.cs`, `Player/FirstPersonCameraController.cs`, `City/DeliveryMotorcycleController.cs`, `Pizzeria/Player/PlayerInventoryAdapter.cs`, `Pizzeria/Domain/Services/{NightCycleService,SpeciesHostilityService,RunProgressionService,EmployeeTaskService}.cs`, `Combat/Monsters/MonsterNpcController.cs`, `Pizzeria/Network/{NetDtos,PizzeriaNetworkState,PizzeriaCommandHandler}.cs`, `Tests/Editor/OvernightExperienceTests.cs`, `Docs/Release/*`.
 - **Resumo:** Implementados em blocos sequenciais com commits locais: M2 (relay de tráfego no `CityGenerator`, sensores A11, colisão e overlay `F7`), M3 (bandoleira `[G]`, moto 1 mão + pistola, ADS 1P, `WeaponId` A08 e atropelamento idempotente), M4 (fechamento no relógio A06, reputação `0..100`, resgate aliado/espectador A04, preservação de munição A10 e suprimentos), M5 (`MonsterNpcController`, `SpeciesHostilityService` e `ZombieConversionService`), M6 (`RunProgressionService` com N noites, votos, modificadores, loja atômica e RNG separado), M7 (`EmployeeTaskService` com reservas exclusivas `T58` e erro por habilidade) e consolidação M8.
 - **Validação:** `git diff --check` limpo em cada etapa; Test Runner EditMode e bateria PlayMode/ParrelSync pendentes no Unity Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -79,6 +156,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-15] — Correção do Ciclo de Interação e Bancadas (Colocação, Coleta e Trabalho)
 - **Escopo:** `PizzeriaCommandHandler.cs`, `PlayerInteraction.cs`, `StationView.cs`, `PrepStation.cs`, `Docs/CURRENT_STATE.md`, `Docs/CHANGELOG.md`.
 - **Causa Raiz:** Quatro fatores combinados travavam o ciclo de bancadas: 1) `IsStationWithinReach` no servidor media distância apenas até o pivô central do GameObject da mesa, rejeitando jogadores em slots periféricos de bancadas longas (> 6.5m); 2) `HandleRaycast` limitava `maxReach` na malha da própria mesa, impedindo detecção de postos 3D (`StationWorkpostTarget`) e acionando `blockedByBoundStationBody`; 3) resolução rígida de slots não encontrava itens ao mirar ligeiramente fora do centro do slot; 4) `UpdateTrackedWork` aguardava fase `Completed` que nunca era vista porque o servidor remove o slot de `StationSlots` no frame de término, prendendo o look lock de câmera.
@@ -91,6 +179,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-15] — Correções de Sessão Relay/WSS, Animações Remotas, Menu ESC & Otimização de Rede NGO
 - **Escopo:** `UIFeedbackService.cs`, `LobbyManager.cs`, `NetworkAutoStart.cs`, `LobbyScene.unity`, `UIModalStack.cs`, `PauseEscapeMenuPresenter.cs`, `CharacterVisualController.cs`, `OwnerNetworkAnimator.cs`, `PlayerArmature.prefab`, `ThirdPersonController.cs`, `CustomerNpcView.cs`, `PlayerState.cs`, `ReplicationProjector.cs`, `ProcessingService.cs`, `PizzeriaRoot.cs`, `NetDtos.cs`, `PlayerInteraction.cs`, `TrafficManager.cs`, `DeliveryMotorcycleController.cs`, `PizzeriaCommandHandler.cs`, `DemandDirector.cs`, `Docs/{CURRENT_STATE,CHANGELOG}.md`.
 - **Alterações:**
@@ -100,6 +199,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
   - **Animações remotas e NPCs:** `AnimatorCullingMode.AlwaysAnimate` em `CharacterVisualController`/`OwnerNetworkAnimator`/`ThirdPersonController`; filtragem via prefab e reflexão em `OwnerNetworkAnimator` desativando sincronização de parâmetros contínuos; estimativa local de velocidade/estado em clientes (`ThirdPersonController.UpdateRemoteVisuals`) e `MotionSpeed = 1f` quando bloqueado; medição real de deslocamento horizontal por frame em `CustomerNpcView.Update()`.
   - **Redução de tráfego NGO:** `UseUnreliableDeltas`, compressão quaternion/half-float e thresholds maiores em `PlayerArmature.prefab`/`PlayerState`; remoção da comparação incondicional de `Revision` em `NetItemDto.Equals`/`ProjectCallsDelta`, `PublishedRevision` atualizado apenas sob mudança real e tolerâncias maiores em `NetDtos`/`ProcessingService`/`PizzeriaRoot`; heartbeats de trabalho/atendimento a `0.30s`; `TrafficManager` (`0.25s`, RPC `Unreliable` só com clientes remotos, yaw `short` + `RGBA byte`) e `DeliveryMotorcycleController`/`PizzeriaCommandHandler` (`0.08s`, envio `Unreliable` por delta de movimento/rotação); conversão de `DemandDirector` para `MonoBehaviour`.
 - **Validação:** `git diff --check` limpo nos arquivos editados (preservando `.meta` e alterações prévias) e `dotnet build --no-restore -m:1` sequencial nos 4 `.csproj` com 0 erros (`Domain=0`, `Runtime=0`, `Editor=0`, `Tests=0`). Validação manual PlayMode/ParrelSync no Unity Editor pendente (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -116,6 +226,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-14] — Sistema Completo de Game Feel Cartoon, Animações Táteis, Audio 3D e Studio Wizard (Fases 0–6)
 - **Escopo:** `Presentation/Feedback/*`, `Pizzeria/Presentation/*`, `Pizzeria/Visual/PizzaVisualComposer.cs`, `Pizzeria/Stations/{OvenStation,PhoneRinger,TicketSheetView,StationView}.cs`, `Player/{PlayerInteraction,FirstPersonCameraController,CharacterVisualController}.cs`, `UI/Piaria/Scripts/Runtime/Core/{UIToolkitTweenService,UIFeedbackService}.cs`, `Editor/GameFeel/GameFeelStudioWindow.cs`, `Pizzeria/Editor/Tests/GameFeelSystemTests.cs`, `Docs/GameFeel/*`, `Docs/{CURRENT_STATE,PizzeriaSetup,INDEX}.md`.
 - **Alterações:**
@@ -128,6 +249,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-14] — Espessura de Outlines e Utilitário de Troca de Horas em Play Mode
 - **Escopo:** `Shaders/IllustrateScreenSpaceOutline.shader`, `VisualStyles/Runtime/TimeOfDayTestOverlay.cs`, `VisualStyles/Runtime/TimeOfDayLightingDirector.cs`, `VisualStyles/Runtime/VisualStyleProfile.cs`, `VisualStyles/Editor/GlobalCelShadingWizard.cs`, `Art/VisualStyles/Profiles/*.asset`, `Art/VisualStyles/Generated/*/Render/*_ScreenSpaceOutline.mat`.
 - **Alterações:**
@@ -136,6 +268,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
   - Abertura automática da seção de ciclo dia/noite no `GlobalCelShadingWizard` durante Play Mode.
 - **Validação:** `dotnet build` com 0 erros nos 4 `.csproj` e `git diff --check` limpo; teste interativo pendente no Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).
 - **Risco:** Mínimo; ativos canônicos preservados e utilitário roda inteiramente desacoplado de código de gameplay.
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -151,6 +294,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-14] — Outline Plane-Invariante, Calibração de Iluminação Interna/Rua e Consistência em Interações
 - **Escopo:** `Shaders/IllustrateScreenSpaceOutline.shader`, `Shaders/IllustrateStylizedCore.hlsl`, `VisualStyles/Runtime`, `VisualStyles/Editor`, `Art/VisualStyles/Profiles/*.asset`, `Art/VisualStyles/Generated/*/Render/*_ScreenSpaceOutline.mat`, `VisualStyles/Tests/Editor`.
 - **Alterações:**
@@ -163,6 +317,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-14] — Iluminação Cartoon Integrada, Modos A/B/C na GameScene Original e Contratos B0–B3
 - **Escopo:** `VisualStyles/Runtime`, `VisualStyles/Editor`, `Lighting/`, `Lighting/Editor/`, `Shaders/Illustrate*Stylized*`, `Pizzeria/`, `Player/`.
 - **Alterações:**
@@ -171,6 +336,17 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
   - Implementação de `TimeOfDayLightingDirector` + `TimeOfDayProfile` (17h/19h/22h/02h), `PizzeriaLightingController` (zonas e remoção de sombra em Point Lights), `CityLightingDirector` + `StylizedLightPool` sem sombra, `NetworkTimeOfDayState`, `LightingReadyGate`, `LightingQualityBudget` (atlas URP 2048) e contratos B0–B3 (`LightingFeatureRegistry`, `FixedInteriorLightingData`).
 - **Validação:** `dotnet build` com 0 erros nas 4 assemblies (`VisualStyles.Runtime`, `Assembly-CSharp`, `Assembly-CSharp-Editor`, `PlayModeTests`); validação estática L0/L1 sem violações de `[MenuItem]` ou `UnityEditor` no runtime. Execução visual e suíte Unity Test Runner pendentes no Editor (`UNITY_EXECUTION=MANUAL_ONLY`).
 - **Risco:** Materiais `.mat` gerados previamente exigem re-seed/regeneração pelo Wizard no Unity Editor para vincular os novos shaders e presets de ciclo Dia/Noite; ativos canônicos (`GameScene.unity`, `PC_RPAsset.asset`, `PC_Renderer.asset`, Distant Lands e prefabs originais) foram preservados intactos.
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
@@ -190,11 +366,33 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-14] — Materiais Cel Shaded (Branch feature/global-cel-shading-wizard)
 - **Escopo:** Pipeline visual de Cel Shading / Toon Shader no URP.
 - **Alterações:** Geração de novos materiais e variantes de cena para visual estilizado (`GameScene_CelShaded.unity`).
 - **Validação:** Visual no Unity Editor pelo desenvolvedor.
 - **Status:** Em desenvolvimento e validação visual no Editor.
+
+---
+
+## [2026-11-19] — Execução do Plano de Auditoria (`C01–C18`) em `fix/auditoria-marcos-noturnos`
+- **Escopo:** Intermissão/Loja (`RunProgressionService`, `PizzeriaCommandHandler`, `RunShopPagePresenter`, `NightIntermissionPresenter`, `OperationsStatusPresenter`, `ScoreboardPresenter`, `LotteryRevealPresenter`, `NightIntermissionFeelBridge`, `UIToolkitTweenService`), Pátio Modular & Muralhas (`PizzeriaFootprint`, `PizzeriaExteriorAnchors`, `PizzeriaParkingLotBuilder`, `PizzeriaPlacementSolver`, `PizzeriaPatioLayoutWizard`, `StreetGridGenerator`), Loading & Navegação (`PizzeriaSceneLoadingCoordinator`, `LobbyManager`, `ReadySceneController`, `LobbyPresenter`, `MainMenuPresenter`, `PauseEscapeMenuPresenter`, `NightResultsPresenter`, `ReadyRoomPresenter`, `NavigationWorldManager`), Tráfego & Spawns/IA & Feel (`TrafficManager`, `TrafficVehicle`, `PlayerState`, `PedestrianNpc`, `PizzeriaRoot`, `EmployeeAgentController`, `GameFeelTypes`).
+- **Resumo:**
+  - **C01–C05:** Guardas de servidor (`TrySetPlayerReady`, `HasAllParticipantsVotedMandatoryStages`, `_lockedParticipants`, início atômico pós-contagem), loja bloqueada no lock + compra correlacionada por `requestId` + pacote de suprimentos transacional, estilos USS embarcados nos UXMLs + catálogo runtime, painel TAB `OperationsStatusPresenter` conectado e replicado, fallback real em `NightIntermissionFeelBridge`, e `KillTweensRecursive`.
+  - **C06–C08 & C16:** `PizzeriaLayoutProfile` + `PizzeriaExteriorAnchors` + `PizzeriaPatioLayoutWizard` (preview L/T), reserva de `exteriorRegions` e `accessCorridors` no `PizzeriaPlacementSolver`, `IsWorldPositionInsidePizzeria` restrito ao interior estrutural, pátio determinístico no recuo do L com colisor e `MaterialPropertyBlock`, e cobertura residual de muralhas/arestas curtas/quinas em `StreetGridGenerator`.
+  - **C09–C11:** `PizzeriaSceneLoadingCoordinator` com `PanelSettings` persistente (`sortingOrder = 5000`), rotas de cena unificadas, primeiro frame antes de carga, prontidão por destino e `UpdateNavMesh` assíncrono; limite por delta de servidor na moto, validação de origem de tiro antes do débito e `RaycastNonAlloc` reutilizado.
+  - **C13–C15 & C17:** Tráfego físico em `FixedUpdate` com `Rigidbody` dinâmico, faixas e curvas, colisão única e recuo direcional com proteção geométrica em jogadores e pedestres; spawns autorados/reservados e alinhamento de contratados; eventos `GameFeelEventId` transversais.
+- **Validação Estática:** `dotnet build` em `ScaryParty.Pizzeria.Tests.csproj`, `Assembly-CSharp.csproj` e `Assembly-CSharp-Editor.csproj` com `0` erros. Testes manuais `T01–T44` no Unity Editor pendentes (`UNITY_EXECUTION=MANUAL_ONLY`).
 
 ---
 
