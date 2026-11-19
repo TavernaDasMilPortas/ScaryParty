@@ -34,6 +34,7 @@ namespace ScaryParty.Pizzeria.Presentation
         public int MaxHpInt => 100;
         public uint Revision { get; private set; } = 1;
         public EmployeeBlockReason LastBlockReason => _lastBlockReason;
+        public EmployeeHighLevelState HighLevelState => MapToHighLevelState((WorkStep)_stepIndex, _lastBlockReason, IsAlive);
         public byte CurrentWorkStepByte => (byte)Mathf.Clamp(_stepIndex, 0, 255);
         public byte CurrentActionProgressPercentByte => (byte)Mathf.Clamp(Mathf.RoundToInt(_actionProgressNormalized * 100f), 0, 100);
 
@@ -94,7 +95,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private ToolItemId _leasedToolId = ToolItemId.None;
         private int _expectedIngredientCountBeforeAsm;
 
-        private enum WorkStep : byte
+        public enum WorkStep : byte
         {
             Idle = 0,
             CashierMoveToCounter = 1,
@@ -2489,21 +2490,65 @@ namespace ScaryParty.Pizzeria.Presentation
             _expectedIngredientCountBeforeAsm = 0;
         }
 
+        private void OnDestroy()
+        {
+            _activeInstances.Remove(this);
+            EmployeeHandAnchorRegistry.Unregister(EmployeeActorOffset + (ulong)EmployeeId);
+            var root = PizzeriaRoot.Instance;
+            if (root != null && root.IsServer)
+            {
+                root.ReleaseEmployeeSpawnReservation(EmployeeId);
+                if (root.DomainState != null)
+                {
+                    ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
+                    if (_leasedToolId != ToolItemId.None && root.ToolOwnershipService != null)
+                    {
+                        root.ToolOwnershipService.ReleaseTool(root.DomainState, actorKey, _leasedToolId);
+                        _leasedToolId = ToolItemId.None;
+                    }
+                    OrderUnitFulfillmentService.ReleaseAllReservationsForActor(root.DomainState, actorKey);
+                }
+            }
+        }
+
+        public static EmployeeHighLevelState MapToHighLevelState(WorkStep step, EmployeeBlockReason blockReason, bool isAlive)
+        {
+            if (!isAlive) return EmployeeHighLevelState.RecoverReplan;
+            if (blockReason != EmployeeBlockReason.None) return EmployeeHighLevelState.Blocked;
+
+            return step switch
+            {
+                WorkStep.Idle => EmployeeHighLevelState.IdleObserve,
+                WorkStep.CashierMoveToCounter or WorkStep.CashierMoveToPhone or WorkStep.CookMoveToBoard
+                    or WorkStep.CookMoveToDoughStorage or WorkStep.CookMoveToPrep or WorkStep.CookMoveToIngredientStorage
+                    or WorkStep.CookMoveToAssembly or WorkStep.CookMoveToOven or WorkStep.CookMoveToBoxStorage
+                    or WorkStep.CookMoveToPackaging or WorkStep.CookMoveToStaging => EmployeeHighLevelState.Navigate,
+                WorkStep.CashierInteractCounter or WorkStep.CashierAnswerPhone or WorkStep.CookReadBoard
+                    or WorkStep.CookKneadDough or WorkStep.CookPrepareIngredient or WorkStep.CookAssemble
+                    or WorkStep.CookBakeInOven or WorkStep.CookPackagePizza => EmployeeHighLevelState.Work,
+                WorkStep.CookTakeDough or WorkStep.CookTakeIngredient or WorkStep.CookTakeFromOven
+                    or WorkStep.CookTakeBox => EmployeeHighLevelState.PickUp,
+                WorkStep.CookDeliverToStaging => EmployeeHighLevelState.Deliver,
+                WorkStep.CashierCooldown => EmployeeHighLevelState.Complete,
+                _ => EmployeeHighLevelState.ClaimTask
+            };
+        }
+
         private static Vector3 ResolveStationPosition<T>(Vector3 fallback) where T : Component
         {
-            var found = FindFirstObjectByType<T>();
+            var found = EmployeeStationCache.GetCachedOrFind<T>();
             return found != null ? found.transform.position : fallback;
         }
 
         private static int ResolvePrepOrAssemblyStationId(PizzeriaRoot root, out StationView view)
         {
-            var prep = FindFirstObjectByType<PrepStation>();
+            var prep = EmployeeStationCache.GetPrep();
             if (prep != null && prep.TryGetComponent<StationView>(out var sv))
             {
                 view = sv;
                 return sv.stationId;
             }
-            var asm = FindFirstObjectByType<AssemblyStation>();
+            var asm = EmployeeStationCache.GetAssembly();
             if (asm != null && asm.TryGetComponent<StationView>(out var sv2))
             {
                 view = sv2;
@@ -2515,7 +2560,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static int ResolvePackagingOnlyStationId(PizzeriaRoot root, out StationView view)
         {
-            var pkg = FindFirstObjectByType<PackagingStation>();
+            var pkg = EmployeeStationCache.GetPackaging();
             if (pkg != null && pkg.TryGetComponent<StationView>(out var sv))
             {
                 view = sv;
@@ -2526,13 +2571,13 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static int ResolvePackagingOrStagingStationId(PizzeriaRoot root, out StationView view)
         {
-            var stg = FindFirstObjectByType<StagingStation>();
+            var stg = EmployeeStationCache.GetStaging();
             if (stg != null && stg.TryGetComponent<StationView>(out var sv))
             {
                 view = sv;
                 return sv.stationId;
             }
-            var pkg = FindFirstObjectByType<PackagingStation>();
+            var pkg = EmployeeStationCache.GetPackaging();
             if (pkg != null && pkg.TryGetComponent<StationView>(out var sv2))
             {
                 view = sv2;
@@ -2562,7 +2607,7 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             ovenStationId = 4;
             StationView ovenView = null;
-            var oven = FindFirstObjectByType<OvenStation>();
+            var oven = EmployeeStationCache.GetOven();
             if (oven != null && oven.TryGetComponent<StationView>(out var sv))
             {
                 ovenView = sv;
