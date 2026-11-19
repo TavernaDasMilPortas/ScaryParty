@@ -961,6 +961,11 @@ namespace ScaryParty.Pizzeria.Composition
 
         public bool IsWorldPositionInsidePizzeria(Vector3 worldPos)
         {
+            var footprint = GetComponent<PizzeriaFootprint>();
+            if (footprint != null)
+            {
+                return footprint.IsWorldPositionInsideInterior(worldPos);
+            }
             Bounds b = GetPizzeriaInteriorBounds();
             return b.Contains(worldPos);
         }

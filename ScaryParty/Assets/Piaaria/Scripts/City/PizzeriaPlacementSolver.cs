@@ -55,7 +55,21 @@ namespace ScaryParty.City
             }
 
             PizzeriaFootprint footprint = pizzeriaPrefab.GetComponent<PizzeriaFootprint>();
-            Rect[] localRegions = footprint != null ? footprint.GetStructuralRegions() : new Rect[] { Rect.MinMaxRect(0f, -13.2f, 32.8f, 9.2f), Rect.MinMaxRect(16.4f, -27.6f, 32.8f, -13.2f) };
+            Rect[] structuralRegions = footprint != null
+                ? footprint.GetStructuralRegions()
+                : new Rect[] { Rect.MinMaxRect(0f, -13.2f, 32.8f, 9.2f), Rect.MinMaxRect(16.4f, -27.6f, 32.8f, -13.2f) };
+            Rect[] exteriorRegions = footprint != null
+                ? footprint.GetExteriorRegions()
+                : new Rect[] { Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f) };
+            Rect[] localRegions = footprint != null
+                ? footprint.GetAllReservedRegions()
+                : new Rect[]
+                {
+                    Rect.MinMaxRect(0f, -13.2f, 32.8f, 9.2f),
+                    Rect.MinMaxRect(16.4f, -27.6f, 32.8f, -13.2f),
+                    Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f)
+                };
+            Rect[] accessCorridors = footprint != null ? footprint.GetAccessCorridors() : Array.Empty<Rect>();
             Vector2 entranceDirLocal = footprint != null ? footprint.entranceDirectionLocal : new Vector2(-1f, 0f);
             float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : -1.6f;
 
@@ -178,9 +192,12 @@ namespace ScaryParty.City
                                 score = score
                             };
 
-                            // Constrói OBBs reservadas para o BlockFiller
-                            bestCandidate.reservedOBBs = BuildReservedOBBs(candidatePos, candidateRot, localRegions, 0.5f);
-                            bestCandidate.worldStructuralPolygons = BuildWorldPolygons(candidatePos, candidateRot, localRegions);
+                            // Constrói OBBs reservadas para o BlockFiller (estrutural + pátio externo + corredores)
+                            var allReserve = new List<Rect>(localRegions.Length + accessCorridors.Length);
+                            allReserve.AddRange(localRegions);
+                            allReserve.AddRange(accessCorridors);
+                            bestCandidate.reservedOBBs = BuildReservedOBBs(candidatePos, candidateRot, allReserve.ToArray(), 0.5f);
+                            bestCandidate.worldStructuralPolygons = BuildWorldPolygons(candidatePos, candidateRot, structuralRegions);
 
                             // Posição da bancada (na calçada em frente à fachada)
                             Vector3 bancadaPos = edgePoint + outwardNormal * 1.5f;

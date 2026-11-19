@@ -13,84 +13,108 @@ namespace ScaryParty.Pizzeria.Composition
     public static class PizzeriaParkingLotBuilder
     {
         private const string ContainerName = "__PizzeriaExteriorFacilities";
+        private static readonly MaterialPropertyBlock _sharedPropBlock = new MaterialPropertyBlock();
 
         public static void EnsureBuilt(PizzeriaRoot root)
         {
             if (root == null) return;
 
+            var footprint = root.GetComponent<PizzeriaFootprint>();
+            var anchors = root.GetComponent<PizzeriaExteriorAnchors>();
+            if (anchors == null) anchors = root.gameObject.AddComponent<PizzeriaExteriorAnchors>();
+
             Transform existing = root.transform.Find(ContainerName);
             if (existing != null)
             {
+                // Se já existe e está válido com controlador de moto e rack, preserva idempotentemente
+                var existingBike = existing.GetComponentInChildren<DeliveryMotorcycleController>(true);
+                var existingRack = existing.GetComponentInChildren<WeaponRackStation>(true);
+                if (existingBike != null && existingRack != null && anchors.HasCompleteExteriorAnchors())
+                {
+                    return;
+                }
+
                 if (Application.isPlaying) Object.Destroy(existing.gameObject);
                 else Object.DestroyImmediate(existing.gameObject);
             }
 
-            Vector3 fwd = root.entranceAnchor != null
-                ? Vector3.ProjectOnPlane(root.entranceAnchor.forward, Vector3.up).normalized
-                : Vector3.ProjectOnPlane(root.transform.forward, Vector3.up).normalized;
-            if (fwd.sqrMagnitude < 0.01f) fwd = Vector3.forward;
+            // Determinístico a partir do recuo do L em PizzeriaFootprint (X: 0..16.4, Z: -27.6..-13.2)
+            Rect patioRect = footprint != null
+                ? footprint.GetExteriorRegions()[0]
+                : Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f);
+            float floorLocalY = footprint != null ? footprint.floorSurfaceLocalY : -1.6f;
 
-            Vector3 right = Vector3.Cross(Vector3.up, fwd).normalized;
-            Vector3 entranceBase = root.entranceAnchor != null
-                ? root.entranceAnchor.position
-                : root.transform.position + fwd * 5f;
+            Vector3 localPatioCenter = new Vector3(patioRect.center.x, floorLocalY, patioRect.center.y);
+            Vector3 worldPatioCenter = root.transform.TransformPoint(localPatioCenter);
 
-            // Escolhe lado direito ou esquerdo livre de colisão externa de prédios
-            Vector3 sideDir = ChooseClearSide(entranceBase, right, fwd);
-            Vector3 lotCenter = entranceBase + sideDir * 6.8f + fwd * 0.4f;
-            float groundY = ResolveGroundY(lotCenter, entranceBase.y);
-            lotCenter.y = groundY;
-
-            Quaternion lotRot = Quaternion.LookRotation(fwd, Vector3.up);
+            Vector3 streetOutwardLocal = footprint != null
+                ? footprint.GetEntranceDirectionLocal3D()
+                : Vector3.left;
+            Vector3 streetOutwardWorld = root.transform.TransformDirection(streetOutwardLocal).normalized;
+            if (streetOutwardWorld.sqrMagnitude < 0.01f) streetOutwardWorld = root.transform.forward;
+            Quaternion lotRot = Quaternion.LookRotation(streetOutwardWorld, Vector3.up);
 
             var container = new GameObject(ContainerName);
             container.transform.SetParent(root.transform, false);
-            container.transform.SetPositionAndRotation(lotCenter, lotRot);
+            container.transform.SetPositionAndRotation(worldPatioCenter, lotRot);
 
-            // 1. Piso do estacionamento lateral + linha da vaga (estacionamento + ponte até a via)
-            BuildAsphaltPad(container.transform);
+            // 1. Piso sólido do pátio com colisor real (apoiado no chão da quadra) + faixas de vaga
+            BuildAsphaltPad(container.transform, patioRect.width, patioRect.height);
 
-            // 2. Moto de entregas no centro da vaga voltada para a rua
-            Vector3 bikePos = lotCenter + fwd * 0.4f + Vector3.up * 0.05f;
-            Bounds lotBounds = new Bounds(lotCenter + fwd * 1.6f, new Vector3(6.8f, 4f, 10.5f));
-            BuildMotorcycle(container.transform, bikePos, lotRot, lotBounds);
+            // Âncoras explícitas dos setores do pátio
+            anchors.exteriorGround = ResolveOrCreateAnchor(container.transform, "ExteriorGround", Vector3.zero, Quaternion.identity);
+            anchors.streetExit = ResolveOrCreateAnchor(container.transform, "StreetExit", new Vector3(0f, 0.05f, patioRect.width * 0.45f), Quaternion.identity);
 
-            // 3. Rack externo de Armas (Pistola 1 mão + Escopeta 2 mãos) junto à parede frontal lateral
-            Vector3 rackLocalPos = new Vector3(-2.15f * Mathf.Sign(Vector3.Dot(sideDir, right)), 0f, -1.85f);
+            // 2. Garagem + Moto (lado frontal do recuo voltado para a saída da rua)
+            Vector3 bikeLocalOffset = new Vector3(-2.6f, 0.05f, 1.8f);
+            Vector3 bikeWorldPos = container.transform.TransformPoint(bikeLocalOffset);
+            anchors.motorcycleSpawn_01 = ResolveOrCreateAnchor(container.transform, "MotorcycleSpawn_01", bikeLocalOffset, Quaternion.identity);
+            anchors.motorcycleRecovery = ResolveOrCreateAnchor(container.transform, "MotorcycleRecovery", bikeLocalOffset + new Vector3(0f, 0.05f, -0.5f), Quaternion.identity);
+            anchors.dismountLeft = ResolveOrCreateAnchor(container.transform, "DismountLeft", bikeLocalOffset + new Vector3(-1.35f, 0.05f, 0f), Quaternion.identity);
+            anchors.dismountRight = ResolveOrCreateAnchor(container.transform, "DismountRight", bikeLocalOffset + new Vector3(1.35f, 0.05f, 0f), Quaternion.identity);
+
+            Bounds lotBounds = new Bounds(worldPatioCenter, new Vector3(patioRect.width, 4f, patioRect.height));
+            BuildMotorcycle(container.transform, bikeWorldPos, lotRot, lotBounds);
+
+            // 3. Expedição e Recebimento (separados da manobra da moto e do treino)
+            anchors.dispatch = ResolveOrCreateAnchor(container.transform, "Dispatch", new Vector3(-3.8f, 0.05f, -3.5f), Quaternion.identity);
+            anchors.supplierReceiving = ResolveOrCreateAnchor(container.transform, "SupplierReceiving", new Vector3(3.8f, 0.05f, -4.5f), Quaternion.identity);
+
+            // 4. Setor de Treino isolado por anteparo (Rack de Armas + Posição de Tiro + Boneco)
+            BuildTrainingBackstop(container.transform, new Vector3(3.6f, 0f, 1.5f));
+            Vector3 rackLocalPos = new Vector3(1.8f, 0f, 3.6f);
+            Vector3 shooterLocalPos = new Vector3(2.2f, 0.05f, 1.8f);
+            Vector3 dummyLocalPos = new Vector3(5.2f, 0f, 1.8f);
+            anchors.weaponRack = ResolveOrCreateAnchor(container.transform, "WeaponRack_Anchor", rackLocalPos, Quaternion.identity);
+            anchors.practiceShooter = ResolveOrCreateAnchor(container.transform, "PracticeShooter", shooterLocalPos, Quaternion.Euler(0f, 90f, 0f));
+            anchors.practiceTarget = ResolveOrCreateAnchor(container.transform, "PracticeTarget_Anchor", dummyLocalPos, Quaternion.Euler(0f, -90f, 0f));
+
             BuildWeaponRack(container.transform, rackLocalPos);
-
-            // 4. Alvo de Prática no canto oposto do pátio para disparos e teste controlado de dano
-            Vector3 dummyLocalPos = new Vector3(2.25f * Mathf.Sign(Vector3.Dot(sideDir, right)), 0f, -2.0f);
             BuildPracticeDummy(container.transform, dummyLocalPos);
         }
 
-        private static Vector3 ChooseClearSide(Vector3 basePos, Vector3 right, Vector3 fwd)
+        private static Transform ResolveOrCreateAnchor(Transform parent, string name, Vector3 localPos, Quaternion localRot)
         {
-            Vector3 rightCand = basePos + right * 7.2f;
-            Vector3 leftCand = basePos - right * 7.2f;
-
-            bool rightBlocked = Physics.CheckSphere(rightCand + Vector3.up * 2f, 2.1f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-            bool leftBlocked = Physics.CheckSphere(leftCand + Vector3.up * 2f, 2.1f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-
-            if (rightBlocked && !leftBlocked) return -right;
-            return right;
+            var existing = parent.Find(name);
+            if (existing != null) return existing;
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = localPos;
+            go.transform.localRotation = localRot;
+            return go.transform;
         }
 
-        private static float ResolveGroundY(Vector3 pos, float fallbackY)
+        private static void BuildAsphaltPad(Transform parent, float width, float depth)
         {
-            if (Physics.Raycast(pos + Vector3.up * 3f, Vector3.down, out var hit, 8f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
-                return hit.point.y;
-            return Mathf.Max(0f, fallbackY);
-        }
+            float padW = Mathf.Clamp(width - 0.6f, 6f, 15.8f);
+            float padD = Mathf.Clamp(depth - 0.6f, 6f, 13.8f);
 
-        private static void BuildAsphaltPad(Transform parent)
-        {
             var pad = GameObject.CreatePrimitive(PrimitiveType.Cube);
             pad.name = "ParkingLotPad";
             pad.transform.SetParent(parent, false);
-            pad.transform.localPosition = new Vector3(0f, 0.02f, 0.5f);
-            pad.transform.localScale = new Vector3(5.6f, 0.04f, 7.6f);
-            DestroyCollider(pad);
+            pad.transform.localPosition = new Vector3(0f, -0.02f, 0f);
+            pad.transform.localScale = new Vector3(padW, 0.06f, padD);
+            // Mantém o BoxCollider no piso para apoio real de jogadores, NPCs e moto!
             TintObject(pad, new Color(0.16f, 0.17f, 0.19f));
 
             for (int side = -1; side <= 1; side += 2)
@@ -98,11 +122,21 @@ namespace ScaryParty.Pizzeria.Composition
                 var stripe = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 stripe.name = side < 0 ? "StripeLeft" : "StripeRight";
                 stripe.transform.SetParent(parent, false);
-                stripe.transform.localPosition = new Vector3(side * 1.45f, 0.045f, 0.7f);
-                stripe.transform.localScale = new Vector3(0.12f, 0.01f, 3.8f);
+                stripe.transform.localPosition = new Vector3(-2.6f + side * 1.15f, 0.02f, 1.8f);
+                stripe.transform.localScale = new Vector3(0.12f, 0.01f, 3.6f);
                 DestroyCollider(stripe);
                 TintObject(stripe, new Color(0.95f, 0.78f, 0.15f));
             }
+        }
+
+        private static void BuildTrainingBackstop(Transform parent, Vector3 localCenter)
+        {
+            var backstop = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            backstop.name = "TrainingSafetyBackstop";
+            backstop.transform.SetParent(parent, false);
+            backstop.transform.localPosition = localCenter + new Vector3(2.4f, 1.25f, 0f);
+            backstop.transform.localScale = new Vector3(0.28f, 2.5f, 4.2f);
+            TintObject(backstop, new Color(0.28f, 0.24f, 0.22f));
         }
 
         private static void BuildMotorcycle(Transform parent, Vector3 worldPos, Quaternion rot, Bounds lotBounds)
@@ -303,19 +337,19 @@ namespace ScaryParty.Pizzeria.Composition
         {
             var rend = go.GetComponent<Renderer>();
             if (rend == null) return;
-            Shader urp = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-            if (urp != null && (rend.sharedMaterial == null || rend.sharedMaterial.shader.name == "Standard"))
+
+            var baseMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+                rend.sharedMaterial,
+                ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+                ScaryParty.VisualStyles.VisualCategoryIds.City,
+                () => rend.sharedMaterial);
+
+            if (baseMat != null && rend.sharedMaterial != baseMat)
             {
-                var mat = new Material(urp);
-                mat.color = color;
-                if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", color);
-                rend.sharedMaterial = mat;
-                return;
+                rend.sharedMaterial = baseMat;
             }
-            if (rend.material == null) return;
-            rend.material.color = color;
-            if (rend.material.HasProperty("_BaseColor"))
-                rend.material.SetColor("_BaseColor", color);
+
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, color, _sharedPropBlock);
         }
     }
 }

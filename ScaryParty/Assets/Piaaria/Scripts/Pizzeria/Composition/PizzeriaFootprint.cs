@@ -46,8 +46,12 @@ namespace ScaryParty.Pizzeria.Composition
         [Tooltip("Envelope 2D XZ de beirais e saliências no espaço local.")]
         public Rect overhangEnvelope = Rect.MinMaxRect(-0.85f, -28.45f, 33.65f, 10.05f);
 
+        [Header("Regiões Externas (Pátio Operacional)")]
+        [Tooltip("Regiões externas reservadas no gerador da cidade (ex: pátio no recuo do L). Não contam como interior da pizzaria.")]
+        public Rect[] exteriorRegions = new Rect[] { Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f) };
+
         [Header("Corredores de Acesso Livres")]
-        [Tooltip("Corredores que devem permanecer desobstruídos por outros prédios (ex: calçada em frente à entrada).")]
+        [Tooltip("Corredores que devem permanecer desobstruídos por outros prédios (ex: calçada em frente à entrada e saída da garagem).")]
         public Rect[] accessCorridors;
 
         [Header("Âncoras de Acesso")]
@@ -62,6 +66,68 @@ namespace ScaryParty.Pizzeria.Composition
             if (structuralRegions != null && structuralRegions.Length > 0)
                 return structuralRegions;
             return new Rect[] { diningHallRect, kitchenRect };
+        }
+
+        /// <summary>
+        /// Retorna as regiões externas reservadas para o pátio operacional (garagem, expedição, recebimento e treino).
+        /// </summary>
+        public Rect[] GetExteriorRegions()
+        {
+            if (exteriorRegions != null && exteriorRegions.Length > 0)
+                return exteriorRegions;
+            return new Rect[] { Rect.MinMaxRect(0f, -27.6f, 16.4f, -13.2f) };
+        }
+
+        /// <summary>
+        /// Retorna os corredores de acesso livres (ou corredor padrão da fachada/saída do pátio).
+        /// </summary>
+        public Rect[] GetAccessCorridors()
+        {
+            if (accessCorridors != null && accessCorridors.Length > 0)
+                return accessCorridors;
+            return new Rect[] { Rect.MinMaxRect(-3.5f, -27.6f, 0f, 9.2f) };
+        }
+
+        /// <summary>
+        /// Retorna todas as regiões (estruturais + externas) que devem estar contidas na quadra e reservadas contra outros prédios.
+        /// </summary>
+        public Rect[] GetAllReservedRegions()
+        {
+            var structural = GetStructuralRegions();
+            var exterior = GetExteriorRegions();
+            var combined = new Rect[structural.Length + exterior.Length];
+            Array.Copy(structural, 0, combined, 0, structural.Length);
+            Array.Copy(exterior, 0, combined, structural.Length, exterior.Length);
+            return combined;
+        }
+
+        /// <summary>
+        /// Verifica se uma posição no mundo está dentro do interior construído da pizzaria (salão/cozinha),
+        /// excluindo o recuo externo do pátio.
+        /// </summary>
+        public bool IsWorldPositionInsideInterior(Vector3 worldPos)
+        {
+            Vector3 local = transform.InverseTransformPoint(worldPos);
+            if (local.y < floorSurfaceLocalY - 0.5f || local.y > floorSurfaceLocalY + 5.0f)
+                return false;
+            return IsPointInsideFootprint(new Vector2(local.x, local.z));
+        }
+
+        /// <summary>
+        /// Verifica se uma posição no mundo está dentro do pátio operacional externo.
+        /// </summary>
+        public bool IsWorldPositionInExteriorPatio(Vector3 worldPos)
+        {
+            Vector3 local = transform.InverseTransformPoint(worldPos);
+            if (local.y < floorSurfaceLocalY - 0.5f || local.y > floorSurfaceLocalY + 5.0f)
+                return false;
+            Vector2 xz = new Vector2(local.x, local.z);
+            var ext = GetExteriorRegions();
+            for (int i = 0; i < ext.Length; i++)
+            {
+                if (ext[i].Contains(xz)) return true;
+            }
+            return false;
         }
 
         /// <summary>
