@@ -2,8 +2,8 @@
 
 **Última Revisão:** 19/11/2026
 **Versão Unity:** Unity 6000.3.6f1
-**Branch Atual:** `fix/auditoria-marcos-noturnos` (derivada de `release/marcos-noturnos` @ `2dacefe6`)
-**Último Bloco Concluído:** **C01–C17 implementados; C18 documentação & validação estática (`dotnet build` `0` erros) concluída; validação L2/L3 no Unity Editor (`T01–T44`) pendente.**
+**Branch Atual:** `fix/auditoria-marcos-noturnos-r2` (derivada de `fix/auditoria-marcos-noturnos` @ `615990b8`)
+**Último Bloco Concluído:** **Rodada R2 (`P0–P10`) implementada em código e testes EditMode em `fix/auditoria-marcos-noturnos-r2` (`Docs/Release/Reports/AUDIT_FIX_R2.md`); validação EditMode/PlayMode, Profiler e multiplayer Host+Cliente pendentes no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
