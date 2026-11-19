@@ -3360,6 +3360,29 @@ namespace ScaryParty.Pizzeria.Network
             {
                 var wc = client.PlayerObject.GetComponent<WeaponController>();
                 wc?.PlayRemoteOrLocalFireVisual(origin, hitPoint, didHit);
+
+                bool isLocalShooter = NetworkManager.Singleton.LocalClientId == shooterClientId;
+                Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                    Presentation.Feedback.GameFeelEventId.WeaponFire,
+                    client.PlayerObject.transform,
+                    shooterClientId,
+                    0,
+                    0,
+                    Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
+                    weaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 1.2f : 0.85f,
+                    isLocalShooter);
+                if (didHit)
+                {
+                    Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                        Presentation.Feedback.GameFeelEventId.WeaponHit,
+                        null,
+                        shooterClientId,
+                        0,
+                        0,
+                        Presentation.Feedback.GameFeelMaterialFamily.Default,
+                        0.9f,
+                        isLocalShooter);
+                }
             }
         }
 

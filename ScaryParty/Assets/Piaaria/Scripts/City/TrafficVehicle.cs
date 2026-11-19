@@ -294,6 +294,16 @@ public class TrafficVehicle : MonoBehaviour
                 HitPoint = hitPt,
                 HitNormal = pushDir
             });
+
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.VehicleImpact,
+                null,
+                (ulong)VehicleId,
+                0,
+                0,
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
+                Mathf.Clamp01(impactSpeed / 12f),
+                isLocal: false);
         }
     }
 }

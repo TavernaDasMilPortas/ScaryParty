@@ -86,7 +86,23 @@ namespace ScaryParty.Pizzeria.Presentation.Feedback
         UIHover = 700,
         UIClick = 701,
         UISuccess = 702,
-        UIError = 703
+        UIError = 703,
+
+        // Veículos, Combate e Contratados (C17)
+        VehicleMount = 800,
+        VehicleDismount = 801,
+        VehicleHorn = 802,
+        VehicleImpact = 803,
+        WeaponAim = 810,
+        WeaponFire = 811,
+        WeaponReload = 812,
+        WeaponHit = 813,
+        PlayerDamaged = 814,
+        PlayerRescued = 815,
+        EmployeeSpawned = 820,
+        EmployeeWorkStart = 821,
+        EmployeeWorkComplete = 822,
+        EmployeeBlocked = 823
     }
 
     public enum GameFeelMaterialFamily

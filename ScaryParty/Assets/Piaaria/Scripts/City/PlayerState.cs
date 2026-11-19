@@ -286,6 +286,16 @@ public class PlayerState : NetworkBehaviour
 
     private void ApplyLocalKnockback(Vector3 horizontalVelocity, float duration)
     {
+        ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.PlayerDamaged,
+            transform,
+            OwnerClientId,
+            0,
+            0,
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.CharacterBody,
+            1f,
+            IsOwner);
+
         if (_knockbackRoutine != null) StopCoroutine(_knockbackRoutine);
         _knockbackRoutine = StartCoroutine(RoutineVehicleKnockback(horizontalVelocity, Mathf.Clamp(duration, 0.1f, 0.75f)));
     }
