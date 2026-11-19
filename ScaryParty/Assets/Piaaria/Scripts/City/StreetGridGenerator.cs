@@ -408,22 +408,18 @@ public class StreetGridGenerator : MonoBehaviour
                     Vector3 dir = edgeDirs[i];
                     Vector3 normal = edgeNormals[i];
                     float length = Vector3.Distance(p1, p2);
+                    if (length < 0.2f) continue;
 
                     bool useModularBorder = (config.buildingGenerationMode == ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit && config.modularCatalog != null);
                     float minEdgeLength = useModularBorder ? 4.2f : Mathf.Max(2.2f, config.minBuildingWidth + 0.2f);
-                    if (length < minEdgeLength) continue;
+                    float buildingOffset = streetHalfWidth;
+                    MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
+                    var coveredIntervals = new List<(float start, float end)>();
 
                     float minWidth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesWidth) * 2f) : config.minBuildingWidth;
                     float maxWidth = useModularBorder ? (Mathf.Max(minWidth, config.maxBuildingModulesWidth * 2f)) : config.maxBuildingWidth;
                     float minDepth = useModularBorder ? (Mathf.Max(2, config.minBuildingModulesDepth) * 2f) : config.minBuildingDepth;
                     float maxDepth = useModularBorder ? (Mathf.Max(minDepth, config.maxBuildingModulesDepth * 2f)) : config.maxBuildingDepth;
-
-                    // Expand the search space backwards and forwards to allow filling convex corner wedges.
-                    // The SAT check against streetOBBs will naturally prevent overlapping concave corners.
-                    float currentDist = -maxWidth;
-                    float maxDist = length + maxWidth;
-                    float buildingOffset = streetHalfWidth;
-                    MaterialPropertyBlock propBlock = new MaterialPropertyBlock();
 
                     bool TryPlaceAt(float startDist, int widthMods, int depthMods, int floorCount, float bWidth, float bDepth, float bHeight, string idSuffix)
                     {
@@ -455,6 +451,12 @@ public class StreetGridGenerator : MonoBehaviour
                         }
 
                         placedBorderBuildings.Add(candidateOBB);
+                        float covStart = Mathf.Max(0f, startDist);
+                        float covEnd = Mathf.Min(length, startDist + bWidth);
+                        if (covEnd > covStart)
+                        {
+                            coveredIntervals.Add((covStart, covEnd));
+                        }
 
                         float groundY = 0.02f + (config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
                         Quaternion buildingRot = Quaternion.LookRotation(-normal, Vector3.up);
@@ -506,95 +508,278 @@ public class StreetGridGenerator : MonoBehaviour
                         return true;
                     }
 
-                    // Passada 1: Preenchimento principal com fallback compacto de 4m quando OBB bloquear peça grande
-                    while (currentDist < maxDist)
+                    if (length >= minEdgeLength)
                     {
-                        float bWidth = 0f;
-                        float bDepth = 0f;
-                        float bHeight = 0f;
-                        int widthMods = 0;
-                        int depthMods = 0;
-                        int floorCount = 1;
+                        // Expand the search space backwards and forwards to allow filling convex corner wedges.
+                        // The SAT check against streetOBBs will naturally prevent overlapping concave corners.
+                        float currentDist = -maxWidth;
+                        float maxDist = length + maxWidth;
 
-                        if (useModularBorder)
+                        // Passada 1: Preenchimento principal com fallback compacto de 4m quando OBB bloquear peça grande
+                        while (currentDist < maxDist)
                         {
-                            int minWMods = Mathf.Max(2, config.minBuildingModulesWidth);
-                            int maxWMods = Mathf.Max(minWMods, config.maxBuildingModulesWidth);
-                            widthMods = rng.Next(minWMods, maxWMods + 1);
-                            bWidth = widthMods * 2f;
+                            float bWidth = 0f;
+                            float bDepth = 0f;
+                            float bHeight = 0f;
+                            int widthMods = 0;
+                            int depthMods = 0;
+                            int floorCount = 1;
 
-                            if (currentDist + bWidth > maxDist)
+                            if (useModularBorder)
                             {
-                                float remaining = maxDist - currentDist;
-                                widthMods = Mathf.FloorToInt(remaining / 2f);
-                                if (widthMods < 2) break;
+                                int minWMods = Mathf.Max(2, config.minBuildingModulesWidth);
+                                int maxWMods = Mathf.Max(minWMods, config.maxBuildingModulesWidth);
+                                widthMods = rng.Next(minWMods, maxWMods + 1);
                                 bWidth = widthMods * 2f;
+
+                                if (currentDist + bWidth > maxDist)
+                                {
+                                    float remaining = maxDist - currentDist;
+                                    widthMods = Mathf.FloorToInt(remaining / 2f);
+                                    if (widthMods < 2) break;
+                                    bWidth = widthMods * 2f;
+                                }
+
+                                int minDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                                int maxDMods = Mathf.Max(minDMods, config.maxBuildingModulesDepth);
+                                depthMods = rng.Next(minDMods, maxDMods + 1);
+                                bDepth = depthMods * 2f;
+
+                                int minFl = Mathf.Max(1, config.minBuildingFloors);
+                                int maxFl = Mathf.Max(minFl, config.maxBuildingFloors);
+                                floorCount = rng.Next(minFl, maxFl + 1);
+                                bHeight = floorCount * 3.5f;
                             }
-
-                            int minDMods = Mathf.Max(2, config.minBuildingModulesDepth);
-                            int maxDMods = Mathf.Max(minDMods, config.maxBuildingModulesDepth);
-                            depthMods = rng.Next(minDMods, maxDMods + 1);
-                            bDepth = depthMods * 2f;
-
-                            int minFl = Mathf.Max(1, config.minBuildingFloors);
-                            int maxFl = Mathf.Max(minFl, config.maxBuildingFloors);
-                            floorCount = rng.Next(minFl, maxFl + 1);
-                            bHeight = floorCount * 3.5f;
-                        }
-                        else
-                        {
-                            bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
-                            if (currentDist + bWidth > maxDist)
+                            else
                             {
-                                bWidth = maxDist - currentDist;
-                                if (bWidth < 2f) break;
+                                bWidth = config.minBuildingWidth + (float)rng.NextDouble() * (config.maxBuildingWidth - config.minBuildingWidth);
+                                if (currentDist + bWidth > maxDist)
+                                {
+                                    bWidth = maxDist - currentDist;
+                                    if (bWidth < 2f) break;
+                                }
+
+                                bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
+                                bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
                             }
 
-                            bDepth = config.minBuildingDepth + (float)rng.NextDouble() * (config.maxBuildingDepth - config.minBuildingDepth);
-                            bHeight = config.minBuildingHeight + (float)rng.NextDouble() * (config.maxBuildingHeight * 1.2f - config.minBuildingHeight);
+                            if (TryPlaceAt(currentDist, widthMods, depthMods, floorCount, bWidth, bDepth, bHeight, Mathf.RoundToInt(currentDist).ToString()))
+                            {
+                                currentDist += bWidth;
+                                continue;
+                            }
+
+                            // A09: Antes de avançar sobre possível lacuna, tenta peça compacta válida (4m / largura mínima)
+                            int compactWMods = 2;
+                            int compactDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                            float compactW = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
+                            float compactD = useModularBorder ? compactDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
+                            if (compactW < bWidth && currentDist + compactW <= maxDist &&
+                                TryPlaceAt(currentDist, compactWMods, compactDMods, Mathf.Max(1, config.minBuildingFloors), compactW, compactD, bHeight, $"{Mathf.RoundToInt(currentDist)}_compact"))
+                            {
+                                currentDist += compactW;
+                                continue;
+                            }
+
+                            currentDist += useModularBorder ? 2f : 1f;
                         }
 
-                        if (TryPlaceAt(currentDist, widthMods, depthMods, floorCount, bWidth, bDepth, bHeight, Mathf.RoundToInt(currentDist).ToString()))
+                        // Passada 2 (A09): Preenchimento determinístico de lacunas remanescentes no perímetro mantendo validação de OBB
+                        float gapWidth = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
+                        int gapWMods = 2;
+                        int gapDMods = Mathf.Max(2, config.minBuildingModulesDepth);
+                        float gapDepth = useModularBorder ? gapDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
+                        float gapHeight = useModularBorder ? Mathf.Max(1, config.minBuildingFloors) * 3.5f : Mathf.Max(3f, config.minBuildingHeight);
+                        float step = useModularBorder ? 2f : 1f;
+
+                        for (float pos = 0f; pos <= length - gapWidth; pos += step)
                         {
-                            currentDist += bWidth;
-                            continue;
+                            if (TryPlaceAt(pos, gapWMods, gapDMods, Mathf.Max(1, config.minBuildingFloors), gapWidth, gapDepth, gapHeight, $"gap_{Mathf.RoundToInt(pos)}"))
+                            {
+                                pos += gapWidth - step;
+                            }
                         }
-
-                        // A09: Antes de avançar sobre possível lacuna, tenta peça compacta válida (4m / largura mínima)
-                        int compactWMods = 2;
-                        int compactDMods = Mathf.Max(2, config.minBuildingModulesDepth);
-                        float compactW = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
-                        float compactD = useModularBorder ? compactDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
-                        if (compactW < bWidth && currentDist + compactW <= maxDist &&
-                            TryPlaceAt(currentDist, compactWMods, compactDMods, Mathf.Max(1, config.minBuildingFloors), compactW, compactD, bHeight, $"{Mathf.RoundToInt(currentDist)}_compact"))
-                        {
-                            currentDist += compactW;
-                            continue;
-                        }
-
-                        currentDist += useModularBorder ? 2f : 1f;
                     }
 
-                    // Passada 2 (A09): Preenchimento determinístico de lacunas remanescentes no perímetro mantendo validação de OBB
-                    float gapWidth = useModularBorder ? 4f : Mathf.Max(2f, config.minBuildingWidth);
-                    int gapWMods = 2;
-                    int gapDMods = Mathf.Max(2, config.minBuildingModulesDepth);
-                    float gapDepth = useModularBorder ? gapDMods * 2f : Mathf.Max(2f, config.minBuildingDepth);
-                    float gapHeight = useModularBorder ? Mathf.Max(1, config.minBuildingFloors) * 3.5f : Mathf.Max(3f, config.minBuildingHeight);
-                    float step = useModularBorder ? 2f : 1f;
-
-                    for (float pos = 0f; pos <= length - gapWidth; pos += step)
-                    {
-                        if (TryPlaceAt(pos, gapWMods, gapDMods, Mathf.Max(1, config.minBuildingFloors), gapWidth, gapDepth, gapHeight, $"gap_{Mathf.RoundToInt(pos)}"))
-                        {
-                            pos += gapWidth - step;
-                        }
-                    }
+                    // Passada 3 (C16): Cobertura residual garantida por intervalos + arestas curtas + selagem de quina
+                    PlaceResidualPerimeterWalls(p1, dir, normal, length, buildingOffset, streetOBBs, coveredIntervals, borderParent.transform, wallMat, propBlock, i, config);
                 }
             }
         }
 
         return graph;
+    }
+
+    public struct CityBorderValidationReport
+    {
+        public int seed;
+        public int totalEdgesEvaluated;
+        public int residualWallsPlaced;
+        public int cornerPostsPlaced;
+        public float maxUncoveredGapMeters;
+        public bool IsComplete => maxUncoveredGapMeters <= 0.25f;
+    }
+
+    public static CityBorderValidationReport LastBorderValidationReport { get; private set; }
+
+    private static void PlaceResidualPerimeterWalls(
+        Vector3 p1,
+        Vector3 dir,
+        Vector3 normal,
+        float edgeLength,
+        float baseOffset,
+        List<BlockFiller.OBB2D> streetOBBs,
+        List<(float start, float end)> coveredIntervals,
+        Transform borderParent,
+        Material wallMat,
+        MaterialPropertyBlock propBlock,
+        int edgeIndex,
+        CityConfig config)
+    {
+        const float GapTolerance = 0.25f;
+        const float WallThickness = 1.6f;
+        const float WallHeight = 4.6f;
+        float groundY = 0.02f + (config != null && config.sidewalkHeight > 0f ? config.sidewalkHeight : 0.15f);
+
+        coveredIntervals.Sort((a, b) => a.start.CompareTo(b.start));
+        var merged = new List<(float start, float end)>();
+        for (int i = 0; i < coveredIntervals.Count; i++)
+        {
+            var cur = coveredIntervals[i];
+            if (cur.end <= cur.start) continue;
+            if (merged.Count == 0 || cur.start > merged[merged.Count - 1].end + 0.05f)
+            {
+                merged.Add(cur);
+            }
+            else
+            {
+                var last = merged[merged.Count - 1];
+                merged[merged.Count - 1] = (last.start, Mathf.Max(last.end, cur.end));
+            }
+        }
+
+        var gaps = new List<(float start, float end)>();
+        float cursor = 0f;
+        for (int i = 0; i < merged.Count; i++)
+        {
+            if (merged[i].start - cursor > GapTolerance)
+            {
+                gaps.Add((cursor, merged[i].start));
+            }
+            cursor = Mathf.Max(cursor, merged[i].end);
+        }
+        if (edgeLength - cursor > GapTolerance)
+        {
+            gaps.Add((cursor, edgeLength));
+        }
+
+        Vector3 fwd = -normal;
+        Vector3 rightDir = Vector3.Cross(Vector3.up, fwd).normalized;
+        Vector2 axisX = new Vector2(rightDir.x, rightDir.z);
+        Vector2 axisZ = new Vector2(fwd.x, fwd.z);
+        Quaternion rot = Quaternion.LookRotation(fwd, Vector3.up);
+
+        var resolvedWallMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
+            wallMat,
+            ScaryParty.VisualStyles.VisualSemanticRole.BuildingFacade,
+            ScaryParty.VisualStyles.VisualCategoryIds.City,
+            () => wallMat);
+
+        var report = LastBorderValidationReport;
+        if (edgeIndex == 0)
+        {
+            report = new CityBorderValidationReport { seed = config != null ? config.seed : 0 };
+        }
+        report.totalEdgesEvaluated++;
+
+        for (int g = 0; g < gaps.Count; g++)
+        {
+            float gStart = gaps[g].start;
+            float gEnd = gaps[g].end;
+            float gLen = (gEnd - gStart) + 0.6f; // Sobreposição controlada para vedar junções
+            float gMid = (gStart + gEnd) * 0.5f;
+
+            float chosenOffset = baseOffset;
+            for (int step = 0; step < 5; step++)
+            {
+                float testOffset = baseOffset + step * 0.85f;
+                Vector3 testCenter = p1 + dir * gMid + normal * (testOffset + WallThickness * 0.5f);
+                var testOBB = new BlockFiller.OBB2D(
+                    new Vector2(testCenter.x, testCenter.z),
+                    new Vector2(gLen * 0.45f, WallThickness * 0.45f),
+                    axisX,
+                    axisZ);
+
+                bool hitsStreet = false;
+                for (int s = 0; s < streetOBBs.Count; s++)
+                {
+                    if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                    {
+                        hitsStreet = true;
+                        break;
+                    }
+                }
+                chosenOffset = testOffset;
+                if (!hitsStreet) break;
+            }
+
+            Vector3 wallCenter = p1 + dir * gMid + normal * (chosenOffset + WallThickness * 0.5f);
+            wallCenter.y = groundY + WallHeight * 0.5f - 0.15f;
+
+            var wallGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            wallGo.name = $"BorderWallFill_{edgeIndex}_{g}";
+            wallGo.transform.SetParent(borderParent, true);
+            wallGo.transform.SetPositionAndRotation(wallCenter, rot);
+            wallGo.transform.localScale = new Vector3(gLen, WallHeight, WallThickness);
+
+            var rend = wallGo.GetComponent<Renderer>();
+            if (rend != null)
+            {
+                if (resolvedWallMat != null) rend.sharedMaterial = resolvedWallMat;
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, new Color(0.24f, 0.24f, 0.27f), propBlock);
+            }
+            report.residualWallsPlaced++;
+        }
+
+        // Pilar de quina no vértice inicial para fechar encontros agudos e última-primeira aresta
+        float cornerOffset = baseOffset + WallThickness * 0.5f;
+        for (int step = 0; step < 4; step++)
+        {
+            float testOffset = baseOffset + WallThickness * 0.5f + step * 0.85f;
+            Vector3 testCorner = p1 + normal * testOffset;
+            var testOBB = new BlockFiller.OBB2D(
+                new Vector2(testCorner.x, testCorner.z),
+                new Vector2(0.8f, 0.8f),
+                axisX,
+                axisZ);
+            bool hitsStreet = false;
+            for (int s = 0; s < streetOBBs.Count; s++)
+            {
+                if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                {
+                    hitsStreet = true;
+                    break;
+                }
+            }
+            cornerOffset = testOffset;
+            if (!hitsStreet) break;
+        }
+
+        Vector3 cornerPos = p1 + normal * cornerOffset;
+        cornerPos.y = groundY + WallHeight * 0.5f - 0.15f;
+        var cornerGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cornerGo.name = $"BorderCornerPost_{edgeIndex}";
+        cornerGo.transform.SetParent(borderParent, true);
+        cornerGo.transform.SetPositionAndRotation(cornerPos, rot);
+        cornerGo.transform.localScale = new Vector3(1.8f, WallHeight, 1.8f);
+        var cornerRend = cornerGo.GetComponent<Renderer>();
+        if (cornerRend != null)
+        {
+            if (resolvedWallMat != null) cornerRend.sharedMaterial = resolvedWallMat;
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(cornerRend, 0, new Color(0.22f, 0.22f, 0.25f), propBlock);
+        }
+        report.cornerPostsPlaced++;
+        LastBorderValidationReport = report;
     }
 
     private struct RawFace
