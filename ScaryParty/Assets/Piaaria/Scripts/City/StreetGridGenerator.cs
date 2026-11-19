@@ -384,6 +384,11 @@ public class StreetGridGenerator : MonoBehaviour
                 streetOBBs.Add(new BlockFiller.OBB2D(center, extents, axisX, axisZ));
             }
 
+            LastBorderValidationReport = new CityBorderValidationReport
+            {
+                seed = config != null ? config.seed : 0
+            };
+
             foreach (var outerPerimeter in cleanedVoidFaces)
             {
                 int n = outerPerimeter.Length;
@@ -616,8 +621,11 @@ public class StreetGridGenerator : MonoBehaviour
         public int totalEdgesEvaluated;
         public int residualWallsPlaced;
         public int cornerPostsPlaced;
+        public int rejectedSegments;
+        public int streetOverlapCount;
         public float maxUncoveredGapMeters;
-        public bool IsComplete => maxUncoveredGapMeters <= 0.25f;
+        public float totalUncoveredGapMeters;
+        public bool IsComplete => totalEdgesEvaluated > 0 && maxUncoveredGapMeters <= 0.25f && streetOverlapCount == 0;
     }
 
     public static CityBorderValidationReport LastBorderValidationReport { get; private set; }
@@ -686,62 +694,33 @@ public class StreetGridGenerator : MonoBehaviour
             () => wallMat);
 
         var report = LastBorderValidationReport;
-        if (edgeIndex == 0)
-        {
-            report = new CityBorderValidationReport { seed = config != null ? config.seed : 0 };
-        }
         report.totalEdgesEvaluated++;
+
+        var finalCovered = new List<(float start, float end)>(merged);
 
         for (int g = 0; g < gaps.Count; g++)
         {
             float gStart = gaps[g].start;
             float gEnd = gaps[g].end;
-            float gLen = (gEnd - gStart) + 0.6f; // Sobreposição controlada para vedar junções
-            float gMid = (gStart + gEnd) * 0.5f;
-
-            float chosenOffset = baseOffset;
-            for (int step = 0; step < 5; step++)
+            if (!TryPlaceWallSegment(gStart, gEnd, $"{edgeIndex}_{g}", p1, dir, normal, baseOffset, WallThickness, WallHeight, groundY, rot, axisX, axisZ, streetOBBs, borderParent, resolvedWallMat, propBlock, ref report, finalCovered))
             {
-                float testOffset = baseOffset + step * 0.85f;
-                Vector3 testCenter = p1 + dir * gMid + normal * (testOffset + WallThickness * 0.5f);
-                var testOBB = new BlockFiller.OBB2D(
-                    new Vector2(testCenter.x, testCenter.z),
-                    new Vector2(gLen * 0.45f, WallThickness * 0.45f),
-                    axisX,
-                    axisZ);
-
-                bool hitsStreet = false;
-                for (int s = 0; s < streetOBBs.Count; s++)
+                float span = gEnd - gStart;
+                int subCount = Mathf.Clamp(Mathf.CeilToInt(span / 2.2f), 2, 6);
+                float subLen = span / subCount;
+                if (subLen >= 0.8f)
                 {
-                    if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                    for (int sub = 0; sub < subCount; sub++)
                     {
-                        hitsStreet = true;
-                        break;
+                        float s0 = gStart + sub * subLen;
+                        float s1 = (sub == subCount - 1) ? gEnd : (s0 + subLen);
+                        TryPlaceWallSegment(s0, s1, $"{edgeIndex}_{g}_s{sub}", p1, dir, normal, baseOffset, WallThickness, WallHeight, groundY, rot, axisX, axisZ, streetOBBs, borderParent, resolvedWallMat, propBlock, ref report, finalCovered);
                     }
                 }
-                chosenOffset = testOffset;
-                if (!hitsStreet) break;
             }
-
-            Vector3 wallCenter = p1 + dir * gMid + normal * (chosenOffset + WallThickness * 0.5f);
-            wallCenter.y = groundY + WallHeight * 0.5f - 0.15f;
-
-            var wallGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            wallGo.name = $"BorderWallFill_{edgeIndex}_{g}";
-            wallGo.transform.SetParent(borderParent, true);
-            wallGo.transform.SetPositionAndRotation(wallCenter, rot);
-            wallGo.transform.localScale = new Vector3(gLen, WallHeight, WallThickness);
-
-            var rend = wallGo.GetComponent<Renderer>();
-            if (rend != null)
-            {
-                if (resolvedWallMat != null) rend.sharedMaterial = resolvedWallMat;
-                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, new Color(0.24f, 0.24f, 0.27f), propBlock);
-            }
-            report.residualWallsPlaced++;
         }
 
-        // Pilar de quina no vértice inicial para fechar encontros agudos e última-primeira aresta
+        // Pilar de quina no vértice inicial apenas se houver posição livre de streetOBBs
+        bool foundValidCorner = false;
         float cornerOffset = baseOffset + WallThickness * 0.5f;
         for (int step = 0; step < 4; step++)
         {
@@ -749,7 +728,7 @@ public class StreetGridGenerator : MonoBehaviour
             Vector3 testCorner = p1 + normal * testOffset;
             var testOBB = new BlockFiller.OBB2D(
                 new Vector2(testCorner.x, testCorner.z),
-                new Vector2(0.8f, 0.8f),
+                new Vector2(0.9f, 0.9f),
                 axisX,
                 axisZ);
             bool hitsStreet = false;
@@ -761,25 +740,160 @@ public class StreetGridGenerator : MonoBehaviour
                     break;
                 }
             }
-            cornerOffset = testOffset;
-            if (!hitsStreet) break;
+            if (!hitsStreet)
+            {
+                cornerOffset = testOffset;
+                foundValidCorner = true;
+                break;
+            }
         }
 
-        Vector3 cornerPos = p1 + normal * cornerOffset;
-        cornerPos.y = groundY + WallHeight * 0.5f - 0.15f;
-        var cornerGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cornerGo.name = $"BorderCornerPost_{edgeIndex}";
-        cornerGo.transform.SetParent(borderParent, true);
-        cornerGo.transform.SetPositionAndRotation(cornerPos, rot);
-        cornerGo.transform.localScale = new Vector3(1.8f, WallHeight, 1.8f);
-        var cornerRend = cornerGo.GetComponent<Renderer>();
-        if (cornerRend != null)
+        if (foundValidCorner)
         {
-            if (resolvedWallMat != null) cornerRend.sharedMaterial = resolvedWallMat;
-            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(cornerRend, 0, new Color(0.22f, 0.22f, 0.25f), propBlock);
+            Vector3 cornerPos = p1 + normal * cornerOffset;
+            cornerPos.y = groundY + WallHeight * 0.5f - 0.15f;
+            var cornerGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cornerGo.name = $"BorderCornerPost_{edgeIndex}";
+            cornerGo.transform.SetParent(borderParent, true);
+            cornerGo.transform.SetPositionAndRotation(cornerPos, rot);
+            cornerGo.transform.localScale = new Vector3(1.8f, WallHeight, 1.8f);
+            var cornerRend = cornerGo.GetComponent<Renderer>();
+            if (cornerRend != null)
+            {
+                if (resolvedWallMat != null) cornerRend.sharedMaterial = resolvedWallMat;
+                ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(cornerRend, 0, new Color(0.22f, 0.22f, 0.25f), propBlock);
+            }
+            report.cornerPostsPlaced++;
+            finalCovered.Add((0f, 0.9f));
         }
-        report.cornerPostsPlaced++;
+
+        // R07: Medir cobertura real a partir dos intervalos finais efetivamente construídos
+        ComputeGapMetrics(edgeLength, finalCovered, out float edgeMaxGap, out float edgeTotalGap);
+        report.maxUncoveredGapMeters = Mathf.Max(report.maxUncoveredGapMeters, edgeMaxGap);
+        report.totalUncoveredGapMeters += edgeTotalGap;
         LastBorderValidationReport = report;
+    }
+
+    private static bool TryPlaceWallSegment(
+        float segStart,
+        float segEnd,
+        string nameSuffix,
+        Vector3 p1,
+        Vector3 dir,
+        Vector3 normal,
+        float baseOffset,
+        float wallThickness,
+        float wallHeight,
+        float groundY,
+        Quaternion rot,
+        Vector2 axisX,
+        Vector2 axisZ,
+        List<BlockFiller.OBB2D> streetOBBs,
+        Transform borderParent,
+        Material resolvedWallMat,
+        MaterialPropertyBlock propBlock,
+        ref CityBorderValidationReport report,
+        List<(float start, float end)> finalCovered)
+    {
+        float gLen = (segEnd - segStart) + 0.6f;
+        float gMid = (segStart + segEnd) * 0.5f;
+        bool foundValid = false;
+        float chosenOffset = baseOffset;
+
+        for (int step = 0; step < 5; step++)
+        {
+            float testOffset = baseOffset + step * 0.85f;
+            Vector3 testCenter = p1 + dir * gMid + normal * (testOffset + wallThickness * 0.5f);
+            var testOBB = new BlockFiller.OBB2D(
+                new Vector2(testCenter.x, testCenter.z),
+                new Vector2(gLen * 0.5f, wallThickness * 0.5f),
+                axisX,
+                axisZ);
+
+            bool hitsStreet = false;
+            for (int s = 0; s < streetOBBs.Count; s++)
+            {
+                if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                {
+                    hitsStreet = true;
+                    break;
+                }
+            }
+            if (!hitsStreet)
+            {
+                chosenOffset = testOffset;
+                foundValid = true;
+                break;
+            }
+        }
+
+        if (!foundValid)
+        {
+            report.rejectedSegments++;
+            return false;
+        }
+
+        Vector3 wallCenter = p1 + dir * gMid + normal * (chosenOffset + wallThickness * 0.5f);
+        wallCenter.y = groundY + wallHeight * 0.5f - 0.15f;
+
+        var wallGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        wallGo.name = $"BorderWallFill_{nameSuffix}";
+        wallGo.transform.SetParent(borderParent, true);
+        wallGo.transform.SetPositionAndRotation(wallCenter, rot);
+        wallGo.transform.localScale = new Vector3(gLen, wallHeight, wallThickness);
+
+        var rend = wallGo.GetComponent<Renderer>();
+        if (rend != null)
+        {
+            if (resolvedWallMat != null) rend.sharedMaterial = resolvedWallMat;
+            ScaryParty.VisualStyles.VisualStyleShaderUtility.ApplyColorBlockToSlot(rend, 0, new Color(0.24f, 0.24f, 0.27f), propBlock);
+        }
+        report.residualWallsPlaced++;
+        finalCovered.Add((segStart, segEnd));
+        return true;
+    }
+
+    public static float ComputeMaxUncoveredGap(float edgeLength, List<(float start, float end)> intervals)
+    {
+        ComputeGapMetrics(edgeLength, intervals, out float maxGap, out _);
+        return maxGap;
+    }
+
+    public static void ComputeGapMetrics(float edgeLength, List<(float start, float end)> intervals, out float maxGap, out float totalGap)
+    {
+        maxGap = 0f;
+        totalGap = 0f;
+        if (edgeLength <= 0.01f) return;
+        if (intervals == null || intervals.Count == 0)
+        {
+            maxGap = edgeLength;
+            totalGap = edgeLength;
+            return;
+        }
+
+        var sorted = new List<(float start, float end)>(intervals);
+        sorted.Sort((a, b) => a.start.CompareTo(b.start));
+
+        float cursor = 0f;
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            float s = Mathf.Clamp(sorted[i].start, 0f, edgeLength);
+            float e = Mathf.Clamp(sorted[i].end, 0f, edgeLength);
+            if (e <= s) continue;
+            if (s > cursor)
+            {
+                float gap = s - cursor;
+                maxGap = Mathf.Max(maxGap, gap);
+                totalGap += gap;
+            }
+            cursor = Mathf.Max(cursor, e);
+        }
+        if (edgeLength > cursor)
+        {
+            float tailGap = edgeLength - cursor;
+            maxGap = Mathf.Max(maxGap, tailGap);
+            totalGap += tailGap;
+        }
     }
 
     private struct RawFace
