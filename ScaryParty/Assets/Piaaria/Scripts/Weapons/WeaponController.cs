@@ -278,6 +278,15 @@ public class WeaponController : MonoBehaviour
         _isReloading = true;
         _reloadRemaining = mode == WeaponMode.Shotgun ? 2.0f : 1.4f;
         StopAim();
+        ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.WeaponReload,
+            transform,
+            0,
+            0,
+            0,
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
+            0.85f,
+            isLocal: true);
     }
 
     private static bool IsReloadPressed()
@@ -361,6 +370,15 @@ public class WeaponController : MonoBehaviour
             if (animator != null) animator.SetBool(AnimIsAiming, true);
             ScaryParty.Player.FirstPersonCameraController.LocalInstance?.SetAimState(true);
             PizzeriaCommandHandler.Instance?.SetWeaponAimServerRpc(true);
+            ScaryParty.Pizzeria.Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelEventId.WeaponAim,
+                transform,
+                0,
+                0,
+                0,
+                ScaryParty.Pizzeria.Presentation.Feedback.GameFeelMaterialFamily.RigidMetal,
+                0.65f,
+                isLocal: true);
         }
     }
 

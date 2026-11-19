@@ -186,7 +186,29 @@ namespace ScaryParty.Pizzeria.Presentation
                 case GameFeelEventId.NpcOrderBad:
                 case GameFeelEventId.NpcLeavingAngry:
                 case GameFeelEventId.OrderDeadlineWarning:
+                case GameFeelEventId.PlayerDamaged:
+                case GameFeelEventId.EmployeeBlocked:
                     return errorSound;
+                case GameFeelEventId.VehicleMount:
+                case GameFeelEventId.VehicleDismount:
+                    return placeSound != null ? placeSound : pickupSound;
+                case GameFeelEventId.VehicleHorn:
+                    return phoneAnswerSound != null ? phoneAnswerSound : ovenReadySound;
+                case GameFeelEventId.VehicleImpact:
+                    return ovenBurnSound != null ? ovenBurnSound : errorSound;
+                case GameFeelEventId.WeaponAim:
+                case GameFeelEventId.EmployeeSpawned:
+                case GameFeelEventId.EmployeeWorkStart:
+                    return pickupSound;
+                case GameFeelEventId.WeaponFire:
+                    return ovenInsertSound != null ? ovenInsertSound : placeSound;
+                case GameFeelEventId.WeaponReload:
+                    return packageSound != null ? packageSound : pickupSound;
+                case GameFeelEventId.WeaponHit:
+                    return cutSound != null ? cutSound : placeSound;
+                case GameFeelEventId.PlayerRescued:
+                case GameFeelEventId.EmployeeWorkComplete:
+                    return deliverySound != null ? deliverySound : ovenReadySound;
                 case GameFeelEventId.UIHover:
                     return uiHoverSound != null ? uiHoverSound : pickupSound;
                 case GameFeelEventId.UIClick:

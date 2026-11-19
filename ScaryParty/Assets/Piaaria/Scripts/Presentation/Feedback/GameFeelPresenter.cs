@@ -107,6 +107,27 @@ namespace ScaryParty.Pizzeria.Presentation.Feedback
             Trigger(in ctx);
         }
 
+        public void TriggerAtPosition(
+            GameFeelEventId eventId,
+            Vector3 worldPos,
+            Transform target = null,
+            ulong entityId = 0,
+            int stationId = 0,
+            uint revision = 0,
+            GameFeelMaterialFamily family = GameFeelMaterialFamily.Default,
+            float intensity = 1f,
+            bool isLocal = true,
+            int slotIndex = -1)
+        {
+            var ctx = GameFeelContext.Create(eventId, entityId, stationId, revision, family);
+            ctx.TargetTransform = target;
+            ctx.WorldPosition = worldPos != Vector3.zero ? worldPos : (target != null ? target.position : Vector3.zero);
+            ctx.Intensity = intensity;
+            ctx.IsLocalOwner = isLocal;
+            ctx.SlotIndex = slotIndex;
+            Trigger(in ctx);
+        }
+
         public void Trigger(in GameFeelContext ctx)
         {
             if (ctx.EventId == GameFeelEventId.None) return;
@@ -219,6 +240,19 @@ namespace ScaryParty.Pizzeria.Presentation.Feedback
                 case GameFeelEventId.BackpackFullRejected:
                     fpCam.TriggerHandImpulse(hand, new Vector3(0.022f, 0f, 0f), new Vector3(0f, 0f, 5f));
                     break;
+                case GameFeelEventId.WeaponFire:
+                    fpCam.TriggerHandImpulse(1, new Vector3(0f, 0.015f, -0.04f), new Vector3(-9f, 0f, 0f));
+                    break;
+                case GameFeelEventId.WeaponReload:
+                    fpCam.TriggerHandImpulse(1, new Vector3(0f, -0.02f, 0.01f), new Vector3(4f, 0f, -4f));
+                    break;
+                case GameFeelEventId.WeaponAim:
+                    fpCam.TriggerHandImpulse(1, new Vector3(-0.01f, 0.008f, 0.015f), new Vector3(-2f, 0f, 0f));
+                    break;
+                case GameFeelEventId.VehicleImpact:
+                case GameFeelEventId.PlayerDamaged:
+                    fpCam.TriggerHandImpulse(-1, new Vector3(0f, -0.03f, -0.035f), new Vector3(-8f, 0f, 6f));
+                    break;
             }
         }
 
@@ -255,7 +289,20 @@ namespace ScaryParty.Pizzeria.Presentation.Feedback
                     SpawnBurstParticles(pos + Vector3.up * 0.08f, new Color(1.0f, 0.92f, 0.60f, 0.9f), Mathf.RoundToInt(7 * partMult), 1.0f, 0.035f);
                     break;
                 case GameFeelEventId.DeliverySuccess:
+                case GameFeelEventId.PlayerRescued:
+                case GameFeelEventId.EmployeeWorkComplete:
                     SpawnBurstParticles(pos + Vector3.up * 1.2f, new Color(0.35f, 0.95f, 0.45f, 0.95f), Mathf.RoundToInt(12 * partMult), 1.5f, 0.045f);
+                    break;
+                case GameFeelEventId.WeaponFire:
+                    SpawnBurstParticles(pos + Vector3.up * 1.25f, new Color(1.0f, 0.78f, 0.28f, 0.95f), Mathf.RoundToInt(6 * partMult), 2.2f, 0.035f);
+                    break;
+                case GameFeelEventId.WeaponHit:
+                case GameFeelEventId.VehicleImpact:
+                case GameFeelEventId.PlayerDamaged:
+                    SpawnBurstParticles(pos, new Color(0.95f, 0.35f, 0.22f, 0.95f), Mathf.RoundToInt(9 * partMult), 1.8f, 0.045f);
+                    break;
+                case GameFeelEventId.EmployeeBlocked:
+                    SpawnBurstParticles(pos + Vector3.up * 1.6f, new Color(0.95f, 0.55f, 0.18f, 0.9f), Mathf.RoundToInt(5 * partMult), 0.9f, 0.035f);
                     break;
             }
         }
