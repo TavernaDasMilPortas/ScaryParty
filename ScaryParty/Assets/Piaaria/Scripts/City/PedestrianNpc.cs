@@ -60,6 +60,62 @@ public class PedestrianNpc : MonoBehaviour
         Motor.MoveTo(sideStep);
     }
 
+    private Coroutine _knockbackCoroutine;
+
+    public void ApplyExternalKnockback(Vector3 horizontalVelocity, float duration = 0.35f)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        if (_knockbackCoroutine != null) StopCoroutine(_knockbackCoroutine);
+        _knockbackCoroutine = StartCoroutine(RoutineExternalKnockback(horizontalVelocity, Mathf.Clamp(duration, 0.1f, 0.7f)));
+    }
+
+    private System.Collections.IEnumerator RoutineExternalKnockback(Vector3 initialVelocity, float duration)
+    {
+        var agent = GetComponent<NavMeshAgent>();
+        bool hadAgent = agent != null && agent.enabled;
+        if (hadAgent)
+        {
+            agent.isStopped = true;
+            agent.updatePosition = false;
+        }
+
+        Vector3 vel = new Vector3(initialVelocity.x, 0f, initialVelocity.z);
+        if (vel.sqrMagnitude > 196f) vel = vel.normalized * 14f;
+
+        float elapsed = 0f;
+        while (elapsed < duration && vel.sqrMagnitude > 0.05f)
+        {
+            float dt = Time.deltaTime;
+            elapsed += dt;
+            float decay = 1f - Mathf.Clamp01(elapsed / duration);
+            Vector3 delta = vel * (decay * dt);
+            float dist = delta.magnitude;
+            if (dist > 0.001f)
+            {
+                Vector3 origin = transform.position + Vector3.up * 0.6f;
+                if (Physics.SphereCast(origin, 0.35f, delta / dist, out RaycastHit hit, dist + 0.15f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                {
+                    float safeDist = Mathf.Max(0f, hit.distance - 0.15f);
+                    transform.position += (delta / dist) * safeDist;
+                    break;
+                }
+                transform.position += delta;
+            }
+            yield return null;
+        }
+
+        if (hadAgent && agent != null && agent.enabled)
+        {
+            if (NavMesh.SamplePosition(transform.position, out NavMeshHit navHit, 3.5f, NavMesh.AllAreas))
+            {
+                agent.Warp(navHit.position);
+            }
+            agent.updatePosition = true;
+            agent.isStopped = false;
+        }
+        _knockbackCoroutine = null;
+    }
+
     public int ColorIndex { get; private set; }
 
     public event Action<PedestrianNpc> OnReachedPizzeria;

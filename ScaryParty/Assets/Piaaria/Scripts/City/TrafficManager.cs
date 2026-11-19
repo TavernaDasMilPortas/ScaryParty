@@ -124,22 +124,27 @@ public class TrafficManager : NetworkBehaviour
 #endif
         if (!_initialized) return;
 
-        if (IsActiveServerOrLocal)
-        {
-            ServerUpdate();
-        }
-        else if (IsActiveClient)
+        if (IsActiveClient)
         {
             ClientUpdate();
         }
     }
 
-    private void ServerUpdate()
+    private void FixedUpdate()
+    {
+        if (!_initialized) return;
+        if (IsActiveServerOrLocal)
+        {
+            ServerFixedUpdate(Time.fixedDeltaTime);
+        }
+    }
+
+    private void ServerFixedUpdate(float fixedDeltaTime)
     {
         // Spawning
         if (_vehicles.Count < _maxVehicles)
         {
-            _spawnTimer += Time.deltaTime;
+            _spawnTimer += fixedDeltaTime;
             if (_spawnTimer >= _spawnDelay)
             {
                 SpawnVehicle();
@@ -147,22 +152,21 @@ public class TrafficManager : NetworkBehaviour
             }
         }
 
-        // Movement
+        // Physical Movement (FixedUpdate)
         for (int i = _vehicles.Count - 1; i >= 0; i--)
         {
             TrafficVehicle vehicle = _vehicles[i];
             if (vehicle == null || !vehicle.isActive) continue;
 
-            bool reachedDestination = vehicle.UpdateMovement(Time.deltaTime);
+            bool reachedDestination = vehicle.UpdateMovement(fixedDeltaTime);
             if (reachedDestination)
             {
-                // Give new random destination
                 AssignRandomPath(vehicle);
             }
         }
 
         // Sync to clients
-        _syncTimer += Time.deltaTime;
+        _syncTimer += fixedDeltaTime;
         if (_syncTimer >= _syncInterval)
         {
             SyncVehicles();
@@ -204,16 +208,31 @@ public class TrafficManager : NetworkBehaviour
 
         GameObject vehicleObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
         vehicleObj.SetActive(false);
-        vehicleObj.transform.localScale = new Vector3(2.5f, 1.2f, 4.5f);
+        vehicleObj.name = $"TrafficVehicle_{_nextVehicleId}";
+        vehicleObj.transform.localScale = new Vector3(2.35f, 1.2f, 4.4f);
         vehicleObj.transform.SetParent(_vehicleRoot.transform);
 
-        Collider col = vehicleObj.GetComponent<Collider>();
-        if (col != null) col.isTrigger = true;
+        // Corpo físico sólido (não-trigger) para colisão real
+        BoxCollider solidCol = vehicleObj.GetComponent<BoxCollider>();
+        if (solidCol != null) solidCol.isTrigger = false;
+
+        // Sensor de antecipação separado (trigger) para pedestres/buzina
+        var sensorGo = new GameObject("AnticipationSensor");
+        sensorGo.transform.SetParent(vehicleObj.transform, false);
+        sensorGo.transform.localPosition = new Vector3(0f, 0f, 0.2f);
+        var sensorCol = sensorGo.AddComponent<BoxCollider>();
+        sensorCol.isTrigger = true;
+        sensorCol.size = new Vector3(1.15f, 1.05f, 1.35f);
 
         var rb = vehicleObj.AddComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
-        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+        rb.isKinematic = false;
+        rb.mass = 1200f;
+        rb.linearDamping = 1.5f;
+        rb.angularDamping = 5.0f;
+        rb.useGravity = true;
+        rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+        rb.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         TrafficVehicle vehicle = vehicleObj.AddComponent<TrafficVehicle>();
         vehicle.VehicleId = _nextVehicleId++;
@@ -237,8 +256,11 @@ public class TrafficManager : NetworkBehaviour
             return;
         }
 
-        vehicleObj.transform.position = vehicle.waypoints[0];
+        Vector3 spawnPos = vehicle.waypoints[0];
+        spawnPos.y += 0.65f;
+        vehicleObj.transform.position = spawnPos;
         Vector3 initialFwd = vehicle.waypoints[1] - vehicle.waypoints[0];
+        initialFwd.y = 0f;
         if (initialFwd.sqrMagnitude > 0.001f)
             vehicleObj.transform.rotation = Quaternion.LookRotation(initialFwd.normalized);
 
@@ -313,9 +335,47 @@ public class TrafficManager : NetworkBehaviour
         vehicle.CurrentEndNode = chosenEndIndex;
         if (vehicle.CurrentEdgeId < 0 && path.Count >= 2)
             vehicle.CurrentEdgeId = ResolveClosestEdgeId(path[0], path[1]);
-        vehicle.waypoints = path;
+        vehicle.waypoints = BuildLaneAndCornerWaypoints(path, laneOffset: 1.85f);
         vehicle.currentWaypointIndex = 0;
         return true;
+    }
+
+    private static List<Vector3> BuildLaneAndCornerWaypoints(List<Vector3> centerPath, float laneOffset)
+    {
+        if (centerPath == null || centerPath.Count < 2) return centerPath;
+        var result = new List<Vector3>(centerPath.Count * 2);
+
+        for (int i = 0; i < centerPath.Count - 1; i++)
+        {
+            Vector3 a = centerPath[i];
+            Vector3 b = centerPath[i + 1];
+            Vector3 dir = b - a;
+            dir.y = 0f;
+            float len = dir.magnitude;
+            if (len < 0.05f) continue;
+            dir /= len;
+
+            Vector3 rightLane = Vector3.Cross(Vector3.up, dir).normalized * laneOffset;
+            float trim = Mathf.Min(2.4f, len * 0.22f);
+            Vector3 entry = a + dir * trim + rightLane;
+            Vector3 exit = b - dir * trim + rightLane;
+
+            if (result.Count > 0)
+            {
+                // Arco suave dentro do cruzamento sem invadir calçada
+                Vector3 prev = result[result.Count - 1];
+                Vector3 midCorner = Vector3.Lerp(prev, entry, 0.5f);
+                Vector3 cornerApex = b * 0f + a + rightLane * 0.5f;
+                midCorner = Vector3.Lerp(midCorner, new Vector3(a.x, prev.y, a.z), 0.35f);
+                result.Add(midCorner);
+            }
+
+            result.Add(entry);
+            result.Add(exit);
+        }
+
+        if (result.Count < 2) return centerPath;
+        return result;
     }
 
     private int ResolveClosestEdgeId(Vector3 a, Vector3 b)

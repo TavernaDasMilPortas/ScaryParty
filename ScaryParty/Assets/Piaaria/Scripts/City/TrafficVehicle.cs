@@ -36,35 +36,43 @@ public class TrafficVehicle : MonoBehaviour
     public TrafficStopReason CurrentStopReason { get; private set; }
     public float CurrentSpeed => _currentSpeed;
 
-    private float _waypointTolerance = 1.0f;
-    private float _raycastDist = 8f;
+    private float _waypointTolerance = 1.6f;
+    private float _raycastDist = 8.5f;
     private float _currentSpeed;
+    private Rigidbody _rb;
     private readonly Dictionary<int, float> _collisionCooldowns = new Dictionary<int, float>();
     private static readonly RaycastHit[] _rayHits = new RaycastHit[16];
 
+    private void Awake()
+    {
+        _rb = GetComponent<Rigidbody>();
+    }
+
     private void Start()
     {
+        if (_rb == null) _rb = GetComponent<Rigidbody>();
         if (speed <= 0.01f) speed = 8f;
         _currentSpeed = speed;
     }
 
     /// <summary>
-    /// Move along path: MoveTowards limitado ao waypoint para evitar overshoot em queda de FPS.
-    /// Returns true when path is complete.
+    /// Simulação física em passo fixo (FixedUpdate) controlada exclusivamente pelo servidor.
     /// </summary>
     public bool UpdateMovement(float deltaTime)
     {
         if (waypoints == null || currentWaypointIndex >= waypoints.Count)
         {
             CurrentStopReason = TrafficStopReason.NoPath;
+            ApplyZeroHorizontalVelocity();
             return true;
         }
 
         if (speed <= 0.01f) speed = 8f;
 
+        Vector3 currentPos = _rb != null ? _rb.position : transform.position;
         Vector3 target = waypoints[currentWaypointIndex];
-        target.y = transform.position.y;
-        Vector3 toTarget = target - transform.position;
+        target.y = currentPos.y;
+        Vector3 toTarget = target - currentPos;
         toTarget.y = 0f;
 
         while (toTarget.magnitude < _waypointTolerance)
@@ -76,8 +84,8 @@ public class TrafficVehicle : MonoBehaviour
                 return true;
             }
             target = waypoints[currentWaypointIndex];
-            target.y = transform.position.y;
-            toTarget = target - transform.position;
+            target.y = currentPos.y;
+            toTarget = target - currentPos;
             toTarget.y = 0f;
         }
 
@@ -91,37 +99,41 @@ public class TrafficVehicle : MonoBehaviour
             bool blockedAhead = !stoppedByLight && CheckObstacleAhead(dir, out obstacleReason);
 
             if (stoppedByLight)
-            {
                 CurrentStopReason = TrafficStopReason.TrafficLight;
-            }
             else if (blockedAhead)
-            {
                 CurrentStopReason = obstacleReason;
-            }
             else
-            {
                 CurrentStopReason = TrafficStopReason.None;
-            }
 
             if (stoppedByLight || blockedAhead)
-            {
-                _currentSpeed = Mathf.Max(0f, _currentSpeed - (speed * 2.5f * deltaTime));
-            }
+                _currentSpeed = Mathf.Max(0f, _currentSpeed - (speed * 2.8f * deltaTime));
             else
-            {
-                _currentSpeed = Mathf.Min(speed, _currentSpeed + (speed * deltaTime));
-            }
+                _currentSpeed = Mathf.Min(speed, _currentSpeed + (speed * 1.2f * deltaTime));
 
-            if (_currentSpeed > 0.01f)
+            if (_rb != null && !_rb.isKinematic)
+            {
+                Vector3 horizVel = dir * _currentSpeed;
+                _rb.linearVelocity = new Vector3(horizVel.x, _rb.linearVelocity.y, horizVel.z);
+                Quaternion targetRot = Quaternion.LookRotation(dir, Vector3.up);
+                _rb.MoveRotation(Quaternion.Slerp(_rb.rotation, targetRot, deltaTime * 6f));
+            }
+            else if (_currentSpeed > 0.01f)
             {
                 float maxStep = _currentSpeed * deltaTime;
-                Vector3 nextPos = Vector3.MoveTowards(transform.position, target, maxStep);
-                transform.position = nextPos;
+                transform.position = Vector3.MoveTowards(transform.position, target, maxStep);
                 transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), deltaTime * 6f);
             }
         }
 
         return false;
+    }
+
+    private void ApplyZeroHorizontalVelocity()
+    {
+        if (_rb != null && !_rb.isKinematic)
+        {
+            _rb.linearVelocity = new Vector3(0f, _rb.linearVelocity.y, 0f);
+        }
     }
 
     private bool CheckTrafficLight()
@@ -211,7 +223,7 @@ public class TrafficVehicle : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!isActive || _currentSpeed < minCollisionSpeed || other == null) return;
+        if (!isActive || other == null) return;
         if (other.transform.IsChildOf(transform)) return;
 
         bool isServerOrLocal = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
@@ -220,31 +232,68 @@ public class TrafficVehicle : MonoBehaviour
         var ped = other.GetComponentInParent<PedestrianNpc>();
         if (ped != null)
         {
-            int key = ped.GetInstanceID();
-            if (!_collisionCooldowns.TryGetValue(key, out float nextAllowed) || Time.time >= nextAllowed)
-            {
-                _collisionCooldowns[key] = Time.time + 2.0f;
-                ped.ReactToHorn(transform.position);
-            }
+            ped.ReactToHorn(transform.position);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (!isActive || collision == null || collision.collider == null) return;
+        if (collision.collider.transform.IsChildOf(transform)) return;
+
+        bool isServerOrLocal = NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening || NetworkManager.Singleton.IsServer;
+        if (!isServerOrLocal) return;
+
+        float impactSpeed = Mathf.Max(_currentSpeed, collision.relativeVelocity.magnitude);
+        if (impactSpeed < minCollisionSpeed) return;
+
+        var victimRoot = collision.collider.transform.root;
+        int episodeKey = victimRoot.GetInstanceID();
+        if (_collisionCooldowns.TryGetValue(episodeKey, out float nextAllowed) && Time.time < nextAllowed)
             return;
+
+        _collisionCooldowns[episodeKey] = Time.time + 1.6f;
+
+        Vector3 pushDir = Vector3.ProjectOnPlane(victimRoot.position - transform.position, Vector3.up);
+        if (pushDir.sqrMagnitude < 0.01f) pushDir = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        pushDir.Normalize();
+
+        Vector3 vehVel = _rb != null ? Vector3.ProjectOnPlane(_rb.linearVelocity, Vector3.up) : transform.forward * _currentSpeed;
+        if (vehVel.sqrMagnitude > 0.25f)
+        {
+            pushDir = (pushDir * 0.65f + vehVel.normalized * 0.35f).normalized;
         }
 
-        var dmgTarget = other.GetComponentInParent<IDamageable>();
+        float knockbackSpeed = Mathf.Clamp(impactSpeed * 1.25f, 5.5f, 14f);
+        Vector3 knockbackVel = pushDir * knockbackSpeed;
+
+        var ps = collision.collider.GetComponentInParent<PlayerState>();
+        if (ps != null)
+        {
+            ps.ApplyVehicleKnockbackServer(knockbackVel, 0.36f);
+        }
+        else
+        {
+            var ped = collision.collider.GetComponentInParent<PedestrianNpc>();
+            if (ped != null)
+            {
+                ped.ApplyExternalKnockback(knockbackVel, 0.38f);
+            }
+        }
+
+        var dmgTarget = collision.collider.GetComponentInParent<IDamageable>();
         if (dmgTarget != null && dmgTarget.IsAlive)
         {
-            int key = other.transform.root.GetInstanceID();
-            if (!_collisionCooldowns.TryGetValue(key, out float nextAllowed) || Time.time >= nextAllowed)
+            int scaledDamage = Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(8f, Mathf.Max(12, collisionDamage * 1.5f), Mathf.InverseLerp(minCollisionSpeed, 14f, impactSpeed))), 5, 35);
+            Vector3 hitPt = collision.contactCount > 0 ? collision.GetContact(0).point : collision.collider.ClosestPoint(transform.position);
+            dmgTarget.ApplyDamageServer(new DamageEvent
             {
-                _collisionCooldowns[key] = Time.time + 2.0f;
-                dmgTarget.ApplyDamageServer(new DamageEvent
-                {
-                    Amount = Mathf.Max(1, collisionDamage),
-                    Source = DamageSourceType.Collision,
-                    InstigatorClientId = 0UL,
-                    HitPoint = other.ClosestPoint(transform.position),
-                    HitNormal = (other.transform.position - transform.position).normalized
-                });
-            }
+                Amount = scaledDamage,
+                Source = DamageSourceType.Collision,
+                InstigatorClientId = 0UL,
+                HitPoint = hitPt,
+                HitNormal = pushDir
+            });
         }
     }
 }

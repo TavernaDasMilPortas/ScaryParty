@@ -259,6 +259,63 @@ public class PlayerState : NetworkBehaviour
         }
     }
 
+    private Coroutine _knockbackRoutine;
+
+    public void ApplyVehicleKnockbackServer(Vector3 horizontalVelocity, float duration = 0.35f)
+    {
+        if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+        {
+            ApplyLocalKnockback(horizontalVelocity, duration);
+            return;
+        }
+
+        if (!IsServer) return;
+        var targetParams = new ClientRpcParams
+        {
+            Send = new ClientRpcSendParams { TargetClientIds = new[] { OwnerClientId } }
+        };
+        ApplyVehicleKnockbackClientRpc(horizontalVelocity, duration, targetParams);
+    }
+
+    [ClientRpc]
+    public void ApplyVehicleKnockbackClientRpc(Vector3 horizontalVelocity, float duration, ClientRpcParams clientRpcParams = default)
+    {
+        if (!IsOwner) return;
+        ApplyLocalKnockback(horizontalVelocity, duration);
+    }
+
+    private void ApplyLocalKnockback(Vector3 horizontalVelocity, float duration)
+    {
+        if (_knockbackRoutine != null) StopCoroutine(_knockbackRoutine);
+        _knockbackRoutine = StartCoroutine(RoutineVehicleKnockback(horizontalVelocity, Mathf.Clamp(duration, 0.1f, 0.75f)));
+    }
+
+    private IEnumerator RoutineVehicleKnockback(Vector3 initialVelocity, float duration)
+    {
+        var cc = GetComponent<CharacterController>();
+        Vector3 vel = new Vector3(initialVelocity.x, 0f, initialVelocity.z);
+        if (vel.sqrMagnitude > 225f) vel = vel.normalized * 15f;
+
+        float elapsed = 0f;
+        while (elapsed < duration && vel.sqrMagnitude > 0.05f)
+        {
+            float dt = Time.deltaTime;
+            elapsed += dt;
+            float decay = 1f - Mathf.Clamp01(elapsed / duration);
+            Vector3 step = (vel * decay + Vector3.down * 4f) * dt;
+            if (cc != null && cc.enabled)
+            {
+                cc.Move(step);
+            }
+            else
+            {
+                transform.position += new Vector3(step.x, 0f, step.z);
+            }
+            yield return null;
+        }
+        _knockbackRoutine = null;
+    }
+
     private IEnumerator SubmitProfileDeferred()
     {
         yield return null; // Aguarda 1 frame para estabilização de rede e registro no NetworkManager
