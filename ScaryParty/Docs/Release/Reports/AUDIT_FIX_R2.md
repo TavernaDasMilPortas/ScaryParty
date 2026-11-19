@@ -24,7 +24,7 @@
 | **R10** Scripts sem `.meta` | P0 | Em progresso | P0 | `AuditR2BaselineTests` (EditMode pendente no Editor) | Verificar importação limpa no Unity Editor | `.meta` de `PizzeriaExteriorAnchors.cs` e `PizzeriaPatioLayoutWizard.cs` versionados; `PizzeriaLayoutProfile` separado | Versionar `.meta` de `PizzeriaLayoutProfile.cs` e `AuditR2BaselineTests.cs` após refresh do Unity Editor |
 | **R11** Feel sem emissores | P4 / P10 | Pendente | — | Não executado | Pendente | — | Ligar 14 eventos obrigatórios com emissor e receita |
 | **R12** Moto depende de RPC | P9 | Pendente | — | Não executado | Pendente | — | Orçamento temporal + saturação `RaycastNonAlloc` |
-| **R13** Compra parcial | P8 | Pendente | — | Não executado | Pendente | — | Agregação transacional + estado pendente persistente |
+| **R13** Compra parcial | P8 | Código integrado (validação Editor pendente) | P8 | `RunIntermissionNetworkTests.SupplyBundle_AggregatesDuplicateIngredients_AndIsAtomicOnInsufficientCapacity` (EditMode pendente no Editor) | Testar loja com duplicata, capacidade exata, troca de aba e timeout | Agregação por `IngredientId`, rollback em divergência e estado pendente estático em `RunShopPagePresenter` | Rodar `RunIntermissionNetworkTests` e bateria manual no Editor |
 | **R14** Readiness permissivo | P1 / P2 | Código integrado (validação Editor pendente) | P2 | `SceneReadinessContractTests` (EditMode pendente no Editor) | Testar loading com dependência ausente e transição Menu→Lobby→Ready→Gameplay | `SceneReadinessContract` + `StageTimingRecorder` integrados em `PizzeriaSceneLoadingCoordinator` (obrigatório vs opcional + diagnóstico de timeout) | Rodar `SceneReadinessContractTests` e bateria manual no Unity Editor |
 
 ---

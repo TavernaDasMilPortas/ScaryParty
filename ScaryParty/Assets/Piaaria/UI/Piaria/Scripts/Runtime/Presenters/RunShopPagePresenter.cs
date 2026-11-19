@@ -25,10 +25,12 @@ namespace ScaryParty.UI.Piaria.Presenters
         private readonly Button _readyBtn;
         private readonly Action<NightIntermissionPresenter.TabPage> _navigateTab;
 
-        private string _pendingOfferId = string.Empty;
-        private string _pendingRequestId = string.Empty;
-        private float _pendingStartedAtRealtime;
-        private int _nextRequestSeq;
+        // Estado pendente compartilhado fora da instância da página para sobreviver a trocas de aba
+        private static string _pendingOfferId = string.Empty;
+        private static string _pendingRequestId = string.Empty;
+        private static float _pendingStartedAtRealtime;
+        private static int _nextRequestSeq;
+        private IVisualElementScheduledItem _pendingTimeoutCheck;
         private readonly List<Button> _shopBuyButtons = new List<Button>();
         private readonly Dictionary<string, VisualElement> _shopCardsByOfferId = new Dictionary<string, VisualElement>(StringComparer.Ordinal);
 
@@ -72,6 +74,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             if (_shopGrid == null) return;
+            UIToolkitTweenService.KillTweensRecursive(_shopGrid);
             _shopGrid.Clear();
             _shopBuyButtons.Clear();
             _shopCardsByOfferId.Clear();
@@ -81,6 +84,30 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 _pendingOfferId = string.Empty;
                 _pendingRequestId = string.Empty;
+            }
+
+            if (!string.IsNullOrEmpty(_pendingOfferId) && _pendingTimeoutCheck == null)
+            {
+                _pendingTimeoutCheck = _shopGrid.schedule.Execute(() =>
+                {
+                    if (_shopGrid == null || _shopGrid.panel == null) return;
+                    if (!string.IsNullOrEmpty(_pendingOfferId) && Time.realtimeSinceStartup - _pendingStartedAtRealtime > 8f)
+                    {
+                        _pendingOfferId = string.Empty;
+                        _pendingRequestId = string.Empty;
+                        _pendingTimeoutCheck?.Pause();
+                        _pendingTimeoutCheck = null;
+                        if (PizzeriaNetworkState.Instance != null)
+                        {
+                            BindShop(PizzeriaNetworkState.Instance);
+                        }
+                    }
+                }).Every(500);
+            }
+            else if (string.IsNullOrEmpty(_pendingOfferId) && _pendingTimeoutCheck != null)
+            {
+                _pendingTimeoutCheck.Pause();
+                _pendingTimeoutCheck = null;
             }
 
             bool hasAnyPending = !string.IsNullOrEmpty(_pendingOfferId);
@@ -285,6 +312,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (success)
             {
                 NightIntermissionFeelBridge.Play(NightUIFeedbackId.ShopItemPurchaseSuccess, FeedbackPriority.High);
+                if (net != null) BindShop(net);
             }
             else
             {
@@ -292,12 +320,16 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (_shopCardsByOfferId.TryGetValue(completedOfferId, out var card))
                 {
                     UIToolkitTweenService.ShakeReject(card);
+                    // Aguarda o feedback visual de ShakeReject antes de reconstruir a grade
+                    _shopGrid?.schedule.Execute(() =>
+                    {
+                        if (net != null) BindShop(net);
+                    }).StartingIn(260);
                 }
-            }
-
-            if (net != null)
-            {
-                BindShop(net);
+                else if (net != null)
+                {
+                    BindShop(net);
+                }
             }
         }
 

@@ -1852,23 +1852,35 @@ namespace ScaryParty.Pizzeria.Network
                 return false;
             }
 
+            var demandByIngredient = new Dictionary<int, int>();
             for (int i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
                 if (line == null || line.IngredientId <= 0 || line.Quantity <= 0) continue;
+                demandByIngredient.TryGetValue(line.IngredientId, out int cur);
+                demandByIngredient[line.IngredientId] = cur + line.Quantity;
+            }
 
+            if (demandByIngredient.Count == 0)
+            {
+                failureReason = "Pacote de suprimentos sem itens validos.";
+                return false;
+            }
+
+            foreach (var req in demandByIngredient)
+            {
                 int totalFree = 0;
                 foreach (var kvp in state.StorageSlots)
                 {
-                    if (kvp.Key.ingredientDefId == line.IngredientId && kvp.Value != null)
+                    if (kvp.Key.ingredientDefId == req.Key && kvp.Value != null)
                     {
                         totalFree += Mathf.Max(0, kvp.Value.MaxCapacity - kvp.Value.Quantity);
                     }
                 }
 
-                if (totalFree < line.Quantity)
+                if (totalFree < req.Value)
                 {
-                    failureReason = $"Estoque insuficiente para pacote completo (falta espaco para {line.Quantity - totalFree} un.).";
+                    failureReason = $"Estoque insuficiente para pacote completo (falta espaco para {req.Value - totalFree} un.).";
                     return false;
                 }
             }
@@ -1878,22 +1890,32 @@ namespace ScaryParty.Pizzeria.Network
 
         public static int ApplySupplyBundleLinesServer(PizzeriaState state, IReadOnlyList<SupplyBundleLineData> lines)
         {
-            if (state == null || lines == null || lines.Count == 0) return 0;
+            if (!CanFitFullSupplyBundleServer(state, lines, out _)) return 0;
 
-            int totalAdded = 0;
+            int expectedTotal = 0;
+            var demandByIngredient = new Dictionary<int, int>();
             for (int i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
                 if (line == null || line.IngredientId <= 0 || line.Quantity <= 0) continue;
+                expectedTotal += line.Quantity;
+                demandByIngredient.TryGetValue(line.IngredientId, out int cur);
+                demandByIngredient[line.IngredientId] = cur + line.Quantity;
+            }
 
-                int remaining = line.Quantity;
+            int totalAdded = 0;
+            var rollbackList = new List<(StorageSlotKey key, int originalQty, uint originalRev)>();
+            foreach (var req in demandByIngredient)
+            {
+                int remaining = req.Value;
                 foreach (var kvp in state.StorageSlots)
                 {
-                    if (kvp.Key.ingredientDefId == line.IngredientId && kvp.Value != null)
+                    if (kvp.Key.ingredientDefId == req.Key && kvp.Value != null)
                     {
                         int free = Mathf.Max(0, kvp.Value.MaxCapacity - kvp.Value.Quantity);
                         if (free <= 0) continue;
                         int add = Mathf.Min(free, remaining);
+                        rollbackList.Add((kvp.Key, kvp.Value.Quantity, kvp.Value.Revision));
                         kvp.Value.Quantity += add;
                         kvp.Value.Revision++;
                         totalAdded += add;
@@ -1903,6 +1925,19 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
+            if (totalAdded != expectedTotal)
+            {
+                for (int r = 0; r < rollbackList.Count; r++)
+                {
+                    if (state.StorageSlots.TryGetValue(rollbackList[r].key, out var slot) && slot != null)
+                    {
+                        slot.Quantity = rollbackList[r].originalQty;
+                        slot.Revision = rollbackList[r].originalRev;
+                    }
+                }
+                Debug.LogError($"[PizzeriaCommandHandler] Divergencia na entrega do pacote (revertido): esperado={expectedTotal}, aplicado={totalAdded}.");
+                return 0;
+            }
             if (totalAdded > 0)
             {
                 state.IncrementRevision();
@@ -2477,6 +2512,10 @@ namespace ScaryParty.Pizzeria.Network
                             c.RescueRemaining = 0f;
                             NotifySuccessClientRpc($"Reanimado por aliado ({c.CurrentHp} HP)!", TargetSender(targetId));
                             NotifySuccessClientRpc($"Você reanimou o aliado #{targetId}!", TargetSender(helperId));
+                            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(targetId, out var rescuedClient) && rescuedClient.PlayerObject != null)
+                            {
+                                BroadcastTransversalFeelClientRpc((ushort)Presentation.Feedback.GameFeelEventId.PlayerRescued, rescuedClient.PlayerObject.transform.position, targetId, 1.0f, (byte)Presentation.Feedback.GameFeelMaterialFamily.CharacterBody);
+                            }
                         }
                         else
                         {
@@ -3140,6 +3179,13 @@ namespace ScaryParty.Pizzeria.Network
         private readonly Dictionary<ScaryParty.Combat.IDamageable, int> _sharedAccumulatedDamage = new Dictionary<ScaryParty.Combat.IDamageable, int>(16);
         private readonly Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)> _sharedFirstHitPoints = new Dictionary<ScaryParty.Combat.IDamageable, (Vector3 pt, Vector3 n)>(16);
         private double _lastMotorcycleServerTime;
+        private float _motorcycleDistanceBudget = 1.2f;
+
+        private void ResetMotorcycleMovementBudget()
+        {
+            _lastMotorcycleServerTime = 0.0;
+            _motorcycleDistanceBudget = 1.2f;
+        }
 
         [ServerRpc(RequireOwnership = false)]
         public void FireWeaponServerRpc(Vector3 rayOrigin, Vector3 rayDir, ServerRpcParams rpcParams = default)
@@ -3233,14 +3279,20 @@ namespace ScaryParty.Pizzeria.Network
                 }
 
                 int hitCount = Physics.RaycastNonAlloc(rayOrigin, pelletDir, _sharedWeaponHits, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
+                RaycastHit[] hitsBuffer = _sharedWeaponHits;
+                if (hitCount >= _sharedWeaponHits.Length)
+                {
+                    hitsBuffer = Physics.RaycastAll(rayOrigin, pelletDir, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
+                    hitCount = hitsBuffer.Length;
+                }
                 if (hitCount > 1)
                 {
-                    System.Array.Sort(_sharedWeaponHits, 0, hitCount, RaycastHitDistanceComparer.Instance);
+                    System.Array.Sort(hitsBuffer, 0, hitCount, RaycastHitDistanceComparer.Instance);
                 }
 
                 for (int h = 0; h < hitCount; h++)
                 {
-                    var hit = _sharedWeaponHits[h];
+                    var hit = hitsBuffer[h];
                     if (hit.collider == null) continue;
                     if (shooterRoot != null && hit.collider.transform.IsChildOf(shooterRoot)) continue;
 
@@ -3373,8 +3425,9 @@ namespace ScaryParty.Pizzeria.Network
                     isLocalShooter);
                 if (didHit)
                 {
-                    Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
+                    Presentation.Feedback.GameFeelPresenter.Instance?.TriggerAtPosition(
                         Presentation.Feedback.GameFeelEventId.WeaponHit,
+                        hitPoint,
                         null,
                         shooterClientId,
                         0,
@@ -3384,6 +3437,22 @@ namespace ScaryParty.Pizzeria.Network
                         isLocalShooter);
                 }
             }
+        }
+
+        [ClientRpc]
+        public void BroadcastTransversalFeelClientRpc(ushort eventIdRaw, Vector3 worldPos, ulong entityId, float intensity, byte materialFamilyByte)
+        {
+            bool isLocal = NetworkManager.Singleton != null && NetworkManager.Singleton.LocalClientId == entityId;
+            Presentation.Feedback.GameFeelPresenter.Instance?.TriggerAtPosition(
+                (Presentation.Feedback.GameFeelEventId)eventIdRaw,
+                worldPos,
+                null,
+                entityId,
+                0,
+                0,
+                (Presentation.Feedback.GameFeelMaterialFamily)materialFamilyByte,
+                intensity,
+                isLocal);
         }
 
         [ClientRpc]
@@ -3414,6 +3483,7 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             bike.ResetServerPoseToParking();
+            ResetMotorcycleMovementBudget();
             return true;
         }
 
@@ -3483,6 +3553,8 @@ namespace ScaryParty.Pizzeria.Network
                 st.Speed = 0f;
                 st.Revision++;
                 net.MotorcycleState.Value = st;
+                ResetMotorcycleMovementBudget();
+                BroadcastTransversalFeelClientRpc((ushort)Presentation.Feedback.GameFeelEventId.VehicleDismount, bike.transform.position, senderId, 0.85f, (byte)Presentation.Feedback.GameFeelMaterialFamily.RigidMetal);
 
                 TeleportRiderSafelyServer(senderId, exitPos, exitRot);
                 return;
@@ -3493,6 +3565,7 @@ namespace ScaryParty.Pizzeria.Network
                 NotifyErrorClientRpc("Você está incapacitado e não pode pilotar a moto!", targetParams);
                 return;
             }
+            ResetMotorcycleMovementBudget();
 
             if (!InteractionValidator.ValidateDistanceAndSight(senderId, bike.transform.position, 4.5f, 3.0f, false))
             {
@@ -3528,6 +3601,7 @@ namespace ScaryParty.Pizzeria.Network
             st.Speed = 0f;
             st.Revision++;
             net.MotorcycleState.Value = st;
+            BroadcastTransversalFeelClientRpc((ushort)Presentation.Feedback.GameFeelEventId.VehicleMount, bike.transform.position, senderId, 0.9f, (byte)Presentation.Feedback.GameFeelMaterialFamily.RigidMetal);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -3627,13 +3701,19 @@ namespace ScaryParty.Pizzeria.Network
                 return;
 
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
-            float dt = _lastMotorcycleServerTime > 0.0 ? Mathf.Clamp((float)(now - _lastMotorcycleServerTime), 0.01f, 0.25f) : 0.05f;
+            float realDt = _lastMotorcycleServerTime > 0.0 ? Mathf.Clamp((float)(now - _lastMotorcycleServerTime), 0f, 0.25f) : 0.05f;
             _lastMotorcycleServerTime = now;
+
+            const float maxBikeSpeedMps = 22f;
+            const float maxBurstBudgetMeters = 1.5f;
+            _motorcycleDistanceBudget = Mathf.Min(maxBurstBudgetMeters, _motorcycleDistanceBudget + maxBikeSpeedMps * realDt);
 
             Vector3 prevPos = new Vector3(st.PosX, st.PosY, st.PosZ);
             Vector3 clamped = bike.ClampToAllowedSurface(prevPos, clientPos, out _);
-            float maxStep = Mathf.Clamp(22f * dt + 0.35f, 0.35f, 3.5f);
-            Vector3 safePos = Vector3.MoveTowards(prevPos, clamped, maxStep);
+            float requestedDist = Vector3.Distance(prevPos, clamped);
+            float allowedDist = Mathf.Min(requestedDist, _motorcycleDistanceBudget);
+            Vector3 safePos = Vector3.MoveTowards(prevPos, clamped, allowedDist);
+            _motorcycleDistanceBudget = Mathf.Max(0f, _motorcycleDistanceBudget - Vector3.Distance(prevPos, safePos));
             safePos.y = Mathf.Clamp(safePos.y, bike.ParkingSpawnPos.y - 1.5f, bike.ParkingSpawnPos.y + 4.0f);
 
             Quaternion flatRot = Quaternion.Euler(0f, clientRot.eulerAngles.y, 0f);
@@ -3672,6 +3752,7 @@ namespace ScaryParty.Pizzeria.Network
             net.MotorcycleState.Value = st;
 
             Vector3 bikePos = new Vector3(st.PosX, st.PosY, st.PosZ);
+            BroadcastTransversalFeelClientRpc((ushort)Presentation.Feedback.GameFeelEventId.VehicleHorn, bikePos, senderId, 1.0f, (byte)Presentation.Feedback.GameFeelMaterialFamily.RigidMetal);
             var peds = FindObjectsByType<PedestrianNpc>(FindObjectsSortMode.None);
             for (int i = 0; i < peds.Length; i++)
             {
