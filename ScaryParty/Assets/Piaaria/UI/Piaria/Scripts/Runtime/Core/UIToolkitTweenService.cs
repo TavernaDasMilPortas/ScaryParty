@@ -68,6 +68,11 @@ namespace ScaryParty.UI.Piaria.Core
 
         public static void KillTweens(VisualElement target)
         {
+            KillTweens(target, recursive: false);
+        }
+
+        public static void KillTweens(VisualElement target, bool recursive)
+        {
             if (target == null) return;
             if (_activeTweens.TryGetValue(target, out var list))
             {
@@ -81,6 +86,20 @@ namespace ScaryParty.UI.Piaria.Core
                 }
                 _activeTweens.Remove(target);
             }
+
+            if (recursive && target.hierarchy.childCount > 0)
+            {
+                int count = target.hierarchy.childCount;
+                for (int i = 0; i < count; i++)
+                {
+                    KillTweens(target.hierarchy[i], recursive: true);
+                }
+            }
+        }
+
+        public static void KillTweensRecursive(VisualElement target)
+        {
+            KillTweens(target, recursive: true);
         }
 
         private static void EnsureDOTweenInitialized()

@@ -65,20 +65,25 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _statusLabel.text = "TURNO PRESTES A COMEÇAR!";
 
                 double remaining = System.Math.Max(0.0, run.StartNightAtServerTime - serverNow);
-                int digit = Mathf.CeilToInt((float)remaining);
-                if (digit != _lastCountdownDigit && digit >= 1 && digit <= 3)
+                int digit = remaining <= 0.02 ? 0 : Mathf.CeilToInt((float)remaining);
+                if (digit != _lastCountdownDigit && digit >= 0 && digit <= 3)
                 {
                     _lastCountdownDigit = digit;
                     if (_countdownLabel != null)
                     {
-                        _countdownLabel.text = digit.ToString();
+                        _countdownLabel.text = digit == 0 ? "VALENDO!" : digit.ToString();
                         UIToolkitTweenService.PunchCountdownNumber(_countdownLabel);
+                    }
+                    if (digit == 0 && _statusLabel != null)
+                    {
+                        _statusLabel.text = "INICIANDO TURNO!";
                     }
                     var tickId = digit switch
                     {
                         3 => NightUIFeedbackId.CountdownTick3,
                         2 => NightUIFeedbackId.CountdownTick2,
-                        _ => NightUIFeedbackId.CountdownTick1
+                        1 => NightUIFeedbackId.CountdownTick1,
+                        _ => NightUIFeedbackId.CountdownGo
                     };
                     NightIntermissionFeelBridge.Play(tickId, FeedbackPriority.High);
                 }

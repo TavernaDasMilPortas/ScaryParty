@@ -75,16 +75,58 @@ namespace ScaryParty.UI.Piaria.Presenters
             Instance = this;
         }
 
+        private void OnDisable()
+        {
+            UnsubscribeCommandEvents();
+            ReleaseInputLock();
+            if (_root != null) UIToolkitTweenService.KillTweensRecursive(_root);
+        }
+
         private void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            UnsubscribeCommandEvents();
             ReleaseInputLock();
-            if (_root != null) UIToolkitTweenService.KillTweens(_root);
+            if (_root != null) UIToolkitTweenService.KillTweensRecursive(_root);
+        }
+
+        private PizzeriaCommandHandler _subscribedHandler;
+
+        private void EnsureCommandEventsSubscribed()
+        {
+            var handler = PizzeriaCommandHandler.Instance;
+            if (_subscribedHandler == handler) return;
+            UnsubscribeCommandEvents();
+            if (handler != null)
+            {
+                handler.OnShopPurchaseResultReceived += OnShopPurchaseResultReceived;
+                _subscribedHandler = handler;
+            }
+        }
+
+        private void UnsubscribeCommandEvents()
+        {
+            if (_subscribedHandler != null)
+            {
+                _subscribedHandler.OnShopPurchaseResultReceived -= OnShopPurchaseResultReceived;
+                _subscribedHandler = null;
+            }
+        }
+
+        private void OnShopPurchaseResultReceived(bool success, string offerId, string requestId, string message)
+        {
+            if (!_isOpen || _shopPresenter == null) return;
+            if (!success && _statusLabel != null && !string.IsNullOrEmpty(message))
+            {
+                _statusLabel.text = message;
+            }
+            _shopPresenter.HandleShopPurchaseResult(success, offerId, requestId, message, PizzeriaNetworkState.Instance);
         }
 
         public void ShowIntermission()
         {
             if (!EnsureBuilt()) return;
+            EnsureCommandEventsSubscribed();
 
             if (!_isOpen)
             {
@@ -96,6 +138,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _lockPushed = true;
                 }
                 UIToolkitTweenService.PopIn(_shell, 0.28f);
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.IntermissionOpen, FeedbackPriority.Normal);
                 SelectTab(TabPage.Summary, animate: true);
             }
 
@@ -106,9 +149,11 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (!_isOpen) return;
             _isOpen = false;
+            UnsubscribeCommandEvents();
+            _shopPresenter?.ClearPendingPurchase();
             if (_root != null)
             {
-                UIToolkitTweenService.KillTweens(_root);
+                UIToolkitTweenService.KillTweensRecursive(_root);
                 _root.style.display = DisplayStyle.None;
             }
             ReleaseInputLock();
@@ -116,6 +161,16 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void SelectTab(TabPage tab, bool animate = true)
         {
+            var net = PizzeriaNetworkState.Instance;
+            bool isLocked = net != null && net.RunState.Value.IntermissionStage >= (byte)IntermissionStage.Locked;
+            if (isLocked && tab != TabPage.Reveal)
+            {
+                return;
+            }
+            if (_activeTab != tab && _isOpen)
+            {
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.TabSwitch, FeedbackPriority.Low);
+            }
             _activeTab = tab;
             UpdateTabVisuals();
             RebuildActivePage(animate);
@@ -165,11 +220,18 @@ namespace ScaryParty.UI.Piaria.Presenters
             int budget = net.RestaurantBudget.Value;
 
             if (_titleLabel != null)
-                _titleLabel.text = $"NOITE {night.NightNumber} CONCLUÍDA";
+                _titleLabel.text = night.NightNumber <= 0 ? "PREPARAR PRIMEIRA NOITE" : $"NOITE {night.NightNumber} CONCLUÍDA";
             if (_subtitleLabel != null)
                 _subtitleLabel.text = $"Preparando Noite {run.TargetNightNumber} de {run.MaxRunNights}";
             if (_budgetLabel != null)
                 _budgetLabel.text = $"Caixa: R$ {budget}";
+
+            bool isLocked = run.IntermissionStage >= (byte)IntermissionStage.Locked;
+            _tabSummary?.SetEnabled(!isLocked);
+            _tabHindrance?.SetEnabled(!isLocked);
+            _tabOpportunity?.SetEnabled(!isLocked);
+            _tabShop?.SetEnabled(!isLocked);
+            _tabPrepare?.SetEnabled(!isLocked);
 
             if (run.IntermissionStage >= (byte)IntermissionStage.Revealing && _activeTab != TabPage.Reveal)
             {
@@ -188,7 +250,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             else if ((_activeTab == TabPage.Shop || _activeTab == TabPage.Prepare) && _shopPresenter != null)
             {
-                _shopPresenter.ClearPendingPurchase();
                 _shopPresenter.Bind(_activeTab == TabPage.Prepare, net);
             }
         }
@@ -212,6 +273,8 @@ namespace ScaryParty.UI.Piaria.Presenters
         private void RebuildActivePage(bool animate)
         {
             if (_pageHost == null) return;
+            UIToolkitTweenService.KillTweensRecursive(_pageHost);
+            _revealPresenter?.Reset();
             _pageHost.Clear();
 
             var net = PizzeriaNetworkState.Instance;
@@ -335,13 +398,23 @@ namespace ScaryParty.UI.Piaria.Presenters
             _root = _uiDocument.rootVisualElement;
             if (_root == null) return false;
 
+            if (catalog != null)
+            {
+                if (catalog.styleNightIntermission != null && !_root.styleSheets.Contains(catalog.styleNightIntermission))
+                    _root.styleSheets.Add(catalog.styleNightIntermission);
+                if (catalog.styleNightModifierCards != null && !_root.styleSheets.Contains(catalog.styleNightModifierCards))
+                    _root.styleSheets.Add(catalog.styleNightModifierCards);
+            }
 #if UNITY_EDITOR
-            var uss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightIntermission.uss");
-            if (uss != null && !_root.styleSheets.Contains(uss))
-                _root.styleSheets.Add(uss);
-            var cardsUss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightModifierCards.uss");
-            if (cardsUss != null && !_root.styleSheets.Contains(cardsUss))
-                _root.styleSheets.Add(cardsUss);
+            if (_root.styleSheets.count == 0)
+            {
+                var uss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightIntermission.uss");
+                if (uss != null && !_root.styleSheets.Contains(uss))
+                    _root.styleSheets.Add(uss);
+                var cardsUss = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightModifierCards.uss");
+                if (cardsUss != null && !_root.styleSheets.Contains(cardsUss))
+                    _root.styleSheets.Add(cardsUss);
+            }
 #endif
 
             _shell = _root.Q<VisualElement>("intermission-shell");

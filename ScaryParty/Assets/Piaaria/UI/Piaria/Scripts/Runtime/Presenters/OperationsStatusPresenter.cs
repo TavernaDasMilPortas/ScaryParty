@@ -59,23 +59,35 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_onlineTeam != null)
             {
                 var sb = new StringBuilder();
-                var nm = NetworkManager.Singleton;
-                if (nm != null && nm.IsListening)
+                if (net.RunPlayerStates.Count > 0)
                 {
-                    foreach (var client in nm.ConnectedClientsList)
+                    for (int i = 0; i < net.RunPlayerStates.Count; i++)
                     {
-                        string pName = $"Jogador {client.ClientId}";
-                        if (client.PlayerObject != null && client.PlayerObject.TryGetComponent<PlayerState>(out var ps))
-                        {
-                            string raw = ps.PlayerName.Value.ToString();
-                            if (!string.IsNullOrWhiteSpace(raw)) pName = raw;
-                        }
-                        sb.AppendLine($"• {pName}");
+                        var rp = net.RunPlayerStates[i];
+                        string pName = rp.PlayerName.Value.ToString();
+                        if (string.IsNullOrWhiteSpace(pName)) pName = $"Jogador #{rp.ClientId}";
+                        string readyTag = rp.IsReady ? " [Pronto]" : string.Empty;
+                        sb.AppendLine($"• {pName}{readyTag}");
                     }
                 }
                 else
                 {
-                    sb.AppendLine("• Offline / Local");
+                    var allPlayers = UnityEngine.Object.FindObjectsByType<PlayerState>(UnityEngine.FindObjectsSortMode.None);
+                    if (allPlayers != null && allPlayers.Length > 0)
+                    {
+                        for (int i = 0; i < allPlayers.Length; i++)
+                        {
+                            var ps = allPlayers[i];
+                            if (ps == null) continue;
+                            string raw = ps.PlayerName.Value.ToString();
+                            string pName = string.IsNullOrWhiteSpace(raw) ? $"Jogador #{ps.OwnerClientId}" : raw;
+                            sb.AppendLine($"• {pName}");
+                        }
+                    }
+                    else
+                    {
+                        sb.AppendLine("• Offline / Local");
+                    }
                 }
                 _onlineTeam.text = sb.ToString().TrimEnd();
             }

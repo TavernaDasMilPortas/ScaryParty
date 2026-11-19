@@ -1,4 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Style src="../USS/NightIntermission.uss" />
+    <Style src="../USS/OperationsStatus.uss" />
     <ui:VisualElement name="ops-overlay-root" class="ops-overlay-root">
         <ui:VisualElement class="ops-panel">
             <ui:Label text="CENTRAL DE SITUAÇÃO (TAB)" class="intermission-title" />

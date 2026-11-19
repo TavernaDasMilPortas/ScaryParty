@@ -238,6 +238,18 @@ namespace ScaryParty.UI.Piaria.Core
             PlaySound(readyClip != null ? readyClip : successClip);
         }
 
+        public void PlayClick()
+        {
+            PlaySound(clickClip, 0.85f);
+            PlayFeelPlayer(clickPlayer);
+        }
+
+        public void PlayHover()
+        {
+            PlaySound(hoverClip, 0.65f);
+            PlayFeelPlayer(hoverPlayer);
+        }
+
         private void PlayFeelPlayer(MMF_Player player)
         {
             if (player == null || UIToolkitTweenService.ReduceMotion) return;

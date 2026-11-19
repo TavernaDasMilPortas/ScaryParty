@@ -18,6 +18,8 @@ namespace ScaryParty.UI.Piaria.Presenters
         private VisualElement _root;
         private VisualElement _scoreboardCard;
         private ScrollView _scoreboardList;
+        private VisualElement _opsRoot;
+        private OperationsStatusPresenter _opsPresenter;
 
         private bool _isOpen = false;
         private float _lastRefreshTime = -999f;
@@ -76,10 +78,50 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void EnsureInitialized()
         {
-            if (_root != null) return;
+            if (_opsRoot != null || _root != null) return;
             if (uiDocument == null)
                 uiDocument = GetComponent<UIDocument>() ?? FindFirstObjectByType<UIDocument>();
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+
+            var catalog = PiariaUIAssetCatalog.Instance;
+
+            // Tenta conectar o novo painel OperationsStatusOverlay (4 blocos TAB)
+            _opsRoot = uiDocument.rootVisualElement.Q<VisualElement>("ops-overlay-root");
+            if (_opsRoot == null)
+            {
+                VisualTreeAsset opsTpl = catalog != null ? catalog.templateOperationsStatusOverlay : null;
+                if (opsTpl == null) opsTpl = Resources.Load<VisualTreeAsset>("OperationsStatusOverlay");
+#if UNITY_EDITOR
+                if (opsTpl == null)
+                    opsTpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml");
+#endif
+                if (opsTpl != null)
+                {
+                    var opsTree = opsTpl.Instantiate();
+                    opsTree.style.position = Position.Absolute;
+                    opsTree.style.left = 0;
+                    opsTree.style.right = 0;
+                    opsTree.style.top = 0;
+                    opsTree.style.bottom = 0;
+                    opsTree.pickingMode = PickingMode.Ignore;
+                    uiDocument.rootVisualElement.Add(opsTree);
+                    _opsRoot = opsTree.Q<VisualElement>("ops-overlay-root") ?? opsTree;
+                }
+            }
+
+            if (_opsRoot != null)
+            {
+                if (catalog != null)
+                {
+                    if (catalog.styleNightIntermission != null && !_opsRoot.styleSheets.Contains(catalog.styleNightIntermission))
+                        _opsRoot.styleSheets.Add(catalog.styleNightIntermission);
+                    if (catalog.styleOperationsStatus != null && !_opsRoot.styleSheets.Contains(catalog.styleOperationsStatus))
+                        _opsRoot.styleSheets.Add(catalog.styleOperationsStatus);
+                }
+                _opsPresenter = new OperationsStatusPresenter(_opsRoot);
+                _opsRoot.style.display = DisplayStyle.None;
+                return;
+            }
 
             _root = uiDocument.rootVisualElement.Q<VisualElement>("ScoreboardRoot");
             if (_root == null)
@@ -100,7 +142,6 @@ namespace ScaryParty.UI.Piaria.Presenters
             _scoreboardCard = _root.Q<VisualElement>("ScoreboardCard");
             _scoreboardList = _root.Q<ScrollView>("ScoreboardList");
 
-            var catalog = PiariaUIAssetCatalog.Instance;
             if (catalog != null && _scoreboardCard != null && catalog.paperPanel3 != null)
             {
                 _scoreboardCard.style.backgroundImage = new StyleBackground(catalog.paperPanel3);
@@ -112,7 +153,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private void Update()
         {
             EnsureInitialized();
-            if (_root == null) return;
+            if (_opsRoot == null && _root == null) return;
 
             // Se houver modal aberto na pilha ou campo de texto com foco, não exibe o placar
             if (UIModalStack.Instance != null && UIModalStack.Instance.HasActiveModal)
@@ -151,7 +192,17 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void Show()
         {
-            if (_root == null || _isOpen) return;
+            if (_isOpen) return;
+            if (_opsRoot != null)
+            {
+                _isOpen = true;
+                RefreshData();
+                _opsRoot.style.display = DisplayStyle.Flex;
+                UIToolkitTweenService.PopIn(_opsRoot.Q<VisualElement>(className: "ops-panel") ?? _opsRoot, 0.16f, 0.96f);
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.TabOverlayOpen, FeedbackPriority.Normal);
+                return;
+            }
+            if (_root == null) return;
             _isOpen = true;
             RefreshData();
 
@@ -162,12 +213,26 @@ namespace ScaryParty.UI.Piaria.Presenters
                 curr = curr.parent;
             }
             UIToolkitTweenService.PopIn(_scoreboardCard != null ? _scoreboardCard : _root, 0.16f, 0.96f);
+            NightIntermissionFeelBridge.Play(NightUIFeedbackId.TabOverlayOpen, FeedbackPriority.Normal);
         }
 
         public void Hide()
         {
-            if (_root == null || !_isOpen) return;
+            if (!_isOpen) return;
+            if (_opsRoot != null)
+            {
+                _isOpen = false;
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.TabOverlayClose, FeedbackPriority.Low);
+                var panel = _opsRoot.Q<VisualElement>(className: "ops-panel") ?? _opsRoot;
+                UIToolkitTweenService.PopOut(panel, 0.12f, 0.96f, () =>
+                {
+                    if (_opsRoot != null) _opsRoot.style.display = DisplayStyle.None;
+                });
+                return;
+            }
+            if (_root == null) return;
             _isOpen = false;
+            NightIntermissionFeelBridge.Play(NightUIFeedbackId.TabOverlayClose, FeedbackPriority.Low);
 
             UIToolkitTweenService.PopOut(_scoreboardCard != null ? _scoreboardCard : _root, 0.12f, 0.96f, () =>
             {
@@ -181,6 +246,11 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void RefreshData()
         {
+            if (_opsPresenter != null)
+            {
+                _opsPresenter.Bind(ScaryParty.Pizzeria.Network.PizzeriaNetworkState.Instance);
+                return;
+            }
             if (_scoreboardList == null) return;
             _scoreboardList.Clear();
 

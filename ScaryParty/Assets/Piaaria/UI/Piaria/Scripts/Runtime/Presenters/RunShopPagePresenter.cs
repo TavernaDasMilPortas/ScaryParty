@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Netcode;
+using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Network;
@@ -24,6 +26,11 @@ namespace ScaryParty.UI.Piaria.Presenters
         private readonly Action<NightIntermissionPresenter.TabPage> _navigateTab;
 
         private string _pendingOfferId = string.Empty;
+        private string _pendingRequestId = string.Empty;
+        private float _pendingStartedAtRealtime;
+        private int _nextRequestSeq;
+        private readonly List<Button> _shopBuyButtons = new List<Button>();
+        private readonly Dictionary<string, VisualElement> _shopCardsByOfferId = new Dictionary<string, VisualElement>(StringComparer.Ordinal);
 
         public RunShopPagePresenter(VisualElement pageRoot, Action<NightIntermissionPresenter.TabPage> navigateTab)
         {
@@ -66,6 +73,18 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_shopGrid == null) return;
             _shopGrid.Clear();
+            _shopBuyButtons.Clear();
+            _shopCardsByOfferId.Clear();
+
+            // Timeout defensivo apenas para destravar UI em queda de rede, nunca reenvia compra.
+            if (!string.IsNullOrEmpty(_pendingOfferId) && Time.realtimeSinceStartup - _pendingStartedAtRealtime > 8f)
+            {
+                _pendingOfferId = string.Empty;
+                _pendingRequestId = string.Empty;
+            }
+
+            bool hasAnyPending = !string.IsNullOrEmpty(_pendingOfferId);
+            bool isLocked = run.IntermissionStage >= (byte)IntermissionStage.Locked;
 
             for (int i = 0; i < net.RunShopOffers.Count; i++)
             {
@@ -77,6 +96,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 card.AddToClassList("modifier-card");
                 card.style.width = Length.Percent(32f);
                 card.style.marginBottom = 10f;
+                _shopCardsByOfferId[offerId] = card;
 
                 var top = new VisualElement();
                 top.AddToClassList("modifier-card-top");
@@ -85,31 +105,59 @@ namespace ScaryParty.UI.Piaria.Presenters
 
                 var title = new Label(offer.DisplayName.ToString());
                 title.AddToClassList("modifier-card-title");
-                var desc = new Label(offer.Description.ToString());
+                string lockReason = offer.LockReason.ToString();
+                string descText = offer.Description.ToString();
+                if (!offer.CanPurchase && !string.IsNullOrEmpty(lockReason))
+                {
+                    descText = $"{descText}\n({lockReason})";
+                }
+                var desc = new Label(descText);
                 desc.AddToClassList("modifier-card-desc");
 
                 var footer = new VisualElement();
                 footer.AddToClassList("modifier-card-footer");
                 footer.Add(new Label($"R$ {offer.EffectiveCost}"));
 
-                bool canBuy = offer.CanPurchase && !isPending && budget >= offer.EffectiveCost;
-                var buyBtn = new Button(() =>
+                bool canBuy = offer.CanPurchase && !hasAnyPending && !isLocked && budget >= offer.EffectiveCost;
+                string btnLabel;
+                if (isPending) btnLabel = "...";
+                else if (isLocked) btnLabel = "TRAVADA";
+                else if (!offer.CanPurchase)
+                    btnLabel = (offer.MaxLevel > 0 && offer.CurrentLevel >= offer.MaxLevel) ? "MÁX." : "BLOQ.";
+                else if (budget < offer.EffectiveCost) btnLabel = "SEM CAIXA";
+                else btnLabel = "COMPRAR";
+
+                Button buyBtn = null;
+                buyBtn = new Button(() =>
                 {
-                    if (!canBuy)
+                    if (!canBuy || !string.IsNullOrEmpty(_pendingOfferId))
                     {
                         UIToolkitTweenService.ShakeReject(card);
                         NightIntermissionFeelBridge.Play(NightUIFeedbackId.ShopItemPurchaseReject, FeedbackPriority.High);
                         return;
                     }
                     _pendingOfferId = offerId;
+                    _pendingRequestId = $"req_{++_nextRequestSeq}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                    _pendingStartedAtRealtime = Time.realtimeSinceStartup;
+
+                    for (int b = 0; b < _shopBuyButtons.Count; b++)
+                    {
+                        _shopBuyButtons[b].SetEnabled(false);
+                    }
+                    if (buyBtn != null) buyBtn.text = "...";
+
                     NightIntermissionFeelBridge.Play(NightUIFeedbackId.ShopItemPurchasePending, FeedbackPriority.Normal);
-                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new FixedString64Bytes(offerId));
+                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferCorrelatedServerRpc(
+                        new FixedString64Bytes(offerId),
+                        new FixedString64Bytes(_pendingRequestId));
                 })
                 {
-                    text = isPending ? "..." : (offer.CanPurchase ? "COMPRAR" : "MÁX.")
+                    text = btnLabel,
+                    tooltip = lockReason
                 };
                 buyBtn.AddToClassList("modifier-card-btn");
                 buyBtn.SetEnabled(canBuy);
+                _shopBuyButtons.Add(buyBtn);
 
                 footer.Add(buyBtn);
                 card.Add(top);
@@ -140,7 +188,9 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_votesSummaryLabel != null)
             {
-                _votesSummaryLabel.text = $"Seus votos: Imprevisto ({hId})  |  Oportunidade ({oId})";
+                string hName = ResolveVoteOptionDisplayName(net, hId);
+                string oName = ResolveVoteOptionDisplayName(net, oId);
+                _votesSummaryLabel.text = $"Seus votos: Imprevisto ({hName})  |  Oportunidade ({oName})";
             }
 
             if (_shortcutsRow != null)
@@ -216,6 +266,57 @@ namespace ScaryParty.UI.Piaria.Presenters
             PizzeriaCommandHandler.Instance?.SetRunReadyServerRpc(!currentlyReady);
         }
 
-        public void ClearPendingPurchase() => _pendingOfferId = string.Empty;
+        public void ClearPendingPurchase()
+        {
+            _pendingOfferId = string.Empty;
+            _pendingRequestId = string.Empty;
+        }
+
+        public void HandleShopPurchaseResult(bool success, string offerId, string requestId, string message, PizzeriaNetworkState net)
+        {
+            if (string.IsNullOrEmpty(_pendingOfferId)) return;
+            if (!string.IsNullOrEmpty(requestId) && !string.Equals(requestId, _pendingRequestId, StringComparison.Ordinal))
+                return;
+
+            string completedOfferId = _pendingOfferId;
+            _pendingOfferId = string.Empty;
+            _pendingRequestId = string.Empty;
+
+            if (success)
+            {
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.ShopItemPurchaseSuccess, FeedbackPriority.High);
+            }
+            else
+            {
+                NightIntermissionFeelBridge.Play(NightUIFeedbackId.ShopItemPurchaseReject, FeedbackPriority.High);
+                if (_shopCardsByOfferId.TryGetValue(completedOfferId, out var card))
+                {
+                    UIToolkitTweenService.ShakeReject(card);
+                }
+            }
+
+            if (net != null)
+            {
+                BindShop(net);
+            }
+        }
+
+        private static string ResolveVoteOptionDisplayName(PizzeriaNetworkState net, string optionId)
+        {
+            if (string.IsNullOrEmpty(optionId) || optionId == "-") return "-";
+            if (net != null)
+            {
+                for (int i = 0; i < net.RunVoteOptions.Count; i++)
+                {
+                    var opt = net.RunVoteOptions[i];
+                    if (string.Equals(opt.OptionId.ToString(), optionId, StringComparison.Ordinal))
+                    {
+                        string display = opt.Title.ToString();
+                        if (!string.IsNullOrEmpty(display)) return display;
+                    }
+                }
+            }
+            return optionId;
+        }
     }
 }

@@ -155,7 +155,7 @@ namespace ScaryParty.UI.Piaria.Core
                 var binding = _bindings[i];
                 if (binding == null || binding.id != id) continue;
 
-                if (binding.mmfPlayer != null)
+                if (binding.mmfPlayer != null && !UIToolkitTweenService.ReduceMotion)
                 {
                     binding.mmfPlayer.PlayFeedbacks();
                     return;
@@ -166,6 +166,34 @@ namespace ScaryParty.UI.Piaria.Core
                     float vol = binding.volumeScale * (theme != null ? theme.sfxVolume : 0.85f);
                     _audioSource.PlayOneShot(binding.fallbackClip, vol);
                     return;
+                }
+            }
+
+            // Fallback real quando auto-instanciado sem bindings manuais no Inspector
+            var uiFeedback = UIFeedbackService.Instance;
+            if (uiFeedback != null)
+            {
+                switch (id)
+                {
+                    case NightUIFeedbackId.ShopItemPurchaseSuccess:
+                    case NightUIFeedbackId.LotteryWinnerHighlight:
+                    case NightUIFeedbackId.CountdownGo:
+                    case NightUIFeedbackId.ReadyToggleOn:
+                    case NightUIFeedbackId.AllPlayersReadyLock:
+                        uiFeedback.PlaySuccess();
+                        break;
+                    case NightUIFeedbackId.ShopItemPurchaseReject:
+                    case NightUIFeedbackId.ReadyBlockedMissingVotes:
+                    case NightUIFeedbackId.ErrorShake:
+                        uiFeedback.PlayError();
+                        break;
+                    case NightUIFeedbackId.CardHover:
+                    case NightUIFeedbackId.ShopItemHover:
+                        uiFeedback.PlayHover();
+                        break;
+                    default:
+                        uiFeedback.PlayClick();
+                        break;
                 }
             }
         }

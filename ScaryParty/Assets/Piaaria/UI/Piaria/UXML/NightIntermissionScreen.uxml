@@ -1,4 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <Style src="../USS/NightIntermission.uss" />
+    <Style src="../USS/NightModifierCards.uss" />
     <ui:VisualElement name="intermission-root" class="intermission-root">
         <ui:VisualElement name="intermission-shell" class="intermission-shell">
             <ui:VisualElement class="intermission-header">
