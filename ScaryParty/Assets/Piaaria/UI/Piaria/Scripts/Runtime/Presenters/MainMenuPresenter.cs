@@ -308,7 +308,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         try
                         {
-                            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
+                            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
                         }
                         catch (Exception ex)
                         {

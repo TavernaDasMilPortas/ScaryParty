@@ -872,7 +872,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 {
                     NetworkManager.Singleton.Shutdown();
                 }
-                SceneManager.LoadScene("LobbyScene");
+                ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
             };
 
             if (ModalPresenter.Instance != null)

@@ -50,7 +50,7 @@ public class ReadySceneController : MonoBehaviour
         if (NetworkManager.Singleton != null && clientId == NetworkManager.Singleton.LocalClientId)
         {
             Debug.Log("[ReadyScene] Fomos desconectados da sessão. Retornando ao LobbyScene...");
-            SceneManager.LoadScene("LobbyScene");
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
         }
     }
 
@@ -205,10 +205,8 @@ public class ReadySceneController : MonoBehaviour
         {
             targetScene = ScaryParty.VisualStyles.VisualStyleRuntimeConfig.CanonicalGameplaySceneName;
         }
-        NetworkManager.Singleton.SceneManager.LoadScene(
-            targetScene,
-            UnityEngine.SceneManagement.LoadSceneMode.Single
-        );
+        ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
+            .BeginNetworkedTransition(targetScene);
     }
 
     private void OnCancelClicked()
@@ -223,7 +221,7 @@ public class ReadySceneController : MonoBehaviour
         if (NetworkManager.Singleton != null)
             NetworkManager.Singleton.Shutdown();
 
-        SceneManager.LoadScene("LobbyScene");
+        ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
     }
 
     private PlayerState GetLocalPlayerState()

@@ -441,7 +441,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();
 
-            SceneManager.LoadScene("LobbyScene");
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
         }
     }
 }

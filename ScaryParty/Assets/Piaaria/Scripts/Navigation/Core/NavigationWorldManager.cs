@@ -67,15 +67,37 @@ namespace ScaryParty.Navigation.Core
 
             citySurface.collectObjects = CollectObjects.All;
             citySurface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            
-            // Set default agent configuration
             citySurface.defaultArea = 0; // Walkable
-            
-            // Build NavMesh synchronously or via update
+
+            if (Application.isPlaying)
+            {
+                _isReady = false;
+                StopAllCoroutines();
+                StartCoroutine(BuildCityNavMeshAsyncRoutine());
+                return;
+            }
+
             citySurface.BuildNavMesh();
             _isReady = true;
-
             UnityEngine.Debug.Log("[NavigationWorldManager] City NavMesh built and verified successfully.");
+            OnNavigationReady?.Invoke();
+        }
+
+        private IEnumerator BuildCityNavMeshAsyncRoutine()
+        {
+            yield return null; // Permite apresentar frame do loading antes da coleta inicial
+            if (citySurface.navMeshData == null)
+            {
+                citySurface.navMeshData = new NavMeshData(citySurface.agentTypeID);
+                citySurface.AddData();
+            }
+            var op = citySurface.UpdateNavMesh(citySurface.navMeshData);
+            while (op != null && !op.isDone)
+            {
+                yield return null;
+            }
+            _isReady = true;
+            UnityEngine.Debug.Log("[NavigationWorldManager] City NavMesh async update completed.");
             OnNavigationReady?.Invoke();
         }
 

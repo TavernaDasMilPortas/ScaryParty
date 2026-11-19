@@ -187,26 +187,11 @@ public class LobbyManager : MonoBehaviour
                     Debug.LogError($"[LobbyManager] Falha ao criar Lobby: {e.Message}");
                 }
 
-                try
+                var status = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
+                    .BeginNetworkedTransition("ReadyScene");
+                if (status != SceneEventProgressStatus.Started)
                 {
-                    if (NetworkManager.Singleton.SceneManager != null)
-                    {
-                        var status = NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-                        if (status != SceneEventProgressStatus.Started)
-                        {
-                            Debug.LogWarning($"[LobbyManager] Netcode LoadScene não iniciou (status: {status}). Usando SceneManager padrão...");
-                            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
-                        }
-                    }
-                    else
-                    {
-                        UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
-                    }
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogWarning($"[LobbyManager] Falha ao carregar ReadyScene via Netcode ({ex.Message}). Usando SceneManager padrão...");
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                    Debug.LogWarning($"[LobbyManager] Falha ao iniciar transição de rede para ReadyScene ({status}).");
                 }
             }
             else
@@ -331,32 +316,18 @@ public class LobbyManager : MonoBehaviour
                 RoomDiscoveryService.Instance.StartHosting(roomName, 7777, 4);
             }
 
-            try
+            var status = ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
+                .BeginNetworkedTransition("ReadyScene");
+            if (status != SceneEventProgressStatus.Started)
             {
-                if (NetworkManager.Singleton.SceneManager != null)
-                {
-                    var status = NetworkManager.Singleton.SceneManager.LoadScene("ReadyScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-                    if (status != SceneEventProgressStatus.Started)
-                    {
-                        Debug.LogWarning($"[LobbyManager] Netcode LoadScene não iniciou (status: {status}). Usando SceneManager padrão...");
-                        UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
-                    }
-                }
-                else
-                {
-                    UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
-                }
-            }
-            catch (System.Exception ex)
-            {
-                Debug.LogWarning($"[LobbyManager] Falha ao carregar ReadyScene via Netcode ({ex.Message}). Usando SceneManager padrão...");
-                UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+                Debug.LogWarning($"[LobbyManager] Falha ao iniciar transição LAN para ReadyScene ({status}).");
             }
         }
         else
         {
-            Debug.LogWarning("[LobbyManager] Falha ao iniciar Host LAN via Netcode. Carregando ReadyScene para teste...");
-            UnityEngine.SceneManagement.SceneManager.LoadScene("ReadyScene");
+            Debug.LogWarning("[LobbyManager] Falha ao iniciar Host LAN via Netcode.");
+            ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.EnsureInstance()
+                .AbortLoading("Não foi possível iniciar o servidor LAN.");
         }
     }
 

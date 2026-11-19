@@ -358,7 +358,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();
             GameplayInputGate.Reset();
-            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyScene");
+            PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
         }
     }
 }
