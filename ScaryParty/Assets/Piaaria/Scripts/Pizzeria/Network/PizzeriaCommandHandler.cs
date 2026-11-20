@@ -1904,7 +1904,7 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             int totalAdded = 0;
-            var rollbackList = new List<(StorageSlotKey key, int originalQty, uint originalRev)>();
+            var rollbackList = new List<((int storageId, int ingredientDefId) key, int originalQty, uint originalRev)>();
             foreach (var req in demandByIngredient)
             {
                 int remaining = req.Value;

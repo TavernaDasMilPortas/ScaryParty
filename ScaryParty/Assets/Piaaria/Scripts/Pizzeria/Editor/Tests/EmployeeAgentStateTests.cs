@@ -11,11 +11,11 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         {
             Assert.AreEqual(
                 EmployeeHighLevelState.RecoverReplan,
-                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.CookAssemble, EmployeeBlockReason.None, isAlive: false));
+                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.PizzaioloAssembleToppings, EmployeeBlockReason.None, isAlive: false));
 
             Assert.AreEqual(
                 EmployeeHighLevelState.Blocked,
-                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.CookMoveToOven, EmployeeBlockReason.PathBlocked, isAlive: true));
+                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.PizzaioloInsertOven, EmployeeBlockReason.PathBlocked, isAlive: true));
 
             Assert.AreEqual(
                 EmployeeHighLevelState.IdleObserve,
@@ -27,11 +27,11 @@ namespace ScaryParty.Pizzeria.Editor.Tests
 
             Assert.AreEqual(
                 EmployeeHighLevelState.Work,
-                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.CookBakeInOven, EmployeeBlockReason.None, isAlive: true));
+                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.PizzaioloWaitBake, EmployeeBlockReason.None, isAlive: true));
 
             Assert.AreEqual(
                 EmployeeHighLevelState.Deliver,
-                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.CookDeliverToStaging, EmployeeBlockReason.None, isAlive: true));
+                EmployeeAgentController.MapToHighLevelState(EmployeeAgentController.WorkStep.PizzaioloServeTable, EmployeeBlockReason.None, isAlive: true));
         }
 
         [Test]

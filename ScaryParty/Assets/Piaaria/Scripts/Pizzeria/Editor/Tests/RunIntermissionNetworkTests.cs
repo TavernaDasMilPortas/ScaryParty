@@ -130,7 +130,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         public void SupplyBundle_AggregatesDuplicateIngredients_AndIsAtomicOnInsufficientCapacity()
         {
             var state = new PizzeriaState();
-            var slotKey = new StorageSlotKey(1, 0, 10);
+            var slotKey = (1, 10);
             state.StorageSlots[slotKey] = new StorageSlotState { Quantity = 2, MaxCapacity = 10 };
 
             // Duas linhas do mesmo ingrediente (4 + 4 = 8): cabe exatamente (2 + 8 = 10)

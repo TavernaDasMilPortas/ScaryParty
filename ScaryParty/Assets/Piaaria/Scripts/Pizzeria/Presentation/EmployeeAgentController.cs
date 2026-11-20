@@ -2493,21 +2493,15 @@ namespace ScaryParty.Pizzeria.Presentation
         private void OnDestroy()
         {
             _activeInstances.Remove(this);
-            EmployeeHandAnchorRegistry.Unregister(EmployeeActorOffset + (ulong)EmployeeId);
+            ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
+            EmployeeHandAnchorRegistry.Unregister(actorKey);
+            NpcWorkPointRegistry.ReleaseAllForActor(actorKey);
+            _leasedToolId = ToolItemId.None;
+
             var root = PizzeriaRoot.Instance;
             if (root != null && root.IsServer)
             {
                 root.ReleaseEmployeeSpawnReservation(EmployeeId);
-                if (root.DomainState != null)
-                {
-                    ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
-                    if (_leasedToolId != ToolItemId.None && root.ToolOwnershipService != null)
-                    {
-                        root.ToolOwnershipService.ReleaseTool(root.DomainState, actorKey, _leasedToolId);
-                        _leasedToolId = ToolItemId.None;
-                    }
-                    OrderUnitFulfillmentService.ReleaseAllReservationsForActor(root.DomainState, actorKey);
-                }
             }
         }
 
@@ -2519,16 +2513,13 @@ namespace ScaryParty.Pizzeria.Presentation
             return step switch
             {
                 WorkStep.Idle => EmployeeHighLevelState.IdleObserve,
-                WorkStep.CashierMoveToCounter or WorkStep.CashierMoveToPhone or WorkStep.CookMoveToBoard
-                    or WorkStep.CookMoveToDoughStorage or WorkStep.CookMoveToPrep or WorkStep.CookMoveToIngredientStorage
-                    or WorkStep.CookMoveToAssembly or WorkStep.CookMoveToOven or WorkStep.CookMoveToBoxStorage
-                    or WorkStep.CookMoveToPackaging or WorkStep.CookMoveToStaging => EmployeeHighLevelState.Navigate,
-                WorkStep.CashierInteractCounter or WorkStep.CashierAnswerPhone or WorkStep.CookReadBoard
-                    or WorkStep.CookKneadDough or WorkStep.CookPrepareIngredient or WorkStep.CookAssemble
-                    or WorkStep.CookBakeInOven or WorkStep.CookPackagePizza => EmployeeHighLevelState.Work,
-                WorkStep.CookTakeDough or WorkStep.CookTakeIngredient or WorkStep.CookTakeFromOven
-                    or WorkStep.CookTakeBox => EmployeeHighLevelState.PickUp,
-                WorkStep.CookDeliverToStaging => EmployeeHighLevelState.Deliver,
+                WorkStep.CashierMoveToCounter or WorkStep.CashierMoveToPhone => EmployeeHighLevelState.Navigate,
+                WorkStep.PizzaioloClaimTicket => EmployeeHighLevelState.ClaimTask,
+                WorkStep.CashierAttendWait or WorkStep.CashierAnswerPhoneWait
+                    or WorkStep.PizzaioloPrepareDough or WorkStep.PizzaioloAssembleToppings
+                    or WorkStep.PizzaioloInsertOven or WorkStep.PizzaioloWaitBake
+                    or WorkStep.PizzaioloPackageAndStage => EmployeeHighLevelState.Work,
+                WorkStep.PizzaioloServeTable => EmployeeHighLevelState.Deliver,
                 WorkStep.CashierCooldown => EmployeeHighLevelState.Complete,
                 _ => EmployeeHighLevelState.ClaimTask
             };
