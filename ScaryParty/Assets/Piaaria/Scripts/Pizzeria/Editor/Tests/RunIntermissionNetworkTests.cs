@@ -131,21 +131,21 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         {
             var state = new PizzeriaState();
             var slotKey = (1, 10);
-            state.StorageSlots[slotKey] = new StorageSlotState { Quantity = 2, MaxCapacity = 10 };
+            state.StorageSlots[slotKey] = new StorageSlotState(1, 10, 2, 10);
 
             // Duas linhas do mesmo ingrediente (4 + 4 = 8): cabe exatamente (2 + 8 = 10)
             var exactLines = new[]
             {
-                new SupplyBundleLineData { IngredientId = 10, Quantity = 4 },
-                new SupplyBundleLineData { IngredientId = 10, Quantity = 4 }
+                new SupplyBundleLineData(10, 4),
+                new SupplyBundleLineData(10, 4)
             };
             Assert.IsTrue(PizzeriaCommandHandler.CanFitFullSupplyBundleServer(state, exactLines, out _));
 
             // Uma unidade a mais (4 + 5 = 9): deve falhar atomicamente sem mutar o estoque
             var overLines = new[]
             {
-                new SupplyBundleLineData { IngredientId = 10, Quantity = 4 },
-                new SupplyBundleLineData { IngredientId = 10, Quantity = 5 }
+                new SupplyBundleLineData(10, 4),
+                new SupplyBundleLineData(10, 5)
             };
             Assert.IsFalse(PizzeriaCommandHandler.CanFitFullSupplyBundleServer(state, overLines, out string reason));
             Assert.IsNotEmpty(reason);

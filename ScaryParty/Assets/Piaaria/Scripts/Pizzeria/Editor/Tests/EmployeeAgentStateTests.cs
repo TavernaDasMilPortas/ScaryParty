@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using ScaryParty.Pizzeria.Domain.Models;
+using ScaryParty.Pizzeria.Domain.Services;
 using ScaryParty.Pizzeria.Presentation;
 
 namespace ScaryParty.Pizzeria.Editor.Tests

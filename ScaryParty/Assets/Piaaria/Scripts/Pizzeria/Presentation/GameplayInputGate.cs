@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using StarterAssets;
 
 namespace ScaryParty.Pizzeria.Presentation
@@ -52,11 +54,38 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        public static bool IsMenuOrLobbyScene()
+        {
+            try
+            {
+                string sceneName = SceneManager.GetActiveScene().name;
+                if (string.IsNullOrEmpty(sceneName)) return false;
+                return string.Equals(sceneName, "LobbyScene", StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(sceneName, "ReadyScene", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private static void ApplyState()
         {
             bool locked = IsLocked;
 
-            var allInputs = Object.FindObjectsByType<StarterAssetsInputs>(FindObjectsSortMode.None);
+            bool isMenuOpen = IsMenuOrLobbyScene() ||
+                              (ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance != null &&
+                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen is UnityEngine.Object screenObj &&
+                               screenObj != null &&
+                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+                              (ScaryParty.UI.Piaria.Core.UIModalStack.Instance != null && ScaryParty.UI.Piaria.Core.UIModalStack.Instance.HasActiveModal) ||
+                              (ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+                              (ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+                              (ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden);
+
+            bool effectiveLocked = locked || isMenuOpen;
+
+            var allInputs = UnityEngine.Object.FindObjectsByType<StarterAssetsInputs>(FindObjectsSortMode.None);
             if (allInputs != null)
             {
                 foreach (var starterInputs in allInputs)
@@ -64,9 +93,9 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (starterInputs == null) continue;
                     var player = starterInputs.GetComponent<Unity.Netcode.NetworkObject>();
                     if (player != null && player.IsSpawned && !player.IsOwner) continue;
-                    starterInputs.cursorInputForLook = !locked;
-                    starterInputs.cursorLocked = !locked;
-                    if (locked)
+                    starterInputs.cursorInputForLook = !effectiveLocked;
+                    starterInputs.cursorLocked = !effectiveLocked;
+                    if (effectiveLocked)
                     {
                         starterInputs.move = Vector2.zero;
                         starterInputs.look = Vector2.zero;
@@ -79,15 +108,6 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
-            bool isMenuOpen = (ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance != null && 
-                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen is UnityEngine.Object screenObj &&
-                               screenObj != null &&
-                               ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
-                              (ScaryParty.UI.Piaria.Core.UIModalStack.Instance != null && ScaryParty.UI.Piaria.Core.UIModalStack.Instance.HasActiveModal) ||
-                              (ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
-                              (ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden);
-
-            bool effectiveLocked = locked || isMenuOpen;
             if (_wasEffectivelyLocked && !effectiveLocked)
             {
                 LastUnlockUnscaledTime = SafeUnscaledTime();

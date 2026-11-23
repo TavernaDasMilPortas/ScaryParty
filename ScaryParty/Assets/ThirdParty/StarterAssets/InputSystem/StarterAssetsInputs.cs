@@ -27,6 +27,7 @@ namespace StarterAssets
 
 		public bool IsInputBlockedByMenu =>
 			ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked ||
+			ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsMenuOrLobbyScene() ||
 			(ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance != null &&
 			 ScaryParty.UI.Piaria.Core.UIScreenRouter.Instance.ActiveScreen is UnityEngine.Object screenObj &&
 			 screenObj != null &&
@@ -34,6 +35,7 @@ namespace StarterAssets
 			(ScaryParty.UI.Piaria.Core.UIModalStack.Instance != null && ScaryParty.UI.Piaria.Core.UIModalStack.Instance.HasActiveModal) ||
 			(ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.MainMenuPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
 			(ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.LobbyPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
+			(ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter.Instance != null && ScaryParty.UI.Piaria.Presenters.ReadyRoomPresenter.Instance.State != ScaryParty.UI.Piaria.Core.ScreenState.Hidden) ||
 			!cursorInputForLook ||
 			!cursorLocked;
 

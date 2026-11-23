@@ -1530,6 +1530,12 @@ MonoBehaviour:
     y: -28.45
     width: 34.5
     height: 38.5
+  exteriorRegions:
+  - serializedVersion: 2
+    x: 0
+    y: -27.6
+    width: 16.4
+    height: 14.400001
   accessCorridors: []
   entranceAnchor: {fileID: 9203573649141137895}
   receivingAnchor: {fileID: 4668248119432011144}
@@ -1619,6 +1625,10 @@ MonoBehaviour:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0
   RunShopOffers:
+    UpdateTraits:
+      MinSecondsBetweenUpdates: 0
+      MaxSecondsBetweenUpdates: 0
+  RunPlayerStates:
     UpdateTraits:
       MinSecondsBetweenUpdates: 0
       MaxSecondsBetweenUpdates: 0

@@ -111,6 +111,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                 return;
             }
 
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
+
             EnsureInitialized();
             UIScreenRouter.Instance?.RegisterScreen(this);
             SessionLaunchConfig.OnConfigChanged += OnSessionLaunchConfigChanged;
@@ -465,6 +468,18 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
+            if (State == ScreenState.Active || State == ScreenState.Opening)
+            {
+                if (UnityEngine.Cursor.lockState != CursorLockMode.None)
+                {
+                    UnityEngine.Cursor.lockState = CursorLockMode.None;
+                }
+                if (!UnityEngine.Cursor.visible)
+                {
+                    UnityEngine.Cursor.visible = true;
+                }
+            }
+
             if (RootElement == null || RootElement.style.display == DisplayStyle.None) return;
             if (Time.time - _lastUpdate < 0.25f) return;
             _lastUpdate = Time.time;
@@ -953,6 +968,8 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             State = ScreenState.Opening;
+            UnityEngine.Cursor.lockState = CursorLockMode.None;
+            UnityEngine.Cursor.visible = true;
             SessionLaunchConfig.EnsureNetworkHooksRegistered();
             UpdateRoomCodeDisplay();
             RefreshPlayers();
