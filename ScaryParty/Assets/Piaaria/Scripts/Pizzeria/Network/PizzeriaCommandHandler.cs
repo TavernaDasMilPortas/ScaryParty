@@ -532,6 +532,7 @@ namespace ScaryParty.Pizzeria.Network
 
                 if (itemInSlot == null)
                 {
+                    RejectWorkClientRpc(stationId, slotIndex, TargetSender(senderClientId));
                     return; // No item in slot and no item in player's hands
                 }
             }
@@ -565,6 +566,7 @@ namespace ScaryParty.Pizzeria.Network
                 string msg = itemInSlot.PrepStage == ProcessingStage.Prepared
                     ? "Este ingrediente já está preparado!"
                     : "Este item não pode ser processado nesta bancada.";
+                RejectWorkClientRpc(stationId, slotIndex, targetParams);
                 NotifyErrorClientRpc(msg, targetParams);
                 return;
             }
@@ -583,8 +585,17 @@ namespace ScaryParty.Pizzeria.Network
                     CommitAndReplicate();
                 }
                 var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+                RejectWorkClientRpc(stationId, slotIndex, targetParams);
                 NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Não foi possível iniciar o trabalho." : res.Message, targetParams);
             }
+        }
+
+        [ClientRpc]
+        private void RejectWorkClientRpc(int stationId, int slotIndex, ClientRpcParams rpcParams = default)
+        {
+            var localPlayer = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+            var interaction = localPlayer != null ? localPlayer.GetComponent<PlayerInteraction>() : null;
+            interaction?.OnWorkRejected(stationId, slotIndex);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -638,6 +649,46 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
+            if (pizza.Location.Type != LocationType.StationSlot)
+            {
+                NotifyErrorClientRpc("Coloque a pizza em uma bancada antes de montar!", targetParams);
+                return;
+            }
+
+            if (!IsStationWithinReach(senderClientId, (int)pizza.Location.HolderId, out string reachError, pizza.Location.SlotId))
+            {
+                NotifyErrorClientRpc(reachError, targetParams);
+                return;
+            }
+
+            if (ingItem.Location.Type != LocationType.Hand || ingItem.Location.HolderId != senderClientId)
+            {
+                NotifyErrorClientRpc("Segure o ingrediente preparado em sua mão!", targetParams);
+                return;
+            }
+
+            if ((pizza.ReservedByHold != ItemState.NoHoldOwner && pizza.ReservedByHold != senderClientId) ||
+                (ingItem.ReservedByHold != ItemState.NoHoldOwner && ingItem.ReservedByHold != senderClientId))
+            {
+                NotifyErrorClientRpc("Pizza ou ingrediente em uso por outro processo.", targetParams);
+                return;
+            }
+
+            var pizzaSlot = new StationSlotId((int)pizza.Location.HolderId, pizza.Location.SlotId);
+            if (state.ActiveOperations.TryGetValue(pizzaSlot, out var slotOp) && slotOp.Phase == OperationPhase.Running)
+            {
+                NotifyErrorClientRpc("Bancada ocupada por outra operação.", targetParams);
+                return;
+            }
+
+            if (ingItem.Category != ItemCategory.Sauce &&
+                ingItem.Category != ItemCategory.Cheese &&
+                ingItem.Category != ItemCategory.Topping)
+            {
+                NotifyErrorClientRpc("Apenas molho, queijo ou coberturas podem ser adicionados à pizza.", targetParams);
+                return;
+            }
+
             if (pizza.Category == ItemCategory.Dough && pizza.PrepStage == ProcessingStage.Raw)
             {
                 NotifyErrorClientRpc("Abra a massa na bancada de preparo antes de montar a pizza!", targetParams);
@@ -672,6 +723,12 @@ namespace ScaryParty.Pizzeria.Network
             if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
 
+            if (!IsStationWithinReach(senderClientId, stationId, out string reachErr, slotIndex))
+            {
+                NotifyErrorClientRpc(reachErr, targetParams);
+                return;
+            }
+
             if (_activeOvenTransfers.ContainsKey(stationId))
             {
                 NotifyErrorClientRpc("O forno está realizando uma transferência!", targetParams);
@@ -697,7 +754,27 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
+            if (pizza.IsBoxed || !pizza.IsPizzaLike)
+            {
+                NotifyErrorClientRpc("Apenas pizzas não embaladas podem entrar no forno!", targetParams);
+                return;
+            }
+
+            if (pizza.CookingStage == CookingStage.Burned)
+            {
+                NotifyErrorClientRpc("Pizza queimada não pode voltar ao forno!", targetParams);
+                return;
+            }
+
+            if (pizza.ReservedByHold != ItemState.NoHoldOwner && pizza.ReservedByHold != senderClientId)
+            {
+                NotifyErrorClientRpc("Pizza reservada por outro processo.", targetParams);
+                return;
+            }
+
             byte handSlot = (byte)pizza.Location.SlotId;
+            pizza.ReservedByHold = OperationState.ServerWorker;
+            pizza.Revision++;
             _activeOvenTransfers[stationId] = (pizzaIdVal, slotIndex, senderClientId, true);
 
             const float doorOpenDuration = 0.25f;
@@ -713,17 +790,31 @@ namespace ScaryParty.Pizzeria.Network
             yield return new WaitForSeconds(delay);
 
             var root = PizzeriaRoot.Instance;
-            if (root == null || root.DomainState == null) yield break;
+            if (root == null || root.DomainState == null)
+            {
+                _activeOvenTransfers.Remove(stationId);
+                yield break;
+            }
 
             if (_activeOvenTransfers.TryGetValue(stationId, out var transfer) && transfer.PizzaId == pizzaIdVal)
             {
                 _activeOvenTransfers.Remove(stationId);
-                var slot = new StationSlotId(stationId, slotIndex);
-                var res = root.ProcessingService.InsertOven(new ItemId(pizzaIdVal), slot, root.DomainState, 15f, root.Clock);
-                if (res.Success)
+                var pizzaId = new ItemId(pizzaIdVal);
+                float bakeDur = root.Config != null ? root.Config.defaultBakeDuration : 15f;
+                if (root.DomainState.Items.TryGetValue(pizzaId, out var pizza) && pizza.CapturedCookDuration > 0.1f)
                 {
-                    CommitAndReplicate();
+                    bakeDur = pizza.CapturedCookDuration;
                 }
+                float burnGrace = root.Config != null ? root.Config.ovenBurnGraceDuration : 12f;
+                var slot = new StationSlotId(stationId, slotIndex);
+                var res = root.ProcessingService.InsertOven(pizzaId, slot, root.DomainState, bakeDur, root.Clock, burnGrace);
+                if (!res.Success && root.DomainState.Items.TryGetValue(pizzaId, out var failedPizza) &&
+                    failedPizza.ReservedByHold == OperationState.ServerWorker)
+                {
+                    failedPizza.ReservedByHold = ItemState.NoHoldOwner;
+                    failedPizza.Revision++;
+                }
+                CommitAndReplicate();
             }
         }
 
@@ -735,6 +826,12 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
             if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (!IsStationWithinReach(senderClientId, stationId, out string reachErr, slotIndex))
+            {
+                NotifyErrorClientRpc(reachErr, targetParams);
+                return;
+            }
 
             if (_activeOvenTransfers.ContainsKey(stationId))
             {
@@ -757,6 +854,12 @@ namespace ScaryParty.Pizzeria.Network
             if (pizzaInSlot == null)
             {
                 NotifyErrorClientRpc("Forno vazio!", targetParams);
+                return;
+            }
+
+            if (pizzaInSlot.ReservedByHold != ItemState.NoHoldOwner && pizzaInSlot.ReservedByHold != senderClientId)
+            {
+                NotifyErrorClientRpc("Pizza reservada por outra interação.", targetParams);
                 return;
             }
 
@@ -787,6 +890,8 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
+            pizzaInSlot.ReservedByHold = OperationState.ServerWorker;
+            pizzaInSlot.Revision++;
             _activeOvenTransfers[stationId] = (pizzaInSlot.Id.Value, slotIndex, senderClientId, false);
 
             const float doorOpenDuration = 0.25f;
@@ -804,18 +909,23 @@ namespace ScaryParty.Pizzeria.Network
             // 1. Aguarda a porta abrir
             yield return new WaitForSeconds(doorOpenDuration);
 
-            // 2. Para a cocção no exato momento em que a porta abre e a pizza começa a sair
+            // 2. Pausa a cocção ao abrir a porta mantendo o slot protegido até concluir o voo até a mão
+            float burnGrace = root != null && root.Config != null ? root.Config.ovenBurnGraceDuration : 12f;
             if (root != null && root.DomainState != null)
             {
                 var slot = new StationSlotId(stationId, slotIndex);
                 if (root.DomainState.ActiveOperations.TryGetValue(slot, out var op))
                 {
-                    op.Progress.Materialize((float)root.Clock.Now);
+                    op.Pause((float)root.Clock.Now);
                     if (root.DomainState.Items.TryGetValue(new ItemId(pizzaIdVal), out var pizza))
                     {
                         pizza.CookProgress = op.Progress.Normalized;
+                        float pastBaked = op.Progress.Accumulated - op.Progress.Duration;
+                        if (pastBaked > 0f && burnGrace > 0.001f)
+                            pizza.BurnProgress = Mathf.Min(1f, Mathf.Max(pizza.BurnProgress, pastBaked / burnGrace));
+                        if (pizza.BurnProgress >= 1f) pizza.CookingStage = CookingStage.Burned;
+                        else if (pizza.CookProgress >= 1f) pizza.CookingStage = CookingStage.Baked;
                     }
-                    root.DomainState.ActiveOperations.Remove(slot);
                     CommitAndReplicate();
                 }
             }
@@ -829,12 +939,46 @@ namespace ScaryParty.Pizzeria.Network
                 {
                     _activeOvenTransfers.Remove(stationId);
                     var slot = new StationSlotId(stationId, slotIndex);
-                    var res = root.ProcessingService.RemoveOven(slot, targetLoc, root.DomainState, root.Clock);
-                    if (res.Success)
+                    var res = root.ProcessingService.RemoveOven(slot, targetLoc, root.DomainState, root.Clock, burnGrace);
+                    if (!res.Success && root.DomainState.Items.TryGetValue(new ItemId(pizzaIdVal), out var fallbackPizza) &&
+                        fallbackPizza.ReservedByHold == OperationState.ServerWorker)
                     {
-                        CommitAndReplicate();
+                        fallbackPizza.ReservedByHold = ItemState.NoHoldOwner;
+                        fallbackPizza.Revision++;
                     }
+                    CommitAndReplicate();
                 }
+            }
+            else
+            {
+                _activeOvenTransfers.Remove(stationId);
+            }
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void UnloadArrivedSuppliesServerRpc(int stationId, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || root.DomainState == null) return;
+            if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
+
+            var targetParams = TargetSender(senderId);
+            if (!IsStationWithinReach(senderId, stationId, out string reachErr))
+            {
+                NotifyErrorClientRpc(reachErr, targetParams);
+                return;
+            }
+
+            int unloadedUnits = NightCycleService.TryUnloadAllArrivedSupplies(root.DomainState);
+            if (unloadedUnits > 0)
+            {
+                CommitAndReplicate();
+                NotifySuccessClientRpc($"Descarregadas {unloadedUnits} unidade(s) da doca para o estoque!", targetParams);
+            }
+            else
+            {
+                NotifyErrorClientRpc("Estoque cheio ou nenhum suprimento aguardando descarga na doca.", targetParams);
             }
         }
 

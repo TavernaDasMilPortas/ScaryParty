@@ -31,11 +31,41 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 if (existing.Phase == OperationPhase.Running || existing.Phase == OperationPhase.Paused)
                 {
-                    if (existing.Phase == OperationPhase.Paused && existing.InputItemId == inputItemId && existing.ToolItemId == toolItemId && existing.ProcessId == processId)
+                    bool compatibleTool = existing.ToolItemId == toolItemId;
+                    if (!compatibleTool &&
+                        catalog != null &&
+                        catalog.Processes.TryGetValue(processId, out var reqProc) &&
+                        reqProc != null)
                     {
-                        if (existing.ToolItemId.IsValid && state.Tools.TryGetValue(existing.ToolItemId, out var resumeTool) &&
-                            !resumeTool.TryAcquireLease(workerId, now, leaseDuration))
+                        if (reqProc.RequiredCapability == ToolCapability.None)
+                        {
+                            compatibleTool = !existing.ToolItemId.IsValid && !toolItemId.IsValid;
+                        }
+                        else if (state.Tools.TryGetValue(toolItemId, out var candTool) &&
+                                 candTool.Capabilities.HasFlag(reqProc.RequiredCapability))
+                        {
+                            compatibleTool = true;
+                        }
+                    }
+
+                    if (existing.Phase == OperationPhase.Paused && existing.InputItemId == inputItemId && compatibleTool && existing.ProcessId == processId)
+                    {
+                        if (toolItemId.IsValid && state.Tools.TryGetValue(toolItemId, out var resumeTool))
+                        {
+                            if (existing.ToolItemId.IsValid && existing.ToolItemId != toolItemId &&
+                                state.Tools.TryGetValue(existing.ToolItemId, out var previousTool))
+                            {
+                                previousTool.ReleaseLease(workerId);
+                            }
+                            if (!resumeTool.TryAcquireLease(workerId, now, leaseDuration))
+                                return CommandResult.Fail(CommandError.ToolBusy, "Ferramenta em uso.");
+                            existing.ToolItemId = toolItemId;
+                        }
+                        else if (existing.ToolItemId.IsValid && state.Tools.TryGetValue(existing.ToolItemId, out var resumeOldTool) &&
+                            !resumeOldTool.TryAcquireLease(workerId, now, leaseDuration))
+                        {
                             return CommandResult.Fail(CommandError.ToolBusy, "Ferramenta em uso.");
+                        }
                         if (state.Items.TryGetValue(inputItemId, out var resumeItem))
                         {
                             resumeItem.ReservedByHold = workerId;
@@ -366,10 +396,16 @@ namespace ScaryParty.Pizzeria.Domain.Services
             return CommandResult.Ok();
         }
 
-        public CommandResult InsertOven(ItemId pizzaId, StationSlotId ovenSlot, PizzeriaState state, float bakeDuration, IClock clock)
+        public CommandResult InsertOven(ItemId pizzaId, StationSlotId ovenSlot, PizzeriaState state, float bakeDuration, IClock clock, float burnGraceDuration = 12f)
         {
             if (!state.Items.TryGetValue(pizzaId, out var pizza))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Pizza não encontrada.");
+
+            if (pizza.IsBoxed || !pizza.IsPizzaLike)
+                return CommandResult.Fail(CommandError.Incompatible, "Apenas pizzas não embaladas podem entrar no forno.");
+
+            if (pizza.CookingStage == CookingStage.Burned)
+                return CommandResult.Fail(CommandError.Incompatible, "Pizza queimada não pode voltar ao forno.");
 
             var ovenLocation = LocationRef.InStation(ovenSlot.StationId, ovenSlot.SlotIndex);
             foreach (var kvp in state.Items)
@@ -378,21 +414,33 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     return CommandResult.Fail(CommandError.SlotFull, "Slot do forno ocupado.");
             }
 
+            float safeBakeDur = Math.Max(0.5f, bakeDuration);
+            float safeBurnGrace = Math.Max(0.1f, burnGraceDuration);
+            float baseAccum = pizza.CookProgress >= 1f
+                ? safeBakeDur + Math.Max(0f, pizza.BurnProgress) * safeBurnGrace
+                : Math.Max(0f, pizza.CookProgress) * safeBakeDur;
+
             pizza.Location = ovenLocation;
-            pizza.CookingStage = CookingStage.Cooking;
-            pizza.CapturedCookDuration = bakeDuration;
+            pizza.ReservedByHold = ItemState.NoHoldOwner;
+            if (pizza.CookProgress < 1f)
+                pizza.CookingStage = CookingStage.Cooking;
+            else if (pizza.BurnProgress >= 1f)
+                pizza.CookingStage = CookingStage.Burned;
+            else
+                pizza.CookingStage = CookingStage.Baked;
+            pizza.CapturedCookDuration = safeBakeDur;
             pizza.Revision++;
 
             var opId = state.GenerateOperationId();
-            var op = new OperationState(opId, ovenSlot, OperationKind.Process, ResumePolicy.Resumable, pizzaId, ToolItemId.None, 0, OperationState.ServerWorker, bakeDuration, (float)clock.Now, 999999f);
-            op.Progress.Accumulated = pizza.CookProgress * bakeDuration;
+            var op = new OperationState(opId, ovenSlot, OperationKind.Process, ResumePolicy.Resumable, pizzaId, ToolItemId.None, 0, OperationState.ServerWorker, safeBakeDur, (float)clock.Now, 999999f);
+            op.Progress.Accumulated = baseAccum;
             state.ActiveOperations[ovenSlot] = op;
 
             state.IncrementRevision();
             return CommandResult.Ok();
         }
 
-        public CommandResult<ItemId> RemoveOven(StationSlotId ovenSlot, LocationRef targetLocation, PizzeriaState state, IClock clock)
+        public CommandResult<ItemId> RemoveOven(StationSlotId ovenSlot, LocationRef targetLocation, PizzeriaState state, IClock clock, float burnGraceDuration = 12f)
         {
             var ovenLocation = LocationRef.InStation(ovenSlot.StationId, ovenSlot.SlotIndex);
             ItemState pizza = null;
@@ -412,11 +460,23 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 op.Progress.Materialize((float)clock.Now);
                 pizza.CookProgress = op.Progress.Normalized;
+                float pastBaked = op.Progress.Accumulated - op.Progress.Duration;
+                if (pastBaked > 0f && burnGraceDuration > 0.001f)
+                {
+                    float clampedBurn = Math.Min(1f, pastBaked / burnGraceDuration);
+                    if (clampedBurn > pizza.BurnProgress)
+                        pizza.BurnProgress = clampedBurn;
+                }
+                if (pizza.BurnProgress >= 1f)
+                    pizza.CookingStage = CookingStage.Burned;
+                else if (pizza.CookProgress >= 1f)
+                    pizza.CookingStage = CookingStage.Baked;
                 state.ActiveOperations.Remove(ovenSlot);
             }
 
             pizza.Location = targetLocation;
-            if (pizza.CookProgress < 1.0f)
+            pizza.ReservedByHold = ItemState.NoHoldOwner;
+            if (pizza.CookProgress < 1.0f && pizza.CookingStage != CookingStage.Burned)
                 pizza.CookingStage = CookingStage.Cooking;
             pizza.Revision++;
 
@@ -431,7 +491,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             op.Progress.Materialize((float)clock.Now);
             float p = op.Progress.Normalized;
-            if (Math.Abs(pizza.CookProgress - p) > 0.04f)
+            if (Math.Abs(pizza.CookProgress - p) > 0.04f || (p >= 1.0f && pizza.CookProgress < 1.0f))
             {
                 pizza.CookProgress = p;
                 pizza.Revision++;
@@ -461,7 +521,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 {
                     float burnP = timePastBaked / burnGraceDuration;
                     float clampedBurn = burnP > 1f ? 1f : burnP;
-                    if (Math.Abs(pizza.BurnProgress - clampedBurn) > 0.04f)
+                    if (Math.Abs(pizza.BurnProgress - clampedBurn) > 0.04f || (clampedBurn >= 1.0f && pizza.BurnProgress < 1.0f))
                     {
                         pizza.BurnProgress = clampedBurn;
                         pizza.Revision++;

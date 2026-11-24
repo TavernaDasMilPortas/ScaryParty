@@ -49,6 +49,10 @@ namespace ScaryParty.Pizzeria.Stations
                 if (netState == null || networkManager == null) return "Forno";
 
                 ulong localClientId = networkManager.LocalClientId;
+                int targetSlot = ResolveTargetSlotIndex();
+                int activeHand = networkManager.LocalClient?.PlayerObject?.GetComponent<ScaryParty.Pizzeria.Player.PlayerInventoryAdapter>()?.ActiveHand
+                    is HandSlotIndex h ? (int)h : 0;
+                bool activeHandWeapon = netState.IsHandOccupiedByWeapon(localClientId, activeHand);
                 bool stationHasPizza = false;
                 bool playerHasPizza = false;
                 float cookProgress = 0f;
@@ -58,16 +62,18 @@ namespace ScaryParty.Pizzeria.Stations
                 {
                     var item = netState.Items[i];
                     bool isPizza = item.Category == (byte)ItemCategory.PizzaBase || item.Category == (byte)ItemCategory.Pizza;
-                    
-                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId)
+                    bool canBake = isPizza && item.PackagingState != (byte)PackagingState.Boxed && item.CookingStage != (byte)CookingStage.Burned;
+
+                    if (item.LocationType == (byte)LocationType.StationSlot && item.HolderId == (ulong)stationId &&
+                        (targetSlot < 0 || item.SlotId == targetSlot))
                     {
                         stationHasPizza = true;
                         cookProgress = item.CookProgress;
                         burnProgress = item.BurnProgress;
                     }
-                    if (item.LocationType == (byte)LocationType.Hand && item.HolderId == localClientId)
+                    if (!activeHandWeapon && item.LocationType == (byte)LocationType.Hand && item.HolderId == localClientId && item.SlotId == activeHand)
                     {
-                        if (isPizza) playerHasPizza = true;
+                        if (canBake) playerHasPizza = true;
                     }
                 }
 
@@ -437,14 +443,29 @@ namespace ScaryParty.Pizzeria.Stations
             }
 
             int otherHand = activeHand == 0 ? 1 : 0;
-            bool otherHandFree = true;
-            for (int i = 0; i < state.Items.Count; i++)
+            bool activeHandBlockedByWeapon = state.IsHandOccupiedByWeapon(playerId, activeHand);
+            bool activeHandHasTool = false;
+            for (int i = 0; i < state.Tools.Count; i++)
             {
-                var it = state.Items[i];
-                if (it.LocationType == (byte)LocationType.Hand && it.HolderId == playerId && it.SlotId == otherHand)
+                var t = state.Tools[i];
+                if (t.LocationType == (byte)LocationType.Hand && t.HolderId == playerId && t.SlotId == activeHand)
                 {
-                    otherHandFree = false;
+                    activeHandHasTool = true;
                     break;
+                }
+            }
+
+            bool otherHandFree = !state.IsHandOccupiedByWeapon(playerId, otherHand);
+            if (otherHandFree)
+            {
+                for (int i = 0; i < state.Items.Count; i++)
+                {
+                    var it = state.Items[i];
+                    if (it.LocationType == (byte)LocationType.Hand && it.HolderId == playerId && it.SlotId == otherHand)
+                    {
+                        otherHandFree = false;
+                        break;
+                    }
                 }
             }
             if (otherHandFree)
@@ -462,7 +483,7 @@ namespace ScaryParty.Pizzeria.Stations
 
             if (hasItemOnStation)
             {
-                if (!hasItemInHand)
+                if (!hasItemInHand && !activeHandBlockedByWeapon && !activeHandHasTool)
                 {
                     cmd.RemoveOvenServerRpc(stationId, slotIndex, (byte)activeHand);
                 }
@@ -475,13 +496,21 @@ namespace ScaryParty.Pizzeria.Stations
                     ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Ambas as mãos ocupadas!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
                 }
             }
-            else if (!hasItemOnStation && hasItemInHand)
+            else if (!hasItemOnStation && hasItemInHand && !activeHandBlockedByWeapon)
             {
-                cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, slotIndex);
-                if (invAdapter != null && !otherHandFree)
+                bool isValidPizza = (itemInHand.Category == (byte)ItemCategory.PizzaBase || itemInHand.Category == (byte)ItemCategory.Pizza) &&
+                                    itemInHand.PackagingState != (byte)PackagingState.Boxed &&
+                                    itemInHand.CookingStage != (byte)CookingStage.Burned;
+                if (!isValidPizza)
                 {
-                    invAdapter.SetActiveHand((HandSlotIndex)otherHand);
+                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Apenas pizzas não embaladas e não queimadas podem entrar no forno.", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+                    return;
                 }
+                cmd.InsertOvenServerRpc(itemInHand.ItemId, stationId, slotIndex);
+            }
+            else if (!hasItemOnStation && (activeHandBlockedByWeapon || activeHandHasTool))
+            {
+                ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Guarde ou troque o equipamento antes de usar o forno.", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
             }
         }
     }

@@ -767,6 +767,92 @@ namespace ScaryParty.Pizzeria.Tests
             Assert.IsFalse(state.ActiveOperations.ContainsKey(ovenSlot));
             Assert.IsFalse(state.Items.ContainsKey(burnedPizza.Id));
         }
+
+        [Test]
+        public void PhaseB2_OvenBurnPreservationArrivedUnloadAndToolResume_BehaveCorrectly()
+        {
+            var state = new PizzeriaState { RestaurantBudget = 1000 };
+            var catalog = new DefinitionCatalog();
+            catalog.RegisterIngredient(new IngredientData(1, "Massa", ItemCategory.Dough, true, 2));
+            catalog.RegisterIngredient(new IngredientData(4, "Queijo Inteiro", ItemCategory.Cheese, true, 5));
+            catalog.RegisterIngredient(new IngredientData(5, "Queijo Ralado", ItemCategory.Cheese));
+            catalog.RegisterSupplyItem(new SupplyItemData(1, 1, 5, 20, 18f, "Pacote Massa"));
+            catalog.RegisterProcess(new ProcessData(2, "Ralar Queijo", 4, ProcessingStage.Raw, 5, ProcessingStage.Prepared, ToolCapability.Grate, 2.0f));
+            var clock = new FixedClock(100.0);
+            var procSvc = new ProcessingService();
+            var ovenSlot = new StationSlotId(5, 0);
+
+            // BUG-KIT-02: Boxed/Burned rejected; burn progress preserved across remove/reinsert
+            var pizza = new ItemState(state.GenerateItemId(), 2, ItemCategory.Pizza, LocationRef.InHand(0UL, HandSlotIndex.Left))
+            {
+                PrepStage = ProcessingStage.Prepared
+            };
+            state.Items[pizza.Id] = pizza;
+            Assert.IsTrue(procSvc.InsertOven(pizza.Id, ovenSlot, state, 10f, clock, 10f).Success);
+            clock.Now += 15.0; // baked (10s) + half burned (5s/10s = 0.5)
+            procSvc.TickOven(ovenSlot, state, 10f, clock);
+            Assert.AreEqual(CookingStage.Baked, pizza.CookingStage);
+            Assert.AreEqual(0.5f, pizza.BurnProgress, 0.06f);
+
+            Assert.IsTrue(procSvc.RemoveOven(ovenSlot, LocationRef.InHand(0UL, HandSlotIndex.Left), state, clock, 10f).Success);
+            Assert.IsTrue(procSvc.InsertOven(pizza.Id, ovenSlot, state, 10f, clock, 10f).Success);
+            clock.Now += 5.5;
+            procSvc.TickOven(ovenSlot, state, 10f, clock);
+            Assert.AreEqual(CookingStage.Burned, pizza.CookingStage);
+            Assert.AreEqual(1.0f, pizza.BurnProgress, 0.001f);
+
+            Assert.IsTrue(procSvc.RemoveOven(ovenSlot, LocationRef.InHand(0UL, HandSlotIndex.Left), state, clock, 10f).Success);
+            Assert.IsFalse(procSvc.InsertOven(pizza.Id, ovenSlot, state, 10f, clock, 10f).Success);
+
+            // BUG-KIT-03: Arrived supply unloads later when storage capacity frees
+            state.StorageSlots[(1, 1)] = new StorageSlotState(1, 1, 5, 5);
+            SupplyOrderState order = null;
+            foreach (var sup in catalog.SupplyItems.Values)
+            {
+                if (sup.IngredientId == 1)
+                {
+                    Assert.IsTrue(NightCycleService.TryPlaceSupplyOrder(state, catalog, sup.Id, 1, clock.Now, 5, 1f, out order, out _));
+                    break;
+                }
+            }
+            Assert.IsNotNull(order);
+            clock.Now = order.ExpectedArrivalTime + 1.0;
+            Assert.IsTrue(NightCycleService.TickSupplies(state, clock.Now));
+            Assert.AreEqual(SupplyOrderLifecycle.Arrived, order.State);
+
+            state.StorageSlots[(1, 1)].Quantity = 0;
+            int unloaded = NightCycleService.TryUnloadAllArrivedSupplies(state);
+            Assert.Greater(unloaded, 0);
+            Assert.AreEqual(SupplyOrderLifecycle.Unloaded, order.State);
+
+            // BUG-KIT-07: Resuming paused operation with another compatible tool succeeds
+            int cutterProcId = -1;
+            ToolCapability reqCap = ToolCapability.None;
+            int rawIngId = -1;
+            foreach (var p in catalog.Processes.Values)
+            {
+                if (p.RequiredCapability != ToolCapability.None)
+                {
+                    cutterProcId = p.Id;
+                    reqCap = p.RequiredCapability;
+                    rawIngId = p.InputIngredientId;
+                    break;
+                }
+            }
+            Assert.Greater(cutterProcId, 0);
+            var toolA = new ToolItemState(state.GenerateToolId(), 1, reqCap, LocationRef.InHand(0UL, HandSlotIndex.Right));
+            var toolB = new ToolItemState(state.GenerateToolId(), 1, reqCap, LocationRef.InHand(1UL, HandSlotIndex.Right));
+            state.Tools[toolA.Id] = toolA;
+            state.Tools[toolB.Id] = toolB;
+            var prepSlot = new StationSlotId(10, 0);
+            var ing = new ItemState(state.GenerateItemId(), rawIngId, ItemCategory.Ingredient, LocationRef.InStation(10, 0));
+            state.Items[ing.Id] = ing;
+
+            Assert.IsTrue(procSvc.BeginOperation(state, prepSlot, OperationKind.Process, ResumePolicy.Resumable, ing.Id, toolA.Id, cutterProcId, 0UL, catalog, (float)clock.Now).Success);
+            Assert.IsTrue(procSvc.CancelOperation(state, prepSlot, 0UL, (float)clock.Now + 0.2f).Success);
+            Assert.IsTrue(procSvc.BeginOperation(state, prepSlot, OperationKind.Process, ResumePolicy.Resumable, ing.Id, toolB.Id, cutterProcId, 1UL, catalog, (float)clock.Now + 0.3f).Success);
+            Assert.AreEqual(toolB.Id, state.ActiveOperations[prepSlot].ToolItemId);
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

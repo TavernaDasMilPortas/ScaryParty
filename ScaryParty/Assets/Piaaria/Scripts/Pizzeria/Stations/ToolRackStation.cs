@@ -143,8 +143,9 @@ namespace ScaryParty.Pizzeria.Stations
 
             if (hasToolInHand)
             {
-                int freeSlot = 0;
-                for (int slot = 0; slot < 4; slot++)
+                int rackSlotCount = (slotAnchors != null && slotAnchors.Length > 0) ? slotAnchors.Length : 4;
+                int freeSlot = -1;
+                for (int slot = 0; slot < rackSlotCount; slot++)
                 {
                     bool slotFree = true;
                     for (int i = 0; i < state.Tools.Count; i++)
@@ -162,18 +163,21 @@ namespace ScaryParty.Pizzeria.Stations
                         break;
                     }
                 }
+                if (freeSlot < 0)
+                {
+                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show("Suporte de utensílios está cheio!", ScaryParty.Pizzeria.Presentation.NotificationType.Warning);
+                    return;
+                }
                 cmd.TransferToolServerRpc(toolInHand.ToolId, (byte)LocationType.StationSlot, (ulong)stationId, freeSlot);
-                string tName = toolInHand.DefinitionId == 1 ? "Ralador" : "Faca";
-                ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} guardado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
             }
             else if (hasToolOnRack)
             {
                 int targetPickHand = -1;
-                if (!hasItemInHand)
+                if (!hasItemInHand && !state.IsHandOccupiedByWeapon(playerId, activeHand))
                 {
                     targetPickHand = activeHand;
                 }
-                else if (otherHandFree)
+                else if (otherHandFree && !state.IsHandOccupiedByWeapon(playerId, otherHand))
                 {
                     targetPickHand = otherHand;
                 }
@@ -181,8 +185,6 @@ namespace ScaryParty.Pizzeria.Stations
                 if (targetPickHand != -1)
                 {
                     cmd.TransferToolServerRpc(toolOnRack.ToolId, (byte)LocationType.Hand, playerId, targetPickHand);
-                    string tName = toolOnRack.DefinitionId == 1 ? "Ralador" : "Faca";
-                    ScaryParty.Pizzeria.Presentation.NotificationManager.Show($"{tName} coletado", ScaryParty.Pizzeria.Presentation.NotificationType.Info);
                 }
                 else
                 {

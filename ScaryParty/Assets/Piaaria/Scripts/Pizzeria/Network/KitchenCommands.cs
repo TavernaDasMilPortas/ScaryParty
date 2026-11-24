@@ -404,9 +404,41 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
 
+            var pizzaId = new ItemId(pizzaIdVal);
+            if (!root.DomainState.Items.TryGetValue(pizzaId, out var pizza) ||
+                pizza.Location.Type != LocationType.Hand ||
+                pizza.Location.HolderId != sender)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Pizza não está na sua mão.", true);
+                return;
+            }
+
+            if (pizza.IsBoxed || !pizza.IsPizzaLike)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Apenas pizzas não embaladas podem ir ao forno.", true);
+                return;
+            }
+
+            if (pizza.CookingStage == CookingStage.Burned)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Pizza queimada não pode voltar ao forno.", true);
+                return;
+            }
+
+            if (pizza.ReservedByHold != ItemState.NoHoldOwner && pizza.ReservedByHold != sender)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Pizza reservada por outro processo.", true);
+                return;
+            }
+
             int ovenStationId = ResolvePrimaryOvenStationId(root);
             var slotId = new StationSlotId(ovenStationId, slotIndex);
-            var res = root.OvenService.InsertPizza(root.DomainState, slotId, new ItemId(pizzaIdVal), sender, root.Catalog, root.Config.defaultBakeDuration);
+            float bakeDuration = pizza.CapturedCookDuration > 0.1f
+                ? pizza.CapturedCookDuration
+                : (root.Config != null ? root.Config.defaultBakeDuration : 15f);
+            float burnGrace = root.Config != null ? root.Config.ovenBurnGraceDuration : 12f;
+
+            var res = root.ProcessingService.InsertOven(pizzaId, slotId, root.DomainState, bakeDuration, root.Clock, burnGrace);
             if (!res.Success)
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);
@@ -440,7 +472,8 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            var res = root.OvenService.RemovePizza(root.DomainState, slotId, handLoc, sender);
+            float burnGrace = root.Config != null ? root.Config.ovenBurnGraceDuration : 12f;
+            var res = root.ProcessingService.RemoveOven(slotId, handLoc, root.DomainState, root.Clock, burnGrace);
             if (!res.Success)
             {
                 PizzeriaSession.Notifier?.NotifyClient(sender, res.Message, true);

@@ -452,30 +452,65 @@ namespace ScaryParty.Pizzeria.Domain.Services
             bool changed = false;
             foreach (var order in state.SupplyOrders.Values)
             {
-                if (order.State == SupplyOrderLifecycle.InTransit && now >= order.ExpectedArrivalTime)
+                bool shouldUnload = order.State == SupplyOrderLifecycle.Arrived ||
+                                    (order.State == SupplyOrderLifecycle.InTransit && now >= order.ExpectedArrivalTime);
+                if (shouldUnload)
                 {
-                    foreach (var line in order.Lines)
-                    {
-                        int remaining = line.RemainingUnits;
-                        foreach (var slot in state.StorageSlots.Values)
-                        {
-                            if (slot.IngredientDefId == line.IngredientDefId && slot.Quantity < slot.MaxCapacity)
-                            {
-                                int add = Math.Min(remaining, slot.MaxCapacity - slot.Quantity);
-                                slot.Quantity += add;
-                                slot.Revision++;
-                                remaining -= add;
-                                if (remaining <= 0) break;
-                            }
-                        }
-                        line.RemainingUnits = remaining;
-                    }
-                    order.State = order.IsFullyUnloaded() ? SupplyOrderLifecycle.Unloaded : SupplyOrderLifecycle.Arrived;
-                    order.Revision++;
-                    changed = true;
+                    if (TryUnloadSupplyOrder(state, order, markArrivedIfRemaining: true))
+                        changed = true;
                 }
             }
             if (changed) state.IncrementRevision();
+            return changed;
+        }
+
+        public static int TryUnloadAllArrivedSupplies(PizzeriaState state)
+        {
+            if (state == null) return 0;
+            int unloadedUnits = 0;
+            foreach (var order in state.SupplyOrders.Values)
+            {
+                if (order == null || order.State != SupplyOrderLifecycle.Arrived) continue;
+                int before = 0;
+                foreach (var l in order.Lines) before += l.RemainingUnits;
+                TryUnloadSupplyOrder(state, order, markArrivedIfRemaining: true);
+                int after = 0;
+                foreach (var l in order.Lines) after += l.RemainingUnits;
+                unloadedUnits += Math.Max(0, before - after);
+            }
+            if (unloadedUnits > 0) state.IncrementRevision();
+            return unloadedUnits;
+        }
+
+        private static bool TryUnloadSupplyOrder(PizzeriaState state, SupplyOrderState order, bool markArrivedIfRemaining)
+        {
+            var prevState = order.State;
+            int movedTotal = 0;
+
+            foreach (var line in order.Lines)
+            {
+                int remaining = line.RemainingUnits;
+                if (remaining <= 0) continue;
+                foreach (var slot in state.StorageSlots.Values)
+                {
+                    if (slot.IngredientDefId == line.IngredientDefId && slot.Quantity < slot.MaxCapacity)
+                    {
+                        int add = Math.Min(remaining, slot.MaxCapacity - slot.Quantity);
+                        slot.Quantity += add;
+                        slot.Revision++;
+                        remaining -= add;
+                        movedTotal += add;
+                        if (remaining <= 0) break;
+                    }
+                }
+                line.RemainingUnits = remaining;
+            }
+
+            if (markArrivedIfRemaining)
+                order.State = order.IsFullyUnloaded() ? SupplyOrderLifecycle.Unloaded : SupplyOrderLifecycle.Arrived;
+
+            bool changed = movedTotal > 0 || order.State != prevState;
+            if (changed) order.Revision++;
             return changed;
         }
 

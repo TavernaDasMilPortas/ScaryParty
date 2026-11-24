@@ -844,10 +844,12 @@ namespace ScaryParty.Pizzeria.Composition
                         {
                             float oldCookProgress = 0f;
                             float oldBurnProgress = 0f;
+                            CookingStage oldStage = CookingStage.Cooking;
                             if (DomainState.Items.TryGetValue(op.InputItemId, out var pizzaItem))
                             {
                                 oldCookProgress = pizzaItem.CookProgress;
                                 oldBurnProgress = pizzaItem.BurnProgress;
+                                oldStage = pizzaItem.CookingStage;
                             }
 
                             var runStats = RunProgressionService != null ? RunProgressionService.RecalculateEffectiveStats() : null;
@@ -855,7 +857,8 @@ namespace ScaryParty.Pizzeria.Composition
                             
                             if (DomainState.Items.TryGetValue(op.InputItemId, out var updatedPizza))
                             {
-                                if (Mathf.Abs(updatedPizza.CookProgress - oldCookProgress) > 0.04f ||
+                                if (updatedPizza.CookingStage != oldStage ||
+                                    Mathf.Abs(updatedPizza.CookProgress - oldCookProgress) > 0.04f ||
                                     Mathf.Abs(updatedPizza.BurnProgress - oldBurnProgress) > 0.04f)
                                 {
                                     dirty = true;

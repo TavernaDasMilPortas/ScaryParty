@@ -286,6 +286,7 @@ public class PlayerInteraction : NetworkBehaviour
     private bool _workCompletedAwaitingFRelease = false;
     private float _workStartTime = 0f;
     private bool _workSawRunning = false;
+    private bool _workWasRedirectedSlot = false;
     private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
 
     public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _discardItemId != 0 || _assistingAllyClientId != 0 || _currentInteractable != null;
@@ -396,6 +397,7 @@ public class PlayerInteraction : NetworkBehaviour
         int station = _workStation;
         int slot = _workSlot;
         _workStation = -1;
+        _workWasRedirectedSlot = false;
         if (IsSpawned && IsOwner)
             ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CancelWorkServerRpc(station, slot);
     }
@@ -515,7 +517,7 @@ public class PlayerInteraction : NetworkBehaviour
 
         // 2. Verificar se o alvo ainda está em alcance
         if (mainCamera == null || !(_currentInteractable is ScaryParty.Pizzeria.Stations.PrepStation prep) ||
-            prep.stationId != _workStation || prep.ResolveTargetSlotIndex() != _workSlot)
+            prep.stationId != _workStation || (!_workWasRedirectedSlot && prep.ResolveTargetSlotIndex() != _workSlot))
         {
             StopTrackedWork();
             return;
@@ -858,14 +860,17 @@ public class PlayerInteraction : NetworkBehaviour
 
     private void HandleNotificationShown(string message, ScaryParty.Pizzeria.Presentation.NotificationType type)
     {
+        // Toasts globais de UI não cancelam mais trabalho de bancada; falhas explícitas chegam via RejectWorkClientRpc.
+    }
+
+    public void OnWorkRejected(int stationId, int slotIndex)
+    {
         if (!IsOwner) return;
-        if (type == ScaryParty.Pizzeria.Presentation.NotificationType.Error || type == ScaryParty.Pizzeria.Presentation.NotificationType.Warning)
+        if (_workStation == stationId && _workSlot == slotIndex)
         {
-            if (_workCameraLock.IsValid)
-            {
-                ReleaseWorkLockOnly();
-                _workStation = -1;
-            }
+            ReleaseWorkLockOnly();
+            _workStation = -1;
+            _workWasRedirectedSlot = false;
         }
     }
 
@@ -1075,6 +1080,7 @@ public class PlayerInteraction : NetworkBehaviour
                 }
             }
 
+            bool slotWasRedirected = false;
             if (!hasItemOnStation)
             {
                 int maxSlots = station.slotAnchors != null && station.slotAnchors.Length > 0 ? station.slotAnchors.Length : 2;
@@ -1089,6 +1095,7 @@ public class PlayerInteraction : NetworkBehaviour
                             slotIndex = s;
                             itemOnStation = it;
                             hasItemOnStation = true;
+                            slotWasRedirected = true;
                             break;
                         }
                     }
@@ -1135,6 +1142,7 @@ public class PlayerInteraction : NetworkBehaviour
                 cmd.StartWorkAtomicServerRpc(prep.stationId, slotIndex, 0, hand);
                 _workStation = prep.stationId;
                 _workSlot = slotIndex;
+                _workWasRedirectedSlot = slotWasRedirected;
                 _workStartTime = Time.unscaledTime;
                 _workSawRunning = false;
                 _nextWorkHeartbeat = Time.unscaledTime + 0.2f;
@@ -1183,9 +1191,12 @@ public class PlayerInteraction : NetworkBehaviour
             if (UnityEngine.InputSystem.Keyboard.current.fKey.wasPressedThisFrame) workPressed = true;
             if (UnityEngine.InputSystem.Keyboard.current.iKey.wasPressedThisFrame) InspectBag();
         }
-        if (Input.GetKeyDown(KeyCode.I)) InspectBag();
-        if (Input.GetKeyDown(KeyCode.E)) interactPressed = true;
-        if (Input.GetKeyDown(KeyCode.F)) workPressed = true;
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.I)) InspectBag();
+            if (Input.GetKeyDown(KeyCode.E)) interactPressed = true;
+            if (Input.GetKeyDown(KeyCode.F)) workPressed = true;
+        }
 
         if (interactPressed && _currentInteractable != null)
         {

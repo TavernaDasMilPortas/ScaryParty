@@ -81,16 +81,28 @@ namespace ScaryParty.Pizzeria.Network
             foreach (var slot in assemblySlots)
                 PizzaAssemblyService.Cancel(state, slot);
 
-            // 2. Pausar operações onde o jogador era o executor
-            foreach (var op in state.ActiveOperations.Values)
+            // 2. Pausar/liberar operações onde o jogador era o executor garantindo desbloqueio de ReservedByHold e leases
+            var opsToCancel = new List<StationSlotId>();
+            foreach (var kvp in state.ActiveOperations)
             {
-                if (op.WorkerId == clientId)
+                if (kvp.Value != null && kvp.Value.WorkerId == clientId)
+                {
+                    opsToCancel.Add(kvp.Key);
+                }
+            }
+            for (int i = 0; i < opsToCancel.Count; i++)
+            {
+                if (root.ProcessingService != null)
+                {
+                    root.ProcessingService.CancelOperation(state, opsToCancel[i], clientId, (float)root.Clock.Now);
+                }
+                else if (state.ActiveOperations.TryGetValue(opsToCancel[i], out var op))
                 {
                     op.Pause((float)root.Clock.Now);
+                    if (state.Items.TryGetValue(op.InputItemId, out var relItem) && relItem.ReservedByHold == clientId)
+                        relItem.ReservedByHold = ItemState.NoHoldOwner;
                     if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
-                    {
                         tool.ReleaseLease(clientId);
-                    }
                 }
             }
 
