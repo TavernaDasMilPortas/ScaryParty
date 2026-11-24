@@ -149,5 +149,13 @@ namespace ScaryParty.Pizzeria.Editor.Tests
 
             viewport.Cleanup();
         }
+
+        [Test]
+        public void ContentStudioTestRunner_DoesNotAutoRunOnInitializeOnLoad()
+        {
+            Assert.IsFalse(
+                typeof(PizzeriaContentStudioTestRunner).IsDefined(typeof(UnityEditor.InitializeOnLoadAttribute), false),
+                "BUG-INFRA-01: PizzeriaContentStudioTestRunner não deve usar [InitializeOnLoad] para não sujar a cena em batchmode.");
+        }
     }
 }

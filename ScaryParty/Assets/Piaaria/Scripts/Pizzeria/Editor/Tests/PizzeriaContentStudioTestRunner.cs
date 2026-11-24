@@ -7,15 +7,9 @@ using UnityEngine;
 
 namespace ScaryParty.Pizzeria.Editor.Tests
 {
-    [InitializeOnLoad]
     public static class PizzeriaContentStudioTestRunner
     {
         private const string ResultFilePath = "Temp/StudioTestsResult.txt";
-
-        static PizzeriaContentStudioTestRunner()
-        {
-            EditorApplication.delayCall += RunAllStudioTests;
-        }
 
         [MenuItem("Tools/Scary Party/Uso Comum/Pizzaria/Executar Testes de Autoria & Slots", false, 111)]
         public static void RunAllStudioTests()
