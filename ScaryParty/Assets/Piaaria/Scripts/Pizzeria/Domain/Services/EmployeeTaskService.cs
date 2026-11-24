@@ -328,6 +328,25 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
         }
 
+        public bool ReleaseActorTaskForOrder(ulong actorId, bool isHuman, OrderId orderId)
+        {
+            foreach (var task in _tasks.Values)
+            {
+                if (task.TargetOrderId == orderId &&
+                    task.ReservedByActorId == actorId &&
+                    task.IsReservedByHuman == isHuman &&
+                    (task.State == EmployeeTaskState.Reserved || task.State == EmployeeTaskState.InProgress || task.State == EmployeeTaskState.Blocked))
+                {
+                    task.State = EmployeeTaskState.Available;
+                    task.ReservedByActorId = 0;
+                    task.IsReservedByHuman = false;
+                    task.LeaseExpiresAt = 0.0;
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public float ComputeEffectiveErrorProbability(HiredEmployeeState emp, float trainingErrorMultiplier = 1f)
         {
             if (emp == null) return 0f;

@@ -98,7 +98,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public CallId Id { get; }
         public AddressId AddressId { get; }
         public List<OrderLineState> Lines { get; }
-        public float ExpiresAt { get; }
+        public float ExpiresAt { get; set; }
 
         public PendingCall(CallId id, AddressId addressId, List<OrderLineState> lines, float expiresAt)
         {

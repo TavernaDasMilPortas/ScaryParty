@@ -43,7 +43,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.IsTrue(PizzaAssemblyService.Complete(_state, _slot));
             Assert.AreEqual(1, _pizza.Ingredients.Count);
             Assert.IsFalse(_state.Items.ContainsKey(_ingredient.Id));
-            Assert.AreEqual(0, _pizza.ReservedByHold);
+            Assert.AreEqual(ItemState.NoHoldOwner, _pizza.ReservedByHold);
             Assert.IsFalse(_state.ActiveOperations.ContainsKey(_slot));
         }
 
@@ -52,8 +52,8 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         {
             Assert.IsTrue(PizzaAssemblyService.Begin(_state, _pizza.Id, _ingredient.Id, 42, 10f, 3f).Success);
             Assert.IsTrue(PizzaAssemblyService.Cancel(_state, _slot));
-            Assert.AreEqual(0, _pizza.ReservedByHold);
-            Assert.AreEqual(0, _ingredient.ReservedByHold);
+            Assert.AreEqual(ItemState.NoHoldOwner, _pizza.ReservedByHold);
+            Assert.AreEqual(ItemState.NoHoldOwner, _ingredient.ReservedByHold);
             Assert.AreEqual(0, _pizza.Ingredients.Count);
             Assert.IsTrue(_state.Items.ContainsKey(_ingredient.Id));
         }

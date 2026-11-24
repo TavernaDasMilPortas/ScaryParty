@@ -59,7 +59,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.IsFalse(BackpackService.StoreItem(_state, _bag, _box.Id, _hostHand).Success);
             Assert.IsEmpty(_state.Backpacks[_bag].Items);
             Assert.AreEqual(_hostHand, _box.Location);
-            _box.ReservedByHold = 0;
+            _box.ReservedByHold = ItemState.NoHoldOwner;
             Assert.IsTrue(BackpackService.StoreItem(_state, _bag, _box.Id, _hostHand).Success);
             Assert.IsFalse(BackpackService.StoreItem(_state, _bag, _box.Id, _hostHand).Success);
             Assert.IsTrue(BackpackService.Equip(_state, _bag, 0).Success);

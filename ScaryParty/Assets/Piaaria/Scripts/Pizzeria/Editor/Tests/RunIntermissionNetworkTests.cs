@@ -211,6 +211,44 @@ namespace ScaryParty.Pizzeria.Editor.Tests
         }
 
         [Test]
+        public void PhaseC_NightGoalAndBackpackEffectiveCapacityDto_RoundTripProperly()
+        {
+            var nightSrc = new NetNightStateDto
+            {
+                NightNumber = 1,
+                TargetNightNumber = 2,
+                EarnedRevenue = 150,
+                RevenueGoal = 210,
+                LastCompletedNightRevenueGoal = 120,
+                Revision = 9
+            };
+            var bagSrc = new NetBackpackDto
+            {
+                BackpackId = 3,
+                EquippedBy = BackpackState.NoOwner,
+                Capacity = 4,
+                EffectiveCapacity = 2,
+                ItemCount = 1,
+                Integrity = 50,
+                MaxIntegrity = 100,
+                IsTorn = false,
+                Revision = 4
+            };
+
+            using var writer = new Unity.Netcode.FastBufferWriter(1024, Unity.Collections.Allocator.Temp);
+            writer.WriteValueSafe(in nightSrc);
+            writer.WriteValueSafe(in bagSrc);
+            using var reader = new Unity.Netcode.FastBufferReader(writer, Unity.Collections.Allocator.Temp);
+            reader.ReadValueSafe(out NetNightStateDto nightOut);
+            reader.ReadValueSafe(out NetBackpackDto bagOut);
+
+            Assert.AreEqual(120, nightOut.LastCompletedNightRevenueGoal);
+            Assert.IsTrue(nightSrc.Equals(nightOut));
+            Assert.AreEqual(2, bagOut.EffectiveCapacity);
+            Assert.IsTrue(bagSrc.Equals(bagOut));
+        }
+
+        [Test]
         public void InteriorPlayerSpawns_ProduceDistinctPositionsInsideFootprint_ForHostAndClient()
         {
             var go = new GameObject("TestPizzeriaFootprint");

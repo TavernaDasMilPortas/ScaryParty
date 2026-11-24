@@ -626,9 +626,10 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (IsIntermissionLocked) return false;
             for (int s = 0; s < _voteStages.Count; s++)
             {
-                if (_voteStages[s].Category == category)
+                if (_voteStages[s].Category == category &&
+                    CastStageVote(clientId, _voteStages[s].StageIndex, optionId))
                 {
-                    return CastStageVote(clientId, s, optionId);
+                    return true;
                 }
             }
             return false;

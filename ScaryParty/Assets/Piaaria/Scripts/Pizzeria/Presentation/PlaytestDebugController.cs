@@ -203,7 +203,9 @@ namespace ScaryParty.Pizzeria.Presentation
         [Button("Ultimos 5s (Avaliacao Natural)")]
         private void JumpToLast5s()
         {
-            PizzeriaCommandHandler.Instance?.DebugAdvanceClockServerRpc(0f, true);
+            if (PizzeriaNetworkState.Instance != null && PizzeriaNetworkState.Instance.NightState.Value.UnlimitedShiftTime)
+                PizzeriaCommandHandler.Instance?.DebugToggleUnlimitedShiftTimeServerRpc();
+            PizzeriaCommandHandler.Instance?.DebugSetShiftClockControlServerRpc(false, shiftSpeedMultiplier, 5f, true);
         }
 
         private void AdjustRemaining(float deltaSeconds)

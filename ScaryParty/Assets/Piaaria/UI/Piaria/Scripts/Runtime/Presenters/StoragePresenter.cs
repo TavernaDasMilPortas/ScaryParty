@@ -30,6 +30,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         private int _currentStationId = -1;
         private HandSlotIndex _selectedHand = HandSlotIndex.Left;
         private bool _isPending = false;
+        private int _pendingStorageId = -1;
+        private int _pendingIngredientId = -1;
+        private int _pendingPreviousQuantity = -1;
+        private ulong _pendingToolId = 0;
         private bool _isOpen = false;
         private Coroutine _timeoutCoroutine;
 
@@ -97,7 +101,14 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (_isPending && _isOpen)
             {
-                OnAuthoritativeSuccess();
+                bool matchesMyIngredient = _pendingIngredientId >= 0 &&
+                    changeEvent.Value.StorageId == _pendingStorageId &&
+                    changeEvent.Value.IngredientDefId == _pendingIngredientId &&
+                    changeEvent.Value.Quantity < _pendingPreviousQuantity;
+                if (matchesMyIngredient)
+                    OnAuthoritativeSuccess();
+                else
+                    RefreshItems();
             }
             else if (_isOpen)
             {
@@ -109,7 +120,15 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (_isPending && _isOpen)
             {
-                OnAuthoritativeSuccess();
+                ulong myId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : ulong.MaxValue;
+                bool matchesMyTool = _pendingToolId != 0 &&
+                    changeEvent.Value.ToolId == _pendingToolId &&
+                    changeEvent.Value.LocationType == (byte)LocationType.Hand &&
+                    changeEvent.Value.HolderId == myId;
+                if (matchesMyTool)
+                    OnAuthoritativeSuccess();
+                else
+                    RefreshItems();
             }
             else if (_isOpen)
             {
@@ -120,6 +139,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         private void OnAuthoritativeSuccess()
         {
             _isPending = false;
+            _pendingStorageId = -1;
+            _pendingIngredientId = -1;
+            _pendingPreviousQuantity = -1;
+            _pendingToolId = 0;
             if (_timeoutCoroutine != null)
             {
                 StopCoroutine(_timeoutCoroutine);
@@ -135,6 +158,10 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_isPending && _isOpen)
             {
                 _isPending = false;
+                _pendingStorageId = -1;
+                _pendingIngredientId = -1;
+                _pendingPreviousQuantity = -1;
+                _pendingToolId = 0;
                 if (_statusLabel != null) _statusLabel.text = "Tempo esgotado. Tente novamente.";
                 _storageList?.SetEnabled(true);
                 UIFeedbackService.Instance?.PlayError();
@@ -364,6 +391,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                         ? new Color(0.88f, 0.22f, 0.20f)
                         : (ratio <= 0.35f ? new Color(0.92f, 0.65f, 0.16f) : new Color(0.22f, 0.72f, 0.34f));
 
+                    int currentQty = slot.Quantity;
                     var row = CreateItemRow(
                         ingName,
                         $"Qtd: {slot.Quantity}/{maxCap} [{stockStatus}]",
@@ -371,6 +399,10 @@ namespace ScaryParty.UI.Piaria.Presenters
                         {
                             if (_isPending) return;
                             _isPending = true;
+                            _pendingStorageId = _currentStationId;
+                            _pendingIngredientId = ingId;
+                            _pendingPreviousQuantity = currentQty;
+                            _pendingToolId = 0;
                             _storageList?.SetEnabled(false);
                             if (_statusLabel != null) _statusLabel.text = "Retirando ingrediente...";
 
@@ -399,6 +431,10 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         if (_isPending) return;
                         _isPending = true;
+                        _pendingStorageId = -1;
+                        _pendingIngredientId = -1;
+                        _pendingPreviousQuantity = -1;
+                        _pendingToolId = tId;
                         _storageList?.SetEnabled(false);
                         if (_statusLabel != null) _statusLabel.text = "Pegando ferramenta...";
 

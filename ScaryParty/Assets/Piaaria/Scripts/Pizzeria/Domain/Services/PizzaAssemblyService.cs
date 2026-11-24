@@ -14,7 +14,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (pizza.Location.Type != LocationType.StationSlot ||
                 ingredient.Location.Type != LocationType.Hand || ingredient.Location.HolderId != playerId)
                 return CommandResult.Fail(CommandError.Incompatible, "A pizza deve estar na bancada e o ingrediente na sua mão.");
-            if (pizza.ReservedByHold != 0 || ingredient.ReservedByHold != 0)
+            if (pizza.ReservedByHold != ItemState.NoHoldOwner || ingredient.ReservedByHold != ItemState.NoHoldOwner)
                 return CommandResult.Fail(CommandError.Busy, "Item em uso.");
             if ((ingredient.Category != ItemCategory.Sauce && ingredient.Category != ItemCategory.Cheese &&
                  ingredient.Category != ItemCategory.Topping) ||
@@ -53,7 +53,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 pizza.AddIngredient(ingredient.DefinitionId, ingredient.PrepStage);
                 state.IncrementRevision();
-                ingredient.ReservedByHold = 0;
+                ingredient.ReservedByHold = ItemState.NoHoldOwner;
                 TransferService.DestroyItem(state, ingredient.Id);
             }
 
@@ -67,12 +67,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 return false;
             if (state.Items.TryGetValue(op.InputItemId, out var pizza))
             {
-                pizza.ReservedByHold = 0;
+                pizza.ReservedByHold = ItemState.NoHoldOwner;
                 pizza.Revision++;
             }
             if (state.Items.TryGetValue(op.SecondaryItemId, out var ingredient))
             {
-                ingredient.ReservedByHold = 0;
+                ingredient.ReservedByHold = ItemState.NoHoldOwner;
                 ingredient.Revision++;
             }
             state.ActiveOperations.Remove(slot);

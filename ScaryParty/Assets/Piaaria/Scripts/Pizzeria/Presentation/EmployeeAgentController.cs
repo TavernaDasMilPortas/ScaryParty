@@ -718,7 +718,7 @@ namespace ScaryParty.Pizzeria.Presentation
             foreach (var kvp in root.DomainState.Customers)
             {
                 var c = kvp.Value;
-                if (c != null && c.IsInQueue && c.QueueSlotIndex == 0 && c.AttendedByPlayerId == 0)
+                if (c != null && c.IsInQueue && c.QueueSlotIndex == 0 && c.AttendedByPlayerId == CustomerState.NoAttendantPlayerId)
                 {
                     targetCustomer = c;
                     break;
@@ -1909,7 +1909,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 var itemId = handItemIds[i];
                 if (!root.DomainState.Items.TryGetValue(itemId, out var item)) continue;
-                item.ReservedByHold = 0;
+                item.ReservedByHold = ItemState.NoHoldOwner;
 
                 if (item.PrepStage == ProcessingStage.Raw && item.Category != ItemCategory.Pizza && item.Category != ItemCategory.PizzaBase)
                 {
@@ -1958,7 +1958,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (root == null || root.DomainState == null) return;
             if (root.DomainState.Items.TryGetValue(itemId, out var item))
             {
-                item.ReservedByHold = 0;
+                item.ReservedByHold = ItemState.NoHoldOwner;
                 foreach (var kvp in root.DomainState.StorageSlots)
                 {
                     if (kvp.Key.ingredientDefId == item.DefinitionId && kvp.Value != null)

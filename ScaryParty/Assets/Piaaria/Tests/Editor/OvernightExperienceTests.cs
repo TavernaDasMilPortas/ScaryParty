@@ -419,7 +419,7 @@ namespace ScaryParty.Pizzeria.Tests
             orderService.ReleaseOrdersClaimedByPlayer(state, 7UL);
             BackpackService.ReleaseOnDisconnect(state, 7UL, new DomainVector3(2, 0, 3));
 
-            Assert.AreEqual(0UL, cust.AttendedByPlayerId);
+            Assert.AreEqual(CustomerState.NoAttendantPlayerId, cust.AttendedByPlayerId);
             Assert.AreEqual(OrderState.UnclaimedClientId, state.Orders[oRes.Value].ClaimedByClientId);
             Assert.IsFalse(bp.IsEquipped);
             Assert.AreEqual(BackpackState.NoOwner, bp.EquippedBy);
@@ -636,6 +636,94 @@ namespace ScaryParty.Pizzeria.Tests
             NightCycleService.StartNight(state, 0, n0);
             Assert.AreEqual(0, state.CurrentNightNumber);
             Assert.AreEqual(15, state.NightRevenueGoal);
+        }
+
+        [Test]
+        public void PhaseC_NightRetryCheckpointAndSentinels_BehaveDeterministically()
+        {
+            // BUG-FLOW-12: Snapshot preserva e restaura Reputation no retry
+            var state = new PizzeriaState { RestaurantBudget = 300, Reputation = 82, CurrentNightNumber = 2 };
+            NightCycleService.CaptureSnapshot(state);
+            state.RestaurantBudget = 50;
+            state.Reputation = 0;
+            NightCycleService.RestoreSnapshot(state);
+            Assert.AreEqual(82, state.Reputation);
+            Assert.AreEqual(300, state.RestaurantBudget);
+
+            // BUG-FLOW-07: Checkpoint restore zera NightPizzasDelivered
+            var store = new PlaytestCheckpointStore();
+            state.NightPizzasDelivered = 7;
+            store.Capture(PlaytestCheckpointKind.NightStart, state, null, null, 50.0);
+            state.NightPizzasDelivered = 12;
+            Assert.IsTrue(store.TryRestore(PlaytestCheckpointKind.NightStart, state, null, null, 50.0, preserveCurrentBudget: false));
+            Assert.AreEqual(0, state.NightPizzasDelivered);
+
+            // BUG-ORD-01: Host (0UL) nao colide com sentinela de item ou cliente
+            var catalog = new DefinitionCatalog();
+            var clock = new FixedClock(50.0);
+            var custSvc = new CustomerService();
+            var holdSvc = new PlayerHoldService();
+            var cRes = custSvc.SpawnWalkInCustomer(state, catalog, clock);
+            Assert.IsTrue(cRes.Success);
+            var cust = state.Customers[cRes.Value];
+            Assert.AreEqual(CustomerState.NoAttendantPlayerId, cust.AttendedByPlayerId);
+            Assert.IsTrue(holdSvc.BeginAttendCustomer(state, 0UL, cust.Id, 1.0f, 50f, 1.0f, custSvc.TableService, 6).Success);
+            Assert.IsFalse(holdSvc.BeginAttendCustomer(state, 1UL, cust.Id, 1.0f, 50f, 1.0f, custSvc.TableService, 6).Success);
+
+            // BUG-ORD-04: Liberar atendimento restaura fase WaitingInQueue
+            custSvc.ReleaseCustomersAttendedByPlayer(state, 0UL);
+            Assert.AreEqual(CustomerPhase.WaitingInQueue, cust.Phase);
+            Assert.AreEqual(CustomerState.NoAttendantPlayerId, cust.AttendedByPlayerId);
+
+            // BUG-ORD-05: ReleaseActorTaskForOrder libera somente a comanda alvo
+            var taskSvc = new EmployeeTaskService();
+            var t1 = taskSvc.EnqueueOrderTask(new OrderId(101), EmployeeRole.Pizzaiolo);
+            var t2 = taskSvc.EnqueueOrderTask(new OrderId(102), EmployeeRole.Pizzaiolo);
+            Assert.IsTrue(taskSvc.HumanTakeoverTask(t1.TaskId, 0UL, 50.0));
+            Assert.IsTrue(taskSvc.HumanTakeoverTask(t2.TaskId, 0UL, 50.0));
+            Assert.IsTrue(taskSvc.ReleaseActorTaskForOrder(0UL, true, new OrderId(101)));
+            Assert.AreEqual(EmployeeTaskState.Available, t1.State);
+            Assert.AreEqual(EmployeeTaskState.InProgress, t2.State);
+
+            // BUG-DELIV-03: Entrega sem pedido ativo nao incrementa NightOrdersFailed
+            var orderSvc = new OrderService();
+            var delivSvc = new DeliveryService();
+            var orphanBox = new ItemState(state.GenerateItemId(), 2, ItemCategory.Box, LocationRef.InHand(0UL, HandSlotIndex.Left))
+            {
+                PackagingState = PackagingState.Boxed
+            };
+            state.Items[orphanBox.Id] = orphanBox;
+            state.NightOrdersFailed = 0;
+            var dRes = delivSvc.SubmitDelivery(state, new AddressId(99), new[] { orphanBox.Id }, 999UL, 0UL, catalog, orderSvc);
+            Assert.IsTrue(dRes.Success);
+            Assert.AreEqual(0, state.NightOrdersFailed);
+
+            // BUG-ORD-02: RebaseRelativeDeadlines preserva chamadas e fila durante pausa
+            var callSvc = new CallService();
+            callSvc.EnqueueCall(state, new AddressId(0), new System.Collections.Generic.List<OrderLineState>(), 50f, 30f);
+            state.QueueLastAdvanceTime[0] = 40.0;
+            NightCycleService.RebaseRelativeDeadlines(state, 10.0);
+            foreach (var c in state.Calls.Values) Assert.AreEqual(90f, c.ExpiresAt, 0.01f);
+            Assert.AreEqual(50.0, state.QueueLastAdvanceTime[0], 0.01);
+
+            // SUSP-02: CastCategoryVote continua procurando estagios da categoria
+            var runSvc = new RunProgressionService();
+            var schedule = new NightPreparationScheduleData(2, 1, 2, 2, 2, 0, 0);
+            runSvc.OpenPreparationStages(2, schedule, opportunityMandatory: true);
+            RunVoteStageState secondOppStage = null;
+            int oppCount = 0;
+            for (int s = 0; s < runSvc.CurrentVoteStages.Count; s++)
+            {
+                if (runSvc.CurrentVoteStages[s].Category == RunModifierKind.Opportunity)
+                {
+                    oppCount++;
+                    if (oppCount == 2) secondOppStage = runSvc.CurrentVoteStages[s];
+                }
+            }
+            if (secondOppStage != null && secondOppStage.Options.Count > 0)
+            {
+                Assert.IsTrue(runSvc.CastCategoryVote(0UL, RunModifierKind.Opportunity, secondOppStage.Options[0].Id));
+            }
         }
     }
 

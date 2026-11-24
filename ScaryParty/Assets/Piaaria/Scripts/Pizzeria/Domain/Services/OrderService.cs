@@ -173,8 +173,12 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 var order = kvp.Value;
                 if (order.Lifecycle == OrderLifecycle.Accepted && now >= order.DeadlineTime)
                 {
+                    if (order.IsDineIn && order.CustomerId.IsValid && state.Customers.ContainsKey(order.CustomerId))
+                        continue;
+
                     order.Lifecycle = OrderLifecycle.Expired;
                     order.TaskStage = OrderTaskBoardStage.Failed;
+                    order.IsArchivedFromBoard = true;
                     state.NightOrdersFailed++;
                     order.Revision++;
                     OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, order.Id, taskService);

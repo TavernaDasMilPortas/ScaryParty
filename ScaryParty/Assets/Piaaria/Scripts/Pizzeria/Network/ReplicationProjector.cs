@@ -449,6 +449,7 @@ namespace ScaryParty.Pizzeria.Network
                     RotZ = bp.WorldRot.Z,
                     RotW = bp.WorldRot.W,
                     Capacity = bp.Capacity,
+                    EffectiveCapacity = bp.EffectiveCapacity,
                     ItemCount = bp.Items.Count,
                     Integrity = bp.Integrity,
                     MaxIntegrity = bp.MaxIntegrity,
@@ -788,7 +789,7 @@ namespace ScaryParty.Pizzeria.Network
             {
                 var cust = kvp.Value;
                 float attendNorm = 0f;
-                if (cust.AttendedByPlayerId != 0 && domainState.PlayerHolds.TryGetValue(cust.AttendedByPlayerId, out var hold) &&
+                if (cust.AttendedByPlayerId != CustomerState.NoAttendantPlayerId && domainState.PlayerHolds.TryGetValue(cust.AttendedByPlayerId, out var hold) &&
                     hold.Kind == PlayerHoldKind.AttendCustomer && hold.TargetCustomerId == cust.Id)
                 {
                     attendNorm = hold.Progress.Normalized;
@@ -901,6 +902,7 @@ namespace ScaryParty.Pizzeria.Network
                 IsForcedDebugOutcome = domainState.IsForcedDebugOutcome,
                 EarnedRevenue = domainState.NightEarnedRevenue,
                 RevenueGoal = domainState.NightRevenueGoal,
+                LastCompletedNightRevenueGoal = domainState.LastCompletedNightRevenueGoal,
                 OrdersCompleted = domainState.NightOrdersCompleted,
                 OrdersFailed = domainState.NightOrdersFailed,
                 LostCustomers = domainState.NightLostCustomers,

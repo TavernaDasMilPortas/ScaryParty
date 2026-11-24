@@ -199,13 +199,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
             ulong myId = NetworkManager.Singleton.LocalClientId;
 
-            for (int i = 0; i < netState.Items.Count; i++)
+            var carriedItems = CarriedCargoResolver.GetCarriedItems(netState, myId);
+            for (int i = 0; i < carriedItems.Count; i++)
             {
-                var item = netState.Items[i];
-                bool isCarriedByMe = item.HolderId == myId &&
-                    (item.LocationType == (byte)LocationType.Hand || item.LocationType == (byte)LocationType.Backpack);
-
-                if (isCarriedByMe && (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box))
+                var item = carriedItems[i];
+                if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
                 {
                     _availableBoxes.Add(item);
                 }

@@ -51,7 +51,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (state == null) return null;
 
-            var snap = new NightStartSnapshot(state.CurrentNightNumber, state.RestaurantBudget);
+            var snap = new NightStartSnapshot(state.CurrentNightNumber, state.RestaurantBudget, state.Reputation);
             foreach (var kvp in state.StorageSlots)
             {
                 snap.SavedStock[kvp.Key] = kvp.Value.Quantity;
@@ -71,6 +71,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             var snap = state.CurrentSnapshot;
             state.RestaurantBudget = snap.RestaurantBudget;
+            state.Reputation = Math.Clamp(snap.Reputation, 0, 100);
 
             foreach (var kvp in snap.SavedStock)
             {
@@ -89,6 +90,48 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             ClearTransientNightEntities(state, repairBackpacks: true);
             state.IncrementRevision();
+        }
+
+        public static void RebaseRelativeDeadlines(PizzeriaState state, double deltaTimeShift)
+        {
+            if (state == null || Math.Abs(deltaTimeShift) < 0.0001d) return;
+
+            foreach (var supply in state.SupplyOrders.Values)
+            {
+                if (supply != null && supply.State == SupplyOrderLifecycle.InTransit)
+                {
+                    supply.OrderedTime += deltaTimeShift;
+                    supply.ExpectedArrivalTime += deltaTimeShift;
+                    supply.Revision++;
+                }
+            }
+
+            foreach (var order in state.Orders.Values)
+            {
+                if (order != null && order.Lifecycle == OrderLifecycle.Accepted)
+                {
+                    order.DeadlineTime += deltaTimeShift;
+                    order.Revision++;
+                }
+            }
+
+            foreach (var call in state.Calls.Values)
+            {
+                if (call != null)
+                {
+                    call.ExpiresAt += (float)deltaTimeShift;
+                }
+            }
+
+            if (state.QueueLastAdvanceTime.Count > 0)
+            {
+                var qKeys = new List<int>(state.QueueLastAdvanceTime.Keys);
+                for (int i = 0; i < qKeys.Count; i++)
+                {
+                    int qk = qKeys[i];
+                    state.QueueLastAdvanceTime[qk] += deltaTimeShift;
+                }
+            }
         }
 
         public static void ClearTransientNightEntities(PizzeriaState state, bool repairBackpacks, bool preservePendingSupplies = true)

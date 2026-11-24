@@ -49,6 +49,8 @@ namespace ScaryParty.Pizzeria.Presentation
                     Destroy(_visual);
                     _visual = null;
                     _cosmeticPivot = null;
+                    _bagRenderers = null;
+                    _lastIntegrity = -1;
                     _displayedBagId = 0;
                 }
                 _hasSampledInitial = true;
@@ -64,6 +66,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 Destroy(_visual);
                 _visual = null;
                 _cosmeticPivot = null;
+                _bagRenderers = null;
+                _lastIntegrity = -1;
             }
             bool newlyCreatedVisual = false;
             if (_visual == null)

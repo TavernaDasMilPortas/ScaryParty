@@ -601,6 +601,7 @@ namespace ScaryParty.Pizzeria.Network
         public float PosX, PosY, PosZ;
         public float RotX, RotY, RotZ, RotW;
         public int Capacity;
+        public int EffectiveCapacity;
         public int ItemCount;
         public int Integrity;
         public int MaxIntegrity;
@@ -619,6 +620,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref RotZ);
             serializer.SerializeValue(ref RotW);
             serializer.SerializeValue(ref Capacity);
+            serializer.SerializeValue(ref EffectiveCapacity);
             serializer.SerializeValue(ref ItemCount);
             serializer.SerializeValue(ref Integrity);
             serializer.SerializeValue(ref MaxIntegrity);
@@ -629,6 +631,8 @@ namespace ScaryParty.Pizzeria.Network
         public bool Equals(NetBackpackDto other)
             => BackpackId == other.BackpackId &&
                EquippedBy == other.EquippedBy &&
+               Capacity == other.Capacity &&
+               EffectiveCapacity == other.EffectiveCapacity &&
                ItemCount == other.ItemCount &&
                Integrity == other.Integrity &&
                MaxIntegrity == other.MaxIntegrity &&
@@ -852,6 +856,7 @@ namespace ScaryParty.Pizzeria.Network
         public bool IsForcedDebugOutcome;
         public int EarnedRevenue;
         public int RevenueGoal;
+        public int LastCompletedNightRevenueGoal;
         public int OrdersCompleted;
         public int OrdersFailed;
         public int LostCustomers;
@@ -884,6 +889,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref IsForcedDebugOutcome);
             serializer.SerializeValue(ref EarnedRevenue);
             serializer.SerializeValue(ref RevenueGoal);
+            serializer.SerializeValue(ref LastCompletedNightRevenueGoal);
             serializer.SerializeValue(ref OrdersCompleted);
             serializer.SerializeValue(ref OrdersFailed);
             serializer.SerializeValue(ref LostCustomers);
@@ -913,6 +919,7 @@ namespace ScaryParty.Pizzeria.Network
                Math.Abs(ElapsedSeconds - other.ElapsedSeconds) < 0.9f &&
                EarnedRevenue == other.EarnedRevenue &&
                RevenueGoal == other.RevenueGoal &&
+               LastCompletedNightRevenueGoal == other.LastCompletedNightRevenueGoal &&
                OrdersCompleted == other.OrdersCompleted &&
                OrdersFailed == other.OrdersFailed &&
                LostCustomers == other.LostCustomers &&

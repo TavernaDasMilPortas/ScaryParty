@@ -104,7 +104,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!state.Items.TryGetValue(itemId, out var itemState))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
 
-            if (!bypassReservation && itemState.ReservedByHold != 0 &&
+            if (!bypassReservation && itemState.ReservedByHold != ItemState.NoHoldOwner &&
                 (itemState.ReservedByHold == OperationState.ServerWorker || itemState.ReservedByHold != requesterId))
                 return CommandResult.Fail(CommandError.Blocked, "Item reservado por outro processo.");
 
@@ -185,7 +185,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
 
             itemState.Location = newLocation;
-            itemState.ReservedByHold = 0;
+            itemState.ReservedByHold = ItemState.NoHoldOwner;
             itemState.Revision++;
             state.IncrementRevision();
 

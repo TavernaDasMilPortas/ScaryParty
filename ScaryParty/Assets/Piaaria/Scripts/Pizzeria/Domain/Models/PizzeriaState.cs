@@ -53,13 +53,15 @@ namespace ScaryParty.Pizzeria.Domain.Models
     {
         public int NightNumber { get; }
         public int RestaurantBudget { get; }
+        public int Reputation { get; }
         public Dictionary<(int storageId, int ingredientDefId), int> SavedStock { get; } = new Dictionary<(int, int), int>();
         public Dictionary<int, int> SavedUpgrades { get; } = new Dictionary<int, int>();
 
-        public NightStartSnapshot(int nightNumber, int restaurantBudget)
+        public NightStartSnapshot(int nightNumber, int restaurantBudget, int reputation = 100)
         {
             NightNumber = nightNumber;
             RestaurantBudget = restaurantBudget;
+            Reputation = System.Math.Clamp(reputation, 0, 100);
         }
     }
 
@@ -86,6 +88,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int NightEarnedRevenue { get; set; } = 0;
         public int RunTotalRevenue { get; set; } = 0;
         public int NightRevenueGoal { get; set; } = 60;
+        public int LastCompletedNightRevenueGoal { get; set; } = 0;
         public int Reputation { get; set; } = 100;
         public int NightReputationMinGoal { get; set; } = 0;
         public int LastReputationDelta { get; set; } = 0;
@@ -188,6 +191,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
             IsForcedDebugOutcome = false;
             NightEarnedRevenue = 0;
             NightRevenueGoal = 60;
+            LastCompletedNightRevenueGoal = 0;
             NightOrdersCompleted = 0;
             NightOrdersFailed = 0;
             NightLostCustomers = 0;

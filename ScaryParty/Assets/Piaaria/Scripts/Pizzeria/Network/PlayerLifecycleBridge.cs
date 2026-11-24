@@ -58,7 +58,7 @@ namespace ScaryParty.Pizzeria.Network
                 if (hold.Kind == PlayerHoldKind.Discard && hold.TargetItemId.IsValid)
                 {
                     if (state.Items.TryGetValue(hold.TargetItemId, out var item))
-                        item.ReservedByHold = 0;
+                        item.ReservedByHold = ItemState.NoHoldOwner;
                 }
                 state.PlayerHolds.Remove(clientId);
             }

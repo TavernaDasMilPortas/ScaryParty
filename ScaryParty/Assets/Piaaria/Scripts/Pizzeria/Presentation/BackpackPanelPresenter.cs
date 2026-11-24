@@ -35,6 +35,8 @@ namespace ScaryParty.Pizzeria.Presentation
         private int _openedFrame = -1;
         private float _nextRefresh;
         private ulong _inspectedBagId;
+        private Coroutine _repairCoroutine;
+        private ulong _repairingBagId;
         public bool IsOpen => _isOpen;
 
         private void Awake()
@@ -219,6 +221,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             else
             {
+                CancelModalRepairHold();
                 _overlay.style.display = DisplayStyle.None;
                 _inspectedBagId = 0;
                 GameplayInputGate.PopModal();
@@ -268,30 +271,36 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
 
+            var boxes = new List<NetItemDto>();
+            if (state != null)
+            {
+                for (int j = 0; j < state.Items.Count; j++)
+                {
+                    var item = state.Items[j];
+                    if (item.LocationType == (byte)LocationType.Backpack && item.HolderId == bag.BackpackId)
+                        boxes.Add(item);
+                }
+            }
+            int effectiveCap = bag.EffectiveCapacity > 0
+                ? bag.EffectiveCapacity
+                : (bag.Integrity < bag.MaxIntegrity ? Mathf.Max(1, bag.Capacity / 2) : bag.Capacity);
             _dropBackpackBtn.SetEnabled(_inspectedBagId == 0);
-            _storeHandBtn.SetEnabled(!bag.IsTorn && bag.ItemCount < bag.Capacity);
+            _storeHandBtn.SetEnabled(!bag.IsTorn && boxes.Count < effectiveCap);
             if (_repairBtn != null)
             {
                 bool needsRepair = bag.Integrity < bag.MaxIntegrity;
-                _repairBtn.SetEnabled(needsRepair);
+                bool isRepairingThis = _repairCoroutine != null && _repairingBagId == bag.BackpackId;
+                _repairBtn.SetEnabled(needsRepair && !isRepairingThis);
                 _repairBtn.style.display = needsRepair ? DisplayStyle.Flex : DisplayStyle.None;
+                if (!isRepairingThis)
+                    _repairBtn.text = "Reparar Mochila (3s)";
             }
-            var boxes = new List<NetItemDto>();
-            if (state != null)
-                for (int i = 0; i < state.Backpacks.Count && i < 1; i++)
-                {
-                    for (int j = 0; j < state.Items.Count; j++)
-                    {
-                        var item = state.Items[j];
-                        if (item.LocationType == (byte)LocationType.Backpack && item.HolderId == bag.BackpackId)
-                            boxes.Add(item);
-                    }
-                }
-            int cap = bag.Capacity;
+            int cap = effectiveCap;
             int integrityPct = bag.MaxIntegrity > 0 ? Mathf.RoundToInt(100f * bag.Integrity / bag.MaxIntegrity) : 100;
+            string damagedSuffix = !bag.IsTorn && effectiveCap < bag.Capacity ? $" (danificada: máx. {effectiveCap}/{bag.Capacity})" : string.Empty;
             _capacityLabel.text = bag.IsTorn
                 ? $"Capacidade: {boxes.Count} / {cap} caixas | MOCHILA RASGADA (0%) — Repare antes de guardar!"
-                : $"Capacidade: {boxes.Count} / {cap} caixas | Integridade: {integrityPct}%";
+                : $"Capacidade: {boxes.Count} / {cap} caixas{damagedSuffix} | Integridade: {integrityPct}%";
             _capacityLabel.style.color = bag.IsTorn
                 ? new Color(0.95f, 0.35f, 0.3f)
                 : (integrityPct < 100 ? new Color(0.95f, 0.78f, 0.25f) : new Color(0.85f, 0.9f, 0.95f));
@@ -382,6 +391,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void RepairBackpack()
         {
+            if (_repairCoroutine != null) return;
             ulong bagId = _inspectedBagId;
             if (bagId == 0)
             {
@@ -391,8 +401,56 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             if (bagId == 0) return;
 
+            _repairingBagId = bagId;
+            _repairCoroutine = StartCoroutine(RepairHoldCoroutine(bagId));
+        }
+
+        private System.Collections.IEnumerator RepairHoldCoroutine(ulong bagId)
+        {
+            LogisticsCommands.Instance?.BeginRepairBackpackHoldServerRpc(bagId);
+            float elapsed = 0f;
+            const float duration = 3.0f;
+            while (elapsed < duration && _isOpen)
+            {
+                elapsed += Time.deltaTime;
+                if (_repairBtn != null)
+                {
+                    float remaining = Mathf.Max(0f, duration - elapsed);
+                    _repairBtn.SetEnabled(false);
+                    _repairBtn.text = $"Costurando... {remaining:0.0}s";
+                }
+                yield return null;
+            }
+
+            _repairCoroutine = null;
+            _repairingBagId = 0;
+            if (!_isOpen)
+            {
+                LogisticsCommands.Instance?.CancelRepairBackpackHoldServerRpc();
+                yield break;
+            }
+
             LogisticsCommands.Instance?.RepairBackpackServerRpc(bagId);
+            if (_repairBtn != null)
+            {
+                _repairBtn.text = "Reparar Mochila (3s)";
+            }
             RefreshSlots();
+        }
+
+        private void CancelModalRepairHold()
+        {
+            if (_repairCoroutine != null)
+            {
+                StopCoroutine(_repairCoroutine);
+                _repairCoroutine = null;
+                _repairingBagId = 0;
+                LogisticsCommands.Instance?.CancelRepairBackpackHoldServerRpc();
+            }
+            if (_repairBtn != null)
+            {
+                _repairBtn.text = "Reparar Mochila (3s)";
+            }
         }
 
         private void DropBackpack()

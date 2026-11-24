@@ -60,7 +60,8 @@ namespace ScaryParty.Pizzeria.Domain.Models
             set => LabelAddress = new AddressId(value);
         }
 
-        public ulong ReservedByHold { get; set; } = 0; // 0 = None
+        public const ulong NoHoldOwner = ulong.MaxValue;
+        public ulong ReservedByHold { get; set; } = NoHoldOwner;
         public uint Revision { get; set; } = 1;
 
         private readonly List<IngredientEntry> _ingredients = new List<IngredientEntry>(8);

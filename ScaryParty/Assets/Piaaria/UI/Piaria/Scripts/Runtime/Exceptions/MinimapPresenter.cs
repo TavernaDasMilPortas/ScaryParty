@@ -406,7 +406,9 @@ namespace ScaryParty.UI.Piaria.Exceptions
 
                         string key = "Order_" + ord.OrderId + "_" + resolvedAddr;
                         _activeRoutes.Add(key);
-                        ulong ownerId = ord.ClaimedByClientId > 0 ? ord.ClaimedByClientId : localClientId;
+                        ulong ownerId = ord.ClaimedByClientId != ScaryParty.Pizzeria.Domain.Models.OrderState.UnclaimedClientId
+                            ? ord.ClaimedByClientId
+                            : localClientId;
                         var color = routeManager.CreateRoute(key, playerPos, targetPos, ownerId);
                         _cargoRoutes[key] = new RouteView
                         {

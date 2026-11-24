@@ -81,7 +81,8 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public float EatingRemainingSeconds { get; set; }
         public float LeavingRemainingSeconds { get; set; }
 
-        public ulong AttendedByPlayerId { get; set; }
+        public const ulong NoAttendantPlayerId = ulong.MaxValue;
+        public ulong AttendedByPlayerId { get; set; } = NoAttendantPlayerId;
         public bool HasPaid { get; set; }
         public bool IsMonsterCustomer { get; set; }
         public uint Revision { get; set; } = 1;
@@ -136,7 +137,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
             FoodPatienceRemaining = FoodPatienceMax;
             EatingRemainingSeconds = 0f;
             LeavingRemainingSeconds = 0f;
-            AttendedByPlayerId = 0;
+            AttendedByPlayerId = NoAttendantPlayerId;
             HasPaid = false;
         }
     }

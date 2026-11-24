@@ -73,7 +73,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
                 if (inputItem.DefinitionId != procData.InputIngredientId || inputItem.PrepStage != procData.InputStage)
                     return CommandResult.Fail(CommandError.Incompatible, "Ingrediente incompatível com o processo.");
-                if (inputItem.Location != LocationRef.InStation(slotId.StationId, slotId.SlotIndex) || inputItem.ReservedByHold != 0)
+                if (inputItem.Location != LocationRef.InStation(slotId.StationId, slotId.SlotIndex) || inputItem.ReservedByHold != ItemState.NoHoldOwner)
                     return CommandResult.Fail(CommandError.Busy, "Ingrediente fora do slot ou em uso.");
 
                 if (procData.RequiredCapability != ToolCapability.None)
@@ -91,7 +91,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     return CommandResult.Fail(CommandError.ItemNotFound, "Pizza não encontrada para embalagem.");
                 if (pkgItem.IsBoxed || (!pkgItem.IsPizzaLike && pkgItem.Category != ItemCategory.Box))
                     return CommandResult.Fail(CommandError.Incompatible, "Este item não pode ser embalado.");
-                if (pkgItem.ReservedByHold != 0 && pkgItem.ReservedByHold != workerId)
+                if (pkgItem.ReservedByHold != ItemState.NoHoldOwner && pkgItem.ReservedByHold != workerId)
                     return CommandResult.Fail(CommandError.Busy, "Pizza reservada por outro processo.");
             }
 
@@ -144,7 +144,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
             if (state.Items.TryGetValue(op.InputItemId, out var releasedItem))
             {
-                releasedItem.ReservedByHold = 0;
+                releasedItem.ReservedByHold = ItemState.NoHoldOwner;
                 releasedItem.Revision++;
             }
 
@@ -158,7 +158,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 op.Cancel();
                 if (state.Items.TryGetValue(op.InputItemId, out var item))
                 {
-                    item.ReservedByHold = 0;
+                    item.ReservedByHold = ItemState.NoHoldOwner;
                     item.Revision++;
                 }
                 state.ActiveOperations.Remove(slotId);
@@ -183,7 +183,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         op.Pause(now);
                         if (state.Items.TryGetValue(op.InputItemId, out var releasedItem))
                         {
-                            releasedItem.ReservedByHold = 0;
+                            releasedItem.ReservedByHold = ItemState.NoHoldOwner;
                             releasedItem.Revision++;
                         }
                         if (op.ToolItemId.IsValid && state.Tools.TryGetValue(op.ToolItemId, out var tool))
@@ -196,7 +196,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                             op.Cancel();
                             if (state.Items.TryGetValue(op.InputItemId, out var item))
                             {
-                                item.ReservedByHold = 0;
+                                item.ReservedByHold = ItemState.NoHoldOwner;
                                 item.Revision++;
                             }
                             completedSlots.Add(kvp.Key);
@@ -231,7 +231,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                                     item.BaseDoughDefinitionId = procData.OutputIngredientId;
                                     item.BaseDoughStage = procData.OutputStage;
                                 }
-                                item.ReservedByHold = 0;
+                                item.ReservedByHold = ItemState.NoHoldOwner;
                                 item.Revision++;
                             }
                         }
@@ -241,7 +241,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                             {
                                 item.PackagingState = PackagingState.Boxed;
                                 item.Category = ItemCategory.Box;
-                                item.ReservedByHold = 0;
+                                item.ReservedByHold = ItemState.NoHoldOwner;
                                 item.Revision++;
                             }
                         }
@@ -275,7 +275,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
             if (itemInSlot == null)
                 return CommandResult<OperationId>.Fail(CommandError.SlotEmpty, "Bancada vazia.");
-            if (itemInSlot.ReservedByHold != 0)
+            if (itemInSlot.ReservedByHold != ItemState.NoHoldOwner)
                 return CommandResult<OperationId>.Fail(CommandError.Busy, "Ingrediente em uso.");
 
             ToolItemId toolId = ToolItemId.None;
@@ -329,7 +329,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
                 pkgItem.PackagingState = PackagingState.Boxed;
                 pkgItem.Category = ItemCategory.Box;
-                pkgItem.ReservedByHold = 0;
+                pkgItem.ReservedByHold = ItemState.NoHoldOwner;
                 pkgItem.Revision++;
                 state.ActiveOperations.Remove(slotId);
                 state.IncrementRevision();
@@ -358,7 +358,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 item.BaseDoughDefinitionId = process.OutputIngredientId;
                 item.BaseDoughStage = process.OutputStage;
             }
-            item.ReservedByHold = 0;
+            item.ReservedByHold = ItemState.NoHoldOwner;
             item.Revision++;
 
             state.ActiveOperations.Remove(slotId);

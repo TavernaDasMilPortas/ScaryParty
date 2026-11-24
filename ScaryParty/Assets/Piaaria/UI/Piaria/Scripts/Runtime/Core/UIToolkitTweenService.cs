@@ -323,6 +323,13 @@ namespace ScaryParty.UI.Piaria.Core
             RegisterTween(target, seq);
         }
 
+        public static string FormatCounterValue(int value, string prefix = "R$", string suffix = "")
+        {
+            if (value < 0 && !string.IsNullOrEmpty(prefix) && prefix.TrimStart().StartsWith("R$"))
+                return $"-{prefix.TrimStart()}{-value}{suffix}";
+            return $"{prefix}{value}{suffix}";
+        }
+
         public static void TweenCounter(Label label, int fromVal, int toVal, float duration = 0.35f, string prefix = "R$", string suffix = "")
         {
             if (label == null) return;
@@ -330,11 +337,11 @@ namespace ScaryParty.UI.Piaria.Core
 
             if (ReduceMotion || duration <= 0f)
             {
-                label.text = $"{prefix}{toVal}{suffix}";
+                label.text = FormatCounterValue(toVal, prefix, suffix);
                 return;
             }
 
-            var tw = DOTween.To(() => fromVal, v => label.text = $"{prefix}{v}{suffix}", toVal, duration)
+            var tw = DOTween.To(() => fromVal, v => label.text = FormatCounterValue(v, prefix, suffix), toVal, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
 

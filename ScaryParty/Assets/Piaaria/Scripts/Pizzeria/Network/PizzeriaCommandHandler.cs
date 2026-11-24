@@ -860,7 +860,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (pizza.ReservedByHold != 0 && pizza.ReservedByHold != senderId)
+            if (pizza.ReservedByHold != ItemState.NoHoldOwner && pizza.ReservedByHold != senderId)
             {
                 NotifyErrorClientRpc("Item reservado por outro processo.", targetParams);
                 return;
@@ -917,7 +917,7 @@ namespace ScaryParty.Pizzeria.Network
             if (root == null || root.DomainState == null) return;
             if (RejectIfCannotActServer(senderId, requireOpenShift: true)) return;
 
-            if (chosenDestinationId <= 0)
+            if (chosenDestinationId < 0)
             {
                 NotifyErrorClientRpc("Selecione um endereço válido para etiquetar a caixa.", targetParams);
                 return;
@@ -936,7 +936,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (box.ReservedByHold != 0 && box.ReservedByHold != senderId)
+            if (box.ReservedByHold != ItemState.NoHoldOwner && box.ReservedByHold != senderId)
             {
                 NotifyErrorClientRpc("Caixa reservada por outro processo.", targetParams);
                 return;
@@ -1010,31 +1010,7 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            // Fallback: gera pedido de pizza por composição de ingredientes
-            var specs = new List<(PizzaSpecification spec, int qty)>
-            {
-                (PizzaOrderGenerator.GenerateRandomSpecification(root.Catalog), 1)
-            };
-
-            int destId = 4;
-            var res = root.OrderService.CreatePhoneOrderBySpecifications(
-                new AddressId(destId),
-                specs,
-                root.DomainState,
-                root.Catalog,
-                root.Clock,
-                root.Config.maxActiveOrders,
-                root.Config.deliveryTimeLimit);
-
-            if (res.Success)
-            {
-                CommitAndReplicate();
-                Debug.Log($"[PizzeriaCommandHandler] Telefone atendido! Pedido #{res.Value.Value} publicado para o destino #{destId}.");
-            }
-            else
-            {
-                NotifyErrorClientRpc(string.IsNullOrEmpty(res.Message) ? "Limite de pedidos ativos atingido." : res.Message, targetParams);
-            }
+            NotifyErrorClientRpc("O telefone não está tocando no momento.", targetParams);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -1130,6 +1106,17 @@ namespace ScaryParty.Pizzeria.Network
             if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
 
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            if (Stations.DiningTableStation.TryGetTable(tableId, out var table) && table != null)
+            {
+                float maxRange = root.Config != null ? Mathf.Max(3.5f, root.Config.interactDistance) : 4.5f;
+                float tol = root.Config != null ? root.Config.serverDistanceTolerance : 2.0f;
+                if (!InteractionValidator.ValidateDistanceAndSight(senderClientId, table.transform.position, maxRange, tol, false))
+                {
+                    NotifyErrorClientRpc("Aproxime-se da mesa para servir a pizza.", targetParams);
+                    return;
+                }
+            }
+
             var res = root.CustomerService.ServeTableUnboxedPizza(
                 root.DomainState,
                 tableId,
@@ -1230,7 +1217,7 @@ namespace ScaryParty.Pizzeria.Network
                 }
                 else if (!claimed)
                 {
-                    root.EmployeeTaskService.ReleaseActorTasks(senderId, isHuman: true);
+                    root.EmployeeTaskService.ReleaseActorTaskForOrder(senderId, isHuman: true, oid);
                 }
             }
 
@@ -4062,9 +4049,9 @@ namespace ScaryParty.Pizzeria.Network
             ulong senderId = rpcParams.Receive.SenderClientId;
             if (!TryBeginHostDebugServer(senderId, out var root)) return;
 
-            int addBudget = Mathf.Clamp(budgetAmount, 0, 5000);
+            int addBudget = Mathf.Clamp(budgetAmount, -5000, 5000);
             int addStock = Mathf.Clamp(restockAmount, 0, 50);
-            root.DomainState.RestaurantBudget += addBudget;
+            root.DomainState.RestaurantBudget = Mathf.Max(0, root.DomainState.RestaurantBudget + addBudget);
             if (addStock > 0)
             {
                 foreach (var kvp in root.DomainState.StorageSlots)
@@ -4077,7 +4064,8 @@ namespace ScaryParty.Pizzeria.Network
             }
 
             CommitAndReplicate();
-            BroadcastNoticeClientRpc($"[DEBUG] +R$ {addBudget} e +{addStock} un/slot aplicados.", isError: false);
+            string budgetLabel = addBudget < 0 ? $"-R$ {-addBudget}" : $"+R$ {addBudget}";
+            BroadcastNoticeClientRpc($"[DEBUG] {budgetLabel} e +{addStock} un/slot aplicados.", isError: false);
         }
 
         [ServerRpc(RequireOwnership = false)]
@@ -4105,6 +4093,11 @@ namespace ScaryParty.Pizzeria.Network
             if (!TryBeginHostDebugServer(senderId, out var root)) return;
 
             var st = root.DomainState;
+            if (endPhaseNow)
+            {
+                st.UnlimitedShiftTime = false;
+                st.IsShiftClockPaused = false;
+            }
             float delta = Mathf.Max(0f, skipSeconds);
             switch (st.CurrentNightPhase)
             {

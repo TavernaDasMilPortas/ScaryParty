@@ -301,7 +301,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             customer.OrderId = orderRes.Value;
             customer.QueueIndex = -1;
             customer.QueueSlotIndex = -1;
-            customer.AttendedByPlayerId = 0;
+            customer.AttendedByPlayerId = CustomerState.NoAttendantPlayerId;
             customer.Phase = CustomerPhase.WalkingToTable;
             customer.Revision++;
 
@@ -325,7 +325,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 cust.QueueIndex = -1;
                 cust.QueueSlotIndex = -1;
-                cust.AttendedByPlayerId = 0;
+                cust.AttendedByPlayerId = CustomerState.NoAttendantPlayerId;
                 _queueService.CompactAndAdvanceQueue(state, prevQueue, now);
             }
 
@@ -533,7 +533,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                         int qIdx = cust.QueueIndex;
                         cust.QueueIndex = -1;
                         cust.QueueSlotIndex = -1;
-                        cust.AttendedByPlayerId = 0;
+                        cust.AttendedByPlayerId = CustomerState.NoAttendantPlayerId;
                         cust.Phase = CustomerPhase.LeavingAngry;
                         cust.LeavingRemainingSeconds = 5f;
                         cust.Revision++;
@@ -569,6 +569,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                                 activeOrder.IsArchivedFromBoard = true;
                                 activeOrder.Revision++;
                                 state.NightOrdersFailed++;
+                                NightCycleService.AdjustReputation(state, -15, "Cliente da mesa perdeu a paciência");
                             }
                             OrderUnitFulfillmentService.OnOrderCancelledOrExpired(state, activeOrder.Id, taskService);
                         }
@@ -640,7 +641,9 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 if (cust.AttendedByPlayerId == playerId)
                 {
-                    cust.AttendedByPlayerId = 0;
+                    cust.AttendedByPlayerId = CustomerState.NoAttendantPlayerId;
+                    if (cust.Phase == CustomerPhase.BeingAttended)
+                        cust.Phase = CustomerPhase.WaitingInQueue;
                     cust.Revision++;
                     dirty = true;
                 }

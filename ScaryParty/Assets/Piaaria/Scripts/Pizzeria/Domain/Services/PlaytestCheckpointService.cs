@@ -192,6 +192,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.NightOrdersCompleted = 0;
             state.NightOrdersFailed = 0;
             state.NightLostCustomers = 0;
+            state.NightPizzasDelivered = 0;
 
             foreach (var kvp in snap.StorageQuantities)
             {
@@ -224,26 +225,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
 
         public static void RebaseRelativeDeadlines(PizzeriaState state, double deltaTimeShift)
         {
-            if (state == null || Math.Abs(deltaTimeShift) < 0.0001d) return;
-
-            foreach (var supply in state.SupplyOrders.Values)
-            {
-                if (supply != null && supply.State == SupplyOrderLifecycle.InTransit)
-                {
-                    supply.OrderedTime += deltaTimeShift;
-                    supply.ExpectedArrivalTime += deltaTimeShift;
-                    supply.Revision++;
-                }
-            }
-
-            foreach (var order in state.Orders.Values)
-            {
-                if (order != null && order.Lifecycle == OrderLifecycle.Accepted)
-                {
-                    order.DeadlineTime += deltaTimeShift;
-                    order.Revision++;
-                }
-            }
+            NightCycleService.RebaseRelativeDeadlines(state, deltaTimeShift);
         }
     }
 }

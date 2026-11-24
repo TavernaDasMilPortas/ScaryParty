@@ -18,7 +18,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (item.Location.Type != LocationType.Hand || (ulong)item.Location.HolderId != playerId)
                 return CommandResult.Fail(CommandError.NotOwner, "Você precisa segurar o item para descartá-lo.");
 
-            if (item.ReservedByHold != 0)
+            if (item.ReservedByHold != ItemState.NoHoldOwner)
                 return CommandResult.Fail(CommandError.Blocked, "Item reservado.");
 
             item.ReservedByHold = playerId;
@@ -65,7 +65,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             if (!customer.IsInQueue || customer.QueueSlotIndex != 0)
                 return CommandResult.Fail(CommandError.InvalidOperation, "Apenas o primeiro cliente da fila pode ser atendido.");
 
-            if (customer.AttendedByPlayerId != 0 && customer.AttendedByPlayerId != playerId)
+            if (customer.AttendedByPlayerId != CustomerState.NoAttendantPlayerId && customer.AttendedByPlayerId != playerId)
                 return CommandResult.Fail(CommandError.Blocked, "Outro jogador já está atendendo este cliente.");
 
             // Verificar se há mesa livre ANTES de aceitar o atendimento
@@ -137,7 +137,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             {
                 if (state.Items.TryGetValue(hold.TargetItemId, out var item))
                 {
-                    item.ReservedByHold = 0;
+                    item.ReservedByHold = ItemState.NoHoldOwner;
                     item.Revision++;
                 }
             }
@@ -146,7 +146,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 if (state.Customers.TryGetValue(hold.TargetCustomerId, out var customer))
                 {
                     if (customer.AttendedByPlayerId == hold.PlayerId)
-                        customer.AttendedByPlayerId = 0;
+                        customer.AttendedByPlayerId = CustomerState.NoAttendantPlayerId;
                     if (customer.Phase == CustomerPhase.BeingAttended)
                         customer.Phase = CustomerPhase.WaitingInQueue;
                     customer.Revision++;

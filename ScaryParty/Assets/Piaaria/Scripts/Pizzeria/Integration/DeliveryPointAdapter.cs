@@ -28,7 +28,7 @@ namespace ScaryParty.Pizzeria.Integration
                 if (item.PackagingState == (byte)PackagingState.Boxed || item.Category == (byte)ItemCategory.Box)
                 {
                     // Prioriza caixas com etiqueta do destino ou aceita todas se não houver etiqueta
-                    if (item.LabelDestinationId == addressId || item.LabelDestinationId <= 0)
+                    if (item.LabelDestinationId == addressId || item.LabelDestinationId < 0)
                     {
                         carriedBoxes.Add(item.ItemId);
                     }

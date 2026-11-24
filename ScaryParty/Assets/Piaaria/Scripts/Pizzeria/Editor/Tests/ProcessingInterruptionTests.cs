@@ -27,7 +27,7 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             else Assert.IsTrue(service.CancelOperation(state, slot, 42, 0.5f).Success);
 
             Assert.AreEqual(OperationPhase.Paused, state.ActiveOperations[slot].Phase);
-            Assert.AreEqual(0ul, item.ReservedByHold);
+            Assert.AreEqual(ItemState.NoHoldOwner, item.ReservedByHold);
             Assert.AreEqual(LocationRef.InStation(12, 0), item.Location);
             Assert.IsTrue(TransferService.TransferItem(state, item.Id,
                 LocationRef.InHand(99, HandSlotIndex.Left), 99).Success);

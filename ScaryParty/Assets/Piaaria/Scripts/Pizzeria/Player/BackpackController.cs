@@ -17,6 +17,7 @@ namespace ScaryParty.Pizzeria.Player
         private ScaryParty.Combat.PlayerHealth _health;
         private float _repairHoldTimer;
         private bool _wasRepairingHudShown;
+        private ulong _activeRepairBagId;
         private void Awake()
         {
             _netObj = GetComponent<NetworkObject>();
@@ -73,6 +74,13 @@ namespace ScaryParty.Pizzeria.Player
                 return;
             }
 
+            if (_activeRepairBagId != bag.BackpackId)
+            {
+                _activeRepairBagId = bag.BackpackId;
+                _repairHoldTimer = 0f;
+                LogisticsCommands.Instance?.BeginRepairBackpackHoldServerRpc(bag.BackpackId);
+            }
+
             _repairHoldTimer += Time.deltaTime;
             float progress = Mathf.Clamp01(_repairHoldTimer / RepairHoldDurationSeconds);
             _wasRepairingHudShown = true;
@@ -82,15 +90,26 @@ namespace ScaryParty.Pizzeria.Player
 
             if (_repairHoldTimer >= RepairHoldDurationSeconds)
             {
+                ulong repairedId = bag.BackpackId;
                 _repairHoldTimer = 0f;
-                CancelRepairHold();
-                LogisticsCommands.Instance?.RepairBackpackServerRpc(bag.BackpackId);
+                _activeRepairBagId = 0;
+                if (_wasRepairingHudShown)
+                {
+                    _wasRepairingHudShown = false;
+                    ScaryParty.UI.Piaria.Presenters.HudPresenter.Instance?.HideProgress();
+                }
+                LogisticsCommands.Instance?.RepairBackpackServerRpc(repairedId);
             }
         }
 
         private void CancelRepairHold()
         {
             _repairHoldTimer = 0f;
+            if (_activeRepairBagId != 0)
+            {
+                _activeRepairBagId = 0;
+                LogisticsCommands.Instance?.CancelRepairBackpackHoldServerRpc();
+            }
             if (_wasRepairingHudShown)
             {
                 _wasRepairingHudShown = false;

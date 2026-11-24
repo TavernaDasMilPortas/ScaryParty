@@ -127,6 +127,7 @@ namespace ScaryParty.Pizzeria.Composition
         {
             if (root == null || root.DomainState == null || root.Config == null) return;
             if (root.DomainState.CurrentNightPhase != NightPhase.Active) return;
+            if (ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused || root.DomainState.IsShiftClockPaused) return;
 
             if (!_initialized)
             {

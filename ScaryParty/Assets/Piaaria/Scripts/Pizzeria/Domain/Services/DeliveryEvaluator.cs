@@ -213,7 +213,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
                     return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.Incompatible, "Apenas caixas fechadas podem ser entregues no delivery.");
 
                 bool inHand = item.Location.Type == LocationType.Hand && item.Location.HolderId == requesterId;
-                if (item.ReservedByHold != 0)
+                if (item.ReservedByHold != ItemState.NoHoldOwner)
                     return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.Blocked, "Caixa reservada por outro processo.");
                 bool inBackpack = item.Location.Type == LocationType.Backpack && state.Backpacks.TryGetValue((BackpackId)item.Location.HolderId, out var bp) && bp.EquippedBy == requesterId;
 
@@ -275,7 +275,8 @@ namespace ScaryParty.Pizzeria.Domain.Services
             }
             else
             {
-                state.NightOrdersFailed++;
+                if (order != null)
+                    state.NightOrdersFailed++;
                 NightCycleService.AdjustReputation(state, -10, "Entrega errada ou sem pizzas válidas");
             }
             state.DeliveryAttempts.Record(attemptId);

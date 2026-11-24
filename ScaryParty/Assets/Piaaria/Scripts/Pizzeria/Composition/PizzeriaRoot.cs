@@ -558,10 +558,11 @@ namespace ScaryParty.Pizzeria.Composition
                 : NightParameterResolver.ResolveEffectiveParameters(
                     resolvedTarget, humanCount, diff, preset != null ? preset.ToDomainData() : null, null, 600f, 60, modMult);
 
+            DomainState.LastCompletedNightRevenueGoal = resolvedTarget > 1 ? DomainState.NightRevenueGoal : 0;
             DomainState.CurrentNightPhase = NightPhase.PreparingNextNight;
             DomainState.CurrentNightNumber = Mathf.Max(0, resolvedTarget - 1);
             DomainState.TargetNightNumber = resolvedTarget;
-            DomainState.AllowDebugPanel = true;
+            DomainState.AllowDebugPanel = preset == null || preset.allowDebugPanel;
             DomainState.FrozenHumanCount = preview.FrozenHumanCount;
             DomainState.ResolvedBaseGoal = preview.BaseGoal;
             DomainState.ResolvedHumanScaleFactor = preview.HumanScaleFactor;
@@ -892,13 +893,35 @@ namespace ScaryParty.Pizzeria.Composition
                     Presentation.EmployeePopulationDirector.TickAndProjectServer(this, Network.PizzeriaNetworkState.Instance, Time.deltaTime);
                 }
 
-                // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais somente durante expediente ativo
+                // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais somente durante expediente ativo e despausado
                 if (DomainState.CurrentNightPhase == NightPhase.Active)
                 {
-                    OrderService?.TickOrders(DomainState, Clock, EmployeeTaskService);
-                    CallService?.TickCalls(DomainState, (float)Clock.Now);
-                    SpeciesHostilityService?.Tick(Time.deltaTime);
-                    dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
+                    bool shiftPaused = ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused || DomainState.IsShiftClockPaused;
+                    if (shiftPaused)
+                    {
+                        NightCycleService.RebaseRelativeDeadlines(DomainState, Time.deltaTime);
+                    }
+                    else
+                    {
+                        OrderService?.TickOrders(DomainState, Clock, EmployeeTaskService);
+                        CallService?.TickCalls(DomainState, (float)Clock.Now);
+                        SpeciesHostilityService?.Tick(Time.deltaTime);
+                        dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
+
+                        if (CustomerService != null)
+                        {
+                            bool custDirty = CustomerService.TickCustomers(
+                                DomainState,
+                                Catalog,
+                                OrderService,
+                                Clock,
+                                Time.deltaTime,
+                                _config != null ? _config.queueStagnationThresholdSeconds : 35f,
+                                _config != null ? _config.queueStagnationDecayMultiplier : 1.35f,
+                                EmployeeTaskService);
+                            dirty |= custDirty;
+                        }
+                    }
 
                     int prevHoldCount = DomainState.PlayerHolds.Count;
                     PlayerHoldService?.TickHolds(
@@ -911,20 +934,6 @@ namespace ScaryParty.Pizzeria.Composition
                         EmployeeTaskService);
                     if (DomainState.PlayerHolds.Count != prevHoldCount)
                         dirty = true;
-
-                    if (CustomerService != null)
-                    {
-                        bool custDirty = CustomerService.TickCustomers(
-                            DomainState,
-                            Catalog,
-                            OrderService,
-                            Clock,
-                            Time.deltaTime,
-                            _config != null ? _config.queueStagnationThresholdSeconds : 35f,
-                            _config != null ? _config.queueStagnationDecayMultiplier : 1.35f,
-                            EmployeeTaskService);
-                        dirty |= custDirty;
-                    }
                 }
 
                 if (!ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused)

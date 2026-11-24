@@ -206,7 +206,7 @@ namespace ScaryParty.Pizzeria.Stations
             for (int i = 0; i < netState.Orders.Count; i++)
             {
                 var order = netState.Orders[i];
-                if (order.TicketArchived) continue;
+                if (order.Lifecycle != (byte)ScaryParty.Pizzeria.Domain.Types.OrderLifecycle.Accepted || order.TicketArchived) continue;
                 if (IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _)) continue;
 
                 if (sheetIndex < _sheets.Count)
@@ -232,11 +232,11 @@ namespace ScaryParty.Pizzeria.Stations
                 return;
             }
 
-            // Se interagiu diretamente com a madeira do quadro, abrir a primeira comanda não arquivada
+            // Se interagiu diretamente com a madeira do quadro, abrir a primeira comanda ativa não arquivada
             for (int i = 0; i < netState.Orders.Count; i++)
             {
                 var order = netState.Orders[i];
-                if (!order.TicketArchived && !IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _))
+                if (order.Lifecycle == (byte)ScaryParty.Pizzeria.Domain.Types.OrderLifecycle.Accepted && !order.TicketArchived && !IsOrderClaimedByActivePizzaiolo(netState, order.OrderId, out _))
                 {
                     if (TicketModalPresenter.Instance != null)
                     {

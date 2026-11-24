@@ -36,34 +36,39 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (_headline != null)
             {
-                _headline.text = $"NOITE {night.NightNumber} CONCLUÍDA — META BATIDA!";
+                _headline.text = night.NightNumber <= 0
+                    ? "PREPARAÇÃO PARA A NOITE 1"
+                    : $"NOITE {night.NightNumber} CONCLUÍDA — META BATIDA!";
             }
 
+            int completedGoal = night.LastCompletedNightRevenueGoal > 0 ? night.LastCompletedNightRevenueGoal : night.RevenueGoal;
             if (_subline != null)
             {
-                _subline.text = $"Preparando turno para a Noite {run.TargetNightNumber} de {run.MaxRunNights}.";
+                _subline.text = night.NightNumber <= 0
+                    ? $"Meta da Noite {run.TargetNightNumber}: R$ {night.RevenueGoal} • Turno {run.TargetNightNumber} de {run.MaxRunNights}."
+                    : $"Meta batida: R$ {completedGoal} • Preparando turno para a Noite {run.TargetNightNumber} de {run.MaxRunNights}.";
             }
 
             int revenue = night.EarnedRevenue;
-            int goal = night.RevenueGoal;
-            int surplus = revenue - goal;
+            int expenses = night.NightSupplySpent + night.NightShopSpent + night.NightWagesSpent;
+            int profit = revenue - expenses;
 
             if (_kpiRevenue != null)
             {
                 if (animate) UIToolkitTweenService.TweenCounter(_kpiRevenue, 0, revenue, 0.55f, "R$ ");
-                else _kpiRevenue.text = $"R$ {revenue}";
+                else _kpiRevenue.text = UIToolkitTweenService.FormatCounterValue(revenue, "R$ ");
             }
 
             if (_kpiExpenses != null)
             {
-                if (animate) UIToolkitTweenService.TweenCounter(_kpiExpenses, 0, goal, 0.55f, "R$ ");
-                else _kpiExpenses.text = $"R$ {goal}";
+                if (animate) UIToolkitTweenService.TweenCounter(_kpiExpenses, 0, expenses, 0.55f, "R$ ");
+                else _kpiExpenses.text = UIToolkitTweenService.FormatCounterValue(expenses, "R$ ");
             }
 
             if (_kpiProfit != null)
             {
-                if (animate) UIToolkitTweenService.TweenCounter(_kpiProfit, 0, surplus, 0.65f, "R$ ");
-                else _kpiProfit.text = $"R$ {surplus}";
+                if (animate) UIToolkitTweenService.TweenCounter(_kpiProfit, 0, profit, 0.65f, "R$ ");
+                else _kpiProfit.text = UIToolkitTweenService.FormatCounterValue(profit, "R$ ");
             }
 
             if (_kpiOrders != null)

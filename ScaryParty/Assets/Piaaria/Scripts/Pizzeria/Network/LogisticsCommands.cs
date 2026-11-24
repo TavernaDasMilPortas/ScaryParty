@@ -13,6 +13,10 @@ namespace ScaryParty.Pizzeria.Network
     {
         public static LogisticsCommands Instance { get; private set; }
 
+        private const float RequiredRepairHoldSeconds = 2.75f;
+        private readonly Dictionary<ulong, (BackpackId BagId, float StartedAt)> _activeRepairHolds =
+            new Dictionary<ulong, (BackpackId, float)>();
+
         private void Awake()
         {
             Instance = this;
@@ -21,12 +25,19 @@ namespace ScaryParty.Pizzeria.Network
         public override void OnNetworkSpawn()
         {
             PizzeriaSession.Logistics = this;
+            _activeRepairHolds.Clear();
         }
 
         public override void OnNetworkDespawn()
         {
+            _activeRepairHolds.Clear();
             if (PizzeriaSession.Logistics == this)
                 PizzeriaSession.Logistics = null;
+        }
+
+        public void ClearRepairHoldForPlayer(ulong clientId)
+        {
+            _activeRepairHolds.Remove(clientId);
         }
 
         private static bool RejectIfCannotActServer(ulong sender)
@@ -263,6 +274,32 @@ namespace ScaryParty.Pizzeria.Network
         }
 
         [ServerRpc(RequireOwnership = false)]
+        public void BeginRepairBackpackHoldServerRpc(ulong backpackIdVal, ServerRpcParams rpcParams = default)
+        {
+            ulong sender = rpcParams.Receive.SenderClientId;
+            var root = PizzeriaRoot.Instance;
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+            if (RejectIfCannotActServer(sender)) return;
+
+            var bpId = new BackpackId(backpackIdVal);
+            if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
+
+            if (!root.DomainState.Backpacks.TryGetValue(bpId, out var bag) || bag.Integrity >= bag.MaxIntegrity)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Esta mochila já está em perfeito estado.");
+                return;
+            }
+
+            _activeRepairHolds[sender] = (bpId, Time.realtimeSinceStartup);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void CancelRepairBackpackHoldServerRpc(ServerRpcParams rpcParams = default)
+        {
+            _activeRepairHolds.Remove(rpcParams.Receive.SenderClientId);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
         public void RepairBackpackServerRpc(ulong backpackIdVal, ServerRpcParams rpcParams = default)
         {
             ulong sender = rpcParams.Receive.SenderClientId;
@@ -273,6 +310,20 @@ namespace ScaryParty.Pizzeria.Network
             var bpId = new BackpackId(backpackIdVal);
             if (!CanAccessBackpack(root.DomainState, bpId, sender, true)) return;
 
+            if (!_activeRepairHolds.TryGetValue(sender, out var hold) || hold.BagId != bpId)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, "Segure [F] (ou o botão de reparo) por 3s para costurar a mochila.", true);
+                return;
+            }
+
+            float elapsed = Time.realtimeSinceStartup - hold.StartedAt;
+            if (elapsed < RequiredRepairHoldSeconds)
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, $"Costura da mochila ainda em andamento ({elapsed:0.0}s / 3.0s).", true);
+                return;
+            }
+
+            _activeRepairHolds.Remove(sender);
             var res = BackpackService.RepairBackpack(root.DomainState, bpId);
             if (!res.Success)
             {
@@ -339,6 +390,18 @@ namespace ScaryParty.Pizzeria.Network
                 return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.InvalidOperation, "Servidor de pedidos indisponível.");
 
             var destination = new AddressId(addressIdVal);
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening &&
+                root.AddressRegistry != null && root.AddressRegistry.TryGetPosition(destination, out var addrPos))
+            {
+                float maxDeliveryRange = root.Config != null ? Mathf.Max(8.5f, root.Config.interactDistance + 5.5f) : 9f;
+                float tol = root.Config != null ? root.Config.serverDistanceTolerance : 2.5f;
+                var targetWorld = new Vector3(addrPos.X, addrPos.Y, addrPos.Z);
+                if (!InteractionValidator.ValidateDistanceAndSight(sender, targetWorld, maxDeliveryRange, tol, false))
+                {
+                    return CommandResult<DeliveryEvaluationResult>.Fail(CommandError.OutOfRange, "Aproxime-se do ponto de entrega para concluir o delivery.");
+                }
+            }
+
             var deliveryService = new DeliveryService();
 
             var list = new List<ItemId>();
