@@ -57,9 +57,28 @@ namespace ScaryParty.Pizzeria.Stations
             }
             obstacle.shape = NavMeshObstacleShape.Box;
             obstacle.center = new Vector3(0f, 0.9f, 0f);
-            obstacle.size = new Vector3(0.9f, 1.8f, 0.9f);
+            obstacle.size = new Vector3(0.85f, 1.8f, 0.75f);
             obstacle.carving = true;
             obstacle.carveOnlyStationary = true;
+
+            EnsureCounterInsideWorkPointClearance();
+        }
+
+        public void EnsureCounterInsideWorkPointClearance(float minForwardOffset = 1.15f)
+        {
+            var workPoints = GetComponentsInChildren<NpcWorkPoint>(true);
+            for (int i = 0; i < workPoints.Length; i++)
+            {
+                var wp = workPoints[i];
+                if (wp == null || wp.role != NpcWorkPointRole.CounterInside) continue;
+                Vector3 delta = wp.transform.position - transform.position;
+                float forwardDot = Vector3.Dot(delta, transform.forward);
+                if (forwardDot < minForwardOffset)
+                {
+                    Vector3 adjusted = wp.transform.position + transform.forward * (minForwardOffset - forwardDot);
+                    wp.transform.position = adjusted;
+                }
+            }
         }
 
         public void EnsureQueueSlotAnchors(int defaultSlots = 3)

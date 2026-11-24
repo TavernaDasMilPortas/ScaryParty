@@ -45,6 +45,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
+            var navMgr = ScaryParty.Navigation.Core.NavigationWorldManager.Instance;
+            if (navMgr != null) navMgr.OnNavigationReady -= OnWorldNavigationReady;
             UnsubscribeNetworkState();
             foreach (var kvp in _activeViews)
             {
@@ -52,6 +54,13 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             _activeViews.Clear();
             if (Instance == this) Instance = null;
+        }
+
+        private void OnWorldNavigationReady()
+        {
+            var navMgr = ScaryParty.Navigation.Core.NavigationWorldManager.Instance;
+            if (navMgr != null) navMgr.OnNavigationReady -= OnWorldNavigationReady;
+            ValidateOrRebuildNavMesh();
         }
 
         private void EnsureVisualPrefabLoaded()
@@ -120,6 +129,14 @@ namespace ScaryParty.Pizzeria.Presentation
         /// </summary>
         public void ValidateOrRebuildNavMesh()
         {
+            var navMgr = ScaryParty.Navigation.Core.NavigationWorldManager.Instance;
+            if (navMgr != null && !navMgr.IsReady)
+            {
+                navMgr.OnNavigationReady -= OnWorldNavigationReady;
+                navMgr.OnNavigationReady += OnWorldNavigationReady;
+                return;
+            }
+
             var root = PizzeriaRoot.Instance != null ? PizzeriaRoot.Instance.transform : transform;
             Vector3 checkPos = root.position + Vector3.up * 0.2f;
             if (UnityEngine.AI.NavMesh.SamplePosition(checkPos, out _, 3.5f, UnityEngine.AI.NavMesh.AllAreas))
@@ -289,15 +306,58 @@ namespace ScaryParty.Pizzeria.Presentation
                     {
                         obs = t.gameObject.AddComponent<NavMeshObstacle>();
                     }
+                    var mf = t.GetComponentInChildren<MeshFilter>();
                     var rend = t.GetComponentInChildren<Renderer>();
-                    if (rend != null)
+                    if (mf != null && mf.sharedMesh != null)
                     {
-                        obs.center = t.InverseTransformPoint(rend.bounds.center);
-                        Vector3 ls = t.lossyScale;
-                        obs.size = new Vector3(
-                            Mathf.Abs(ls.x) > 0.001f ? rend.bounds.size.x / Mathf.Abs(ls.x) : rend.bounds.size.x,
-                            Mathf.Abs(ls.y) > 0.001f ? rend.bounds.size.y / Mathf.Abs(ls.y) : rend.bounds.size.y,
-                            Mathf.Abs(ls.z) > 0.001f ? rend.bounds.size.z / Mathf.Abs(ls.z) : rend.bounds.size.z);
+                        Bounds localBounds = mf.sharedMesh.bounds;
+                        if (mf.transform == t)
+                        {
+                            obs.center = localBounds.center;
+                            obs.size = localBounds.size;
+                        }
+                        else
+                        {
+                            Vector3 min = localBounds.min;
+                            Vector3 max = localBounds.max;
+                            Bounds localAabb = new Bounds();
+                            bool first = true;
+                            for (int ix = 0; ix < 2; ix++)
+                            for (int iy = 0; iy < 2; iy++)
+                            for (int iz = 0; iz < 2; iz++)
+                            {
+                                Vector3 corner = mf.transform.TransformPoint(new Vector3(
+                                    ix == 0 ? min.x : max.x,
+                                    iy == 0 ? min.y : max.y,
+                                    iz == 0 ? min.z : max.z));
+                                Vector3 inTarget = t.InverseTransformPoint(corner);
+                                if (first) { localAabb = new Bounds(inTarget, Vector3.zero); first = false; }
+                                else localAabb.Encapsulate(inTarget);
+                            }
+                            obs.center = localAabb.center;
+                            obs.size = localAabb.size;
+                        }
+                    }
+                    else if (rend != null)
+                    {
+                        Vector3 min = rend.bounds.min;
+                        Vector3 max = rend.bounds.max;
+                        Bounds localAabb = new Bounds();
+                        bool first = true;
+                        for (int ix = 0; ix < 2; ix++)
+                        for (int iy = 0; iy < 2; iy++)
+                        for (int iz = 0; iz < 2; iz++)
+                        {
+                            Vector3 corner = new Vector3(
+                                ix == 0 ? min.x : max.x,
+                                iy == 0 ? min.y : max.y,
+                                iz == 0 ? min.z : max.z);
+                            Vector3 inTarget = t.InverseTransformPoint(corner);
+                            if (first) { localAabb = new Bounds(inTarget, Vector3.zero); first = false; }
+                            else localAabb.Encapsulate(inTarget);
+                        }
+                        obs.center = localAabb.center;
+                        obs.size = localAabb.size;
                     }
                     else
                     {

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Unity.AI.Navigation;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
@@ -173,6 +174,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
                     var obs = t.GetComponent<NavMeshObstacle>();
                     if (obs != null) DestroySafe(obs);
+
+                    var navMod = t.GetComponent<NavMeshModifier>();
+                    if (navMod == null) navMod = t.gameObject.AddComponent<NavMeshModifier>();
+                    navMod.ignoreFromBuild = true;
+                    navMod.applyToChildren = true;
                 }
                 else if (lower.StartsWith("balcaopabertura"))
                 {

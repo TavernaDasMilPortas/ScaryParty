@@ -725,6 +725,48 @@ namespace ScaryParty.Pizzeria.Tests
                 Assert.IsTrue(runSvc.CastCategoryVote(0UL, RunModifierKind.Opportunity, secondOppStage.Options[0].Id));
             }
         }
+
+        [Test]
+        public void PhaseB1_OvenRemovalAndBurnedCleanup_DoNotLeakOperations()
+        {
+            var state = new PizzeriaState();
+            var clock = new FixedClock(10.0);
+            var procSvc = new ProcessingService();
+            var ovenSlot = new StationSlotId(5, 0);
+
+            var pizza = new ItemState(state.GenerateItemId(), 2, ItemCategory.Pizza, LocationRef.InHand(1_000_001UL, HandSlotIndex.Right))
+            {
+                PrepStage = ProcessingStage.Prepared
+            };
+            state.Items[pizza.Id] = pizza;
+
+            Assert.IsTrue(procSvc.InsertOven(pizza.Id, ovenSlot, state, 12f, clock).Success);
+            Assert.IsTrue(state.ActiveOperations.ContainsKey(ovenSlot));
+
+            clock.Now += 13.0;
+            procSvc.TickOven(ovenSlot, state, 15f, clock);
+            Assert.AreEqual(CookingStage.Baked, pizza.CookingStage);
+
+            var handTarget = LocationRef.InHand(1_000_001UL, HandSlotIndex.Right);
+            var remRes = procSvc.RemoveOven(ovenSlot, handTarget, state, clock);
+            Assert.IsTrue(remRes.Success);
+            Assert.IsFalse(state.ActiveOperations.ContainsKey(ovenSlot));
+            Assert.AreEqual(handTarget, pizza.Location);
+
+            // DestroyItem on an item still inside an oven operation must clean ActiveOperations
+            var burnedPizza = new ItemState(state.GenerateItemId(), 2, ItemCategory.Pizza, LocationRef.InHand(1_000_001UL, HandSlotIndex.Right))
+            {
+                PrepStage = ProcessingStage.Prepared
+            };
+            state.Items[burnedPizza.Id] = burnedPizza;
+            Assert.IsTrue(procSvc.InsertOven(burnedPizza.Id, ovenSlot, state, 10f, clock).Success);
+            burnedPizza.ReservedByHold = OperationState.ServerWorker;
+            burnedPizza.CookingStage = CookingStage.Burned;
+
+            Assert.IsTrue(TransferService.DestroyItem(state, burnedPizza.Id).Success);
+            Assert.IsFalse(state.ActiveOperations.ContainsKey(ovenSlot));
+            Assert.IsFalse(state.Items.ContainsKey(burnedPizza.Id));
+        }
     }
 
     internal sealed class FixedClock : ScaryParty.Pizzeria.Domain.Ports.IClock

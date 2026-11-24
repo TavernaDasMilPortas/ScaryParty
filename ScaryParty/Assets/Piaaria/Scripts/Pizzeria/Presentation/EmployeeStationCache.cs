@@ -73,10 +73,17 @@ namespace ScaryParty.Pizzeria.Presentation
             _cachedSceneHandle = -1;
         }
 
+        private static bool HasDestroyed<T>(T[] arr) where T : Component
+        {
+            for (int i = 0; i < arr.Length; i++)
+                if (arr[i] == null) return true;
+            return false;
+        }
+
         public static CustomerCounterStation[] GetCounters()
         {
             EnsureSceneValidity();
-            if (_counters == null || (_counters.Length > 0 && _counters[0] == null))
+            if (_counters == null || _counters.Length == 0 || HasDestroyed(_counters))
                 _counters = Object.FindObjectsByType<CustomerCounterStation>(FindObjectsSortMode.None);
             return _counters;
         }
@@ -84,7 +91,7 @@ namespace ScaryParty.Pizzeria.Presentation
         public static StorageStation[] GetStorages()
         {
             EnsureSceneValidity();
-            if (_storages == null || (_storages.Length > 0 && _storages[0] == null))
+            if (_storages == null || _storages.Length == 0 || HasDestroyed(_storages))
                 _storages = Object.FindObjectsByType<StorageStation>(FindObjectsSortMode.None);
             return _storages;
         }

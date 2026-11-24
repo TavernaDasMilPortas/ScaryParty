@@ -43,7 +43,16 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _impatienceTriggered;
         private float _nextMicroFidgetTime;
         private DiningTableStation _chairOccupantTable;
+        private DiningTableStation _lastSeatedTable;
         private bool _loggedNoNavMeshWarning;
+
+        private void OnDisable()
+        {
+            ReleaseClaimedChair();
+            _hasReachedApproach = false;
+            _hasReachedSeat = false;
+            _isExitingSeat = false;
+        }
 
         private void OnDestroy()
         {
@@ -194,7 +203,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (Agent != null && Agent.isOnNavMesh)
             {
                 Agent.speed = _walkSpeed;
-                if (!shouldBeSeated && !_isExitingSeat)
+                if (!shouldBeSeated && !_isExitingSeat && !(phase == CustomerPhase.WalkingToTable && _hasReachedApproach))
                 {
                     Agent.updatePosition = true;
                     Agent.updateRotation = true;
@@ -239,6 +248,11 @@ namespace ScaryParty.Pizzeria.Presentation
                         }
                     }
                 }
+                if (table != null) _lastSeatedTable = table;
+            }
+            else if (isLeaving && _lastSeatedTable != null)
+            {
+                table = _lastSeatedTable;
             }
 
             float currentSpeed = 0f;
@@ -262,7 +276,11 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (_isExitingSeat)
                     {
                         _exitTimer -= Time.deltaTime;
-                        Vector3 exitPos = table != null ? table.GetExitPosition() : _targetPosition;
+                        Vector3 exitPos = table != null ? table.GetExitPosition() : transform.position;
+                        if (table == null && UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var safeExitHit, 3.0f, UnityEngine.AI.NavMesh.AllAreas))
+                        {
+                            exitPos = safeExitHit.position;
+                        }
                         transform.position = Vector3.MoveTowards(transform.position, exitPos, Time.deltaTime * 1.3f);
                         Vector3 exitDir = exitPos - transform.position;
                         exitDir.y = 0f;
@@ -275,19 +293,29 @@ namespace ScaryParty.Pizzeria.Presentation
                         {
                             _isExitingSeat = false;
                             _wasSeated = false;
+                            _lastSeatedTable = null;
                             ReleaseClaimedChair();
-                            if (Agent != null && Agent.isOnNavMesh)
+                            if (Agent != null)
                             {
-                                Agent.updatePosition = true;
-                                Agent.updateRotation = true;
-                                Agent.isStopped = false;
-                                Agent.SetDestination(_targetPosition);
+                                if (UnityEngine.AI.NavMesh.SamplePosition(transform.position, out var warpHit, 3.0f, UnityEngine.AI.NavMesh.AllAreas))
+                                {
+                                    Agent.enabled = true;
+                                    Agent.Warp(warpHit.position);
+                                }
+                                if (Agent.isOnNavMesh)
+                                {
+                                    Agent.updatePosition = true;
+                                    Agent.updateRotation = true;
+                                    Agent.isStopped = false;
+                                    Agent.SetDestination(_targetPosition);
+                                }
                             }
                         }
                     }
                 }
                 else
                 {
+                    ReleaseClaimedChair();
                     if (Agent != null && Agent.enabled && Agent.isOnNavMesh)
                     {
                         Agent.updatePosition = true;

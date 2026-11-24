@@ -1016,7 +1016,7 @@ namespace ScaryParty.Pizzeria.Composition
                 preferredStartSlot,
                 slot =>
                 {
-                    Vector3 spread = transform.right * ((slot % 3 - 1) * 1.15f) + transform.forward * ((slot / 3) * 1.15f);
+                    Vector3 spread = ComputeSpawnSpreadOffset(slot, transform.right, transform.forward);
                     var slotReq = capturedRequest;
                     slotReq.PrimaryPosition = capturedRequest.PrimaryPosition + spread;
                     return SpawnResolver.TryResolveCandidate(in slotReq, SpawnResolver.ValidateUnityCandidate, out resolvedPos, out lastCheckFailure);
@@ -1048,6 +1048,36 @@ namespace ScaryParty.Pizzeria.Composition
             reservation.Rotation = request.PrimaryRotation;
             _spawnReservations.UpdateReservationPose(request.OwnerId, request.OwnerKind, resolvedPos, request.PrimaryRotation);
             return true;
+        }
+
+        public static Vector3 ComputeSpawnSpreadOffset(int slot, Vector3 right, Vector3 forward)
+        {
+            if (slot <= 0) return Vector3.zero;
+            int col = slot % 3;
+            int lateral = col == 1 ? 1 : (col == 2 ? -1 : 0);
+            int row = slot / 3;
+            return right * (lateral * 1.15f) + forward * (row * 1.15f);
+        }
+
+        private static Vector3 ResolveEmployeePathDestination(EmployeeRole role, Vector3 fallbackPos, Vector3? waitingAnchor)
+        {
+            if (role == EmployeeRole.Cashier)
+            {
+                var counters = Presentation.EmployeeStationCache.GetCounters();
+                if (counters != null && counters.Length > 0 && counters[0] != null)
+                    return counters[0].transform.position;
+            }
+            else
+            {
+                var prep = Presentation.EmployeeStationCache.GetPrep();
+                if (prep != null)
+                    return prep.transform.position;
+            }
+
+            if (waitingAnchor.HasValue)
+                return waitingAnchor.Value;
+
+            return fallbackPos;
         }
 
         public static Vector3 ComputeInteriorGridLocalPosition(int slotIndex, float floorSurfaceLocalY)
@@ -1308,6 +1338,13 @@ namespace ScaryParty.Pizzeria.Composition
                     : (ext.employeeSpawnCook != null ? ext.employeeSpawnCook : ext.employeeArrival);
             }
 
+            var fp = GetComponent<PizzeriaFootprint>();
+            float floorY = fp != null ? fp.floorSurfaceLocalY : -1.6f;
+            Vector3 localPos = role == EmployeeRole.Cashier
+                ? new Vector3(6.0f, floorY + 0.05f, -1.5f)
+                : new Vector3(20.0f, floorY + 0.05f, -18.0f);
+            Vector3 insideFallbackPos = transform.TransformPoint(localPos);
+
             Vector3 basePos;
             if (preferred != null)
             {
@@ -1316,17 +1353,16 @@ namespace ScaryParty.Pizzeria.Composition
             }
             else
             {
-                var fp = GetComponent<PizzeriaFootprint>();
-                float floorY = fp != null ? fp.floorSurfaceLocalY : -1.6f;
-                Vector3 localPos = role == EmployeeRole.Cashier
-                    ? new Vector3(6.0f, floorY + 0.05f, -1.5f)
-                    : new Vector3(20.0f, floorY + 0.05f, -18.0f);
-                basePos = transform.TransformPoint(localPos);
+                basePos = insideFallbackPos;
                 spawnRot = transform.rotation;
             }
 
             Vector3? recovery = ext != null && ext.employeeRecovery != null ? ext.employeeRecovery.position : (Vector3?)null;
             Vector3? waiting = ext != null && ext.employeeWaiting != null ? ext.employeeWaiting.position : (Vector3?)null;
+            Vector3 pathDestination = ResolveEmployeePathDestination(role, basePos, waiting);
+            Vector3[] altPositions = preferred != null
+                ? (waiting.HasValue ? new[] { waiting.Value, insideFallbackPos } : new[] { insideFallbackPos })
+                : (waiting.HasValue ? new[] { waiting.Value } : null);
 
             var req = new SpawnRequest
             {
@@ -1334,9 +1370,9 @@ namespace ScaryParty.Pizzeria.Composition
                 OwnerKind = SpawnOwnerKind.Employee,
                 PrimaryPosition = basePos,
                 PrimaryRotation = spawnRot,
-                AlternativePositions = waiting.HasValue ? new[] { waiting.Value } : null,
+                AlternativePositions = altPositions,
                 RecoveryPosition = recovery,
-                PathDestination = basePos,
+                PathDestination = pathDestination,
                 ExpectedFloorY = basePos.y,
                 MaxAnchorDistance = 8f,
                 MaxSlopeDegrees = 35f,

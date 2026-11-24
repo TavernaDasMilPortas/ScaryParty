@@ -146,6 +146,44 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.AreEqual(-1f, rotatedLeft.z, 0.005f);
             Assert.AreEqual(0f, rotatedLeft.x, 0.005f);
         }
+
+        [Test]
+        public void PhaseB1_CounterWorkPointDoorModifierAndSpawnSpread_MeetNavRequirements()
+        {
+            var rootGo = new GameObject("TestNavPizzeriaRoot");
+            try
+            {
+                var counterGo = new GameObject("Counter");
+                counterGo.transform.SetParent(rootGo.transform, false);
+                var counter = counterGo.AddComponent<CustomerCounterStation>();
+
+                var wpGo = new GameObject("NpcWorkPoint_CounterInside");
+                wpGo.transform.SetParent(counterGo.transform, false);
+                wpGo.transform.localPosition = new Vector3(0f, 0f, 0.85f);
+                var wp = wpGo.AddComponent<NpcWorkPoint>();
+                wp.role = NpcWorkPointRole.CounterInside;
+                wp.targetStation = counter;
+
+                counter.EnsureNavMeshObstacle();
+                float dot = Vector3.Dot(wp.transform.position - counterGo.transform.position, counterGo.transform.forward);
+                Assert.GreaterOrEqual(dot, 1.15f - 0.001f);
+
+                var openingLeaf = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                openingLeaf.name = "abertura.001";
+                openingLeaf.transform.SetParent(rootGo.transform, false);
+                CounterPassageDoorController.EnsureCounterPassageDoorsConfigured(rootGo.transform);
+                var navMod = openingLeaf.GetComponent<Unity.AI.Navigation.NavMeshModifier>();
+                Assert.IsNotNull(navMod);
+                Assert.IsTrue(navMod.ignoreFromBuild);
+
+                Assert.AreEqual(Vector3.zero, ScaryParty.Pizzeria.Composition.PizzeriaRoot.ComputeSpawnSpreadOffset(0, Vector3.right, Vector3.forward));
+                Assert.AreNotEqual(Vector3.zero, ScaryParty.Pizzeria.Composition.PizzeriaRoot.ComputeSpawnSpreadOffset(1, Vector3.right, Vector3.forward));
+            }
+            finally
+            {
+                Object.DestroyImmediate(rootGo);
+            }
+        }
     }
 }
 #endif

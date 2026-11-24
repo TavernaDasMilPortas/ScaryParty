@@ -83,6 +83,16 @@ namespace ScaryParty.Pizzeria.Presentation
         private int _ovenStationId = -1;
         private int _ovenSlotIndex = -1;
         private int _prepStationId = -1;
+        private NavMeshPath _reusableNavPath;
+        private Vector3 _lastPathMoveDest;
+        private Vector3 _resolvedNavPos;
+        private bool _hasResolvedNavPos;
+        private float _nextPathCalcTime;
+        private Vector3 _stuckLastSamplePos;
+        private float _stuckAccumSeconds;
+        private Transform _ensuredCounterDoorsRoot;
+        private bool _hasFetchedStorageDough;
+        private int _pendingFetchIngredientId = -1;
         private int _prepSlotIndex = -1;
         private int _processStationId = -1;
         private int _processSlotIndex = -1;
@@ -680,7 +690,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private static Vector3 ResolveCounterPositionForQueue(int queueIndex, Vector3 fallback)
         {
-            var counters = FindObjectsByType<CustomerCounterStation>(FindObjectsSortMode.None);
+            var counters = EmployeeStationCache.GetCounters();
             CustomerCounterStation anyCounter = null;
             for (int i = 0; i < counters.Length; i++)
             {
@@ -695,7 +705,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void TickCashier(PizzeriaRoot root, HiredEmployeeState emp, float dt)
         {
-            CounterPassageDoorController.EnsureCounterPassageDoorsConfigured(root.transform);
+            if (_ensuredCounterDoorsRoot != root.transform)
+            {
+                CounterPassageDoorController.EnsureCounterPassageDoorsConfigured(root.transform);
+                _ensuredCounterDoorsRoot = root.transform;
+            }
 
             if (_cashierCooldownRemaining > 0f)
             {
@@ -757,16 +771,24 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 _activePhoneCallId = targetCall.Id;
                 ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
-                var phoneStation = FindFirstObjectByType<PhoneStation>();
+                var phoneStation = EmployeeStationCache.GetPhone();
                 if (!MoveToWorkPointAndFace(phoneStation, -1, actorKey, now, dt, out bool pathBlocked, out _))
                 {
-                    if (pathBlocked && _activeTaskId > 0)
+                    if (pathBlocked)
                     {
-                        root.EmployeeTaskService.MarkTaskBlocked(_activeTaskId, EmployeeBlockReason.PathBlocked);
+                        SharedEmployeeTask activeTask = null;
+                        if (_activeTaskId > 0) root.EmployeeTaskService?.Tasks.TryGetValue(_activeTaskId, out activeTask);
+                        RecordBlock(root, activeTask, EmployeeBlockReason.PathBlocked, "Caminho até Telefone bloqueado.");
                     }
                     _stepIndex = (int)WorkStep.CashierMoveToPhone;
                     _actionProgressNormalized = 0f;
                     return;
+                }
+                if (_lastBlockReason == EmployeeBlockReason.PathBlocked)
+                {
+                    SharedEmployeeTask activeTask = null;
+                    if (_activeTaskId > 0) root.EmployeeTaskService?.Tasks.TryGetValue(_activeTaskId, out activeTask);
+                    ClearBlock(root, activeTask);
                 }
 
                 if (_stepIndex != (int)WorkStep.CashierAnswerPhoneWait)
@@ -820,7 +842,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             ulong cashierActorKey = EmployeeActorOffset + (ulong)EmployeeId;
             CustomerCounterStation targetCounter = null;
-            var allCounters = FindObjectsByType<CustomerCounterStation>(FindObjectsSortMode.None);
+            var allCounters = EmployeeStationCache.GetCounters();
             for (int i = 0; i < allCounters.Length; i++)
             {
                 if (allCounters[i] == null) continue;
@@ -834,13 +856,21 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (!MoveToWorkPointAndFace(targetCounter, -1, cashierActorKey, now, dt, out bool counterPathBlocked, out _))
             {
-                if (counterPathBlocked && _activeTaskId > 0)
+                if (counterPathBlocked)
                 {
-                    root.EmployeeTaskService.MarkTaskBlocked(_activeTaskId, EmployeeBlockReason.PathBlocked);
+                    SharedEmployeeTask activeTask = null;
+                    if (_activeTaskId > 0) root.EmployeeTaskService?.Tasks.TryGetValue(_activeTaskId, out activeTask);
+                    RecordBlock(root, activeTask, EmployeeBlockReason.PathBlocked, "Caminho até Balcão de Atendimento bloqueado.");
                 }
                 _stepIndex = (int)WorkStep.CashierMoveToCounter;
                 _actionProgressNormalized = 0f;
                 return;
+            }
+            if (_lastBlockReason == EmployeeBlockReason.PathBlocked)
+            {
+                SharedEmployeeTask activeTask = null;
+                if (_activeTaskId > 0) root.EmployeeTaskService?.Tasks.TryGetValue(_activeTaskId, out activeTask);
+                ClearBlock(root, activeTask);
             }
 
             if (_stepIndex != (int)WorkStep.CashierAttendWait)
@@ -1001,7 +1031,7 @@ namespace ScaryParty.Pizzeria.Presentation
             // Etapa 0: Ir até o Quadro de Comandas pegar o pedido fisicamente
             if (_stepIndex == (int)WorkStep.PizzaioloClaimTicket)
             {
-                var board = FindFirstObjectByType<TicketBoardStation>();
+                var board = EmployeeStationCache.GetTicketBoard();
                 if (board != null && !MoveToWorkPointAndFace(board, -1, actorKey, now, dt, out bool boardBlocked, out _))
                 {
                     _actionProgressNormalized = 0f;
@@ -1024,7 +1054,33 @@ namespace ScaryParty.Pizzeria.Presentation
             if (_stepIndex == (int)WorkStep.PizzaioloPrepareDough || _stepIndex == (int)WorkStep.Idle)
             {
                 _stepIndex = (int)WorkStep.PizzaioloPrepareDough;
-                var prepStation = FindFirstObjectByType<PrepStation>();
+                if ((!_workingPizzaId.IsValid || !root.DomainState.Items.ContainsKey(_workingPizzaId)) && !_hasFetchedStorageDough)
+                {
+                    int doughDefId = CanDispenseIngredientFromAnyStorage(root, PizzaSpecification.DefaultBaseDoughId)
+                        ? PizzaSpecification.DefaultBaseDoughId
+                        : (CanDispenseIngredientFromAnyStorage(root, 1) ? 1 : -1);
+                    if (doughDefId >= 0)
+                    {
+                        var doughStorage = FindStorageStationWithIngredient(root, doughDefId);
+                        if (doughStorage != null)
+                        {
+                            if (!MoveToWorkPointAndFace(doughStorage, -1, actorKey, now, dt, out bool doughStorageBlocked, out _))
+                            {
+                                _actionProgressNormalized = 0f;
+                                if (doughStorageBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Estoque de Massa bloqueado.");
+                                return;
+                            }
+                            if (IsEmployeeRightHandFree(root.DomainState, actorKey) &&
+                                FindHandItemByDefinition(root.DomainState, actorKey, doughDefId) == null)
+                            {
+                                TryDispenseIngredientFromAnyStorage(root, doughDefId, actorKey, out _);
+                            }
+                            _hasFetchedStorageDough = true;
+                        }
+                    }
+                }
+
+                var prepStation = EmployeeStationCache.GetPrep();
                 if (!MoveToWorkPointAndFace(prepStation, _prepSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
                 {
                     _actionProgressNormalized = 0f;
@@ -1144,7 +1200,34 @@ namespace ScaryParty.Pizzeria.Presentation
                     return;
                 }
 
-                Component asmStation = (Component)FindFirstObjectByType<AssemblyStation>() ?? FindFirstObjectByType<PrepStation>();
+                if (_pendingFetchIngredientId > 0)
+                {
+                    var storageStation = FindStorageStationWithIngredient(root, _pendingFetchIngredientId);
+                    if (storageStation == null)
+                    {
+                        _pendingFetchIngredientId = -1;
+                    }
+                    else
+                    {
+                        if (!MoveToWorkPointAndFace(storageStation, -1, actorKey, now, dt, out bool storBlocked, out _))
+                        {
+                            _actionProgressNormalized = 0f;
+                            if (storBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Geladeira/Estoque bloqueado.");
+                            return;
+                        }
+                        if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
+                        {
+                            ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
+                        }
+                        if (IsEmployeeRightHandFree(root.DomainState, actorKey))
+                        {
+                            TryDispenseIngredientFromAnyStorage(root, _pendingFetchIngredientId, actorKey, out _);
+                        }
+                        _pendingFetchIngredientId = -1;
+                    }
+                }
+
+                Component asmStation = (Component)EmployeeStationCache.GetAssembly() ?? EmployeeStationCache.GetPrep();
                 int asmSlot = pizza.Location.Type == LocationType.StationSlot ? pizza.Location.SlotId : -1;
                 if (!MoveToWorkPointAndFace(asmStation, asmSlot, actorKey, now, dt, out bool pathBlocked, out _))
                 {
@@ -1189,7 +1272,7 @@ namespace ScaryParty.Pizzeria.Presentation
                     return;
                 }
 
-                var ovenStation = FindFirstObjectByType<OvenStation>();
+                var ovenStation = EmployeeStationCache.GetOven();
                 if (!MoveToWorkPointAndFace(ovenStation, _ovenSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
                 {
                     if (pathBlocked) RecordBlock(root, currentTask, EmployeeBlockReason.PathBlocked, "Caminho até Forno bloqueado.");
@@ -1241,8 +1324,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
                 if (bakingPizza.CookingStage == CookingStage.Burned)
                 {
-                    // Pizza queimada é descartada corretamente e a unidade volta ao ciclo para ser refeita
+                    // Pizza queimada é retirada/descartada limpando a operação no forno e reiniciando a unidade
                     ReleaseSpecificSlotReservation(root.DomainState, _ovenStationId, _ovenSlotIndex, actorKey);
+                    var burnedSlot = new StationSlotId(_ovenStationId, _ovenSlotIndex);
+                    root.ProcessingService.RemoveOven(burnedSlot, LocationRef.InHand(actorKey, HandSlotIndex.Right), root.DomainState, root.Clock);
                     TransferService.DestroyItem(root.DomainState, bakingPizza.Id, root.EmployeeTaskService);
                     ResetUnitState();
                     PizzeriaCommandHandler.Instance?.CommitAndReplicate();
@@ -1258,7 +1343,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 _actionProgressNormalized = 1f;
                 var ovenSlot = new StationSlotId(_ovenStationId, _ovenSlotIndex);
                 var handLoc = LocationRef.InHand(actorKey, HandSlotIndex.Right);
-                var remRes = root.OvenService.RemovePizza(root.DomainState, ovenSlot, handLoc, actorKey);
+                var remRes = root.ProcessingService.RemoveOven(ovenSlot, handLoc, root.DomainState, root.Clock);
                 if (!remRes.Success && !bakingPizza.Location.Equals(handLoc))
                 {
                     RecordBlock(root, currentTask, EmployeeBlockReason.ToolInUse, $"Não foi possível retirar pizza do forno: {remRes.Message}");
@@ -1319,8 +1404,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
 
                 Component pkgOrStageStation = requiresBox && !_hasStartedPackageOp && !finishedPizza.IsBoxed
-                    ? (Component)FindFirstObjectByType<PackagingStation>() ?? FindFirstObjectByType<StagingStation>()
-                    : (Component)FindFirstObjectByType<StagingStation>() ?? FindFirstObjectByType<PackagingStation>();
+                    ? (Component)EmployeeStationCache.GetPackaging() ?? EmployeeStationCache.GetStaging()
+                    : (Component)EmployeeStationCache.GetStaging() ?? EmployeeStationCache.GetPackaging();
 
                 if (!MoveToWorkPointAndFace(pkgOrStageStation, _packagingSlotIndex, actorKey, now, dt, out bool pathBlocked, out _))
                 {
@@ -1631,6 +1716,13 @@ namespace ScaryParty.Pizzeria.Presentation
                 // Primeiro tenta estoque já no estágio desejado (molho ou ingrediente pronto)
                 if (CanDispenseIngredientFromAnyStorage(root, targetIngId))
                 {
+                    var readyStorage = FindStorageStationWithIngredient(root, targetIngId);
+                    if (readyStorage != null && HorizontalDistanceSqr(transform.position, readyStorage.transform.position) > 2.4f * 2.4f)
+                    {
+                        _pendingFetchIngredientId = targetIngId;
+                        return AssembleStepStatus.Waiting;
+                    }
+
                     if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
                     {
                         ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
@@ -1651,8 +1743,8 @@ namespace ScaryParty.Pizzeria.Presentation
                 else if (targetStage == ProcessingStage.Prepared &&
                          TryFindProcessProducingIngredient(root, targetIngId, out var procData))
                 {
-                    // Verifica TUDO antes de dispensar estoque cru: estoque + slot de preparo livre + ferramenta livre
-                    if (!CanDispenseIngredientFromAnyStorage(root, procData.InputIngredientId))
+                    ItemState heldRawItem = FindHandItemByDefinition(root.DomainState, actorKey, procData.InputIngredientId);
+                    if (heldRawItem == null && !CanDispenseIngredientFromAnyStorage(root, procData.InputIngredientId))
                     {
                         blockReason = EmployeeBlockReason.MissingIngredient;
                         blockMessage = $"Sem estoque para ingrediente {targetIngId} (nem cru {procData.InputIngredientId}).";
@@ -1681,22 +1773,37 @@ namespace ScaryParty.Pizzeria.Presentation
                         procToolId = availTool.Id;
                     }
 
-                    if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
+                    ItemId rawItemId;
+                    if (heldRawItem != null)
                     {
-                        ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
+                        rawItemId = heldRawItem.Id;
+                    }
+                    else
+                    {
+                        var rawStorage = FindStorageStationWithIngredient(root, procData.InputIngredientId);
+                        if (rawStorage != null && HorizontalDistanceSqr(transform.position, rawStorage.transform.position) > 2.4f * 2.4f)
+                        {
+                            _pendingFetchIngredientId = procData.InputIngredientId;
+                            return AssembleStepStatus.Waiting;
+                        }
+
                         if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
                         {
-                            blockReason = EmployeeBlockReason.ToolInUse;
-                            blockMessage = "Mão direita do funcionário ocupada.";
+                            ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
+                            if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
+                            {
+                                blockReason = EmployeeBlockReason.ToolInUse;
+                                blockMessage = "Mão direita do funcionário ocupada.";
+                                return AssembleStepStatus.Blocked;
+                            }
+                        }
+
+                        if (!TryDispenseIngredientFromAnyStorage(root, procData.InputIngredientId, actorKey, out rawItemId))
+                        {
+                            blockReason = EmployeeBlockReason.MissingIngredient;
+                            blockMessage = $"Falha ao dispensar ingrediente cru {procData.InputIngredientId}.";
                             return AssembleStepStatus.Blocked;
                         }
-                    }
-
-                    if (!TryDispenseIngredientFromAnyStorage(root, procData.InputIngredientId, actorKey, out var rawItemId))
-                    {
-                        blockReason = EmployeeBlockReason.MissingIngredient;
-                        blockMessage = $"Falha ao dispensar ingrediente cru {procData.InputIngredientId}.";
-                        return AssembleStepStatus.Blocked;
                     }
 
                     var targetProcLoc = LocationRef.InStation(procStationId, freeProcSlot);
@@ -2020,21 +2127,30 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
-            if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
+            ItemState heldDough = FindHandItemByDefinition(root.DomainState, actorKey, selectedDefId);
+            if (heldDough != null)
             {
-                ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
+                doughId = heldDough.Id;
+            }
+            else
+            {
                 if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
                 {
-                    failReason = EmployeeBlockReason.ToolInUse;
+                    ReturnHandItemsOrPlaceOnCounter(root, actorKey, keepWorkingPizzaOnStation: true);
+                    if (!IsEmployeeRightHandFree(root.DomainState, actorKey))
+                    {
+                        failReason = EmployeeBlockReason.ToolInUse;
+                        return false;
+                    }
+                }
+
+                if (!TryDispenseIngredientFromAnyStorage(root, selectedDefId, actorKey, out doughId))
+                {
+                    failReason = EmployeeBlockReason.NoDough;
                     return false;
                 }
             }
-
-            if (!TryDispenseIngredientFromAnyStorage(root, selectedDefId, actorKey, out doughId))
-            {
-                failReason = EmployeeBlockReason.NoDough;
-                return false;
-            }
+            _hasFetchedStorageDough = false;
 
             var targetLoc = LocationRef.InStation(stationId, slotIdx);
             var tr = TransferService.TransferItem(root.DomainState, doughId, targetLoc, actorKey, bypassReservation: false);
@@ -2168,6 +2284,23 @@ namespace ScaryParty.Pizzeria.Presentation
                     total += Math.Max(1, pizza.Ingredients[i].Count);
             }
             return total;
+        }
+
+        private static ItemState FindHandItemByDefinition(PizzeriaState state, ulong actorKey, int definitionId)
+        {
+            if (state == null) return null;
+            foreach (var kvp in state.Items)
+            {
+                var item = kvp.Value;
+                if (item != null &&
+                    item.DefinitionId == definitionId &&
+                    item.Location.Type == LocationType.Hand &&
+                    item.Location.HolderId == actorKey)
+                {
+                    return item;
+                }
+            }
+            return null;
         }
 
         private static bool TryDispenseIngredientFromAnyStorage(
@@ -2345,12 +2478,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 workForward.Normalize();
             }
 
-            if (!MoveToValidated(targetPos, out pathBlocked))
+            if (!MoveToValidated(targetPos, out pathBlocked, out Vector3 resolvedNavPos))
             {
                 return false;
             }
 
-            if (HorizontalDistanceSqr(transform.position, targetPos) > 0.55f * 0.55f)
+            if (HorizontalDistanceSqr(transform.position, resolvedNavPos) > 0.55f * 0.55f)
             {
                 return false;
             }
@@ -2378,7 +2511,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
             if (targetStorageId < 0) return null;
 
-            var storages = FindObjectsByType<StorageStation>(FindObjectsSortMode.None);
+            var storages = EmployeeStationCache.GetStorages();
             for (int i = 0; i < storages.Length; i++)
             {
                 if (storages[i] != null && storages[i].stationId == targetStorageId)
@@ -2421,17 +2554,23 @@ namespace ScaryParty.Pizzeria.Presentation
         }
 
         private bool MoveToValidated(Vector3 destination, out bool pathBlocked)
+            => MoveToValidated(destination, out pathBlocked, out _);
+
+        private bool MoveToValidated(Vector3 destination, out bool pathBlocked, out Vector3 resolvedNavPos)
         {
             pathBlocked = false;
+            resolvedNavPos = destination;
             if (_agent == null || !_agent.enabled) return true;
 
             _agent.autoTraverseOffMeshLink = false;
 
             if (!TrySampleFloorNavMesh(destination, 4.0f, out var targetNavPos))
             {
+                _hasResolvedNavPos = false;
                 pathBlocked = true;
                 return false;
             }
+            resolvedNavPos = targetNavPos;
 
             if (!_agent.isOnNavMesh || _agent.isOnOffMeshLink)
             {
@@ -2446,15 +2585,72 @@ namespace ScaryParty.Pizzeria.Presentation
                 }
             }
 
-            var path = new NavMeshPath();
-            if (!NavMesh.CalculatePath(_agent.transform.position, targetNavPos, NavMesh.AllAreas, path) ||
-                path.status != NavMeshPathStatus.PathComplete)
+            if (!_hasResolvedNavPos || HorizontalDistanceSqr(_lastPathMoveDest, destination) > 0.12f * 0.12f)
             {
-                pathBlocked = true;
-                return false;
+                _stuckLastSamplePos = transform.position;
+                _stuckAccumSeconds = 0f;
             }
 
-            _agent.SetDestination(targetNavPos);
+            bool needRecalc = !_hasResolvedNavPos ||
+                              !_agent.hasPath ||
+                              HorizontalDistanceSqr(_lastPathMoveDest, destination) > 0.12f * 0.12f ||
+                              Time.time >= _nextPathCalcTime;
+
+            if (!needRecalc)
+            {
+                resolvedNavPos = _resolvedNavPos;
+            }
+            else
+            {
+                if (_reusableNavPath == null) _reusableNavPath = new NavMeshPath();
+                if (!NavMesh.CalculatePath(_agent.transform.position, targetNavPos, NavMesh.AllAreas, _reusableNavPath) ||
+                    _reusableNavPath.status != NavMeshPathStatus.PathComplete)
+                {
+                    _hasResolvedNavPos = false;
+                    pathBlocked = true;
+                    return false;
+                }
+
+                _lastPathMoveDest = destination;
+                _resolvedNavPos = targetNavPos;
+                _hasResolvedNavPos = true;
+                _nextPathCalcTime = Time.time + 0.25f;
+                _agent.SetDestination(targetNavPos);
+            }
+
+            // Detector de travamento (stuck): tenta pequeno ajuste na malha e sinaliza bloqueio se persistir
+            if (_agent.hasPath && !_agent.pathPending && HorizontalDistanceSqr(transform.position, resolvedNavPos) > 0.60f * 0.60f)
+            {
+                if (HorizontalDistanceSqr(transform.position, _stuckLastSamplePos) > 0.06f * 0.06f)
+                {
+                    _stuckLastSamplePos = transform.position;
+                    _stuckAccumSeconds = 0f;
+                }
+                else
+                {
+                    _stuckAccumSeconds += Time.deltaTime;
+                    if (_stuckAccumSeconds >= 4.5f)
+                    {
+                        _stuckAccumSeconds = 0f;
+                        _nextPathCalcTime = 0f;
+                        pathBlocked = true;
+                        return false;
+                    }
+                    if (_stuckAccumSeconds >= 2.2f && _stuckAccumSeconds - Time.deltaTime < 2.2f)
+                    {
+                        if (TrySampleFloorNavMesh(transform.position + transform.right * 0.45f, 1.5f, out var nudge))
+                            _agent.Warp(nudge);
+                        _agent.ResetPath();
+                        _nextPathCalcTime = 0f;
+                    }
+                }
+            }
+            else
+            {
+                _stuckLastSamplePos = transform.position;
+                _stuckAccumSeconds = 0f;
+            }
+
             return true;
         }
 
@@ -2544,6 +2740,11 @@ namespace ScaryParty.Pizzeria.Presentation
             _hasStartedPackageOp = false;
             _leasedToolId = ToolItemId.None;
             _expectedIngredientCountBeforeAsm = 0;
+            _hasFetchedStorageDough = false;
+            _pendingFetchIngredientId = -1;
+            _hasResolvedNavPos = false;
+            _nextPathCalcTime = 0f;
+            _stuckAccumSeconds = 0f;
         }
 
         private void OnDestroy()

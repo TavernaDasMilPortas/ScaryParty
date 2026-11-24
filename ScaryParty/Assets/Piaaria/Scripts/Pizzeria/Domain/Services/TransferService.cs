@@ -232,6 +232,24 @@ namespace ScaryParty.Pizzeria.Domain.Services
         {
             if (!state.Items.TryGetValue(itemId, out var item))
                 return CommandResult.Fail(CommandError.ItemNotFound, "Item não encontrado.");
+
+            if (item.Location.Type == LocationType.StationSlot)
+            {
+                var slotId = new StationSlotId((int)item.Location.HolderId, item.Location.SlotIndex);
+                if (state.ActiveOperations.TryGetValue(slotId, out var slotOp) && slotOp.InputItemId == itemId)
+                {
+                    bool isOvenOp = slotOp.Kind == OperationKind.Process && slotOp.ProcessId == 0;
+                    if (isOvenOp || slotOp.Phase != OperationPhase.Running)
+                    {
+                        if (slotOp.ToolItemId.IsValid && state.Tools.TryGetValue(slotOp.ToolItemId, out var tool))
+                            tool.ReleaseLease(slotOp.WorkerId);
+                        state.ActiveOperations.Remove(slotId);
+                        if (item.ReservedByHold == OperationState.ServerWorker || item.ReservedByHold == slotOp.WorkerId)
+                            item.ReservedByHold = ItemState.NoHoldOwner;
+                    }
+                }
+            }
+
             if (item.ReservedByHold == OperationState.ServerWorker)
                 return CommandResult.Fail(CommandError.Busy, "Item em processamento.");
 

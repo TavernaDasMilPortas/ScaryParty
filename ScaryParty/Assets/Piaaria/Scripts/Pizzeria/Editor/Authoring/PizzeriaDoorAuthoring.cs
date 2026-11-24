@@ -345,7 +345,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                     if (counter == null) continue;
                     // Fila fica em -forward; lado de dentro do balcão fica em +forward
                     Vector3 targetPos = counter.transform.position;
-                    Vector3 insidePos = targetPos + counter.transform.forward * 0.85f;
+                    Vector3 insidePos = targetPos + counter.transform.forward * 1.20f;
                     insidePos.y = floorY;
                     UpsertWorkPoint(counter.transform, counter, -1, NpcWorkPointRole.CounterInside, "NpcWorkPoint_CounterInside", insidePos, targetPos, ref created, ref updated);
                 }
