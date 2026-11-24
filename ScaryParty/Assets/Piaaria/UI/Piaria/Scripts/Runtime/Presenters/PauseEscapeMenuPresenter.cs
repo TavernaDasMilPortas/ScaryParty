@@ -4,6 +4,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Unity.Netcode;
 using ScaryParty.Player;
+using ScaryParty.Cutscenes;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Presentation;
 using ScaryParty.UI.Piaria.Core;
@@ -289,25 +290,59 @@ namespace ScaryParty.UI.Piaria.Presenters
 #endif
         }
 
+        public static bool ShouldBlockPauseOnEscape(
+            bool hasStackModal,
+            bool ticketOpen,
+            bool backpackOpen,
+            bool recipeBookOpen,
+            bool deliverySelectOpen,
+            bool deliveryResultOpen,
+            bool nightResultsOpen,
+            bool opsHubOpen,
+            bool intermissionOpen,
+            bool runPrepOpen,
+            CutscenePlaybackState cutsceneState,
+            bool blockingIntro,
+            bool loadingOrErrorVisible)
+        {
+            return hasStackModal ||
+                   ticketOpen ||
+                   backpackOpen ||
+                   recipeBookOpen ||
+                   deliverySelectOpen ||
+                   deliveryResultOpen ||
+                   nightResultsOpen ||
+                   opsHubOpen ||
+                   intermissionOpen ||
+                   runPrepOpen ||
+                   cutsceneState != CutscenePlaybackState.Idle ||
+                   blockingIntro ||
+                   loadingOrErrorVisible;
+        }
+
         private bool IsAnyOtherModalOpen()
         {
-            if (UIModalStack.Instance != null && UIModalStack.Instance.HasActiveModal)
-                return true;
-            if (TicketModalPresenter.Instance != null && TicketModalPresenter.Instance.IsOpen)
-                return true;
-            if (BackpackPanelPresenter.Instance != null && BackpackPanelPresenter.Instance.IsOpen)
-                return true;
-            if (RecipeBookPresenter.Instance != null && RecipeBookPresenter.Instance.IsOpen)
-                return true;
-            if (DeliverySelectionPresenter.Instance != null && DeliverySelectionPresenter.Instance.IsOpen)
-                return true;
-            if (DeliveryResultPresenter.Instance != null && DeliveryResultPresenter.Instance.IsOpen)
-                return true;
-            if (NightResultsPresenter.Instance != null && NightResultsPresenter.Instance.IsOpen)
-                return true;
-            if (OperationsHubPresenter.Instance != null && OperationsHubPresenter.Instance.IsOpen)
-                return true;
-            return false;
+            var cutsceneState = CutscenePlaybackService.Instance != null
+                ? CutscenePlaybackService.Instance.State
+                : CutscenePlaybackState.Idle;
+            var loadingCoord = PizzeriaSceneLoadingCoordinator.Instance;
+            bool loadingOrError = loadingCoord != null &&
+                                  (loadingCoord.IsLoading || loadingCoord.OperationState == LoadingOperationState.ErrorVisible);
+
+            return ShouldBlockPauseOnEscape(
+                UIModalStack.Instance != null && UIModalStack.Instance.HasActiveModal,
+                TicketModalPresenter.Instance != null && TicketModalPresenter.Instance.IsOpen,
+                BackpackPanelPresenter.Instance != null && BackpackPanelPresenter.Instance.IsOpen,
+                RecipeBookPresenter.Instance != null && RecipeBookPresenter.Instance.IsOpen,
+                DeliverySelectionPresenter.Instance != null && DeliverySelectionPresenter.Instance.IsOpen,
+                DeliveryResultPresenter.Instance != null && DeliveryResultPresenter.Instance.IsOpen,
+                NightResultsPresenter.Instance != null && NightResultsPresenter.Instance.IsOpen,
+                OperationsHubPresenter.Instance != null && OperationsHubPresenter.Instance.IsOpen,
+                NightIntermissionPresenter.Instance != null && NightIntermissionPresenter.Instance.IsOpen,
+                RunPreparationPresenter.Instance != null && RunPreparationPresenter.Instance.IsOpen,
+                cutsceneState,
+                GameplayIntroCutsceneFlow.IsBlockingIntermission,
+                loadingOrError);
         }
 
         private void Update()
@@ -437,6 +472,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (RoomDiscoveryService.Instance != null)
                 RoomDiscoveryService.Instance.StopHosting();
+            UgsLobbySessionService.StopHostingLobby();
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();

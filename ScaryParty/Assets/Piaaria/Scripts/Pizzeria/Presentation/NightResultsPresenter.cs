@@ -302,7 +302,7 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 if (isTutorialNight)
                 {
-                    _subtitleLabel.text = "Tutorial concluído sem consumir as 3 noites da RUN. Avance para a Noite 1!";
+                    _subtitleLabel.text = $"Tutorial concluído sem consumir as {maxNights} noites da RUN. Avance para a Noite 1!";
                 }
                 else if (isRunFinalVictory)
                 {
@@ -347,7 +347,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (_nextNightBtn != null)
             {
-                _nextNightBtn.text = isTutorialNight ? "Iniciar Noite 1 (3 Noites)" : "Ir para Votação e Loja";
+                _nextNightBtn.text = isTutorialNight ? $"Iniciar Noite 1 ({maxNights} Noites)" : "Ir para Votação e Loja";
                 _nextNightBtn.style.display = (isHost && isVictory && !isRunFinalVictory) ? DisplayStyle.Flex : DisplayStyle.None;
             }
         }
@@ -380,6 +380,7 @@ namespace ScaryParty.Pizzeria.Presentation
             Close();
             if (RoomDiscoveryService.Instance != null)
                 RoomDiscoveryService.Instance.StopHosting();
+            UgsLobbySessionService.StopHostingLobby();
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();
             GameplayInputGate.Reset();

@@ -171,6 +171,43 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.IsNotNull(catalog.templateShopPreparationPage, "templateShopPreparationPage ausente no catálogo de Resources.");
             Assert.IsNotNull(catalog.templateLotteryRevealPage, "templateLotteryRevealPage ausente no catálogo de Resources.");
             Assert.IsNotNull(catalog.templateOperationsStatusOverlay, "templateOperationsStatusOverlay ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.styleNightIntermission, "styleNightIntermission ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.styleNightModifierCards, "styleNightModifierCards ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.styleOperationsStatus, "styleOperationsStatus ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.uiClickClip, "uiClickClip ausente no catálogo de Resources.");
+        }
+
+        [Test]
+        public void PhaseA_UiEscapeShopAndDtoSerializationContracts_RemainValid()
+        {
+            Assert.IsTrue(ScaryParty.UI.Piaria.Presenters.RunShopPagePresenter.IsPendingExpired("offer_a", 10f, 18.5f, 8f));
+            Assert.IsFalse(ScaryParty.UI.Piaria.Presenters.RunShopPagePresenter.IsPendingExpired("", 10f, 50f, 8f));
+
+            Assert.IsTrue(ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.ShouldAbortIntroAfterLoading(ScaryParty.Pizzeria.Presentation.LoadingOperationState.ErrorVisible));
+            Assert.IsTrue(ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.ShouldAbortIntroAfterLoading(ScaryParty.Pizzeria.Presentation.LoadingOperationState.Failed));
+            Assert.IsFalse(ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.ShouldAbortIntroAfterLoading(ScaryParty.Pizzeria.Presentation.LoadingOperationState.Completed));
+
+            Assert.IsTrue(ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.ShouldBlockPauseOnEscape(
+                false, false, false, false, false, false, false, false, true, false, ScaryParty.Cutscenes.CutscenePlaybackState.Idle, false, false));
+            Assert.IsTrue(ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.ShouldBlockPauseOnEscape(
+                false, false, false, false, false, false, false, false, false, false, ScaryParty.Cutscenes.CutscenePlaybackState.Finishing, false, false));
+            Assert.IsFalse(ScaryParty.UI.Piaria.Presenters.PauseEscapeMenuPresenter.ShouldBlockPauseOnEscape(
+                false, false, false, false, false, false, false, false, false, false, ScaryParty.Cutscenes.CutscenePlaybackState.Idle, false, false));
+
+            var runSrc = new NetRunStateDto { SupplyEtaMultiplier = 0.72f, Revision = 5 };
+            var empSrc = new NetEmployeeDto { EmployeeId = 2, Level = 2, MaxLevel = 4, NextUpgradeCost = 220, Revision = 3 };
+            using var writer = new Unity.Netcode.FastBufferWriter(1024, Unity.Collections.Allocator.Temp);
+            writer.WriteValueSafe(in runSrc);
+            writer.WriteValueSafe(in empSrc);
+            using var reader = new Unity.Netcode.FastBufferReader(writer, Unity.Collections.Allocator.Temp);
+            reader.ReadValueSafe(out NetRunStateDto runOut);
+            reader.ReadValueSafe(out NetEmployeeDto empOut);
+
+            Assert.AreEqual(0.72f, runOut.SupplyEtaMultiplier, 0.001f);
+            Assert.IsTrue(runSrc.Equals(runOut));
+            Assert.AreEqual((byte)4, empOut.MaxLevel);
+            Assert.AreEqual(220, empOut.NextUpgradeCost);
+            Assert.IsTrue(empSrc.Equals(empOut));
         }
 
         [Test]

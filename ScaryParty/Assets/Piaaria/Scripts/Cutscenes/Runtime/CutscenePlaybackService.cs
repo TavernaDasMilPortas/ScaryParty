@@ -123,29 +123,30 @@ namespace ScaryParty.Cutscenes
             _activeRoutine = StartCoroutine(PrepareRoutine(def));
         }
 
-        public void Play(string cutsceneId)
+        public bool Play(string cutsceneId)
         {
             if (_state == CutscenePlaybackState.Ready && _activeDef != null && _activeDef.cutsceneId == cutsceneId)
             {
                 _activeRoutine = StartCoroutine(PlayRoutine(_activeDef));
-                return;
+                return true;
             }
 
             if (_state != CutscenePlaybackState.Idle && _state != CutscenePlaybackState.Failed)
             {
                 Debug.LogWarning($"[CutscenePlaybackService] Cannot play '{cutsceneId}' while in state {_state}.");
-                return;
+                return false;
             }
 
             if (!_byId.TryGetValue(cutsceneId, out var def))
             {
                 Fail(cutsceneId, $"CutsceneDefinition '{cutsceneId}' not found.");
-                return;
+                return false;
             }
 
             _activeDef = def;
             _completionFired = false;
             _activeRoutine = StartCoroutine(PrepareAndPlayRoutine(def));
+            return true;
         }
 
         public void Skip()
@@ -369,7 +370,13 @@ namespace ScaryParty.Cutscenes
         private void Fail(string id, string reason)
         {
             Debug.LogError($"[CutscenePlaybackService] Failed '{id}': {reason}");
+            if (_activeRoutine != null)
+            {
+                StopCoroutine(_activeRoutine);
+                _activeRoutine = null;
+            }
             _state = CutscenePlaybackState.Failed;
+            _completionFired = true;
             Failed?.Invoke(id, reason);
             StartCoroutine(CleanupRoutine(id, skipped: true));
         }

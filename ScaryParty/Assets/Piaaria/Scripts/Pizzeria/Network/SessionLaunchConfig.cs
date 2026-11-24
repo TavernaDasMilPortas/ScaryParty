@@ -43,6 +43,7 @@ namespace ScaryParty.Pizzeria.Network
 
         private static bool _hooksRegistered;
         private static NetworkManager _hookedManager;
+        private static CustomMessagingManager _hookedMessagingManager;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnSubsystemLoad()
@@ -50,6 +51,7 @@ namespace ScaryParty.Pizzeria.Network
             Current = SessionLaunchConfigData.CreateDefault();
             _hooksRegistered = false;
             _hookedManager = null;
+            _hookedMessagingManager = null;
         }
 
         public static void ResetToDefault()
@@ -86,6 +88,19 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        public static bool ShouldRebindMessaging(
+            object hookedManager,
+            object currentManager,
+            object hookedMessaging,
+            object currentMessaging,
+            bool hooksRegistered)
+        {
+            return !(hooksRegistered &&
+                     ReferenceEquals(hookedManager, currentManager) &&
+                     currentMessaging != null &&
+                     ReferenceEquals(hookedMessaging, currentMessaging));
+        }
+
         public static void EnsureNetworkHooksRegistered()
         {
             var nm = NetworkManager.Singleton;
@@ -96,21 +111,36 @@ namespace ScaryParty.Pizzeria.Network
                 UnhookManager(_hookedManager);
             }
 
-            if (_hooksRegistered && _hookedManager == nm) return;
+            var currentMessaging = nm.CustomMessagingManager;
+            if (!ShouldRebindMessaging(_hookedManager, nm, _hookedMessagingManager, currentMessaging, _hooksRegistered))
+                return;
 
-            _hookedManager = nm;
-            _hooksRegistered = true;
-
-            if (nm.CustomMessagingManager != null)
+            if (_hookedMessagingManager != null && _hookedMessagingManager != currentMessaging)
             {
-                nm.CustomMessagingManager.UnregisterNamedMessageHandler(NetworkMessageName);
-                nm.CustomMessagingManager.RegisterNamedMessageHandler(NetworkMessageName, HandleNamedMessageReceived);
+                try { _hookedMessagingManager.UnregisterNamedMessageHandler(NetworkMessageName); } catch { }
+                _hookedMessagingManager = null;
             }
 
-            nm.OnClientConnectedCallback -= HandleClientConnected;
-            nm.OnClientConnectedCallback += HandleClientConnected;
+            if (_hookedManager != nm || !_hooksRegistered)
+            {
+                _hookedManager = nm;
+                nm.OnClientConnectedCallback -= HandleClientConnected;
+                nm.OnClientConnectedCallback += HandleClientConnected;
+            }
 
-            if (nm.IsServer)
+            if (currentMessaging != null)
+            {
+                currentMessaging.UnregisterNamedMessageHandler(NetworkMessageName);
+                currentMessaging.RegisterNamedMessageHandler(NetworkMessageName, HandleNamedMessageReceived);
+                _hookedMessagingManager = currentMessaging;
+                _hooksRegistered = true;
+            }
+            else
+            {
+                _hooksRegistered = false;
+            }
+
+            if (nm.IsServer && currentMessaging != null)
             {
                 TryBroadcastToAllClients();
             }
@@ -122,7 +152,11 @@ namespace ScaryParty.Pizzeria.Network
             try
             {
                 nm.OnClientConnectedCallback -= HandleClientConnected;
-                if (nm.CustomMessagingManager != null)
+                if (_hookedMessagingManager != null)
+                {
+                    _hookedMessagingManager.UnregisterNamedMessageHandler(NetworkMessageName);
+                }
+                if (nm.CustomMessagingManager != null && nm.CustomMessagingManager != _hookedMessagingManager)
                 {
                     nm.CustomMessagingManager.UnregisterNamedMessageHandler(NetworkMessageName);
                 }
@@ -132,6 +166,7 @@ namespace ScaryParty.Pizzeria.Network
             }
             _hooksRegistered = false;
             _hookedManager = null;
+            _hookedMessagingManager = null;
         }
 
         private static void HandleClientConnected(ulong clientId)
@@ -144,6 +179,7 @@ namespace ScaryParty.Pizzeria.Network
 
         public static void TryBroadcastToAllClients()
         {
+            EnsureNetworkHooksRegistered();
             var nm = NetworkManager.Singleton;
             if (nm == null || !nm.IsServer || !nm.IsListening || nm.CustomMessagingManager == null) return;
             if (nm.ConnectedClientsIds == null || nm.ConnectedClientsIds.Count <= 1) return;

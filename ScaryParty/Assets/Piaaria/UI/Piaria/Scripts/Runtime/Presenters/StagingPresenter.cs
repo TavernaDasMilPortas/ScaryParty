@@ -99,11 +99,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("StagingModalRoot");
             if (RootElement == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("StagingModal")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/StagingModal.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateStagingModal,
+                    "Assets/Piaaria/UI/Piaria/UXML/StagingModal.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);

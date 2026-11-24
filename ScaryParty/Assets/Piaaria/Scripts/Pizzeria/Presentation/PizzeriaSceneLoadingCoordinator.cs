@@ -64,8 +64,9 @@ namespace ScaryParty.Pizzeria.Presentation
         private readonly StageTimingRecorder _stageTimings = new StageTimingRecorder();
         private Action _retryCallback;
         private bool _hasInputLock;
-        private bool _hookedNetworkEvents;
-        private bool _hookedDisconnectEvent;
+        private NetworkSceneManager _hookedSceneManager;
+        private NetworkManager _hookedDisconnectManager;
+        private bool _currentTransitionIsNetworked;
         private float _hintTimer;
         private int _hintIndex;
 
@@ -388,7 +389,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void Update()
         {
-            if (!_hookedNetworkEvents)
+            var nm = NetworkManager.Singleton;
+            if (nm != null &&
+                (ShouldRehookInstance(_hookedSceneManager, nm.SceneManager) ||
+                 ShouldRehookInstance(_hookedDisconnectManager, nm)))
             {
                 TryHookNetworkSceneEvents();
             }
@@ -460,6 +464,7 @@ namespace ScaryParty.Pizzeria.Presentation
             EnsureUIOverlay();
             TryHookNetworkSceneEvents();
 
+            _currentTransitionIsNetworked = true;
             _retryCallback = retryAction;
             if (!sm.TryBeginConnecting(null, SceneReadinessProfile.MenuOrLobby.ToString(), Time.realtimeSinceStartup, timeoutSeconds, out int opToken))
             {
@@ -504,14 +509,26 @@ namespace ScaryParty.Pizzeria.Presentation
         public void CancelConnectionOperation(int token)
         {
             var sm = EnsureStateMachine();
+            bool wasConnecting = sm.State == LoadingOperationState.Connecting;
             if (!sm.Cancel(token)) return;
 
             StopAllCoroutines();
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening && !NetworkManager.Singleton.IsServer)
+            if (wasConnecting)
+            {
+                if (RoomDiscoveryService.Instance != null)
+                {
+                    RoomDiscoveryService.Instance.StopHosting();
+                }
+                UgsLobbySessionService.StopHostingLobby();
+            }
+            if (NetworkManager.Singleton != null &&
+                NetworkManager.Singleton.IsListening &&
+                (!NetworkManager.Singleton.IsServer || wasConnecting))
             {
                 NetworkManager.Singleton.Shutdown();
             }
+            _currentTransitionIsNetworked = false;
             HideOverlayNow();
         }
 
@@ -531,10 +548,7 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 
             var sm = EnsureStateMachine();
-            if (!sm.Retry(Time.realtimeSinceStartup, 15f, out _))
-            {
-                sm.DismissErrorToIdle();
-            }
+            sm.DismissErrorToIdle();
             HideOverlayNow();
             retry.Invoke();
         }
@@ -568,6 +582,7 @@ namespace ScaryParty.Pizzeria.Presentation
             if (sm.IsActiveState && sm.State != LoadingOperationState.Connecting) return;
 
             StopAllCoroutines();
+            _currentTransitionIsNetworked = false;
             _retryCallback = null;
             int token = sm.BeginSceneTransition(
                 targetSceneName,
@@ -606,6 +621,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
             StopAllCoroutines();
             TryHookNetworkSceneEvents();
+            _currentTransitionIsNetworked = true;
             _retryCallback = null;
             int token = sm.BeginSceneTransition(
                 targetSceneName,
@@ -684,8 +700,12 @@ namespace ScaryParty.Pizzeria.Presentation
         private void ReturnToLobbyFromError()
         {
             _retryCallback = null;
+            _currentTransitionIsNetworked = false;
             _stateMachine?.DismissErrorToIdle();
             GameplayInputGate.Reset();
+            if (RoomDiscoveryService.Instance != null)
+                RoomDiscoveryService.Instance.StopHosting();
+            UgsLobbySessionService.StopHostingLobby();
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 NetworkManager.Singleton.Shutdown();
 
@@ -700,48 +720,83 @@ namespace ScaryParty.Pizzeria.Presentation
             }
         }
 
+        public static bool ShouldRehookInstance(object hookedInstance, object currentInstance)
+        {
+            return currentInstance != null && !ReferenceEquals(hookedInstance, currentInstance);
+        }
+
+        public static bool ShouldAbortOnClientDisconnect(
+            LoadingOperationState state,
+            bool isNetworkedTransition,
+            bool isServer,
+            ulong disconnectedClientId,
+            ulong localClientId)
+        {
+            if (isServer) return false;
+            if (disconnectedClientId != localClientId && disconnectedClientId != NetworkManager.ServerClientId)
+                return false;
+
+            if (state == LoadingOperationState.Connecting)
+                return true;
+
+            return isNetworkedTransition &&
+                   (state == LoadingOperationState.LoadingScene || state == LoadingOperationState.WaitingReadiness);
+        }
+
         private void TryHookNetworkSceneEvents()
         {
             var nm = NetworkManager.Singleton;
             if (nm == null) return;
 
-            if (nm.SceneManager != null && !_hookedNetworkEvents)
+            var sceneMgr = nm.SceneManager;
+            if (ShouldRehookInstance(_hookedSceneManager, sceneMgr))
             {
-                nm.SceneManager.OnSceneEvent += OnNetworkSceneEvent;
-                _hookedNetworkEvents = true;
+                if (_hookedSceneManager != null)
+                {
+                    try { _hookedSceneManager.OnSceneEvent -= OnNetworkSceneEvent; } catch { }
+                }
+                _hookedSceneManager = sceneMgr;
+                if (_hookedSceneManager != null)
+                {
+                    _hookedSceneManager.OnSceneEvent += OnNetworkSceneEvent;
+                }
             }
 
-            if (!_hookedDisconnectEvent)
+            if (ShouldRehookInstance(_hookedDisconnectManager, nm))
             {
-                nm.OnClientDisconnectCallback += OnLocalClientDisconnected;
-                _hookedDisconnectEvent = true;
+                if (_hookedDisconnectManager != null)
+                {
+                    try { _hookedDisconnectManager.OnClientDisconnectCallback -= OnLocalClientDisconnected; } catch { }
+                }
+                _hookedDisconnectManager = nm;
+                _hookedDisconnectManager.OnClientDisconnectCallback += OnLocalClientDisconnected;
             }
         }
 
         private void UnhookNetworkSceneEvents()
         {
-            var nm = NetworkManager.Singleton;
-            if (_hookedNetworkEvents && nm != null && nm.SceneManager != null)
+            if (_hookedSceneManager != null)
             {
-                nm.SceneManager.OnSceneEvent -= OnNetworkSceneEvent;
+                try { _hookedSceneManager.OnSceneEvent -= OnNetworkSceneEvent; } catch { }
+                _hookedSceneManager = null;
             }
-            _hookedNetworkEvents = false;
 
-            if (_hookedDisconnectEvent && nm != null)
+            if (_hookedDisconnectManager != null)
             {
-                nm.OnClientDisconnectCallback -= OnLocalClientDisconnected;
+                try { _hookedDisconnectManager.OnClientDisconnectCallback -= OnLocalClientDisconnected; } catch { }
+                _hookedDisconnectManager = null;
             }
-            _hookedDisconnectEvent = false;
         }
 
         private void OnLocalClientDisconnected(ulong clientId)
         {
             var nm = NetworkManager.Singleton;
-            if (!_awaitingConnection) return;
-            if (nm != null && !nm.IsServer && (clientId == nm.LocalClientId || clientId == NetworkManager.ServerClientId))
-            {
-                AbortLoading("Conexão recusada ou encerrada pelo host.");
-            }
+            bool isServer = nm != null && nm.IsServer;
+            ulong localId = nm != null ? nm.LocalClientId : 0UL;
+            if (!ShouldAbortOnClientDisconnect(OperationState, _currentTransitionIsNetworked, isServer, clientId, localId))
+                return;
+
+            AbortLoading("Conexão recusada ou encerrada pelo host.");
         }
 
         private void OnNetworkSceneEvent(SceneEvent sceneEvent)
@@ -751,6 +806,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 case SceneEventType.Load:
                 case SceneEventType.Synchronize:
                     if (string.IsNullOrWhiteSpace(sceneEvent.SceneName)) return;
+                    _currentTransitionIsNetworked = true;
                     _expectedTargetScene = sceneEvent.SceneName;
                     _trackedNetworkAsyncOp = sceneEvent.AsyncOperation;
                     _networkSceneLoadCompleted = sceneEvent.SceneEventType == SceneEventType.Synchronize;

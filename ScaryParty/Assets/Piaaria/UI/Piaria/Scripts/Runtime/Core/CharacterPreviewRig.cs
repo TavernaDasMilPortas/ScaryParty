@@ -391,18 +391,24 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        private VisualElement _boundDragElement;
+        private EventCallback<PointerDownEvent> _onPointerDown;
+        private EventCallback<PointerMoveEvent> _onPointerMove;
+        private EventCallback<PointerUpEvent> _onPointerUp;
+
         public void BindDragEvents(VisualElement previewElement)
         {
             if (previewElement == null) return;
+            if (ReferenceEquals(_boundDragElement, previewElement)) return;
+            UnbindDragEvents();
 
-            previewElement.RegisterCallback<PointerDownEvent>(evt =>
+            _onPointerDown = evt =>
             {
                 _isDragging = true;
                 _lastMousePos = evt.position;
                 previewElement.CapturePointer(evt.pointerId);
-            });
-
-            previewElement.RegisterCallback<PointerMoveEvent>(evt =>
+            };
+            _onPointerMove = evt =>
             {
                 if (!_isDragging || modelContainer == null) return;
                 float deltaX = evt.position.x - _lastMousePos.x;
@@ -414,13 +420,26 @@ namespace ScaryParty.UI.Piaria.Core
                 {
                     previewCamera.Render();
                 }
-            });
-
-            previewElement.RegisterCallback<PointerUpEvent>(evt =>
+            };
+            _onPointerUp = evt =>
             {
                 _isDragging = false;
                 previewElement.ReleasePointer(evt.pointerId);
-            });
+            };
+
+            previewElement.RegisterCallback(_onPointerDown);
+            previewElement.RegisterCallback(_onPointerMove);
+            previewElement.RegisterCallback(_onPointerUp);
+            _boundDragElement = previewElement;
+        }
+
+        private void UnbindDragEvents()
+        {
+            if (_boundDragElement == null) return;
+            if (_onPointerDown != null) _boundDragElement.UnregisterCallback(_onPointerDown);
+            if (_onPointerMove != null) _boundDragElement.UnregisterCallback(_onPointerMove);
+            if (_onPointerUp != null) _boundDragElement.UnregisterCallback(_onPointerUp);
+            _boundDragElement = null;
         }
     }
 }

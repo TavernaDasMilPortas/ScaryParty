@@ -9,6 +9,19 @@ namespace ScaryParty.UI.Piaria.Core
 {
     public static class PiariaPresenterUtils
     {
+        public static VisualTreeAsset ResolveTemplate(Func<PiariaUIAssetCatalog, VisualTreeAsset> catalogSelector, string editorFallbackPath = null)
+        {
+            var catalog = PiariaUIAssetCatalog.Instance;
+            VisualTreeAsset asset = (catalog != null && catalogSelector != null) ? catalogSelector(catalog) : null;
+#if UNITY_EDITOR
+            if (asset == null && !string.IsNullOrEmpty(editorFallbackPath))
+            {
+                asset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(editorFallbackPath);
+            }
+#endif
+            return asset;
+        }
+
         public static void ConfigureHierarchyPicking(VisualElement root)
         {
             if (root == null) return;
@@ -60,9 +73,15 @@ namespace ScaryParty.UI.Piaria.Core
                     uiDoc = presenter.gameObject.AddComponent<UIDocument>();
                     var catalog = PiariaUIAssetCatalog.Instance;
                     if (catalog != null && catalog.panelSettings != null)
+                    {
                         uiDoc.panelSettings = catalog.panelSettings;
+                    }
                     else
-                        uiDoc.panelSettings = Resources.Load<PanelSettings>("PanelSettings");
+                    {
+                        var foundPs = Resources.FindObjectsOfTypeAll<PanelSettings>();
+                        if (foundPs != null && foundPs.Length > 0)
+                            uiDoc.panelSettings = foundPs[0];
+                    }
                 }
 
                 if (uiDoc != null && uiDoc.visualTreeAsset == null && !string.IsNullOrEmpty(fallbackUxmlPath))

@@ -123,11 +123,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("MainMenuRoot");
             if (RootElement == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("MainMenuScreen")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/MainMenuScreen.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateMainMenu,
+                    "Assets/Piaaria/UI/Piaria/UXML/MainMenuScreen.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);

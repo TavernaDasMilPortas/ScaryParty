@@ -103,5 +103,101 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.AreEqual(2, lockRelease);
             Assert.IsFalse(sm.InputLocked);
         }
+
+        [Test]
+        public void DismissErrorToIdle_AllowsFreshConnectingAttemptWithBalancedLock()
+        {
+            int lockAcquire = 0;
+            int lockRelease = 0;
+            var sm = new LoadingTransitionStateMachine(() => lockAcquire++, () => lockRelease++);
+
+            Assert.IsTrue(sm.TryBeginConnecting(null, "MenuOrLobby", 0f, 15f, out int t1));
+            Assert.IsTrue(sm.Fail(t1, "Relay offline"));
+            sm.DismissErrorToIdle();
+            Assert.AreEqual(LoadingOperationState.Idle, sm.State);
+            Assert.IsFalse(sm.InputLocked);
+
+            Assert.IsTrue(sm.TryBeginConnecting(null, "MenuOrLobby", 1f, 15f, out int t2));
+            Assert.Greater(t2, t1);
+            Assert.AreEqual(LoadingOperationState.Connecting, sm.State);
+            Assert.IsTrue(sm.InputLocked);
+            Assert.AreEqual(2, lockAcquire);
+            Assert.AreEqual(1, lockRelease);
+        }
+
+        [Test]
+        public void SceneManagerRehookAndClientDisconnectGuards_HandleSecondSessionAndOfflineReturn()
+        {
+            var objA = new object();
+            var objB = new object();
+            Assert.IsFalse(PizzeriaSceneLoadingCoordinator.ShouldRehookInstance(objA, objA));
+            Assert.IsTrue(PizzeriaSceneLoadingCoordinator.ShouldRehookInstance(objA, objB));
+            Assert.IsFalse(PizzeriaSceneLoadingCoordinator.ShouldRehookInstance(objA, null));
+
+            // Offline transition back to Lobby must NOT abort when client disconnect fires
+            Assert.IsFalse(PizzeriaSceneLoadingCoordinator.ShouldAbortOnClientDisconnect(
+                LoadingOperationState.LoadingScene, isNetworkedTransition: false, isServer: false, 1UL, 1UL));
+            // Networked scene load / readiness / connecting MUST abort for client disconnect
+            Assert.IsTrue(PizzeriaSceneLoadingCoordinator.ShouldAbortOnClientDisconnect(
+                LoadingOperationState.LoadingScene, isNetworkedTransition: true, isServer: false, 0UL, 1UL));
+            Assert.IsTrue(PizzeriaSceneLoadingCoordinator.ShouldAbortOnClientDisconnect(
+                LoadingOperationState.WaitingReadiness, isNetworkedTransition: true, isServer: false, 1UL, 1UL));
+            Assert.IsTrue(PizzeriaSceneLoadingCoordinator.ShouldAbortOnClientDisconnect(
+                LoadingOperationState.Connecting, isNetworkedTransition: false, isServer: false, 1UL, 1UL));
+            Assert.IsFalse(PizzeriaSceneLoadingCoordinator.ShouldAbortOnClientDisconnect(
+                LoadingOperationState.LoadingScene, isNetworkedTransition: true, isServer: true, 1UL, 0UL));
+        }
+
+        [Test]
+        public void SessionLaunchConfig_RebindsWhenCustomMessagingRecreated()
+        {
+            var nm = new object();
+            var msg1 = new object();
+            var msg2 = new object();
+            Assert.IsFalse(ScaryParty.Pizzeria.Network.SessionLaunchConfig.ShouldRebindMessaging(nm, nm, msg1, msg1, true));
+            Assert.IsTrue(ScaryParty.Pizzeria.Network.SessionLaunchConfig.ShouldRebindMessaging(nm, nm, msg1, msg2, true));
+            Assert.IsTrue(ScaryParty.Pizzeria.Network.SessionLaunchConfig.ShouldRebindMessaging(nm, nm, null, null, false));
+        }
+
+        private sealed class FakeUgsLobbyGateway : IUgsLobbyGateway
+        {
+            public readonly System.Collections.Generic.List<string> DeletedIds = new System.Collections.Generic.List<string>();
+
+            public System.Threading.Tasks.Task SendHeartbeatPingAsync(string lobbyId)
+                => System.Threading.Tasks.Task.CompletedTask;
+
+            public System.Threading.Tasks.Task DeleteLobbyAsync(string lobbyId)
+            {
+                DeletedIds.Add(lobbyId);
+                return System.Threading.Tasks.Task.CompletedTask;
+            }
+        }
+
+        [Test]
+        public void UgsLobbySessionService_PersistsAcrossSceneChanges_UntilExplicitStopOrReplacement()
+        {
+            var gw = new FakeUgsLobbyGateway();
+            UgsLobbySessionService.SetGatewayForTests(gw);
+            try
+            {
+                UgsLobbySessionService.AdoptHostedLobby("lobby_1", 60000);
+                Assert.AreEqual("lobby_1", UgsLobbySessionService.ActiveLobbyId);
+                Assert.AreEqual(0, gw.DeletedIds.Count);
+
+                UgsLobbySessionService.AdoptHostedLobby("lobby_2", 60000);
+                Assert.AreEqual("lobby_2", UgsLobbySessionService.ActiveLobbyId);
+                Assert.AreEqual(1, gw.DeletedIds.Count);
+                Assert.AreEqual("lobby_1", gw.DeletedIds[0]);
+
+                UgsLobbySessionService.StopHostingLobby();
+                Assert.IsNull(UgsLobbySessionService.ActiveLobbyId);
+                Assert.AreEqual(2, gw.DeletedIds.Count);
+                Assert.AreEqual("lobby_2", gw.DeletedIds[1]);
+            }
+            finally
+            {
+                UgsLobbySessionService.SetGatewayForTests(null);
+            }
+        }
     }
 }

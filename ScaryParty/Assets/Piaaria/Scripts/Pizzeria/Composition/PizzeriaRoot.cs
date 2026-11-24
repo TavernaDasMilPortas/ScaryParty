@@ -477,9 +477,10 @@ namespace ScaryParty.Pizzeria.Composition
                     ? preset.difficulty
                     : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
 
-            bool includeNight0 = (useLaunch && launch.IncludeNight0Tutorial) ||
-                                 (preset != null && preset.includeNight0Tutorial) ||
-                                 (_config != null && _config.enableTutorialNight0ByDefault);
+            bool includeNight0 = useLaunch
+                ? launch.IncludeNight0Tutorial
+                : ((preset != null && preset.includeNight0Tutorial) ||
+                   (_config != null && _config.enableTutorialNight0ByDefault));
             startNight = includeNight0 ? 0 : 1;
         }
 

@@ -37,7 +37,7 @@ namespace ScaryParty.Pizzeria.Network
             CleanupPlayerWorldAndDomainStateServer(clientId);
             if (root != null && root.IsServer)
             {
-                PizzeriaCommandHandler.Instance?.ResolveAndStartPreparedNightIfReadyServer();
+                PizzeriaCommandHandler.Instance?.ResolveAndStartPreparedNightIfReadyServer(excludedClientId: clientId);
             }
         }
 

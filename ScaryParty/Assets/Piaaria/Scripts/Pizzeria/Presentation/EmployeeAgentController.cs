@@ -2768,11 +2768,18 @@ namespace ScaryParty.Pizzeria.Presentation
                     uint rev = hasCtrl ? ctrl.Revision : 1u;
 
                     float errProb = root.EmployeeTaskService.ComputeEffectiveErrorProbability(emp, runStats.EmployeeErrorMultiplier);
+                    var roleProfile = root.EmployeeTaskService.GetRoleProfile(emp.Role);
+                    byte maxLevel = (byte)(roleProfile != null ? Mathf.Clamp(roleProfile.MaxLevel, 1, 255) : 5);
+                    int nextUpgradeCost = (roleProfile != null && emp.Level < roleProfile.MaxLevel)
+                        ? roleProfile.ComputeCostForLevel(emp.Level + 1)
+                        : 0;
                     var dto = new NetEmployeeDto
                     {
                         EmployeeId = emp.EmployeeId,
                         Role = (byte)emp.Role,
                         Level = (byte)Mathf.Clamp(emp.Level, 1, 255),
+                        MaxLevel = maxLevel,
+                        NextUpgradeCost = nextUpgradeCost,
                         IsAlive = emp.IsAlive,
                         CurrentHp = curHp,
                         MaxHp = maxHp,

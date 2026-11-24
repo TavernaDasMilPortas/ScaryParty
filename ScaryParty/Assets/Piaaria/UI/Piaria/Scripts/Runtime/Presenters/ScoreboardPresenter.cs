@@ -89,12 +89,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             _opsRoot = uiDocument.rootVisualElement.Q<VisualElement>("ops-overlay-root");
             if (_opsRoot == null)
             {
-                VisualTreeAsset opsTpl = catalog != null ? catalog.templateOperationsStatusOverlay : null;
-                if (opsTpl == null) opsTpl = Resources.Load<VisualTreeAsset>("OperationsStatusOverlay");
-#if UNITY_EDITOR
-                if (opsTpl == null)
-                    opsTpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml");
-#endif
+                VisualTreeAsset opsTpl = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateOperationsStatusOverlay,
+                    "Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml");
                 if (opsTpl != null)
                 {
                     var opsTree = opsTpl.Instantiate();
@@ -126,11 +123,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             _root = uiDocument.rootVisualElement.Q<VisualElement>("ScoreboardRoot");
             if (_root == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("ScoreboardOverlay")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ScoreboardOverlay.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateScoreboardOverlay,
+                    "Assets/Piaaria/UI/Piaria/UXML/ScoreboardOverlay.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);

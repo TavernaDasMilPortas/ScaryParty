@@ -59,8 +59,16 @@ namespace ScaryParty.UI.Piaria.Core
 
                 if (clickClip == null)
                 {
+                    var catalog = PiariaUIAssetCatalog.Instance;
+                    if (catalog != null && catalog.uiClickClip != null)
+                    {
+                        clickClip = catalog.uiClickClip;
+                    }
 #if UNITY_EDITOR
-                    clickClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/EasyGridBuilder Pro/Misc Assets/Sound/UIClick.wav");
+                    if (clickClip == null)
+                    {
+                        clickClip = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/ThirdParty/EasyGridBuilder Pro/Misc Assets/Sound/UIClick.wav");
+                    }
 #endif
                 }
             }

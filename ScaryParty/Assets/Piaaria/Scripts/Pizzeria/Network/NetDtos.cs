@@ -1093,6 +1093,7 @@ namespace ScaryParty.Pizzeria.Network
         public float EmployeeErrorMultiplier;
         public float VampireSpawnMultiplier;
         public float DemandMultiplier;
+        public float SupplyEtaMultiplier;
         public Unity.Collections.FixedString32Bytes ActivePresetId;
         public bool AllowDebugPanel;
         public bool IsDebugTaintedRun;
@@ -1129,6 +1130,7 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref EmployeeErrorMultiplier);
             serializer.SerializeValue(ref VampireSpawnMultiplier);
             serializer.SerializeValue(ref DemandMultiplier);
+            serializer.SerializeValue(ref SupplyEtaMultiplier);
             serializer.SerializeValue(ref ActivePresetId);
             serializer.SerializeValue(ref AllowDebugPanel);
             serializer.SerializeValue(ref IsDebugTaintedRun);
@@ -1168,6 +1170,7 @@ namespace ScaryParty.Pizzeria.Network
                WinningHindranceId.Equals(other.WinningHindranceId) &&
                WinningOpportunityId.Equals(other.WinningOpportunityId) &&
                Math.Abs(EmployeeErrorMultiplier - other.EmployeeErrorMultiplier) < 0.01f &&
+               Math.Abs(SupplyEtaMultiplier - other.SupplyEtaMultiplier) < 0.01f &&
                Revision == other.Revision;
 
         public override bool Equals(object obj) => obj is NetRunStateDto other && Equals(other);
@@ -1228,6 +1231,8 @@ namespace ScaryParty.Pizzeria.Network
         public int EmployeeId;
         public byte Role; // 0=Cashier, 1=Pizzaiolo
         public byte Level;
+        public byte MaxLevel;
+        public int NextUpgradeCost;
         public bool IsAlive;
         public int CurrentHp;
         public int MaxHp;
@@ -1253,6 +1258,8 @@ namespace ScaryParty.Pizzeria.Network
             serializer.SerializeValue(ref EmployeeId);
             serializer.SerializeValue(ref Role);
             serializer.SerializeValue(ref Level);
+            serializer.SerializeValue(ref MaxLevel);
+            serializer.SerializeValue(ref NextUpgradeCost);
             serializer.SerializeValue(ref IsAlive);
             serializer.SerializeValue(ref CurrentHp);
             serializer.SerializeValue(ref MaxHp);
@@ -1278,6 +1285,8 @@ namespace ScaryParty.Pizzeria.Network
             => EmployeeId == other.EmployeeId &&
                Role == other.Role &&
                Level == other.Level &&
+               MaxLevel == other.MaxLevel &&
+               NextUpgradeCost == other.NextUpgradeCost &&
                IsAlive == other.IsAlive &&
                CurrentHp == other.CurrentHp &&
                MaxHp == other.MaxHp &&

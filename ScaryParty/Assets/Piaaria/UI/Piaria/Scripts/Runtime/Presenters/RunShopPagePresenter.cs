@@ -30,6 +30,20 @@ namespace ScaryParty.UI.Piaria.Presenters
         private static string _pendingRequestId = string.Empty;
         private static float _pendingStartedAtRealtime;
         private static int _nextRequestSeq;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _pendingOfferId = string.Empty;
+            _pendingRequestId = string.Empty;
+            _pendingStartedAtRealtime = 0f;
+            _nextRequestSeq = 0;
+        }
+
+        public static bool IsPendingExpired(string pendingOfferId, float startedAtRealtime, float nowRealtime, float timeoutSeconds = 8f)
+        {
+            return !string.IsNullOrEmpty(pendingOfferId) && (nowRealtime - startedAtRealtime) > timeoutSeconds;
+        }
         private IVisualElementScheduledItem _pendingTimeoutCheck;
         private readonly List<Button> _shopBuyButtons = new List<Button>();
         private readonly Dictionary<string, VisualElement> _shopCardsByOfferId = new Dictionary<string, VisualElement>(StringComparer.Ordinal);
@@ -80,34 +94,19 @@ namespace ScaryParty.UI.Piaria.Presenters
             _shopCardsByOfferId.Clear();
 
             // Timeout defensivo apenas para destravar UI em queda de rede, nunca reenvia compra.
-            if (!string.IsNullOrEmpty(_pendingOfferId) && Time.realtimeSinceStartup - _pendingStartedAtRealtime > 8f)
+            if (IsPendingExpired(_pendingOfferId, _pendingStartedAtRealtime, Time.realtimeSinceStartup))
             {
                 _pendingOfferId = string.Empty;
                 _pendingRequestId = string.Empty;
             }
 
-            if (!string.IsNullOrEmpty(_pendingOfferId) && _pendingTimeoutCheck == null)
+            if (!string.IsNullOrEmpty(_pendingOfferId))
             {
-                _pendingTimeoutCheck = _shopGrid.schedule.Execute(() =>
-                {
-                    if (_shopGrid == null || _shopGrid.panel == null) return;
-                    if (!string.IsNullOrEmpty(_pendingOfferId) && Time.realtimeSinceStartup - _pendingStartedAtRealtime > 8f)
-                    {
-                        _pendingOfferId = string.Empty;
-                        _pendingRequestId = string.Empty;
-                        _pendingTimeoutCheck?.Pause();
-                        _pendingTimeoutCheck = null;
-                        if (PizzeriaNetworkState.Instance != null)
-                        {
-                            BindShop(PizzeriaNetworkState.Instance);
-                        }
-                    }
-                }).Every(500);
+                EnsurePendingTimeoutScheduled();
             }
-            else if (string.IsNullOrEmpty(_pendingOfferId) && _pendingTimeoutCheck != null)
+            else
             {
-                _pendingTimeoutCheck.Pause();
-                _pendingTimeoutCheck = null;
+                StopPendingTimeoutSchedule();
             }
 
             bool hasAnyPending = !string.IsNullOrEmpty(_pendingOfferId);
@@ -166,6 +165,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _pendingOfferId = offerId;
                     _pendingRequestId = $"req_{++_nextRequestSeq}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
                     _pendingStartedAtRealtime = Time.realtimeSinceStartup;
+                    EnsurePendingTimeoutScheduled();
 
                     for (int b = 0; b < _shopBuyButtons.Count; b++)
                     {
@@ -293,10 +293,40 @@ namespace ScaryParty.UI.Piaria.Presenters
             PizzeriaCommandHandler.Instance?.SetRunReadyServerRpc(!currentlyReady);
         }
 
+        private void EnsurePendingTimeoutScheduled()
+        {
+            if (_shopGrid == null || _pendingTimeoutCheck != null) return;
+            _pendingTimeoutCheck = _shopGrid.schedule.Execute(() =>
+            {
+                if (_shopGrid == null || _shopGrid.panel == null)
+                {
+                    StopPendingTimeoutSchedule();
+                    return;
+                }
+                if (IsPendingExpired(_pendingOfferId, _pendingStartedAtRealtime, Time.realtimeSinceStartup))
+                {
+                    _pendingOfferId = string.Empty;
+                    _pendingRequestId = string.Empty;
+                    StopPendingTimeoutSchedule();
+                    if (PizzeriaNetworkState.Instance != null)
+                    {
+                        BindShop(PizzeriaNetworkState.Instance);
+                    }
+                }
+            }).Every(500);
+        }
+
+        private void StopPendingTimeoutSchedule()
+        {
+            _pendingTimeoutCheck?.Pause();
+            _pendingTimeoutCheck = null;
+        }
+
         public void ClearPendingPurchase()
         {
             _pendingOfferId = string.Empty;
             _pendingRequestId = string.Empty;
+            StopPendingTimeoutSchedule();
         }
 
         public void HandleShopPurchaseResult(bool success, string offerId, string requestId, string message, PizzeriaNetworkState net)
@@ -308,6 +338,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             string completedOfferId = _pendingOfferId;
             _pendingOfferId = string.Empty;
             _pendingRequestId = string.Empty;
+            StopPendingTimeoutSchedule();
 
             if (success)
             {

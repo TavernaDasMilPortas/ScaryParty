@@ -56,6 +56,11 @@ namespace ScaryParty.UI.Piaria.Presenters
         private bool _offlineReady = false;
         private bool? _optimisticReadyState = null;
         private readonly HashSet<PlayerState> _observedPlayers = new HashSet<PlayerState>();
+        private NetworkManager _hookedNm;
+        private bool _isLeavingVoluntarily;
+        private bool _handlingDisconnect;
+        private int _boundPreviewSlotIndex = -1;
+        private int _localPlayerSlotIndex = 0;
 
         // P4: Configuração da sessão pelo Host
         private VisualElement _hostConfigPanel;
@@ -118,11 +123,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             UIScreenRouter.Instance?.RegisterScreen(this);
             SessionLaunchConfig.OnConfigChanged += OnSessionLaunchConfigChanged;
             SessionLaunchConfig.EnsureNetworkHooksRegistered();
+            EnsureDisconnectHooks();
             Open();
         }
 
         private void OnDestroy()
         {
+            UnhookDisconnectCallbacks();
             SessionLaunchConfig.OnConfigChanged -= OnSessionLaunchConfigChanged;
             foreach (var ps in _observedPlayers)
             {
@@ -135,6 +142,57 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             UIScreenRouter.Instance?.UnregisterScreen(this);
             if (Instance == this) Instance = null;
+        }
+
+        private void EnsureDisconnectHooks()
+        {
+            var nm = NetworkManager.Singleton;
+            if (nm == null) return;
+            if (ReferenceEquals(_hookedNm, nm)) return;
+
+            UnhookDisconnectCallbacks();
+            _hookedNm = nm;
+            _hookedNm.OnClientDisconnectCallback += HandleNetworkClientDisconnected;
+            _hookedNm.OnClientStopped += HandleNetworkClientStopped;
+        }
+
+        private void UnhookDisconnectCallbacks()
+        {
+            if (_hookedNm == null) return;
+            try { _hookedNm.OnClientDisconnectCallback -= HandleNetworkClientDisconnected; } catch { }
+            try { _hookedNm.OnClientStopped -= HandleNetworkClientStopped; } catch { }
+            _hookedNm = null;
+        }
+
+        private void HandleNetworkClientDisconnected(ulong clientId)
+        {
+            if (_isLeavingVoluntarily || _handlingDisconnect) return;
+            var nm = NetworkManager.Singleton ?? _hookedNm;
+            if (nm == null || nm.IsServer) return;
+            if (clientId != nm.LocalClientId && clientId != NetworkManager.ServerClientId) return;
+
+            string reason = !string.IsNullOrWhiteSpace(nm.DisconnectReason)
+                ? nm.DisconnectReason
+                : "O líder encerrou a sala ou a conexão foi perdida.";
+            TriggerUnexpectedDisconnectReturn(reason);
+        }
+
+        private void HandleNetworkClientStopped(bool isHost)
+        {
+            if (_isLeavingVoluntarily || _handlingDisconnect || isHost) return;
+            var nm = NetworkManager.Singleton ?? _hookedNm;
+            string reason = nm != null && !string.IsNullOrWhiteSpace(nm.DisconnectReason)
+                ? nm.DisconnectReason
+                : "Conexão com a sala encerrada.";
+            TriggerUnexpectedDisconnectReturn(reason);
+        }
+
+        private void TriggerUnexpectedDisconnectReturn(string reason)
+        {
+            _handlingDisconnect = true;
+            CharacterPreviewRig.Instance?.SetActive(false);
+            NotificationManager.Show(reason, NotificationType.Warning);
+            PizzeriaSceneLoadingCoordinator.EnsureInstance().TransitionToScene("LobbyScene");
         }
 
         private void OnPlayerReadyChanged(bool previous, bool current)
@@ -152,11 +210,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             RootElement = uiDocument.rootVisualElement.Q<VisualElement>("ReadyRoomRoot");
             if (RootElement == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("ReadyRoomScreen")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ReadyRoomScreen.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateReadyRoom,
+                    "Assets/Piaaria/UI/Piaria/UXML/ReadyRoomScreen.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);
@@ -554,7 +610,12 @@ namespace ScaryParty.UI.Piaria.Presenters
 
                     if (isMe)
                     {
-                        SetupPreviewRig(ps.PlayerColor.Value);
+                        _localPlayerSlotIndex = i;
+                        SetupPreviewRig(i, ps.PlayerColor.Value);
+                    }
+                    else
+                    {
+                        ClearPreviewFromSlot(i);
                     }
 
                     if (_slots[i].RoleLabel != null)
@@ -587,6 +648,7 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
                 else
                 {
+                    ClearPreviewFromSlot(i);
                     if (_slots[i].Occupied != null) _slots[i].Occupied.style.display = DisplayStyle.None;
                     if (_slots[i].Empty != null) _slots[i].Empty.style.display = DisplayStyle.Flex;
                     _slots[i].LastKnownReady = false;
@@ -652,7 +714,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (_slots[0].ColorBox != null) _slots[0].ColorBox.style.backgroundColor = localColor;
                 if (_slots[0].RoleLabel != null) _slots[0].RoleLabel.text = "👑 Líder da Sala";
 
-                SetupPreviewRig(localColor);
+                _localPlayerSlotIndex = 0;
+                SetupPreviewRig(0, localColor);
                 bool isReady = _optimisticReadyState ?? _offlineReady;
                 if (_slots[0].ReadyBadge != null)
                 {
@@ -722,18 +785,19 @@ namespace ScaryParty.UI.Piaria.Presenters
                 }
             }
 
-            if (_slots[0].Initialized && _slots[0].ReadyBadge != null)
+            int targetSlot = (_localPlayerSlotIndex >= 0 && _localPlayerSlotIndex < _slots.Length) ? _localPlayerSlotIndex : 0;
+            if (_slots[targetSlot].Initialized && _slots[targetSlot].ReadyBadge != null)
             {
-                _slots[0].ReadyBadge.text = ready ? "PRONTO!" : "PREPARANDO...";
+                _slots[targetSlot].ReadyBadge.text = ready ? "PRONTO!" : "PREPARANDO...";
                 if (ready)
                 {
-                    _slots[0].ReadyBadge.RemoveFromClassList("status-waiting");
-                    _slots[0].ReadyBadge.AddToClassList("status-ready");
+                    _slots[targetSlot].ReadyBadge.RemoveFromClassList("status-waiting");
+                    _slots[targetSlot].ReadyBadge.AddToClassList("status-ready");
                 }
                 else
                 {
-                    _slots[0].ReadyBadge.RemoveFromClassList("status-ready");
-                    _slots[0].ReadyBadge.AddToClassList("status-waiting");
+                    _slots[targetSlot].ReadyBadge.RemoveFromClassList("status-ready");
+                    _slots[targetSlot].ReadyBadge.AddToClassList("status-waiting");
                 }
             }
 
@@ -832,6 +896,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
+            UgsLobbySessionService.StopHostingLobby();
 
             UIFeedbackService.Instance?.PlaySuccess();
 
@@ -881,8 +946,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             Action doLeave = () =>
             {
+                _isLeavingVoluntarily = true;
                 CharacterPreviewRig.Instance?.SetActive(false);
                 if (RoomDiscoveryService.Instance != null) RoomDiscoveryService.Instance.StopHosting();
+                UgsLobbySessionService.StopHostingLobby();
                 if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
                 {
                     NetworkManager.Singleton.Shutdown();
@@ -927,8 +994,33 @@ namespace ScaryParty.UI.Piaria.Presenters
             return null;
         }
 
-        private void SetupPreviewRig(Color playerColor)
+        private void ClearPreviewFromSlot(int slotIndex)
         {
+            if (slotIndex < 0 || slotIndex >= _slots.Length) return;
+            if (_slots[slotIndex].PreviewRT != null)
+            {
+                _slots[slotIndex].PreviewRT.style.backgroundImage = StyleKeyword.None;
+                _slots[slotIndex].PreviewRT.style.display = DisplayStyle.None;
+            }
+            if (_slots[slotIndex].AvatarIcon != null)
+            {
+                _slots[slotIndex].AvatarIcon.style.display = DisplayStyle.Flex;
+            }
+            if (_boundPreviewSlotIndex == slotIndex)
+            {
+                _boundPreviewSlotIndex = -1;
+            }
+        }
+
+        private void SetupPreviewRig(int slotIndex, Color playerColor)
+        {
+            if (slotIndex < 0 || slotIndex >= _slots.Length) slotIndex = 0;
+
+            if (_boundPreviewSlotIndex >= 0 && _boundPreviewSlotIndex != slotIndex)
+            {
+                ClearPreviewFromSlot(_boundPreviewSlotIndex);
+            }
+
             if (CharacterPreviewRig.Instance == null)
             {
                 var existingRig = FindFirstObjectByType<CharacterPreviewRig>();
@@ -943,15 +1035,20 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 CharacterPreviewRig.Instance.SetActive(true);
                 var rt = CharacterPreviewRig.Instance.RenderTexture;
-                if (rt != null && _slots[0].PreviewRT != null)
+                var targetSlot = _slots[slotIndex];
+                if (rt != null && targetSlot.PreviewRT != null)
                 {
-                    _slots[0].PreviewRT.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
-                    _slots[0].PreviewRT.style.display = DisplayStyle.Flex;
-                    if (_slots[0].AvatarIcon != null)
+                    targetSlot.PreviewRT.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
+                    targetSlot.PreviewRT.style.display = DisplayStyle.Flex;
+                    if (targetSlot.AvatarIcon != null)
                     {
-                        _slots[0].AvatarIcon.style.display = DisplayStyle.None;
+                        targetSlot.AvatarIcon.style.display = DisplayStyle.None;
                     }
-                    CharacterPreviewRig.Instance.BindDragEvents(_slots[0].PreviewRT);
+                    if (_boundPreviewSlotIndex != slotIndex)
+                    {
+                        CharacterPreviewRig.Instance.BindDragEvents(targetSlot.PreviewRT);
+                        _boundPreviewSlotIndex = slotIndex;
+                    }
                 }
                 CharacterPreviewRig.Instance.SetPlayerColor(playerColor);
             }
@@ -961,6 +1058,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             PizzeriaSceneLoadingCoordinator.EnsureInstance();
             EnsureInitialized();
+            EnsureDisconnectHooks();
             if (RootElement == null)
             {
                 onComplete?.Invoke();

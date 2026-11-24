@@ -64,6 +64,13 @@ namespace ScaryParty.UI.Piaria.Presenters
         private bool _pushedToStack;
         private bool _pushedGateFallback;
         private float _refreshTimer;
+        private string _pendingOfferId = string.Empty;
+        private string _pendingRequestId = string.Empty;
+        private float _pendingStartedAtRealtime;
+        private int _hubRequestSeq;
+        private float _pendingEmployeeActionUntil;
+        private bool _subscribedShopEvents;
+        private PizzeriaCommandHandler _subscribedHandler;
 
         private void Awake()
         {
@@ -87,6 +94,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void OnDestroy()
         {
+            UnsubscribeShopPurchaseEvents();
             if (_isOpen)
             {
                 _isOpen = false;
@@ -95,11 +103,46 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (Instance == this) Instance = null;
         }
 
+        private void EnsureSubscribedShopPurchaseEvents()
+        {
+            var handler = PizzeriaCommandHandler.Instance;
+            if (handler == null) return;
+            if (_subscribedShopEvents && ReferenceEquals(_subscribedHandler, handler)) return;
+
+            UnsubscribeShopPurchaseEvents();
+            _subscribedHandler = handler;
+            _subscribedHandler.OnShopPurchaseResultReceived += HandleShopPurchaseResult;
+            _subscribedShopEvents = true;
+        }
+
+        private void UnsubscribeShopPurchaseEvents()
+        {
+            if (_subscribedHandler != null)
+            {
+                _subscribedHandler.OnShopPurchaseResultReceived -= HandleShopPurchaseResult;
+                _subscribedHandler = null;
+            }
+            _subscribedShopEvents = false;
+        }
+
+        private void HandleShopPurchaseResult(bool success, string offerId, string requestId, string message)
+        {
+            if (string.IsNullOrEmpty(_pendingOfferId)) return;
+            if (!string.IsNullOrEmpty(requestId) && !string.Equals(requestId, _pendingRequestId, StringComparison.Ordinal))
+                return;
+
+            _pendingOfferId = string.Empty;
+            _pendingRequestId = string.Empty;
+            _pendingStartedAtRealtime = 0f;
+            if (_isOpen) RefreshCurrentTab();
+        }
+
         public void Open(string tab = "orders")
         {
             EnsureUIInitialized();
             if (_overlay == null) return;
 
+            EnsureSubscribedShopPurchaseEvents();
             if (!string.IsNullOrEmpty(tab))
                 _activeTab = tab;
 
@@ -124,6 +167,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (!_isOpen) return;
             _isOpen = false;
+            _pendingOfferId = string.Empty;
+            _pendingRequestId = string.Empty;
+            _pendingEmployeeActionUntil = 0f;
+            UnsubscribeShopPurchaseEvents();
             if (_overlay != null)
                 _overlay.style.display = DisplayStyle.None;
             ReleaseModalLock();
@@ -183,6 +230,14 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 #endif
             if (!_isOpen) return;
+
+            EnsureSubscribedShopPurchaseEvents();
+            if (!string.IsNullOrEmpty(_pendingOfferId) && Time.realtimeSinceStartup - _pendingStartedAtRealtime > 8f)
+            {
+                _pendingOfferId = string.Empty;
+                _pendingRequestId = string.Empty;
+                RefreshCurrentTab();
+            }
 
             _refreshTimer += Time.unscaledDeltaTime;
             if (_refreshTimer >= 0.45f)
@@ -488,9 +543,17 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             var catalog = PizzeriaRoot.Instance?.Catalog;
             int budget = net.RestaurantBudget.Value;
-            float etaMult = 1f;
-            if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.IsServer && PizzeriaRoot.Instance.RunProgressionService != null)
-                etaMult = PizzeriaRoot.Instance.RunProgressionService.RecalculateEffectiveStats().SupplyEtaMultiplier;
+            float etaMult = net.RunState.Value.SupplyEtaMultiplier > 0.01f
+                ? net.RunState.Value.SupplyEtaMultiplier
+                : 1f;
+            if (etaMult <= 1.001f &&
+                PizzeriaRoot.Instance != null &&
+                PizzeriaRoot.Instance.IsServer &&
+                PizzeriaRoot.Instance.RunProgressionService != null)
+            {
+                float srvEta = PizzeriaRoot.Instance.RunProgressionService.RecalculateEffectiveStats().SupplyEtaMultiplier;
+                if (srvEta > 0.01f) etaMult = srvEta;
+            }
 
             var stockSection = CreateSectionHeader("Estoque Atual (Geladeira & Despensa)");
             _contentScroll.Add(stockSection);
@@ -652,14 +715,31 @@ namespace ScaryParty.UI.Piaria.Presenters
             row.Add(textCol);
 
             string offerIdStr = offer.OfferId.ToString();
+            bool hasPending = !string.IsNullOrEmpty(_pendingOfferId);
+            bool isThisPending = string.Equals(_pendingOfferId, offerIdStr, StringComparison.Ordinal);
+            bool effectiveCanBuy = canBuy && !hasPending;
+            string btnText = isThisPending
+                ? "..."
+                : (maxed
+                    ? "MAXIMIZADO"
+                    : (hasPending
+                        ? "AGUARDE..."
+                        : (effectiveCanBuy ? $"Comprar (R$ {offer.EffectiveCost})" : $"Indisp. (R$ {offer.EffectiveCost})")));
             var buyBtn = new Button(() =>
             {
-                PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(offerIdStr));
+                if (!string.IsNullOrEmpty(_pendingOfferId)) return;
+                _pendingOfferId = offerIdStr;
+                _pendingRequestId = $"hub_{++_hubRequestSeq}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                _pendingStartedAtRealtime = Time.realtimeSinceStartup;
+                PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferCorrelatedServerRpc(
+                    new Unity.Collections.FixedString64Bytes(offerIdStr),
+                    new Unity.Collections.FixedString64Bytes(_pendingRequestId));
+                RefreshCurrentTab();
             })
             {
-                text = maxed ? "MAXIMIZADO" : (canBuy ? $"Comprar (R$ {offer.EffectiveCost})" : $"Indisp. (R$ {offer.EffectiveCost})")
+                text = btnText
             };
-            buyBtn.SetEnabled(canBuy);
+            buyBtn.SetEnabled(effectiveCanBuy);
             buyBtn.style.height = 34;
             buyBtn.style.minWidth = 150;
             buyBtn.style.backgroundColor = maxed
@@ -734,42 +814,77 @@ namespace ScaryParty.UI.Piaria.Presenters
             hireRow.style.flexWrap = Wrap.Wrap;
             hireRow.style.marginBottom = 10;
 
+            bool hasPendingPurchase = !string.IsNullOrEmpty(_pendingOfferId);
+            bool hasPendingEmpAction = Time.realtimeSinceStartup < _pendingEmployeeActionUntil;
+            bool cashierPending = string.Equals(_pendingOfferId, cashierOfferId, StringComparison.Ordinal);
+            bool pizzaioloPending = string.Equals(_pendingOfferId, pizzaioloOfferId, StringComparison.Ordinal);
+            bool canHireCashier = hasCashierOffer && budget >= cashierCost && !hasPendingPurchase && !hasPendingEmpAction;
+            bool canHirePizzaiolo = hasPizzaioloOffer && budget >= pizzaioloCost && !hasPendingPurchase && !hasPendingEmpAction;
+
             var hireCashierBtn = new Button(() =>
             {
+                if (!string.IsNullOrEmpty(_pendingOfferId) || Time.realtimeSinceStartup < _pendingEmployeeActionUntil) return;
                 if (!string.IsNullOrEmpty(cashierOfferId))
-                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(cashierOfferId));
+                {
+                    _pendingOfferId = cashierOfferId;
+                    _pendingRequestId = $"hub_{++_hubRequestSeq}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                    _pendingStartedAtRealtime = Time.realtimeSinceStartup;
+                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferCorrelatedServerRpc(
+                        new Unity.Collections.FixedString64Bytes(cashierOfferId),
+                        new Unity.Collections.FixedString64Bytes(_pendingRequestId));
+                }
                 else
+                {
+                    _pendingEmployeeActionUntil = Time.realtimeSinceStartup + 2.5f;
                     PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Cashier);
+                }
+                RefreshCurrentTab();
             })
             {
-                text = hasCashierOffer
-                    ? (budget >= cashierCost ? $"{cashierName} (R$ {cashierCost})" : $"{cashierName} R$ {cashierCost} (Saldo Insuf.)")
-                    : "Balconista indisponivel"
+                text = cashierPending
+                    ? "..."
+                    : (hasCashierOffer
+                        ? (budget >= cashierCost ? $"{cashierName} (R$ {cashierCost})" : $"{cashierName} R$ {cashierCost} (Saldo Insuf.)")
+                        : "Balconista indisponivel")
             };
-            hireCashierBtn.SetEnabled(hasCashierOffer && budget >= cashierCost);
+            hireCashierBtn.SetEnabled(canHireCashier);
             hireCashierBtn.style.flexGrow = 1;
             hireCashierBtn.style.height = 38;
             hireCashierBtn.style.marginRight = 8;
-            hireCashierBtn.style.backgroundColor = (hasCashierOffer && budget >= cashierCost) ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
+            hireCashierBtn.style.backgroundColor = canHireCashier ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
             hireCashierBtn.style.color = Color.white;
             hireRow.Add(hireCashierBtn);
 
             var hirePizzaioloBtn = new Button(() =>
             {
+                if (!string.IsNullOrEmpty(_pendingOfferId) || Time.realtimeSinceStartup < _pendingEmployeeActionUntil) return;
                 if (!string.IsNullOrEmpty(pizzaioloOfferId))
-                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferServerRpc(new Unity.Collections.FixedString64Bytes(pizzaioloOfferId));
+                {
+                    _pendingOfferId = pizzaioloOfferId;
+                    _pendingRequestId = $"hub_{++_hubRequestSeq}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                    _pendingStartedAtRealtime = Time.realtimeSinceStartup;
+                    PizzeriaCommandHandler.Instance?.PurchaseRunShopOfferCorrelatedServerRpc(
+                        new Unity.Collections.FixedString64Bytes(pizzaioloOfferId),
+                        new Unity.Collections.FixedString64Bytes(_pendingRequestId));
+                }
                 else
+                {
+                    _pendingEmployeeActionUntil = Time.realtimeSinceStartup + 2.5f;
                     PizzeriaCommandHandler.Instance?.HireEmployeeFromHubServerRpc((byte)EmployeeRole.Pizzaiolo);
+                }
+                RefreshCurrentTab();
             })
             {
-                text = hasPizzaioloOffer
-                    ? (budget >= pizzaioloCost ? $"{pizzaioloName} (R$ {pizzaioloCost})" : $"{pizzaioloName} R$ {pizzaioloCost} (Saldo Insuf.)")
-                    : "Pizzaiolo indisponivel"
+                text = pizzaioloPending
+                    ? "..."
+                    : (hasPizzaioloOffer
+                        ? (budget >= pizzaioloCost ? $"{pizzaioloName} (R$ {pizzaioloCost})" : $"{pizzaioloName} R$ {pizzaioloCost} (Saldo Insuf.)")
+                        : "Pizzaiolo indisponivel")
             };
-            hirePizzaioloBtn.SetEnabled(hasPizzaioloOffer && budget >= pizzaioloCost);
+            hirePizzaioloBtn.SetEnabled(canHirePizzaiolo);
             hirePizzaioloBtn.style.flexGrow = 1;
             hirePizzaioloBtn.style.height = 38;
-            hirePizzaioloBtn.style.backgroundColor = (hasPizzaioloOffer && budget >= pizzaioloCost) ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
+            hirePizzaioloBtn.style.backgroundColor = canHirePizzaiolo ? new Color(0.20f, 0.52f, 0.34f) : new Color(0.42f, 0.22f, 0.22f);
             hirePizzaioloBtn.style.color = Color.white;
             hireRow.Add(hirePizzaioloBtn);
             _contentScroll.Add(hireRow);
@@ -796,12 +911,14 @@ namespace ScaryParty.UI.Piaria.Presenters
                 var empRole = (EmployeeRole)emp.Role;
                 var empService = PizzeriaRoot.Instance?.EmployeeTaskService;
                 var profile = empService?.GetRoleProfile(empRole);
-                int maxLevel = profile != null ? profile.MaxLevel : 5;
-                int nextCost = profile != null
-                    ? profile.ComputeCostForLevel(emp.Level + 1)
-                    : ((emp.Role == 0 ? cashierCost : pizzaioloCost) * (emp.Level + 1));
+                int maxLevel = emp.MaxLevel > 0 ? emp.MaxLevel : (profile != null ? profile.MaxLevel : 5);
+                int nextCost = emp.MaxLevel > 0
+                    ? emp.NextUpgradeCost
+                    : (profile != null
+                        ? profile.ComputeCostForLevel(emp.Level + 1)
+                        : ((emp.Role == 0 ? cashierCost : pizzaioloCost) * (emp.Level + 1)));
                 bool atMaxLevel = emp.Level >= maxLevel;
-                bool canUpgrade = !atMaxLevel && budget >= nextCost;
+                bool canUpgrade = !atMaxLevel && budget >= nextCost && !hasPendingEmpAction;
 
                 var row = CreateCardRow();
                 row.style.flexDirection = FlexDirection.Row;
@@ -819,10 +936,15 @@ namespace ScaryParty.UI.Piaria.Presenters
                 int capturedEmpId = emp.EmployeeId;
                 var upgBtn = new Button(() =>
                 {
+                    if (Time.realtimeSinceStartup < _pendingEmployeeActionUntil) return;
+                    _pendingEmployeeActionUntil = Time.realtimeSinceStartup + 1.5f;
                     PizzeriaCommandHandler.Instance?.UpgradeEmployeeFromHubServerRpc(capturedEmpId);
+                    RefreshCurrentTab();
                 })
                 {
-                    text = canUpgrade ? $"Promover (R$ {nextCost})" : $"R$ {nextCost} (Insuf.)"
+                    text = atMaxLevel
+                        ? "NÍVEL MÁX."
+                        : (canUpgrade ? $"Promover (R$ {nextCost})" : $"R$ {nextCost} (Insuf.)")
                 };
                 upgBtn.SetEnabled(canUpgrade);
                 upgBtn.style.height = 32;

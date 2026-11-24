@@ -17,6 +17,13 @@ namespace ScaryParty.UI.Piaria.Core
 
         public static event Action<bool> OnReduceMotionChanged;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _activeTweens.Clear();
+            OnReduceMotionChanged = null;
+        }
+
         public static bool ReduceMotion
         {
             get => PlayerPrefs.GetInt("ReduceMotion", 0) == 1;

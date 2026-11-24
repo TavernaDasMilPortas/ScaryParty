@@ -13,6 +13,14 @@ namespace ScaryParty.Pizzeria.Presentation
         public static float LastUnlockUnscaledTime { get; private set; } = -10f;
         public static bool IsLocked => _lockCount > 0;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            _lockCount = 0;
+            _wasEffectivelyLocked = false;
+            LastUnlockUnscaledTime = -10f;
+        }
+
         public static void PushLock()
         {
             _lockCount++;

@@ -112,11 +112,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             _toastContainer = uiDocument.rootVisualElement.Q<VisualElement>("ToastContainerRoot");
             if (_toastContainer == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("ToastContainer")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ToastContainer.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateToastContainer,
+                    "Assets/Piaaria/UI/Piaria/UXML/ToastContainer.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);

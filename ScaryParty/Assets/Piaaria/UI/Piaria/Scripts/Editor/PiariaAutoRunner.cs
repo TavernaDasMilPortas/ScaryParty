@@ -95,8 +95,8 @@ namespace ScaryParty.UI.Piaria.Editor
             PlayerPreviewPrefabGenerator.EnsurePreviewPrefabExists();
 
             string sceneName = activeScene.name;
-            var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Piaaria/UI/Piaria/Config/PiariaUIAssetCatalog.asset")
-                          ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset");
+            var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset")
+                          ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Piaaria/UI/Piaria/Config/PiariaUIAssetCatalog.asset");
             var panelSettings = catalog?.panelSettings ?? AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/Piaaria/UI/PanelSettings.asset");
             if (panelSettings != null)
             {

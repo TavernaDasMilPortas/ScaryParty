@@ -991,6 +991,7 @@ namespace ScaryParty.Pizzeria.Network
                 EmployeeErrorMultiplier = stats.EmployeeErrorMultiplier,
                 VampireSpawnMultiplier = stats.VampireSpawnMultiplier,
                 DemandMultiplier = stats.DemandMultiplier,
+                SupplyEtaMultiplier = stats.SupplyEtaMultiplier > 0.01f ? stats.SupplyEtaMultiplier : 1f,
                 ActivePresetId = TruncateFs32(domainState.ActivePresetId),
                 AllowDebugPanel = domainState.AllowDebugPanel,
                 IsDebugTaintedRun = domainState.IsDebugTaintedRun,

@@ -196,6 +196,9 @@ namespace ScaryParty.UI.Piaria.Core
         public UnityEngine.UIElements.StyleSheet styleNightModifierCards;
         public UnityEngine.UIElements.StyleSheet styleOperationsStatus;
 
+        [Header("Áudio UI")]
+        public AudioClip uiClickClip;
+
         [Header("Configurações de UI Toolkit")]
         public UnityEngine.UIElements.PanelSettings panelSettings;
 

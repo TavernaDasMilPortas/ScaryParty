@@ -30,6 +30,19 @@ namespace ScaryParty.Pizzeria.Presentation
         public static IntroPresentationStage CurrentStage { get; private set; } = IntroPresentationStage.Loading;
         public static bool IsBlockingIntermission => Instance != null && CurrentStage < IntroPresentationStage.PreparationVisible;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics()
+        {
+            Instance = null;
+            CurrentStage = IntroPresentationStage.Loading;
+        }
+
+        public static bool ShouldAbortIntroAfterLoading(LoadingOperationState loadingState)
+        {
+            return loadingState == LoadingOperationState.ErrorVisible ||
+                   loadingState == LoadingOperationState.Failed;
+        }
+
         [SerializeField] private string introCutsceneId = "cutscene_01";
         [SerializeField] private float nightBannerDurationSeconds = 3.5f;
 
@@ -80,6 +93,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 yield return null;
             }
 
+            if (PizzeriaSceneLoadingCoordinator.Instance != null &&
+                ShouldAbortIntroAfterLoading(PizzeriaSceneLoadingCoordinator.Instance.OperationState))
+            {
+                CurrentStage = IntroPresentationStage.NightActive;
+                CutscenePlaybackService.IsNightTimerPaused = false;
+                yield break;
+            }
+
             CurrentStage = IntroPresentationStage.IntroPreparing;
             GameplayInputGate.PushLock();
             _hasInputLock = true;
@@ -94,13 +115,14 @@ namespace ScaryParty.Pizzeria.Presentation
                 service.Failed += OnCutsceneFailed;
 
                 CurrentStage = IntroPresentationStage.IntroPlaying;
-                service.Play(introCutsceneId);
-
-                while (!_cutsceneFinished &&
-                       service != null &&
-                       service.State != CutscenePlaybackState.Idle)
+                if (service.Play(introCutsceneId))
                 {
-                    yield return null;
+                    while (!_cutsceneFinished &&
+                           service != null &&
+                           service.State != CutscenePlaybackState.Idle)
+                    {
+                        yield return null;
+                    }
                 }
 
                 UnbindCutsceneEvents();

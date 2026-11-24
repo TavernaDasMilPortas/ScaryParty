@@ -1275,6 +1275,8 @@ namespace ScaryParty.Pizzeria.Network
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} reiniciada (modo debug) pelo Host!", isError: false);
         }
 
+        private float _lastStartNewRunServerTime = -999f;
+
         [ServerRpc(RequireOwnership = false)]
         public void StartNewRunServerRpc(ServerRpcParams rpcParams = default)
         {
@@ -1288,15 +1290,31 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            StartNewRunInternalServer();
+            var phase = root.DomainState.CurrentNightPhase;
+            if (phase != NightPhase.Results && phase != NightPhase.Defeat)
+            {
+                return;
+            }
+
+            if (Time.realtimeSinceStartup - _lastStartNewRunServerTime < 0.75f)
+            {
+                return;
+            }
+            _lastStartNewRunServerTime = Time.realtimeSinceStartup;
+
+            StartNewRunInternalServer(forceStartNight: 1);
         }
 
-        private void StartNewRunInternalServer()
+        private void StartNewRunInternalServer(int? forceStartNight = null)
         {
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
             root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out int startNight);
+            if (forceStartNight.HasValue)
+            {
+                startNight = Mathf.Clamp(forceStartNight.Value, 0, maxNights);
+            }
 
             root.ReinitializeForNewRunServer(newSeed, maxNights: maxNights, difficulty: diff, startNight: startNight);
             ApplyRunBackpackCapacityBonusServer(root);
@@ -1412,7 +1430,7 @@ namespace ScaryParty.Pizzeria.Network
             {
                 run.TryCompleteNightAndAdvance(root.DomainState);
                 CommitAndReplicate();
-                BroadcastNoticeClientRpc("VITÓRIA DA RUN! Todas as 3 noites foram concluídas com sucesso!", isError: false);
+                BroadcastNoticeClientRpc($"VITÓRIA DA RUN! Todas as {run.MaxNights} noites foram concluídas com sucesso!", isError: false);
                 return;
             }
 
@@ -1554,7 +1572,7 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
-        public void ResolveAndStartPreparedNightIfReadyServer(ulong? triggeringClientId = null)
+        public void ResolveAndStartPreparedNightIfReadyServer(ulong? triggeringClientId = null, ulong? excludedClientId = null)
         {
             var root = PizzeriaRoot.Instance;
             if (root == null || !IsServer || root.DomainState == null || root.RunProgressionService == null) return;
@@ -1563,12 +1581,17 @@ namespace ScaryParty.Pizzeria.Network
             var connected = new List<ulong>();
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClientsIds.Count > 0)
             {
-                foreach (var cid in NetworkManager.Singleton.ConnectedClientsIds) connected.Add(cid);
+                foreach (var cid in NetworkManager.Singleton.ConnectedClientsIds)
+                {
+                    if (excludedClientId.HasValue && cid == excludedClientId.Value) continue;
+                    connected.Add(cid);
+                }
             }
-            else
+            if (connected.Count == 0 && !excludedClientId.HasValue)
             {
                 connected.Add(0UL);
             }
+            if (connected.Count == 0) return;
 
             var run = root.RunProgressionService;
             if (run.IntermissionStage == Domain.Services.IntermissionStage.Open)

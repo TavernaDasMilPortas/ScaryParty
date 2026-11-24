@@ -480,6 +480,20 @@ namespace ScaryParty.UI.Piaria.Editor
             catalog.templateScoreboardOverlay = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ScoreboardOverlay.uxml");
             catalog.templatePlayerReadyCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/PlayerReadyCard.uxml");
 
+            // Preparação entre Noites 2.1 + Áudio UI
+            catalog.nightIntermissionTheme = AssetDatabase.LoadAssetAtPath<NightIntermissionTheme>("Assets/Piaaria/UI/Piaria/Config/NightIntermissionTheme.asset");
+            catalog.nightIntermissionIconCatalog = AssetDatabase.LoadAssetAtPath<NightIntermissionIconCatalog>("Assets/Piaaria/UI/Piaria/Config/NightIntermissionIconCatalog.asset");
+            catalog.templateNightIntermissionScreen = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/NightIntermissionScreen.uxml");
+            catalog.templateNightSummaryPage = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/NightSummaryPage.uxml");
+            catalog.templateModifierVotePage = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ModifierVotePage.uxml");
+            catalog.templateShopPreparationPage = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ShopPreparationPage.uxml");
+            catalog.templateLotteryRevealPage = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/LotteryRevealPage.uxml");
+            catalog.templateOperationsStatusOverlay = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml");
+            catalog.styleNightIntermission = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightIntermission.uss");
+            catalog.styleNightModifierCards = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>("Assets/Piaaria/UI/Piaria/USS/NightModifierCards.uss");
+            catalog.styleOperationsStatus = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>("Assets/Piaaria/UI/Piaria/USS/OperationsStatus.uss");
+            catalog.uiClickClip = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/ThirdParty/EasyGridBuilder Pro/Misc Assets/Sound/UIClick.wav");
+
             // PanelSettings
             string panelSettingsPath = "Assets/Piaaria/UI/PanelSettings.asset";
             var panelSettings = AssetDatabase.LoadAssetAtPath<PanelSettings>(panelSettingsPath);
@@ -566,8 +580,8 @@ namespace ScaryParty.UI.Piaria.Editor
                 return;
             }
 
-            var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Piaaria/UI/Piaria/Config/PiariaUIAssetCatalog.asset")
-                          ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset");
+            var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Resources/PiariaUIAssetCatalog.asset")
+                          ?? AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Piaaria/UI/Piaria/Config/PiariaUIAssetCatalog.asset");
             var panelSettings = catalog?.panelSettings ?? AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/Piaaria/UI/PanelSettings.asset");
 
             // 1. LobbyScene

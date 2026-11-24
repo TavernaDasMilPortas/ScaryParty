@@ -197,6 +197,7 @@ public class ReadySceneController : MonoBehaviour
         {
             RoomDiscoveryService.Instance.StopHosting();
         }
+        UgsLobbySessionService.StopHostingLobby();
 
         // Carrega a cena de gameplay ativa (original ou variante estilizada se ativada no VisualStyleRuntimeConfig).
         // O PlayerState detecta automaticamente a cena de gameplay e libera os controles.
@@ -217,6 +218,7 @@ public class ReadySceneController : MonoBehaviour
         {
             RoomDiscoveryService.Instance.StopHosting();
         }
+        UgsLobbySessionService.StopHostingLobby();
 
         if (NetworkManager.Singleton != null)
             NetworkManager.Singleton.Shutdown();

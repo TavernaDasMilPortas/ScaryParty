@@ -135,11 +135,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             _root = uiDocument.rootVisualElement.Q<VisualElement>("MainGameHUDRoot");
             if (_root == null)
             {
-                var template = Resources.Load<VisualTreeAsset>("MainGameHUD")
-#if UNITY_EDITOR
-                    ?? UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/MainGameHUD.uxml")
-#endif
-                    ;
+                var template = PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateMainGameHud,
+                    "Assets/Piaaria/UI/Piaria/UXML/MainGameHUD.uxml");
                 if (template != null)
                 {
                     template.CloneTree(uiDocument.rootVisualElement);

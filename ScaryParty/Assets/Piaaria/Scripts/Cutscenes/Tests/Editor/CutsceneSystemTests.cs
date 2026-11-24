@@ -63,5 +63,28 @@ namespace ScaryParty.Cutscenes.Tests
             Assert.IsTrue(CutsceneSceneAssembler.IsProtectedGameplayScene("Assets/Piaaria/Scenes/GameplayVariants/GameScene_CelShaded.unity"));
             Assert.IsFalse(CutsceneSceneAssembler.IsProtectedGameplayScene("Assets/Piaaria/Scenes/Cutscenes/Night01Intro.unity"));
         }
+
+        [Test]
+        public void CutscenePlaybackService_PlayMissingId_ReturnsFalseAndDoesNotFireSkipped()
+        {
+            var go = new GameObject("TestCutsceneService");
+            try
+            {
+                var svc = go.AddComponent<CutscenePlaybackService>();
+                bool failed = false;
+                bool skipped = false;
+                svc.Failed += (_, _) => failed = true;
+                svc.Skipped += _ => skipped = true;
+
+                bool started = svc.Play("missing_cutscene_id");
+                Assert.IsFalse(started);
+                Assert.IsTrue(failed);
+                Assert.IsFalse(skipped);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }
