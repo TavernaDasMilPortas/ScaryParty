@@ -95,7 +95,6 @@ namespace ScaryParty.UI.Piaria.Presenters
                         return;
                     }
 
-                    UIToolkitTweenService.PressCard(card, theme != null ? theme.pressScale : 0.97f);
                     UIToolkitTweenService.SelectCardPulse(card, theme != null ? theme.impactScale : 1.04f);
                     NightIntermissionFeelBridge.Play(
                         category == RunModifierKind.Hindrance ? NightUIFeedbackId.HindranceCardSelect : NightUIFeedbackId.OpportunityCardSelect,

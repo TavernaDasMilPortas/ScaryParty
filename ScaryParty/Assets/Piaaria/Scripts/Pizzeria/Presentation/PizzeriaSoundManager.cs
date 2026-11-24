@@ -37,6 +37,11 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
             Instance = this;
             _source = GetComponent<AudioSource>();
             if (_source == null) _source = gameObject.AddComponent<AudioSource>();

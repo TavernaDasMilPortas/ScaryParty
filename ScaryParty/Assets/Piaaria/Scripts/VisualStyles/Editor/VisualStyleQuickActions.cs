@@ -43,6 +43,17 @@ namespace ScaryParty.VisualStyles.Editor
                 Debug.LogWarning("[VisualStyleQuickActions] Aplicado na cena, mas houve falha na ativação persistente de runtime.");
             }
         }
+
+        [MenuItem("Tools/Scary Party/Setup e Uso Único/VFX & Visuals/Sanitizar Caminhos Longos de Materiais", false, 264)]
+        public static void SanitizeLongMaterialPaths()
+        {
+            int moved = VisualStyleMaterialFactory.SanitizeLongGeneratedMaterialPaths();
+            Debug.Log($"[VisualStyleQuickActions] Sanitização concluída: {moved} material(is) movido(s) com GUIDs preservados.");
+            EditorUtility.DisplayDialog(
+                "Sanitização de Caminhos",
+                $"{moved} arquivo(s) .mat com caminho longo foram encurtados via AssetDatabase.MoveAsset preservando todos os GUIDs.",
+                "OK");
+        }
     }
 }
 #endif

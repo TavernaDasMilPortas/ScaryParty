@@ -22,6 +22,11 @@ namespace ScaryParty.Interaction
 
         private bool _lastNotifiedHighlightState;
         private MaterialPropertyBlock _propBlock;
+        private Material _fillMaterialOccluded;
+        private Material _fillMaterialAlways;
+        private bool _createdMaskMaterial;
+        private bool _createdFillMaterial;
+        private Camera _cachedMainCamera;
         private readonly Dictionary<SkinnedMeshRenderer, Mesh> _tempSkinnedMeshes = new Dictionary<SkinnedMeshRenderer, Mesh>();
 
         private void Awake()
@@ -50,6 +55,7 @@ namespace ScaryParty.Interaction
                 if (maskShader != null)
                 {
                     _maskMaterial = new Material(maskShader) { name = "OutlineMask_AutoInstance" };
+                    _createdMaskMaterial = true;
                 }
             }
 
@@ -59,6 +65,21 @@ namespace ScaryParty.Interaction
                 if (fillShader != null)
                 {
                     _fillMaterial = new Material(fillShader) { name = "OutlineFill_AutoInstance" };
+                    _createdFillMaterial = true;
+                }
+            }
+
+            if (_fillMaterial != null)
+            {
+                if (_fillMaterialOccluded == null)
+                {
+                    _fillMaterialOccluded = new Material(_fillMaterial) { name = "OutlineFill_Occluded" };
+                    _fillMaterialOccluded.SetFloat("_ZTest", 4f);
+                }
+                if (_fillMaterialAlways == null)
+                {
+                    _fillMaterialAlways = new Material(_fillMaterial) { name = "OutlineFill_Always" };
+                    _fillMaterialAlways.SetFloat("_ZTest", 8f);
                 }
             }
         }
@@ -107,13 +128,16 @@ namespace ScaryParty.Interaction
 
             Color targetColor = CurrentTarget.outlineColor;
             float targetWidth = CurrentTarget.outlineWidth > 0f ? CurrentTarget.outlineWidth : defaultOutlineWidth;
-            float zTestVal = CurrentTarget.occludedByGeometry ? 4f : 8f; // 4 = LEqual, 8 = Always
+            Material activeFillMat = CurrentTarget.occludedByGeometry
+                ? (_fillMaterialOccluded != null ? _fillMaterialOccluded : _fillMaterial)
+                : (_fillMaterialAlways != null ? _fillMaterialAlways : _fillMaterial);
 
             _propBlock.SetColor("_OutlineColor", targetColor);
             _propBlock.SetFloat("_OutlineWidth", targetWidth);
-            _propBlock.SetFloat("_ZTest", zTestVal);
 
-            Camera cam = Camera.main;
+            if (_cachedMainCamera == null || !_cachedMainCamera.isActiveAndEnabled)
+                _cachedMainCamera = Camera.main;
+            Camera cam = _cachedMainCamera;
 
             for (int rIdx = 0; rIdx < renderers.Count; rIdx++)
             {
@@ -134,7 +158,7 @@ namespace ScaryParty.Interaction
                     for (int s = 0; s < submeshCount; s++)
                     {
                         Graphics.DrawMesh(mesh, matrix, _maskMaterial, layer, cam, s, _propBlock);
-                        Graphics.DrawMesh(mesh, matrix, _fillMaterial, layer, cam, s, _propBlock);
+                        Graphics.DrawMesh(mesh, matrix, activeFillMat, layer, cam, s, _propBlock);
                     }
                 }
                 else if (rend is SkinnedMeshRenderer smr)
@@ -154,7 +178,7 @@ namespace ScaryParty.Interaction
                     for (int s = 0; s < submeshCount; s++)
                     {
                         Graphics.DrawMesh(bakedMesh, matrix, _maskMaterial, layer, cam, s, _propBlock);
-                        Graphics.DrawMesh(bakedMesh, matrix, _fillMaterial, layer, cam, s, _propBlock);
+                        Graphics.DrawMesh(bakedMesh, matrix, activeFillMat, layer, cam, s, _propBlock);
                     }
                 }
             }
@@ -182,6 +206,11 @@ namespace ScaryParty.Interaction
                 if (kvp.Value != null) Destroy(kvp.Value);
             }
             _tempSkinnedMeshes.Clear();
+
+            if (_fillMaterialOccluded != null) { Destroy(_fillMaterialOccluded); _fillMaterialOccluded = null; }
+            if (_fillMaterialAlways != null) { Destroy(_fillMaterialAlways); _fillMaterialAlways = null; }
+            if (_createdMaskMaterial && _maskMaterial != null) { Destroy(_maskMaterial); _maskMaterial = null; }
+            if (_createdFillMaterial && _fillMaterial != null) { Destroy(_fillMaterial); _fillMaterial = null; }
         }
     }
 }

@@ -30,6 +30,30 @@ namespace ScaryParty.Lighting
         private TimeOfDayLightingDirector _subscribedTod;
         private VisualStyleManager _subscribedMgr;
         private bool _appliedRealtimeOverrides;
+        private Light[] _cachedLights;
+        private Renderer[] _cachedRenderers;
+        private InteriorLightingZone[] _cachedZones;
+        private float _cacheNextRefreshTime = -10f;
+
+        public void InvalidateHierarchyCache()
+        {
+            _cachedLights = null;
+            _cachedRenderers = null;
+            _cachedZones = null;
+            _cacheNextRefreshTime = -10f;
+        }
+
+        private void EnsureHierarchyCache()
+        {
+            float now = Application.isPlaying ? Time.unscaledTime : 0f;
+            if (_cachedLights != null && _cachedRenderers != null && _cachedZones != null && (!Application.isPlaying || now < _cacheNextRefreshTime))
+                return;
+
+            _cachedLights = GetComponentsInChildren<Light>(true);
+            _cachedRenderers = GetComponentsInChildren<Renderer>(true);
+            _cachedZones = GetComponentsInChildren<InteriorLightingZone>(true);
+            _cacheNextRefreshTime = now + 5f;
+        }
 
         public string ActiveFallbackReason { get; private set; }
         public bool IsUsingPrecomputedB2 { get; private set; }
@@ -128,7 +152,8 @@ namespace ScaryParty.Lighting
 
         public void SanitizeInteriorLights()
         {
-            Light[] lights = GetComponentsInChildren<Light>(true);
+            EnsureHierarchyCache();
+            Light[] lights = _cachedLights;
             int allowedSpotShadows = Mathf.Max(0, Mathf.RoundToInt(maxShadowedInteriorSpotLights));
             int spotShadowCount = 0;
 
@@ -188,7 +213,8 @@ namespace ScaryParty.Lighting
                 ? TimeOfDayLightingDirector.Active.GetInteriorFillMultiplier()
                 : 1.0f;
 
-            Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+            EnsureHierarchyCache();
+            Renderer[] renderers = _cachedRenderers;
             for (int i = 0; i < renderers.Length; i++)
             {
                 Renderer r = renderers[i];
@@ -201,7 +227,8 @@ namespace ScaryParty.Lighting
         public bool ResolveFillForPosition(Vector3 worldPos, float globalScale, out Color fillColor, out float fillWeight)
         {
             // Prioriza componentes explicitos InteriorLightingZone colocados no prefab/cena
-            InteriorLightingZone[] explicitZones = GetComponentsInChildren<InteriorLightingZone>(true);
+            EnsureHierarchyCache();
+            InteriorLightingZone[] explicitZones = _cachedZones;
             for (int i = 0; i < explicitZones.Length; i++)
             {
                 InteriorLightingZone z = explicitZones[i];

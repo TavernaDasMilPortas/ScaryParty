@@ -840,23 +840,82 @@ namespace ScaryParty.UI.Piaria.Editor
                 checksPassed++;
             }
 
-            // 3. UI Toolkit obrigatório nas telas principais
-            Log("✔ [OK] Menu Principal, Configurações, Lobby, Sala de Espera, HUD, Placar e Modais implementados exclusivamente em UI Toolkit.");
-            checksPassed++;
+            // 3. UI Toolkit em runtime (UXMLs + UIDocument em cena)
+            string uiDir = Path.GetFullPath("Assets/Piaaria/UI/Piaria");
+            bool hasUxml = Directory.Exists(uiDir) && Directory.GetFiles(uiDir, "*.uxml", SearchOption.AllDirectories).Length > 0;
+            var docs = UnityEngine.Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            bool allOpenDocsValid = true;
+            for (int d = 0; d < docs.Length; d++)
+            {
+                if (docs[d] != null && docs[d].visualTreeAsset == null) { allOpenDocsValid = false; break; }
+            }
+            if (hasUxml && allOpenDocsValid)
+            {
+                Log($"✔ [OK] Templates UI Toolkit encontrados ({docs.Length} UIDocument(s) válidos na cena atual).");
+                checksPassed++;
+            }
+            else
+            {
+                Log($"✖ [FALHA] Templates UXML ausentes ou UIDocument sem VisualTreeAsset (hasUxml={hasUxml}, docsValid={allOpenDocsValid}).");
+            }
 
-            // 4. Exceções autorizadas uGUI
-            Log("✔ [OK] Exceções uGUI/Canvas rigorosamente isoladas em Minimapa e Quadro 3D de comandas.");
-            checksPassed++;
+            // 4. Exceções uGUI isoladas na cena aberta
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+            int unauthorizedCanvases = 0;
+            for (int c = 0; c < canvases.Length; c++)
+            {
+                var cv = canvases[c];
+                if (cv == null) continue;
+                string n = cv.gameObject.name;
+                bool isAuthorizedWorldUi = n.IndexOf("Minimap", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                           n.IndexOf("Ticket", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                           n.IndexOf("Phone", StringComparison.OrdinalIgnoreCase) >= 0;
+                if (!isAuthorizedWorldUi) unauthorizedCanvases++;
+            }
+            if (unauthorizedCanvases == 0)
+            {
+                Log("✔ [OK] Nenhuma Canvas uGUI não autorizada presente na cena aberta.");
+                checksPassed++;
+            }
+            else
+            {
+                Log($"⚠ [AVISO] Encontrada(s) {unauthorizedCanvases} Canvas uGUI fora de Minimapa/Comandas/Telefone.");
+            }
 
-            // 5. Sem OnGUI
-            Log("✔ [OK] Runtime sem chamadas a OnGUI/IMGUI.");
-            checksPassed++;
+            // 5. Auditoria estática: zero OnGUI ativo em UI/Piaria/Scripts/Runtime
+            string uiRuntimeDir = Path.GetFullPath("Assets/Piaaria/UI/Piaria/Scripts/Runtime");
+            int onGuiHits = 0;
+            if (Directory.Exists(uiRuntimeDir))
+            {
+                foreach (string rtFile in Directory.GetFiles(uiRuntimeDir, "*.cs", SearchOption.AllDirectories))
+                {
+                    string stripped = System.Text.RegularExpressions.Regex.Replace(File.ReadAllText(rtFile), @"//.*$|/\*[\s\S]*?\*/", string.Empty, System.Text.RegularExpressions.RegexOptions.Multiline);
+                    if (System.Text.RegularExpressions.Regex.IsMatch(stripped, @"\bvoid\s+OnGUI\s*\(")) onGuiHits++;
+                }
+            }
+            if (onGuiHits == 0)
+            {
+                Log("✔ [OK] UI Toolkit runtime verificado sem chamadas ativas a OnGUI.");
+                checksPassed++;
+            }
+            else
+            {
+                Log($"✖ [FALHA] Encontrada(s) {onGuiHits} ocorrência(s) de OnGUI em UI/Piaria/Scripts/Runtime.");
+            }
 
-            // 6. Animações e Presets
-            Log("✔ [OK] DOTween Pro e Feel vinculados para abertura/fechamento, toasts, contador de dinheiro e feedbacks de botões.");
-            checksPassed++;
+            // 6. Catálogo de temas/feedbacks vinculados
+            string[] themeGuids = AssetDatabase.FindAssets("PiariaUIAssetCatalog");
+            if (themeGuids != null && themeGuids.Length > 0 && catalog?.panelSettings != null)
+            {
+                Log("✔ [OK] Assets de tema, PanelSettings e UIToolkitTweenService disponíveis.");
+                checksPassed++;
+            }
+            else
+            {
+                Log("✖ [FALHA] Assets de tema/PanelSettings de feedback visual incompletos.");
+            }
 
-            Log($"Validação finalizada: {checksPassed}/{checksTotal} verificações aprovadas com distinção.");
+            Log($"Validação finalizada: {checksPassed}/{checksTotal} verificações aprovadas.");
         }
     }
 }

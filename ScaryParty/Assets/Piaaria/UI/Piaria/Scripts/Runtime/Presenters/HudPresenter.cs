@@ -682,20 +682,15 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_participantsStatusLabel != null && netState.PlayerCombatStates != null)
             {
                 var pSb = new System.Text.StringBuilder("Equipe: ");
-                var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
                 int listed = 0;
                 for (int i = 0; i < netState.PlayerCombatStates.Count; i++)
                 {
                     var pcs = netState.PlayerCombatStates[i];
                     string pName = null;
-                    for (int p = 0; p < allPlayers.Length; p++)
+                    if (PlayerState.TryGetByClientId(pcs.ClientId, out var ps) && ps != null)
                     {
-                        if (allPlayers[p] != null && allPlayers[p].OwnerClientId == pcs.ClientId)
-                        {
-                            string candidateName = allPlayers[p].PlayerName.Value.ToString();
-                            if (!string.IsNullOrWhiteSpace(candidateName)) pName = candidateName;
-                            break;
-                        }
+                        string candidateName = ps.PlayerName.Value.ToString();
+                        if (!string.IsNullOrWhiteSpace(candidateName)) pName = candidateName;
                     }
                     if (string.IsNullOrEmpty(pName))
                         pName = pcs.ClientId == localClientId ? "Você" : $"Jog.#{pcs.ClientId}";

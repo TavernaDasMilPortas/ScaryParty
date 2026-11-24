@@ -24,6 +24,7 @@ namespace ScaryParty.Combat
         private Renderer[] _renderers;
         private MaterialPropertyBlock _mpb;
 
+        public int CurrentHp => _currentHp;
         public bool IsAlive => _currentHp > 0;
 
         public string InteractPrompt => $"[E] Testar Dano em Si ({testHitDamageOnPlayer} HP / desgasta mochila) | Atire no alvo ({_currentHp}/{maxHp} HP)";
@@ -35,6 +36,14 @@ namespace ScaryParty.Combat
             _baseLocalRotation = transform.localRotation;
             _renderers = GetComponentsInChildren<Renderer>(true);
             _mpb = new MaterialPropertyBlock();
+        }
+
+        private void Start()
+        {
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsClient && !NetworkManager.Singleton.IsServer)
+            {
+                PizzeriaCommandHandler.Instance?.RequestSyncDummyVisualServerRpc();
+            }
         }
 
         private void Update()

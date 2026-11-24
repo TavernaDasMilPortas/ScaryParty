@@ -3,7 +3,7 @@
 **Última Revisão:** 24/11/2026
 **Versão Unity:** Unity 6000.3.6f1
 **Branch Atual:** `main`
-**Último Bloco Concluído:** **Adendo transição Noite 0 → Noite 1 (preparação/votação obrigatória + UI Build em `Resources/PiariaUIAssetCatalog.asset` + `GameplayIntroCutsceneFlow`) e restauração física da pizzaria (respawn autoritativo interno + origem canônica de utensílios sem duplicação); validação EditMode/PlayMode e Host+Cliente pendentes no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`).**
+**Último Bloco Concluído:** **Execução integral do `Plano_Correcao_Integral_ScaryParty_8607e1fb.md` (Fases 0, A, C, B1, B2, D, E e F; commits `20b4a0e6`..Fase F) — 81 bugs confirmados endereçados em código/domínio, 2 melhorias defensivas aplicadas e 1 suspeita híbrida (`SUSP-08` Parte B aplicada, Parte A pendente PlayMode). Compilação `dotnet build` e suíte `DomainTestRunner` (`62/62` NUnit) aprovadas; EditMode/PlayMode completos no Test Runner, sanitização via Editor em `BUG-ASSET-01`, Build standalone e Host+Cliente pendentes no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`). Relatório completo em `Docs/Release/Reports/RELATORIO_CORRECAO_INTEGRAL_8607e1fb.md`.**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---

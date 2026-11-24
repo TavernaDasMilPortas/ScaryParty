@@ -180,8 +180,12 @@ namespace ScaryParty.VisualStyles.Editor
                         string folderPath = $"{styleFolder}/Materials/{subfolder}";
 
                         string shortHash = ExtractShortHash(target.conversionKey);
-                        string cleanMatName = SanitizeFileToken(target.descriptor.materialName);
-                        string assetName = $"Mat_VS_{SanitizeFileToken(profile.styleId)}_{target.decision.semanticRole}_{cleanMatName}_{shortHash}.mat";
+                        string assetName = BuildBoundedMaterialAssetName(
+                            profile.styleId,
+                            target.decision.semanticRole,
+                            target.descriptor.materialName,
+                            shortHash,
+                            folderPath);
                         string assetPath = existingEntry != null && !string.IsNullOrEmpty(existingEntry.targetMaterialAssetPath)
                             ? existingEntry.targetMaterialAssetPath
                             : $"{folderPath}/{assetName}";
@@ -637,6 +641,114 @@ namespace ScaryParty.VisualStyles.Editor
             if (string.IsNullOrEmpty(conversionKey)) return "00000000";
             int idx = conversionKey.LastIndexOf('_');
             return idx >= 0 && idx + 1 < conversionKey.Length ? conversionKey.Substring(idx + 1) : "00000000";
+        }
+
+        public static string BuildBoundedMaterialAssetName(
+            string styleId,
+            VisualSemanticRole semanticRole,
+            string rawMaterialName,
+            string shortHash,
+            string folderPath,
+            int maxRelativeAssetPathLength = 175)
+        {
+            string cleanStyle = SanitizeFileToken(string.IsNullOrEmpty(styleId) ? "default" : styleId);
+            string cleanRole = SanitizeFileToken(semanticRole.ToString());
+            string cleanMatName = SanitizeFileToken(rawMaterialName);
+            string cleanHash = string.IsNullOrEmpty(shortHash) ? "00000000" : SanitizeFileToken(shortHash);
+
+            int folderLen = string.IsNullOrEmpty(folderPath) ? 0 : folderPath.Length + 1;
+            int budgetForFileName = Mathf.Max(28, maxRelativeAssetPathLength - folderLen);
+
+            string fullCandidate = $"Mat_VS_{cleanStyle}_{cleanRole}_{cleanMatName}_{cleanHash}.mat";
+            if (fullCandidate.Length <= budgetForFileName)
+                return fullCandidate;
+
+            if (cleanStyle.Length > 18) cleanStyle = cleanStyle.Substring(0, 18);
+            string compactPrefix = $"Mat_VS_{cleanStyle}_{cleanRole}_";
+            string suffix = $"_{cleanHash}.mat";
+            int maxMatNameLen = budgetForFileName - compactPrefix.Length - suffix.Length;
+            if (maxMatNameLen < 4)
+            {
+                if (cleanRole.Length > 12) cleanRole = cleanRole.Substring(0, 12);
+                compactPrefix = $"Mat_VS_{cleanStyle}_{cleanRole}_";
+                maxMatNameLen = budgetForFileName - compactPrefix.Length - suffix.Length;
+            }
+            if (maxMatNameLen < 4)
+            {
+                string minName = cleanMatName.Length > 6 ? cleanMatName.Substring(0, 6) : cleanMatName;
+                return $"Mat_{minName}_{cleanHash}.mat";
+            }
+
+            if (cleanMatName.Length > maxMatNameLen)
+                cleanMatName = cleanMatName.Substring(0, maxMatNameLen);
+            return $"{compactPrefix}{cleanMatName}{suffix}";
+        }
+
+        public static int SanitizeLongGeneratedMaterialPaths(int maxRelativeAssetPathLength = 175)
+        {
+            string[] matGuids = AssetDatabase.FindAssets("t:Material", new[] { GeneratedRootFolder });
+            var movedMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < matGuids.Length; i++)
+            {
+                string oldPath = AssetDatabase.GUIDToAssetPath(matGuids[i]);
+                if (string.IsNullOrEmpty(oldPath) || oldPath.Length <= maxRelativeAssetPathLength)
+                    continue;
+
+                string folder = Path.GetDirectoryName(oldPath)?.Replace('\\', '/') ?? GeneratedRootFolder;
+                string fileNameNoExt = Path.GetFileNameWithoutExtension(oldPath);
+                string shortHash = matGuids[i].Length >= 8 ? matGuids[i].Substring(0, 8) : matGuids[i];
+                int budget = Mathf.Max(28, maxRelativeAssetPathLength - folder.Length - 1);
+                string prefix = "Mat_VS_";
+                string suffix = $"_{shortHash}.mat";
+                int trimmedLen = Mathf.Max(4, budget - prefix.Length - suffix.Length);
+                string core = fileNameNoExt.Length > trimmedLen ? fileNameNoExt.Substring(0, trimmedLen) : fileNameNoExt;
+                string newPath = $"{folder}/{prefix}{core}{suffix}";
+
+                if (AssetDatabase.LoadAssetAtPath<Material>(newPath) != null && !string.Equals(oldPath, newPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    newPath = $"{folder}/Mat_{shortHash}.mat";
+                }
+
+                if (!string.Equals(oldPath, newPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    string moveError = AssetDatabase.MoveAsset(oldPath, newPath);
+                    if (string.IsNullOrEmpty(moveError))
+                    {
+                        movedMap[oldPath] = newPath;
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[VisualStyleMaterialFactory] Falha ao encurtar caminho '{oldPath}': {moveError}");
+                    }
+                }
+            }
+
+            if (movedMap.Count > 0)
+            {
+                string[] manifestGuids = AssetDatabase.FindAssets("t:VisualStyleConversionManifest", new[] { GeneratedRootFolder });
+                for (int i = 0; i < manifestGuids.Length; i++)
+                {
+                    var manifest = AssetDatabase.LoadAssetAtPath<VisualStyleConversionManifest>(AssetDatabase.GUIDToAssetPath(manifestGuids[i]));
+                    if (manifest == null || manifest.entries == null) continue;
+                    bool dirty = false;
+                    for (int e = 0; e < manifest.entries.Count; e++)
+                    {
+                        var entry = manifest.entries[e];
+                        if (entry != null && !string.IsNullOrEmpty(entry.targetMaterialAssetPath) &&
+                            movedMap.TryGetValue(entry.targetMaterialAssetPath, out string updatedPath))
+                        {
+                            entry.targetMaterialAssetPath = updatedPath;
+                            dirty = true;
+                        }
+                    }
+                    if (dirty) EditorUtility.SetDirty(manifest);
+                }
+
+                AssetDatabase.SaveAssets();
+            }
+
+            return movedMap.Count;
         }
 
         public static string SanitizeFileToken(string raw)

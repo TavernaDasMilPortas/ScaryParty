@@ -43,6 +43,8 @@ namespace ScaryParty.Lighting
         private Color _baselineFogColor;
         private float _baselineFogDensity;
         private bool _baselineFog;
+        private float _lastEvaluatedClockHours = -999f;
+        private float _lastEvaluatedUnscaledTime = -999f;
 
         private void Awake()
         {
@@ -61,6 +63,7 @@ namespace ScaryParty.Lighting
             EnsureProfileLoaded();
             if (IsActivelyControllingScene)
             {
+                _lastEvaluatedClockHours = -999f;
                 EvaluateAndApply(currentClockHours);
             }
         }
@@ -85,12 +88,19 @@ namespace ScaryParty.Lighting
         {
             if (!Application.isPlaying || !IsActivelyControllingScene) return;
 
+            bool advanced = false;
             if (autoAdvance && !lockTimeForTests && gameHoursPerRealMinute > 0.0001f)
             {
                 currentClockHours = (currentClockHours + (gameHoursPerRealMinute / 60f) * Time.deltaTime) % 24f;
+                advanced = true;
             }
 
-            EvaluateAndApply(currentClockHours);
+            bool clockShifted = Mathf.Abs(currentClockHours - _lastEvaluatedClockHours) >= 0.015f;
+            bool pollDue = advanced && (Time.unscaledTime - _lastEvaluatedUnscaledTime) >= 0.5f;
+            if (_lastEvaluatedClockHours < -100f || clockShifted || pollDue)
+            {
+                EvaluateAndApply(currentClockHours);
+            }
         }
 
         public void ConfigureFromRuntimeConfig(bool enableCycle, float startHour, bool lockedForTests)
@@ -98,6 +108,7 @@ namespace ScaryParty.Lighting
             autoAdvance = enableCycle;
             lockTimeForTests = lockedForTests;
             currentClockHours = ((startHour % 24f) + 24f) % 24f;
+            _lastEvaluatedClockHours = -999f;
             EnsureProfileLoaded();
             if (IsActivelyControllingScene)
             {
@@ -111,6 +122,7 @@ namespace ScaryParty.Lighting
             VisualStyleRuntimeConfig.SetSessionTimeOverride(currentClockHours);
             if (evaluateNow)
             {
+                _lastEvaluatedClockHours = -999f;
                 EvaluateAndApply(currentClockHours);
             }
         }
@@ -122,11 +134,14 @@ namespace ScaryParty.Lighting
 
         public void ApplyStyleModulation(VisualStyleProfile activeStyleProfile)
         {
+            _lastEvaluatedClockHours = -999f;
             EvaluateAndApply(currentClockHours, activeStyleProfile);
         }
 
         public void EvaluateAndApply(float clockHours, VisualStyleProfile styleOverride = null)
         {
+            _lastEvaluatedClockHours = clockHours;
+            _lastEvaluatedUnscaledTime = Time.unscaledTime;
             EnsureProfileLoaded();
             if (profile == null) return;
 

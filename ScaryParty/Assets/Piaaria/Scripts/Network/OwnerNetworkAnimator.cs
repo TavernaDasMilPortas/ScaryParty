@@ -40,16 +40,26 @@ public class OwnerNetworkAnimator : NetworkAnimator
         base.OnNetworkSpawn();
     }
 
+    private static bool _loggedReflectionWarning;
+
     private void ConfigureParameterSyncFiltering()
     {
         var entriesField = typeof(NetworkAnimator).GetField("AnimatorParameterEntries", BindingFlags.Instance | BindingFlags.NonPublic);
-        if (entriesField == null) return;
+        if (entriesField == null)
+        {
+            LogReflectionMismatchOnce("campo interno AnimatorParameterEntries ausente");
+            return;
+        }
 
         var container = entriesField.GetValue(this);
         if (container == null) return;
 
         var listField = container.GetType().GetField("ParameterEntries", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (listField?.GetValue(container) is not IList entries) return;
+        if (listField?.GetValue(container) is not IList entries)
+        {
+            LogReflectionMismatchOnce("campo ParameterEntries ausente no contêiner do NetworkAnimator");
+            return;
+        }
 
         for (int i = 0; i < entries.Count; i++)
         {
@@ -59,13 +69,24 @@ public class OwnerNetworkAnimator : NetworkAnimator
             var entryType = entry.GetType();
             var nameField = entryType.GetField("name", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             var syncField = entryType.GetField("Synchronize", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (nameField == null || syncField == null) continue;
+            if (nameField == null || syncField == null)
+            {
+                LogReflectionMismatchOnce("campos name/Synchronize ausentes em ParameterEntry do NetworkAnimator");
+                continue;
+            }
 
             if (nameField.GetValue(entry) is string paramName && s_ExcludedParameters.Contains(paramName))
             {
                 syncField.SetValue(entry, false);
             }
         }
+    }
+
+    private static void LogReflectionMismatchOnce(string detail)
+    {
+        if (_loggedReflectionWarning) return;
+        _loggedReflectionWarning = true;
+        Debug.LogWarning($"[OwnerNetworkAnimator] Filtro de parâmetros por reflexão não aplicado ({detail}); verifique compatibilidade com esta versão do NGO.");
     }
 
     public void EnsureAnimatorBound()

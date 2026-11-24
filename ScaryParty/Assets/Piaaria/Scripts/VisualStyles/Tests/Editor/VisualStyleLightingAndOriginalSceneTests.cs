@@ -493,6 +493,27 @@ namespace ScaryParty.VisualStyles.Editor.Tests
                 }
             }
         }
+
+        [Test]
+        public void MaterialFactory_BuildBoundedMaterialAssetName_CapsLongRelativePathsAndPreservesHash()
+        {
+            string styleId = "custom_style_20261111_225726_very_long_suffix";
+            string folder = $"{VisualStyleMaterialFactory.GeneratedRootFolder}/custom_style_20261111_225726/Materials/Architecture";
+            string longName = "PizzeriaWall_Mat_Gen_CaixaRegistradora_DetailedProceduralSurfaceName_ExtraLongToken";
+            string shortHash = "9aa86e4c";
+
+            string boundedName = VisualStyleMaterialFactory.BuildBoundedMaterialAssetName(
+                styleId,
+                VisualSemanticRole.PizzeriaWall,
+                longName,
+                shortHash,
+                folder,
+                175);
+
+            string relPath = $"{folder}/{boundedName}";
+            Assert.LessOrEqual(relPath.Length, 175, $"Caminho relativo gerado excedeu o limite: {relPath}");
+            StringAssert.EndsWith($"_{shortHash}.mat", boundedName);
+        }
     }
 }
 #endif

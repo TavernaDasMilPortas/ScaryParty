@@ -3788,8 +3788,25 @@ namespace ScaryParty.Pizzeria.Network
                 isLocal);
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void RequestSyncDummyVisualServerRpc(ServerRpcParams rpcParams = default)
+        {
+            if (!IsServer) return;
+            var dummy = FindFirstObjectByType<ScaryParty.Combat.PracticeTargetDummy>();
+            if (dummy == null) return;
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            SyncDummyVisualForClientClientRpc(dummy.CurrentHp, TargetSender(senderId));
+        }
+
         [ClientRpc]
         private void SyncDummyVisualClientRpc(int serverCurrentHp)
+        {
+            var dummy = FindFirstObjectByType<ScaryParty.Combat.PracticeTargetDummy>();
+            dummy?.ApplyLocalVisualPulse(serverCurrentHp);
+        }
+
+        [ClientRpc]
+        private void SyncDummyVisualForClientClientRpc(int serverCurrentHp, ClientRpcParams rpcParams = default)
         {
             var dummy = FindFirstObjectByType<ScaryParty.Combat.PracticeTargetDummy>();
             dummy?.ApplyLocalVisualPulse(serverCurrentHp);

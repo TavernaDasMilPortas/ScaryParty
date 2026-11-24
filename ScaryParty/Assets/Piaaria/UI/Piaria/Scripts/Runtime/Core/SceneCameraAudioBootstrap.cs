@@ -14,6 +14,7 @@ namespace ScaryParty.UI.Piaria.Core
     {
         private static SceneCameraAudioBootstrap _instance;
         private static GameObject _fallbackCameraGo;
+        private float _nextCamPollUnscaledTime;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoad()
@@ -73,6 +74,9 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void LateUpdate()
         {
+            if (Time.unscaledTime < _nextCamPollUnscaledTime) return;
+            _nextCamPollUnscaledTime = Time.unscaledTime + 0.5f;
+
             // Se houver uma câmera de jogador ativa no mundo jogável, desativa a câmera de fallback
             if (_fallbackCameraGo != null && _fallbackCameraGo.activeSelf)
             {

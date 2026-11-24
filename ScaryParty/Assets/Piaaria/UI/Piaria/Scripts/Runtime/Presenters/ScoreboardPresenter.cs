@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.UI.Piaria.Core;
@@ -249,8 +250,11 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_scoreboardList == null) return;
             _scoreboardList.Clear();
 
-            var allPlayers = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-            foreach (var p in allPlayers)
+            var activePlayers = PlayerState.ActivePlayers;
+            IEnumerable<PlayerState> playersToShow = activePlayers.Count > 0
+                ? activePlayers
+                : FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
+            foreach (var p in playersToShow)
             {
                 if (p == null) continue;
 
