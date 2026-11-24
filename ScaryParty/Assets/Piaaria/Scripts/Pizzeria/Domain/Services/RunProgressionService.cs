@@ -161,6 +161,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             _purchasedUniqueItems.Clear();
             IsVoteResolved = false;
             LastResolvedOptionId = null;
+            ResetIntermissionState();
 
             if (activeModifiers != null)
             {
@@ -250,6 +251,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             PreparationTargetNight = 1;
             IsVoteResolved = false;
             LastResolvedOptionId = null;
+            ResetIntermissionState();
             InitializeStreams(seed);
 
             if (state != null)

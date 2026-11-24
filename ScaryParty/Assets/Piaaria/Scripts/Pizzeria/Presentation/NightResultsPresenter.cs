@@ -43,6 +43,8 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private bool _isOpen = false;
         private bool _hasLock = false;
+        private bool _actionInFlight = false;
+        private float _actionSentRealtime = 0f;
         private byte _lastPhase = 255;
 
         public bool IsOpen => _isOpen;
@@ -159,6 +161,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _retryNightBtn = new Button(() =>
             {
+                if (_actionInFlight) return;
+                _actionInFlight = true;
+                _actionSentRealtime = Time.realtimeSinceStartup;
+                SetActionButtonsEnabled(false);
                 PizzeriaCommandHandler.Instance?.StartNewRunServerRpc();
             });
             _retryNightBtn.text = "Iniciar Nova RUN (Noite 1)";
@@ -173,6 +179,10 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _nextNightBtn = new Button(() =>
             {
+                if (_actionInFlight) return;
+                _actionInFlight = true;
+                _actionSentRealtime = Time.realtimeSinceStartup;
+                SetActionButtonsEnabled(false);
                 PizzeriaCommandHandler.Instance?.AdvanceToNextNightServerRpc();
             });
             _nextNightBtn.text = "Próxima Noite";
@@ -217,10 +227,17 @@ namespace ScaryParty.Pizzeria.Presentation
             {
                 if (!_isOpen || _lastPhase != dto.Phase)
                 {
+                    _actionInFlight = false;
+                    SetActionButtonsEnabled(true);
                     OpenWithState(dto, netState.RestaurantBudget.Value);
                 }
                 else
                 {
+                    if (_actionInFlight && Time.realtimeSinceStartup - _actionSentRealtime > 3f)
+                    {
+                        _actionInFlight = false;
+                        SetActionButtonsEnabled(true);
+                    }
                     RefreshLabels(dto, netState.RestaurantBudget.Value);
                 }
             }
@@ -339,6 +356,8 @@ namespace ScaryParty.Pizzeria.Presentation
         {
             if (!_isOpen) return;
             _isOpen = false;
+            _actionInFlight = false;
+            SetActionButtonsEnabled(true);
 
             if (_overlay != null)
                 _overlay.style.display = DisplayStyle.None;
@@ -348,6 +367,12 @@ namespace ScaryParty.Pizzeria.Presentation
                 GameplayInputGate.PopLock();
                 _hasLock = false;
             }
+        }
+
+        private void SetActionButtonsEnabled(bool enabled)
+        {
+            _nextNightBtn?.SetEnabled(enabled);
+            _retryNightBtn?.SetEnabled(enabled);
         }
 
         private void ReturnToMainMenu()

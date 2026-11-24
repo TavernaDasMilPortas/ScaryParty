@@ -156,5 +156,21 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.AreEqual(8, PizzeriaCommandHandler.ApplySupplyBundleLinesServer(state, exactLines));
             Assert.AreEqual(10, state.StorageSlots[slotKey].Quantity);
         }
+
+        [Test]
+        public void ResourcesUiCatalog_ContainsIntermissionTemplatesAndSettings_ForBuildParity()
+        {
+            var catalog = Resources.Load<ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog>("PiariaUIAssetCatalog");
+            Assert.IsNotNull(catalog, "Assets/Resources/PiariaUIAssetCatalog.asset precisa existir para builds standalone.");
+            Assert.IsNotNull(catalog.panelSettings, "PanelSettings ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.nightIntermissionTheme, "nightIntermissionTheme ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.nightIntermissionIconCatalog, "nightIntermissionIconCatalog ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateNightIntermissionScreen, "templateNightIntermissionScreen ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateNightSummaryPage, "templateNightSummaryPage ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateModifierVotePage, "templateModifierVotePage ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateShopPreparationPage, "templateShopPreparationPage ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateLotteryRevealPage, "templateLotteryRevealPage ausente no catálogo de Resources.");
+            Assert.IsNotNull(catalog.templateOperationsStatusOverlay, "templateOperationsStatusOverlay ausente no catálogo de Resources.");
+        }
     }
 }

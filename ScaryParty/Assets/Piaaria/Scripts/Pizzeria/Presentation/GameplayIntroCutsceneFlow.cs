@@ -1,21 +1,34 @@
 using System.Collections;
 using ScaryParty.Cutscenes;
 using ScaryParty.Pizzeria.Composition;
+using ScaryParty.Pizzeria.Domain.Types;
+using ScaryParty.Pizzeria.Network;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace ScaryParty.Pizzeria.Presentation
 {
+    public enum IntroPresentationStage
+    {
+        Loading = 0,
+        IntroPreparing = 1,
+        IntroPlaying = 2,
+        PreparationVisible = 3,
+        NightActive = 4
+    }
+
     /// <summary>
     /// Fluxo de entrada da cena de gameplay:
     /// 1. Pausa o relógio da noite ao entrar na cena.
     /// 2. Reproduz a cutscene de introdução em RawImage (assim que o loading termina).
-    /// 3. Ao término/skip da cutscene, exibe o banner da Noite 1 e o objetivo em dinheiro.
-    /// 4. Libera o controle do jogador e inicia a contagem do tempo da noite.
+    /// 3. Se a preparação pré-noite estiver ativa, libera a UI de intermissão antes do banner da noite.
+    /// 4. Ao início do turno, exibe o banner da noite e libera o relógio.
     /// </summary>
     public sealed class GameplayIntroCutsceneFlow : MonoBehaviour
     {
         public static GameplayIntroCutsceneFlow Instance { get; private set; }
+        public static IntroPresentationStage CurrentStage { get; private set; } = IntroPresentationStage.Loading;
+        public static bool IsBlockingIntermission => Instance != null && CurrentStage < IntroPresentationStage.PreparationVisible;
 
         [SerializeField] private string introCutsceneId = "cutscene_01";
         [SerializeField] private float nightBannerDurationSeconds = 3.5f;
@@ -23,6 +36,7 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _hasStarted;
         private bool _cutsceneFinished;
         private bool _hasInputLock;
+        private CutscenePlaybackService _boundService;
 
         public static GameplayIntroCutsceneFlow EnsureInstance()
         {
@@ -45,6 +59,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 return;
             }
             Instance = this;
+            CurrentStage = IntroPresentationStage.Loading;
         }
 
         private void Start()
@@ -56,6 +71,7 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private IEnumerator RunIntroSequence()
         {
+            CurrentStage = IntroPresentationStage.Loading;
             CutscenePlaybackService.IsNightTimerPaused = true;
 
             // Aguardar o loading screen terminar antes de iniciar a cutscene
@@ -64,47 +80,94 @@ namespace ScaryParty.Pizzeria.Presentation
                 yield return null;
             }
 
+            CurrentStage = IntroPresentationStage.IntroPreparing;
             GameplayInputGate.PushLock();
             _hasInputLock = true;
 
             var service = CutscenePlaybackService.EnsureInstance();
-            if (service.HasDefinition(introCutsceneId))
+            if (service != null && service.HasDefinition(introCutsceneId))
             {
+                _boundService = service;
                 _cutsceneFinished = false;
                 service.Completed += OnCutsceneEnded;
                 service.Skipped += OnCutsceneEnded;
                 service.Failed += OnCutsceneFailed;
 
+                CurrentStage = IntroPresentationStage.IntroPlaying;
                 service.Play(introCutsceneId);
 
-                while (!_cutsceneFinished)
+                while (!_cutsceneFinished &&
+                       service != null &&
+                       service.State != CutscenePlaybackState.Idle)
                 {
                     yield return null;
                 }
 
-                service.Completed -= OnCutsceneEnded;
-                service.Skipped -= OnCutsceneEnded;
-                service.Failed -= OnCutsceneFailed;
+                UnbindCutsceneEvents();
             }
 
-            // Exibir banner da Primeira Noite + Objetivo em dinheiro
-            int nightNumber = 1;
-            int revenueGoal = 60;
-            if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.DomainState != null)
-            {
-                nightNumber = Mathf.Max(1, PizzeriaRoot.Instance.DomainState.CurrentNightNumber);
-                revenueGoal = Mathf.Max(10, PizzeriaRoot.Instance.DomainState.NightRevenueGoal);
-            }
-
-            yield return ShowNightObjectiveBannerRoutine(nightNumber, revenueGoal);
-
-            // Liberar input e iniciar a contagem do tempo da noite
+            // Liberar o lock da intro antes de exibir a preparação ou o banner
             if (_hasInputLock)
             {
                 GameplayInputGate.PopLock();
                 _hasInputLock = false;
             }
+
+            // Se a preparação (votação/loja) estiver aberta, aguardá-la concluir antes do banner da noite
+            if (IsPreparationPhaseActive())
+            {
+                CurrentStage = IntroPresentationStage.PreparationVisible;
+                while (IsPreparationPhaseActive())
+                {
+                    yield return null;
+                }
+            }
+            else
+            {
+                CurrentStage = IntroPresentationStage.PreparationVisible;
+            }
+
+            CurrentStage = IntroPresentationStage.NightActive;
+
+            // Ler número da noite e meta de forma replicada (host e cliente)
+            int nightNumber = 1;
+            int revenueGoal = 60;
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState != null && netState.IsSpawned)
+            {
+                var dto = netState.NightState.Value;
+                nightNumber = Mathf.Max(0, dto.NightNumber);
+                revenueGoal = Mathf.Max(10, dto.RevenueGoal);
+            }
+            else if (PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.DomainState != null)
+            {
+                nightNumber = Mathf.Max(0, PizzeriaRoot.Instance.DomainState.CurrentNightNumber);
+                revenueGoal = Mathf.Max(10, PizzeriaRoot.Instance.DomainState.NightRevenueGoal);
+            }
+
             CutscenePlaybackService.IsNightTimerPaused = false;
+            yield return ShowNightObjectiveBannerRoutine(nightNumber, revenueGoal);
+        }
+
+        private static bool IsPreparationPhaseActive()
+        {
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState != null && netState.IsSpawned)
+            {
+                return netState.NightState.Value.Phase == (byte)NightPhase.PreparingNextNight;
+            }
+            return PizzeriaRoot.Instance != null &&
+                   PizzeriaRoot.Instance.DomainState != null &&
+                   PizzeriaRoot.Instance.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight;
+        }
+
+        private void UnbindCutsceneEvents()
+        {
+            if (_boundService == null) return;
+            _boundService.Completed -= OnCutsceneEnded;
+            _boundService.Skipped -= OnCutsceneEnded;
+            _boundService.Failed -= OnCutsceneFailed;
+            _boundService = null;
         }
 
         private void OnCutsceneEnded(string id)
@@ -157,7 +220,9 @@ namespace ScaryParty.Pizzeria.Presentation
             titleText.fontStyle = FontStyle.Bold;
             titleText.alignment = TextAnchor.MiddleCenter;
             titleText.color = new Color(1f, 0.85f, 0.35f, 1f);
-            titleText.text = nightNumber == 1 ? "PRIMEIRA NOITE" : $"NOITE {nightNumber}";
+            titleText.text = nightNumber == 0
+                ? "NOITE 0 — TUTORIAL"
+                : (nightNumber == 1 ? "PRIMEIRA NOITE" : $"NOITE {nightNumber}");
 
             var subGo = new GameObject("Objective");
             subGo.transform.SetParent(panelGo.transform, false);
@@ -198,13 +263,23 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
+            UnbindCutsceneEvents();
+            if (CutscenePlaybackService.Instance != null &&
+                CutscenePlaybackService.Instance.State != CutscenePlaybackState.Idle)
+            {
+                CutscenePlaybackService.Instance.Cancel();
+            }
             if (_hasInputLock)
             {
                 GameplayInputGate.PopLock();
                 _hasInputLock = false;
             }
             CutscenePlaybackService.IsNightTimerPaused = false;
-            if (Instance == this) Instance = null;
+            if (Instance == this)
+            {
+                CurrentStage = IntroPresentationStage.NightActive;
+                Instance = null;
+            }
         }
     }
 }

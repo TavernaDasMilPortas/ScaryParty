@@ -197,6 +197,7 @@ namespace ScaryParty.Pizzeria.Domain.Services
             state.NightShopSpent = 0;
             state.NightWagesSpent = 0;
             state.NightOrdersCompleted = 0;
+            state.NightPizzasDelivered = 0;
             state.NightOrdersFailed = 0;
             state.NightLostCustomers = 0;
             if (parameters.NightNumber <= 0)

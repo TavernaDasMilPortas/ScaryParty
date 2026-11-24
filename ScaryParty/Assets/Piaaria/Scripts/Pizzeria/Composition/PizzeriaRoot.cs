@@ -453,6 +453,36 @@ namespace ScaryParty.Pizzeria.Composition
             return resolved;
         }
 
+        public void ResolveSessionRunSettings(out int seed, out int maxNights, out RunDifficulty difficulty, out int startNight)
+        {
+            var preset = GetEffectiveRunPreset();
+            var launch = Network.SessionLaunchConfig.Current;
+            bool useLaunch = ActivePresetOverride == null && launch.HasHostSelection;
+
+            seed = (useLaunch && launch.SeedOverride != 0)
+                ? launch.SeedOverride
+                : ((_config != null && _config.runSeedOverride != 0)
+                    ? _config.runSeedOverride
+                    : (System.Environment.TickCount ^ GetInstanceID()));
+
+            maxNights = useLaunch
+                ? Mathf.Clamp(launch.MaxNights, 1, 7)
+                : (preset != null
+                    ? Mathf.Clamp(preset.totalNights, 1, 7)
+                    : (_config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3));
+
+            difficulty = useLaunch
+                ? launch.Difficulty
+                : (preset != null
+                    ? preset.difficulty
+                    : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
+
+            bool includeNight0 = (useLaunch && launch.IncludeNight0Tutorial) ||
+                                 (preset != null && preset.includeNight0Tutorial) ||
+                                 (_config != null && _config.enableTutorialNight0ByDefault);
+            startNight = includeNight0 ? 0 : 1;
+        }
+
         private void InitializeServerDomain()
         {
             DomainState = new PizzeriaState();
@@ -470,27 +500,7 @@ namespace ScaryParty.Pizzeria.Composition
             CustomerService = new CustomerService();
 
             var preset = GetEffectiveRunPreset();
-            var launch = Network.SessionLaunchConfig.Current;
-            int runSeed = (launch.HasHostSelection && launch.SeedOverride != 0)
-                ? launch.SeedOverride
-                : ((_config != null && _config.runSeedOverride != 0)
-                    ? _config.runSeedOverride
-                    : (System.Environment.TickCount ^ GetInstanceID()));
-            int maxNights = launch.HasHostSelection
-                ? Mathf.Clamp(launch.MaxNights, 1, 7)
-                : (preset != null
-                    ? Mathf.Clamp(preset.totalNights, 1, 7)
-                    : (_config != null ? Mathf.Clamp(_config.runMaxNights, 1, 7) : 3));
-            var diff = launch.HasHostSelection
-                ? launch.Difficulty
-                : (preset != null
-                    ? preset.difficulty
-                    : (_config != null ? _config.runDifficulty : RunDifficulty.Normal));
-            int initialNight = (launch.HasHostSelection && launch.IncludeNight0Tutorial) ||
-                               (preset != null && preset.includeNight0Tutorial) ||
-                               (_config != null && _config.enableTutorialNight0ByDefault)
-                ? 0
-                : 1;
+            ResolveSessionRunSettings(out int runSeed, out int maxNights, out var diff, out int initialNight);
 
             string balancingDiagnostic = string.Empty;
             var balancingSnapshot = _config != null
@@ -563,8 +573,15 @@ namespace ScaryParty.Pizzeria.Composition
             DomainState.IsNonLethalTutorialNight = preview.NonLethalDefeat;
             DomainState.NightDurationSeconds = preview.DurationSeconds;
             DomainState.NightRemainingSeconds = preview.DurationSeconds;
+            DomainState.NightPrepRemainingSeconds = preview.PrepSeconds;
+            DomainState.NightGraceRemainingSeconds = preview.ClosingGraceSeconds;
+            DomainState.UnlimitedShiftTime = preview.UnlimitedShiftTime;
+            DomainState.IsForcedDebugOutcome = false;
 
             RunProgressionService?.OpenTypedBallots(resolvedTarget, 3, 3, respectCatalogSchedule: true);
+            int stageCount = RunProgressionService?.CurrentVoteStages?.Count ?? 0;
+            var stageState = RunProgressionService != null ? RunProgressionService.IntermissionStage : Domain.Services.IntermissionStage.None;
+            Debug.Log($"[PizzeriaRoot] Preparação aberta: CurrentNight={DomainState.CurrentNightNumber}, TargetNight={DomainState.TargetNightNumber}, Phase={DomainState.CurrentNightPhase}, IntermissionStage={stageState}, VoteStages={stageCount}, Preset={DomainState.ActivePresetId}, UnlimitedShift={DomainState.UnlimitedShiftTime}.");
 #if UNITY_EDITOR
             if (resolvedTarget == 1)
             {
@@ -866,37 +883,45 @@ namespace ScaryParty.Pizzeria.Composition
                     }
                 }
 
-                // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais
-                OrderService?.TickOrders(DomainState, Clock, EmployeeTaskService);
-                CallService?.TickCalls(DomainState, (float)Clock.Now);
-                SpeciesHostilityService?.Tick(Time.deltaTime);
-                Presentation.EmployeePopulationDirector.TickAndProjectServer(this, Network.PizzeriaNetworkState.Instance, Time.deltaTime);
-                dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
-
-                int prevHoldCount = DomainState.PlayerHolds.Count;
-                PlayerHoldService?.TickHolds(
-                    DomainState,
-                    (float)Clock.Now,
-                    OrderService,
-                    CustomerService,
-                    Clock,
-                    _config != null ? _config.maxActiveOrders : 6,
-                    EmployeeTaskService);
-                if (DomainState.PlayerHolds.Count != prevHoldCount)
-                    dirty = true;
-
-                if (CustomerService != null)
+                // Funcionários só atuam durante preparação inicial/expediente ativo
+                if (DomainState.CurrentNightPhase == NightPhase.Preparing || DomainState.CurrentNightPhase == NightPhase.Active)
                 {
-                    bool custDirty = CustomerService.TickCustomers(
+                    Presentation.EmployeePopulationDirector.TickAndProjectServer(this, Network.PizzeriaNetworkState.Instance, Time.deltaTime);
+                }
+
+                // Tick de Pedidos (A15), Chamadas, Suprimentos, Holds do Jogador e Clientes Presenciais somente durante expediente ativo
+                if (DomainState.CurrentNightPhase == NightPhase.Active)
+                {
+                    OrderService?.TickOrders(DomainState, Clock, EmployeeTaskService);
+                    CallService?.TickCalls(DomainState, (float)Clock.Now);
+                    SpeciesHostilityService?.Tick(Time.deltaTime);
+                    dirty |= NightCycleService.TickSupplies(DomainState, Clock.Now);
+
+                    int prevHoldCount = DomainState.PlayerHolds.Count;
+                    PlayerHoldService?.TickHolds(
                         DomainState,
-                        Catalog,
+                        (float)Clock.Now,
                         OrderService,
+                        CustomerService,
                         Clock,
-                        Time.deltaTime,
-                        _config != null ? _config.queueStagnationThresholdSeconds : 35f,
-                        _config != null ? _config.queueStagnationDecayMultiplier : 1.35f,
+                        _config != null ? _config.maxActiveOrders : 6,
                         EmployeeTaskService);
-                    dirty |= custDirty;
+                    if (DomainState.PlayerHolds.Count != prevHoldCount)
+                        dirty = true;
+
+                    if (CustomerService != null)
+                    {
+                        bool custDirty = CustomerService.TickCustomers(
+                            DomainState,
+                            Catalog,
+                            OrderService,
+                            Clock,
+                            Time.deltaTime,
+                            _config != null ? _config.queueStagnationThresholdSeconds : 35f,
+                            _config != null ? _config.queueStagnationDecayMultiplier : 1.35f,
+                            EmployeeTaskService);
+                        dirty |= custDirty;
+                    }
                 }
 
                 if (!ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused)

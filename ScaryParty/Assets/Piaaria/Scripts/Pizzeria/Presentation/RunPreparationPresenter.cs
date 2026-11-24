@@ -206,8 +206,12 @@ namespace ScaryParty.Pizzeria.Presentation
             if (ns == null) return;
 
             var night = ns.NightState.Value;
-            bool shouldBeOpen = night.Phase == (byte)NightPhase.PreparingNextNight &&
-                                ScaryParty.UI.Piaria.Presenters.NightIntermissionPresenter.Instance == null;
+            var intermission = ScaryParty.UI.Piaria.Presenters.NightIntermissionPresenter.Instance;
+            bool primaryCanRender = intermission != null && intermission.CanRenderIntermission;
+            bool blockedByIntro = GameplayIntroCutsceneFlow.IsBlockingIntermission;
+            bool shouldBeOpen = !blockedByIntro &&
+                                night.Phase == (byte)NightPhase.PreparingNextNight &&
+                                !primaryCanRender;
 
             if (shouldBeOpen)
             {

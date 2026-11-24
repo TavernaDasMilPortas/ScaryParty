@@ -46,15 +46,20 @@ namespace ScaryParty.UI.Piaria.Presenters
         private TabPage _activeTab = TabPage.Summary;
         private bool _isOpen;
         private bool _lockPushed;
+        private bool _buildFailed;
+        private bool _listDirty;
         private uint _lastObservedRevision;
+        private uint _lastNightRevision;
         private NightIntermissionTheme _theme;
         private NightSummaryPagePresenter _summaryPresenter;
         private ModifierVotePagePresenter _votePresenter;
         private RunShopPagePresenter _shopPresenter;
         private LotteryRevealPresenter _revealPresenter;
+        private PizzeriaNetworkState _subscribedNetState;
 
         public bool IsOpen => _isOpen;
         public TabPage ActiveTab => _activeTab;
+        public bool CanRenderIntermission => _root != null || (!_buildFailed && EnsureBuilt());
 
         public static NightIntermissionPresenter EnsureInstance()
         {
@@ -78,6 +83,7 @@ namespace ScaryParty.UI.Piaria.Presenters
         private void OnDisable()
         {
             UnsubscribeCommandEvents();
+            UnsubscribeNetworkLists();
             ReleaseInputLock();
             if (_root != null) UIToolkitTweenService.KillTweensRecursive(_root);
         }
@@ -86,11 +92,37 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (Instance == this) Instance = null;
             UnsubscribeCommandEvents();
+            UnsubscribeNetworkLists();
             ReleaseInputLock();
             if (_root != null) UIToolkitTweenService.KillTweensRecursive(_root);
         }
 
         private PizzeriaCommandHandler _subscribedHandler;
+
+        private void EnsureNetworkListsSubscribed(PizzeriaNetworkState net)
+        {
+            if (_subscribedNetState == net) return;
+            UnsubscribeNetworkLists();
+            if (net == null) return;
+
+            if (net.RunVoteOptions != null) net.RunVoteOptions.OnListChanged += OnVoteOptionsListChanged;
+            if (net.RunShopOffers != null) net.RunShopOffers.OnListChanged += OnShopOffersListChanged;
+            if (net.RunPlayerStates != null) net.RunPlayerStates.OnListChanged += OnPlayerStatesListChanged;
+            _subscribedNetState = net;
+        }
+
+        private void UnsubscribeNetworkLists()
+        {
+            if (_subscribedNetState == null) return;
+            if (_subscribedNetState.RunVoteOptions != null) _subscribedNetState.RunVoteOptions.OnListChanged -= OnVoteOptionsListChanged;
+            if (_subscribedNetState.RunShopOffers != null) _subscribedNetState.RunShopOffers.OnListChanged -= OnShopOffersListChanged;
+            if (_subscribedNetState.RunPlayerStates != null) _subscribedNetState.RunPlayerStates.OnListChanged -= OnPlayerStatesListChanged;
+            _subscribedNetState = null;
+        }
+
+        private void OnVoteOptionsListChanged(NetworkListEvent<NetRunVoteOptionDto> _) => _listDirty = true;
+        private void OnShopOffersListChanged(NetworkListEvent<NetRunShopOfferDto> _) => _listDirty = true;
+        private void OnPlayerStatesListChanged(NetworkListEvent<NetPlayerIntermissionDto> _) => _listDirty = true;
 
         private void EnsureCommandEventsSubscribed()
         {
@@ -127,10 +159,15 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (!EnsureBuilt()) return;
             EnsureCommandEventsSubscribed();
+            var net = PizzeriaNetworkState.Instance;
+            EnsureNetworkListsSubscribed(net);
 
             if (!_isOpen)
             {
                 _isOpen = true;
+                _listDirty = false;
+                _lastObservedRevision = net != null ? net.RunState.Value.Revision : 0;
+                _lastNightRevision = net != null ? net.NightState.Value.Revision : 0;
                 _root.style.display = DisplayStyle.Flex;
                 if (!_lockPushed)
                 {
@@ -149,7 +186,11 @@ namespace ScaryParty.UI.Piaria.Presenters
         {
             if (!_isOpen) return;
             _isOpen = false;
+            _listDirty = false;
+            _lastObservedRevision = 0;
+            _lastNightRevision = 0;
             UnsubscribeCommandEvents();
+            UnsubscribeNetworkLists();
             _shopPresenter?.ClearPendingPurchase();
             if (_root != null)
             {
@@ -183,12 +224,14 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             var night = net.NightState.Value;
             var run = net.RunState.Value;
-            bool shouldShow = night.Phase == (byte)NightPhase.PreparingNextNight &&
+            bool blockedByIntro = ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.IsBlockingIntermission;
+            bool shouldShow = !blockedByIntro &&
+                              night.Phase == (byte)NightPhase.PreparingNextNight &&
                               !run.IsRunCompleted;
 
             if (shouldShow && !_isOpen)
             {
-                ShowIntermission();
+                if (!_buildFailed) ShowIntermission();
             }
             else if (!shouldShow && _isOpen)
             {
@@ -196,15 +239,18 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
             else if (_isOpen)
             {
+                EnsureNetworkListsSubscribed(net);
                 ScaryParty.Pizzeria.Presentation.GameplayInputGate.MaintainMenuCursorUnlocked();
                 if (_activeTab == TabPage.Reveal && _revealPresenter != null)
                 {
                     double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
                     _revealPresenter.Tick(net, serverNow);
                 }
-                if (run.Revision != _lastObservedRevision)
+                if (_listDirty || run.Revision != _lastObservedRevision || night.Revision != _lastNightRevision)
                 {
+                    _listDirty = false;
                     _lastObservedRevision = run.Revision;
+                    _lastNightRevision = night.Revision;
                     RefreshFromNetwork();
                 }
             }
@@ -384,6 +430,18 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             if (_uiDocument.panelSettings == null && catalog != null && catalog.panelSettings != null)
                 _uiDocument.panelSettings = catalog.panelSettings;
+            if (_uiDocument.panelSettings == null)
+            {
+                var hud = FindFirstObjectByType<HudPresenter>();
+                if (hud != null && hud.uiDocument != null && hud.uiDocument.panelSettings != null)
+                    _uiDocument.panelSettings = hud.uiDocument.panelSettings;
+            }
+            if (_uiDocument.panelSettings == null)
+            {
+                var ps = Resources.FindObjectsOfTypeAll<PanelSettings>();
+                if (ps != null && ps.Length > 0)
+                    _uiDocument.panelSettings = ps[0];
+            }
 
             _uiDocument.sortingOrder = 120;
 
@@ -392,11 +450,22 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (screenTpl == null)
                 screenTpl = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/NightIntermissionScreen.uxml");
 #endif
-            if (screenTpl == null) return false;
+            if (screenTpl == null || _uiDocument.panelSettings == null)
+            {
+                _buildFailed = true;
+                Debug.LogError($"[NightIntermissionPresenter] Falha ao inicializar shell de preparação (screenTpl={(screenTpl != null)}, panelSettings={(_uiDocument.panelSettings != null)}). Fallback RunPreparationPresenter será utilizado.");
+                return false;
+            }
 
             _uiDocument.visualTreeAsset = screenTpl;
             _root = _uiDocument.rootVisualElement;
-            if (_root == null) return false;
+            if (_root == null)
+            {
+                _buildFailed = true;
+                Debug.LogError("[NightIntermissionPresenter] rootVisualElement nulo após atribuir VisualTreeAsset; habilitando fallback RunPreparationPresenter.");
+                return false;
+            }
+            _buildFailed = false;
 
             if (catalog != null)
             {

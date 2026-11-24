@@ -1293,20 +1293,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
 
-            var preset = root.GetEffectiveRunPreset();
-            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
-                ? root.Config.runSeedOverride
-                : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = preset != null
-                ? Mathf.Clamp(preset.totalNights, 1, 7)
-                : (root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3);
-            var diff = preset != null
-                ? preset.difficulty
-                : (root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal);
-            int startNight = ((preset != null && preset.includeNight0Tutorial) ||
-                              (root.Config != null && root.Config.enableTutorialNight0ByDefault))
-                ? 0
-                : 1;
+            root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out int startNight);
 
             _storageSessions.Clear();
             _activeOvenTransfers.Clear();
@@ -1335,7 +1322,11 @@ namespace ScaryParty.Pizzeria.Network
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
 
             CommitAndReplicate();
-            string nightLabel = startNight == 0 ? "Noite 0 (Tutorial)" : $"Noite {root.DomainState.CurrentNightNumber}";
+            string nightLabel = startNight == 0
+                ? "Noite 0 (Tutorial)"
+                : (root.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight
+                    ? $"Preparação para Noite {root.DomainState.TargetNightNumber}"
+                    : $"Noite {root.DomainState.CurrentNightNumber}");
             BroadcastNoticeClientRpc($"Nova RUN iniciada! {nightLabel} — Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
         }
 
@@ -1353,13 +1344,9 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (root.DomainState.CurrentNightNumber == 0) return;
+            if (root.DomainState.CurrentNightNumber == 0 && root.DomainState.CurrentNightPhase != NightPhase.PreparingNextNight) return;
 
-            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
-                ? root.Config.runSeedOverride
-                : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
-            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
+            root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out _);
 
             root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 0);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
@@ -1381,20 +1368,26 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            if (root.DomainState.CurrentNightNumber != 0)
+            if (root.DomainState.CurrentNightNumber != 0 ||
+                root.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight)
             {
                 return;
             }
 
-            int newSeed = (root.Config != null && root.Config.runSeedOverride != 0)
-                ? root.Config.runSeedOverride
-                : (System.Environment.TickCount ^ GetInstanceID());
-            int maxNights = root.Config != null ? Mathf.Clamp(root.Config.runMaxNights, 1, 7) : 3;
-            var diff = root.Config != null ? root.Config.runDifficulty : RunDifficulty.Normal;
+            root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out _);
+
+            _storageSessions.Clear();
+            _activeOvenTransfers.Clear();
+            _lastPlayerRecoverTime.Clear();
+            _lastMotoRecoverTime.Clear();
 
             root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1);
+            ApplyRunBackpackCapacityBonusServer(root);
             RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
             CommitAndReplicate();
+
+            var run = root.RunProgressionService;
+            Debug.Log($"[PizzeriaCommandHandler] Tutorial concluído -> Preparação Noite 1: CurrentNight={root.DomainState.CurrentNightNumber}, TargetNight={root.DomainState.TargetNightNumber}, Phase={root.DomainState.CurrentNightPhase}, IntermissionStage={(run != null ? run.IntermissionStage.ToString() : "null")}, Ballots={(run?.CurrentVoteStages?.Count ?? 0)}.");
             BroadcastNoticeClientRpc("Tutorial concluído! Preparação para a Noite 1 aberta: votem, comprem melhorias e marquem Pronto!", isError: false);
         }
 
@@ -1614,6 +1607,7 @@ namespace ScaryParty.Pizzeria.Network
                 double serverNow = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.unscaledTimeAsDouble;
                 if (run.TryLockAndResolveBallotsServer(serverNow, participants: connected))
                 {
+                    Debug.Log($"[PizzeriaCommandHandler] Intermissão travada (urnas resolvidas): TargetNight={root.DomainState.TargetNightNumber}, Stage={run.IntermissionStage}, Ready={run.ReadyPlayers.Count}/{connected.Count}.");
                     root.DomainState.Revision++;
                     CommitAndReplicate();
                 }
@@ -1623,6 +1617,12 @@ namespace ScaryParty.Pizzeria.Network
             if (run.IntermissionStage >= Domain.Services.IntermissionStage.Locked &&
                 run.IntermissionStage < Domain.Services.IntermissionStage.Starting)
             {
+                return;
+            }
+
+            if (run.CurrentVoteStages.Count > 0 && run.IntermissionStage != Domain.Services.IntermissionStage.Starting)
+            {
+                Debug.LogWarning($"[PizzeriaCommandHandler] Bloqueado início prematuro da Noite {root.DomainState.TargetNightNumber}: IntermissionStage={run.IntermissionStage} com {run.CurrentVoteStages.Count} etapa(s) de votação.");
                 return;
             }
 
@@ -4067,7 +4067,7 @@ namespace ScaryParty.Pizzeria.Network
                 ApplyRunBackpackCapacityBonusServer(root);
                 if (kind == PlaytestCheckpointKind.PrePreparation && root.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight)
                 {
-                    root.RunProgressionService?.OpenPreparationStages(Mathf.Max(1, root.DomainState.TargetNightNumber));
+                    root.RunProgressionService?.OpenTypedBallots(Mathf.Max(1, root.DomainState.TargetNightNumber), 3, 3, respectCatalogSchedule: true);
                 }
                 RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
                 CommitAndReplicate();
