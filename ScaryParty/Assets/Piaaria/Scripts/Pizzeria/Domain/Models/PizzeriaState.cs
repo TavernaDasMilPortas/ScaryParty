@@ -1,8 +1,54 @@
+using System;
 using System.Collections.Generic;
 using ScaryParty.Pizzeria.Domain.Types;
 
 namespace ScaryParty.Pizzeria.Domain.Models
 {
+    public readonly struct ToolOriginRecord
+    {
+        public readonly ToolItemId ToolId;
+        public readonly int DefinitionId;
+        public readonly ToolCapability Capabilities;
+        public readonly int HomeStationId;
+        public readonly int HomeSlotIndex;
+
+        public ToolOriginRecord(
+            ToolItemId toolId,
+            int definitionId,
+            ToolCapability capabilities,
+            int homeStationId,
+            int homeSlotIndex)
+        {
+            ToolId = toolId;
+            DefinitionId = definitionId;
+            Capabilities = capabilities;
+            HomeStationId = homeStationId;
+            HomeSlotIndex = homeSlotIndex;
+        }
+    }
+
+    public readonly struct NightEntryKey : IEquatable<NightEntryKey>
+    {
+        public readonly uint RunGenerationId;
+        public readonly int NightNumber;
+        public readonly int AttemptId;
+
+        public NightEntryKey(uint runGenerationId, int nightNumber, int attemptId)
+        {
+            RunGenerationId = runGenerationId;
+            NightNumber = nightNumber;
+            AttemptId = attemptId;
+        }
+
+        public bool Equals(NightEntryKey other)
+            => RunGenerationId == other.RunGenerationId &&
+               NightNumber == other.NightNumber &&
+               AttemptId == other.AttemptId;
+
+        public override bool Equals(object obj) => obj is NightEntryKey other && Equals(other);
+        public override int GetHashCode() => HashCode.Combine(RunGenerationId, NightNumber, AttemptId);
+    }
+
     public class NightStartSnapshot
     {
         public int NightNumber { get; }
@@ -63,6 +109,9 @@ namespace ScaryParty.Pizzeria.Domain.Models
         public int NightWagesSpent { get; set; } = 0;
         public int ToolRackStationId { get; set; } = 3;
         public NightStartSnapshot CurrentSnapshot { get; set; }
+        public int NightEntryAttemptCounter { get; set; } = 0;
+        public NightEntryKey LastAppliedNightEntryKey { get; set; }
+        public readonly Dictionary<ToolItemId, ToolOriginRecord> CanonicalToolOrigins = new Dictionary<ToolItemId, ToolOriginRecord>();
 
         private ulong _nextItemId = 1;
         private ulong _nextToolId = 1;
@@ -155,6 +204,8 @@ namespace ScaryParty.Pizzeria.Domain.Models
             NightShopSpent = 0;
             NightWagesSpent = 0;
             CurrentSnapshot = null;
+            NightEntryAttemptCounter = 0;
+            LastAppliedNightEntryKey = default;
             _nextItemId = 1;
             _nextToolId = 1;
             _nextOrderId = 1;
@@ -168,6 +219,7 @@ namespace ScaryParty.Pizzeria.Domain.Models
 
             Items.Clear();
             Tools.Clear();
+            CanonicalToolOrigins.Clear();
             Orders.Clear();
             ActiveOperations.Clear();
             StorageSlots.Clear();

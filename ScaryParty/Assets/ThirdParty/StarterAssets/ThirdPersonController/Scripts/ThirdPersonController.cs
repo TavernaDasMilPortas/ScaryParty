@@ -565,6 +565,24 @@ namespace StarterAssets
             }
         }
 
+        public void ResetMotionStateAfterTeleport()
+        {
+            _verticalVelocity = 0f;
+            _speed = 0f;
+            _animationBlend = 0f;
+            _rotationVelocity = 0f;
+            _jumpTimeoutDelta = JumpTimeout;
+            _fallTimeoutDelta = FallTimeout;
+
+            if (_hasAnimator && _animator != null)
+            {
+                SetAnimFloatCached(_animIDSpeed, ref _cachedAnimSpeed, 0f);
+                SetAnimFloatCached(_animIDMotionSpeed, ref _cachedAnimMotionSpeed, 1f);
+                SetAnimBoolCached(_animIDJump, ref _hasCachedJump, ref _cachedJump, false);
+                SetAnimBoolCached(_animIDFreeFall, ref _hasCachedFreeFall, ref _cachedFreeFall, false);
+            }
+        }
+
         private static float ClampAngle(float lfAngle, float lfMin, float lfMax)
         {
             if (lfAngle < -360f) lfAngle += 360f;

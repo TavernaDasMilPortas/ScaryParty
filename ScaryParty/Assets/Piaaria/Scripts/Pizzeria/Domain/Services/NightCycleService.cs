@@ -133,29 +133,124 @@ namespace ScaryParty.Pizzeria.Domain.Services
                 bp.Revision++;
             }
 
+            RestoreCanonicalTools(state);
+        }
+
+        public static void RegisterCanonicalToolOrigin(
+            PizzeriaState state,
+            ToolItemState tool,
+            int homeStationId,
+            int homeSlotIndex)
+        {
+            if (state == null || tool == null || !tool.Id.IsValid) return;
+            state.CanonicalToolOrigins[tool.Id] = new ToolOriginRecord(
+                tool.Id,
+                tool.DefinitionId,
+                tool.Capabilities,
+                homeStationId,
+                Math.Max(0, homeSlotIndex));
+        }
+
+        public static int AllocateNightEntryAttemptId(PizzeriaState state)
+        {
+            if (state == null) return 1;
+            state.NightEntryAttemptCounter++;
+            return state.NightEntryAttemptCounter;
+        }
+
+        public static bool TryBeginNightEntry(
+            PizzeriaState state,
+            int nightNumber,
+            int attemptId,
+            out NightEntryKey entryKey)
+        {
+            if (state == null)
+            {
+                entryKey = default;
+                return false;
+            }
+
+            entryKey = new NightEntryKey(state.GenerationId, nightNumber, attemptId);
+            if (state.LastAppliedNightEntryKey.Equals(entryKey))
+            {
+                return false;
+            }
+
+            state.LastAppliedNightEntryKey = entryKey;
+            return true;
+        }
+
+        public static void RestoreCanonicalTools(PizzeriaState state)
+        {
+            if (state == null) return;
+
+            if (state.CanonicalToolOrigins.Count > 0)
+            {
+                var strayIds = new List<ToolItemId>();
+                foreach (var kvp in state.Tools)
+                {
+                    if (!state.CanonicalToolOrigins.ContainsKey(kvp.Key))
+                        strayIds.Add(kvp.Key);
+                }
+                for (int i = 0; i < strayIds.Count; i++)
+                {
+                    state.Tools.Remove(strayIds[i]);
+                }
+
+                foreach (var kvp in state.CanonicalToolOrigins)
+                {
+                    var origin = kvp.Value;
+                    var homeLoc = LocationRef.InStation(origin.HomeStationId, origin.HomeSlotIndex);
+                    if (state.Tools.TryGetValue(origin.ToolId, out var existing) && existing != null)
+                    {
+                        existing.ForceReleaseLease();
+                        existing.Location = homeLoc;
+                        existing.Revision++;
+                    }
+                    else
+                    {
+                        var recreated = new ToolItemState(
+                            origin.ToolId,
+                            origin.DefinitionId,
+                            origin.Capabilities,
+                            homeLoc);
+                        state.Tools[origin.ToolId] = recreated;
+                    }
+                }
+                return;
+            }
+
             int rackStationId = state.ToolRackStationId > 0 ? state.ToolRackStationId : 3;
             var occupiedRackSlots = new HashSet<int>();
+            var needsRelocation = new List<ToolItemState>();
+
             foreach (var tool in state.Tools.Values)
             {
+                if (tool == null) continue;
                 tool.ForceReleaseLease();
-                if (tool.Location.Type == LocationType.StationSlot && tool.Location.StationId == rackStationId)
+                if (tool.Location.Type == LocationType.StationSlot &&
+                    tool.Location.StationId == rackStationId &&
+                    tool.Location.SlotIndex >= 0 &&
+                    occupiedRackSlots.Add(tool.Location.SlotIndex))
                 {
-                    occupiedRackSlots.Add(tool.Location.SlotIndex);
+                    tool.Revision++;
+                }
+                else
+                {
+                    needsRelocation.Add(tool);
                 }
             }
 
             int fallbackRackIdx = 0;
-            foreach (var tool in state.Tools.Values)
+            for (int i = 0; i < needsRelocation.Count; i++)
             {
-                if (tool.Location.Type != LocationType.StationSlot)
-                {
-                    while (occupiedRackSlots.Contains(fallbackRackIdx))
-                        fallbackRackIdx++;
-
-                    tool.Location = LocationRef.InStation(rackStationId, fallbackRackIdx);
-                    occupiedRackSlots.Add(fallbackRackIdx);
+                var tool = needsRelocation[i];
+                while (occupiedRackSlots.Contains(fallbackRackIdx))
                     fallbackRackIdx++;
-                }
+
+                tool.Location = LocationRef.InStation(rackStationId, fallbackRackIdx);
+                occupiedRackSlots.Add(fallbackRackIdx);
+                fallbackRackIdx++;
                 tool.Revision++;
             }
         }

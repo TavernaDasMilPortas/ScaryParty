@@ -172,5 +172,29 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.IsNotNull(catalog.templateLotteryRevealPage, "templateLotteryRevealPage ausente no catálogo de Resources.");
             Assert.IsNotNull(catalog.templateOperationsStatusOverlay, "templateOperationsStatusOverlay ausente no catálogo de Resources.");
         }
+
+        [Test]
+        public void InteriorPlayerSpawns_ProduceDistinctPositionsInsideFootprint_ForHostAndClient()
+        {
+            var go = new GameObject("TestPizzeriaFootprint");
+            try
+            {
+                var fp = go.AddComponent<PizzeriaFootprint>();
+                Vector3 local0 = PizzeriaRoot.ComputeInteriorGridLocalPosition(0, fp.floorSurfaceLocalY);
+                Vector3 local1 = PizzeriaRoot.ComputeInteriorGridLocalPosition(1, fp.floorSurfaceLocalY);
+                Vector3 world0 = go.transform.TransformPoint(local0);
+                Vector3 world1 = go.transform.TransformPoint(local1);
+
+                Assert.IsTrue(fp.IsWorldPositionInsideInterior(world0), "Spawn do Host fora do interior da pizzaria.");
+                Assert.IsTrue(fp.IsWorldPositionInsideInterior(world1), "Spawn do Cliente fora do interior da pizzaria.");
+                Assert.IsFalse(fp.IsWorldPositionInExteriorPatio(world0));
+                Assert.IsFalse(fp.IsWorldPositionInExteriorPatio(world1));
+                Assert.GreaterOrEqual(Vector3.Distance(world0, world1), 1.0f, "Spawns de Host e Cliente não podem colidir no mesmo ponto.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }

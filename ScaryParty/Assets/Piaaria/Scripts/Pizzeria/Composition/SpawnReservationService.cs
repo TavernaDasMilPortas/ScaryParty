@@ -182,6 +182,18 @@ namespace ScaryParty.Pizzeria.Composition
             _byOwner.Clear();
             _occupiedSlots.Clear();
         }
+
+        public void CollectPositions(SpawnOwnerKind kind, List<Vector3> outPositions, int excludeOwnerId = -1)
+        {
+            if (outPositions == null) return;
+            outPositions.Clear();
+            foreach (var kvp in _byOwner)
+            {
+                if (kvp.Key.Item1 != kind) continue;
+                if (excludeOwnerId >= 0 && kvp.Key.Item2 == excludeOwnerId) continue;
+                outPositions.Add(kvp.Value.Position);
+            }
+        }
     }
 
     /// <summary>

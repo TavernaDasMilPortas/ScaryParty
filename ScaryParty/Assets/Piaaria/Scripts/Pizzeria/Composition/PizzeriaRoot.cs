@@ -655,8 +655,10 @@ namespace ScaryParty.Pizzeria.Composition
                     for (int i = 0; i < toolData.InitialCount; i++)
                     {
                         var toolId = DomainState.GenerateToolId();
-                        var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(toolRackStationId, globalToolSlotIndex++));
+                        int slotIndex = globalToolSlotIndex++;
+                        var toolState = new ToolItemState(toolId, toolData.Id, toolData.Capabilities, LocationRef.InStation(toolRackStationId, slotIndex));
                         DomainState.Tools[toolId] = toolState;
+                        NightCycleService.RegisterCanonicalToolOrigin(DomainState, toolState, toolRackStationId, slotIndex);
                     }
                 }
             }
@@ -1035,6 +1037,146 @@ namespace ScaryParty.Pizzeria.Composition
             reservation.Position = resolvedPos;
             reservation.Rotation = request.PrimaryRotation;
             _spawnReservations.UpdateReservationPose(request.OwnerId, request.OwnerKind, resolvedPos, request.PrimaryRotation);
+            return true;
+        }
+
+        public static Vector3 ComputeInteriorGridLocalPosition(int slotIndex, float floorSurfaceLocalY)
+        {
+            int safe = Mathf.Max(0, slotIndex);
+            int col = safe % 4;
+            int row = safe / 4;
+            return new Vector3(4.5f + col * 1.45f, floorSurfaceLocalY + 0.05f, -2.5f + row * 1.45f);
+        }
+
+        public bool TryResolveInteriorPlayerSpawnPoseServer(ulong clientId, int playerIndex, out Vector3 spawnPos, out Quaternion spawnRot)
+        {
+            EnsureAnchorsResolved();
+            spawnRot = GetPlayerSpawnRotation(playerIndex);
+
+            var fp = GetComponent<PizzeriaFootprint>();
+            float floorY = fp != null ? fp.floorSurfaceLocalY : 0f;
+            Vector3? recoveryPos = recoveryAnchor != null && IsWorldPositionInsidePizzeria(recoveryAnchor.position)
+                ? recoveryAnchor.position
+                : (Vector3?)null;
+
+            var candidates = new List<(Vector3 pos, Quaternion rot)>(12);
+            if (playerSpawnAnchors != null)
+            {
+                for (int i = 0; i < playerSpawnAnchors.Length; i++)
+                {
+                    var t = playerSpawnAnchors[i];
+                    if (t != null && IsWorldPositionInsidePizzeria(t.position))
+                        candidates.Add((t.position, t.rotation));
+                }
+            }
+
+            var ext = GetComponent<PizzeriaExteriorAnchors>();
+            if (ext != null && ext.playerSpawns != null)
+            {
+                for (int i = 0; i < ext.playerSpawns.Length; i++)
+                {
+                    var t = ext.playerSpawns[i];
+                    if (t != null && IsWorldPositionInsidePizzeria(t.position))
+                        candidates.Add((t.position, t.rotation));
+                }
+            }
+
+            for (int g = 0; g < 8; g++)
+            {
+                Vector3 worldPt = transform.TransformPoint(ComputeInteriorGridLocalPosition(g, floorY));
+                if (fp == null || IsWorldPositionInsidePizzeria(worldPt))
+                {
+                    candidates.Add((worldPt, transform.rotation));
+                }
+            }
+
+            if (candidates.Count == 0)
+            {
+                candidates.Add((transform.TransformPoint(ComputeInteriorGridLocalPosition(playerIndex, floorY)), transform.rotation));
+            }
+
+            int ownerId = unchecked((int)clientId);
+            var usedPositions = new List<Vector3>(8);
+            _spawnReservations.CollectPositions(SpawnOwnerKind.Player, usedPositions, ownerId);
+
+            bool IsSeparatedFromOtherPlayers(Vector3 p)
+            {
+                for (int i = 0; i < usedPositions.Count; i++)
+                {
+                    if ((usedPositions[i] - p).sqrMagnitude < 0.72f)
+                        return false;
+                }
+                return true;
+            }
+
+            Vector3 resolvedPos = Vector3.zero;
+            Quaternion resolvedRot = spawnRot;
+
+            bool reserved = _spawnReservations.TryReserve(
+                ownerId,
+                SpawnOwnerKind.Player,
+                16,
+                Mathf.Max(0, playerIndex),
+                slot =>
+                {
+                    var c = candidates[slot % candidates.Count];
+                    var req = new SpawnRequest
+                    {
+                        OwnerId = ownerId,
+                        OwnerKind = SpawnOwnerKind.Player,
+                        PrimaryPosition = c.pos,
+                        PrimaryRotation = c.rot,
+                        RecoveryPosition = recoveryPos,
+                        ExpectedFloorY = c.pos.y,
+                        MaxAnchorDistance = 6f,
+                        MaxSlopeDegrees = 35f,
+                        CapsuleRadius = 0.34f,
+                        CapsuleHeight = 1.8f,
+                        CollisionMask = Physics.DefaultRaycastLayers
+                    };
+
+                    if (SpawnResolver.TryResolveCandidate(in req, SpawnResolver.ValidateUnityCandidate, out var validPos, out _) &&
+                        (fp == null || IsWorldPositionInsidePizzeria(validPos)) &&
+                        IsSeparatedFromOtherPlayers(validPos))
+                    {
+                        resolvedPos = validPos;
+                        resolvedRot = c.rot;
+                        return true;
+                    }
+                    return false;
+                },
+                out var reservation,
+                out _);
+
+            if (reserved)
+            {
+                if (resolvedPos == Vector3.zero)
+                {
+                    resolvedPos = reservation.Position != Vector3.zero
+                        ? reservation.Position
+                        : candidates[Mathf.Max(0, playerIndex) % candidates.Count].pos;
+                    resolvedRot = reservation.Rotation != default ? reservation.Rotation : spawnRot;
+                }
+                _spawnReservations.UpdateReservationPose(ownerId, SpawnOwnerKind.Player, resolvedPos, resolvedRot);
+                spawnPos = resolvedPos;
+                spawnRot = resolvedRot;
+                return true;
+            }
+
+            // Fallback seguro se NavMesh ainda não estiver pronto ou física indisponível (mantém separação no interior)
+            for (int offset = 0; offset < candidates.Count; offset++)
+            {
+                var c = candidates[(Mathf.Max(0, playerIndex) + offset) % candidates.Count];
+                if (IsSeparatedFromOtherPlayers(c.pos))
+                {
+                    spawnPos = c.pos;
+                    spawnRot = c.rot;
+                    return true;
+                }
+            }
+
+            spawnPos = transform.TransformPoint(ComputeInteriorGridLocalPosition(playerIndex, floorY));
+            spawnRot = transform.rotation;
             return true;
         }
 

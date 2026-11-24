@@ -2458,6 +2458,62 @@ namespace ScaryParty.Pizzeria.Presentation
             return true;
         }
 
+        public void ResetForNewNightServer(PizzeriaRoot root)
+        {
+            if (root == null || !root.IsServer || root.DomainState == null) return;
+
+            ulong actorKey = EmployeeActorOffset + (ulong)EmployeeId;
+            ReleaseEmployeeActiveWorkAndHandsServer(root, keepWorkingPizzaOnStation: false);
+            NpcWorkPointRegistry.ReleaseAllForActor(actorKey);
+
+            _hp = 100f;
+            _serverIsAlive = true;
+            _cashierCooldownRemaining = 0f;
+            _cashierCooldownTotal = 0f;
+            _cashierInteractTotal = 0f;
+            _activePhoneCallId = default;
+            _rolledUnitKey = default;
+            ResetWorkState();
+
+            if (root.EmployeeTaskService != null &&
+                root.EmployeeTaskService.Employees.TryGetValue(EmployeeId, out var emp) &&
+                emp != null)
+            {
+                emp.IsAlive = true;
+                emp.AssignedTaskId = -1;
+            }
+
+            if (_mainCollider != null) _mainCollider.enabled = true;
+
+            if (root.GetEmployeeSpawnPose(Role, EmployeeId, out var spawnPos, out var spawnRot))
+            {
+                if (_agent != null)
+                {
+                    if (!_agent.enabled) _agent.enabled = true;
+                    if (_agent.isOnNavMesh)
+                    {
+                        _agent.ResetPath();
+                        _agent.Warp(spawnPos);
+                    }
+                    else
+                    {
+                        transform.SetPositionAndRotation(spawnPos, spawnRot);
+                        if (TrySampleFloorNavMesh(spawnPos, 4f, out var sampled))
+                        {
+                            _agent.Warp(sampled);
+                        }
+                    }
+                }
+                else
+                {
+                    transform.SetPositionAndRotation(spawnPos, spawnRot);
+                }
+                transform.rotation = spawnRot;
+            }
+
+            Revision++;
+        }
+
         private void ResetWorkState()
         {
             _activeTaskId = -1;
@@ -2768,6 +2824,19 @@ namespace ScaryParty.Pizzeria.Presentation
                     {
                         netState.Employees.RemoveAt(j);
                     }
+                }
+            }
+        }
+
+        public static void ResetEmployeesForNewNightServer(PizzeriaRoot root)
+        {
+            if (root == null || !root.IsServer) return;
+            foreach (var kvp in _spawned)
+            {
+                var emp = kvp.Value;
+                if (emp != null)
+                {
+                    emp.ResetForNewNightServer(root);
                 }
             }
         }

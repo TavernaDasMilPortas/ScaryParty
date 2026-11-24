@@ -1263,12 +1263,15 @@ namespace ScaryParty.Pizzeria.Network
                 ? root.DomainState.CurrentSnapshot.NightNumber
                 : root.DomainState.CurrentNightNumber;
 
-            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
-            root.EmployeeTaskService?.OnNightEnded();
             root.ResolveAndApplyNightStartParametersServer(nightNum, isRetry: true);
-            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
+            int attemptId = NightCycleService.AllocateNightEntryAttemptId(root.DomainState);
+            ExecuteNightEntryResetServer(
+                root,
+                root.DomainState.CurrentNightNumber,
+                attemptId,
+                isRetry: true,
+                resetWeaponsAndAmmo: false);
 
-            CommitAndReplicate();
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} reiniciada (modo debug) pelo Host!", isError: false);
         }
 
@@ -1295,33 +1298,18 @@ namespace ScaryParty.Pizzeria.Network
 
             root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out int startNight);
 
-            _storageSessions.Clear();
-            _activeOvenTransfers.Clear();
-            _lastPlayerRecoverTime.Clear();
-            _lastMotoRecoverTime.Clear();
-
             root.ReinitializeForNewRunServer(newSeed, maxNights: maxNights, difficulty: diff, startNight: startNight);
             ApplyRunBackpackCapacityBonusServer(root);
+            ResetConnectedPlayersPersonalMoneyServer();
 
-            if (NetworkManager.Singleton != null)
-            {
-                int idx = 0;
-                foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
-                {
-                    var po = kvp.Value != null ? kvp.Value.PlayerObject : null;
-                    if (po != null)
-                    {
-                        var pState = po.GetComponent<PlayerState>();
-                        if (pState != null) pState.Money.Value = 0;
-                        TeleportRiderSafelyServer(kvp.Key, root.GetPlayerSpawnPosition(idx), root.GetPlayerSpawnRotation(idx));
-                    }
-                    idx++;
-                }
-            }
+            int attemptId = NightCycleService.AllocateNightEntryAttemptId(root.DomainState);
+            ExecuteNightEntryResetServer(
+                root,
+                root.DomainState.TargetNightNumber,
+                attemptId,
+                isRetry: false,
+                resetWeaponsAndAmmo: true);
 
-            RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
-
-            CommitAndReplicate();
             string nightLabel = startNight == 0
                 ? "Noite 0 (Tutorial)"
                 : (root.DomainState.CurrentNightPhase == NightPhase.PreparingNextNight
@@ -1376,15 +1364,17 @@ namespace ScaryParty.Pizzeria.Network
 
             root.ResolveSessionRunSettings(out int newSeed, out int maxNights, out var diff, out _);
 
-            _storageSessions.Clear();
-            _activeOvenTransfers.Clear();
-            _lastPlayerRecoverTime.Clear();
-            _lastMotoRecoverTime.Clear();
-
             root.ReinitializeForNewRunServer(newSeed, maxNights, diff, startNight: 1);
             ApplyRunBackpackCapacityBonusServer(root);
-            RequestResetNightCombatServer(resetWeaponsAndAmmo: true);
-            CommitAndReplicate();
+            ResetConnectedPlayersPersonalMoneyServer();
+
+            int attemptId = NightCycleService.AllocateNightEntryAttemptId(root.DomainState);
+            ExecuteNightEntryResetServer(
+                root,
+                root.DomainState.TargetNightNumber,
+                attemptId,
+                isRetry: false,
+                resetWeaponsAndAmmo: true);
 
             var run = root.RunProgressionService;
             Debug.Log($"[PizzeriaCommandHandler] Tutorial concluído -> Preparação Noite 1: CurrentNight={root.DomainState.CurrentNightNumber}, TargetNight={root.DomainState.TargetNightNumber}, Phase={root.DomainState.CurrentNightPhase}, IntermissionStage={(run != null ? run.IntermissionStage.ToString() : "null")}, Ballots={(run?.CurrentVoteStages?.Count ?? 0)}.");
@@ -1669,10 +1659,100 @@ namespace ScaryParty.Pizzeria.Network
             root.ResolveAndApplyNightStartParametersServer(nextNight, isRetry: false);
             ApplyRunBackpackCapacityBonusServer(root);
 
-            RequestResetNightCombatServer(resetWeaponsAndAmmo: false);
-            run.ResetIntermissionState();
+            int attemptId = NightCycleService.AllocateNightEntryAttemptId(root.DomainState);
+            ExecuteNightEntryResetServer(
+                root,
+                root.DomainState.CurrentNightNumber,
+                attemptId,
+                isRetry: false,
+                resetWeaponsAndAmmo: false);
 
+            run.ResetIntermissionState();
+            CommitAndReplicate();
+
+            Debug.Log($"[PizzeriaCommandHandler] Noite iniciada após preparação: Night={root.DomainState.CurrentNightNumber}, Phase={root.DomainState.CurrentNightPhase}, Budget=R${root.DomainState.RestaurantBudget}, Rep={root.DomainState.Reputation}.");
             BroadcastNoticeClientRpc($"Noite {root.DomainState.CurrentNightNumber} iniciada! Meta: R$ {root.DomainState.NightRevenueGoal}.", isError: false);
+        }
+
+        private static void ResetConnectedPlayersPersonalMoneyServer()
+        {
+            if (NetworkManager.Singleton == null) return;
+            foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
+            {
+                var po = kvp.Value != null ? kvp.Value.PlayerObject : null;
+                if (po == null) continue;
+                var pState = po.GetComponent<PlayerState>();
+                if (pState != null) pState.Money.Value = 0;
+            }
+        }
+
+        /// <summary>
+        /// Evento único e idempotente de entrada/reinício de noite no servidor:
+        /// encerra sessões/moto, limpa entidades transitórias, restaura utensílios canônicos,
+        /// reseta funcionários/monstros/combate e reposiciona todos os jogadores no interior da pizzaria.
+        /// </summary>
+        public bool ExecuteNightEntryResetServer(
+            PizzeriaRoot root,
+            int targetNight,
+            int attemptId,
+            bool isRetry,
+            bool resetWeaponsAndAmmo)
+        {
+            if (root == null || !IsServer || root.DomainState == null) return false;
+            if (!NightCycleService.TryBeginNightEntry(root.DomainState, targetNight, attemptId, out var entryKey))
+            {
+                return false;
+            }
+
+            // 1. Encerrar interações de bancadas/forno e desmontar moto
+            _storageSessions.Clear();
+            _activeOvenTransfers.Clear();
+            _lastPlayerRecoverTime.Clear();
+            _lastMotoRecoverTime.Clear();
+
+            if (NetworkManager.Singleton != null)
+            {
+                foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
+                {
+                    ReleasePlayerSessions(kvp.Key);
+                }
+            }
+            ResetMotorcycleAndDismountRiderServer();
+
+            // 2. Limpar entidades transitórias e restaurar utensílios canônicos ao suporte original
+            NightCycleService.ClearTransientNightEntities(root.DomainState, repairBackpacks: true);
+            NightCycleService.RestoreCanonicalTools(root.DomainState);
+
+            // 3. Limpar reservas, resetar funcionários (sem demitir), monstros e demanda
+            root.ClearSpawnReservations();
+            root.EmployeeTaskService?.OnNightEnded();
+            Presentation.EmployeePopulationDirector.ResetEmployeesForNewNightServer(root);
+            ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance?.ClearNightMonstersServer();
+            DemandDirector.Instance?.ResetForNewRun();
+
+            // 4. Resetar combate respeitando política de armas
+            RequestResetNightCombatServer(resetWeaponsAndAmmo);
+
+            // 5. Resolver pontos de spawn distintos no interior da pizzaria e teleportar jogadores
+            if (NetworkManager.Singleton != null)
+            {
+                int idx = 0;
+                foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
+                {
+                    var po = kvp.Value != null ? kvp.Value.PlayerObject : null;
+                    if (po != null && root.TryResolveInteriorPlayerSpawnPoseServer(kvp.Key, idx, out var spawnPos, out var spawnRot))
+                    {
+                        TeleportRiderSafelyServer(kvp.Key, spawnPos, spawnRot);
+                    }
+                    idx++;
+                }
+            }
+
+            // 6. Replicar estado consolidado
+            root.DomainState.IncrementRevision();
+            CommitAndReplicate();
+            Debug.Log($"[PizzeriaCommandHandler] NightEntryReset concluído: Gen={entryKey.RunGenerationId}, Night={entryKey.NightNumber}, Attempt={entryKey.AttemptId}, Retry={isRetry}, Tools={root.DomainState.Tools.Count}.");
+            return true;
         }
 
         private static bool ContainsClientId(IReadOnlyCollection<ulong> set, ulong target)
@@ -2080,7 +2160,9 @@ namespace ScaryParty.Pizzeria.Network
                 var cc = po.GetComponent<CharacterController>();
                 if (cc != null) cc.enabled = false;
                 po.transform.SetPositionAndRotation(safePos, safeRot);
-                if (cc != null) cc.enabled = true;
+                var tpc = po.GetComponent<StarterAssets.ThirdPersonController>();
+                if (tpc != null) tpc.ResetMotionStateAfterTeleport();
+                if (cc != null && po.IsOwner) cc.enabled = true;
             }
 
             TeleportPlayerClientRpc(clientId, safePos, safeRot);
@@ -2125,7 +2207,24 @@ namespace ScaryParty.Pizzeria.Network
             var cc = po.GetComponent<CharacterController>();
             if (cc != null) cc.enabled = false;
             po.transform.SetPositionAndRotation(safePos, safeRot);
+
+            var tpc = po.GetComponent<StarterAssets.ThirdPersonController>();
+            if (tpc != null) tpc.ResetMotionStateAfterTeleport();
+
+            var fpCam = po.GetComponent<ScaryParty.Player.FirstPersonCameraController>() ??
+                        ScaryParty.Player.FirstPersonCameraController.LocalInstance;
+            if (fpCam != null)
+            {
+                fpCam.ReleaseAllLookLocks();
+                fpCam.SetYawPitch(safeRot.eulerAngles.y, 0f);
+            }
+
             if (cc != null) cc.enabled = true;
+
+            if (Presentation.GameplayIntroCutsceneFlow.CurrentStage == Presentation.IntroPresentationStage.NightActive)
+            {
+                ScaryParty.Cutscenes.CutscenePlaybackService.IsNightTimerPaused = false;
+            }
         }
 
         [ClientRpc]
