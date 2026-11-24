@@ -37,6 +37,17 @@ namespace ScaryParty.Pizzeria.Network
             return false;
         }
 
+        private static bool RejectIfOutOfRangeStationServer<TStation>(ulong sender, string notifyMsg) where TStation : Component
+        {
+            var station = FindFirstObjectByType<TStation>();
+            if (station != null && !InteractionValidator.ValidateDistanceAndSight(sender, station.transform.position, 4.5f, 2.0f, false))
+            {
+                PizzeriaSession.Notifier?.NotifyClient(sender, notifyMsg, true);
+                return true;
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void AnswerCallServerRpc(ulong callIdVal, ServerRpcParams rpcParams = default)
         {
@@ -44,6 +55,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfOutOfRangeStationServer<ScaryParty.Pizzeria.Stations.PhoneStation>(sender, "Aproxime-se do telefone para atender!")) return;
 
             var callId = new CallId(callIdVal);
             var res = root.CallService.AnswerCall(
@@ -66,6 +78,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfOutOfRangeStationServer<ScaryParty.Pizzeria.Stations.TicketBoardStation>(sender, "Aproxime-se do quadro de comandas!")) return;
 
             var orderId = new OrderId(orderIdVal);
             root.OrderService.ArchiveTicket(orderId, root.DomainState);
@@ -79,6 +92,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfOutOfRangeStationServer<ScaryParty.Pizzeria.Stations.TicketBoardStation>(sender, "Aproxime-se do quadro de comandas!")) return;
 
             var orderId = new OrderId(orderIdVal);
             var res = root.PlayerHoldService.BeginArchiveTicket(
@@ -121,6 +135,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfOutOfRangeStationServer<ScaryParty.Pizzeria.Stations.TicketBoardStation>(sender, "Aproxime-se do quadro de comandas!")) return;
 
             var orderId = new OrderId(orderIdVal);
             var res = root.OrderService.RestoreTicket(orderId, root.DomainState);

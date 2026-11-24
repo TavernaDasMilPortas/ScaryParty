@@ -181,12 +181,13 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (dto.IsDead)
             {
                 _titleLabel.text = "VOCÊ MORREU — MODO ESPECTADOR";
-                string allyName = ResolvePlayerName(dto.SpectatingTargetClientId);
-                _detailLabel.text = dto.SpectatingTargetClientId > 0 || allyName != null
+                bool hasTarget = dto.SpectatingTargetClientId != ulong.MaxValue;
+                string allyName = hasTarget ? ResolvePlayerName(dto.SpectatingTargetClientId) : null;
+                _detailLabel.text = hasTarget
                     ? $"Observando: {allyName ?? $"Jogador #{dto.SpectatingTargetClientId}"} ([Q]/[E] ou clique abaixo). Retorno automático na próxima noite."
                     : "Aguardando resolução do turno ou retorno na próxima noite.";
                 _progressBg.style.display = DisplayStyle.None;
-                _spectatorBtnRow.style.display = DisplayStyle.Flex;
+                _spectatorBtnRow.style.display = hasTarget ? DisplayStyle.Flex : DisplayStyle.None;
             }
             else
             {
@@ -203,15 +204,11 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private static string ResolvePlayerName(ulong clientId)
         {
-            var players = FindObjectsByType<PlayerState>(FindObjectsSortMode.None);
-            for (int i = 0; i < players.Length; i++)
+            if (clientId == ulong.MaxValue) return null;
+            if (PlayerState.TryGetByClientId(clientId, out var matched) && matched != null)
             {
-                var p = players[i];
-                if (p != null && p.OwnerClientId == clientId)
-                {
-                    string n = p.PlayerName.Value.ToString();
-                    return string.IsNullOrWhiteSpace(n) ? $"Jogador #{clientId}" : n;
-                }
+                string n = matched.PlayerName.Value.ToString();
+                return string.IsNullOrWhiteSpace(n) ? $"Jogador #{clientId}" : n;
             }
             return null;
         }

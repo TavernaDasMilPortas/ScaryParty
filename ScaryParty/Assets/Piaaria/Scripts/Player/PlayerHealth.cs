@@ -26,6 +26,10 @@ namespace ScaryParty.Combat
         private float _baseJumpHeight = 1.2f;
         private int _lastObservedHp = DefaultMaxHp;
         private bool _hasObservedInitial;
+        private bool _disabledTpcByDeath;
+        private bool _wasIncapacitatedSpeedOverride;
+
+        public const ulong NoSpectatorTarget = ulong.MaxValue;
 
         public int MaxHp => maxHp;
         public bool EnableAllPlayersDeadDefeat => enableAllPlayersDeadDefeat;
@@ -75,7 +79,7 @@ namespace ScaryParty.Combat
             get
             {
                 var state = PizzeriaNetworkState.Instance;
-                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) ? dto.SpectatingTargetClientId : 0;
+                return state != null && state.TryGetPlayerCombatState(ClientId, out var dto) ? dto.SpectatingTargetClientId : NoSpectatorTarget;
             }
         }
 
@@ -149,28 +153,41 @@ namespace ScaryParty.Combat
                     isDead,
                     hasState ? dto.RescueProgress : 0f,
                     hasState ? dto.RescueMode : (byte)0,
-                    hasState ? dto.SpectatingTargetClientId : 0UL);
+                    hasState ? dto.SpectatingTargetClientId : NoSpectatorTarget);
 
                 if (_tpc != null)
                 {
                     if (isDead)
                     {
-                        if (_tpc.enabled) _tpc.enabled = false;
-                    }
-                    else if (incap)
-                    {
-                        // Enquanto nocauteado, permite rastejo lento e bloqueia corrida/pulo
-                        if (!_tpc.enabled) _tpc.enabled = true;
-                        _tpc.MoveSpeed = 0.70f;
-                        _tpc.SprintSpeed = 0.70f;
-                        _tpc.JumpHeight = 0f;
+                        if (_tpc.enabled)
+                        {
+                            _tpc.enabled = false;
+                            _disabledTpcByDeath = true;
+                        }
                     }
                     else
                     {
-                        if (!_tpc.enabled) _tpc.enabled = true;
-                        _tpc.MoveSpeed = _baseMoveSpeed;
-                        _tpc.SprintSpeed = _baseSprintSpeed;
-                        _tpc.JumpHeight = _baseJumpHeight;
+                        if (_disabledTpcByDeath)
+                        {
+                            _tpc.enabled = true;
+                            _disabledTpcByDeath = false;
+                        }
+
+                        if (incap)
+                        {
+                            // Enquanto nocauteado, permite rastejo lento e bloqueia corrida/pulo
+                            _tpc.MoveSpeed = 0.70f;
+                            _tpc.SprintSpeed = 0.70f;
+                            _tpc.JumpHeight = 0f;
+                            _wasIncapacitatedSpeedOverride = true;
+                        }
+                        else if (_wasIncapacitatedSpeedOverride)
+                        {
+                            _tpc.MoveSpeed = _baseMoveSpeed;
+                            _tpc.SprintSpeed = _baseSprintSpeed;
+                            _tpc.JumpHeight = _baseJumpHeight;
+                            _wasIncapacitatedSpeedOverride = false;
+                        }
                     }
                 }
 

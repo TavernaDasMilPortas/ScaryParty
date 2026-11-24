@@ -228,8 +228,23 @@ namespace ScaryParty.Combat.Monsters
 
         private void SetBehaviorStateInternal(NpcBehaviorState next)
         {
+            var prev = _localBehaviorState;
             _localBehaviorState = next;
             Revision++;
+
+            // BUG-CMB-02: Se o bote do Lobisomem foi interrompido externamente (dano/mudança de alvo), restaura controle do NavMeshAgent
+            if (prev == NpcBehaviorState.Attacking && next != NpcBehaviorState.Attacking && next != NpcBehaviorState.Dead)
+            {
+                _lungePrepTimer = 0f;
+                _lungeTimer = 0f;
+                if (_agent != null && _agent.enabled)
+                {
+                    if (!_agent.isOnNavMesh && NavMesh.SamplePosition(transform.position, out var navHit, 4.0f, NavMesh.AllAreas))
+                        _agent.Warp(navHit.position);
+                    _agent.updatePosition = true;
+                    if (_agent.isOnNavMesh) _agent.isStopped = false;
+                }
+            }
         }
 
         private void SetHealthInternal(int nextHp)
@@ -396,7 +411,7 @@ namespace ScaryParty.Combat.Monsters
                     _recoveryTimer -= dt;
                     if (_recoveryTimer <= 0f)
                     {
-                        SetBehaviorStateInternal(_currentTarget != null ? NpcBehaviorState.Aggressive : NpcBehaviorState.Routine);
+                        SetBehaviorStateInternal(IsTargetAlive(_currentTarget) ? NpcBehaviorState.Aggressive : NpcBehaviorState.Routine);
                     }
                     break;
 
@@ -623,9 +638,9 @@ namespace ScaryParty.Combat.Monsters
             foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
             {
                 var po = kvp.Value?.PlayerObject;
-                if (po == null) continue;
-                var health = po.GetComponent<PlayerHealth>();
-                if (health != null && (health.IsIncapacitated || health.IsDead)) continue;
+                if (po == null || !po.gameObject.activeInHierarchy) continue;
+                var dmg = po.GetComponentInParent<IDamageable>();
+                if (dmg != null && !dmg.IsAlive) continue;
 
                 float dSq = (po.transform.position - transform.position).sqrMagnitude;
                 if (dSq <= bestDistSq)
@@ -672,9 +687,16 @@ namespace ScaryParty.Combat.Monsters
             }
         }
 
+        private static bool IsTargetAlive(Transform target)
+        {
+            if (target == null || !target.gameObject.activeInHierarchy) return false;
+            var dmg = target.GetComponentInParent<IDamageable>();
+            return dmg == null || dmg.IsAlive;
+        }
+
         private void TickChase(float dt)
         {
-            if (_currentTarget == null || !_currentTarget.gameObject.activeInHierarchy)
+            if (!IsTargetAlive(_currentTarget))
             {
                 SetBehaviorStateInternal(NpcBehaviorState.Disengaging);
                 return;
@@ -843,6 +865,14 @@ namespace ScaryParty.Combat.Monsters
         private void ApplyMeleeHit(Transform target)
         {
             if (target == null) return;
+
+            Vector3 eyeFrom = transform.position + Vector3.up * 1.15f;
+            Vector3 eyeTo = target.position + Vector3.up * 1.0f;
+            if (Physics.Linecast(eyeFrom, eyeTo, out RaycastHit losHit, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                if (!losHit.collider.transform.IsChildOf(transform) && !losHit.collider.transform.IsChildOf(target))
+                    return;
+            }
 
             var dmg = target.GetComponentInParent<IDamageable>();
             if (dmg != null && dmg.IsAlive)

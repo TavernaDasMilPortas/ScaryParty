@@ -36,6 +36,10 @@ namespace ScaryParty.Combat.Monsters
         private readonly List<MonsterNpcController> _activeMonsters = new List<MonsterNpcController>();
         private readonly Dictionary<ulong, MonsterNpcController> _clientProxies = new Dictionary<ulong, MonsterNpcController>();
         private readonly List<NetMonsterDto> _clientSyncBuffer = new List<NetMonsterDto>();
+        private readonly HashSet<ulong> _reusableAliveIds = new HashSet<ulong>();
+        private readonly HashSet<ulong> _reusableActiveIds = new HashSet<ulong>();
+        private readonly List<ulong> _reusableToRemove = new List<ulong>();
+        private readonly Dictionary<ulong, int> _reusableNetIndexById = new Dictionary<ulong, int>();
         private PizzeriaNetworkState _subscribedNetState;
         private int _spawnedForNight = -1;
         private ulong _nextMonsterId = 1;
@@ -267,11 +271,11 @@ namespace ScaryParty.Combat.Monsters
                 return;
             }
 
-            var aliveIds = new HashSet<ulong>();
+            _reusableAliveIds.Clear();
             for (int i = 0; i < snapshot.Count; i++)
             {
                 var dto = snapshot[i];
-                aliveIds.Add(dto.MonsterId);
+                _reusableAliveIds.Add(dto.MonsterId);
                 if (_clientProxies.TryGetValue(dto.MonsterId, out var proxy) && proxy != null)
                 {
                     proxy.ApplyReplicatedDto(dto);
@@ -282,17 +286,17 @@ namespace ScaryParty.Combat.Monsters
                 }
             }
 
-            var toRemove = new List<ulong>();
+            _reusableToRemove.Clear();
             foreach (var kvp in _clientProxies)
             {
-                if (kvp.Value == null || !aliveIds.Contains(kvp.Key))
-                    toRemove.Add(kvp.Key);
+                if (kvp.Value == null || !_reusableAliveIds.Contains(kvp.Key))
+                    _reusableToRemove.Add(kvp.Key);
             }
-            for (int i = 0; i < toRemove.Count; i++)
+            for (int i = 0; i < _reusableToRemove.Count; i++)
             {
-                if (_clientProxies.TryGetValue(toRemove[i], out var p) && p != null)
+                if (_clientProxies.TryGetValue(_reusableToRemove[i], out var p) && p != null)
                     DestroyObjectSafe(p.gameObject);
-                _clientProxies.Remove(toRemove[i]);
+                _clientProxies.Remove(_reusableToRemove[i]);
             }
         }
 
@@ -567,12 +571,18 @@ namespace ScaryParty.Combat.Monsters
             var ns = PizzeriaNetworkState.Instance;
             if (ns == null || ns.Monsters == null) return;
 
-            var activeIds = new HashSet<ulong>();
+            _reusableActiveIds.Clear();
+            _reusableNetIndexById.Clear();
+            for (int j = 0; j < ns.Monsters.Count; j++)
+            {
+                _reusableNetIndexById[ns.Monsters[j].MonsterId] = j;
+            }
+
             for (int i = 0; i < _activeMonsters.Count; i++)
             {
                 var m = _activeMonsters[i];
                 if (m == null) continue;
-                activeIds.Add(m.MonsterId);
+                _reusableActiveIds.Add(m.MonsterId);
 
                 var dto = new NetMonsterDto
                 {
@@ -590,12 +600,7 @@ namespace ScaryParty.Combat.Monsters
                     Revision = m.Revision
                 };
 
-                int idx = -1;
-                for (int j = 0; j < ns.Monsters.Count; j++)
-                {
-                    if (ns.Monsters[j].MonsterId == dto.MonsterId) { idx = j; break; }
-                }
-                if (idx >= 0)
+                if (_reusableNetIndexById.TryGetValue(dto.MonsterId, out int idx))
                 {
                     if (!ns.Monsters[idx].Equals(dto)) ns.Monsters[idx] = dto;
                 }
@@ -607,7 +612,7 @@ namespace ScaryParty.Combat.Monsters
 
             for (int j = ns.Monsters.Count - 1; j >= 0; j--)
             {
-                if (!activeIds.Contains(ns.Monsters[j].MonsterId))
+                if (!_reusableActiveIds.Contains(ns.Monsters[j].MonsterId))
                     ns.Monsters.RemoveAt(j);
             }
         }

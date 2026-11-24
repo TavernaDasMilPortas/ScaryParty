@@ -51,6 +51,24 @@ namespace ScaryParty.Pizzeria.Network
             return false;
         }
 
+        private static bool RejectIfStackOutOfRangeServer(ulong sender, ulong stackIdVal)
+        {
+            var stacks = FindObjectsByType<ScaryParty.Pizzeria.Stations.StackStation>(FindObjectsSortMode.None);
+            for (int i = 0; i < stacks.Length; i++)
+            {
+                if (stacks[i] != null && stacks[i].stackId == stackIdVal)
+                {
+                    if (!InteractionValidator.ValidateDistanceAndSight(sender, stacks[i].transform.position, 4.5f, 2.0f, false))
+                    {
+                        PizzeriaSession.Notifier?.NotifyClient(sender, "Aproxime-se da pilha de caixas.", true);
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            return false;
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void DepositStackServerRpc(ulong stackIdVal, ulong boxItemIdVal, HandSlotIndex hand, int addressIdVal, ServerRpcParams rpcParams = default)
         {
@@ -58,6 +76,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfStackOutOfRangeServer(sender, stackIdVal)) return;
 
             var stackId = new StackId(stackIdVal);
             var boxId = new ItemId(boxItemIdVal);
@@ -82,6 +101,7 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (root == null || !root.IsServer || root.DomainState == null) return;
             if (RejectIfCannotActServer(sender)) return;
+            if (RejectIfStackOutOfRangeServer(sender, stackIdVal)) return;
 
             var stackId = new StackId(stackIdVal);
             var expectedTop = new ItemId(expectedTopItemIdVal);

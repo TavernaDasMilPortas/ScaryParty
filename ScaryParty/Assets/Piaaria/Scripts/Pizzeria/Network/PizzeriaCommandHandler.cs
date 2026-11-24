@@ -124,12 +124,44 @@ namespace ScaryParty.Pizzeria.Network
             }
         }
 
+        public void CleanupDisconnectedPlayerServer(ulong clientId)
+        {
+            if (!IsServer) return;
+
+            ReturnPlayerWeaponsToRackServer(clientId);
+            _playerCombat.Remove(clientId);
+            _lastPlayerRecoverTime.Remove(clientId);
+            _lastMotoRecoverTime.Remove(clientId);
+            _lastCombatContinuousSyncTime = -10.0;
+
+            var netState = PizzeriaNetworkState.Instance;
+            if (netState != null && netState.PlayerCombatStates != null)
+            {
+                for (int i = netState.PlayerCombatStates.Count - 1; i >= 0; i--)
+                {
+                    if (netState.PlayerCombatStates[i].ClientId == clientId)
+                    {
+                        netState.PlayerCombatStates.RemoveAt(i);
+                    }
+                }
+            }
+
+            ReleasePlayerSessions(clientId);
+        }
+
         [ServerRpc(RequireOwnership = false)]
         public void RequestOpenStorageSessionServerRpc(int stationId, ServerRpcParams rpcParams = default)
         {
             ulong senderClientId = rpcParams.Receive.SenderClientId;
             if (RejectIfCannotActServer(senderClientId, requireOpenShift: true)) return;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+
+            if (StationRegistry.TryGetStation(stationId, out var stationTrans) && stationTrans != null &&
+                !InteractionValidator.ValidateDistanceAndSight(senderClientId, stationTrans.position, 4.5f, 2.0f, false))
+            {
+                NotifyErrorClientRpc("Aproxime-se do armário/geladeira para abrir.", targetParams);
+                return;
+            }
 
             if (_storageSessions.TryGetValue(stationId, out var existing) && existing.ClientId != senderClientId && Time.time < existing.Expiry)
             {
@@ -213,6 +245,12 @@ namespace ScaryParty.Pizzeria.Network
 
             var targetHand = (HandSlotIndex)hand;
             var targetParams = new ClientRpcParams { Send = new ClientRpcSendParams { TargetClientIds = new[] { senderClientId } } };
+            if (StationRegistry.TryGetStation(storageId, out var storageTrans) && storageTrans != null &&
+                !InteractionValidator.ValidateDistanceAndSight(senderClientId, storageTrans.position, 4.5f, 2.0f, false))
+            {
+                NotifyErrorClientRpc("Aproxime-se do armário/geladeira para pegar ingredientes.", targetParams);
+                return;
+            }
             if (!TryPrepareHandForItemOrToolPickupServer(senderClientId, targetHand, out string weaponErr))
             {
                 NotifyErrorClientRpc(weaponErr, targetParams);
@@ -2399,6 +2437,8 @@ namespace ScaryParty.Pizzeria.Network
         private const int AllyHealAmount = 25;
         private const double AllyHealCooldownSeconds = 6.0;
 
+        public const ulong NoSpectatorTarget = ulong.MaxValue;
+
         private sealed class PlayerCombatRuntime
         {
             public int CurrentHp = 100;
@@ -2411,7 +2451,7 @@ namespace ScaryParty.Pizzeria.Network
             public ulong RescuedByClientId;
             public double AssistHeartbeatTime = -999.0;
             public double NextHealAllowedTime = -999.0;
-            public ulong SpectatingTargetClientId;
+            public ulong SpectatingTargetClientId = NoSpectatorTarget;
             public bool IsAiming;
             public uint Revision = 1;
         }
@@ -2458,6 +2498,8 @@ namespace ScaryParty.Pizzeria.Network
 
         private readonly Dictionary<ulong, PlayerCombatRuntime> _playerCombat = new Dictionary<ulong, PlayerCombatRuntime>();
         private readonly Dictionary<uint, double> _lastWeaponFireServerTime = new Dictionary<uint, double>();
+        private readonly Dictionary<uint, double> _lastWeaponReloadServerTime = new Dictionary<uint, double>();
+        private double _lastCombatContinuousSyncTime = -10.0;
         private readonly HashSet<ulong> _processedMotorcycleImpacts = new HashSet<ulong>();
         [SerializeField] private int motorcycleHitDamage = 40;
         [SerializeField] private int motorcycleRiderFallDamage = 0;
@@ -2621,7 +2663,7 @@ namespace ScaryParty.Pizzeria.Network
                 kvp.Value.RescuedByClientId = 0;
                 kvp.Value.AssistHeartbeatTime = -999.0;
                 kvp.Value.NextHealAllowedTime = -999.0;
-                kvp.Value.SpectatingTargetClientId = 0;
+                kvp.Value.SpectatingTargetClientId = NoSpectatorTarget;
                 kvp.Value.IsAiming = false;
                 kvp.Value.Revision++;
                 if (wasDeadOrDown)
@@ -2630,6 +2672,7 @@ namespace ScaryParty.Pizzeria.Network
             SyncPlayerCombatListServer();
             _processedMotorcycleImpacts.Clear();
             _lastWeaponFireServerTime.Clear();
+            _lastWeaponReloadServerTime.Clear();
 
             if (root != null)
             {
@@ -2693,7 +2736,8 @@ namespace ScaryParty.Pizzeria.Network
             var net = PizzeriaNetworkState.Instance;
             double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
             bool enableAllPlayersDeadDefeat = ResolveAllPlayersDeadDefeatPolicy(root);
-            bool changed = false;
+            bool discreteChanged = false;
+            bool continuousChanged = false;
 
             var bleedoutExpired = new List<ulong>();
             foreach (var kvp in _playerCombat)
@@ -2708,7 +2752,7 @@ namespace ScaryParty.Pizzeria.Network
                     {
                         c.SpectatingTargetClientId = validSpec;
                         c.Revision++;
-                        changed = true;
+                        discreteChanged = true;
                     }
                     continue;
                 }
@@ -2717,7 +2761,7 @@ namespace ScaryParty.Pizzeria.Network
                 if (c.IsIncapacitated)
                 {
                     c.RescueRemaining = Mathf.Max(0f, c.RescueRemaining - dt);
-                    changed = true;
+                    continuousChanged = true;
                     if (c.RescueRemaining <= 0f)
                     {
                         bleedoutExpired.Add(targetId);
@@ -2742,13 +2786,12 @@ namespace ScaryParty.Pizzeria.Network
                         c.RescueProgress = 0f;
                         c.RescuedByClientId = 0;
                         c.Revision++;
-                        changed = true;
+                        discreteChanged = true;
                         continue;
                     }
 
                     c.RescueProgress = Mathf.Clamp01(c.RescueProgress + dt / AssistDurationSeconds);
-                    c.Revision++;
-                    changed = true;
+                    continuousChanged = true;
 
                     if (c.RescueProgress >= 1.0f)
                     {
@@ -2778,6 +2821,7 @@ namespace ScaryParty.Pizzeria.Network
                             NotifySuccessClientRpc($"Aliado #{targetId} curado ({c.CurrentHp}/{c.MaxHp} HP)!", TargetSender(helperId));
                         }
                         c.Revision++;
+                        discreteChanged = true;
                     }
                 }
             }
@@ -2785,11 +2829,17 @@ namespace ScaryParty.Pizzeria.Network
             for (int i = 0; i < bleedoutExpired.Count; i++)
             {
                 HandlePlayerTransitionToDeadServer(bleedoutExpired[i], enableAllPlayersDeadDefeat);
-                changed = true;
+                discreteChanged = true;
             }
 
-            if (changed)
+            if (discreteChanged)
             {
+                _lastCombatContinuousSyncTime = now;
+                SyncPlayerCombatListServer();
+            }
+            else if (continuousChanged && now - _lastCombatContinuousSyncTime >= 0.10)
+            {
+                _lastCombatContinuousSyncTime = now;
                 SyncPlayerCombatListServer();
             }
         }
@@ -2867,7 +2917,7 @@ namespace ScaryParty.Pizzeria.Network
                     candidates.Add(cid);
                 }
             }
-            if (candidates.Count == 0) return 0;
+            if (candidates.Count == 0) return NoSpectatorTarget;
 
             int idx = candidates.IndexOf(currentTarget);
             if (idx < 0) return candidates[0];
@@ -2887,7 +2937,7 @@ namespace ScaryParty.Pizzeria.Network
             c.RescueProgress = 0f;
             c.RescueMode = 0;
             c.RescuedByClientId = 0;
-            c.SpectatingTargetClientId = ResolveValidSpectatorTargetServer(clientId, 0, 0);
+            c.SpectatingTargetClientId = ResolveValidSpectatorTargetServer(clientId, NoSpectatorTarget, 0);
             c.IsAiming = false;
             c.Revision++;
 
@@ -2896,7 +2946,7 @@ namespace ScaryParty.Pizzeria.Network
             ReturnPlayerWeaponsToRackServer(clientId);
             PlayerLifecycleBridge.CleanupPlayerWorldAndDomainStateServer(clientId);
 
-            string specLabel = c.SpectatingTargetClientId != 0
+            string specLabel = c.SpectatingTargetClientId != NoSpectatorTarget
                 ? $" Espectando Aliado #{c.SpectatingTargetClientId}."
                 : string.Empty;
             NotifyErrorClientRpc(
@@ -3037,40 +3087,11 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void ReportCustomerAttackInPizzeriaServerRpc(ulong customerId, bool insidePizzeriaVolume, ServerRpcParams rpcParams = default)
         {
+            // BUG-NET-01: clientes não têm autoridade para impor penalidade de reputação diretamente.
+            // A perda de reputação por ataque a cliente é aplicada exclusivamente no servidor dentro de MonsterNpcController.ApplyDamageServer.
             ulong senderId = rpcParams.Receive.SenderClientId;
-            var root = PizzeriaRoot.Instance;
-            if (!IsServer || root == null || root.DomainState == null) return;
-
-            Vector3 victimPos = Vector3.zero;
-            bool foundVictim = false;
-            var views = FindObjectsByType<ScaryParty.Pizzeria.Presentation.CustomerNpcView>(FindObjectsSortMode.None);
-            for (int i = 0; i < views.Length; i++)
-            {
-                if (views[i] != null && views[i].CustomerId == customerId)
-                {
-                    victimPos = views[i].transform.position;
-                    foundVictim = true;
-                    break;
-                }
-            }
-
-            if (!foundVictim && NetworkManager.Singleton != null &&
-                NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var senderClient) &&
-                senderClient.PlayerObject != null)
-            {
-                victimPos = senderClient.PlayerObject.transform.position;
-                foundVictim = true;
-            }
-
-            if (!foundVictim || !root.IsWorldPositionInsidePizzeria(victimPos))
-                return;
-
-            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
-            if (_customerAttackRepCooldown.TryGetValue(customerId, out double nextAllowed) && now < nextAllowed) return;
-            _customerAttackRepCooldown[customerId] = now + 3.0;
-            int penalty = root.Config != null ? root.Config.repPenaltyExpiredOrAttack : -15;
-            NightCycleService.AdjustReputation(root.DomainState, penalty, "Cliente atacado dentro da pizzaria");
-            CommitAndReplicate();
+            if (!IsServer) return;
+            Debug.LogWarning($"[PizzeriaCommandHandler] ReportCustomerAttackInPizzeriaServerRpc ignorado do cliente {senderId}; detecção ocorre autoritativamente no servidor.");
         }
 
         private void SyncPlayerCombatListServer()
@@ -3209,7 +3230,7 @@ namespace ScaryParty.Pizzeria.Network
                         BroadcastNoticeClientRpc("Modo Tutorial (Noite 0): derrota não-letal — equipe recuperada!", isError: false);
                         CommitAndReplicate();
                     }
-                    else if (enableAllPlayersDeadDefeat || ResolveAllPlayersDeadDefeatPolicy(root))
+                    else if (enableAllPlayersDeadDefeat && ResolveAllPlayersDeadDefeatPolicy(root))
                     {
                         NightCycleService.ForceOperationalDefeat(root.DomainState, NightDefeatReason.AllPlayersIncapacitated);
                         CommitAndReplicate();
@@ -3278,28 +3299,27 @@ namespace ScaryParty.Pizzeria.Network
             var root = PizzeriaRoot.Instance;
             if (netState == null || netState.Weapons == null || root == null || root.DomainState == null) return;
 
-            // Sempre devolve a arma atualmente equipada pelo solicitante antes de equipar outra ou guardar.
-            bool returnedAny = false;
-            for (int i = 0; i < netState.Weapons.Count; i++)
-            {
-                var w = netState.Weapons[i];
-                if (!w.IsAvailableOnRack && w.OwnerClientId == senderId)
-                {
-                    w.IsAvailableOnRack = true;
-                    w.IsSlinged = false;
-                    w.OwnerClientId = 0;
-                    w.Revision++;
-                    netState.Weapons[i] = w;
-                    returnedAny = true;
-                }
-            }
-
             if (requestedWeaponType == (byte)ScaryParty.Combat.WeaponType.Unarmed)
             {
-                if (returnedAny) NotifySuccessClientRpc("Arma devolvida ao rack.", targetParams);
+                bool returned = false;
+                for (int i = 0; i < netState.Weapons.Count; i++)
+                {
+                    var w = netState.Weapons[i];
+                    if (!w.IsAvailableOnRack && w.OwnerClientId == senderId)
+                    {
+                        w.IsAvailableOnRack = true;
+                        w.IsSlinged = false;
+                        w.OwnerClientId = 0;
+                        w.Revision++;
+                        netState.Weapons[i] = w;
+                        returned = true;
+                    }
+                }
+                if (returned) NotifySuccessClientRpc("Arma devolvida ao rack.", targetParams);
                 return;
             }
 
+            // Valida disponibilidade e pré-requisitos ANTES de devolver a arma atual (transação atômica)
             int targetIdx = -1;
             int totalOfType = 0;
             for (int i = 0; i < netState.Weapons.Count; i++)
@@ -3330,8 +3350,6 @@ namespace ScaryParty.Pizzeria.Network
                 return;
             }
 
-            var targetWeapon = netState.Weapons[targetIdx];
-
             if (requestedWeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun)
             {
                 var moto = netState.MotorcycleState.Value;
@@ -3356,6 +3374,22 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
+            // Todas as validações passaram: devolve eventual arma anterior e equipa a nova atomicamente
+            for (int i = 0; i < netState.Weapons.Count; i++)
+            {
+                if (i == targetIdx) continue;
+                var w = netState.Weapons[i];
+                if (!w.IsAvailableOnRack && w.OwnerClientId == senderId)
+                {
+                    w.IsAvailableOnRack = true;
+                    w.IsSlinged = false;
+                    w.OwnerClientId = 0;
+                    w.Revision++;
+                    netState.Weapons[i] = w;
+                }
+            }
+
+            var targetWeapon = netState.Weapons[targetIdx];
             targetWeapon.IsAvailableOnRack = false;
             targetWeapon.IsSlinged = false;
             targetWeapon.OwnerClientId = senderId;
@@ -3500,11 +3534,27 @@ namespace ScaryParty.Pizzeria.Network
             if (shooterRoot != null)
             {
                 Vector3 chestOrigin = shooterRoot.position + Vector3.up * 1.45f;
-                if (Physics.Linecast(chestOrigin, rayOrigin, out RaycastHit muzzleBlock, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                Vector3 muzzleVec = rayOrigin - chestOrigin;
+                float muzzleDist = muzzleVec.magnitude;
+                if (muzzleDist > 0.02f)
                 {
-                    if (!muzzleBlock.collider.transform.IsChildOf(shooterRoot))
+                    Vector3 muzzleDir = muzzleVec / muzzleDist;
+                    int muzzleHits = Physics.RaycastNonAlloc(chestOrigin, muzzleDir, _sharedWeaponHits, muzzleDist, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+                    float nearestWallDist = float.MaxValue;
+                    Vector3 nearestWallPt = rayOrigin;
+                    for (int m = 0; m < muzzleHits; m++)
                     {
-                        PlayWeaponFireEffectsClientRpc(senderId, weapon.WeaponType, rayOrigin, muzzleBlock.point, true);
+                        var mh = _sharedWeaponHits[m];
+                        if (mh.collider == null || mh.collider.transform.IsChildOf(shooterRoot)) continue;
+                        if (mh.distance < nearestWallDist)
+                        {
+                            nearestWallDist = mh.distance;
+                            nearestWallPt = mh.point;
+                        }
+                    }
+                    if (nearestWallDist < float.MaxValue)
+                    {
+                        PlayWeaponFireEffectsClientRpc(senderId, weapon.WeaponType, rayOrigin, nearestWallPt, true);
                         return;
                     }
                 }
@@ -3603,25 +3653,42 @@ namespace ScaryParty.Pizzeria.Network
             var netState = PizzeriaNetworkState.Instance;
             if (netState == null || netState.Weapons == null) return;
 
+            double now = NetworkManager.Singleton != null ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
+            var rack = ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance;
+
             for (int i = 0; i < netState.Weapons.Count; i++)
             {
                 var w = netState.Weapons[i];
-                if (w.IsAvailableOnRack || w.OwnerClientId != senderId) continue;
+                if (w.IsAvailableOnRack || w.IsSlinged || w.OwnerClientId != senderId) continue;
 
-                // Se estiver próximo ao rack, reabastece reserva antes de recarregar o pente
-                var rack = ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance;
+                uint weaponKey = w.WeaponId > 0 ? w.WeaponId : (uint)(i + 1);
+                float minReloadCooldown = w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 1.15f : 0.75f;
+                if (_lastWeaponReloadServerTime.TryGetValue(weaponKey, out double lastReload) && now - lastReload < minReloadCooldown)
+                    return;
+
+                bool reserveChanged = false;
                 if (rack != null && InteractionValidator.ValidateDistanceAndSight(senderId, rack.transform.position, 4.5f, 2.0f, false))
                 {
                     int fullReserve = w.WeaponType == (byte)ScaryParty.Combat.WeaponType.Shotgun ? 24 : 48;
-                    if (w.RackReserveAmmo < fullReserve) w.RackReserveAmmo = fullReserve;
+                    if (w.RackReserveAmmo < fullReserve)
+                    {
+                        w.RackReserveAmmo = fullReserve;
+                        reserveChanged = true;
+                    }
                 }
 
                 int needed = w.MaxMagAmmo - w.CurrentMagAmmo;
-                if (needed <= 0 || w.RackReserveAmmo <= 0) return;
+                bool magChanged = needed > 0 && w.RackReserveAmmo > 0;
+                if (magChanged)
+                {
+                    int take = Mathf.Min(needed, w.RackReserveAmmo);
+                    w.CurrentMagAmmo += take;
+                    w.RackReserveAmmo -= take;
+                }
 
-                int take = Mathf.Min(needed, w.RackReserveAmmo);
-                w.CurrentMagAmmo += take;
-                w.RackReserveAmmo -= take;
+                if (!reserveChanged && !magChanged) return;
+
+                _lastWeaponReloadServerTime[weaponKey] = now;
                 w.Revision++;
                 netState.Weapons[i] = w;
                 return;
@@ -3631,8 +3698,9 @@ namespace ScaryParty.Pizzeria.Network
         [ServerRpc(RequireOwnership = false)]
         public void RequestTestPlayerDamageServerRpc(int amount, ServerRpcParams rpcParams = default)
         {
+#if UNITY_EDITOR
             ulong senderId = rpcParams.Receive.SenderClientId;
-            if (!IsServer) return;
+            if (!IsServer || !Application.isEditor) return;
 
             var dummy = FindFirstObjectByType<ScaryParty.Combat.PracticeTargetDummy>();
             if (dummy != null && !InteractionValidator.ValidateDistanceAndSight(senderId, dummy.transform.position, 5.5f, 2.0f, false))
@@ -3646,6 +3714,7 @@ namespace ScaryParty.Pizzeria.Network
                 HitPoint = dummy != null ? dummy.transform.position : Vector3.zero,
                 HitNormal = Vector3.up
             });
+#endif
         }
 
         public void NotifyDummyHitServer(ulong instigatorClientId, string msg, int curHp, int maxHp)
@@ -3659,17 +3728,28 @@ namespace ScaryParty.Pizzeria.Network
         [ClientRpc]
         private void PlayWeaponFireEffectsClientRpc(ulong shooterClientId, byte weaponType, Vector3 origin, Vector3 hitPoint, bool didHit)
         {
-            if (NetworkManager.Singleton != null &&
-                NetworkManager.Singleton.ConnectedClients.TryGetValue(shooterClientId, out var client) &&
-                client.PlayerObject != null)
+            Transform shooterTf = null;
+            if (PlayerState.TryGetByClientId(shooterClientId, out var shooterPs) && shooterPs != null)
             {
-                var wc = client.PlayerObject.GetComponent<WeaponController>();
+                shooterTf = shooterPs.transform;
+            }
+            else if (NetworkManager.Singleton != null &&
+                     NetworkManager.Singleton.IsServer &&
+                     NetworkManager.Singleton.ConnectedClients.TryGetValue(shooterClientId, out var client) &&
+                     client.PlayerObject != null)
+            {
+                shooterTf = client.PlayerObject.transform;
+            }
+
+            if (shooterTf != null)
+            {
+                var wc = shooterTf.GetComponent<WeaponController>();
                 wc?.PlayRemoteOrLocalFireVisual(origin, hitPoint, didHit);
 
-                bool isLocalShooter = NetworkManager.Singleton.LocalClientId == shooterClientId;
+                bool isLocalShooter = NetworkManager.Singleton != null && NetworkManager.Singleton.LocalClientId == shooterClientId;
                 Presentation.Feedback.GameFeelPresenter.Instance?.TriggerSimple(
                     Presentation.Feedback.GameFeelEventId.WeaponFire,
-                    client.PlayerObject.transform,
+                    shooterTf,
                     shooterClientId,
                     0,
                     0,

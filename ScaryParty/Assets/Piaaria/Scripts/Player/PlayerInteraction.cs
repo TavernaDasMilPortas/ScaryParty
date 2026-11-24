@@ -189,11 +189,9 @@ public class PlayerInteraction : NetworkBehaviour
 
         if (ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance != null)
         {
-            var cc = GetComponent<CharacterController>();
-            if (cc != null) cc.enabled = false;
-            transform.position = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition((int)OwnerClientId);
-            transform.rotation = ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation((int)OwnerClientId);
-            if (cc != null) cc.enabled = true;
+            ApplyLocalTeleport(
+                ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnPosition((int)OwnerClientId),
+                ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance.GetPlayerSpawnRotation((int)OwnerClientId));
             return;
         }
 
@@ -218,14 +216,7 @@ public class PlayerInteraction : NetworkBehaviour
             Vector3 pos = root.GetPlayerSpawnPosition((int)OwnerClientId);
             Quaternion rot = root.GetPlayerSpawnRotation((int)OwnerClientId);
             if (viaClientRpc) TeleportClientRpc(pos, rot);
-            else
-            {
-                var cc = GetComponent<CharacterController>();
-                if (cc != null) cc.enabled = false;
-                transform.position = pos;
-                transform.rotation = rot;
-                if (cc != null) cc.enabled = true;
-            }
+            else ApplyLocalTeleport(pos, rot);
             yield break;
         }
 
@@ -235,14 +226,7 @@ public class PlayerInteraction : NetworkBehaviour
             Vector3 pos = cityGen.CityData.pizzariaPosition + new Vector3(0, 0.1f, -12f);
             Quaternion rot = Quaternion.Euler(0, 180, 0);
             if (viaClientRpc) TeleportClientRpc(pos, rot);
-            else
-            {
-                var cc = GetComponent<CharacterController>();
-                if (cc != null) cc.enabled = false;
-                transform.position = pos;
-                transform.rotation = rot;
-                if (cc != null) cc.enabled = true;
-            }
+            else ApplyLocalTeleport(pos, rot);
         }
     }
 
@@ -261,22 +245,42 @@ public class PlayerInteraction : NetworkBehaviour
         StartCoroutine(WaitForPizzeriaThenTeleport(true));
     }
 
-    [ClientRpc]
-    private void TeleportClientRpc(Vector3 position, Quaternion rotation)
+    private void ApplyLocalTeleport(Vector3 position, Quaternion rotation)
     {
         var cc = GetComponent<CharacterController>();
         if (cc != null) cc.enabled = false;
-        transform.position = position;
-        transform.rotation = rotation;
-        if (cc != null) cc.enabled = true;
+        Physics.SyncTransforms();
+        transform.SetPositionAndRotation(position, rotation);
+        Physics.SyncTransforms();
+
+        var tpc = GetComponent<StarterAssets.ThirdPersonController>();
+        if (tpc != null) tpc.ResetMotionStateAfterTeleport();
+
+        var fpCam = GetComponent<ScaryParty.Player.FirstPersonCameraController>() ??
+                    ScaryParty.Player.FirstPersonCameraController.LocalInstance;
+        if (fpCam != null)
+        {
+            fpCam.ReleaseAllLookLocks();
+            fpCam.SetYawPitch(rotation.eulerAngles.y, 0f);
+        }
+
+        if (cc != null && IsOwner) cc.enabled = true;
     }
 
+    [ClientRpc]
+    private void TeleportClientRpc(Vector3 position, Quaternion rotation)
+    {
+        if (!IsOwner) return;
+        ApplyLocalTeleport(position, rotation);
+    }
+
+    private const ulong NoAllyClientId = ulong.MaxValue;
     private int _workStation = -1;
     private int _workSlot;
     private ulong _attendingCustomerId = 0;
     private ulong _discardItemId = 0;
     private float _nextWorkHeartbeat;
-    private ulong _assistingAllyClientId = 0;
+    private ulong _assistingAllyClientId = NoAllyClientId;
     private float _nextAssistHeartbeat;
     private bool _assistCompletedAwaitingERelease = false;
     private bool _wasAssistHudShown = false;
@@ -289,7 +293,7 @@ public class PlayerInteraction : NetworkBehaviour
     private bool _workWasRedirectedSlot = false;
     private ScaryParty.Pizzeria.Domain.Types.HandSlotIndex _lastObservedHand = ScaryParty.Pizzeria.Domain.Types.HandSlotIndex.Left;
 
-    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _discardItemId != 0 || _assistingAllyClientId != 0 || _currentInteractable != null;
+    public bool IsBusyWithStationOrAiming => _workStation >= 0 || _attendingCustomerId != 0 || _discardItemId != 0 || _assistingAllyClientId != NoAllyClientId || _currentInteractable != null;
 
     private bool IsWorkFKeyHeld()
     {
@@ -311,9 +315,9 @@ public class PlayerInteraction : NetworkBehaviour
 
     private void StopAssistAlly()
     {
-        if (_assistingAllyClientId != 0)
+        if (_assistingAllyClientId != NoAllyClientId)
         {
-            _assistingAllyClientId = 0;
+            _assistingAllyClientId = NoAllyClientId;
             if (IsSpawned && IsOwner)
                 ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.Instance?.CancelAssistAllyServerRpc();
         }
@@ -329,7 +333,7 @@ public class PlayerInteraction : NetworkBehaviour
         if (!IsInteractEKeyHeld())
             _assistCompletedAwaitingERelease = false;
 
-        if (_assistingAllyClientId == 0) return;
+        if (_assistingAllyClientId == NoAllyClientId) return;
 
         if (!IsInteractEKeyHeld())
         {
@@ -664,6 +668,7 @@ public class PlayerInteraction : NetworkBehaviour
         if (ScaryParty.Pizzeria.Presentation.GameplayInputGate.IsLocked || Cursor.lockState != CursorLockMode.Locked || Cursor.visible)
         {
             StopTrackedWork();
+            StopAssistAlly();
             if (OutlineService.Instance != null)
             {
                 OutlineService.Instance.SetTarget(null);
@@ -855,6 +860,7 @@ public class PlayerInteraction : NetworkBehaviour
         if (!hasFocus)
         {
             StopTrackedWork();
+            StopAssistAlly();
         }
     }
 

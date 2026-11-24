@@ -418,7 +418,7 @@ public class PlayerState : NetworkBehaviour
         PlayerColor.Value = finalColor;
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     public void SetReadyServerRpc(bool ready)
     {
         IsReady.Value = ready;

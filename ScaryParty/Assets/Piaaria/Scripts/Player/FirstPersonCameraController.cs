@@ -363,10 +363,20 @@ namespace ScaryParty.Player
             {
                 ulong targetId = _health.SpectatingTargetClientId;
                 Transform targetTf = null;
-                var nm = NetworkManager.Singleton;
-                if (nm != null && nm.ConnectedClients.TryGetValue(targetId, out var targetClient) && targetClient.PlayerObject != null)
+                if (targetId != ulong.MaxValue)
                 {
-                    targetTf = targetClient.PlayerObject.transform;
+                    if (PlayerState.TryGetByClientId(targetId, out var targetPs) && targetPs != null)
+                    {
+                        targetTf = targetPs.transform;
+                    }
+                    else
+                    {
+                        var nm = NetworkManager.Singleton;
+                        if (nm != null && nm.IsServer && nm.ConnectedClients.TryGetValue(targetId, out var targetClient) && targetClient.PlayerObject != null)
+                        {
+                            targetTf = targetClient.PlayerObject.transform;
+                        }
+                    }
                 }
 
                 if (targetTf != null && targetTf != transform)

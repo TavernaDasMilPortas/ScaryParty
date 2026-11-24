@@ -48,5 +48,40 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.AreEqual(-1.0, budget.LastServerTime);
             Assert.AreEqual(0f, budget.AvailableBudgetMeters);
         }
+
+        [Test]
+        public void SpectatorSentinel_UsesMaxValueInsteadOfHostZero()
+        {
+            Assert.AreEqual(ulong.MaxValue, ScaryParty.Combat.PlayerHealth.NoSpectatorTarget);
+            Assert.AreEqual(ulong.MaxValue, ScaryParty.Pizzeria.Network.PizzeriaCommandHandler.NoSpectatorTarget);
+        }
+
+        [Test]
+        public void NeutralBenchClassifier_AcceptsPrepAndRejectsTrashStorageOven()
+        {
+            var go = new GameObject("TestStations_Lifecycle");
+            try
+            {
+                var trash = go.AddComponent<ScaryParty.Pizzeria.Stations.TrashStation>();
+                var storage = go.AddComponent<ScaryParty.Pizzeria.Stations.StorageStation>();
+                var oven = go.AddComponent<ScaryParty.Pizzeria.Stations.OvenStation>();
+                var prepGo = new GameObject("Prep");
+                prepGo.transform.SetParent(go.transform);
+                var prep = prepGo.AddComponent<ScaryParty.Pizzeria.Stations.PrepStation>();
+                var baseGo = new GameObject("Neutral");
+                baseGo.transform.SetParent(go.transform);
+                var neutral = baseGo.AddComponent<ScaryParty.Pizzeria.Stations.StationView>();
+
+                Assert.IsFalse(ScaryParty.Pizzeria.Network.PlayerLifecycleBridge.IsNeutralBenchStation(trash));
+                Assert.IsFalse(ScaryParty.Pizzeria.Network.PlayerLifecycleBridge.IsNeutralBenchStation(storage));
+                Assert.IsFalse(ScaryParty.Pizzeria.Network.PlayerLifecycleBridge.IsNeutralBenchStation(oven));
+                Assert.IsTrue(ScaryParty.Pizzeria.Network.PlayerLifecycleBridge.IsNeutralBenchStation(prep));
+                Assert.IsTrue(ScaryParty.Pizzeria.Network.PlayerLifecycleBridge.IsNeutralBenchStation(neutral));
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }

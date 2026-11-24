@@ -247,13 +247,18 @@ public class WeaponController : MonoBehaviour
         }
         else if (controlsAllowed && !GameplayInputGate.IsLocked && IsReloadPressed())
         {
-            if (hasRepWeapon && repWeapon.CurrentMagAmmo < repWeapon.MaxMagAmmo && repWeapon.RackReserveAmmo > 0)
+            if (hasRepWeapon)
             {
-                StartLocalReload(repMode);
-            }
-            else if (hasRepWeapon && repWeapon.RackReserveAmmo <= 0)
-            {
-                NotificationManager.Show("Sem reserva de munição! Aproxime-se do rack e pressione [R].", NotificationType.Warning);
+                bool nearRack = ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance != null &&
+                                (ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance.transform.position - transform.position).sqrMagnitude <= 4.5f * 4.5f;
+                if ((repWeapon.CurrentMagAmmo < repWeapon.MaxMagAmmo && repWeapon.RackReserveAmmo > 0) || nearRack)
+                {
+                    StartLocalReload(repMode);
+                }
+                else if (repWeapon.RackReserveAmmo <= 0)
+                {
+                    NotificationManager.Show("Sem reserva de munição! Aproxime-se do rack e pressione [R].", NotificationType.Warning);
+                }
             }
         }
 
@@ -408,7 +413,9 @@ public class WeaponController : MonoBehaviour
             if (repWeapon.CurrentMagAmmo <= 0)
             {
                 lastFireTime = Time.time;
-                if (repWeapon.RackReserveAmmo > 0) StartLocalReload(currentMode);
+                bool nearRack = ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance != null &&
+                                (ScaryParty.Pizzeria.Stations.WeaponRackStation.Instance.transform.position - transform.position).sqrMagnitude <= 4.5f * 4.5f;
+                if (repWeapon.RackReserveAmmo > 0 || nearRack) StartLocalReload(currentMode);
                 else NotificationManager.Show("Pente vazio! Aproxime-se do rack e pressione [R].", NotificationType.Warning);
                 return;
             }

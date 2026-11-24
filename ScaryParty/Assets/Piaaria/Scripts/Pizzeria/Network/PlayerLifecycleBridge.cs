@@ -37,6 +37,7 @@ namespace ScaryParty.Pizzeria.Network
             CleanupPlayerWorldAndDomainStateServer(clientId);
             if (root != null && root.IsServer)
             {
+                PizzeriaCommandHandler.Instance?.CleanupDisconnectedPlayerServer(clientId);
                 PizzeriaCommandHandler.Instance?.ResolveAndStartPreparedNightIfReadyServer(excludedClientId: clientId);
             }
         }
@@ -164,18 +165,42 @@ namespace ScaryParty.Pizzeria.Network
             Debug.Log($"[PlayerLifecycleBridge] Limpeza do cliente {clientId} aplicada: itens, ferramentas, balcões e comandas liberados.");
         }
 
+        public static bool IsNeutralBenchStation(ScaryParty.Pizzeria.Stations.StationView sv)
+        {
+            if (sv == null) return false;
+            return sv is ScaryParty.Pizzeria.Stations.PrepStation ||
+                   sv is ScaryParty.Pizzeria.Stations.AssemblyStation ||
+                   sv is ScaryParty.Pizzeria.Stations.PackagingStation ||
+                   sv is ScaryParty.Pizzeria.Stations.CounterStation ||
+                   sv is ScaryParty.Pizzeria.Stations.StagingStation ||
+                   sv.GetType() == typeof(ScaryParty.Pizzeria.Stations.StationView);
+        }
+
         private static StationSlotId? FindFreeNeutralSlot(PizzeriaState state, PizzeriaRoot root)
         {
-            // Procurar slots livres na estação neutra (ex: Station 1 slots)
-            for (int s = 0; s < 4; s++)
+            var stations = Object.FindObjectsByType<ScaryParty.Pizzeria.Stations.StationView>(FindObjectsSortMode.None);
+            for (int i = 0; i < stations.Length; i++)
             {
-                var loc = LocationRef.InStation(1, s);
-                bool occupied = false;
-                foreach (var item in state.Items.Values)
+                var sv = stations[i];
+                if (!IsNeutralBenchStation(sv) || sv.stationId <= 0) continue;
+                int slotCount = sv.slotAnchors != null && sv.slotAnchors.Length > 0 ? sv.slotAnchors.Length : 2;
+                for (int s = 0; s < slotCount; s++)
                 {
-                    if (item.Location.Equals(loc)) { occupied = true; break; }
+                    var loc = LocationRef.InStation(sv.stationId, s);
+                    bool occupied = false;
+                    foreach (var item in state.Items.Values)
+                    {
+                        if (item.Location.Equals(loc)) { occupied = true; break; }
+                    }
+                    if (!occupied)
+                    {
+                        foreach (var tool in state.Tools.Values)
+                        {
+                            if (tool.Location.Equals(loc)) { occupied = true; break; }
+                        }
+                    }
+                    if (!occupied) return new StationSlotId(sv.stationId, s);
                 }
-                if (!occupied) return new StationSlotId(1, s);
             }
             return null;
         }
