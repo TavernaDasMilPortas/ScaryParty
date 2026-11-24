@@ -10,8 +10,10 @@ using UnityEngine;
 public class StreetGridGenerator : MonoBehaviour
 {
     public StreetGraph Generate(CityConfig config, System.Random rng, Transform parent,
-        Material streetMat, Material sidewalkMat, Material[] buildingMaterials, out List<Vector3[]> blockPolygons)
+        Material streetMat, Material sidewalkMat, Material[] buildingMaterials, out List<Vector3[]> blockPolygons,
+        int? seedOverride = null)
     {
+        int activeSeed = seedOverride ?? (config != null ? config.seed : 0);
         streetMat = ScaryParty.VisualStyles.VisualStyleManager.ResolveMaterialOrFallback(
             streetMat,
             ScaryParty.VisualStyles.VisualSemanticRole.Street,
@@ -386,7 +388,7 @@ public class StreetGridGenerator : MonoBehaviour
 
             LastBorderValidationReport = new CityBorderValidationReport
             {
-                seed = config != null ? config.seed : 0
+                seed = activeSeed
             };
 
             foreach (var outerPerimeter in cleanedVoidFaces)
@@ -470,7 +472,7 @@ public class StreetGridGenerator : MonoBehaviour
                         {
                             Vector3 modularFrontCenter = p1 + dir * (startDist + bWidth * 0.5f) + normal * buildingOffset;
                             modularFrontCenter.y = groundY;
-                            int borderSeed = (config.seed ^ (i * 9973) ^ (int)(startDist * 101f)) + rng.Next(1, 10000);
+                            int borderSeed = (activeSeed ^ (i * 9973) ^ (int)(startDist * 101f)) + rng.Next(1, 10000);
                             string bId = $"BorderBuilding_{i}_{idSuffix}";
 
                             var layout = ScaryParty.City.Modular.ModularBuildingAssembler.CreateProceduralLayout(
@@ -799,31 +801,41 @@ public class StreetGridGenerator : MonoBehaviour
         float gMid = (segStart + segEnd) * 0.5f;
         bool foundValid = false;
         float chosenOffset = baseOffset;
+        float chosenThickness = wallThickness;
 
-        for (int step = 0; step < 5; step++)
+        float[] candidateThicknesses = wallThickness > 0.65f
+            ? new[] { wallThickness, Mathf.Max(0.45f, wallThickness * 0.45f) }
+            : new[] { wallThickness };
+
+        for (int tIdx = 0; tIdx < candidateThicknesses.Length && !foundValid; tIdx++)
         {
-            float testOffset = baseOffset + step * 0.85f;
-            Vector3 testCenter = p1 + dir * gMid + normal * (testOffset + wallThickness * 0.5f);
-            var testOBB = new BlockFiller.OBB2D(
-                new Vector2(testCenter.x, testCenter.z),
-                new Vector2(gLen * 0.5f, wallThickness * 0.5f),
-                axisX,
-                axisZ);
-
-            bool hitsStreet = false;
-            for (int s = 0; s < streetOBBs.Count; s++)
+            float effThickness = candidateThicknesses[tIdx];
+            for (int step = 0; step < 5; step++)
             {
-                if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                float testOffset = baseOffset + step * 0.85f;
+                Vector3 testCenter = p1 + dir * gMid + normal * (testOffset + effThickness * 0.5f);
+                var testOBB = new BlockFiller.OBB2D(
+                    new Vector2(testCenter.x, testCenter.z),
+                    new Vector2(gLen * 0.5f, effThickness * 0.5f),
+                    axisX,
+                    axisZ);
+
+                bool hitsStreet = false;
+                for (int s = 0; s < streetOBBs.Count; s++)
                 {
-                    hitsStreet = true;
+                    if (BlockFiller.OBBOverlap(testOBB, streetOBBs[s], out _, out _))
+                    {
+                        hitsStreet = true;
+                        break;
+                    }
+                }
+                if (!hitsStreet)
+                {
+                    chosenOffset = testOffset;
+                    chosenThickness = effThickness;
+                    foundValid = true;
                     break;
                 }
-            }
-            if (!hitsStreet)
-            {
-                chosenOffset = testOffset;
-                foundValid = true;
-                break;
             }
         }
 
@@ -833,14 +845,14 @@ public class StreetGridGenerator : MonoBehaviour
             return false;
         }
 
-        Vector3 wallCenter = p1 + dir * gMid + normal * (chosenOffset + wallThickness * 0.5f);
+        Vector3 wallCenter = p1 + dir * gMid + normal * (chosenOffset + chosenThickness * 0.5f);
         wallCenter.y = groundY + wallHeight * 0.5f - 0.15f;
 
         var wallGo = GameObject.CreatePrimitive(PrimitiveType.Cube);
         wallGo.name = $"BorderWallFill_{nameSuffix}";
         wallGo.transform.SetParent(borderParent, true);
         wallGo.transform.SetPositionAndRotation(wallCenter, rot);
-        wallGo.transform.localScale = new Vector3(gLen, wallHeight, wallThickness);
+        wallGo.transform.localScale = new Vector3(gLen, wallHeight, chosenThickness);
 
         var rend = wallGo.GetComponent<Renderer>();
         if (rend != null)

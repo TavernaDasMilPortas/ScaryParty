@@ -6,9 +6,34 @@ using StarterAssets;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using System.Collections;
+using System.Collections.Generic;
 
 public class PlayerState : NetworkBehaviour
 {
+    private static readonly Dictionary<ulong, PlayerState> _playersByClientId = new Dictionary<ulong, PlayerState>();
+
+    public static bool TryGetByClientId(ulong clientId, out PlayerState player)
+    {
+        if (_playersByClientId.TryGetValue(clientId, out player) && player != null)
+            return true;
+
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.SpawnManager != null)
+        {
+            foreach (var no in NetworkManager.Singleton.SpawnManager.SpawnedObjectsList)
+            {
+                if (no != null && no.IsPlayerObject && no.OwnerClientId == clientId && no.TryGetComponent(out player))
+                {
+                    _playersByClientId[clientId] = player;
+                    return true;
+                }
+            }
+        }
+
+        player = null;
+        return false;
+    }
+
+    public static IReadOnlyCollection<PlayerState> ActivePlayers => _playersByClientId.Values;
     public NetworkVariable<FixedString32Bytes> PlayerName = new NetworkVariable<FixedString32Bytes>("", NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<Color> PlayerColor = new NetworkVariable<Color>(Color.white, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
     public NetworkVariable<bool> IsReady = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -102,6 +127,7 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        _playersByClientId[OwnerClientId] = this;
         Debug.Log($"[PlayerState] Spawn: owner={OwnerClientId}, local={NetworkManager.LocalClientId}, " +
             $"object={NetworkObjectId}, server={IsServer}, active={gameObject.activeInHierarchy}, " +
             $"scene={SceneManager.GetActiveScene().name}", this);
@@ -363,9 +389,18 @@ public class PlayerState : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        if (_playersByClientId.TryGetValue(OwnerClientId, out var registered) && registered == this)
+            _playersByClientId.Remove(OwnerClientId);
         IsGameStarted.OnValueChanged -= OnGameStartedChanged;
         PlayerColor.OnValueChanged -= OnColorChanged;
         Money.OnValueChanged -= OnMoneyChanged;
+    }
+
+    public override void OnDestroy()
+    {
+        if (_playersByClientId.TryGetValue(OwnerClientId, out var registered) && registered == this)
+            _playersByClientId.Remove(OwnerClientId);
+        base.OnDestroy();
     }
 
     [ServerRpc]

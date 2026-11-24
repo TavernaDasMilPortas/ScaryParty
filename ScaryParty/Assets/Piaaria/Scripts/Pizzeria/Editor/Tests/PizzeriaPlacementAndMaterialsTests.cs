@@ -171,8 +171,8 @@ namespace ScaryParty.Pizzeria.Editor.Tests
                 }
             }
 
-            // Verifica que foram geradas OBBs reservadas para o BlockFiller
-            Assert.AreEqual(2, result.reservedOBBs.Count, "Deve gerar 2 OBBs reservadas correspondentes aos dois retângulos do L");
+            // Verifica que foram geradas OBBs reservadas para o BlockFiller (2 estruturais + pátio externo + corredor de acesso = 4)
+            Assert.AreEqual(4, result.reservedOBBs.Count, "Deve gerar 4 OBBs reservadas (estruturais + pátio externo + corredor de acesso)");
         }
 
         [Test]
@@ -320,6 +320,35 @@ namespace ScaryParty.Pizzeria.Editor.Tests
 
             // Preservação de textos/comandas
             Assert.AreEqual(MaterialPaletteRole.Preserve, _tempProfile.SuggestRole("SheetText", ""));
+        }
+
+        [Test]
+        public void Test_PlacementSolver_EnforcesNonFrontSetbackOnTightBlock()
+        {
+            var config = ScriptableObject.CreateInstance<CityConfig>();
+            config.sidewalkHeight = 0.15f;
+
+            // Quadra justa na largura (exatamente tamanho sem folga para minStreetSeparation) deve falhar se não respeitar setback lateral/fundo
+            List<BlockInfo> blocks = new List<BlockInfo>
+            {
+                new BlockInfo
+                {
+                    worldCenter = new Vector3(16.4f, 0f, 18.4f),
+                    size = new Vector3(33.3f, 0f, 36.8f),
+                    area = 33.3f * 36.8f,
+                    zoneType = ZoneType.Commercial,
+                    polygon = new Vector3[]
+                    {
+                        new Vector3(0f, 0f, 0f),
+                        new Vector3(33.3f, 0f, 0f),
+                        new Vector3(33.3f, 0f, 36.8f),
+                        new Vector3(0f, 0f, 36.8f)
+                    }
+                }
+            };
+
+            PlacementResult strictResult = PizzeriaPlacementSolver.Solve(blocks, _tempPizzeriaGo, config, new System.Random(42), frontSetback: 0.5f, minStreetSeparation: 1.5f);
+            Assert.IsFalse(strictResult.success, "Não deve posicionar quando arestas laterais/fundo violam minStreetSeparation");
         }
     }
 }

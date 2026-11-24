@@ -11,11 +11,11 @@ public class BlockFiller : MonoBehaviour
     /// Fills a block with procedurally generated buildings.
     /// Supports both modular 12-piece kit assembly and legacy stretched primitives.
     /// </summary>
-    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null, Material sidewalkMaterial = null)
+    public void FillBlock(BlockInfo block, CityConfig config, System.Random rng, Transform parent, Material[] buildingMaterials, int blockIndex, List<OBB2D> reservedOBBs = null, Material sidewalkMaterial = null, int? seedOverride = null)
     {
         if (config != null && config.buildingGenerationMode == ScaryParty.City.Modular.CityBuildingGenerationMode.ModularKit && config.modularCatalog != null)
         {
-            FillBlockModular(block, config, rng, parent, blockIndex, reservedOBBs);
+            FillBlockModular(block, config, rng, parent, blockIndex, reservedOBBs, seedOverride);
             return;
         }
 
@@ -33,14 +33,15 @@ public class BlockFiller : MonoBehaviour
     /// <summary>
     /// Preenche a quadra usando o sistema modular de 12 peças sem esticar nem cortar modelos.
     /// </summary>
-    private void FillBlockModular(BlockInfo block, CityConfig config, System.Random rng, Transform parent, int blockIndex, List<OBB2D> reservedOBBs = null)
+    private void FillBlockModular(BlockInfo block, CityConfig config, System.Random rng, Transform parent, int blockIndex, List<OBB2D> reservedOBBs = null, int? seedOverride = null)
     {
         GameObject blockParent = new GameObject($"Block_{blockIndex}");
         blockParent.transform.SetParent(parent);
         blockParent.transform.position = block.worldCenter;
 
+        int activeSeed = seedOverride ?? (config != null ? config.seed : 0);
         var layouts = ScaryParty.City.Modular.ModularLotPlanner.PlanBlock(
-            block, config, blockIndex, config.seed, reservedOBBs, config.modularBuildingProfile);
+            block, config, blockIndex, activeSeed, reservedOBBs, config.modularBuildingProfile);
 
         for (int i = 0; i < layouts.Count; i++)
         {

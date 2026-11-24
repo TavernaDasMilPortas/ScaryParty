@@ -481,11 +481,12 @@ public class CityGenerator : NetworkBehaviour
 
         StreetGraph graph = _streetGridGen.Generate(
             config, rng, _streetsRoot.transform,
-            resolvedStreetMat, resolvedSidewalkMat, buildingMaterials, out List<Vector3[]> blockPolygons
+            resolvedStreetMat, resolvedSidewalkMat, buildingMaterials, out List<Vector3[]> blockPolygons,
+            seedOverride: seed
         );
         CityData.streetGraph = graph;
 
-        GenerateBlocks(rng, blockPolygons, out ScaryParty.City.PlacementResult placementResult);
+        GenerateBlocks(rng, blockPolygons, out ScaryParty.City.PlacementResult placementResult, seed);
 
         if (placementResult != null && placementResult.success)
         {
@@ -533,6 +534,10 @@ public class CityGenerator : NetworkBehaviour
         if (routeManager != null) routeManager.Initialize(_pathfinder);
 
         ValidateProceduralAnchorsAndConnectivity(allBuildings, points);
+        if (Application.isPlaying)
+        {
+            ScaryParty.Pizzeria.Composition.PizzeriaRoot.Instance?.RebuildAddressRegistry();
+        }
         _enemySpawnGen.GenerateSpawnPoints(CityData, config, rng);
 
         if (Application.isPlaying) InitializeRuntimeSystems(seed, graph);
@@ -581,15 +586,48 @@ public class CityGenerator : NetworkBehaviour
         LastValidatedRooftopCount = roofCount;
 
         int reachable = 0;
-        if (points != null && _pathfinder != null && CityData != null)
+        if (points != null && _pathfinder != null && CityData != null && points.Count > 0)
         {
             Vector3 origin = CityData.pizzariaPosition;
+            var reachablePoints = new List<DeliveryPoint>(points.Count);
+            var unreachablePoints = new List<DeliveryPoint>();
+
             for (int i = 0; i < points.Count; i++)
             {
                 var dp = points[i];
                 if (dp == null) continue;
                 if (_pathfinder.TryFindPath(origin, dp.transform.position, out var path) && path != null && path.Count > 0)
+                {
                     reachable++;
+                    reachablePoints.Add(dp);
+                }
+                else
+                {
+                    unreachablePoints.Add(dp);
+                }
+            }
+
+            if (reachablePoints.Count > 0 && unreachablePoints.Count > 0)
+            {
+                for (int i = 0; i < unreachablePoints.Count; i++)
+                {
+                    var deadDp = unreachablePoints[i];
+                    if (deadDp == null) continue;
+                    if (deadDp.associatedBuilding != null) deadDp.associatedBuilding.deliveryPointIndex = -1;
+                    if (Application.isPlaying) Destroy(deadDp.gameObject);
+                    else DestroyImmediate(deadDp.gameObject);
+                }
+
+                points.Clear();
+                for (int i = 0; i < reachablePoints.Count; i++)
+                {
+                    var kept = reachablePoints[i];
+                    kept.AddressId = i;
+                    kept.gameObject.name = $"DeliveryPoint_{i}";
+                    if (kept.associatedBuilding != null) kept.associatedBuilding.deliveryPointIndex = i;
+                    points.Add(kept);
+                }
+                CityData.DeliveryPointCount = points.Count;
             }
         }
         LastReachableDeliveryCount = reachable;
@@ -1280,10 +1318,10 @@ public class CityGenerator : NetworkBehaviour
 
     private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons)
     {
-        GenerateBlocks(rng, blockPolygons, out _);
+        GenerateBlocks(rng, blockPolygons, out _, CurrentSeed);
     }
 
-    private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons, out ScaryParty.City.PlacementResult placementResult)
+    private void GenerateBlocks(System.Random rng, List<Vector3[]> blockPolygons, out ScaryParty.City.PlacementResult placementResult, int? seedOverride = null)
     {
         placementResult = null;
         CityGenLogger.StartLog();
@@ -1388,7 +1426,7 @@ public class CityGenerator : NetworkBehaviour
             var reserved = (placementResult != null && placementResult.success && i == placementResult.blockIndex)
                 ? placementResult.reservedOBBs
                 : null;
-            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i, reserved, sidewalkMaterial);
+            _blockFiller.FillBlock(block, config, rng, _blocksRoot.transform, buildingMaterials, i, reserved, sidewalkMaterial, seedOverride ?? CurrentSeed);
         }
         
         CityGenLogger.SaveLog();

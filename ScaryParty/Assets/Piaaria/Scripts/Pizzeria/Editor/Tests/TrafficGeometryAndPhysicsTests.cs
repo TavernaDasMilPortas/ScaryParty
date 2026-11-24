@@ -46,5 +46,43 @@ namespace ScaryParty.Pizzeria.Editor.Tests
             Assert.Greater(TrafficManager.VehicleDimensions.y, 0.8f);
             Assert.Greater(TrafficManager.VehicleDimensions.z, 3.0f);
         }
+
+        [Test]
+        public void BuildLaneAndCornerWaypoints_MapsEdgeIdsAlongMultiSegmentRoute()
+        {
+            var centerPath = new List<Vector3>
+            {
+                new Vector3(0f, 0f, 0f),
+                new Vector3(0f, 0f, 20f),
+                new Vector3(20f, 0f, 20f)
+            };
+
+            var waypoints = TrafficManager.BuildLaneAndCornerWaypoints(
+                centerPath,
+                7.0f,
+                TrafficManager.VehicleDimensions.x,
+                (a, b) => a.x == b.x ? 101 : 202,
+                out var edgeIds);
+
+            Assert.AreEqual(waypoints.Count, edgeIds.Count);
+            Assert.AreEqual(101, edgeIds[0]);
+            Assert.AreEqual(202, edgeIds[edgeIds.Count - 1]);
+        }
+
+        [Test]
+        public void MotorcycleExitDriveway_AllowsCrossingSidewalkBetweenPatioAndStreet()
+        {
+            var parkPos = new Vector3(10f, 0.2f, 10f);
+            var exitAnchor = new Vector3(10f, 0.2f, 15f);
+            float sidewalkWidth = 3.5f;
+
+            // Ponto sobre a calçada a 4m além da âncora de saída
+            Assert.IsTrue(ScaryParty.City.DeliveryMotorcycleController.IsPointInExitDriveway(
+                new Vector3(10f, 0.2f, 19f), parkPos, Quaternion.identity, exitAnchor, sidewalkWidth));
+
+            // Ponto muito afastado lateralmente para dentro dos prédios vizinhos
+            Assert.IsFalse(ScaryParty.City.DeliveryMotorcycleController.IsPointInExitDriveway(
+                new Vector3(20f, 0.2f, 19f), parkPos, Quaternion.identity, exitAnchor, sidewalkWidth));
+        }
     }
 }

@@ -3887,6 +3887,9 @@ namespace ScaryParty.Pizzeria.Network
                 }
 
                 var dmgTarget = targetObj.GetComponentInParent<ScaryParty.Combat.IDamageable>();
+                bool isPlayerTarget = targetObj.GetComponentInParent<PlayerState>() != null || dmgTarget is ScaryParty.Combat.PlayerHealth;
+                if (isPlayerTarget) return;
+
                 if (dmgTarget != null && dmgTarget.IsAlive)
                 {
                     dmgTarget.ApplyDamageServer(new ScaryParty.Combat.DamageEvent
@@ -3900,30 +3903,87 @@ namespace ScaryParty.Pizzeria.Network
                 }
             }
 
-            // Derruba imediatamente o condutor no servidor (dano ao condutor configurável, padrão 0)
+            EjectMotorcycleRiderAfterImpactServer(senderId, st, net, bike);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void ReportMotorcycleMonsterImpactServerRpc(ulong monsterId, uint impactEpisodeId, Vector3 impactPoint, ServerRpcParams rpcParams = default)
+        {
+            ulong senderId = rpcParams.Receive.SenderClientId;
+            if (!IsServer) return;
+
+            var net = PizzeriaNetworkState.Instance;
+            var bike = ScaryParty.City.DeliveryMotorcycleController.Instance;
+            var director = ScaryParty.Combat.Monsters.MonsterPopulationDirector.Instance;
+            if (net == null || bike == null || director == null) return;
+
+            var st = net.MotorcycleState.Value;
+            if (!st.IsActive || !st.IsMounted || st.RiderClientId != senderId) return;
+            if (Mathf.Abs(st.Speed) < 3.5f) return;
+
+            ulong dedupKey = ((ulong)st.Revision << 32) | impactEpisodeId;
+            if (!_processedMotorcycleImpacts.Add(dedupKey)) return;
+
+            ScaryParty.Combat.Monsters.MonsterNpcController targetMonster = null;
+            var monsters = director.ActiveMonsters;
+            for (int i = 0; i < monsters.Count; i++)
+            {
+                if (monsters[i] != null && monsters[i].MonsterId == monsterId)
+                {
+                    targetMonster = monsters[i];
+                    break;
+                }
+            }
+            if (targetMonster == null || !targetMonster.IsAlive) return;
+
+            Vector3 bikeCenter = bike.transform.position + Vector3.up * 0.7f;
+            Vector3 targetCenter = targetMonster.transform.position + Vector3.up * 0.9f;
+            if ((targetCenter - bikeCenter).sqrMagnitude > 5.5f * 5.5f) return;
+
+            if (Physics.Linecast(bikeCenter, targetCenter, out var losHit, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            {
+                if (!losHit.collider.transform.IsChildOf(bike.transform) && !losHit.collider.transform.IsChildOf(targetMonster.transform))
+                    return;
+            }
+
+            targetMonster.ApplyDamageServer(new ScaryParty.Combat.DamageEvent
+            {
+                Amount = Mathf.Max(1, motorcycleHitDamage),
+                Source = ScaryParty.Combat.DamageSourceType.Collision,
+                InstigatorClientId = senderId,
+                HitPoint = impactPoint,
+                HitNormal = (targetMonster.transform.position - bike.transform.position).normalized
+            });
+
+            EjectMotorcycleRiderAfterImpactServer(senderId, st, net, bike);
+        }
+
+        private void EjectMotorcycleRiderAfterImpactServer(ulong riderId, NetMotorcycleDto st, PizzeriaNetworkState net, ScaryParty.City.DeliveryMotorcycleController bike)
+        {
             st.IsMounted = false;
             st.RiderClientId = 0;
             st.Speed = 0f;
             st.Revision++;
             net.MotorcycleState.Value = st;
+            ResetMotorcycleMovementBudget();
 
             if (motorcycleRiderFallDamage > 0)
             {
-                ApplyDamageToPlayerServer(senderId, new ScaryParty.Combat.DamageEvent
+                ApplyDamageToPlayerServer(riderId, new ScaryParty.Combat.DamageEvent
                 {
                     Amount = motorcycleRiderFallDamage,
                     Source = ScaryParty.Combat.DamageSourceType.Collision,
-                    InstigatorClientId = senderId,
+                    InstigatorClientId = riderId,
                     HitPoint = bike.transform.position,
                     HitNormal = Vector3.up
                 }, ResolveAllPlayersDeadDefeatPolicy(PizzeriaRoot.Instance));
             }
 
-            if (NetworkManager.Singleton != null && NetworkManager.Singleton.ConnectedClients.TryGetValue(senderId, out var client) && client.PlayerObject != null)
-            {
-                Vector3 safeExit = bike.transform.position + bike.transform.right * 1.4f;
-                client.PlayerObject.transform.position = safeExit;
-            }
+            Vector3 safeExit = ResolveMotorcycleExitPosition(bike);
+            Quaternion safeRot = Quaternion.LookRotation(Vector3.ProjectOnPlane(bike.transform.forward, Vector3.up).sqrMagnitude > 0.01f
+                ? Vector3.ProjectOnPlane(bike.transform.forward, Vector3.up).normalized
+                : Vector3.forward, Vector3.up);
+            TeleportRiderSafelyServer(riderId, safeExit, safeRot);
         }
 
         private sealed class RaycastHitDistanceComparer : IComparer<RaycastHit>

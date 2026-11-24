@@ -23,6 +23,7 @@ public class TrafficVehicle : MonoBehaviour
     public int CurrentEndNode = -1;
     public int CurrentEdgeId = -1;
     public List<Vector3> waypoints;
+    public List<int> waypointEdgeIds;
     public int currentWaypointIndex;
     public float speed;
     public bool isWaitingAtLight;
@@ -39,6 +40,7 @@ public class TrafficVehicle : MonoBehaviour
     private float _waypointTolerance = 1.6f;
     private float _raycastDist = 8.5f;
     private float _currentSpeed;
+    private float _blockedByVehicleTimer;
     private Rigidbody _rb;
     private readonly Dictionary<int, float> _collisionCooldowns = new Dictionary<int, float>();
     private static readonly RaycastHit[] _rayHits = new RaycastHit[16];
@@ -78,6 +80,8 @@ public class TrafficVehicle : MonoBehaviour
         while (toTarget.magnitude < _waypointTolerance)
         {
             currentWaypointIndex++;
+            if (waypointEdgeIds != null && currentWaypointIndex < waypointEdgeIds.Count && waypointEdgeIds[currentWaypointIndex] >= 0)
+                CurrentEdgeId = waypointEdgeIds[currentWaypointIndex];
             if (currentWaypointIndex >= waypoints.Count)
             {
                 CurrentStopReason = TrafficStopReason.NoPath;
@@ -87,6 +91,10 @@ public class TrafficVehicle : MonoBehaviour
             target.y = currentPos.y;
             toTarget = target - currentPos;
             toTarget.y = 0f;
+        }
+        if (waypointEdgeIds != null && currentWaypointIndex >= 0 && currentWaypointIndex < waypointEdgeIds.Count && waypointEdgeIds[currentWaypointIndex] >= 0)
+        {
+            CurrentEdgeId = waypointEdgeIds[currentWaypointIndex];
         }
 
         if (toTarget.sqrMagnitude > 0.0025f)
@@ -125,11 +133,23 @@ public class TrafficVehicle : MonoBehaviour
             bool blockedAhead = !stoppedByLight && CheckObstacleAhead(dir, out obstacleReason);
 
             if (stoppedByLight)
+            {
                 CurrentStopReason = TrafficStopReason.TrafficLight;
+                _blockedByVehicleTimer = 0f;
+            }
             else if (blockedAhead)
+            {
                 CurrentStopReason = obstacleReason;
+                if (obstacleReason == TrafficStopReason.VehicleAhead)
+                    _blockedByVehicleTimer += deltaTime;
+                else
+                    _blockedByVehicleTimer = 0f;
+            }
             else
+            {
                 CurrentStopReason = TrafficStopReason.None;
+                _blockedByVehicleTimer = 0f;
+            }
 
             if (stoppedByLight || blockedAhead)
                 _currentSpeed = Mathf.Max(0f, _currentSpeed - (speed * 2.8f * deltaTime));
@@ -226,11 +246,20 @@ public class TrafficVehicle : MonoBehaviour
             TrafficVehicle otherVehicle = hit.collider.GetComponentInParent<TrafficVehicle>();
             if (otherVehicle != null && otherVehicle != this && otherVehicle.isActive)
             {
+                float alignment = Vector3.Dot(otherVehicle.transform.forward, forwardDir);
                 // Ignorar veículo em sentido oposto fora da nossa faixa
-                if (Vector3.Dot(otherVehicle.transform.forward, forwardDir) > -0.35f)
+                if (alignment > -0.35f)
                 {
-                    closestDist = hit.distance;
-                    reason = TrafficStopReason.VehicleAhead;
+                    // BUG-TRF-04: Desempate determinístico em cruzamentos quando ambos os veículos estão parados um pelo outro
+                    bool isCrossingAngle = alignment < 0.45f;
+                    bool mutualWait = otherVehicle.CurrentStopReason == TrafficStopReason.VehicleAhead && otherVehicle.CurrentSpeed < 0.35f;
+                    bool hasPriorityTieBreak = isCrossingAngle && mutualWait && hit.distance > 1.6f &&
+                        (VehicleId < otherVehicle.VehicleId || _blockedByVehicleTimer > 4.0f);
+                    if (!hasPriorityTieBreak)
+                    {
+                        closestDist = hit.distance;
+                        reason = TrafficStopReason.VehicleAhead;
+                    }
                 }
                 continue;
             }
@@ -277,14 +306,20 @@ public class TrafficVehicle : MonoBehaviour
         float impactSpeed = Mathf.Max(_currentSpeed, collision.relativeVelocity.magnitude);
         if (impactSpeed < minCollisionSpeed) return;
 
-        var victimRoot = collision.collider.transform.root;
-        int episodeKey = victimRoot.GetInstanceID();
+        var ps = collision.collider.GetComponentInParent<PlayerState>();
+        var ped = ps == null ? collision.collider.GetComponentInParent<PedestrianNpc>() : null;
+        var dmgTarget = collision.collider.GetComponentInParent<IDamageable>();
+        Transform entityTransform = ps != null
+            ? ps.transform
+            : (ped != null ? ped.transform : ((dmgTarget as Component)?.transform ?? collision.collider.transform));
+
+        int episodeKey = entityTransform.GetInstanceID();
         if (_collisionCooldowns.TryGetValue(episodeKey, out float nextAllowed) && Time.time < nextAllowed)
             return;
 
         _collisionCooldowns[episodeKey] = Time.time + 1.6f;
 
-        Vector3 pushDir = Vector3.ProjectOnPlane(victimRoot.position - transform.position, Vector3.up);
+        Vector3 pushDir = Vector3.ProjectOnPlane(entityTransform.position - transform.position, Vector3.up);
         if (pushDir.sqrMagnitude < 0.01f) pushDir = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
         pushDir.Normalize();
 
@@ -297,21 +332,15 @@ public class TrafficVehicle : MonoBehaviour
         float knockbackSpeed = Mathf.Clamp(impactSpeed * 1.25f, 5.5f, 14f);
         Vector3 knockbackVel = pushDir * knockbackSpeed;
 
-        var ps = collision.collider.GetComponentInParent<PlayerState>();
         if (ps != null)
         {
             ps.ApplyVehicleKnockbackServer(knockbackVel, 0.36f);
         }
-        else
+        else if (ped != null)
         {
-            var ped = collision.collider.GetComponentInParent<PedestrianNpc>();
-            if (ped != null)
-            {
-                ped.ApplyExternalKnockback(knockbackVel, 0.38f);
-            }
+            ped.ApplyExternalKnockback(knockbackVel, 0.38f);
         }
 
-        var dmgTarget = collision.collider.GetComponentInParent<IDamageable>();
         if (dmgTarget != null && dmgTarget.IsAlive)
         {
             int scaledDamage = Mathf.Clamp(Mathf.RoundToInt(Mathf.Lerp(8f, Mathf.Max(12, collisionDamage * 1.5f), Mathf.InverseLerp(minCollisionSpeed, 14f, impactSpeed))), 5, 35);

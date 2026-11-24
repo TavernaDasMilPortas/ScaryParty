@@ -281,17 +281,53 @@ public class TrafficManager : NetworkBehaviour
         _vehicles.Add(vehicle);
     }
 
+    private int FindClosestNodeIndex(Vector3 worldPos)
+    {
+        if (_graph == null || _graph.nodes == null || _graph.nodes.Count == 0) return -1;
+        int best = -1;
+        float bestDistSq = float.MaxValue;
+        for (int i = 0; i < _graph.nodes.Count; i++)
+        {
+            Vector3 d = _graph.nodes[i].worldPosition - worldPos;
+            d.y = 0f;
+            float sq = d.sqrMagnitude;
+            if (sq < bestDistSq)
+            {
+                bestDistSq = sq;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    private static bool VehicleUsesRemainingEdge(TrafficVehicle v, int blockedEdgeId)
+    {
+        if (v == null || blockedEdgeId < 0) return false;
+        if (v.CurrentEdgeId == blockedEdgeId) return true;
+        if (v.waypointEdgeIds == null) return false;
+        int startIdx = Mathf.Max(0, v.currentWaypointIndex);
+        for (int i = startIdx; i < v.waypointEdgeIds.Count; i++)
+        {
+            if (v.waypointEdgeIds[i] == blockedEdgeId) return true;
+        }
+        return false;
+    }
+
     private bool AssignRandomPath(TrafficVehicle vehicle, bool isInitialSpawn = false)
     {
         if (_graph == null || _graph.nodes == null || _graph.nodes.Count < 2) return false;
 
-        int startIndex = (!isInitialSpawn && vehicle.CurrentEndNode >= 0 && vehicle.CurrentEndNode < _graph.nodes.Count)
-            ? vehicle.CurrentEndNode
-            : _rng.Next(0, _graph.nodes.Count);
+        int startIndex = -1;
+        if (!isInitialSpawn)
+        {
+            startIndex = FindClosestNodeIndex(vehicle.transform.position);
+            if (startIndex < 0 && vehicle.CurrentEndNode >= 0 && vehicle.CurrentEndNode < _graph.nodes.Count)
+                startIndex = vehicle.CurrentEndNode;
+        }
+        if (startIndex < 0)
+            startIndex = _rng.Next(0, _graph.nodes.Count);
 
-        Vector3 startPos = (!isInitialSpawn && vehicle.CurrentEndNode >= 0)
-            ? _graph.nodes[startIndex].worldPosition
-            : _graph.nodes[startIndex].worldPosition;
+        Vector3 startPos = _graph.nodes[startIndex].worldPosition;
 
         List<Vector3> path = null;
         int chosenEndIndex = -1;
@@ -331,7 +367,6 @@ public class TrafficManager : NetworkBehaviour
 
                     path = new List<Vector3> { _graph.nodes[startIndex].worldPosition, _graph.nodes[neighborId].worldPosition };
                     chosenEndIndex = neighborId;
-                    vehicle.CurrentEdgeId = edgeId;
                     break;
                 }
             }
@@ -345,13 +380,15 @@ public class TrafficManager : NetworkBehaviour
 
         vehicle.CurrentStartNode = startIndex;
         vehicle.CurrentEndNode = chosenEndIndex;
-        if (vehicle.CurrentEdgeId < 0 && path.Count >= 2)
-            vehicle.CurrentEdgeId = ResolveClosestEdgeId(path[0], path[1]);
         float streetWidth = (_networkRelay != null && _networkRelay.config != null && _networkRelay.config.streetWidth > 1f)
             ? _networkRelay.config.streetWidth
             : 6.0f;
-        vehicle.waypoints = BuildLaneAndCornerWaypoints(path, streetWidth, VehicleDimensions.x);
+        vehicle.waypoints = BuildLaneAndCornerWaypoints(path, streetWidth, VehicleDimensions.x, ResolveClosestEdgeId, out List<int> wpEdgeIds);
+        vehicle.waypointEdgeIds = wpEdgeIds;
         vehicle.currentWaypointIndex = 0;
+        vehicle.CurrentEdgeId = (wpEdgeIds != null && wpEdgeIds.Count > 0 && wpEdgeIds[0] >= 0)
+            ? wpEdgeIds[0]
+            : ResolveClosestEdgeId(path[0], path[1]);
         return true;
     }
 
@@ -402,6 +439,17 @@ public class TrafficManager : NetworkBehaviour
 
     public static List<Vector3> BuildLaneAndCornerWaypoints(List<Vector3> centerPath, float streetWidth, float vehicleWidth)
     {
+        return BuildLaneAndCornerWaypoints(centerPath, streetWidth, vehicleWidth, null, out _);
+    }
+
+    public static List<Vector3> BuildLaneAndCornerWaypoints(
+        List<Vector3> centerPath,
+        float streetWidth,
+        float vehicleWidth,
+        System.Func<Vector3, Vector3, int> edgeResolver,
+        out List<int> waypointEdges)
+    {
+        waypointEdges = new List<int>();
         if (centerPath == null || centerPath.Count < 2) return centerPath;
 
         float halfStreet = Mathf.Max(2.0f, streetWidth * 0.5f);
@@ -412,6 +460,7 @@ public class TrafficManager : NetworkBehaviour
         float trimBase = Mathf.Clamp(halfStreet * 0.85f, 1.4f, 3.2f);
 
         var result = new List<Vector3>(centerPath.Count * 4);
+        waypointEdges = new List<int>(centerPath.Count * 4);
 
         for (int i = 0; i < centerPath.Count - 1; i++)
         {
@@ -422,6 +471,8 @@ public class TrafficManager : NetworkBehaviour
             float len = dir.magnitude;
             if (len < 0.05f) continue;
             dir /= len;
+
+            int segEdgeId = edgeResolver != null ? edgeResolver(a, b) : -1;
 
             Vector3 rightLane = Vector3.Cross(Vector3.up, dir).normalized * laneOffset;
             float trim = Mathf.Min(trimBase, len * 0.28f);
@@ -445,14 +496,26 @@ public class TrafficManager : NetworkBehaviour
                     Vector3 arcPt = (omt * omt * prev) + (2f * omt * t * control) + (t * t * entry);
                     arcPt = ClampPointToStreetCorridor(arcPt, a, b, maxSafeOffset);
                     result.Add(arcPt);
+                    waypointEdges.Add(segEdgeId);
                 }
             }
 
             result.Add(entry);
+            waypointEdges.Add(segEdgeId);
             result.Add(exit);
+            waypointEdges.Add(segEdgeId);
         }
 
-        if (result.Count < 2) return centerPath;
+        if (result.Count < 2)
+        {
+            waypointEdges.Clear();
+            for (int i = 0; i < centerPath.Count; i++)
+            {
+                int segEdgeId = edgeResolver != null && i < centerPath.Count - 1 ? edgeResolver(centerPath[i], centerPath[i + 1]) : -1;
+                waypointEdges.Add(segEdgeId);
+            }
+            return centerPath;
+        }
         return result;
     }
 
@@ -630,15 +693,14 @@ public class TrafficManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// Forces reroute for affected vehicles when an edge is blocked
+    /// Forces reroute only for vehicles whose active or remaining path crosses the blocked edge.
     /// </summary>
     public void OnEdgeBlocked(int edgeId)
     {
         if (!IsActiveServerOrLocal) return;
-        // Reroute logic - for simplicity, give all vehicles a new path
         foreach (var v in _vehicles)
         {
-            if (v != null && v.isActive)
+            if (v != null && v.isActive && VehicleUsesRemainingEdge(v, edgeId))
             {
                 AssignRandomPath(v);
             }

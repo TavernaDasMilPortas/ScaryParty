@@ -163,8 +163,8 @@ namespace ScaryParty.City
                         float groundY = 0.02f + (config != null ? config.sidewalkHeight : 0.15f);
                         candidatePos.y = groundY + 0.03f - floorLocalY;
 
-                        // Validação de contenção estrita no polígono da quadra
-                        if (!ValidateContainment(candidatePos, candidateRot, localRegions, poly, minStreetSeparation))
+                        // Validação de contenção estrita no polígono da quadra (mantendo minStreetSeparation nas laterais/fundo)
+                        if (!ValidateContainment(candidatePos, candidateRot, localRegions, poly, minStreetSeparation, e))
                             continue;
 
                         // Score: menor distância ao centro da cidade + bônus de zona comercial
@@ -222,8 +222,11 @@ namespace ScaryParty.City
             Quaternion rot,
             Rect[] localRegions,
             Vector3[] blockPoly,
-            float minSetback)
+            float minSetback,
+            int frontEdgeIndex = -1)
         {
+            float minSetbackSq = minSetback > 0f ? minSetback * minSetback : 0f;
+
             for (int r = 0; r < localRegions.Length; r++)
             {
                 Rect rect = localRegions[r];
@@ -237,6 +240,19 @@ namespace ScaryParty.City
                     // 1. Cada vértice deve estar dentro do polígono da quadra
                     if (!IsPointInsidePolygonXZ(worldCorners[c], blockPoly))
                         return false;
+
+                    // 1b. Afasta arestas laterais/fundo da guia da rua quando minSetback > 0
+                    if (minSetbackSq > 0f)
+                    {
+                        for (int p = 0; p < blockPoly.Length; p++)
+                        {
+                            if (p == frontEdgeIndex) continue;
+                            Vector3 polyA = blockPoly[p];
+                            Vector3 polyB = blockPoly[(p + 1) % blockPoly.Length];
+                            if (SqrDistancePointToSegmentXZ(worldCorners[c], polyA, polyB) < minSetbackSq)
+                                return false;
+                        }
+                    }
                 }
 
                 // 2. Nenhuma aresta do retângulo pode cruzar as arestas do polígono da quadra
@@ -257,6 +273,25 @@ namespace ScaryParty.City
             }
 
             return true;
+        }
+
+        private static float SqrDistancePointToSegmentXZ(Vector3 pt, Vector3 a, Vector3 b)
+        {
+            float abx = b.x - a.x;
+            float abz = b.z - a.z;
+            float lenSq = abx * abx + abz * abz;
+            if (lenSq < 0.00001f)
+            {
+                float dx = pt.x - a.x;
+                float dz = pt.z - a.z;
+                return dx * dx + dz * dz;
+            }
+            float t = Mathf.Clamp01(((pt.x - a.x) * abx + (pt.z - a.z) * abz) / lenSq);
+            float projX = a.x + abx * t;
+            float projZ = a.z + abz * t;
+            float px = pt.x - projX;
+            float pz = pt.z - projZ;
+            return px * px + pz * pz;
         }
 
         private static List<BlockFiller.OBB2D> BuildReservedOBBs(

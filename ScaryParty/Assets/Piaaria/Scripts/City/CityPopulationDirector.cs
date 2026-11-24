@@ -154,6 +154,7 @@ public class CityPopulationDirector : MonoBehaviour
         if (_pool.Count > 0)
         {
             npc = _pool.Dequeue();
+            npc.ReconfigureFromPool(id, speed, colorIndex);
             npc.gameObject.SetActive(true);
             ScaryParty.VisualStyles.VisualStyleManager.ApplyHierarchyOrFallback(
                 npc.gameObject,
@@ -189,7 +190,10 @@ public class CityPopulationDirector : MonoBehaviour
 
             npc = npcGo.AddComponent<PedestrianNpc>();
             npc.Initialize(id, visualInst, speed, colorIndex);
+            npc.OnEnteredBuilding -= HandlePedestrianEnteredBuilding;
             npc.OnEnteredBuilding += HandlePedestrianEnteredBuilding;
+            npc.OnNavigationAbandoned -= HandlePedestrianNavigationAbandoned;
+            npc.OnNavigationAbandoned += HandlePedestrianNavigationAbandoned;
         }
 
         return npc;
@@ -260,8 +264,22 @@ public class CityPopulationDirector : MonoBehaviour
 
         _virtualOccupants.Add(entry);
 
+        npc.ResetStateForPool();
         npc.gameObject.SetActive(false);
-        _pool.Enqueue(npc);
+        if (!_pool.Contains(npc))
+            _pool.Enqueue(npc);
+    }
+
+    private void HandlePedestrianNavigationAbandoned(PedestrianNpc npc)
+    {
+        if (npc == null) return;
+        npc.OnReachedPizzeria -= HandlePedestrianReachedPizzeria;
+        _activePedestrians.Remove(npc);
+        _activePedestriansCount = _activePedestrians.Count;
+        npc.ResetStateForPool();
+        npc.gameObject.SetActive(false);
+        if (!_pool.Contains(npc))
+            _pool.Enqueue(npc);
     }
 
     /// <summary>
@@ -281,12 +299,14 @@ public class CityPopulationDirector : MonoBehaviour
             }
         }
 
-        // Find nearest traveling pedestrian not currently at the pizzeria
+        // Find nearest active, traveling pedestrian not currently visiting or entering
         float bestDistSqr = float.MaxValue;
         for (int i = 0; i < _activePedestrians.Count; i++)
         {
             var p = _activePedestrians[i];
-            if (p == null || p.State == PedestrianState.VisitingPizzeria) continue;
+            if (p == null || !p.gameObject.activeInHierarchy ||
+                p.State == PedestrianState.VisitingPizzeria ||
+                p.State == PedestrianState.EnteringBuilding) continue;
 
             float d2 = (p.transform.position - pizzeriaEntrance).sqrMagnitude;
             if (d2 < bestDistSqr)
@@ -313,8 +333,10 @@ public class CityPopulationDirector : MonoBehaviour
         npc.OnReachedPizzeria -= HandlePedestrianReachedPizzeria;
         _activePedestrians.Remove(npc);
         _activePedestriansCount = _activePedestrians.Count;
+        npc.ResetStateForPool();
         npc.gameObject.SetActive(false);
-        _pool.Enqueue(npc);
+        if (!_pool.Contains(npc))
+            _pool.Enqueue(npc);
     }
 
     /// <summary>
@@ -350,6 +372,8 @@ public class CityPopulationDirector : MonoBehaviour
         npc.Initialize(id, visualObj, 2.2f, colorIdx);
         npc.OnEnteredBuilding -= HandlePedestrianEnteredBuilding;
         npc.OnEnteredBuilding += HandlePedestrianEnteredBuilding;
+        npc.OnNavigationAbandoned -= HandlePedestrianNavigationAbandoned;
+        npc.OnNavigationAbandoned += HandlePedestrianNavigationAbandoned;
 
         _activePedestrians.Add(npc);
         _activePedestriansCount = _activePedestrians.Count;

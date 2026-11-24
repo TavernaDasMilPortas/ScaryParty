@@ -95,7 +95,7 @@ namespace ScaryParty.Pizzeria.Composition
 
             // R08: Bounds mundiais computados pelos 4 cantos transformados do patioRect (suporta 0°, 90°, 180°, 270°)
             Bounds lotBounds = ComputeWorldBoundsFromLocalRect(root.transform, patioRect, floorLocalY, 4f);
-            BuildMotorcycle(exitFrame.transform, bikeWorldPos, exitRot, lotBounds);
+            BuildMotorcycle(exitFrame.transform, bikeWorldPos, exitRot, lotBounds, anchors.streetExit);
 
             // 3. Expedição e Recebimento
             anchors.dispatch = ResolveOrCreateAnchor(container.transform, "Dispatch", new Vector3(-3.8f, 0.05f, -3.5f), Quaternion.identity);
@@ -237,7 +237,7 @@ namespace ScaryParty.Pizzeria.Composition
             TintObject(backstop, new Color(0.28f, 0.24f, 0.22f));
         }
 
-        private static void BuildMotorcycle(Transform parent, Vector3 worldPos, Quaternion rot, Bounds lotBounds)
+        private static void BuildMotorcycle(Transform parent, Vector3 worldPos, Quaternion rot, Bounds lotBounds, Transform streetExitAnchor = null)
         {
             var bike = new GameObject("DeliveryMotorcycle");
             bike.transform.SetParent(parent, false);
@@ -246,6 +246,13 @@ namespace ScaryParty.Pizzeria.Composition
             var collider = bike.AddComponent<BoxCollider>();
             collider.center = new Vector3(0f, 0.6f, 0f);
             collider.size = new Vector3(0.9f, 1.15f, 2.1f);
+
+            var sensorGo = new GameObject("ImpactSensor");
+            sensorGo.transform.SetParent(bike.transform, false);
+            var triggerSensor = sensorGo.AddComponent<BoxCollider>();
+            triggerSensor.isTrigger = true;
+            triggerSensor.center = new Vector3(0f, 0.65f, 0.05f);
+            triggerSensor.size = new Vector3(1.05f, 1.15f, 2.25f);
 
             var rb = bike.AddComponent<Rigidbody>();
             rb.isKinematic = true;
@@ -343,7 +350,8 @@ namespace ScaryParty.Pizzeria.Composition
                 hbRight,
                 leftExit,
                 rightExit,
-                cargoRack);
+                cargoRack,
+                streetExitAnchor);
         }
 
         private static void BuildWeaponRack(Transform parent, Vector3 localPos)

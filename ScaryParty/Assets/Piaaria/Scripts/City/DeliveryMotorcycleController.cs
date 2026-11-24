@@ -34,6 +34,7 @@ namespace ScaryParty.City
         public Transform LeftExitAnchor { get; private set; }
         public Transform RightExitAnchor { get; private set; }
         public Transform CargoRackAnchor { get; private set; }
+        public Transform StreetExitAnchor { get; private set; }
         private CityGenerator _cityGen;
         private float _localSpeed;
         private float _netSendTimer;
@@ -44,8 +45,12 @@ namespace ScaryParty.City
         private uint _lastHornCounter;
         private bool _wasLocalDriver;
         private ThirdPersonController _lockedLocalTpc;
+        private Transform _riderRootTransform;
+        private CharacterController _disabledSeatedCc;
+        private ulong _disabledSeatedRiderClientId = ulong.MaxValue;
         private uint _impactReportedForMountRevision;
         private uint _nextImpactEpisodeId = 1;
+        private static readonly RaycastHit[] _sweepHits = new RaycastHit[16];
 
         public Vector3 ParkingSpawnPos => _parkingPos;
         public Quaternion ParkingSpawnRot => _parkingRot;
@@ -74,17 +79,35 @@ namespace ScaryParty.City
         private void Awake()
         {
             Instance = this;
+            EnsureImpactTriggerSensor();
+        }
+
+        private void EnsureImpactTriggerSensor()
+        {
+            var cols = GetComponentsInChildren<Collider>(true);
+            for (int i = 0; i < cols.Length; i++)
+            {
+                if (cols[i] != null && cols[i].isTrigger) return;
+            }
+            var sensorGo = new GameObject("ImpactSensor");
+            sensorGo.transform.SetParent(transform, false);
+            var triggerSensor = sensorGo.AddComponent<BoxCollider>();
+            triggerSensor.isTrigger = true;
+            triggerSensor.center = new Vector3(0f, 0.65f, 0.05f);
+            triggerSensor.size = new Vector3(1.05f, 1.15f, 2.25f);
         }
 
         private void OnDestroy()
         {
             ReleaseLocalDrivingState();
+            ReleaseSeatedRiderAvatar();
             if (Instance == this) Instance = null;
         }
 
         private void OnDisable()
         {
             ReleaseLocalDrivingState();
+            ReleaseSeatedRiderAvatar();
         }
 
         public void ConfigureParking(
@@ -96,7 +119,8 @@ namespace ScaryParty.City
             Transform handlebarRight = null,
             Transform leftExit = null,
             Transform rightExit = null,
-            Transform cargoRack = null)
+            Transform cargoRack = null,
+            Transform streetExit = null)
         {
             _parkingPos = parkPos;
             _parkingRot = parkRot;
@@ -107,6 +131,7 @@ namespace ScaryParty.City
             LeftExitAnchor = leftExit;
             RightExitAnchor = rightExit;
             CargoRackAnchor = cargoRack;
+            StreetExitAnchor = streetExit;
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer && PizzeriaNetworkState.Instance != null)
             {
@@ -201,6 +226,10 @@ namespace ScaryParty.City
                 {
                     SyncRiderAvatarToSeat(st.RiderClientId);
                 }
+                else
+                {
+                    ReleaseSeatedRiderAvatar();
+                }
             }
         }
 
@@ -230,9 +259,15 @@ namespace ScaryParty.City
                 dismountPressed = kb.eKey.wasPressedThisFrame;
                 hornPressed = kb.hKey.wasPressedThisFrame;
             }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.E)) dismountPressed = true;
+                if (Input.GetKeyDown(KeyCode.H)) hornPressed = true;
+            }
+#else
+            if (Input.GetKeyDown(KeyCode.E)) dismountPressed = true;
+            if (Input.GetKeyDown(KeyCode.H)) hornPressed = true;
 #endif
-            if (!dismountPressed && Input.GetKeyDown(KeyCode.E)) dismountPressed = true;
-            if (!hornPressed && Input.GetKeyDown(KeyCode.H)) hornPressed = true;
 
             if (dismountPressed)
             {
@@ -275,7 +310,8 @@ namespace ScaryParty.City
             }
 
             Vector3 currentPos = transform.position;
-            Vector3 desiredPos = currentPos + transform.forward * (_localSpeed * Time.deltaTime);
+            Vector3 moveDelta = transform.forward * (_localSpeed * Time.deltaTime);
+            Vector3 desiredPos = ResolveSolidCollisionSweep(currentPos, moveDelta);
             Vector3 clampedPos = ClampToAllowedSurface(currentPos, desiredPos, out bool hitCurb);
             if (hitCurb)
             {
@@ -304,15 +340,71 @@ namespace ScaryParty.City
             }
         }
 
+        private Vector3 ResolveSolidCollisionSweep(Vector3 currentPos, Vector3 moveDelta)
+        {
+            float dist = moveDelta.magnitude;
+            if (dist < 0.001f) return currentPos + moveDelta;
+
+            Vector3 dir = moveDelta / dist;
+            Vector3 center = currentPos + Vector3.up * 0.65f;
+            Vector3 halfExtents = new Vector3(0.42f, 0.48f, 0.90f);
+            int hits = Physics.BoxCastNonAlloc(center, halfExtents, dir, _sweepHits, transform.rotation, dist + 0.08f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+
+            float closestSafeDist = dist;
+            bool blocked = false;
+            Vector3 blockNormal = Vector3.zero;
+
+            for (int i = 0; i < hits; i++)
+            {
+                var h = _sweepHits[i];
+                if (h.collider == null || h.collider.transform.IsChildOf(transform)) continue;
+                if (_riderRootTransform != null && h.collider.transform.IsChildOf(_riderRootTransform)) continue;
+                if (h.normal.y > 0.65f) continue;
+
+                if (Mathf.Abs(_localSpeed) >= 3.5f && TryReportImpactFromCollider(h.collider, h.point))
+                    return currentPos;
+
+                if (h.distance < closestSafeDist)
+                {
+                    closestSafeDist = Mathf.Max(0f, h.distance - 0.06f);
+                    blockNormal = new Vector3(h.normal.x, 0f, h.normal.z);
+                    blocked = true;
+                }
+            }
+
+            if (!blocked) return currentPos + moveDelta;
+
+            _localSpeed *= 0.45f;
+            Vector3 remaining = moveDelta - dir * closestSafeDist;
+            if (blockNormal.sqrMagnitude > 0.001f)
+            {
+                blockNormal.Normalize();
+                Vector3 slide = Vector3.ProjectOnPlane(remaining, blockNormal);
+                return currentPos + dir * closestSafeDist + slide * 0.5f;
+            }
+            return currentPos + dir * closestSafeDist;
+        }
+
         private void SyncRiderAvatarToSeat(ulong clientId)
         {
-            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
-                return;
-
-            var po = client.PlayerObject;
+            Transform po = null;
+            if (PlayerState.TryGetByClientId(clientId, out var riderPs) && riderPs != null)
+            {
+                po = riderPs.transform;
+            }
+            else if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsServer &&
+                     NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client) &&
+                     client.PlayerObject != null)
+            {
+                po = client.PlayerObject.transform;
+            }
             if (po == null) return;
 
-            if (po.IsOwner)
+            if (_disabledSeatedRiderClientId != clientId)
+                ReleaseSeatedRiderAvatar();
+
+            var no = po.GetComponent<NetworkObject>();
+            if (no != null && no.IsOwner)
             {
                 var tpc = po.GetComponent<ThirdPersonController>();
                 if (tpc != null && tpc.enabled)
@@ -323,10 +415,27 @@ namespace ScaryParty.City
             }
 
             var cc = po.GetComponent<CharacterController>();
-            if (cc != null && cc.enabled) cc.enabled = false;
+            if (cc != null && cc.enabled)
+            {
+                cc.enabled = false;
+                _disabledSeatedCc = cc;
+                _disabledSeatedRiderClientId = clientId;
+            }
+            _riderRootTransform = po;
 
             Vector3 seatPos = _riderSeatAnchor != null ? _riderSeatAnchor.position : transform.position + Vector3.up * 0.55f;
-            po.transform.SetPositionAndRotation(seatPos, transform.rotation);
+            po.SetPositionAndRotation(seatPos, transform.rotation);
+        }
+
+        private void ReleaseSeatedRiderAvatar()
+        {
+            if (_disabledSeatedCc != null)
+            {
+                if (!_disabledSeatedCc.enabled) _disabledSeatedCc.enabled = true;
+                _disabledSeatedCc = null;
+            }
+            _riderRootTransform = null;
+            _disabledSeatedRiderClientId = ulong.MaxValue;
         }
 
         private void ReleaseLocalDrivingState()
@@ -341,6 +450,8 @@ namespace ScaryParty.City
                 _lockedLocalTpc.enabled = true;
                 _lockedLocalTpc = null;
             }
+
+            ReleaseSeatedRiderAvatar();
 
             if (NetworkManager.Singleton != null && NetworkManager.Singleton.LocalClient != null && NetworkManager.Singleton.LocalClient.PlayerObject != null)
             {
@@ -372,6 +483,31 @@ namespace ScaryParty.City
             return FindNearestAllowedPoint(desiredPos);
         }
 
+        public static bool IsPointInExitDriveway(
+            Vector3 pos,
+            Vector3 parkingPos,
+            Quaternion parkingRot,
+            Vector3? streetExitAnchorPos,
+            float sidewalkWidth)
+        {
+            Vector3 fwd = parkingRot * Vector3.forward;
+            if (streetExitAnchorPos.HasValue)
+            {
+                Vector3 toExit = streetExitAnchorPos.Value - parkingPos;
+                toExit.y = 0f;
+                if (toExit.sqrMagnitude > 0.25f) fwd = toExit.normalized;
+            }
+            fwd.y = 0f;
+            if (fwd.sqrMagnitude < 0.001f) fwd = Vector3.forward;
+            fwd.Normalize();
+
+            Vector3 start = streetExitAnchorPos ?? (parkingPos + fwd * 2.0f);
+            start -= fwd * 1.5f;
+            float reach = Mathf.Clamp(sidewalkWidth + 4.5f, 6.5f, 13.5f);
+            Vector3 end = start + fwd * reach;
+            return SqrDistanceToSegmentXZ(pos, start, end) <= 2.15f * 2.15f;
+        }
+
         public bool IsPointOnDrivableSurface(Vector3 pos)
         {
             Vector3 flat = new Vector3(pos.x, _parkingPos.y, pos.z);
@@ -383,6 +519,13 @@ namespace ScaryParty.City
             }
 
             if (_cityGen == null) _cityGen = FindFirstObjectByType<CityGenerator>();
+            float sidewalkWidth = _cityGen != null && _cityGen.config != null ? _cityGen.config.sidewalkWidth : 2.5f;
+            if (_parkingBounds.size.sqrMagnitude > 0.1f &&
+                IsPointInExitDriveway(pos, _parkingPos, _parkingRot, StreetExitAnchor != null ? StreetExitAnchor.position : (Vector3?)null, sidewalkWidth))
+            {
+                return true;
+            }
+
             var graph = _cityGen != null && _cityGen.CityData != null ? _cityGen.CityData.streetGraph : null;
             if (graph == null || graph.edges == null || graph.nodes == null) return true;
 
@@ -471,24 +614,51 @@ namespace ScaryParty.City
         private void OnTriggerEnter(Collider other)
         {
             if (!_wasLocalDriver || Mathf.Abs(_localSpeed) < 3.5f || other == null) return;
+            TryReportImpactFromCollider(other, other.ClosestPoint(transform.position));
+        }
+
+        private bool TryReportImpactFromCollider(Collider other, Vector3 hitPoint)
+        {
+            if (other == null || other.transform.IsChildOf(transform)) return false;
             var net = PizzeriaNetworkState.Instance;
-            if (net == null) return;
+            if (net == null) return false;
 
             var st = net.MotorcycleState.Value;
             ulong localId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0;
-            if (!st.IsActive || !st.IsMounted || st.RiderClientId != localId) return;
-            if (_impactReportedForMountRevision == st.Revision) return;
+            if (!st.IsActive || !st.IsMounted || st.RiderClientId != localId) return false;
+            if (_impactReportedForMountRevision == st.Revision) return false;
+
+            // Sem friendly-fire contra jogadores
+            if (other.GetComponentInParent<PlayerState>() != null ||
+                other.GetComponentInParent<ScaryParty.Combat.PlayerHealth>() != null)
+            {
+                return false;
+            }
+
+            // Suporte a monstros replicados por MonsterId (sem NetworkObject próprio)
+            var monster = other.GetComponentInParent<ScaryParty.Combat.Monsters.MonsterNpcController>();
+            if (monster != null)
+            {
+                if (!monster.IsAlive) return false;
+                _impactReportedForMountRevision = st.Revision;
+                PizzeriaCommandHandler.Instance?.ReportMotorcycleMonsterImpactServerRpc(
+                    monster.MonsterId,
+                    _nextImpactEpisodeId++,
+                    hitPoint);
+                return true;
+            }
 
             var targetDmg = other.GetComponentInParent<ScaryParty.Combat.IDamageable>();
             var targetNet = other.GetComponentInParent<NetworkObject>();
-            if (targetDmg == null || targetNet == null || targetNet.OwnerClientId == localId && other.GetComponentInParent<PlayerState>() != null)
-                return;
+            if (targetDmg == null || !targetDmg.IsAlive || targetNet == null)
+                return false;
 
             _impactReportedForMountRevision = st.Revision;
             PizzeriaCommandHandler.Instance?.ReportMotorcycleImpactServerRpc(
                 targetNet.NetworkObjectId,
                 _nextImpactEpisodeId++,
-                other.ClosestPoint(transform.position));
+                hitPoint);
+            return true;
         }
 
         public void OnFocus() { }

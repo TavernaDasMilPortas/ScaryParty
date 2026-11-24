@@ -27,8 +27,24 @@ public class DeliveryPointPlacer : MonoBehaviour
 
         if (eligible.Count == 0) return deliveryPoints;
 
-        // Stable sort by buildingId (or instance ID if buildingId missing) to prevent non-deterministic order
-        eligible.Sort((a, b) => string.CompareOrdinal(a.buildingId ?? a.name, b.buildingId ?? b.name));
+        // Stable deterministic sort by buildingId/name, blockId and quantized world position (no runtime InstanceID order drift)
+        eligible.Sort((a, b) =>
+        {
+            string idA = !string.IsNullOrEmpty(a.buildingId) ? a.buildingId : a.name;
+            string idB = !string.IsNullOrEmpty(b.buildingId) ? b.buildingId : b.name;
+            int cmp = string.CompareOrdinal(idA, idB);
+            if (cmp != 0) return cmp;
+            cmp = a.blockId.CompareTo(b.blockId);
+            if (cmp != 0) return cmp;
+            Vector3 pa = a.transform.position;
+            Vector3 pb = b.transform.position;
+            cmp = Mathf.RoundToInt(pa.x * 100f).CompareTo(Mathf.RoundToInt(pb.x * 100f));
+            if (cmp != 0) return cmp;
+            cmp = Mathf.RoundToInt(pa.z * 100f).CompareTo(Mathf.RoundToInt(pb.z * 100f));
+            if (cmp != 0) return cmp;
+            cmp = Mathf.RoundToInt(pa.y * 100f).CompareTo(Mathf.RoundToInt(pb.y * 100f));
+            return cmp != 0 ? cmp : a.GetInstanceID().CompareTo(b.GetInstanceID());
+        });
 
         // Group eligible buildings by block using explicit blockId if available
         Dictionary<string, List<CityBuilding>> buildingsByBlock = new Dictionary<string, List<CityBuilding>>();

@@ -44,12 +44,20 @@ public class PedestrianNpc : MonoBehaviour
     private float _walkSpeed = 2.2f;
     private int _navFailRetries;
     private float _hornYieldTimer;
+    private bool _isYieldingToHorn;
+    private PedestrianState _preCrosswalkState = PedestrianState.Travelling;
+    private float _crosswalkCheckTimer;
+    private PedestrianCrossing _lastCompletedCrossing;
+    private static PedestrianCrossing[] _cachedCrossings;
+    private static float _cachedCrossingsTime = -10f;
 
     public void ReactToHorn(Vector3 hornOrigin)
     {
         if (!gameObject.activeInHierarchy || Motor == null) return;
+        if (State == PedestrianState.InsideBuilding || State == PedestrianState.EnteringBuilding) return;
         if (_hornYieldTimer > 0f) return;
         _hornYieldTimer = 2.5f;
+        _isYieldingToHorn = true;
 
         Vector3 away = transform.position - hornOrigin;
         away.y = 0f;
@@ -57,6 +65,8 @@ public class PedestrianNpc : MonoBehaviour
         away.Normalize();
 
         Vector3 sideStep = transform.position + away * 2.2f;
+        if (NavMesh.SamplePosition(sideStep, out var navHit, 2.5f, NavMesh.AllAreas))
+            sideStep = navHit.position;
         Motor.MoveTo(sideStep);
     }
 
@@ -120,6 +130,7 @@ public class PedestrianNpc : MonoBehaviour
 
     public event Action<PedestrianNpc> OnReachedPizzeria;
     public event Action<PedestrianNpc, CityBuilding> OnEnteredBuilding;
+    public event Action<PedestrianNpc> OnNavigationAbandoned;
 
     private static readonly Color[] PedestrianPalette = new[]
     {
@@ -183,6 +194,50 @@ public class PedestrianNpc : MonoBehaviour
         }
     }
 
+    public void ReconfigureFromPool(string id, float speed, int colorIndex)
+    {
+        PedestrianId = id;
+        _walkSpeed = speed;
+        ColorIndex = colorIndex;
+        ResetStateForPool();
+        Motor?.Configure(_walkSpeed, 360f, 12f, 0.35f);
+        if (Appearance != null)
+        {
+            Color c = PedestrianPalette[Mathf.Abs(colorIndex) % PedestrianPalette.Length];
+            Appearance.ApplyPrimaryColor(c);
+        }
+    }
+
+    public void ResetStateForPool()
+    {
+        if (CurrentCrossing != null)
+        {
+            CurrentCrossing.NotifyCrossingCompleted(this);
+            CurrentCrossing = null;
+        }
+        TargetBuilding = null;
+        TargetPosition = Vector3.zero;
+        _navFailRetries = 0;
+        _hornYieldTimer = 0f;
+        _isYieldingToHorn = false;
+        _stateTimer = 0f;
+        _crosswalkCheckTimer = 0f;
+        _lastCompletedCrossing = null;
+        _preCrosswalkState = PedestrianState.Travelling;
+        State = PedestrianState.InsideBuilding;
+    }
+
+    private void OnDisable()
+    {
+        if (CurrentCrossing != null)
+        {
+            CurrentCrossing.NotifyCrossingCompleted(this);
+            CurrentCrossing = null;
+        }
+        _isYieldingToHorn = false;
+        _hornYieldTimer = 0f;
+    }
+
     private void OnDestroy()
     {
         if (Motor != null)
@@ -229,23 +284,60 @@ public class PedestrianNpc : MonoBehaviour
         if (target == null) return;
         TargetBuilding = target;
         _dwellDuration = dwellTime;
+        _preCrosswalkState = PedestrianState.Travelling;
+        _lastCompletedCrossing = null;
         State = PedestrianState.Travelling;
         if (TryResolveReachableNavMeshPoint(target.entrancePosition, out var safeDest))
         {
             TargetPosition = safeDest;
             Motor.MoveTo(TargetPosition);
         }
+        else
+        {
+            HandleNavigationFailed();
+        }
     }
 
     public void AssignVisitPizzeria(Vector3 pizzeriaEntrance)
     {
         TargetBuilding = null;
+        _preCrosswalkState = PedestrianState.VisitingPizzeria;
+        _lastCompletedCrossing = null;
         State = PedestrianState.VisitingPizzeria;
         if (TryResolveReachableNavMeshPoint(pizzeriaEntrance, out var safeDest))
         {
             TargetPosition = safeDest;
             Motor.MoveTo(TargetPosition);
         }
+        else
+        {
+            HandleNavigationFailed();
+        }
+    }
+
+    private void ResumeAfterHornYield()
+    {
+        _isYieldingToHorn = false;
+        _hornYieldTimer = 0f;
+        if (Motor == null) return;
+        if (State == PedestrianState.CrossingStreet && CurrentCrossing != null)
+        {
+            Motor.MoveTo(CurrentCrossing.GetOppositeWaitingPoint(transform.position));
+        }
+        else if (TargetPosition != Vector3.zero)
+        {
+            Motor.MoveTo(TargetPosition);
+        }
+    }
+
+    private static PedestrianCrossing[] GetSceneCrossingsCached()
+    {
+        if (_cachedCrossings == null || Time.unscaledTime - _cachedCrossingsTime > 5f)
+        {
+            _cachedCrossings = FindObjectsByType<PedestrianCrossing>(FindObjectsSortMode.None);
+            _cachedCrossingsTime = Time.unscaledTime;
+        }
+        return _cachedCrossings;
     }
 
     private void Update()
@@ -253,22 +345,61 @@ public class PedestrianNpc : MonoBehaviour
         if (_hornYieldTimer > 0f)
         {
             _hornYieldTimer -= Time.deltaTime;
-            if (_hornYieldTimer <= 0f && TargetPosition != Vector3.zero && Motor != null)
+            if (_hornYieldTimer <= 0f && _isYieldingToHorn)
             {
-                Motor.MoveTo(TargetPosition);
+                ResumeAfterHornYield();
             }
         }
 
         if (State == PedestrianState.WaitingAtCrosswalk)
         {
             _stateTimer += Time.deltaTime;
-            if (CurrentCrossing != null && CurrentCrossing.CanBeginCrossing(true))
+            if (CurrentCrossing == null || CurrentCrossing.CanBeginCrossing(true) || _stateTimer > 12f)
             {
-                // Signal turned green for pedestrians!
+                // Signal turned green (or safety timeout) -> begin crossing!
                 State = PedestrianState.CrossingStreet;
-                CurrentCrossing.NotifyCrossingStarted(this);
-                Vector3 oppositeSide = CurrentCrossing.GetOppositeWaitingPoint(transform.position);
-                Motor.MoveTo(oppositeSide);
+                if (CurrentCrossing != null)
+                {
+                    CurrentCrossing.NotifyCrossingStarted(this);
+                    Vector3 oppositeSide = CurrentCrossing.GetOppositeWaitingPoint(transform.position);
+                    Motor.MoveTo(oppositeSide);
+                }
+                else if (TargetPosition != Vector3.zero)
+                {
+                    State = _preCrosswalkState;
+                    Motor.MoveTo(TargetPosition);
+                }
+            }
+            return;
+        }
+
+        if (!_isYieldingToHorn && CurrentCrossing == null && (State == PedestrianState.Travelling || State == PedestrianState.VisitingPizzeria) && TargetPosition != Vector3.zero)
+        {
+            _crosswalkCheckTimer -= Time.deltaTime;
+            if (_crosswalkCheckTimer <= 0f)
+            {
+                _crosswalkCheckTimer = 0.25f;
+                var crossings = GetSceneCrossingsCached();
+                var nearCrossing = PedestrianRoutePlanner.FindNearestCrosswalk(transform.position, crossings, 3.2f);
+                if (nearCrossing != null && nearCrossing != _lastCompletedCrossing && nearCrossing.IsControlledBySignal && !nearCrossing.CanBeginCrossing(true))
+                {
+                    Vector3 waitNear = nearCrossing.GetNearestWaitingPoint(transform.position);
+                    Vector3 waitOpp = nearCrossing.GetOppositeWaitingPoint(transform.position);
+                    Vector3 crossDir = waitOpp - waitNear;
+                    Vector3 toGoal = TargetPosition - transform.position;
+                    crossDir.y = 0f;
+                    toGoal.y = 0f;
+                    if (crossDir.sqrMagnitude > 0.2f && toGoal.sqrMagnitude > 16f &&
+                        Vector3.Dot(crossDir.normalized, toGoal.normalized) > 0.3f &&
+                        (waitNear - transform.position).sqrMagnitude <= 3.0f * 3.0f)
+                    {
+                        _preCrosswalkState = State;
+                        CurrentCrossing = nearCrossing;
+                        State = PedestrianState.WaitingAtCrosswalk;
+                        _stateTimer = 0f;
+                        Motor?.Stop();
+                    }
+                }
             }
         }
     }
@@ -276,6 +407,12 @@ public class PedestrianNpc : MonoBehaviour
     private void HandleDestinationReached()
     {
         _navFailRetries = 0;
+        if (_isYieldingToHorn)
+        {
+            ResumeAfterHornYield();
+            return;
+        }
+
         switch (State)
         {
             case PedestrianState.Travelling:
@@ -290,13 +427,14 @@ public class PedestrianNpc : MonoBehaviour
             case PedestrianState.CrossingStreet:
                 if (CurrentCrossing != null)
                 {
+                    _lastCompletedCrossing = CurrentCrossing;
                     CurrentCrossing.NotifyCrossingCompleted(this);
                     CurrentCrossing = null;
                 }
                 // Resume travelling to target building or pizzeria
                 if (TargetPosition != Vector3.zero)
                 {
-                    State = PedestrianState.Travelling;
+                    State = _preCrosswalkState == PedestrianState.VisitingPizzeria ? PedestrianState.VisitingPizzeria : PedestrianState.Travelling;
                     Motor.MoveTo(TargetPosition);
                 }
                 break;
@@ -309,11 +447,22 @@ public class PedestrianNpc : MonoBehaviour
 
     private void HandleNavigationFailed()
     {
+        if (_isYieldingToHorn)
+        {
+            ResumeAfterHornYield();
+            return;
+        }
+
+        if (CurrentCrossing != null)
+        {
+            CurrentCrossing.NotifyCrossingCompleted(this);
+            CurrentCrossing = null;
+        }
+
         _navFailRetries++;
         if (_navFailRetries > 3)
         {
-            _navFailRetries = 0;
-            gameObject.SetActive(false);
+            AbandonAndReturnToPool();
             return;
         }
 
@@ -325,7 +474,21 @@ public class PedestrianNpc : MonoBehaviour
         }
         else
         {
-            _navFailRetries = 0;
+            AbandonAndReturnToPool();
+        }
+    }
+
+    private void AbandonAndReturnToPool()
+    {
+        _navFailRetries = 0;
+        TargetBuilding = null;
+        TargetPosition = Vector3.zero;
+        if (OnNavigationAbandoned != null)
+        {
+            OnNavigationAbandoned.Invoke(this);
+        }
+        else
+        {
             gameObject.SetActive(false);
         }
     }
