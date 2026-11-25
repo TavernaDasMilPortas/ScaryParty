@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feac8bcb4368c4f4aa9d4af8784768cc, type: 3}
+  m_Name: TrailerCityConfig
+  m_EditorClassIdentifier: Assembly-CSharp::CityConfig
+  gerarEmTempoReal: 1
+  generateBorderWalls: 1
+  generateSolidCore: 0
+  fillBlockGroundInRoadMesh: 1
+  seed: 1998419108
+  gridWidth: 13
+  gridHeight: 8
+  minStreetBranchLength: 30
+  maxStreetBranchLength: 80
+  streetWidth: 6
+  sidewalkWidth: 3
+  sidewalkHeight: 0.5
+  buildingGenerationMode: 1
+  modularCatalog: {fileID: 11400000, guid: f9d163b1b949dc740a3e48fe85fe7ce1, type: 2}
+  modularBuildingProfile: {fileID: 0}
+  minBuildingModulesWidth: 2
+  maxBuildingModulesWidth: 8
+  minBuildingModulesDepth: 2
+  maxBuildingModulesDepth: 6
+  minBuildingFloors: 1
+  maxBuildingFloors: 8
+  minBuildingWidth: 5
+  maxBuildingWidth: 15
+  minBuildingDepth: 4
+  maxBuildingDepth: 20
+  blockCornerMargin: 1
+  buildingGap: 1
+  buildingInnerSafetyMargin: 1
+  minBuildingHeight: 5
+  maxBuildingHeight: 30
+  pizzariaInsideBlock: 1
+  maxEnemySpawnPointsPerZone: 3
+  minDeliveryPointsPerBlock: 0
+  maxDeliveryPointsPerBlock: 3
+  deliveryBuildingDensity: 0.18
+  minimumDeliveryPoints: 4
+  maximumDeliveryPoints: 50
+  minDeliverySeparation: 8
+  preferZoneDistribution: 1
+  enablePedestrians: 1
+  populationBase: 8
+  populationDensity: 0.15
+  maxActivePedestrians: 40
+  pedestrianCrossingTime: 8
+  pedestrianWaitTrafficLight: 1
+  maxTrafficVehicles: 10
+  trafficBaseSpeed: 8
+  trafficLightProbability: 0.5
+  minEventInterval: 30
+  maxEventInterval: 90
+  blockadeDuration: 45

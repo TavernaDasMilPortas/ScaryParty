@@ -19,6 +19,7 @@
   <Project Path="Unity.VisualScripting.Core.Editor.csproj" />
   <Project Path="Unity.PerformanceTesting.Editor.csproj" />
   <Project Path="Unity.Burst.csproj" />
+  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="Unity.VisualScripting.Flow.Editor.csproj" />
   <Project Path="Unity.VisualStudio.Editor.csproj" />
   <Project Path="Unity.Networking.Transport.csproj" />
@@ -100,7 +101,6 @@
   <Project Path="Unity.Services.Core.Analytics.csproj" />
   <Project Path="MPUIKit.Editor.csproj" />
   <Project Path="Unity.Netcode.Editor.csproj" />
-  <Project Path="ScaryParty.Pizzeria.Tests.csproj" />
   <Project Path="ScaryParty.Cutscenes.Editor.Tests.csproj" />
   <Project Path="Unity.AI.Navigation.csproj" />
   <Project Path="Unity.Mathematics.Editor.csproj" />

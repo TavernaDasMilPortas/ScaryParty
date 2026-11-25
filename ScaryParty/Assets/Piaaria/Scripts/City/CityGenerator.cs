@@ -359,6 +359,18 @@ public class CityGenerator : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Gera a cidade localmente em Play Mode com uma seed explícita, sem rede e sem alterar o asset de config.
+    /// </summary>
+    public bool TryGenerateOfflineWithSeed(int seed)
+    {
+        if (!Application.isPlaying || config == null || IsSpawned) return false;
+        if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening) return false;
+        ClearLocalCity();
+        GenerateLocally(seed);
+        return true;
+    }
+
     [ClientRpc]
     private void ClearCityClientRpc()
     {
