@@ -166,7 +166,14 @@ namespace ScaryParty.UI.Piaria.Presenters
             tabHeld = Input.GetKey(KeyCode.Tab);
 #endif
 
-            bool blockedByOverlay = (NightIntermissionPresenter.Instance != null && NightIntermissionPresenter.Instance.IsOpen) ||
+            bool loadingOrIntro = (ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance != null &&
+                                   ScaryParty.Pizzeria.Presentation.PizzeriaSceneLoadingCoordinator.Instance.IsLoading) ||
+                                  ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.IsBlockingIntermission ||
+                                  (ScaryParty.Cutscenes.CutscenePlaybackService.Instance != null &&
+                                   ScaryParty.Cutscenes.CutscenePlaybackService.Instance.State != ScaryParty.Cutscenes.CutscenePlaybackState.Idle);
+
+            bool blockedByOverlay = loadingOrIntro ||
+                                   (NightIntermissionPresenter.Instance != null && NightIntermissionPresenter.Instance.IsOpen) ||
                                    (Core.UIModalStack.Instance != null && Core.UIModalStack.Instance.HasActiveModal);
             if (blockedByOverlay) tabHeld = false;
 

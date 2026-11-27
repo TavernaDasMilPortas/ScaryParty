@@ -26,13 +26,10 @@ namespace ScaryParty.UI.Piaria.Presenters
         private VisualElement _colRoomList;
         private VisualElement _colConnect;
 
-        // Perfil
+        // Perfil (compartilhado via ProfileEditorController)
+        private ProfileEditorController _profileEditor;
         private TextField _playerNameInput;
-        private Button _btnColorOrange, _btnColorGreen, _btnColorBlue, _btnColorPink, _btnColorRed;
-        private VisualElement _previewContainer;
-        private VisualElement _previewRenderTexture;
         private Button _btnSaveProfile;
-        private Color _selectedColor = new Color(1f, 0.45f, 0.1f);
 
         // Salas
         private ScrollView _roomList;
@@ -190,16 +187,21 @@ namespace ScaryParty.UI.Piaria.Presenters
             _colRoomList = RootElement.Q<VisualElement>("ColRoomList");
             _colConnect = RootElement.Q<VisualElement>("ColConnect");
 
-            // Perfil
+            // Perfil (compartilhado)
+            _profileEditor = new ProfileEditorController(RootElement);
+            _profileEditor.OnProfileSaved += (savedName, savedColor) =>
+            {
+                if (lobbyManager != null && lobbyManager.PlayerData != null)
+                {
+                    lobbyManager.PlayerData.PlayerName = savedName;
+                    lobbyManager.PlayerData.PlayerColor = savedColor;
+                    lobbyManager.PlayerData.Save();
+                }
+            };
             _playerNameInput = RootElement.Q<TextField>("PlayerNameInput");
-            _btnColorOrange = RootElement.Q<Button>("BtnColorOrange");
-            _btnColorGreen = RootElement.Q<Button>("BtnColorGreen");
-            _btnColorBlue = RootElement.Q<Button>("BtnColorBlue");
-            _btnColorPink = RootElement.Q<Button>("BtnColorPink");
-            _btnColorRed = RootElement.Q<Button>("BtnColorRed");
-            _previewContainer = RootElement.Q<VisualElement>("PreviewContainer");
-            _previewRenderTexture = RootElement.Q<VisualElement>("PreviewRenderTexture");
             _btnSaveProfile = RootElement.Q<Button>("BtnSaveProfile");
+
+            PiariaPresenterUtils.RegisterResponsiveLayout(RootElement);
 
             // Salas
             _roomList = RootElement.Q<ScrollView>("RoomList");
@@ -330,20 +332,9 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_colConnect != null && catalog.paperPanel3 != null)
                 _colConnect.style.backgroundImage = new StyleBackground(catalog.paperPanel3);
 
-            // Botões de Amostra de Cores Ilustrados
-            if (_btnColorOrange != null && catalog.colorOrange != null)
-                _btnColorOrange.style.backgroundImage = new StyleBackground(catalog.colorOrange);
-            if (_btnColorGreen != null && catalog.colorGreen != null)
-                _btnColorGreen.style.backgroundImage = new StyleBackground(catalog.colorGreen);
-            if (_btnColorBlue != null && catalog.colorBlue != null)
-                _btnColorBlue.style.backgroundImage = new StyleBackground(catalog.colorBlue);
-            if (_btnColorPink != null && catalog.colorPink != null)
-                _btnColorPink.style.backgroundImage = new StyleBackground(catalog.colorPink);
-            if (_btnColorRed != null && catalog.colorRed != null)
-                _btnColorRed.style.backgroundImage = new StyleBackground(catalog.colorRed);
+            _profileEditor?.ApplyCatalogAssets();
 
             // Cabeçalhos ilustrados — esconde os rótulos de texto duplicados caso o sprite já contenha o texto desenhado
-            ApplyHeader(RootElement.Q<VisualElement>("HeaderMyProfile"), catalog.headerMyProfile);
             ApplyHeader(RootElement.Q<VisualElement>("HeaderRooms"), catalog.headerAvailableRooms);
             ApplyHeader(RootElement.Q<VisualElement>("HeaderCreateRoom"), catalog.headerCreateRoom);
             ApplyHeader(RootElement.Q<VisualElement>("HeaderJoinCode"), catalog.headerJoinCode);
@@ -365,87 +356,17 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void SetupPreview()
         {
-            if (CharacterPreviewRig.Instance == null)
-            {
-                var existingRig = FindFirstObjectByType<CharacterPreviewRig>();
-                if (existingRig == null)
-                {
-                    var rigGo = new GameObject("CharacterPreviewRig");
-                    rigGo.AddComponent<CharacterPreviewRig>();
-                }
-            }
-
-            if (CharacterPreviewRig.Instance != null)
-            {
-                CharacterPreviewRig.Instance.SetActive(true);
-                if (_previewRenderTexture != null)
-                {
-                    var rt = CharacterPreviewRig.Instance.RenderTexture;
-                    if (rt != null)
-                    {
-                        _previewRenderTexture.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(rt));
-                    }
-                }
-                CharacterPreviewRig.Instance.BindDragEvents(_previewContainer);
-                CharacterPreviewRig.Instance.SetPlayerColor(_selectedColor);
-            }
+            _profileEditor?.ActivatePreview();
         }
 
         private void LoadProfileData()
         {
-            if (lobbyManager != null && lobbyManager.PlayerData != null)
-            {
-                if (_playerNameInput != null)
-                    _playerNameInput.value = lobbyManager.PlayerData.PlayerName;
-                _selectedColor = lobbyManager.PlayerData.PlayerColor;
-                SetColor(_selectedColor);
-            }
-            else
-            {
-                var savedName = PlayerPrefs.GetString("PlayerName", "rubens");
-                if (_playerNameInput != null)
-                    _playerNameInput.value = savedName;
-
-                if (PlayerPrefs.HasKey("PlayerColorR"))
-                {
-                    _selectedColor = new Color(
-                        PlayerPrefs.GetFloat("PlayerColorR"),
-                        PlayerPrefs.GetFloat("PlayerColorG"),
-                        PlayerPrefs.GetFloat("PlayerColorB")
-                    );
-                    SetColor(_selectedColor);
-                }
-            }
+            _profileEditor?.LoadFromPrefsOrData(lobbyManager != null ? lobbyManager.PlayerData : null);
         }
 
         private void SaveProfileData()
         {
-            if (_playerNameInput != null)
-            {
-                PlayerPrefs.SetString("PlayerName", _playerNameInput.value);
-                PlayerPrefs.SetFloat("PlayerColorR", _selectedColor.r);
-                PlayerPrefs.SetFloat("PlayerColorG", _selectedColor.g);
-                PlayerPrefs.SetFloat("PlayerColorB", _selectedColor.b);
-                PlayerPrefs.Save();
-            }
-
-            if (_playerNameInput != null && lobbyManager != null && lobbyManager.PlayerData != null)
-            {
-                lobbyManager.PlayerData.PlayerName = _playerNameInput.value;
-                lobbyManager.PlayerData.PlayerColor = _selectedColor;
-                lobbyManager.PlayerData.Save();
-                UIFeedbackService.Instance?.PlaySuccess();
-            }
-        }
-
-        private void SetColor(Color c)
-        {
-            _selectedColor = c;
-            if (CharacterPreviewRig.Instance != null)
-                CharacterPreviewRig.Instance.SetPlayerColor(c);
-
-            if (lobbyManager != null && lobbyManager.PlayerData != null)
-                lobbyManager.PlayerData.PlayerColor = c;
+            _profileEditor?.SaveProfileToStorage(lobbyManager != null ? lobbyManager.PlayerData : null);
         }
 
         private void BindEvents()
@@ -453,6 +374,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnBack != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnBack);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnBack, 1.06f, 0.94f);
                 _btnBack.clicked += () =>
                 {
                     if (UIScreenRouter.Instance != null)
@@ -466,46 +388,38 @@ namespace ScaryParty.UI.Piaria.Presenters
                 };
             }
 
-            // Cores
-            _btnColorOrange?.RegisterCallback<ClickEvent>(evt => SetColor(new Color(1f, 0.45f, 0.1f)));
-            _btnColorGreen?.RegisterCallback<ClickEvent>(evt => SetColor(new Color(0.2f, 0.8f, 0.2f)));
-            _btnColorBlue?.RegisterCallback<ClickEvent>(evt => SetColor(new Color(0.2f, 0.5f, 1f)));
-            _btnColorPink?.RegisterCallback<ClickEvent>(evt => SetColor(new Color(0.9f, 0.3f, 0.6f)));
-            _btnColorRed?.RegisterCallback<ClickEvent>(evt => SetColor(new Color(0.85f, 0.15f, 0.15f)));
-
-            if (_btnSaveProfile != null)
-            {
-                UIFeedbackService.Instance?.BindButton(_btnSaveProfile);
-                _btnSaveProfile.clicked += SaveProfileData;
-            }
-
             if (_btnRefreshRooms != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnRefreshRooms);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnRefreshRooms, 1.03f, 0.97f);
                 _btnRefreshRooms.clicked += RefreshRooms;
             }
 
             if (_btnCreateRoom != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnCreateRoom);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnCreateRoom, 1.03f, 0.97f);
                 _btnCreateRoom.clicked += OnCreateRoomClicked;
             }
 
             if (_btnJoinManual != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnJoinManual);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnJoinManual, 1.03f, 0.97f);
                 _btnJoinManual.clicked += OnJoinManualClicked;
             }
 
             if (_btnCreateLAN != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnCreateLAN);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnCreateLAN, 1.03f, 0.97f);
                 _btnCreateLAN.clicked += OnCreateLANClicked;
             }
 
             if (_btnJoinLAN != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnJoinLAN);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnJoinLAN, 1.03f, 0.97f);
                 _btnJoinLAN.clicked += OnJoinLANClicked;
             }
         }
@@ -727,6 +641,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 State = ScreenState.Active;
                 onComplete?.Invoke();
             });
+            UIToolkitTweenService.StaggerReveal(
+                new VisualElement[] { _colProfile, _colRoomList, _colConnect },
+                new Vector2(0f, 18f),
+                0.06f,
+                0.24f);
         }
 
         public void Close(Action onComplete = null)

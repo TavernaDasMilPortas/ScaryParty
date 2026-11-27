@@ -114,111 +114,107 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void BuildUIHierarchy()
         {
+            var catalog = PiariaUIAssetCatalog.Instance;
             RootElement = new VisualElement();
             RootElement.name = "PauseEscapeOverlay";
-            RootElement.style.position = Position.Absolute;
-            RootElement.style.left = 0;
-            RootElement.style.top = 0;
-            RootElement.style.right = 0;
-            RootElement.style.bottom = 0;
-            RootElement.style.backgroundColor = new Color(0f, 0f, 0f, 0.72f);
-            RootElement.style.justifyContent = Justify.Center;
-            RootElement.style.alignItems = Align.Center;
+            RootElement.AddToClassList("pause-overlay");
             RootElement.style.display = DisplayStyle.None;
 
-            var card = new VisualElement();
-            card.style.width = 480;
-            card.style.backgroundColor = new Color(0.10f, 0.11f, 0.15f, 0.98f);
-            card.style.borderTopWidth = 2;
-            card.style.borderBottomWidth = 2;
-            card.style.borderLeftWidth = 2;
-            card.style.borderRightWidth = 2;
-            card.style.borderTopColor = new Color(0.88f, 0.62f, 0.25f);
-            card.style.borderBottomColor = new Color(0.88f, 0.62f, 0.25f);
-            card.style.borderLeftColor = new Color(0.88f, 0.62f, 0.25f);
-            card.style.borderRightColor = new Color(0.88f, 0.62f, 0.25f);
-            card.style.borderTopLeftRadius = 12;
-            card.style.borderTopRightRadius = 12;
-            card.style.borderBottomLeftRadius = 12;
-            card.style.borderBottomRightRadius = 12;
-            card.style.paddingLeft = 24;
-            card.style.paddingRight = 24;
-            card.style.paddingTop = 22;
-            card.style.paddingBottom = 22;
+#if UNITY_EDITOR
+            var settingsSheet = UnityEditor.AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/Piaaria/UI/Piaria/USS/Settings.uss");
+            if (settingsSheet != null && !RootElement.styleSheets.Contains(settingsSheet))
+                RootElement.styleSheets.Add(settingsSheet);
+#endif
+
+            _card = new VisualElement();
+            _card.AddToClassList("pause-card");
+            if (catalog != null && catalog.paperPanel1 != null)
+                _card.style.backgroundImage = new StyleBackground(catalog.paperPanel1);
 
             var title = new Label("PAUSA — PIZZARIA");
-            title.style.fontSize = 24;
-            title.style.unityFontStyleAndWeight = FontStyle.Bold;
-            title.style.color = new Color(0.98f, 0.8f, 0.35f);
-            title.style.unityTextAlign = TextAnchor.MiddleCenter;
-            title.style.marginBottom = 16;
-            card.Add(title);
+            title.AddToClassList("pause-title");
+            _card.Add(title);
 
             _mainPanel = new VisualElement();
-            AddMenuButton(_mainPanel, "Continuar [ESC]", Close, new Color(0.20f, 0.56f, 0.32f));
-            AddMenuButton(_mainPanel, "Controles", () => ShowSubPanel(_controlsSubPanel), new Color(0.24f, 0.28f, 0.36f));
-            AddMenuButton(_mainPanel, "Configurações", () => ShowSubPanel(_settingsSubPanel), new Color(0.24f, 0.28f, 0.36f));
+            AddMenuButton(_mainPanel, "Continuar [ESC]", Close, "pause-btn-primary");
+            AddMenuButton(_mainPanel, "Controles", () => ShowSubPanel(_controlsSubPanel), "pause-btn-neutral");
+            AddMenuButton(_mainPanel, "Configurações", () => ShowSubPanel(_settingsSubPanel), "pause-btn-neutral");
             AddMenuButton(_mainPanel, "Ajuda / Tutorial", () =>
             {
                 Close();
                 ContextualTutorialPresenter.EnsureInstance().ShowTutorial();
-            }, new Color(0.24f, 0.35f, 0.45f));
+            }, "pause-btn-secondary");
 
-            _recoverPlayerBtn = AddMenuButton(_mainPanel, "Recuperar Jogador (60s)", RequestRecoverPlayer, new Color(0.55f, 0.40f, 0.18f));
-            _recoverMotoBtn = AddMenuButton(_mainPanel, "Recuperar Moto (60s)", RequestRecoverMoto, new Color(0.55f, 0.40f, 0.18f));
+            _recoverPlayerBtn = AddMenuButton(_mainPanel, "Recuperar Jogador (60s)", RequestRecoverPlayer, "pause-btn-warning");
+            _recoverMotoBtn = AddMenuButton(_mainPanel, "Recuperar Moto (60s)", RequestRecoverMoto, "pause-btn-warning");
 
             AddMenuButton(_mainPanel, "Sair da Partida", () =>
             {
                 if (Time.unscaledTime - _openedUnscaledTime < 0.15f) return;
                 ShowSubPanel(_confirmLeaveSubPanel);
-            }, new Color(0.68f, 0.22f, 0.22f));
-            card.Add(_mainPanel);
+            }, "pause-btn-danger");
+            _card.Add(_mainPanel);
 
             // Subpainel Confirmar Saída
-            _confirmLeaveSubPanel = new VisualElement();
-            _confirmLeaveSubPanel.style.display = DisplayStyle.None;
+            _confirmLeaveSubPanel = new VisualElement { style = { display = DisplayStyle.None } };
             var confirmText = new Label("Deseja realmente sair da partida e voltar ao Lobby?");
-            confirmText.style.fontSize = 16;
-            confirmText.style.color = new Color(0.95f, 0.92f, 0.92f);
-            confirmText.style.unityTextAlign = TextAnchor.MiddleCenter;
-            confirmText.style.whiteSpace = WhiteSpace.Normal;
-            confirmText.style.marginBottom = 16;
+            confirmText.AddToClassList("pause-confirm-text");
             _confirmLeaveSubPanel.Add(confirmText);
-            AddMenuButton(_confirmLeaveSubPanel, "Sim, Sair da Partida", LeaveMatch, new Color(0.75f, 0.18f, 0.18f));
-            AddMenuButton(_confirmLeaveSubPanel, "Cancelar [ESC]", () => ShowSubPanel(_mainPanel), new Color(0.32f, 0.34f, 0.40f));
-            card.Add(_confirmLeaveSubPanel);
+            AddMenuButton(_confirmLeaveSubPanel, "Sim, Sair da Partida", LeaveMatch, "pause-btn-danger");
+            AddMenuButton(_confirmLeaveSubPanel, "Cancelar [ESC]", () => ShowSubPanel(_mainPanel), "pause-btn-neutral");
+            _card.Add(_confirmLeaveSubPanel);
 
-            // Subpainel Controles
-            _controlsSubPanel = new VisualElement();
-            _controlsSubPanel.style.display = DisplayStyle.None;
-            var controlsText = new Label(
-                "Movimento: WASD / Shift (Correr)\n" +
-                "Interagir / Montar Moto / Equipar Arma: [E]\n" +
-                "Descartar no Lixo / Reparar Mochila / Comanda: [F] (segurar)\n" +
-                "Central de Operações (Pedidos/Reposição/Loja/Equipe): [J]\n" +
-                "Abrir Mochila: [B]  |  Bandoleira da Escopeta: [G]\n" +
-                "Guia de Receitas / Buzina na Moto: [H]\n" +
-                "Tutorial Operacional: [F1]  |  Ir p/ Noite 1 (Host): [F2]\n" +
-                "Mirar / Atirar: [Botão Direito] / [Botão Esquerdo] | Recarregar: [R]\n" +
-                "Trocar Mão Ativa: [1] / [2] | Placar: [TAB]\n" +
-                "Minimapa Tela Cheia: [M] | Pausa: [ESC]");
-            controlsText.style.fontSize = 15;
-            controlsText.style.color = new Color(0.92f, 0.92f, 0.96f);
-            controlsText.style.marginBottom = 14;
-            _controlsSubPanel.Add(controlsText);
-            AddMenuButton(_controlsSubPanel, "Voltar", () => ShowSubPanel(_mainPanel), new Color(0.32f, 0.32f, 0.38f));
-            card.Add(_controlsSubPanel);
+            // Subpainel Controles organizado por contexto (Ação / Tecla)
+            _controlsSubPanel = new VisualElement { style = { display = DisplayStyle.None } };
+            var controlsScroll = new ScrollView { name = "PauseControlsScroll" };
+            controlsScroll.AddToClassList("controls-scroll");
+
+            AddControlsGroup(controlsScroll, "Cozinha & Preparo", new (string action, string key)[]
+            {
+                ("Interagir / Pegar / Soltar", "E"),
+                ("Preparar / Cortar / Assar / Montar", "F (segurar)"),
+                ("Descartar no lixo / Limpar comanda", "F (segurar)"),
+                ("Trocar mão ativa", "1 / 2"),
+                ("Guia de receitas", "H")
+            });
+
+            AddControlsGroup(controlsScroll, "Entregas & Cidade", new (string action, string key)[]
+            {
+                ("Mover / Correr", "WASD / Shift"),
+                ("Abrir mochila de entregas", "B"),
+                ("Montar / Desmontar moto", "E"),
+                ("Buzinar na moto", "H"),
+                ("Mapa ampliado da cidade", "M")
+            });
+
+            AddControlsGroup(controlsScroll, "Combate & Resgate", new (string action, string key)[]
+            {
+                ("Mirar / Atirar", "Botão Dir. / Esq."),
+                ("Recarregar arma", "R"),
+                ("Guardar / Sacar espingarda (Bandoleira)", "G"),
+                ("Reparar mochila / Resgatar aliado", "F (segurar)")
+            });
+
+            AddControlsGroup(controlsScroll, "Menus & Equipe", new (string action, string key)[]
+            {
+                ("Central de operações (Pedidos/Loja/Equipe)", "J"),
+                ("Placar da sessão", "TAB"),
+                ("Tutorial operacional", "F1"),
+                ("Pausa / Controles", "ESC")
+            });
+
+            _controlsSubPanel.Add(controlsScroll);
+            AddMenuButton(_controlsSubPanel, "Voltar", () => ShowSubPanel(_mainPanel), "pause-btn-neutral");
+            _card.Add(_controlsSubPanel);
 
             // Subpainel Configurações Rápidas
-            _settingsSubPanel = new VisualElement();
-            _settingsSubPanel.style.display = DisplayStyle.None;
+            _settingsSubPanel = new VisualElement { style = { display = DisplayStyle.None } };
 
             float savedMaster = PlayerPrefs.GetFloat("MasterVolume", 1.0f);
             float savedSens = PlayerPrefs.GetFloat("LookSensitivity", 1.0f);
 
             var volSlider = new Slider("Volume Geral", 0f, 1f) { value = savedMaster };
-            volSlider.style.color = Color.white;
-            volSlider.style.marginBottom = 10;
+            volSlider.AddToClassList("pause-setting-slider");
             volSlider.RegisterValueChangedCallback(evt =>
             {
                 AudioListener.volume = evt.newValue;
@@ -227,8 +223,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             _settingsSubPanel.Add(volSlider);
 
             var sensSlider = new Slider("Sensibilidade Câmera", 0.2f, 3.0f) { value = savedSens };
-            sensSlider.style.color = Color.white;
-            sensSlider.style.marginBottom = 16;
+            sensSlider.AddToClassList("pause-setting-slider");
             sensSlider.RegisterValueChangedCallback(evt =>
             {
                 PlayerPrefs.SetFloat("LookSensitivity", evt.newValue);
@@ -244,26 +239,51 @@ namespace ScaryParty.UI.Piaria.Presenters
             {
                 PlayerPrefs.Save();
                 ShowSubPanel(_mainPanel);
-            }, new Color(0.22f, 0.55f, 0.32f));
-            card.Add(_settingsSubPanel);
+            }, "pause-btn-primary");
+            _card.Add(_settingsSubPanel);
 
-            RootElement.Add(card);
+            RootElement.Add(_card);
             _root.Add(RootElement);
         }
 
-        private Button AddMenuButton(VisualElement parent, string text, Action onClick, Color bg)
+        private VisualElement _card;
+
+        private static void AddControlsGroup(VisualElement parent, string groupTitle, (string action, string key)[] items)
+        {
+            var groupBox = new VisualElement();
+            groupBox.AddToClassList("controls-group-box");
+
+            var header = new Label(groupTitle);
+            header.AddToClassList("controls-group-title");
+            groupBox.Add(header);
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                var row = new VisualElement();
+                row.AddToClassList("controls-row");
+
+                var actionLbl = new Label(items[i].action);
+                actionLbl.AddToClassList("controls-action");
+
+                var keyLbl = new Label(items[i].key);
+                keyLbl.AddToClassList("controls-key");
+
+                row.Add(actionLbl);
+                row.Add(keyLbl);
+                groupBox.Add(row);
+            }
+
+            parent.Add(groupBox);
+        }
+
+        private Button AddMenuButton(VisualElement parent, string text, Action onClick, string variantClass)
         {
             var btn = new Button(onClick) { text = text };
-            btn.style.height = 42;
-            btn.style.marginBottom = 8;
-            btn.style.fontSize = 16;
-            btn.style.unityFontStyleAndWeight = FontStyle.Bold;
-            btn.style.backgroundColor = bg;
-            btn.style.color = Color.white;
-            btn.style.borderTopLeftRadius = 6;
-            btn.style.borderTopRightRadius = 6;
-            btn.style.borderBottomLeftRadius = 6;
-            btn.style.borderBottomRightRadius = 6;
+            btn.AddToClassList("pause-btn");
+            if (!string.IsNullOrEmpty(variantClass))
+                btn.AddToClassList(variantClass);
+            UIFeedbackService.Instance?.BindButton(btn);
+            UIToolkitTweenService.BindInteractiveFeedback(btn, 1.03f, 0.97f);
             parent.Add(btn);
             return btn;
         }
@@ -274,6 +294,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_controlsSubPanel != null) _controlsSubPanel.style.display = target == _controlsSubPanel ? DisplayStyle.Flex : DisplayStyle.None;
             if (_settingsSubPanel != null) _settingsSubPanel.style.display = target == _settingsSubPanel ? DisplayStyle.Flex : DisplayStyle.None;
             if (_confirmLeaveSubPanel != null) _confirmLeaveSubPanel.style.display = target == _confirmLeaveSubPanel ? DisplayStyle.Flex : DisplayStyle.None;
+            if (target != null) UIToolkitTweenService.FadeIn(target, 0.14f);
         }
 
         private bool IsSubPanelVisible =>
@@ -387,6 +408,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             _openedUnscaledTime = Time.unscaledTime;
             ShowSubPanel(_mainPanel);
             UpdateRecoverButtonLabels();
+            UIToolkitTweenService.PopIn(_card ?? RootElement, 0.18f, 0.95f);
             RootElement.style.display = DisplayStyle.Flex;
 
             if (UIModalStack.Instance != null)

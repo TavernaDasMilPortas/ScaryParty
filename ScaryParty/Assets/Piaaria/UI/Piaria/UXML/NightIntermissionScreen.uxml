@@ -21,7 +21,9 @@
                 <ui:Button name="tab-prepare" text="5. Preparar" class="intermission-tab" />
             </ui:VisualElement>
 
-            <ui:VisualElement name="intermission-page-host" class="intermission-page-host" />
+            <ui:ScrollView name="intermission-page-scroll" class="intermission-page-scroll">
+                <ui:VisualElement name="intermission-page-host" class="intermission-page-host" />
+            </ui:ScrollView>
 
             <ui:VisualElement class="intermission-footer">
                 <ui:Label name="intermission-status-label" text="Vote nas 2 categorias antes de ficar pronto." class="intermission-status-label" />

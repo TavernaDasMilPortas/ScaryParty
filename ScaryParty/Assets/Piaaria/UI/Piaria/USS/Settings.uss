@@ -1,6 +1,11 @@
+/* ========================================================
+   P.I.A.R.I.A — Configurações & Menu de Pausa (Prancheta 9)
+   ======================================================== */
+
 .settings-card {
-    width: 680px;
-    max-height: 85%;
+    width: 92%;
+    max-width: 720px;
+    max-height: 88%;
     flex-direction: column;
 }
 
@@ -11,14 +16,16 @@
     border-bottom-width: 2px;
     border-bottom-color: var(--color-border-brown);
     padding-bottom: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 .close-icon-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 19px;
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
     background-color: var(--color-btn-red);
+    border-color: var(--color-ink);
+    border-width: 2.5px;
     color: #FFFFFF;
     font-size: 18px;
     -unity-font-style: bold;
@@ -27,19 +34,20 @@
 
 .settings-scroll {
     flex-grow: 1;
-    padding-right: 12px;
+    padding-right: 10px;
 }
 
 .section-title {
     font-size: 19px;
     -unity-font-style: bold;
     color: var(--color-border-brown-light);
-    margin-top: 14px;
+    margin-top: 12px;
     margin-bottom: 8px;
 }
 
 .setting-row {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
@@ -49,15 +57,17 @@
     font-size: 17px;
     color: var(--color-text-dark);
     flex-grow: 1;
+    min-width: 180px;
 }
 
 .setting-slider {
     width: 240px;
-    margin-right: 12px;
+    max-width: 100%;
+    margin-right: 10px;
 }
 
 .setting-val-label {
-    width: 50px;
+    width: 52px;
     font-size: 16px;
     -unity-text-align: middle-right;
     color: var(--color-text-muted);
@@ -69,6 +79,7 @@
 
 .setting-dropdown {
     width: 240px;
+    max-width: 100%;
 }
 
 .setting-divider {
@@ -80,11 +91,130 @@
 
 .settings-actions {
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: space-between;
-    margin-top: 20px;
-    gap: 16px;
+    margin-top: 16px;
 }
 
 .action-btn-half {
     flex-grow: 1;
+    min-width: 160px;
+    margin: 4px;
+}
+
+/* --- Menu de Pausa (ESC) --- */
+.pause-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(34, 18, 10, 0.72);
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.pause-card {
+    width: 92%;
+    max-width: 560px;
+    max-height: 90%;
+    background-color: var(--color-paper-light);
+    border-color: var(--color-ink);
+    border-width: 4px;
+    border-radius: 16px;
+    padding: 20px 24px;
+    flex-direction: column;
+}
+
+.pause-title {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: var(--color-ink);
+    -unity-text-align: middle-center;
+    margin-bottom: 14px;
+}
+
+.pause-btn {
+    height: 44px;
+    margin-bottom: 9px;
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    border-color: var(--color-ink);
+    border-width: 3px;
+    border-radius: 10px;
+}
+
+.pause-btn-primary { background-color: var(--color-btn-green); }
+.pause-btn-secondary { background-color: var(--color-btn-blue); }
+.pause-btn-neutral { background-color: #7c5238; }
+.pause-btn-warning { background-color: #d97706; }
+.pause-btn-danger { background-color: var(--color-btn-red); }
+
+.pause-confirm-text {
+    font-size: 17px;
+    color: var(--color-ink);
+    -unity-text-align: middle-center;
+    white-space: normal;
+    margin-bottom: 16px;
+}
+
+.controls-scroll {
+    max-height: 430px;
+    margin-bottom: 12px;
+    padding-right: 6px;
+}
+
+.controls-group-box {
+    background-color: var(--color-surface-card);
+    border-color: var(--color-border-brown-light);
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+}
+
+.controls-group-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--color-orange);
+    margin-bottom: 6px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-paper-dark);
+    padding-bottom: 4px;
+}
+
+.controls-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 2px;
+}
+
+.controls-action {
+    font-size: 15px;
+    color: var(--color-ink);
+    flex-grow: 1;
+    white-space: normal;
+    margin-right: 10px;
+}
+
+.controls-key {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--color-ink);
+    background-color: #fcd34d;
+    border-color: var(--color-ink);
+    border-width: 2px;
+    border-radius: 6px;
+    padding: 2px 8px;
+    flex-shrink: 0;
+}
+
+.pause-setting-slider {
+    margin-bottom: 12px;
+    color: var(--color-ink);
+    font-size: 16px;
+    -unity-font-style: bold;
 }

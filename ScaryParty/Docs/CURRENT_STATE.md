@@ -1,9 +1,9 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 24/11/2026
+**Última Revisão:** 26/11/2026
 **Versão Unity:** Unity 6000.3.6f1
 **Branch Atual:** `main`
-**Último Bloco Concluído:** **Execução integral do `Plano_Correcao_Integral_ScaryParty_8607e1fb.md` (Fases 0, A, C, B1, B2, D, E e F; commits `20b4a0e6`..Fase F) — 81 bugs confirmados endereçados em código/domínio, 2 melhorias defensivas aplicadas e 1 suspeita híbrida (`SUSP-08` Parte B aplicada, Parte A pendente PlayMode). Compilação `dotnet build` e suíte `DomainTestRunner` (`62/62` NUnit) aprovadas; EditMode/PlayMode completos no Test Runner, sanitização via Editor em `BUG-ASSET-01`, Build standalone e Host+Cliente pendentes no Unity Editor aberto (`UNITY_EXECUTION=MANUAL_ONLY`). Relatório completo em `Docs/Release/Reports/RELATORIO_CORRECAO_INTEGRAL_8607e1fb.md`.**
+**Último Bloco Concluído:** **Etapas A–E do `PLANO_IMPLEMENTACAO_UI_PIARIA_ATUALIZADO.md` + estabilização da sequência de entrada em `GameScene` (`PizzeriaSceneLoadingCoordinator` com `IsWaitingForPresentationHandoff` sem deadlock de 15s, `GameplayIntroCutsceneFlow` sincronizado após prontidão real, `CutscenePlaybackService` com cleanup/unload garantido mesmo durante abort/preload e `RebuildLookup` em `"Cutscenes"`, e `CutsceneOverlayPresenter` migrado para UI Toolkit `sortingOrder = 4000` abaixo apenas do Loading `5000` e com botão/atalhos de skip). Validação em Editor/PlayMode/Host+Cliente pendente (`UNITY_EXECUTION=MANUAL_ONLY`).**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---
@@ -17,7 +17,7 @@
 | **Combat / Player** | `Assets/Piaaria/Scripts/Weapons/`, `Scripts/Player/` | Implementado (L2 pendente) | Rack de armas (Pistola 1 mão / Escopeta 2 mãos), `PlayerHealth` (100 HP + auto-resgate 10s), `PracticeTargetDummy`, interação e reparo da mochila (`[F]` 3s). |
 | **Navigation** | `Assets/Piaaria/Scripts/Navigation/` | Funcional | Geração dinâmica de NavMesh para NPCs, clientes e pedestres (incluindo recuo à buzina). |
 | **Network (NGO)** | `Assets/Piaaria/Scripts/Network/`, `Pizzeria/Network/` | Implementado (L2 pendente) | RPCs autoritativos em `PizzeriaCommandHandler` (armas, combate, dano à mochila, noites, recuperação e moto/buzina) e replicação em `PizzeriaNetworkState`/`NetDtos`. |
-| **UI / Minimap** | `Assets/Piaaria/Scripts/UI/`, `UI/Piaria/` | Implementado (L2 pendente) | Loading unificado, HUD da noite/vida/munição/mochila, menu de pausa (`PauseEscapeMenuPresenter`), resultados da noite (`NightResultsPresenter`) e dicas contextuais. |
+| **UI / Minimap** | `Assets/Piaaria/Scripts/UI/`, `UI/Piaria/` | Implementado (L2 pendente) | `LoadingScreen` opaca (Prancheta 10), `ProfileEditor` compartilhado (Lobby/Sala), HUD limpa e responsiva (`.layout-compact`/`.layout-wide`), Pausa com controles por contexto, Intermissão com `ScrollView` e `UIToolkitTweenService`. |
 | **VisualStyles / Lighting** | `Assets/Piaaria/Scripts/VisualStyles/`, `Scripts/Lighting/`, `Shaders/` | Implementado (validação manual pendente) | Modos A/B/C na `GameScene` original, shaders próprios `ScaryParty/Illustrate Stylized/*`, ciclo Dia/Noite, zonas da pizzaria, iluminação da cidade e contratos B0–B3. |
 | **Editor / Tools** | `Assets/Piaaria/Scripts/Editor/`, `Tests/Editor/` | Funcional / L2 pendente | Wizards Odin/Editor organizados sob `Tools/Scary Party/`, testes `OvernightExperienceTests.cs` e `ModularCityTests.cs`. |
 

@@ -14,6 +14,8 @@ namespace ScaryParty.UI.Piaria.Core
     public static class UIToolkitTweenService
     {
         private static readonly Dictionary<VisualElement, List<Tween>> _activeTweens = new Dictionary<VisualElement, List<Tween>>();
+        private static readonly Dictionary<VisualElement, int> _transitionTokens = new Dictionary<VisualElement, int>();
+        private static readonly HashSet<VisualElement> _boundInteractiveElements = new HashSet<VisualElement>();
 
         public static event Action<bool> OnReduceMotionChanged;
 
@@ -21,7 +23,23 @@ namespace ScaryParty.UI.Piaria.Core
         private static void ResetStatics()
         {
             _activeTweens.Clear();
+            _transitionTokens.Clear();
+            _boundInteractiveElements.Clear();
             OnReduceMotionChanged = null;
+        }
+
+        public static int NextTransitionToken(VisualElement owner)
+        {
+            if (owner == null) return 0;
+            int next = _transitionTokens.TryGetValue(owner, out int current) ? current + 1 : 1;
+            _transitionTokens[owner] = next;
+            return next;
+        }
+
+        public static bool IsTransitionTokenValid(VisualElement owner, int token)
+        {
+            if (owner == null) return false;
+            return _transitionTokens.TryGetValue(owner, out int current) && current == token;
         }
 
         public static bool ReduceMotion
@@ -582,6 +600,223 @@ namespace ScaryParty.UI.Piaria.Core
                 return;
             }
             FadeIn(page, 0.22f);
+        }
+
+        public static void BindInteractiveFeedback(VisualElement target, float hoverScale = 1.03f, float pressScale = 0.97f)
+        {
+            if (target == null || !_boundInteractiveElements.Add(target)) return;
+
+            target.RegisterCallback<PointerEnterEvent>(_ =>
+            {
+                if (!target.enabledInHierarchy || ReduceMotion) return;
+                ScaleTo(target, hoverScale, 0.1f, Ease.OutQuad);
+            });
+            target.RegisterCallback<PointerLeaveEvent>(_ =>
+            {
+                ScaleTo(target, 1f, 0.11f, Ease.OutQuad);
+            });
+            target.RegisterCallback<PointerDownEvent>(_ =>
+            {
+                if (!target.enabledInHierarchy || ReduceMotion) return;
+                ScaleTo(target, pressScale, 0.08f, Ease.OutQuad);
+            });
+            target.RegisterCallback<PointerUpEvent>(_ =>
+            {
+                if (!target.enabledInHierarchy)
+                {
+                    target.style.scale = new StyleScale(new Scale(Vector2.one));
+                    return;
+                }
+                ScaleTo(target, hoverScale, 0.1f, Ease.OutQuad);
+            });
+            target.RegisterCallback<FocusInEvent>(_ =>
+            {
+                if (!target.enabledInHierarchy || ReduceMotion) return;
+                ScaleTo(target, hoverScale, 0.1f, Ease.OutQuad);
+            });
+            target.RegisterCallback<FocusOutEvent>(_ =>
+            {
+                ScaleTo(target, 1f, 0.1f, Ease.OutQuad);
+            });
+            target.RegisterCallback<DetachFromPanelEvent>(_ =>
+            {
+                KillTweens(target);
+                target.style.scale = new StyleScale(new Scale(Vector2.one));
+            });
+        }
+
+        public static void StaggerReveal(IReadOnlyList<VisualElement> elements, Vector2 fromOffset, float stagger = 0.055f, float duration = 0.24f)
+        {
+            if (elements == null) return;
+            for (int i = 0; i < elements.Count; i++)
+            {
+                var el = elements[i];
+                if (el == null) continue;
+                KillTweens(el);
+                el.style.display = DisplayStyle.Flex;
+                el.style.visibility = Visibility.Visible;
+
+                if (ReduceMotion)
+                {
+                    el.style.opacity = 1f;
+                    el.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                    continue;
+                }
+
+                EnsureDOTweenInitialized();
+                el.style.opacity = 0f;
+                el.style.translate = new StyleTranslate(new Translate(new Length(fromOffset.x, LengthUnit.Pixel), new Length(fromOffset.y, LengthUnit.Pixel), 0f));
+
+                float delay = i * stagger;
+                var seq = DOTween.Sequence().SetUpdate(true);
+                if (delay > 0f) seq.AppendInterval(delay);
+                seq.Append(DOTween.To(() => 0f, a =>
+                {
+                    if (el != null) el.style.opacity = a;
+                }, 1f, duration * 0.7f).SetEase(Ease.OutQuad));
+                seq.Join(DOTween.To(() => fromOffset, o =>
+                {
+                    if (el != null)
+                        el.style.translate = new StyleTranslate(new Translate(new Length(o.x, LengthUnit.Pixel), new Length(o.y, LengthUnit.Pixel), 0f));
+                }, Vector2.zero, duration).SetEase(Ease.OutCubic));
+                seq.OnComplete(() =>
+                {
+                    if (el != null)
+                    {
+                        el.style.opacity = 1f;
+                        el.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                    }
+                });
+                RegisterTween(el, seq);
+            }
+        }
+
+        public static void WaveLetters(IReadOnlyList<VisualElement> letters, float amplitude = 10f, float letterDelay = 0.065f, float cyclePause = 0.45f)
+        {
+            if (letters == null || letters.Count == 0) return;
+
+            for (int i = 0; i < letters.Count; i++)
+            {
+                var letter = letters[i];
+                if (letter == null) continue;
+                KillTweens(letter);
+                letter.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                if (ReduceMotion) continue;
+
+                EnsureDOTweenInitialized();
+                float upTime = 0.18f;
+                float downTime = 0.22f;
+                float startDelay = i * letterDelay;
+                float totalBeforeNext = Mathf.Max(0.1f, (letters.Count - 1) * letterDelay + cyclePause - startDelay);
+
+                var seq = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Restart);
+                if (startDelay > 0f) seq.AppendInterval(startDelay);
+                seq.Append(DOTween.To(() => 0f, y =>
+                {
+                    if (letter != null)
+                        letter.style.translate = new StyleTranslate(new Translate(0f, new Length(y, LengthUnit.Pixel), 0f));
+                }, -Mathf.Abs(amplitude), upTime).SetEase(Ease.OutQuad));
+                seq.Append(DOTween.To(() => -Mathf.Abs(amplitude), y =>
+                {
+                    if (letter != null)
+                        letter.style.translate = new StyleTranslate(new Translate(0f, new Length(y, LengthUnit.Pixel), 0f));
+                }, 0f, downTime).SetEase(Ease.InOutQuad));
+                seq.AppendInterval(totalBeforeNext);
+                RegisterTween(letter, seq);
+            }
+        }
+
+        public static void SpinAndPulseLoop(VisualElement target, float pulseScale = 1.05f, float pulseHalfDuration = 0.85f, float spinSecondsPerTurn = 9f)
+        {
+            if (target == null) return;
+            KillTweens(target);
+            target.style.scale = new StyleScale(new Scale(Vector2.one));
+            target.style.rotate = new StyleRotate(new Rotate(Angle.Degrees(0f)));
+            if (ReduceMotion) return;
+
+            EnsureDOTweenInitialized();
+            var pulseSeq = DOTween.Sequence().SetUpdate(true).SetLoops(-1, LoopType.Yoyo);
+            pulseSeq.Append(DOTween.To(() => 1f, s =>
+            {
+                if (target != null)
+                    target.style.scale = new StyleScale(new Scale(new Vector2(s, s)));
+            }, pulseScale, pulseHalfDuration).SetEase(Ease.InOutSine));
+            RegisterTween(target, pulseSeq);
+
+            var spinTw = DOTween.To(() => 0f, deg =>
+            {
+                if (target != null)
+                    target.style.rotate = new StyleRotate(new Rotate(Angle.Degrees(deg)));
+            }, 360f, Mathf.Max(1f, spinSecondsPerTurn))
+                .SetEase(Ease.Linear)
+                .SetUpdate(true)
+                .SetLoops(-1, LoopType.Restart);
+            RegisterTween(target, spinTw);
+        }
+
+        public static void AnimateProgressPercent(VisualElement fillElement, float fromPercent, float toPercent, float duration = 0.2f)
+        {
+            if (fillElement == null) return;
+            KillTweens(fillElement);
+            float clampedFrom = Mathf.Clamp(fromPercent, 0f, 100f);
+            float clampedTo = Mathf.Clamp(toPercent, 0f, 100f);
+
+            if (ReduceMotion || duration <= 0.001f)
+            {
+                fillElement.style.width = Length.Percent(clampedTo);
+                return;
+            }
+
+            EnsureDOTweenInitialized();
+            var tw = DOTween.To(() => clampedFrom, p =>
+            {
+                if (fillElement != null)
+                    fillElement.style.width = Length.Percent(p);
+            }, clampedTo, duration).SetEase(Ease.OutQuad).SetUpdate(true);
+            RegisterTween(fillElement, tw);
+        }
+
+        public static void ElasticSlideIn(VisualElement target, Vector2 fromOffset, float duration = 0.48f, float delay = 0f, Action onComplete = null)
+        {
+            if (target == null) return;
+            KillTweens(target);
+
+            target.style.display = DisplayStyle.Flex;
+            target.style.visibility = Visibility.Visible;
+
+            if (ReduceMotion || duration <= 0.001f)
+            {
+                target.style.opacity = 1f;
+                target.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                onComplete?.Invoke();
+                return;
+            }
+
+            EnsureDOTweenInitialized();
+            target.style.opacity = 0f;
+            target.style.translate = new StyleTranslate(new Translate(new Length(fromOffset.x, LengthUnit.Pixel), new Length(fromOffset.y, LengthUnit.Pixel), 0f));
+
+            var seq = DOTween.Sequence().SetUpdate(true);
+            if (delay > 0f) seq.AppendInterval(delay);
+            seq.Append(DOTween.To(() => 0f, a =>
+            {
+                if (target != null) target.style.opacity = a;
+            }, 1f, Mathf.Max(0.05f, duration * 0.45f)).SetEase(Ease.OutQuad));
+            seq.Join(DOTween.To(() => fromOffset, o =>
+            {
+                if (target != null)
+                    target.style.translate = new StyleTranslate(new Translate(new Length(o.x, LengthUnit.Pixel), new Length(o.y, LengthUnit.Pixel), 0f));
+            }, Vector2.zero, duration).SetEase(Ease.OutBack, 1.55f));
+            seq.OnComplete(() =>
+            {
+                if (target != null)
+                {
+                    target.style.opacity = 1f;
+                    target.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                }
+                onComplete?.Invoke();
+            });
+            RegisterTween(target, seq);
         }
     }
 }

@@ -157,6 +157,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         public void ShowIntermission()
         {
+            if (ScaryParty.Pizzeria.Presentation.GameplayIntroCutsceneFlow.IsBlockingIntermission) return;
             if (!EnsureBuilt()) return;
             EnsureCommandEventsSubscribed();
             var net = PizzeriaNetworkState.Instance;

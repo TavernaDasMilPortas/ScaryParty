@@ -1,31 +1,32 @@
 /* ========================================================
-   P.I.A.R.I.A — Tela de Lobby (Design Fiel à Prévia)
-   Layout: 3 Colunas de Papel, Proporções Estáveis,
-   Preview 3D em RawImage, Botões Fita e Cores Ilustradas.
+   P.I.A.R.I.A — Tela de Lobby (Responsiva, Prancheta 2)
+   Layout: 3 Colunas proporcionais em normal/wide,
+   com wrap e scroll vertical seguro em telas compactas.
    ======================================================== */
 
 .lobby-bg {
     background-color: var(--color-bg-peach);
-    padding: 16px 24px 20px 24px;
+    padding: 16px 24px 18px 24px;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 /* --- TOPO --- */
 .lobby-header-bar {
-    position: absolute;
-    top: 16px;
-    left: 24px;
-    right: 24px;
-    height: 56px;
+    width: 100%;
+    max-width: 1320px;
+    height: 58px;
+    flex-shrink: 0;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .btn-back-ribbon {
-    width: 52px;
+    width: 54px;
     height: 48px;
     background-color: #cb3428;
     border-color: #402318;
@@ -34,17 +35,6 @@
     justify-content: center;
     align-items: center;
     padding: 0;
-    transition-property: scale;
-    transition-duration: 0.12s;
-    transition-timing-function: ease-out-back;
-}
-
-.btn-back-ribbon:hover {
-    scale: 1.08 1.08;
-}
-
-.btn-back-ribbon:active {
-    scale: 0.94 0.94;
 }
 
 .btn-back-arrow {
@@ -55,79 +45,83 @@
 }
 
 .lobby-title-logo {
-    width: 250px;
-    height: 60px;
+    width: 260px;
+    height: 58px;
     -unity-background-scale-mode: scale-to-fit;
     align-self: center;
 }
 
 .lobby-badge-container {
-    width: 230px;
+    width: 54px;
     align-items: flex-end;
 }
 
-.lobby-preview-badge {
-    font-size: 13px;
-    color: #a37d68;
-    -unity-font-style: bold;
+/* --- SCROLL E COLUNAS --- */
+.lobby-main-scroll {
+    width: 100%;
+    max-width: 1320px;
+    flex-grow: 1;
 }
 
-/* --- COLUNAS CENTRAIS --- */
-.lobby-columns-row {
-    width: 1140px;
-    height: 720px;
-    margin-top: 50px;
-    flex-direction: row;
+.lobby-main-scroll > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-grow: 1;
     justify-content: center;
+    align-items: center;
+}
+
+.lobby-columns-row {
+    width: 100%;
+    max-height: 740px;
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.lobby-column-wrapper {
+    position: relative;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 280px;
+    max-width: 375px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.col-profile-wrapper > .profile-editor-column {
+    flex-grow: 1;
+    height: 100%;
 }
 
 .lobby-column {
-    height: 100%;
     background-color: #ffebd5;
     border-color: #402318;
     border-width: 4px;
     border-radius: 8px;
-    padding: 16px 18px;
-    margin-left: 10px;
-    margin-right: 10px;
+    padding: 14px 16px;
+    margin-left: 8px;
+    margin-right: 8px;
     flex-direction: column;
-}
-
-.col-profile {
-    width: 335px;
+    -unity-background-scale-mode: stretch-to-fill;
 }
 
 .col-roomlist {
-    width: 405px;
+    flex-grow: 1.25;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 320px;
+    max-width: 460px;
 }
 
 .col-connect {
-    width: 360px;
-}
-
-/* Faixas de Título das Colunas */
-.col-ribbon-banner {
-    height: 44px;
-    width: 230px;
-    align-self: center;
-    justify-content: center;
-    align-items: center;
-    border-color: #402318;
-    border-width: 3px;
-    border-radius: 4px;
-    margin-bottom: 12px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.ribbon-yellow {
-    background-color: #fcd34d;
-}
-
-.col-ribbon-title {
-    color: #402318;
-    font-size: 19px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    flex-grow: 1.05;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 300px;
+    max-width: 400px;
+    justify-content: space-between;
 }
 
 .section-sub-ribbon {
@@ -137,189 +131,13 @@
 }
 
 .small-title {
-    font-size: 15px;
-}
-
-/* Rótulos e Campos de Entrada Estilo Papel */
-.field-caption {
-    font-size: 13.5px;
-    -unity-font-style: bold;
-    color: #b07d5b;
-    margin-top: 2px;
-    margin-bottom: 2px;
-}
-
-.paper-input-box {
-    height: 38px;
-    background-color: #fffbf5;
-    border-color: #402318;
-    border-width: 2.5px;
-    border-radius: 4px;
-    color: #402318;
-    font-size: 17px;
-    -unity-font-style: bold;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-bottom: 10px;
-}
-
-.paper-input-box > .unity-text-field__input {
-    background-color: transparent;
-    border-width: 0;
-    color: #402318;
-    font-size: 17px;
-    -unity-font-style: bold;
-    padding: 0;
-}
-
-/* Moldura e RawImage 3D */
-.character-preview-card {
-    width: 100%;
-    height: 320px;
-    background-color: #fce8d5;
-    border-color: #402318;
-    border-width: 3.5px;
-    border-radius: 6px;
-    margin-top: 4px;
-    margin-bottom: 12px;
-    position: relative;
-    overflow: hidden;
-}
-
-.preview-rt-layer {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    -unity-background-scale-mode: scale-and-crop;
-}
-
-.preview-frame-overlay {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    -unity-background-scale-mode: stretch-to-fill;
-}
-
-.preview-placeholder-center {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-}
-
-.avatar-ph-icon {
-    font-size: 40px;
-    margin-bottom: 4px;
-}
-
-.avatar-ph-title {
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: #402318;
-}
-
-.avatar-ph-subtitle {
-    font-size: 13.5px;
-    color: #96745f;
-}
-
-/* Amostras de Cores */
-.swatches-paper-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-}
-
-.swatch-paper-card {
-    width: 62px;
-    height: 38px;
-    background-color: #fffbf5;
-    border-color: #402318;
-    border-width: 2.5px;
-    border-radius: 4px;
-    padding: 3px;
-    align-items: center;
-    justify-content: center;
-    transition-property: scale;
-    transition-duration: 0.12s;
-    transition-timing-function: ease-out-back;
-}
-
-.swatch-paper-card:hover {
-    scale: 1.1 1.1;
-}
-
-.swatch-paper-card:active {
-    scale: 0.95 0.95;
-}
-
-.swatch-color-pill {
-    width: 48px;
-    height: 24px;
-    border-radius: 3px;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.color-pill-orange { background-color: #ff741f; }
-.color-pill-green  { background-color: #7ec850; }
-.color-pill-blue   { background-color: #3b82f6; }
-.color-pill-pink   { background-color: #f472b6; }
-.color-pill-red    { background-color: #ef4444; }
-
-/* Botões Fita */
-.ribbon-action-btn {
-    height: 44px;
-    border-color: #402318;
-    border-width: 3px;
-    border-radius: 6px;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    transition-property: scale;
-    transition-duration: 0.12s;
-    transition-timing-function: ease-out-back;
-    -unity-background-scale-mode: stretch-to-fill;
-}
-
-.ribbon-action-btn:hover {
-    scale: 1.04 1.04;
-}
-
-.ribbon-action-btn:active {
-    scale: 0.96 0.96;
-}
-
-.btn-orange {
-    background-color: #ff741f;
-}
-
-.btn-blue {
-    background-color: #2563eb;
-}
-
-.btn-green {
-    background-color: #8cb836;
-}
-
-.btn-action-label {
-    color: #ffffff;
-    font-size: 19px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-}
-
-.btn-action-label-small {
-    color: #ffffff;
-    font-size: 15.5px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    font-size: 16px;
 }
 
 /* Coluna 2: Lista de Salas */
 .room-cards-scrollview {
     flex-grow: 1;
+    min-height: 240px;
     margin-top: 4px;
     margin-bottom: 12px;
 }
@@ -327,7 +145,7 @@
 .empty-room-paper-box {
     align-items: center;
     justify-content: center;
-    padding: 30px 16px;
+    padding: 28px 14px;
 }
 
 .empty-pizza-art {
@@ -338,14 +156,14 @@
 }
 
 .empty-main-text {
-    font-size: 16px;
+    font-size: 17px;
     -unity-font-style: bold;
     color: #7a503e;
     margin-bottom: 2px;
 }
 
 .empty-sub-text {
-    font-size: 13.5px;
+    font-size: 15px;
     color: #a37d68;
 }
 
@@ -356,6 +174,7 @@
 
 .btn-refresh-pill {
     width: 220px;
+    max-width: 100%;
 }
 
 /* Cartões de Sala Gerados */
@@ -367,7 +186,7 @@
     border-color: #402318;
     border-width: 3px;
     border-radius: 6px;
-    padding: 12px 14px;
+    padding: 10px 14px;
     margin-bottom: 10px;
 }
 
@@ -378,8 +197,8 @@
 }
 
 .room-details-lbl {
-    font-size: 13.5px;
-    color: #997561;
+    font-size: 14px;
+    color: #7a503e;
 }
 
 .btn-room-enter {
@@ -387,18 +206,19 @@
     border-color: #402318;
     border-width: 2.5px;
     border-radius: 4px;
-    width: 96px;
+    min-width: 96px;
     height: 38px;
     color: #ffffff;
     font-size: 16px;
     -unity-font-style: bold;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
 }
 
-/* Coluna 3: Conexões (Sem Scroll) */
+/* Coluna 3: Conexões */
 .connect-section-box {
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
 .last-box {
@@ -411,6 +231,44 @@
     align-items: center;
 }
 
+.btn-action-label-small {
+    color: #ffffff;
+    font-size: 16px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+}
+
 .flex-1 { flex-grow: 1; }
 .mr-6 { margin-right: 6px; }
 .ml-6 { margin-left: 6px; }
+
+/* Responsividade: Compacta (1280x720 / 1366x768) */
+.layout-compact.lobby-bg {
+    padding: 10px 14px 12px 14px;
+}
+
+.layout-compact .lobby-header-bar {
+    height: 48px;
+    margin-bottom: 6px;
+}
+
+.layout-compact .lobby-columns-row {
+    flex-wrap: wrap;
+    max-height: none;
+    min-height: 0;
+    align-items: flex-start;
+}
+
+.layout-compact .lobby-column-wrapper,
+.layout-compact .lobby-column {
+    flex-basis: 370px;
+    max-width: 480px;
+    margin-bottom: 12px;
+    min-height: 480px;
+}
+
+/* Ultrawide (2560x1080) */
+.layout-wide .lobby-columns-row {
+    max-width: 1320px;
+    align-self: center;
+}

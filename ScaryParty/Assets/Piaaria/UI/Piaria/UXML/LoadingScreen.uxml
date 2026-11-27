@@ -1,0 +1,65 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/PiariaCommon.uss" />
+    <Style src="project://database/Assets/Piaaria/UI/Piaria/USS/Loading.uss" />
+
+    <ui:VisualElement name="PizzeriaLoadingOverlay" class="loading-fullscreen-root" picking-mode="Position">
+        <ui:VisualElement name="LoadingBgLayer" class="loading-bg-layer" picking-mode="Ignore" />
+
+        <ui:VisualElement name="LoadingCenterContainer" class="loading-center-container" picking-mode="Ignore">
+            <!-- Título com letras individuais para onda sequencial + 3 pontinhos sem alterar largura -->
+            <ui:VisualElement class="loading-title-row" picking-mode="Ignore">
+                <ui:VisualElement name="LoadingLettersRow" class="loading-letters-row" picking-mode="Ignore">
+                    <ui:Label text="C" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="a" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="r" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="r" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="e" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="g" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="a" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="n" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="d" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                    <ui:Label text="o" class="loading-wave-letter title-font" picking-mode="Ignore" />
+                </ui:VisualElement>
+                <ui:VisualElement name="LoadingDotsRow" class="loading-dots-row" picking-mode="Ignore">
+                    <ui:VisualElement name="LoadingDot0" class="loading-dot" picking-mode="Ignore" />
+                    <ui:VisualElement name="LoadingDot1" class="loading-dot" picking-mode="Ignore" />
+                    <ui:VisualElement name="LoadingDot2" class="loading-dot" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Label name="LoadingNightBanner" text="NOITE 1 — META: R$ 150" class="loading-night-banner" picking-mode="Ignore" />
+
+            <!-- Barra de progresso (reutiliza estética da barra de vida) -->
+            <ui:VisualElement class="loading-progress-block" picking-mode="Ignore">
+                <ui:VisualElement class="loading-stage-row" picking-mode="Ignore">
+                    <ui:Label name="LoadingStageTag" text="Preparando" class="loading-stage-tag" picking-mode="Ignore" />
+                    <ui:Label name="LoadingPercentLabel" text="0%" class="loading-percent-label" picking-mode="Ignore" />
+                </ui:VisualElement>
+
+                <ui:VisualElement name="LoadingBarFrame" class="loading-bar-frame" picking-mode="Ignore">
+                    <ui:VisualElement name="LoadingBarFill" class="loading-bar-fill" picking-mode="Ignore">
+                        <ui:VisualElement name="LoadingBarFillImage" class="loading-bar-fill-image" picking-mode="Ignore" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:Label name="LoadingStatusLabel" text="Preparando turno..." class="loading-status-label" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <ui:Label name="LoadingHintLabel" text="Dica: Segure [F] no balcão para atender clientes." class="loading-hint-label" picking-mode="Ignore" />
+
+            <ui:Button name="LoadingCancelBtn" text="Cancelar Conexão" class="piaria-button piaria-button-secondary loading-cancel-btn" style="display: none;" picking-mode="Position" />
+
+            <!-- Bloco de Erro / Retry -->
+            <ui:VisualElement name="LoadingErrorBox" class="loading-error-box" style="display: none;" picking-mode="Position">
+                <ui:Label name="LoadingErrorReason" text="" class="loading-error-reason" picking-mode="Ignore" />
+                <ui:VisualElement class="loading-error-actions" picking-mode="Ignore">
+                    <ui:Button name="LoadingErrorRetryBtn" text="Tentar Novamente" class="piaria-button piaria-button-primary loading-error-btn" style="display: none;" picking-mode="Position" />
+                    <ui:Button name="LoadingErrorMenuBtn" text="Voltar ao Menu" class="piaria-button piaria-button-danger loading-error-btn" picking-mode="Position" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Pizza animada no canto inferior direito -->
+        <ui:VisualElement name="LoadingPizzaCorner" class="loading-pizza-corner" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

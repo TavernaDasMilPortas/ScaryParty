@@ -1264,6 +1264,7 @@ MonoBehaviour:
   _fillImage: {fileID: 51821677}
   _glossImage: {fileID: 1867102035}
   _percentText: {fileID: 1523084203}
+  _headerText: {fileID: 0}
 --- !u!224 &2000295581
 RectTransform:
   m_ObjectHideFlags: 0

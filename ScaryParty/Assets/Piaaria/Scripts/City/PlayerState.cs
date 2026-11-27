@@ -418,6 +418,29 @@ public class PlayerState : NetworkBehaviour
         PlayerColor.Value = finalColor;
     }
 
+    /// <summary>
+    /// Atualiza nome e cor apenas do jogador local (com validação autoritativa no servidor).
+    /// </summary>
+    public void UpdateProfile(string pName, Color pColor)
+    {
+        if (!IsSpawned || !IsOwner) return;
+
+        if (IsServer)
+        {
+            if (string.IsNullOrWhiteSpace(pName))
+            {
+                pName = $"Player {OwnerClientId}";
+            }
+
+            PlayerName.Value = new FixedString32Bytes(pName);
+            PlayerColor.Value = EnsureUniqueColor(pColor);
+        }
+        else
+        {
+            SubmitProfileServerRpc(pName, pColor);
+        }
+    }
+
     [ServerRpc]
     public void SetReadyServerRpc(bool ready)
     {

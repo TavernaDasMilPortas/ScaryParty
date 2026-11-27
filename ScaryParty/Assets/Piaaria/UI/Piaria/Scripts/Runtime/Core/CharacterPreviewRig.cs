@@ -9,7 +9,7 @@ namespace ScaryParty.UI.Piaria.Core
 {
     /// <summary>
     /// Rig isolado de visualização 3D do personagem para a tela de Lobby e Sala de Espera.
-    /// Renderiza o modelo do jogador com iluminação própria para uma RenderTexture exibida em UI Toolkit (Raw Image).
+    /// Renderiza o modelo do jogador com iluminação própria para uma RenderTexture exibida em UI Toolkit.
     /// Fica isolado no espaço distante (-3000, -3000, -3000) com scripts de gameplay, física e rede rigorosamente ausentes.
     /// </summary>
     public class CharacterPreviewRig : MonoBehaviour
@@ -25,9 +25,11 @@ namespace ScaryParty.UI.Piaria.Core
 
         private GameObject _spawnedModel;
         private Renderer[] _renderers;
+        private MaterialPropertyBlock _mpb;
         private float _currentRotationY = 0f;
         private bool _isDragging = false;
         private Vector2 _lastMousePos;
+        private float _lastAspect = 1f;
 
         public RenderTexture RenderTexture => targetTexture;
 
@@ -48,6 +50,7 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void OnDestroy()
         {
+            UnbindDragEvents();
             if (targetTexture != null)
             {
                 targetTexture.Release();
@@ -67,7 +70,6 @@ namespace ScaryParty.UI.Piaria.Core
 
         private void EnsureSetup()
         {
-            // Posiciona o rig longe do mundo jogável
             transform.position = new Vector3(-3000f, -3000f, -3000f);
 
             if (targetTexture == null)
@@ -90,14 +92,12 @@ namespace ScaryParty.UI.Piaria.Core
                 }
             }
 
-            previewCamera.transform.localPosition = new Vector3(0f, 0.82f, 2.35f);
-            previewCamera.transform.localRotation = Quaternion.Euler(4f, 180f, 0f);
             previewCamera.targetTexture = targetTexture;
             previewCamera.clearFlags = CameraClearFlags.SolidColor;
-            previewCamera.backgroundColor = new Color(0.99f, 0.94f, 0.88f, 1f); // Creme papel suave
-            previewCamera.fieldOfView = 38f;
-            previewCamera.nearClipPlane = 0.1f;
-            previewCamera.farClipPlane = 20f;
+            previewCamera.backgroundColor = new Color(0.99f, 0.94f, 0.88f, 0f);
+            previewCamera.fieldOfView = 36f;
+            previewCamera.nearClipPlane = 0.05f;
+            previewCamera.farClipPlane = 25f;
             previewCamera.enabled = false;
 
             if (previewLight == null)
@@ -156,7 +156,7 @@ namespace ScaryParty.UI.Piaria.Core
                 if (defaultModelPrefab == null)
                 {
                     defaultModelPrefab = Resources.Load<GameObject>("CharacterVisual")
-                        ?? Resources.Load<GameObject>("PlayerArmature_Preview") 
+                        ?? Resources.Load<GameObject>("PlayerArmature_Preview")
                         ?? Resources.Load<GameObject>("PlayerArmature");
                 }
             }
@@ -167,8 +167,7 @@ namespace ScaryParty.UI.Piaria.Core
                 _spawnedModel.transform.localPosition = Vector3.zero;
                 _spawnedModel.transform.localRotation = Quaternion.identity;
 
-                // Higienização segura em ordem inversa de dependência (caso venha do PlayerArmature com scripts)
-                // Remove primeiro os scripts folha (que dependem de outros)
+                // Higienização segura em ordem inversa de dependência
                 var weaponInput = _spawnedModel.GetComponent<WeaponInputHandler>();
                 if (weaponInput != null) DestroyImmediate(weaponInput);
 
@@ -216,7 +215,6 @@ namespace ScaryParty.UI.Piaria.Core
 
                 StripRemainingComponentsSafely(_spawnedModel);
 
-                // Desativa e remove com segurança câmeras de gameplay do modelo clonado
                 var cams = _spawnedModel.GetComponentsInChildren<Camera>(true);
                 foreach (var cam in cams)
                 {
@@ -231,7 +229,6 @@ namespace ScaryParty.UI.Piaria.Core
                     }
                 }
 
-                // Desativa listeners de áudio do modelo clonado
                 var listeners = _spawnedModel.GetComponentsInChildren<AudioListener>(true);
                 foreach (var l in listeners)
                 {
@@ -246,7 +243,6 @@ namespace ScaryParty.UI.Piaria.Core
                     }
                 }
 
-                // Desativa quaisquer colliders remanescentes
                 var colliders = _spawnedModel.GetComponentsInChildren<Collider>(true);
                 foreach (var c in colliders)
                 {
@@ -263,7 +259,89 @@ namespace ScaryParty.UI.Piaria.Core
                     visualCtrl.SetSitting(false, false);
                     visualCtrl.SetLocomotion(0f, 1f, true);
                 }
+
+                var anim = _spawnedModel.GetComponentInChildren<Animator>(true);
+                if (anim != null)
+                {
+                    anim.Rebind();
+                    anim.Update(0f);
+                }
+
+                FrameModelToBounds(_lastAspect);
             }
+        }
+
+        /// <summary>
+        /// Centraliza e recua a câmera com base nos Renderer.bounds combinados do modelo,
+        /// garantindo ~8% de folga vertical acima da cabeça e abaixo dos pés.
+        /// </summary>
+        public void FrameModelToBounds(float containerAspect = 1f)
+        {
+            if (previewCamera == null) return;
+            if (containerAspect > 0.1f && containerAspect < 10f)
+                _lastAspect = containerAspect;
+
+            if (_spawnedModel == null)
+            {
+                previewCamera.transform.localPosition = new Vector3(0f, 0.9f, 2.6f);
+                previewCamera.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                return;
+            }
+
+            if (_renderers == null || _renderers.Length == 0)
+                _renderers = _spawnedModel.GetComponentsInChildren<Renderer>(true);
+
+            bool hasBounds = false;
+            Bounds combined = default;
+            if (_renderers != null)
+            {
+                foreach (var r in _renderers)
+                {
+                    if (r == null || !r.enabled || !r.gameObject.activeInHierarchy) continue;
+                    if (r is ParticleSystemRenderer) continue;
+                    Bounds b = r.bounds;
+                    if (b.size.sqrMagnitude < 0.0001f) continue;
+
+                    if (!hasBounds)
+                    {
+                        combined = b;
+                        hasBounds = true;
+                    }
+                    else
+                    {
+                        combined.Encapsulate(b);
+                    }
+                }
+            }
+
+            if (!hasBounds)
+            {
+                previewCamera.transform.localPosition = new Vector3(0f, 0.9f, 2.6f);
+                previewCamera.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
+                return;
+            }
+
+            // ~8% acima e abaixo => fator 1.16 sobre metade da altura
+            float paddedHalfHeight = Mathf.Max(0.45f, combined.extents.y * 1.16f);
+            float paddedHalfWidth = Mathf.Max(0.35f, Mathf.Max(combined.extents.x, combined.extents.z) * 1.25f);
+
+            float rtAspect = targetTexture != null && targetTexture.height > 0
+                ? (float)targetTexture.width / targetTexture.height
+                : 1f;
+            float effectiveAspect = Mathf.Max(0.25f, Mathf.Min(rtAspect, _lastAspect));
+            previewCamera.aspect = rtAspect;
+
+            float halfVRad = previewCamera.fieldOfView * 0.5f * Mathf.Deg2Rad;
+            float tanHalfV = Mathf.Max(0.05f, Mathf.Tan(halfVRad));
+            float tanHalfH = Mathf.Max(0.05f, tanHalfV * effectiveAspect);
+
+            float distV = paddedHalfHeight / tanHalfV;
+            float distH = paddedHalfWidth / tanHalfH;
+            float distance = Mathf.Max(distV, distH) + combined.extents.z * 0.6f;
+
+            Vector3 localCenter = transform.InverseTransformPoint(combined.center);
+            previewCamera.transform.localPosition = new Vector3(localCenter.x, localCenter.y, localCenter.z + distance);
+            previewCamera.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);
         }
 
         private static void StripRemainingComponentsSafely(GameObject go)
@@ -325,6 +403,7 @@ namespace ScaryParty.UI.Piaria.Core
                 previewCamera.enabled = active;
                 if (active)
                 {
+                    FrameModelToBounds(_lastAspect);
                     previewCamera.Render();
                 }
             }
@@ -360,27 +439,27 @@ namespace ScaryParty.UI.Piaria.Core
 
             if (_renderers == null) return;
 
-            var mpb = new MaterialPropertyBlock();
+            if (_mpb == null) _mpb = new MaterialPropertyBlock();
             foreach (var r in _renderers)
             {
                 if (r == null || r.sharedMaterials == null) continue;
                 if (r.sharedMaterials.Length == 4)
                 {
-                    r.GetPropertyBlock(mpb, 3);
-                    mpb.SetColor("_BaseColor", color);
-                    mpb.SetColor("_Color", color);
-                    mpb.SetColor("_MainColor", color);
-                    r.SetPropertyBlock(mpb, 3);
+                    r.GetPropertyBlock(_mpb, 3);
+                    _mpb.SetColor("_BaseColor", color);
+                    _mpb.SetColor("_Color", color);
+                    _mpb.SetColor("_MainColor", color);
+                    r.SetPropertyBlock(_mpb, 3);
                 }
                 else
                 {
                     for (int i = 0; i < r.sharedMaterials.Length; i++)
                     {
-                        r.GetPropertyBlock(mpb, i);
-                        mpb.SetColor("_BaseColor", color);
-                        mpb.SetColor("_Color", color);
-                        mpb.SetColor("_MainColor", color);
-                        r.SetPropertyBlock(mpb, i);
+                        r.GetPropertyBlock(_mpb, i);
+                        _mpb.SetColor("_BaseColor", color);
+                        _mpb.SetColor("_Color", color);
+                        _mpb.SetColor("_MainColor", color);
+                        r.SetPropertyBlock(_mpb, i);
                     }
                 }
             }
@@ -395,6 +474,7 @@ namespace ScaryParty.UI.Piaria.Core
         private EventCallback<PointerDownEvent> _onPointerDown;
         private EventCallback<PointerMoveEvent> _onPointerMove;
         private EventCallback<PointerUpEvent> _onPointerUp;
+        private EventCallback<GeometryChangedEvent> _onGeometryChanged;
 
         public void BindDragEvents(VisualElement previewElement)
         {
@@ -426,11 +506,28 @@ namespace ScaryParty.UI.Piaria.Core
                 _isDragging = false;
                 previewElement.ReleasePointer(evt.pointerId);
             };
+            _onGeometryChanged = evt =>
+            {
+                if (evt.newRect.height > 1f && evt.newRect.width > 1f)
+                {
+                    FrameModelToBounds(evt.newRect.width / evt.newRect.height);
+                    if (previewCamera != null && previewCamera.enabled)
+                    {
+                        previewCamera.Render();
+                    }
+                }
+            };
 
             previewElement.RegisterCallback(_onPointerDown);
             previewElement.RegisterCallback(_onPointerMove);
             previewElement.RegisterCallback(_onPointerUp);
+            previewElement.RegisterCallback(_onGeometryChanged);
             _boundDragElement = previewElement;
+
+            if (previewElement.resolvedStyle.height > 1f && previewElement.resolvedStyle.width > 1f)
+            {
+                FrameModelToBounds(previewElement.resolvedStyle.width / previewElement.resolvedStyle.height);
+            }
         }
 
         private void UnbindDragEvents()
@@ -439,6 +536,7 @@ namespace ScaryParty.UI.Piaria.Core
             if (_onPointerDown != null) _boundDragElement.UnregisterCallback(_onPointerDown);
             if (_onPointerMove != null) _boundDragElement.UnregisterCallback(_onPointerMove);
             if (_onPointerUp != null) _boundDragElement.UnregisterCallback(_onPointerUp);
+            if (_onGeometryChanged != null) _boundDragElement.UnregisterCallback(_onGeometryChanged);
             _boundDragElement = null;
         }
     }

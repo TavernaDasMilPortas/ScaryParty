@@ -72,12 +72,28 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void OnDestroy()
         {
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
             if (Instance == this) Instance = null;
         }
 
         private void Start()
         {
             EnsureUIInitialized();
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
+            GameplayIntroCutsceneFlow.OnStageChanged += HandlePresentationStageChanged;
+        }
+
+        private void HandlePresentationStageChanged(IntroPresentationStage stage)
+        {
+            if (_panel == null) return;
+            if (stage != IntroPresentationStage.NightActive)
+            {
+                _panel.style.display = DisplayStyle.None;
+            }
+            else if (!_dismissed)
+            {
+                _panel.style.display = DisplayStyle.Flex;
+            }
         }
 
         private void EnsureUIInitialized()
@@ -181,6 +197,12 @@ namespace ScaryParty.Pizzeria.Presentation
 
             _panel.Add(_body);
             _root.Add(_panel);
+
+            if (GameplayIntroCutsceneFlow.Instance != null &&
+                GameplayIntroCutsceneFlow.CurrentStage != IntroPresentationStage.NightActive)
+            {
+                _panel.style.display = DisplayStyle.None;
+            }
         }
 
         private void ToggleMinimize()
@@ -251,6 +273,17 @@ namespace ScaryParty.Pizzeria.Presentation
             }
 #endif
             if (_dismissed || _panel == null) return;
+
+            if (GameplayIntroCutsceneFlow.Instance != null &&
+                GameplayIntroCutsceneFlow.CurrentStage != IntroPresentationStage.NightActive)
+            {
+                if (_panel.style.display != DisplayStyle.None)
+                    _panel.style.display = DisplayStyle.None;
+                return;
+            }
+
+            if (_panel.style.display == DisplayStyle.None)
+                _panel.style.display = DisplayStyle.Flex;
 
             var netCheck = PizzeriaNetworkState.Instance;
             if (_skipNight0Btn != null && netCheck != null)

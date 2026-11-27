@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using ScaryParty.Pizzeria.Network;
 using ScaryParty.Pizzeria.Presentation;
+using ScaryParty.UI.Piaria.Core;
 
 namespace ScaryParty.UI.Piaria.Presenters
 {
@@ -60,11 +61,23 @@ namespace ScaryParty.UI.Piaria.Presenters
                 sceneName.IndexOf("Ready", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 enabled = false;
+                return;
+            }
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
+            GameplayIntroCutsceneFlow.OnStageChanged += HandlePresentationStageChanged;
+        }
+
+        private void HandlePresentationStageChanged(IntroPresentationStage stage)
+        {
+            if (stage != IntroPresentationStage.NightActive && _banner != null)
+            {
+                _banner.style.display = DisplayStyle.None;
             }
         }
 
         private void OnDestroy()
         {
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
             if (Instance == this) Instance = null;
         }
 
@@ -79,82 +92,45 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             _banner = new VisualElement { name = "LifeAndSpectatorBanner" };
             _banner.pickingMode = PickingMode.Ignore;
-            _banner.style.position = Position.Absolute;
-            _banner.style.left = Length.Percent(28);
-            _banner.style.width = Length.Percent(44);
-            _banner.style.bottom = 128;
-            _banner.style.backgroundColor = new Color(0.18f, 0.04f, 0.05f, 0.92f);
-            _banner.style.borderTopWidth = 2;
-            _banner.style.borderBottomWidth = 2;
-            _banner.style.borderLeftWidth = 2;
-            _banner.style.borderRightWidth = 2;
-            var border = new Color(0.95f, 0.30f, 0.25f);
-            _banner.style.borderTopColor = border;
-            _banner.style.borderBottomColor = border;
-            _banner.style.borderLeftColor = border;
-            _banner.style.borderRightColor = border;
-            _banner.style.borderTopLeftRadius = 10;
-            _banner.style.borderTopRightRadius = 10;
-            _banner.style.borderBottomLeftRadius = 10;
-            _banner.style.borderBottomRightRadius = 10;
-            _banner.style.paddingLeft = 16;
-            _banner.style.paddingRight = 16;
-            _banner.style.paddingTop = 10;
-            _banner.style.paddingBottom = 10;
-            _banner.style.alignItems = Align.Center;
+            _banner.AddToClassList("life-spectator-banner");
             _banner.style.display = DisplayStyle.None;
 
             _titleLabel = new Label();
             _titleLabel.pickingMode = PickingMode.Ignore;
-            _titleLabel.style.fontSize = 18;
-            _titleLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            _titleLabel.style.color = new Color(1f, 0.45f, 0.40f);
+            _titleLabel.AddToClassList("life-spectator-title");
             _banner.Add(_titleLabel);
 
             _detailLabel = new Label();
             _detailLabel.pickingMode = PickingMode.Ignore;
-            _detailLabel.style.fontSize = 13;
-            _detailLabel.style.color = Color.white;
-            _detailLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _detailLabel.style.whiteSpace = WhiteSpace.Normal;
-            _detailLabel.style.marginTop = 4;
+            _detailLabel.AddToClassList("life-spectator-detail");
             _banner.Add(_detailLabel);
 
             _progressBg = new VisualElement();
             _progressBg.pickingMode = PickingMode.Ignore;
-            _progressBg.style.width = Length.Percent(90);
-            _progressBg.style.height = 10;
-            _progressBg.style.backgroundColor = new Color(0.08f, 0.08f, 0.10f, 0.9f);
-            _progressBg.style.marginTop = 6;
+            _progressBg.AddToClassList("life-progress-bg");
             _progressFill = new VisualElement();
             _progressFill.pickingMode = PickingMode.Ignore;
-            _progressFill.style.height = Length.Percent(100);
-            _progressFill.style.width = Length.Percent(0);
-            _progressFill.style.backgroundColor = new Color(0.32f, 0.88f, 0.45f);
+            _progressFill.AddToClassList("life-progress-fill");
             _progressBg.Add(_progressFill);
             _banner.Add(_progressBg);
 
             _spectatorBtnRow = new VisualElement();
-            _spectatorBtnRow.style.flexDirection = FlexDirection.Row;
-            _spectatorBtnRow.style.marginTop = 8;
+            _spectatorBtnRow.AddToClassList("spectator-btn-row");
 
             var prevBtn = new Button(() => PizzeriaCommandHandler.Instance?.CycleSpectatorTargetServerRpc(-1))
             {
-                text = "◀ Aliado Anterior [Q]"
+                text = "Aliado Anterior [Q]"
             };
-            prevBtn.style.height = 30;
-            prevBtn.style.marginRight = 8;
-            prevBtn.style.backgroundColor = new Color(0.24f, 0.30f, 0.42f);
-            prevBtn.style.color = Color.white;
+            prevBtn.AddToClassList("spectator-nav-btn");
+            UIToolkitTweenService.BindInteractiveFeedback(prevBtn, 1.04f, 0.96f);
             _spectatorBtnRow.Add(prevBtn);
 
             var nextBtn = new Button(() => PizzeriaCommandHandler.Instance?.CycleSpectatorTargetServerRpc(1))
             {
-                text = "Próximo Aliado [E] ▶"
+                text = "Próximo Aliado [E]"
             };
-            nextBtn.style.height = 30;
-            nextBtn.style.backgroundColor = new Color(0.24f, 0.30f, 0.42f);
-            nextBtn.style.color = Color.white;
+            nextBtn.AddToClassList("spectator-nav-btn");
+            UIToolkitTweenService.BindInteractiveFeedback(nextBtn, 1.04f, 0.96f);
             _spectatorBtnRow.Add(nextBtn);
 
             _banner.Add(_spectatorBtnRow);
@@ -163,6 +139,14 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private void Update()
         {
+            if (GameplayIntroCutsceneFlow.Instance != null &&
+                GameplayIntroCutsceneFlow.CurrentStage != IntroPresentationStage.NightActive)
+            {
+                if (_banner != null)
+                    _banner.style.display = DisplayStyle.None;
+                return;
+            }
+
             var net = PizzeriaNetworkState.Instance;
             if (net == null) return;
 

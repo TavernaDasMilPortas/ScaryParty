@@ -43,9 +43,12 @@ namespace ScaryParty.Cutscenes
         private CutsceneDefinition _activeDef;
         private CutsceneStage _activeStage;
         private Scene _loadedScene;
+        private string _loadingSceneName;
+        private AsyncOperation _pendingLoadOp;
         private RenderTexture _renderTexture;
         private Coroutine _activeRoutine;
         private bool _completionFired;
+        private bool _cleaningUp;
 
         // Saved gameplay state
         private Camera _disabledGameplayCam;
@@ -94,9 +97,16 @@ namespace ScaryParty.Cutscenes
         private void RebuildLookup()
         {
             _byId.Clear();
-            foreach (var def in Resources.LoadAll<CutsceneDefinition>(""))
+            foreach (var def in Resources.LoadAll<CutsceneDefinition>("Cutscenes"))
             {
                 RegisterDefinition(def);
+            }
+            if (_byId.Count == 0)
+            {
+                foreach (var def in Resources.LoadAll<CutsceneDefinition>(""))
+                {
+                    RegisterDefinition(def);
+                }
             }
             foreach (var def in definitions)
             {
@@ -184,15 +194,31 @@ namespace ScaryParty.Cutscenes
                 yield break;
             }
 
+            var existingScene = SceneManager.GetSceneByName(def.targetSceneName);
+            if (existingScene.IsValid() && existingScene.isLoaded)
+            {
+                DisableAllScenePlayback(existingScene);
+                var oldUnload = SceneManager.UnloadSceneAsync(existingScene);
+                if (oldUnload != null)
+                {
+                    while (!oldUnload.isDone)
+                        yield return null;
+                }
+            }
+
+            _loadingSceneName = def.targetSceneName;
             var loadOp = SceneManager.LoadSceneAsync(def.targetSceneName, LoadSceneMode.Additive);
             if (loadOp == null)
             {
+                _loadingSceneName = null;
                 Fail(def.cutsceneId, $"Failed to start additive load for '{def.targetSceneName}'.");
                 yield break;
             }
 
+            _pendingLoadOp = loadOp;
             while (!loadOp.isDone)
                 yield return null;
+            _pendingLoadOp = null;
 
             _loadedScene = SceneManager.GetSceneByName(def.targetSceneName);
             if (!_loadedScene.IsValid() || !_loadedScene.isLoaded)
@@ -208,16 +234,29 @@ namespace ScaryParty.Cutscenes
                 yield break;
             }
 
+            foreach (var root in _loadedScene.GetRootGameObjects())
+            {
+                foreach (var cam in root.GetComponentsInChildren<Camera>(true))
+                {
+                    if (cam != _activeStage.outputCamera)
+                        cam.enabled = false;
+                }
+            }
+
             AllocateRenderTexture(def);
-            _activeStage.outputCamera.targetTexture = _renderTexture;
+            // Impede auto-play (PlayOnAwake) e vazamento para tela principal durante preload
+            _activeStage.director.Stop();
             _activeStage.director.timeUpdateMode = def.useUnscaledTime
                 ? DirectorUpdateMode.UnscaledGameTime
                 : DirectorUpdateMode.GameTime;
             _activeStage.director.time = 0.0;
             _activeStage.director.Evaluate();
+            _activeStage.outputCamera.targetTexture = _renderTexture;
+            _activeStage.outputCamera.enabled = false;
             _activeStage.outputCamera.Render();
 
             _state = CutscenePlaybackState.Ready;
+            Debug.Log($"[CutscenePlaybackService] Prepared '{def.cutsceneId}' (scene='{def.targetSceneName}').");
             Prepared?.Invoke(def.cutsceneId);
         }
 
@@ -231,10 +270,16 @@ namespace ScaryParty.Cutscenes
 
             _state = CutscenePlaybackState.Playing;
 
+            if (_activeStage.outputCamera != null)
+            {
+                _activeStage.outputCamera.targetTexture = _renderTexture;
+                _activeStage.outputCamera.enabled = true;
+            }
+
             _savedCursorVisible = Cursor.visible;
             _savedCursorLock = Cursor.lockState;
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = def.allowSkip;
+            Cursor.lockState = def.allowSkip ? CursorLockMode.None : CursorLockMode.Locked;
 
             // Ensure single AudioListener
             if (_activeStage != null && _activeStage.cutsceneAudioListener != null && _activeStage.cutsceneAudioListener.enabled)
@@ -252,24 +297,13 @@ namespace ScaryParty.Cutscenes
 
             float aspect = (float)def.referenceWidth / Mathf.Max(1, def.referenceHeight);
             overlayPresenter.Show(_renderTexture, aspect, def.allowSkip);
-
-            // Fade in
-            float elapsed = 0f;
-            float fadeIn = Mathf.Max(0.01f, def.fadeInDuration);
-            while (elapsed < fadeIn && _state == CutscenePlaybackState.Playing && _activeStage != null && _activeStage.director != null)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                overlayPresenter.SetAlpha(elapsed / fadeIn);
-                yield return null;
-            }
+            overlayPresenter.SetAlpha(1f);
 
             if (_activeStage == null || _activeStage.director == null)
             {
                 FinishSession(skipped: true);
                 yield break;
             }
-
-            overlayPresenter.SetAlpha(1f);
 
             if (def.disableGameplay3DRenderingWhenOpaque)
             {
@@ -281,12 +315,27 @@ namespace ScaryParty.Cutscenes
                 }
             }
 
+            double duration = def.durationSeconds > 0f ? def.durationSeconds : _activeStage.director.duration;
+            if (duration <= 0.05) duration = 3.0;
+            Debug.Log($"[CutscenePlaybackService] Playing '{def.cutsceneId}' (duration={duration:F2}s, allowSkip={def.allowSkip}).");
+
             _activeStage.director.Play();
             Started?.Invoke(def.cutsceneId);
 
-            double duration = def.durationSeconds > 0f ? def.durationSeconds : _activeStage.director.duration;
-            while (_state == CutscenePlaybackState.Playing && _activeStage != null && _activeStage.director != null && _activeStage.director.time < duration)
+            // Aguarda 1 frame para o PlayableDirector entrar em PlayState.Playing antes de monitorar o término
+            yield return null;
+
+            double elapsedPlayTime = 0.0;
+            while (_state == CutscenePlaybackState.Playing &&
+                   _activeStage != null &&
+                   _activeStage.director != null &&
+                   _activeStage.director.time < duration - 0.02 &&
+                   elapsedPlayTime < duration + 0.15)
             {
+                if (elapsedPlayTime > 0.25 && _activeStage.director.state != PlayState.Playing)
+                    break;
+
+                elapsedPlayTime += Time.unscaledDeltaTime;
                 yield return null;
             }
 
@@ -299,9 +348,10 @@ namespace ScaryParty.Cutscenes
 
         private void FinishSession(bool skipped)
         {
-            if (_state == CutscenePlaybackState.Finishing || _state == CutscenePlaybackState.Idle)
+            if (_cleaningUp || _state == CutscenePlaybackState.Finishing || _state == CutscenePlaybackState.Idle)
                 return;
 
+            _cleaningUp = true;
             _state = CutscenePlaybackState.Finishing;
             if (_activeRoutine != null)
             {
@@ -315,6 +365,24 @@ namespace ScaryParty.Cutscenes
 
         private IEnumerator CleanupRoutine(string id, bool skipped)
         {
+            _cleaningUp = true;
+
+            // Desativa imediatamente a câmera/stage da cutscene antes de desconectar a RenderTexture
+            // para impedir que a CutsceneOutputCamera renderize direto na tela principal.
+            if (_activeStage != null)
+            {
+                if (_activeStage.outputCamera != null)
+                {
+                    _activeStage.outputCamera.enabled = false;
+                    _activeStage.outputCamera.targetTexture = null;
+                }
+                if (_activeStage.director != null)
+                {
+                    _activeStage.director.Stop();
+                }
+                _activeStage.gameObject.SetActive(false);
+            }
+
             if (_disabledGameplayCam != null)
             {
                 _disabledGameplayCam.enabled = true;
@@ -327,16 +395,29 @@ namespace ScaryParty.Cutscenes
                 _savedGameplayListener = null;
             }
 
-            Cursor.visible = _savedCursorVisible;
-            Cursor.lockState = _savedCursorLock;
-
-            if (_activeStage != null && _activeStage.director != null)
-                _activeStage.director.Stop();
+            if (overlayPresenter != null && _renderTexture != null)
+            {
+                float fadeOut = Mathf.Max(0.45f, _activeDef != null ? _activeDef.fadeOutDuration : 0.45f);
+                float elapsed = 0f;
+                while (elapsed < fadeOut)
+                {
+                    elapsed += Time.unscaledDeltaTime;
+                    overlayPresenter.SetAlpha(1f - Mathf.Clamp01(elapsed / fadeOut));
+                    yield return null;
+                }
+            }
 
             overlayPresenter.Hide();
 
-            if (_activeStage != null && _activeStage.outputCamera != null)
-                _activeStage.outputCamera.targetTexture = null;
+            Cursor.visible = _savedCursorVisible;
+            Cursor.lockState = _savedCursorLock;
+
+            if (_pendingLoadOp != null && !_pendingLoadOp.isDone)
+            {
+                while (!_pendingLoadOp.isDone)
+                    yield return null;
+            }
+            _pendingLoadOp = null;
 
             if (_renderTexture != null)
             {
@@ -345,19 +426,34 @@ namespace ScaryParty.Cutscenes
                 _renderTexture = null;
             }
 
-            if (_loadedScene.IsValid() && _loadedScene.isLoaded)
+            Scene sceneToUnload = _loadedScene;
+            if (!sceneToUnload.IsValid() && !string.IsNullOrEmpty(_loadingSceneName))
             {
-                var unloadOp = SceneManager.UnloadSceneAsync(_loadedScene);
+                sceneToUnload = SceneManager.GetSceneByName(_loadingSceneName);
+            }
+
+            bool sceneUnloaded = false;
+            if (sceneToUnload.IsValid() && sceneToUnload.isLoaded)
+            {
+                DisableAllScenePlayback(sceneToUnload);
+                var unloadOp = SceneManager.UnloadSceneAsync(sceneToUnload);
                 if (unloadOp != null)
                 {
                     while (!unloadOp.isDone)
                         yield return null;
+                    sceneUnloaded = true;
                 }
             }
 
+            _pendingLoadOp = null;
+            _loadingSceneName = null;
+            _loadedScene = default;
             _activeStage = null;
             _activeDef = null;
+            _cleaningUp = false;
             _state = CutscenePlaybackState.Idle;
+
+            Debug.Log($"[CutscenePlaybackService] Cleanup concluído para '{id}' (skipped={skipped}, sceneUnloaded={sceneUnloaded}).");
 
             if (!_completionFired)
             {
@@ -378,7 +474,30 @@ namespace ScaryParty.Cutscenes
             _state = CutscenePlaybackState.Failed;
             _completionFired = true;
             Failed?.Invoke(id, reason);
-            StartCoroutine(CleanupRoutine(id, skipped: true));
+            if (!_cleaningUp)
+            {
+                StartCoroutine(CleanupRoutine(id, skipped: true));
+            }
+        }
+
+        private static void DisableAllScenePlayback(Scene scene)
+        {
+            if (!scene.IsValid() || !scene.isLoaded) return;
+            foreach (var root in scene.GetRootGameObjects())
+            {
+                if (root == null) continue;
+                foreach (var cam in root.GetComponentsInChildren<Camera>(true))
+                {
+                    cam.enabled = false;
+                    cam.targetTexture = null;
+                }
+                foreach (var dir in root.GetComponentsInChildren<PlayableDirector>(true))
+                {
+                    dir.Stop();
+                    dir.enabled = false;
+                }
+                root.SetActive(false);
+            }
         }
 
         private void AllocateRenderTexture(CutsceneDefinition def)

@@ -50,6 +50,8 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Button _btnStartGame;
         private Button _btnLeaveRoom;
         private Button _btnEditProfile;
+        private ProfileEditorController _profileEditor;
+        private bool _profileEditorSyncedOnce;
 
         private float _lastUpdate = -999f;
         private string _currentRoomCode = "";
@@ -136,6 +138,8 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (ps != null)
                 {
                     ps.IsReady.OnValueChanged -= OnPlayerReadyChanged;
+                    ps.PlayerName.OnValueChanged -= OnPlayerNameChanged;
+                    ps.PlayerColor.OnValueChanged -= OnPlayerColorChanged;
                 }
             }
             _observedPlayers.Clear();
@@ -200,6 +204,16 @@ namespace ScaryParty.UI.Piaria.Presenters
             RefreshPlayers();
         }
 
+        private void OnPlayerNameChanged(Unity.Collections.FixedString32Bytes previous, Unity.Collections.FixedString32Bytes current)
+        {
+            RefreshPlayers();
+        }
+
+        private void OnPlayerColorChanged(Color previous, Color current)
+        {
+            RefreshPlayers();
+        }
+
         public void EnsureInitialized()
         {
             if (RootElement != null) return;
@@ -231,6 +245,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             _btnStartGame = RootElement.Q<Button>("BtnStartGame");
             _btnLeaveRoom = RootElement.Q<Button>("BtnLeaveRoom");
             _btnEditProfile = RootElement.Q<Button>("BtnEditProfile");
+
+            PiariaPresenterUtils.RegisterResponsiveLayout(RootElement);
+
+            _profileEditor = new ProfileEditorController(RootElement);
+            _profileEditor.LoadFromPrefsOrData(Resources.Load<PlayerData>("PlayerData"));
+            _profileEditor.OnProfileSaved += HandleLocalProfileSaved;
 
             // 4 Cartões persistentes
             for (int i = 0; i < 4; i++)
@@ -450,6 +470,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_readyCard != null && catalog.waitingPaperPanel != null)
                 _readyCard.style.backgroundImage = new StyleBackground(catalog.waitingPaperPanel);
 
+            var colProfile = RootElement.Q<VisualElement>("ColProfile");
+            if (colProfile != null && catalog.paperPanel1 != null)
+                colProfile.style.backgroundImage = new StyleBackground(catalog.paperPanel1);
+
+            _profileEditor?.ApplyCatalogAssets();
+
             for (int i = 0; i < 4; i++)
             {
                 if (!_slots[i].Initialized) continue;
@@ -466,6 +492,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnCopyCode != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnCopyCode);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnCopyCode, 1.04f, 0.96f);
                 _btnCopyCode.clicked += () =>
                 {
                     if (!string.IsNullOrEmpty(_currentRoomCode))
@@ -480,29 +507,61 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (_btnReady != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnReady);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnReady, 1.03f, 0.97f);
                 _btnReady.clicked += OnReadyClicked;
             }
 
             if (_btnStartGame != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnStartGame);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnStartGame, 1.03f, 0.97f);
                 _btnStartGame.clicked += OnStartGameClicked;
             }
 
             if (_btnLeaveRoom != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnLeaveRoom);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnLeaveRoom, 1.03f, 0.97f);
                 _btnLeaveRoom.clicked += OnLeaveRoomClicked;
             }
 
             if (_btnEditProfile != null)
             {
                 UIFeedbackService.Instance?.BindButton(_btnEditProfile);
+                UIToolkitTweenService.BindInteractiveFeedback(_btnEditProfile, 1.03f, 0.97f);
                 _btnEditProfile.clicked += () =>
                 {
-                    SettingsPresenter.Instance?.OpenModal();
+                    RootElement?.Q<TextField>("PlayerNameInput")?.Focus();
                 };
             }
+        }
+
+        private void HandleLocalProfileSaved(string savedName, Color savedColor)
+        {
+            var localPs = GetLocalPlayerState();
+            bool currentlyReady = _optimisticReadyState ?? (localPs != null ? localPs.IsReady.Value : _offlineReady);
+
+            if (currentlyReady)
+            {
+                _optimisticReadyState = false;
+                _offlineReady = false;
+                if (localPs != null)
+                {
+                    localPs.SetReady(false);
+                }
+                ApplyLocalReadyUI(false);
+                NotificationManager.Show("Perfil alterado: 'Pronto' desmarcado para confirmação.", NotificationType.Info);
+            }
+
+            _profileEditor?.SaveProfileToStorage(Resources.Load<PlayerData>("PlayerData"));
+
+            if (localPs != null)
+            {
+                localPs.UpdateProfile(savedName, savedColor);
+            }
+
+            NotificationManager.Show($"Perfil atualizado: {savedName}", NotificationType.Success);
+            RefreshPlayers();
         }
 
         private void UpdateRoomCodeDisplay()
@@ -562,10 +621,17 @@ namespace ScaryParty.UI.Piaria.Presenters
                 if (ps != null && _observedPlayers.Add(ps))
                 {
                     ps.IsReady.OnValueChanged += OnPlayerReadyChanged;
+                    ps.PlayerName.OnValueChanged += OnPlayerNameChanged;
+                    ps.PlayerColor.OnValueChanged += OnPlayerColorChanged;
                 }
             }
 
             var localPs = GetLocalPlayerState();
+            if (!_profileEditorSyncedOnce && localPs != null && _profileEditor != null)
+            {
+                _profileEditorSyncedOnce = true;
+                _profileEditor.SetProfileValuesWithoutNotify(localPs.PlayerName.Value.ToString(), localPs.PlayerColor.Value);
+            }
 
             // Sincroniza estado otimista se a rede já confirmou
             if (_optimisticReadyState.HasValue && localPs != null)
@@ -1034,6 +1100,7 @@ namespace ScaryParty.UI.Piaria.Presenters
             if (CharacterPreviewRig.Instance != null)
             {
                 CharacterPreviewRig.Instance.SetActive(true);
+                _profileEditor?.ActivatePreview();
                 var rt = CharacterPreviewRig.Instance.RenderTexture;
                 var targetSlot = _slots[slotIndex];
                 if (rt != null && targetSlot.PreviewRT != null)
@@ -1044,13 +1111,9 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         targetSlot.AvatarIcon.style.display = DisplayStyle.None;
                     }
-                    if (_boundPreviewSlotIndex != slotIndex)
-                    {
-                        CharacterPreviewRig.Instance.BindDragEvents(targetSlot.PreviewRT);
-                        _boundPreviewSlotIndex = slotIndex;
-                    }
+                    _boundPreviewSlotIndex = slotIndex;
                 }
-                CharacterPreviewRig.Instance.SetPlayerColor(playerColor);
+                CharacterPreviewRig.Instance.SetPlayerColor(_profileEditor != null ? _profileEditor.SelectedColor : playerColor);
             }
         }
 

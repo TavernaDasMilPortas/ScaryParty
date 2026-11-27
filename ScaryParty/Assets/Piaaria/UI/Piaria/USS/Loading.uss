@@ -1,0 +1,229 @@
+/* ========================================================
+   P.I.A.R.I.A — Tela de Carregamento (Prancheta 10)
+   100% Opaca enquanto ativa, onda de letras, barra temática
+   e pizza animada no canto inferior direito.
+   ======================================================== */
+
+.loading-fullscreen-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #f8d5c4;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.loading-bg-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #f8d5c4;
+    -unity-background-scale-mode: scale-and-crop;
+}
+
+.loading-center-container {
+    width: 90%;
+    max-width: 720px;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 28px;
+    background-color: rgba(255, 235, 213, 0.90);
+    border-color: #402318;
+    border-width: 4px;
+    border-radius: 18px;
+}
+
+.loading-title-row {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.loading-letters-row {
+    flex-direction: row;
+    align-items: flex-end;
+}
+
+.loading-wave-letter {
+    font-size: 56px;
+    -unity-font-style: bold;
+    color: #402318;
+    margin-left: 1px;
+    margin-right: 1px;
+    -unity-text-align: middle-center;
+}
+
+.loading-dots-row {
+    flex-direction: row;
+    align-items: center;
+    margin-left: 8px;
+    margin-bottom: 12px;
+    width: 54px;
+    justify-content: space-between;
+}
+
+.loading-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+    background-color: #ff741f;
+    border-color: #402318;
+    border-width: 2px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.loading-night-banner {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #b45309;
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+.loading-progress-block {
+    width: 100%;
+    max-width: 560px;
+    align-items: stretch;
+    margin-bottom: 14px;
+}
+
+.loading-stage-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.loading-stage-tag {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #402318;
+    background-color: #fcd34d;
+    border-color: #402318;
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 3px 10px;
+}
+
+.loading-percent-label {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #402318;
+}
+
+.loading-bar-frame {
+    width: 100%;
+    height: 32px;
+    background-color: #3a2216;
+    border-color: #402318;
+    border-width: 3px;
+    border-radius: 10px;
+    padding: 3px;
+    overflow: hidden;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.loading-bar-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.loading-bar-fill-image {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 554px;
+    background-color: #ff741f;
+    border-radius: 6px;
+    -unity-background-scale-mode: stretch-to-fill;
+}
+
+.loading-status-label {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: #402318;
+    margin-top: 8px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.loading-hint-label {
+    font-size: 15px;
+    color: #7a503e;
+    margin-top: 6px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
+.loading-cancel-btn {
+    margin-top: 12px;
+    height: 40px;
+    font-size: 16px;
+}
+
+.loading-error-box {
+    width: 100%;
+    margin-top: 14px;
+    padding: 14px;
+    background-color: #fee2e2;
+    border-color: #c83232;
+    border-width: 3px;
+    border-radius: 12px;
+    align-items: center;
+}
+
+.loading-error-reason {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #7f1d1d;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+}
+
+.loading-error-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.loading-error-btn {
+    margin: 4px 6px;
+    font-size: 16px;
+    height: 42px;
+}
+
+.loading-pizza-corner {
+    position: absolute;
+    right: 36px;
+    bottom: 28px;
+    width: 140px;
+    height: 140px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Responsividade Loading */
+.layout-compact .loading-wave-letter {
+    font-size: 40px;
+}
+
+.layout-compact .loading-dots-row {
+    width: 44px;
+    margin-bottom: 8px;
+}
+
+.layout-compact .loading-pizza-corner {
+    width: 96px;
+    height: 96px;
+    right: 20px;
+    bottom: 18px;
+}

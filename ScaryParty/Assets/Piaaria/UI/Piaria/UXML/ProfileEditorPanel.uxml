@@ -1,0 +1,36 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="ColProfile" class="profile-editor-column paper-panel" picking-mode="Ignore">
+        <ui:VisualElement name="HeaderMyProfile" class="col-ribbon-banner ribbon-yellow" picking-mode="Ignore">
+            <ui:Label text="MEU PERFIL" class="col-ribbon-title" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <ui:Label text="Nome" class="field-caption" picking-mode="Ignore" />
+        <ui:TextField name="PlayerNameInput" text="Jogador" max-length="18" class="paper-input-box" picking-mode="Position" />
+
+        <ui:VisualElement name="PreviewContainer" class="character-preview-card" picking-mode="Position">
+            <ui:VisualElement name="PreviewRenderTexture" class="preview-rt-layer" picking-mode="Ignore" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="swatches-paper-row" picking-mode="Ignore">
+            <ui:Button name="BtnColorOrange" class="swatch-paper-card" tooltip="Laranja" picking-mode="Position">
+                <ui:VisualElement class="swatch-color-pill color-pill-orange" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="BtnColorGreen" class="swatch-paper-card" tooltip="Verde" picking-mode="Position">
+                <ui:VisualElement class="swatch-color-pill color-pill-green" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="BtnColorBlue" class="swatch-paper-card" tooltip="Azul" picking-mode="Position">
+                <ui:VisualElement class="swatch-color-pill color-pill-blue" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="BtnColorPink" class="swatch-paper-card" tooltip="Rosa" picking-mode="Position">
+                <ui:VisualElement class="swatch-color-pill color-pill-pink" picking-mode="Ignore" />
+            </ui:Button>
+            <ui:Button name="BtnColorRed" class="swatch-paper-card" tooltip="Vermelho" picking-mode="Position">
+                <ui:VisualElement class="swatch-color-pill color-pill-red" picking-mode="Ignore" />
+            </ui:Button>
+        </ui:VisualElement>
+
+        <ui:Button name="BtnSaveProfile" class="ribbon-action-btn btn-orange" picking-mode="Position">
+            <ui:Label text="SALVAR PERFIL" class="btn-action-label" picking-mode="Ignore" />
+        </ui:Button>
+    </ui:VisualElement>
+</ui:UXML>

@@ -82,6 +82,32 @@ MonoBehaviour:
   - {fileID: 21300000, guid: 174b8d0ffaa24e84d8a03f208448cd4d, type: 3}
   - {fileID: 21300000, guid: 7ef4ed18dff87d9458ac65862a56a83c, type: 3}
   - {fileID: 21300000, guid: 890d5c801f7b76549bb64284710e53bc, type: 3}
+  settingsPanelBg: {fileID: 21300000, guid: a544210f9b4ef1349b668a7d178f8786, type: 3}
+  settingsExitBtn: {fileID: 21300000, guid: 6ec2c05924d2b344c9c43c08a5d98779, type: 3}
+  settingsNameBox: {fileID: 21300000, guid: ef316a87010b4d54e9fc747f52a47601, type: 3}
+  settingsSprite124: {fileID: 21300000, guid: b2be6f6f402e32340896336ca526ff38, type: 3}
+  settingsSprite125: {fileID: 21300000, guid: 1720eb4324b1e1341b49fb4272268da8, type: 3}
+  settingsSprite126: {fileID: 21300000, guid: 99a2d5a39564819409a5a0da75bb6a17, type: 3}
+  settingsSprite127: {fileID: 21300000, guid: 6a3521ca2bbfe344eb09cb8d8e034387, type: 3}
+  settingsSprite132: {fileID: 21300000, guid: 487a61404f002474498ea14528a894bc, type: 3}
+  settingsSprite134: {fileID: 21300000, guid: 610de40bd73c58942a9938297b888751, type: 3}
+  settingsSprite135: {fileID: 21300000, guid: ae5d8b6322eac97499e7acb8e41b9c7c, type: 3}
+  settingsSprite137: {fileID: 21300000, guid: c0a02bf30d02ebc498c2cc4e4080a4de, type: 3}
+  settingsSprite138: {fileID: 21300000, guid: 75ce77ff0e5662b4c87f54409d5d7d89, type: 3}
+  settingsSprite139: {fileID: 21300000, guid: 6f4cf12565e2f2a43958c74936f04df6, type: 3}
+  settingsSprite140: {fileID: 21300000, guid: a864ee5c7f157b0428bc3d89fc7459a4, type: 3}
+  loadingBackground: {fileID: 21300000, guid: c6fd5af60ef73a441b7048dd3c2db0e0, type: 3}
+  loadingTitleArt: {fileID: 21300000, guid: be1e6893c15779a4c81af5cc4d6b3ff2, type: 3}
+  loadingPizza: {fileID: 21300000, guid: 89ad6f9761d2a844caeff834260908e6, type: 3}
+  loadingDot: {fileID: 21300000, guid: 2ce4a8fd48aa0ad4199f8ee8c2c4ddd7, type: 3}
+  orderAsset116: {fileID: 21300000, guid: 73aac34efb07d574da48e9d555885598, type: 3}
+  orderAsset117: {fileID: 21300000, guid: 91bb127a1d19aca4a9ab1c1194ae1643, type: 3}
+  orderExitBtn: {fileID: 21300000, guid: a11c4b42d933ed84eb4be39c9c07eca5, type: 3}
+  orderLargePreview: {fileID: 21300000, guid: 963172afbf6c34440976c26fc59cb69d, type: 3}
+  orderSmallPending: {fileID: 21300000, guid: 920bd4a5550d7124daf0d24ca976d390, type: 3}
+  orderSmallReady: {fileID: 21300000, guid: 9e449130e2b54934e9808146f89c271e, type: 3}
+  scrollBarTrack: {fileID: 21300000, guid: 5619c7c3ec129404a941b2e918337dab, type: 3}
+  scrollButtonThumb: {fileID: 21300000, guid: 11b63b8d1a6dcde4da1c645a206f82fc, type: 3}
   fontCastleChunk: {fileID: 12800000, guid: 6590be8a4bbef6740b81964bf685ce17, type: 3}
   fontLostTumbler: {fileID: 12800000, guid: af2c240b154825b4cb3d923b086b07d5, type: 3}
   fontMunstar: {fileID: 12800000, guid: de449113a433c7f44beecb197c65e32f, type: 3}
@@ -98,6 +124,8 @@ MonoBehaviour:
   templateStagingModal: {fileID: 9197481963319205126, guid: bb6ad47dffb84bf5aee87d54811253b8, type: 3}
   templateScoreboardOverlay: {fileID: 9197481963319205126, guid: db1109197b064d9db8f15a9d6da5996f, type: 3}
   templatePlayerReadyCard: {fileID: 0}
+  templateLoadingScreen: {fileID: 9197481963319205126, guid: f21fc040abbf23544865fd16e4e26b33, type: 3}
+  styleLoadingScreen: {fileID: 7433441132597879392, guid: c013b99a83160da409a22ced30a97936, type: 3}
   nightIntermissionTheme: {fileID: 11400000, guid: c201202600014a1b9c00000000000003, type: 2}
   nightIntermissionIconCatalog: {fileID: 11400000, guid: c201202600014a1b9c00000000000004, type: 2}
   templateNightIntermissionScreen: {fileID: 9197481963319205126, guid: c201202600014a1b9c00000000000009, type: 3}

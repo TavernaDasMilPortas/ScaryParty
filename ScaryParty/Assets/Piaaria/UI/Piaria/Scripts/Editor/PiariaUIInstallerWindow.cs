@@ -460,6 +460,38 @@ namespace ScaryParty.UI.Piaria.Editor
                 }
             }
 
+            // Carregamento (Drive)
+            catalog.loadingBackground = LoadSprite(files, "fundo carregamento");
+            catalog.loadingTitleArt = LoadSprite(files, "título de carregando");
+            catalog.loadingPizza = LoadSprite(files, "pizza de carregamento");
+            catalog.loadingDot = LoadSprite(files, "pontinho de carregamento");
+
+            // Configurações e Pausa (Drive)
+            catalog.settingsPanelBg = LoadSprite(files, "configuracoes/asset 136.png") ?? LoadSprite(files, "asset 136");
+            catalog.settingsExitBtn = LoadSprite(files, "configuracoes/botão sair.png") ?? LoadSprite(files, "botão sair.png");
+            catalog.settingsNameBox = LoadSprite(files, "caixa para nome (9)");
+            catalog.settingsSprite124 = LoadSprite(files, "asset 124");
+            catalog.settingsSprite125 = LoadSprite(files, "asset 125");
+            catalog.settingsSprite126 = LoadSprite(files, "asset 126");
+            catalog.settingsSprite127 = LoadSprite(files, "asset 127");
+            catalog.settingsSprite132 = LoadSprite(files, "asset 132");
+            catalog.settingsSprite134 = LoadSprite(files, "asset 134");
+            catalog.settingsSprite135 = LoadSprite(files, "asset 135");
+            catalog.settingsSprite137 = LoadSprite(files, "asset 137");
+            catalog.settingsSprite138 = LoadSprite(files, "asset 138");
+            catalog.settingsSprite139 = LoadSprite(files, "asset 139");
+            catalog.settingsSprite140 = LoadSprite(files, "asset 140");
+
+            // Comandas e Scroll (Drive)
+            catalog.orderAsset116 = LoadSprite(files, "asset 116");
+            catalog.orderAsset117 = LoadSprite(files, "asset 117");
+            catalog.orderExitBtn = LoadSprite(files, "botão de sair");
+            catalog.orderLargePreview = LoadSprite(files, "preview grande comanda");
+            catalog.orderSmallPending = LoadSprite(files, "preview pequena comanda pendente");
+            catalog.orderSmallReady = LoadSprite(files, "preview pequena comanda pronta entrega");
+            catalog.scrollBarTrack = LoadSprite(files, "scroll bar");
+            catalog.scrollButtonThumb = LoadSprite(files, "scroll button");
+
             // Tipografia
             catalog.fontCastleChunk = LoadFont(files, "castlechunk");
             catalog.fontLostTumbler = LoadFont(files, "lost tumbler");
@@ -479,6 +511,8 @@ namespace ScaryParty.UI.Piaria.Editor
             catalog.templateStagingModal = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/StagingModal.uxml");
             catalog.templateScoreboardOverlay = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/ScoreboardOverlay.uxml");
             catalog.templatePlayerReadyCard = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/PlayerReadyCard.uxml");
+            catalog.templateLoadingScreen = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/Piaaria/UI/Piaria/UXML/LoadingScreen.uxml");
+            catalog.styleLoadingScreen = AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.StyleSheet>("Assets/Piaaria/UI/Piaria/USS/Loading.uss");
 
             // Preparação entre Noites 2.1 + Áudio UI
             catalog.nightIntermissionTheme = AssetDatabase.LoadAssetAtPath<NightIntermissionTheme>("Assets/Piaaria/UI/Piaria/Config/NightIntermissionTheme.asset");
@@ -823,14 +857,16 @@ namespace ScaryParty.UI.Piaria.Editor
 
             // 1. Catálogo
             var catalog = AssetDatabase.LoadAssetAtPath<PiariaUIAssetCatalog>("Assets/Piaaria/UI/Piaria/Config/PiariaUIAssetCatalog.asset");
-            if (catalog != null && catalog.logoPiaria != null && catalog.paperPanel1 != null)
+            var missingCore = new List<string>();
+            int missingCount = catalog != null ? catalog.CountMissingCoreAssets(missingCore) : -1;
+            if (catalog != null && catalog.logoPiaria != null && catalog.paperPanel1 != null && missingCount == 0)
             {
                 Log("✔ [OK] Catálogo PiariaUIAssetCatalog instanciado com referências de sprites válidas.");
                 checksPassed++;
             }
             else
             {
-                Log("⚠ [AVISO] Catálogo com referências pendentes.");
+                Log($"⚠ [AVISO] Catálogo com referências pendentes ({string.Join(", ", missingCore)}).");
             }
 
             // 2. PanelSettings

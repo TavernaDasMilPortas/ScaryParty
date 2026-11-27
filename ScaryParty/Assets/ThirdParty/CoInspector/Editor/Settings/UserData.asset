@@ -209,7 +209,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: e9017d5f96b9f09489b4b37e1d6eb914
     sceneName: GameScene
-    lastSaveTimePrint: 08:52 AM (November 24, 2026)
+    lastSaveTimePrint: 09:45 PM (November 26, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -223,13 +223,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 65
+    lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 62
+      tabWidth: 0
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -241,10 +241,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: 
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: 
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -323,7 +323,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: c06a3bc951e685f43806fb4592c4bc4c
     sceneName: LobbyScene
-    lastSaveTimePrint: 10:01 AM (November 25, 2026)
+    lastSaveTimePrint: 10:30 PM (November 26, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -437,7 +437,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: f1e2d3c4b5a6978869504132b1c2d3e4
     sceneName: ReadyScene
-    lastSaveTimePrint: 10:03 AM (November 25, 2026)
+    lastSaveTimePrint: 09:44 PM (November 26, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -1193,7 +1193,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d
     sceneName: PiariaUIDemoScene
-    lastSaveTimePrint: 08:53 AM (November 24, 2026)
+    lastSaveTimePrint: 10:35 PM (November 26, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -1207,13 +1207,13 @@ MonoBehaviour:
     scrollPosition: {x: 0, y: 0}
     toolbarScrollPosition: {x: 0, y: 0}
     rawUserHeight: 0
-    lastValidTabWidth: 65
+    lastValidTabWidth: 0
     alreadyCalculatedHeight: 0
     lastKnownHeight: 0
     tabs:
     - path: 
       paths: []
-      tabWidth: 62
+      tabWidth: 0
       name: 
       icon: {fileID: 0}
       shortName: New Tab
@@ -1225,10 +1225,10 @@ MonoBehaviour:
       runtimeFoldouts: 
       runtimeMultiComponents: []
       tabTextContent:
-        m_Text: New Tab
+        m_Text: 
         m_Image: {fileID: 0}
         m_Tooltip: 
-        m_TextWithWhitespace: "New Tab\u200B"
+        m_TextWithWhitespace: 
       multiEditMode: 0
       locked: 0
       hasPreview: 0
@@ -1480,7 +1480,7 @@ MonoBehaviour:
       recentlyClickedContents: []
     sceneGUID: d025abb8dadcdb8478503837e226699a
     sceneName: TrailerStudio
-    lastSaveTimePrint: 07:34 PM (November 25, 2026)
+    lastSaveTimePrint: 07:46 AM (November 26, 2026)
     gracePeriod: 3
     activeIndex: 0
     checkingToLoad: 0
@@ -1619,6 +1619,6 @@ MonoBehaviour:
     lastSelectedAsset: Assets/Piaaria/UI/Piaria/UXML/OperationsStatusOverlay.uxml
     lastClickedTab: -1
     previousTab: 0
-  tipsShown: 01000000000000000100000000000000000000000000000001000000010000000100000000000000010000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000001000000010000000000000000000000010000000000000001000000000000000000000001000000000000000000000000000000010000000000000000000000000000000100000001000000
+  tipsShown: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
   playModeStartScene: {}
   enteringPlayMode: 0

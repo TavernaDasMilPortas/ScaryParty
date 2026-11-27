@@ -34,12 +34,13 @@ namespace ScaryParty.UI.Piaria.Presenters
         private Label _progressBarLabel;
 
         // Mochila
+        private VisualElement _backpackPanel;
         private VisualElement _backpackBox;
         private VisualElement _backpackPizzaLayer;
         private VisualElement _backpackGradientLayer;
         private Label _backpackCountLabel;
 
-        // MÃƒÆ’Ã‚Â£os
+        // Mãos
         private VisualElement _leftHandCard;
         private VisualElement _rightHandCard;
         private Label _leftHandContent;
@@ -54,22 +55,26 @@ namespace ScaryParty.UI.Piaria.Presenters
 
         private int _currentMoney = 0;
         private int _currentDeliveries = 0;
-        private bool _isDraggingMap = false;
-        private Vector2 _lastMousePos;
         private bool _isMinimapFullscreen = false;
+        private bool _hudGameplayVisible = true;
 
-        // Noite / Combate / Mochila (O5, O8, C1-C4)
+        // Noite / Combate / Mochila / Dica contextual
+        private VisualElement _hudTopLeft;
+        private VisualElement _hudTopRight;
+        private VisualElement _hudBottomLeft;
+        private VisualElement _hudBottomRight;
         private VisualElement _nightBannerBox;
         private Label _nightBannerLabel;
         private VisualElement _combatStatusBox;
         private Label _healthStatusLabel;
-        private Label _participantsStatusLabel;
+        private VisualElement _slingPill;
         private Label _slingStatusLabel;
         private Label _bagIntegrityLabel;
+        private VisualElement _weaponAmmoPill;
         private Label _weaponAmmoLabel;
-        private Label _claimedOrdersLabel;
-        private Label _employeesStatusLabel;
-        private Label _hintsTextLabel;
+        private VisualElement _contextualHintContainer;
+        private Label _contextualHintLabel;
+        private float _contextualHintHideAt = -1f;
         private VisualElement _crosshairContainer;
         private float _hudMonitorTimer = 0f;
         private readonly Dictionary<int, float> _lowStockAlertCooldowns = new Dictionary<int, float>();
@@ -118,10 +123,21 @@ namespace ScaryParty.UI.Piaria.Presenters
             }
 
             EnsureInitialized();
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
+            GameplayIntroCutsceneFlow.OnStageChanged += HandlePresentationStageChanged;
+        }
+
+        private void HandlePresentationStageChanged(IntroPresentationStage stage)
+        {
+            if (stage != IntroPresentationStage.NightActive)
+            {
+                SetGameplayHudVisible(false);
+            }
         }
 
         private void OnDestroy()
         {
+            GameplayIntroCutsceneFlow.OnStageChanged -= HandlePresentationStageChanged;
             if (Instance == this) Instance = null;
         }
 
@@ -148,6 +164,7 @@ namespace ScaryParty.UI.Piaria.Presenters
 
             _root.pickingMode = PickingMode.Ignore;
             PiariaPresenterUtils.ConfigureHierarchyPicking(_root);
+            PiariaPresenterUtils.RegisterResponsiveLayout(_root);
 
             _moneyLabel = _root.Q<Label>("MoneyLabel");
             _scoreLabel = _root.Q<Label>("ScoreLabel");
@@ -158,10 +175,12 @@ namespace ScaryParty.UI.Piaria.Presenters
             _progressBarFill = _root.Q<VisualElement>("ProgressBarFill");
             _progressBarLabel = _root.Q<Label>("ProgressBarLabel");
 
+            _backpackPanel = _root.Q<VisualElement>("BackpackPanel");
             _backpackBox = _root.Q<VisualElement>("BackpackContainer");
             _backpackPizzaLayer = _root.Q<VisualElement>("BackpackPizzaLayer");
             _backpackGradientLayer = _root.Q<VisualElement>("BackpackGradientLayer");
             _backpackCountLabel = _root.Q<Label>("BackpackCountLabel");
+            _bagIntegrityLabel = _root.Q<Label>("BagIntegrityLabel");
 
             _leftHandCard = _root.Q<VisualElement>("LeftHandSlot");
             _rightHandCard = _root.Q<VisualElement>("RightHandSlot");
@@ -174,8 +193,24 @@ namespace ScaryParty.UI.Piaria.Presenters
             _minimapPaperFrame = _root.Q<VisualElement>("MinimapPaperFrame");
             _minimapImage = _root.Q<VisualElement>("MinimapImage");
 
+            _hudTopLeft = _root.Q<VisualElement>(className: "hud-top-left");
+            _hudTopRight = _root.Q<VisualElement>(className: "hud-top-right");
+            _hudBottomLeft = _root.Q<VisualElement>(className: "hud-bottom-left");
+            _hudBottomRight = _root.Q<VisualElement>(className: "hud-bottom-right");
+
+            _nightBannerBox = _root.Q<VisualElement>("NightStatusBanner");
+            _nightBannerLabel = _root.Q<Label>("NightStatusLabel");
+            _combatStatusBox = _root.Q<VisualElement>("CombatBagStatusBox");
+            _healthStatusLabel = _root.Q<Label>("HealthStatusLabel");
+            _weaponAmmoPill = _root.Q<VisualElement>("WeaponAmmoPill");
+            _weaponAmmoLabel = _root.Q<Label>("WeaponAmmoLabel");
+            _slingPill = _root.Q<VisualElement>("SlingPill");
+            _slingStatusLabel = _root.Q<Label>("SlingStatusLabel");
+            _contextualHintContainer = _root.Q<VisualElement>("ContextualHintContainer");
+            _contextualHintLabel = _root.Q<Label>("ContextualHintLabel");
+            _crosshairContainer = _root.Q<VisualElement>("CombatCrosshair");
+
             ApplyCatalogAssets();
-            // The map presenter owns pointer and wheel input.
 
             SetMoney(0, immediate: true);
             SetDeliveries(0);
@@ -186,10 +221,16 @@ namespace ScaryParty.UI.Piaria.Presenters
             SetHandState(true, false, "Vazio");
 
             EnsureExperienceHudWidgets();
-            _hintsTextLabel = _root.Q<Label>(className: "hints-text");
-            if (_hintsTextLabel != null)
+
+            bool introBlocking = GameplayIntroCutsceneFlow.Instance != null &&
+                                 GameplayIntroCutsceneFlow.CurrentStage != IntroPresentationStage.NightActive;
+            if (introBlocking)
             {
-                _hintsTextLabel.text = "[F1] Tutorial • [J] Operações • [M] Mapa • [B] Mochila • [G] Bandoleira • [H] Receitas • [TAB] Placar • [ESC] Pausa";
+                SetGameplayHudVisible(false);
+            }
+            else
+            {
+                TryShowInitialDiscoveryHint();
             }
 
             NightResultsPresenter.EnsureInstance();
@@ -200,128 +241,79 @@ namespace ScaryParty.UI.Piaria.Presenters
             RunPreparationPresenter.EnsureInstance();
         }
 
+        private void TryShowInitialDiscoveryHint()
+        {
+            const string key = "Piaria_EscHintShownCount";
+            int shownCount = PlayerPrefs.GetInt(key, 0);
+            if (shownCount < 3)
+            {
+                PlayerPrefs.SetInt(key, shownCount + 1);
+                PlayerPrefs.Save();
+                ShowContextualHint("ESC: Controles e Pausa  |  F1: Tutorial", 5.5f);
+            }
+        }
+
+        public void ShowContextualHint(string message, float durationSeconds = 4.0f)
+        {
+            EnsureInitialized();
+            if (_contextualHintContainer == null || _contextualHintLabel == null) return;
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                HideContextualHint();
+                return;
+            }
+
+            _contextualHintLabel.text = message;
+            _contextualHintHideAt = durationSeconds > 0f ? Time.unscaledTime + durationSeconds : -1f;
+            UIToolkitTweenService.SlideIn(_contextualHintContainer, new Vector2(0f, 16f), 0.22f);
+        }
+
+        public void HideContextualHint()
+        {
+            _contextualHintHideAt = -1f;
+            if (_contextualHintContainer != null && _contextualHintContainer.style.display != DisplayStyle.None)
+            {
+                UIToolkitTweenService.FadeOut(_contextualHintContainer, 0.16f);
+            }
+        }
+
+        public void SetGameplayHudVisible(bool visible)
+        {
+            EnsureInitialized();
+            _hudGameplayVisible = visible;
+            if (_root == null) return;
+
+            _root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+        }
+
+        public void RevealGameplayHudElastic()
+        {
+            EnsureInitialized();
+            _hudGameplayVisible = true;
+            if (_root == null) return;
+
+            _root.style.display = DisplayStyle.Flex;
+
+            UIToolkitTweenService.ElasticSlideIn(_hudTopLeft, new Vector2(-110f, -60f), 0.52f, 0.00f);
+            UIToolkitTweenService.ElasticSlideIn(_hudTopRight, new Vector2(110f, -60f), 0.52f, 0.06f);
+            UIToolkitTweenService.ElasticSlideIn(_hudBottomLeft, new Vector2(-110f, 90f), 0.54f, 0.12f);
+            UIToolkitTweenService.ElasticSlideIn(_hudBottomRight, new Vector2(110f, 90f), 0.54f, 0.18f);
+
+            NightIntermissionFeelBridge.Play(NightUIFeedbackId.CountdownGo, FeedbackPriority.High);
+            UIFeedbackService.Instance?.PlaySuccess();
+            TryShowInitialDiscoveryHint();
+        }
+
         private void EnsureExperienceHudWidgets()
         {
-            if (_root == null || _nightBannerBox != null) return;
-
-            _nightBannerBox = new VisualElement();
-            _nightBannerBox.name = "NightStatusBanner";
-            _nightBannerBox.pickingMode = PickingMode.Ignore;
-            _nightBannerBox.style.position = Position.Absolute;
-            _nightBannerBox.style.top = 14;
-            _nightBannerBox.style.left = Length.Percent(28);
-            _nightBannerBox.style.width = Length.Percent(44);
-            _nightBannerBox.style.backgroundColor = new Color(0.08f, 0.08f, 0.11f, 0.82f);
-            _nightBannerBox.style.borderTopLeftRadius = 8;
-            _nightBannerBox.style.borderTopRightRadius = 8;
-            _nightBannerBox.style.borderBottomLeftRadius = 8;
-            _nightBannerBox.style.borderBottomRightRadius = 8;
-            _nightBannerBox.style.borderBottomWidth = 2;
-            _nightBannerBox.style.borderBottomColor = new Color(0.95f, 0.72f, 0.25f);
-            _nightBannerBox.style.paddingTop = 6;
-            _nightBannerBox.style.paddingBottom = 6;
-            _nightBannerBox.style.paddingLeft = 14;
-            _nightBannerBox.style.paddingRight = 14;
-
-            _nightBannerLabel = new Label("NOITE 1 — PREPARANDO...");
-            _nightBannerLabel.pickingMode = PickingMode.Ignore;
-            _nightBannerLabel.style.fontSize = 15;
-            _nightBannerLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            _nightBannerLabel.style.color = new Color(0.98f, 0.94f, 0.84f);
-            _nightBannerLabel.style.unityTextAlign = TextAnchor.MiddleCenter;
-            _nightBannerBox.Add(_nightBannerLabel);
-            _root.Add(_nightBannerBox);
-
-            _combatStatusBox = new VisualElement();
-            _combatStatusBox.name = "CombatBagStatusBox";
-            _combatStatusBox.pickingMode = PickingMode.Ignore;
-            _combatStatusBox.style.position = Position.Absolute;
-            _combatStatusBox.style.left = 20;
-            _combatStatusBox.style.bottom = 175;
-            _combatStatusBox.style.backgroundColor = new Color(0.08f, 0.09f, 0.12f, 0.80f);
-            _combatStatusBox.style.borderTopLeftRadius = 8;
-            _combatStatusBox.style.borderTopRightRadius = 8;
-            _combatStatusBox.style.borderBottomLeftRadius = 8;
-            _combatStatusBox.style.borderBottomRightRadius = 8;
-            _combatStatusBox.style.paddingLeft = 12;
-            _combatStatusBox.style.paddingRight = 12;
-            _combatStatusBox.style.paddingTop = 8;
-            _combatStatusBox.style.paddingBottom = 8;
-
-            _healthStatusLabel = new Label("HP: 100 / 100");
-            _healthStatusLabel.pickingMode = PickingMode.Ignore;
-            _healthStatusLabel.style.fontSize = 14;
-            _healthStatusLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            _healthStatusLabel.style.color = new Color(0.45f, 0.92f, 0.55f);
-            _combatStatusBox.Add(_healthStatusLabel);
-
-            _participantsStatusLabel = new Label("Equipe Online: Local");
-            _participantsStatusLabel.pickingMode = PickingMode.Ignore;
-            _participantsStatusLabel.style.fontSize = 12;
-            _participantsStatusLabel.style.color = new Color(0.84f, 0.90f, 0.96f);
-            _participantsStatusLabel.style.whiteSpace = WhiteSpace.Normal;
-            _combatStatusBox.Add(_participantsStatusLabel);
-
-            _slingStatusLabel = new Label("Bandoleira [G]: Sem espingarda");
-            _slingStatusLabel.pickingMode = PickingMode.Ignore;
-            _slingStatusLabel.style.fontSize = 12;
-            _slingStatusLabel.style.color = new Color(0.95f, 0.85f, 0.52f);
-            _combatStatusBox.Add(_slingStatusLabel);
-
-            _bagIntegrityLabel = new Label("Mochila [B]: Sem mochila");
-            _bagIntegrityLabel.pickingMode = PickingMode.Ignore;
-            _bagIntegrityLabel.style.fontSize = 13;
-            _bagIntegrityLabel.style.color = new Color(0.88f, 0.88f, 0.92f);
-            _combatStatusBox.Add(_bagIntegrityLabel);
-
-            _weaponAmmoLabel = new Label("");
-            _weaponAmmoLabel.pickingMode = PickingMode.Ignore;
-            _weaponAmmoLabel.style.fontSize = 14;
-            _weaponAmmoLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-            _weaponAmmoLabel.style.color = new Color(0.98f, 0.82f, 0.42f);
-            _weaponAmmoLabel.style.display = DisplayStyle.None;
-            _combatStatusBox.Add(_weaponAmmoLabel);
-
-            _claimedOrdersLabel = new Label("");
-            _claimedOrdersLabel.pickingMode = PickingMode.Ignore;
-            _claimedOrdersLabel.style.fontSize = 12;
-            _claimedOrdersLabel.style.color = new Color(0.75f, 0.90f, 0.98f);
-            _claimedOrdersLabel.style.display = DisplayStyle.None;
-            _combatStatusBox.Add(_claimedOrdersLabel);
-
-            _employeesStatusLabel = new Label("");
-            _employeesStatusLabel.pickingMode = PickingMode.Ignore;
-            _employeesStatusLabel.style.fontSize = 12;
-            _employeesStatusLabel.style.color = new Color(0.86f, 0.82f, 0.96f);
-            _employeesStatusLabel.style.display = DisplayStyle.None;
-            _combatStatusBox.Add(_employeesStatusLabel);
-
-            _root.Add(_combatStatusBox);
-
-            _crosshairContainer = new VisualElement();
-            _crosshairContainer.name = "CombatCrosshair";
-            _crosshairContainer.pickingMode = PickingMode.Ignore;
-            _crosshairContainer.style.position = Position.Absolute;
-            _crosshairContainer.style.left = Length.Percent(50);
-            _crosshairContainer.style.top = Length.Percent(50);
-            _crosshairContainer.style.width = 16;
-            _crosshairContainer.style.height = 16;
-            _crosshairContainer.style.marginLeft = -8;
-            _crosshairContainer.style.marginTop = -8;
-            _crosshairContainer.style.borderTopWidth = 2;
-            _crosshairContainer.style.borderBottomWidth = 2;
-            _crosshairContainer.style.borderLeftWidth = 2;
-            _crosshairContainer.style.borderRightWidth = 2;
-            _crosshairContainer.style.borderTopColor = Color.white;
-            _crosshairContainer.style.borderBottomColor = Color.white;
-            _crosshairContainer.style.borderLeftColor = Color.white;
-            _crosshairContainer.style.borderRightColor = Color.white;
-            _crosshairContainer.style.borderTopLeftRadius = 8;
-            _crosshairContainer.style.borderTopRightRadius = 8;
-            _crosshairContainer.style.borderBottomLeftRadius = 8;
-            _crosshairContainer.style.borderBottomRightRadius = 8;
-            _crosshairContainer.style.display = DisplayStyle.None;
-            _root.Add(_crosshairContainer);
+            // Estrutura e estilização agora residem em MainGameHUD.uxml e HUD.uss.
+            // Este método permanece apenas como guarda defensiva caso um template legado seja carregado.
+            if (_root == null) return;
+            if (_nightBannerBox == null) _nightBannerBox = _root.Q<VisualElement>("NightStatusBanner");
+            if (_nightBannerLabel == null) _nightBannerLabel = _root.Q<Label>("NightStatusLabel");
+            if (_combatStatusBox == null) _combatStatusBox = _root.Q<VisualElement>("CombatBagStatusBox");
+            if (_healthStatusLabel == null) _healthStatusLabel = _root.Q<Label>("HealthStatusLabel");
+            if (_crosshairContainer == null) _crosshairContainer = _root.Q<VisualElement>("CombatCrosshair");
         }
 
         public void SetCombatHealthHud(
@@ -337,56 +329,50 @@ namespace ScaryParty.UI.Piaria.Presenters
             EnsureInitialized();
             if (_healthStatusLabel == null) return;
 
+            _healthStatusLabel.RemoveFromClassList("status-healthy");
+            _healthStatusLabel.RemoveFromClassList("status-warning");
+            _healthStatusLabel.RemoveFromClassList("status-critical");
+
             if (isDead)
             {
-                _healthStatusLabel.text = $"MORTO — Espectando Aliado #{spectatingTargetClientId} ([Q]/[E] trocar)";
-                _healthStatusLabel.style.color = new Color(0.85f, 0.35f, 0.45f);
+                _healthStatusLabel.text = $"MORTO (#{spectatingTargetClientId})";
+                _healthStatusLabel.AddToClassList("status-critical");
             }
             else if (incapacitated)
             {
-                string pct = rescueProgress > 0.01f ? $" | Resgatando {Mathf.RoundToInt(rescueProgress * 100f)}%" : string.Empty;
-                _healthStatusLabel.text = $"INCAPACITADO ({Mathf.CeilToInt(rescueSeconds)}s restantes{pct})";
-                _healthStatusLabel.style.color = new Color(0.95f, 0.28f, 0.28f);
+                string pct = rescueProgress > 0.01f ? $" ({Mathf.RoundToInt(rescueProgress * 100f)}%)" : string.Empty;
+                _healthStatusLabel.text = $"NOCAUTE ({Mathf.CeilToInt(rescueSeconds)}s{pct})";
+                _healthStatusLabel.AddToClassList("status-critical");
             }
             else
             {
                 string healPct = rescueMode == 1 && rescueProgress > 0.01f
-                    ? $" | Curando {Mathf.RoundToInt(rescueProgress * 100f)}%"
+                    ? $" | +{Mathf.RoundToInt(rescueProgress * 100f)}%"
                     : string.Empty;
-                _healthStatusLabel.text = $"HP: {currentHp} / {maxHp}{healPct}";
+                _healthStatusLabel.text = $"HP {currentHp}/{maxHp}{healPct}";
                 float ratio = maxHp > 0 ? (float)currentHp / maxHp : 1f;
-                _healthStatusLabel.style.color = ratio <= 0.3f
-                    ? new Color(0.95f, 0.35f, 0.30f)
-                    : (ratio <= 0.6f ? new Color(0.95f, 0.78f, 0.25f) : new Color(0.45f, 0.92f, 0.55f));
+                _healthStatusLabel.AddToClassList(ratio <= 0.3f ? "status-critical" : (ratio <= 0.6f ? "status-warning" : "status-healthy"));
             }
         }
 
         public void SetWeaponAmmoHud(bool equipped, string weaponLabel, int currentAmmo, int reserveAmmo, bool isReloading, bool isAiming)
         {
             EnsureInitialized();
-            if (_weaponAmmoLabel != null)
+            if (_weaponAmmoPill != null)
             {
-                if (!equipped)
-                {
-                    _weaponAmmoLabel.style.display = DisplayStyle.None;
-                }
-                else
-                {
-                    _weaponAmmoLabel.style.display = DisplayStyle.Flex;
-                    _weaponAmmoLabel.text = isReloading
-                        ? $"{weaponLabel}: Recarregando..."
-                        : $"{weaponLabel}: {currentAmmo} / {reserveAmmo}";
-                }
+                _weaponAmmoPill.style.display = equipped ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            if (_weaponAmmoLabel != null && equipped)
+            {
+                _weaponAmmoLabel.text = isReloading
+                    ? $"{weaponLabel}: Recarregando..."
+                    : $"{weaponLabel}: {currentAmmo}/{reserveAmmo}";
             }
 
             if (_crosshairContainer != null)
             {
                 _crosshairContainer.style.display = equipped ? DisplayStyle.Flex : DisplayStyle.None;
-                float size = isAiming ? 12f : 20f;
-                _crosshairContainer.style.width = size;
-                _crosshairContainer.style.height = size;
-                _crosshairContainer.style.marginLeft = -size * 0.5f;
-                _crosshairContainer.style.marginTop = -size * 0.5f;
+                _crosshairContainer.EnableInClassList("crosshair-aiming", isAiming);
             }
         }
 
@@ -558,61 +544,37 @@ namespace ScaryParty.UI.Piaria.Presenters
             EnsureInitialized();
             if (_minimapContainer == null) return;
             _isMinimapFullscreen = isFullscreen;
+            UIToolkitTweenService.KillTweens(_minimapContainer);
+            _minimapContainer.style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+            _minimapContainer.EnableInClassList("minimap-fullscreen", isFullscreen);
 
-            if (isFullscreen)
+            if (_minimapPaperFrame != null)
             {
-                float rootW = _root != null && _root.resolvedStyle.width > 0 ? _root.resolvedStyle.width : Screen.width;
-                float rootH = _root != null && _root.resolvedStyle.height > 0 ? _root.resolvedStyle.height : Screen.height;
-                float side = Mathf.Round(Mathf.Min(rootW, rootH) * 0.78f);
-
-                _minimapContainer.style.width = side;
-                _minimapContainer.style.height = side;
-                _minimapContainer.style.left = Mathf.Round((rootW - side) * 0.5f);
-                _minimapContainer.style.top = Mathf.Round((rootH - side) * 0.5f);
-                _minimapContainer.style.right = StyleKeyword.Null;
-                _minimapContainer.style.bottom = StyleKeyword.Null;
-
-                if (_minimapPaperFrame != null)
+                if (isFullscreen)
                 {
-                    _minimapPaperFrame.style.width = Length.Percent(100);
-                    _minimapPaperFrame.style.height = Length.Percent(100);
                     _minimapPaperFrame.style.backgroundImage = StyleKeyword.None;
-                    SetBorderRadius(_minimapPaperFrame, 12);
+                    UIToolkitTweenService.PopIn(_minimapPaperFrame, 0.22f, 0.88f);
                 }
-            }
-            else
-            {
-                _minimapContainer.style.width = StyleKeyword.Null;
-                _minimapContainer.style.height = StyleKeyword.Null;
-                _minimapContainer.style.left = StyleKeyword.Null;
-                _minimapContainer.style.top = StyleKeyword.Null;
-                _minimapContainer.style.right = 28;
-                _minimapContainer.style.bottom = 24;
-
-                if (_minimapPaperFrame != null)
+                else
                 {
-                    _minimapPaperFrame.style.width = 180;
-                    _minimapPaperFrame.style.height = 180;
                     var catalog = PiariaUIAssetCatalog.Instance;
                     if (catalog != null && catalog.minimapPaperBase != null)
                         _minimapPaperFrame.style.backgroundImage = new StyleBackground(catalog.minimapPaperBase);
-                    SetBorderRadius(_minimapPaperFrame, 90);
                 }
             }
-        }
-
-        private void SetBorderRadius(VisualElement el, float radius)
-        {
-            if (el == null) return;
-            el.style.borderTopLeftRadius = radius;
-            el.style.borderTopRightRadius = radius;
-            el.style.borderBottomLeftRadius = radius;
-            el.style.borderBottomRightRadius = radius;
         }
 
         private void Update()
         {
-            // Vincula dinamicamente a RenderTexture do WorldImage do minimapa se ainda nÃƒÆ’Ã‚Â£o estiver vinculada
+            if (GameplayIntroCutsceneFlow.Instance != null &&
+                GameplayIntroCutsceneFlow.CurrentStage != IntroPresentationStage.NightActive)
+            {
+                if (_root != null && _root.style.display != DisplayStyle.None)
+                    _root.style.display = DisplayStyle.None;
+                return;
+            }
+
+            // Vincula dinamicamente a RenderTexture do WorldImage do minimapa se ainda não estiver vinculada
             if (_minimapImage != null && _minimapImage.resolvedStyle.backgroundImage.texture == null)
             {
                 var worldImage = FindFirstObjectByType<Kamgam.UGUIWorldImage.WorldImage>();
@@ -620,6 +582,11 @@ namespace ScaryParty.UI.Piaria.Presenters
                 {
                     _minimapImage.style.backgroundImage = new StyleBackground(Background.FromRenderTexture(worldImage.RenderTexture));
                 }
+            }
+
+            if (_contextualHintHideAt > 0f && Time.unscaledTime >= _contextualHintHideAt)
+            {
+                HideContextualHint();
             }
 
             _hudMonitorTimer += Time.deltaTime;
@@ -651,129 +618,27 @@ namespace ScaryParty.UI.Piaria.Presenters
                     _ => ""
                 };
 
-                string repDelta = n.LastReputationDelta != 0
-                    ? $" ({(n.LastReputationDelta > 0 ? "+" : "")}{n.LastReputationDelta})"
-                    : string.Empty;
-                int budget = netState.RestaurantBudget.Value;
-                string nightTag = n.NightNumber == 0 ? "NOITE 0 (TUTORIAL)" : $"NOITE {n.NightNumber}";
-                _nightBannerLabel.text = $"{nightTag} [{phaseLabel}]  |  META: R$ {n.EarnedRevenue}/{n.RevenueGoal}  |  CAIXA: R$ {budget}  |  REP: {n.Reputation}{repDelta}";
+                string nightTag = n.NightNumber == 0 ? "NOITE 0" : $"NOITE {n.NightNumber}";
+                string metaPart = n.RevenueGoal > 0 ? $" • Meta R$ {n.EarnedRevenue}/{n.RevenueGoal}" : string.Empty;
+                _nightBannerLabel.text = $"{nightTag} [{phaseLabel}]{metaPart}";
             }
 
             ulong localClientId = NetworkManager.Singleton != null ? NetworkManager.Singleton.LocalClientId : 0UL;
-            if (_slingStatusLabel != null)
+            if (_slingPill != null && _slingStatusLabel != null)
             {
                 if (netState.TryGetSlingedWeapon(localClientId, out var slinged))
                 {
-                    _slingStatusLabel.text = $"Bandoleira [G]: Espingarda guardada ({slinged.CurrentMagAmmo}/{slinged.MaxMagAmmo})";
-                    _slingStatusLabel.style.color = new Color(0.55f, 0.95f, 0.62f);
+                    _slingPill.style.display = DisplayStyle.Flex;
+                    _slingStatusLabel.text = $"Bandoleira [G]: {slinged.CurrentMagAmmo}/{slinged.MaxMagAmmo}";
                 }
                 else if (netState.TryGetEquippedWeapon(localClientId, out var eqWep) && eqWep.WeaponType == 2)
                 {
-                    _slingStatusLabel.text = "Bandoleira [G]: Espingarda em punho ([G] p/ guardar)";
-                    _slingStatusLabel.style.color = new Color(0.98f, 0.85f, 0.42f);
+                    _slingPill.style.display = DisplayStyle.Flex;
+                    _slingStatusLabel.text = "[G] Guardar Espingarda";
                 }
                 else
                 {
-                    _slingStatusLabel.text = "Bandoleira [G]: Livre (sem espingarda)";
-                    _slingStatusLabel.style.color = new Color(0.75f, 0.78f, 0.84f);
-                }
-            }
-
-            if (_participantsStatusLabel != null && netState.PlayerCombatStates != null)
-            {
-                var pSb = new System.Text.StringBuilder("Equipe: ");
-                int listed = 0;
-                for (int i = 0; i < netState.PlayerCombatStates.Count; i++)
-                {
-                    var pcs = netState.PlayerCombatStates[i];
-                    string pName = null;
-                    if (PlayerState.TryGetByClientId(pcs.ClientId, out var ps) && ps != null)
-                    {
-                        string candidateName = ps.PlayerName.Value.ToString();
-                        if (!string.IsNullOrWhiteSpace(candidateName)) pName = candidateName;
-                    }
-                    if (string.IsNullOrEmpty(pName))
-                        pName = pcs.ClientId == localClientId ? "Você" : $"Jog.#{pcs.ClientId}";
-
-                    string lifeTag = pcs.IsDead
-                        ? "Morto"
-                        : (pcs.IsIncapacitated ? "Nocauteado" : $"{pcs.CurrentHp}HP");
-                    if (listed > 0) pSb.Append(" | ");
-                    pSb.Append($"{pName}: {lifeTag}");
-                    listed++;
-                }
-                _participantsStatusLabel.text = listed > 0 ? pSb.ToString() : "Equipe: Local (1 jogador)";
-            }
-
-            if (_claimedOrdersLabel != null && netState.Orders != null)
-            {
-                var claimedSb = new System.Text.StringBuilder();
-                double now = PizzeriaRoot.Instance != null && PizzeriaRoot.Instance.Clock != null
-                    ? PizzeriaRoot.Instance.Clock.Now
-                    : Time.timeAsDouble;
-                for (int i = 0; i < netState.Orders.Count; i++)
-                {
-                    var ord = netState.Orders[i];
-                    if (ord.Lifecycle == (byte)OrderLifecycle.Accepted && ord.ClaimedByClientId == localClientId)
-                    {
-                        int remSec = Mathf.Max(0, Mathf.CeilToInt((float)(ord.DeadlineTime - now)));
-                        if (claimedSb.Length > 0) claimedSb.Append(" | ");
-                        claimedSb.Append($"#{ord.OrderId} ({remSec}s)");
-                    }
-                }
-                if (claimedSb.Length > 0)
-                {
-                    _claimedOrdersLabel.text = $"Comandas Assumidas: {claimedSb}";
-                    _claimedOrdersLabel.style.display = DisplayStyle.Flex;
-                }
-                else
-                {
-                    _claimedOrdersLabel.style.display = DisplayStyle.None;
-                }
-            }
-
-            if (_employeesStatusLabel != null && netState.Employees != null)
-            {
-                if (netState.Employees.Count == 0)
-                {
-                    _employeesStatusLabel.style.display = DisplayStyle.None;
-                }
-                else
-                {
-                    var empSb = new System.Text.StringBuilder("Equipe: ");
-                    for (int i = 0; i < netState.Employees.Count; i++)
-                    {
-                        if (i > 0) empSb.Append(" | ");
-                        var emp = netState.Employees[i];
-                        string roleName = emp.Role == 0 ? "Caixa" : "Pizzaiolo";
-                        if (!emp.IsAlive)
-                        {
-                            empSb.Append($"{roleName}#{emp.EmployeeId}: Caído");
-                        }
-                        else if (emp.TaskState == (byte)ScaryParty.Pizzeria.Domain.Services.EmployeeTaskState.Blocked)
-                        {
-                            string reason = emp.BlockReason switch
-                            {
-                                1 => "Sem Massa",
-                                2 => "Falta Ingred.",
-                                3 => "Forno Cheio",
-                                4 => "Ferram. em Uso",
-                                5 => "Caminho Bloq.",
-                                _ => "Bloqueado"
-                            };
-                            empSb.Append($"{roleName}#{emp.EmployeeId}: {reason}");
-                        }
-                        else if (emp.TargetOrderId > 0)
-                        {
-                            empSb.Append($"{roleName}#{emp.EmployeeId}: Ped.#{emp.TargetOrderId}");
-                        }
-                        else
-                        {
-                            empSb.Append($"{roleName}#{emp.EmployeeId}: Livre");
-                        }
-                    }
-                    _employeesStatusLabel.text = empSb.ToString();
-                    _employeesStatusLabel.style.display = DisplayStyle.Flex;
+                    _slingPill.style.display = DisplayStyle.None;
                 }
             }
 
@@ -788,28 +653,30 @@ namespace ScaryParty.UI.Piaria.Presenters
                     {
                         found = true;
                         int pct = bp.MaxIntegrity > 0 ? Mathf.RoundToInt(100f * bp.Integrity / bp.MaxIntegrity) : 100;
+                        _bagIntegrityLabel.style.display = DisplayStyle.Flex;
+                        _bagIntegrityLabel.RemoveFromClassList("bag-warning");
+                        _bagIntegrityLabel.RemoveFromClassList("bag-critical");
+
                         if (bp.IsTorn)
                         {
-                            _bagIntegrityLabel.text = "Mochila: RASGADA (0%) — Segure [F] 3s";
-                            _bagIntegrityLabel.style.color = new Color(0.95f, 0.25f, 0.25f);
+                            _bagIntegrityLabel.text = "Rasgada [F] 3s";
+                            _bagIntegrityLabel.AddToClassList("bag-critical");
                         }
                         else if (pct <= 40)
                         {
-                            _bagIntegrityLabel.text = $"Mochila: {pct}% (Danificada - [F] 3s)";
-                            _bagIntegrityLabel.style.color = new Color(0.95f, 0.72f, 0.20f);
+                            _bagIntegrityLabel.text = $"{pct}% [F]";
+                            _bagIntegrityLabel.AddToClassList("bag-warning");
                         }
                         else
                         {
-                            _bagIntegrityLabel.text = $"Mochila: {pct}% ({bp.ItemCount}/{bp.Capacity})";
-                            _bagIntegrityLabel.style.color = new Color(0.85f, 0.90f, 0.95f);
+                            _bagIntegrityLabel.text = $"{pct}% ({bp.ItemCount}/{bp.Capacity})";
                         }
                         break;
                     }
                 }
                 if (!found)
                 {
-                    _bagIntegrityLabel.text = "Mochila: Nenhuma equipada";
-                    _bagIntegrityLabel.style.color = new Color(0.75f, 0.75f, 0.80f);
+                    _bagIntegrityLabel.style.display = DisplayStyle.None;
                 }
             }
 

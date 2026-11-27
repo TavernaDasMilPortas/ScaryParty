@@ -1,4 +1,4 @@
-/* P.I.A.R.I.A. Night Intermission 2.1 — Digital Cartoon UI Toolkit */
+/* P.I.A.R.I.A. Night Intermission 2.1 — Digital Cartoon UI Toolkit (Responsivo) */
 
 .intermission-root {
     position: absolute;
@@ -9,14 +9,14 @@
     background-color: rgba(24, 12, 8, 0.72);
     align-items: center;
     justify-content: center;
-    padding: 24px;
+    padding: 18px;
 }
 
 .intermission-shell {
-    width: 1180px;
-    max-width: 94%;
-    height: 760px;
-    max-height: 92%;
+    width: 95%;
+    max-width: 1220px;
+    height: 90%;
+    max-height: 820px;
     background-color: #f8d5c4;
     border-top-width: 5px;
     border-right-width: 5px;
@@ -24,19 +24,21 @@
     border-left-width: 5px;
     border-color: #402318;
     border-radius: 22px;
-    padding: 18px 22px;
+    padding: 16px 20px;
     flex-direction: column;
 }
 
 .intermission-header {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .intermission-title {
-    font-size: 30px;
+    font-size: 28px;
     color: #402318;
     -unity-font-style: bold;
 }
@@ -68,13 +70,16 @@
 
 .intermission-tabs {
     flex-direction: row;
-    margin-bottom: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .intermission-tab {
     flex-grow: 1;
-    height: 44px;
-    margin-right: 8px;
+    min-width: 140px;
+    height: 42px;
+    margin: 3px 4px;
     background-color: #ffebd5;
     border-top-width: 3px;
     border-right-width: 3px;
@@ -99,7 +104,7 @@
     border-color: #2e7d32;
 }
 
-.intermission-page-host {
+.intermission-page-scroll {
     flex-grow: 1;
     background-color: #ffebd5;
     border-top-width: 3px;
@@ -108,25 +113,38 @@
     border-left-width: 3px;
     border-color: #402318;
     border-radius: 16px;
-    padding: 18px;
-    overflow: hidden;
+}
+
+.intermission-page-scroll > .unity-scroll-view__content-viewport > .unity-scroll-view__content-container {
+    flex-grow: 1;
+}
+
+.intermission-page-host {
+    flex-grow: 1;
+    padding: 16px;
 }
 
 .intermission-footer {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    margin-top: 12px;
+    margin-top: 10px;
+    flex-shrink: 0;
 }
 
 .intermission-status-label {
-    font-size: 15px;
+    font-size: 16px;
     color: #402318;
     -unity-font-style: bold;
+    flex-grow: 1;
+    margin-right: 12px;
+    white-space: normal;
 }
 
 .intermission-primary-btn {
     height: 46px;
+    min-width: 170px;
     padding: 0 24px;
     background-color: #3ca34d;
     border-top-width: 3px;
@@ -136,20 +154,23 @@
     border-color: #402318;
     border-radius: 14px;
     color: #fffbf5;
-    font-size: 16px;
+    font-size: 17px;
     -unity-font-style: bold;
+    flex-shrink: 0;
 }
 
 .summary-grid {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin-top: 14px;
+    margin-top: 12px;
 }
 
 .summary-kpi-card {
-    width: 31%;
-    min-height: 112px;
+    flex-grow: 1;
+    flex-basis: 210px;
+    min-width: 180px;
+    min-height: 104px;
     background-color: #fffbf5;
     border-top-width: 3px;
     border-right-width: 3px;
@@ -158,19 +179,19 @@
     border-color: #402318;
     border-radius: 14px;
     padding: 12px 14px;
-    margin-bottom: 12px;
+    margin: 5px;
     justify-content: center;
 }
 
 .summary-kpi-title {
-    font-size: 13px;
+    font-size: 14px;
     color: #6b3c2b;
     -unity-font-style: bold;
     margin-bottom: 4px;
 }
 
 .summary-kpi-value {
-    font-size: 26px;
+    font-size: 24px;
     color: #402318;
     -unity-font-style: bold;
 }

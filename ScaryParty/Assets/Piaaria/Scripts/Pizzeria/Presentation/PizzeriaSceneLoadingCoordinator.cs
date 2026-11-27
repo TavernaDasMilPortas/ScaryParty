@@ -40,7 +40,7 @@ namespace ScaryParty.Pizzeria.Presentation
         }
 
         [Header("Configuração de Transição")]
-        [SerializeField] private float _fadeDuration = 0.22f;
+        [SerializeField] private float _fadeDuration = 0.55f;
         [SerializeField] private float _loadingTimeoutSeconds = 40f;
 
         private UIDocument _loadingUiDocument;
@@ -48,12 +48,24 @@ namespace ScaryParty.Pizzeria.Presentation
         private VisualElement _overlayRoot;
         private VisualElement _card;
         private ProgressBar _progressBar;
+        private VisualElement _progressFillBar;
+        private VisualElement _progressFillImage;
         private Label _percentLabel;
         private Label _nightBannerLabel;
         private Label _statusLabel;
         private Label _stageTagLabel;
         private Label _hintLabel;
         private VisualElement _spinnerIcon;
+        private VisualElement _pizzaCorner;
+        private readonly System.Collections.Generic.List<VisualElement> _waveLetters = new System.Collections.Generic.List<VisualElement>();
+        private readonly VisualElement[] _loadingDots = new VisualElement[3];
+        private bool _animationsRunning;
+        private float _dotTimer;
+        private int _dotStep;
+        private bool _holdingForPresentation;
+        private bool _waitingForPresentationHandoff;
+        private bool _presentationReleased;
+        private int _presentationHoldToken;
         private Button _cancelBtn;
         private VisualElement _errorBox;
         private Label _errorReasonLabel;
@@ -69,6 +81,8 @@ namespace ScaryParty.Pizzeria.Presentation
         private bool _currentTransitionIsNetworked;
         private float _hintTimer;
         private int _hintIndex;
+        private float _visualProgress01;
+        private float _visualProgressVelocity;
 
         private bool _isLoading => _stateMachine != null && _stateMachine.IsActiveState;
         private bool _awaitingConnection => _stateMachine != null && _stateMachine.State == LoadingOperationState.Connecting;
@@ -112,7 +126,28 @@ namespace ScaryParty.Pizzeria.Presentation
         public LoadingStage CurrentStage => _currentStage;
         public float CurrentProgress => _currentProgress;
         public bool IsLoading => _isLoading;
+        public bool IsHoldingForPresentation => _holdingForPresentation;
+        public bool IsWaitingForPresentationHandoff => _waitingForPresentationHandoff;
+        public int CurrentOperationToken => _transitionId;
         public LoadingOperationState OperationState => _stateMachine != null ? _stateMachine.State : LoadingOperationState.Idle;
+
+        public bool HoldForPresentation(int token)
+        {
+            if (token == 0 || token != _transitionId) return false;
+            _holdingForPresentation = true;
+            _presentationHoldToken = token;
+            _presentationReleased = false;
+            return true;
+        }
+
+        public void ReleaseToCutscene(int token)
+        {
+            if (!_holdingForPresentation) return;
+            if (token != 0 && token != _presentationHoldToken) return;
+            Debug.Log($"[LoadingCoordinator] ReleaseToCutscene recebido (token={token}) — iniciando fade-out do loading.");
+            _presentationReleased = true;
+            _holdingForPresentation = false;
+        }
 
         private LoadingTransitionStateMachine EnsureStateMachine()
         {
@@ -207,10 +242,129 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (_overlayRoot == null)
             {
-                _overlayRoot = new VisualElement
+                var docRoot = _loadingUiDocument.rootVisualElement;
+                var template = ScaryParty.UI.Piaria.Core.PiariaPresenterUtils.ResolveTemplate(
+                    c => c.templateLoadingScreen,
+                    "Assets/Piaaria/UI/Piaria/UXML/LoadingScreen.uxml");
+
+                if (template != null && docRoot != null)
                 {
-                    name = "PizzeriaLoadingOverlay"
-                };
+                    template.CloneTree(docRoot);
+                    _overlayRoot = docRoot.Q<VisualElement>("PizzeriaLoadingOverlay");
+                    if (_overlayRoot != null)
+                    {
+                        BindTemplateOverlayElements();
+                    }
+                }
+            }
+
+            if (_overlayRoot == null)
+            {
+                BuildFallbackOverlay();
+            }
+        }
+
+        private void BindTemplateOverlayElements()
+        {
+            if (_overlayRoot == null) return;
+            _overlayRoot.style.display = DisplayStyle.None;
+            _overlayRoot.style.opacity = 0f;
+            ScaryParty.UI.Piaria.Core.PiariaPresenterUtils.RegisterResponsiveLayout(_overlayRoot);
+
+            _card = _overlayRoot.Q<VisualElement>("LoadingCenterContainer");
+            _nightBannerLabel = _overlayRoot.Q<Label>("LoadingNightBanner");
+            _stageTagLabel = _overlayRoot.Q<Label>("LoadingStageTag");
+            _percentLabel = _overlayRoot.Q<Label>("LoadingPercentLabel");
+            _progressFillBar = _overlayRoot.Q<VisualElement>("LoadingBarFill");
+            _progressFillImage = _overlayRoot.Q<VisualElement>("LoadingBarFillImage");
+            _statusLabel = _overlayRoot.Q<Label>("LoadingStatusLabel");
+            _hintLabel = _overlayRoot.Q<Label>("LoadingHintLabel");
+            _cancelBtn = _overlayRoot.Q<Button>("LoadingCancelBtn");
+            _errorBox = _overlayRoot.Q<VisualElement>("LoadingErrorBox");
+            _errorReasonLabel = _overlayRoot.Q<Label>("LoadingErrorReason");
+            _errorRetryBtn = _overlayRoot.Q<Button>("LoadingErrorRetryBtn");
+            _errorMenuBtn = _overlayRoot.Q<Button>("LoadingErrorMenuBtn");
+            _pizzaCorner = _overlayRoot.Q<VisualElement>("LoadingPizzaCorner");
+
+            _waveLetters.Clear();
+            _overlayRoot.Query<VisualElement>(className: "loading-wave-letter").ForEach(el => _waveLetters.Add(el));
+            _loadingDots[0] = _overlayRoot.Q<VisualElement>("LoadingDot0");
+            _loadingDots[1] = _overlayRoot.Q<VisualElement>("LoadingDot1");
+            _loadingDots[2] = _overlayRoot.Q<VisualElement>("LoadingDot2");
+
+            var catalog = ScaryParty.UI.Piaria.Core.PiariaUIAssetCatalog.Instance;
+            if (catalog != null)
+            {
+                var bgLayer = _overlayRoot.Q<VisualElement>("LoadingBgLayer");
+                if (bgLayer != null && catalog.loadingBackground != null)
+                    bgLayer.style.backgroundImage = new StyleBackground(catalog.loadingBackground);
+
+                var barFrame = _overlayRoot.Q<VisualElement>("LoadingBarFrame");
+                if (barFrame != null && catalog.progressBarFrame != null)
+                    barFrame.style.backgroundImage = new StyleBackground(catalog.progressBarFrame);
+
+                if (barFrame != null && _progressFillImage != null)
+                {
+                    barFrame.RegisterCallback<GeometryChangedEvent>(evt =>
+                    {
+                        float w = barFrame.contentRect.width;
+                        if (w > 1f) _progressFillImage.style.width = w;
+                    });
+                }
+
+                var fillTarget = _progressFillImage ?? _progressFillBar;
+                if (fillTarget != null && catalog.progressBarFill != null)
+                {
+                    fillTarget.style.backgroundImage = new StyleBackground(catalog.progressBarFill);
+                    fillTarget.style.backgroundColor = Color.clear;
+                }
+
+                if (_pizzaCorner != null && catalog.loadingPizza != null)
+                    _pizzaCorner.style.backgroundImage = new StyleBackground(catalog.loadingPizza);
+
+                if (catalog.loadingDot != null)
+                {
+                    for (int i = 0; i < _loadingDots.Length; i++)
+                    {
+                        if (_loadingDots[i] != null)
+                        {
+                            _loadingDots[i].style.backgroundImage = new StyleBackground(catalog.loadingDot);
+                            _loadingDots[i].style.backgroundColor = Color.clear;
+                            _loadingDots[i].style.borderTopWidth = 0;
+                            _loadingDots[i].style.borderBottomWidth = 0;
+                            _loadingDots[i].style.borderLeftWidth = 0;
+                            _loadingDots[i].style.borderRightWidth = 0;
+                        }
+                    }
+                }
+            }
+
+            if (_cancelBtn != null)
+            {
+                _cancelBtn.clicked += CancelCurrentOperation;
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.BindInteractiveFeedback(_cancelBtn, 1.03f, 0.97f);
+            }
+            if (_errorRetryBtn != null)
+            {
+                _errorRetryBtn.clicked += RetryFailedOperation;
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.BindInteractiveFeedback(_errorRetryBtn, 1.03f, 0.97f);
+            }
+            if (_errorMenuBtn != null)
+            {
+                _errorMenuBtn.clicked += ReturnToLobbyFromError;
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.BindInteractiveFeedback(_errorMenuBtn, 1.03f, 0.97f);
+            }
+
+            RefreshNightBannerText();
+        }
+
+        private void BuildFallbackOverlay()
+        {
+            if (_overlayRoot != null) return;
+            _overlayRoot = new VisualElement
+            {
+                name = "PizzeriaLoadingOverlay"
+            };
 
                 _overlayRoot.style.position = Position.Absolute;
                 _overlayRoot.style.left = 0;
@@ -384,6 +538,49 @@ namespace ScaryParty.Pizzeria.Presentation
                 {
                     root.Add(_overlayRoot);
                 }
+        }
+
+        private void SetProgressVisual(float progress01)
+        {
+            float pct = Mathf.Clamp01(progress01) * 100f;
+            if (_progressBar != null) _progressBar.value = pct;
+            if (_progressFillBar != null) _progressFillBar.style.width = Length.Percent(pct);
+            if (_percentLabel != null) _percentLabel.text = $"{Mathf.RoundToInt(pct)}%";
+        }
+
+        private void StartLoadingAnimations()
+        {
+            if (_animationsRunning) return;
+            _animationsRunning = true;
+            _dotTimer = 0f;
+            _dotStep = 1;
+            if (_waveLetters.Count > 0)
+            {
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.WaveLetters(_waveLetters, 9f, 0.06f, 0.45f);
+            }
+            if (_pizzaCorner != null)
+            {
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.SpinAndPulseLoop(_pizzaCorner, 1.05f, 0.9f, 9f);
+            }
+        }
+
+        private void StopLoadingAnimations()
+        {
+            if (!_animationsRunning) return;
+            _animationsRunning = false;
+            for (int i = 0; i < _waveLetters.Count; i++)
+            {
+                if (_waveLetters[i] != null)
+                {
+                    ScaryParty.UI.Piaria.Core.UIToolkitTweenService.KillTweens(_waveLetters[i]);
+                    _waveLetters[i].style.translate = new StyleTranslate(new Translate(0f, 0f, 0f));
+                }
+            }
+            if (_pizzaCorner != null)
+            {
+                ScaryParty.UI.Piaria.Core.UIToolkitTweenService.KillTweens(_pizzaCorner);
+                _pizzaCorner.style.scale = new StyleScale(new Scale(Vector2.one));
+                _pizzaCorner.style.rotate = new StyleRotate(new Rotate(Angle.Degrees(0f)));
             }
         }
 
@@ -399,12 +596,28 @@ namespace ScaryParty.Pizzeria.Presentation
 
             if (!_isLoading) return;
 
-            // Suavização monotônica do progresso exibido (sempre <= progresso confirmado)
-            if (_stateMachine != null && _stateMachine.DisplayedProgress < _stateMachine.ConfirmedProgress)
+            StartLoadingAnimations();
+
+            // Suavização contínua (SmoothDamp) da barra e do percentual com dt limitado para não saltar após frames pesados
+            if (_stateMachine != null)
             {
-                float shown = _stateMachine.StepDisplayedProgress(Time.unscaledDeltaTime * 0.9f);
-                if (_progressBar != null) _progressBar.value = Mathf.Clamp01(shown) * 100f;
-                if (_percentLabel != null) _percentLabel.text = $"{Mathf.RoundToInt(Mathf.Clamp01(shown) * 100f)}%";
+                float target = _stateMachine.ConfirmedProgress;
+                _stateMachine.StepDisplayedProgress(Time.unscaledDeltaTime * 0.9f);
+                if (_visualProgress01 < target)
+                {
+                    float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+                    if (ScaryParty.UI.Piaria.Core.UIToolkitTweenService.ReduceMotion)
+                    {
+                        _visualProgress01 = target;
+                    }
+                    else
+                    {
+                        _visualProgress01 = Mathf.SmoothDamp(_visualProgress01, target, ref _visualProgressVelocity, 0.16f, Mathf.Infinity, dt);
+                        if (target - _visualProgress01 < 0.002f)
+                            _visualProgress01 = target;
+                    }
+                    SetProgressVisual(_visualProgress01);
+                }
             }
 
             if (_spinnerIcon != null)
@@ -419,6 +632,22 @@ namespace ScaryParty.Pizzeria.Presentation
                     _spinnerIcon.style.opacity = 1f;
                     float rot = (Time.unscaledTime * 280f) % 360f;
                     _spinnerIcon.style.rotate = new Rotate(rot);
+                }
+            }
+
+            // Ciclo de 1 a 3 pontinhos mantendo espaço reservado sem variar largura
+            _dotTimer += Time.unscaledDeltaTime;
+            if (_dotTimer >= 0.4f)
+            {
+                _dotTimer = 0f;
+                _dotStep = (_dotStep % 3) + 1;
+                for (int i = 0; i < _loadingDots.Length; i++)
+                {
+                    if (_loadingDots[i] != null)
+                    {
+                        bool visible = ScaryParty.UI.Piaria.Core.UIToolkitTweenService.ReduceMotion || i < _dotStep;
+                        _loadingDots[i].style.opacity = visible ? 1f : 0.15f;
+                    }
                 }
             }
 
@@ -484,8 +713,9 @@ namespace ScaryParty.Pizzeria.Presentation
                 _overlayRoot.style.opacity = 1f;
             }
 
-            if (_progressBar != null) _progressBar.value = 2f;
-            if (_percentLabel != null) _percentLabel.text = "2%";
+            _visualProgress01 = 0.02f;
+            _visualProgressVelocity = 0f;
+            SetProgressVisual(_visualProgress01);
             SetStage(LoadingStage.ConnectingSession, 0.02f, statusText);
 
             StartCoroutine(RoutineWaitForConnection(opToken, Mathf.Max(4f, timeoutSeconds)));
@@ -513,6 +743,9 @@ namespace ScaryParty.Pizzeria.Presentation
             if (!sm.Cancel(token)) return;
 
             StopAllCoroutines();
+            _waitingForPresentationHandoff = false;
+            _holdingForPresentation = false;
+            _presentationReleased = false;
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
             if (wasConnecting)
             {
@@ -582,6 +815,9 @@ namespace ScaryParty.Pizzeria.Presentation
             if (sm.IsActiveState && sm.State != LoadingOperationState.Connecting) return;
 
             StopAllCoroutines();
+            _waitingForPresentationHandoff = false;
+            _holdingForPresentation = false;
+            _presentationReleased = false;
             _currentTransitionIsNetworked = false;
             _retryCallback = null;
             int token = sm.BeginSceneTransition(
@@ -593,6 +829,9 @@ namespace ScaryParty.Pizzeria.Presentation
             _expectedTargetScene = targetSceneName;
             _trackedNetworkAsyncOp = null;
             _networkSceneLoadCompleted = false;
+            _visualProgress01 = 0f;
+            _visualProgressVelocity = 0f;
+            SetProgressVisual(0f);
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
             StartCoroutine(RoutineTransition(token, targetSceneName, false, startNetworkLoadAfterFirstFrame: false, onReadyCallback));
         }
@@ -621,6 +860,9 @@ namespace ScaryParty.Pizzeria.Presentation
 
             StopAllCoroutines();
             TryHookNetworkSceneEvents();
+            _waitingForPresentationHandoff = false;
+            _holdingForPresentation = false;
+            _presentationReleased = false;
             _currentTransitionIsNetworked = true;
             _retryCallback = null;
             int token = sm.BeginSceneTransition(
@@ -632,6 +874,9 @@ namespace ScaryParty.Pizzeria.Presentation
             _expectedTargetScene = targetSceneName;
             _trackedNetworkAsyncOp = null;
             _networkSceneLoadCompleted = false;
+            _visualProgress01 = 0f;
+            _visualProgressVelocity = 0f;
+            SetProgressVisual(0f);
 
             EnsureUIOverlay();
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
@@ -658,6 +903,9 @@ namespace ScaryParty.Pizzeria.Presentation
             if (sm.IsActiveState && token != sm.OperationToken) return;
 
             StopAllCoroutines();
+            _waitingForPresentationHandoff = false;
+            _holdingForPresentation = false;
+            _presentationReleased = false;
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
 
             if (!string.IsNullOrEmpty(reason))
@@ -687,6 +935,12 @@ namespace ScaryParty.Pizzeria.Presentation
 
         private void HideOverlayNow()
         {
+            _waitingForPresentationHandoff = false;
+            _holdingForPresentation = false;
+            _presentationReleased = false;
+            _visualProgress01 = 0f;
+            _visualProgressVelocity = 0f;
+            StopLoadingAnimations();
             if (_cancelBtn != null) _cancelBtn.style.display = DisplayStyle.None;
             if (_errorBox != null) _errorBox.style.display = DisplayStyle.None;
             if (_overlayRoot != null)
@@ -813,6 +1067,9 @@ namespace ScaryParty.Pizzeria.Presentation
                     if (!_isLoading || _awaitingConnection)
                     {
                         StopAllCoroutines();
+                        _waitingForPresentationHandoff = false;
+                        _holdingForPresentation = false;
+                        _presentationReleased = false;
                         var sm = EnsureStateMachine();
                         _retryCallback = null;
                         int token = _awaitingConnection && sm.PromoteConnectingToSceneLoad(
@@ -1063,15 +1320,59 @@ namespace ScaryParty.Pizzeria.Presentation
             yield return null;
             if (myTransitionId != _transitionId) yield break;
 
-            SetStage(LoadingStage.Ready, 1.0f, "Tudo pronto!");
+            SetStage(LoadingStage.Ready, readiness == SceneReadinessProfile.Gameplay ? 0.99f : 1.0f,
+                readiness == SceneReadinessProfile.Gameplay ? "Preparando apresentação..." : "Tudo pronto!");
             sm.MarkReady(myTransitionId);
-            if (_progressBar != null) _progressBar.value = 100f;
-            if (_percentLabel != null) _percentLabel.text = "100%";
-            ScaryParty.UI.Piaria.Core.UIFeedbackService.Instance?.PlaySuccess();
 
-            yield return new WaitForSecondsRealtime(0.18f);
-            if (myTransitionId != _transitionId) yield break;
-            onReadyCallback?.Invoke();
+            if (readiness == SceneReadinessProfile.Gameplay)
+            {
+                // Mantém overlay 100% opaco até a apresentação (cutscene/briefing) concluir preload e liberar explicitamente
+                _waitingForPresentationHandoff = true;
+                HoldForPresentation(myTransitionId);
+                Debug.Log($"[LoadingCoordinator] Gameplay pronto — aguardando ReleaseToCutscene (token={myTransitionId}).");
+                onReadyCallback?.Invoke();
+
+                float holdStart = Time.realtimeSinceStartup;
+                while (_holdingForPresentation && !_presentationReleased)
+                {
+                    if (myTransitionId != _transitionId)
+                    {
+                        _waitingForPresentationHandoff = false;
+                        yield break;
+                    }
+                    if (Time.realtimeSinceStartup - holdStart >= 15f)
+                    {
+                        Debug.LogWarning("[LoadingCoordinator] Timeout aguardando ReleaseToCutscene — liberando overlay.");
+                        _holdingForPresentation = false;
+                        break;
+                    }
+                    yield return null;
+                }
+                _waitingForPresentationHandoff = false;
+            }
+            else
+            {
+                SetProgressVisual(1.0f);
+                ScaryParty.UI.Piaria.Core.UIFeedbackService.Instance?.PlaySuccess();
+                yield return new WaitForSecondsRealtime(0.18f);
+                if (myTransitionId != _transitionId) yield break;
+                onReadyCallback?.Invoke();
+            }
+
+            if (!ScaryParty.UI.Piaria.Core.UIToolkitTweenService.ReduceMotion && _visualProgress01 < 0.995f)
+            {
+                float finishWait = 0f;
+                while (_visualProgress01 < 0.995f && finishWait < 0.35f)
+                {
+                    if (myTransitionId != _transitionId) yield break;
+                    finishWait += Time.unscaledDeltaTime;
+                    yield return null;
+                }
+            }
+            _visualProgress01 = 1f;
+            _visualProgressVelocity = 0f;
+            SetProgressVisual(1.0f);
+            ScaryParty.UI.Piaria.Core.UIFeedbackService.Instance?.PlaySuccess();
 
             // Fade-out e liberação segura do input
             sm.BeginFadeOut(myTransitionId);
@@ -1084,6 +1385,7 @@ namespace ScaryParty.Pizzeria.Presentation
                 yield return null;
             }
 
+            StopLoadingAnimations();
             _overlayRoot.style.opacity = 0f;
             _overlayRoot.style.display = DisplayStyle.None;
             _stageTimings.EndActiveStage(Time.realtimeSinceStartup);

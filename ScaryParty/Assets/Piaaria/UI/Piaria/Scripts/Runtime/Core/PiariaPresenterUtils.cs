@@ -48,6 +48,37 @@ namespace ScaryParty.UI.Piaria.Core
             }
         }
 
+        public static void RegisterResponsiveLayout(VisualElement root)
+        {
+            if (root == null) return;
+
+            void ApplyBreakpoints(float width, float height)
+            {
+                if (width <= 1f || height <= 1f) return;
+
+                bool isCompact = width < 1450f || height < 840f;
+                bool isWide = width >= 2250f;
+
+                root.EnableInClassList("layout-compact", isCompact);
+                root.EnableInClassList("layout-wide", !isCompact && isWide);
+                root.EnableInClassList("layout-normal", !isCompact && !isWide);
+            }
+
+            root.RegisterCallback<GeometryChangedEvent>(evt =>
+            {
+                ApplyBreakpoints(evt.newRect.width, evt.newRect.height);
+            });
+
+            if (root.resolvedStyle.width > 1f && root.resolvedStyle.height > 1f)
+            {
+                ApplyBreakpoints(root.resolvedStyle.width, root.resolvedStyle.height);
+            }
+            else
+            {
+                ApplyBreakpoints(Screen.width, Screen.height);
+            }
+        }
+
         public static void ResolveUIDocument(MonoBehaviour presenter, ref UIDocument uiDoc, string fallbackUxmlPath = null)
         {
             if (uiDoc == null)
