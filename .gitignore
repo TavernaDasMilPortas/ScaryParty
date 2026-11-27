@@ -1,24 +1,32 @@
-# Unity rules
-[Ll]ibrary/
-[Tt]emp/
-[Oo]bj/
-[Bb]uild/
-[Bb]uilds/
-[Ll]ogs/
-[Uu]ser[Ss]ettings/
-.utmp/
+# Unity rules (applies to root and nested Unity projects like ScaryParty/ and UndertaleUIToolkit/)
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/[Ll]ogs/
+**/[Uu]ser[Ss]ettings/
+**/.utmp/
 *.log
-[Mm]emoryCaptures/
-[Rr]ecordings/
+**/[Mm]emoryCaptures/
+**/[Rr]ecordings/
 
-# Visual Studio / Rider
+# Unity3D generated meta files
+**/[Aa]ssets/AssetStoreTools*
+**/[Aa]ssets/AddressableAssetsData/*/*.bin*
+**/[Aa]ssets/StreamingAssets/aa.meta
+**/[Aa]ssets/StreamingAssets/aa/*
+
+# Visual Studio / Rider / VS Code
 .vs/
+.idea/
 .gradle/
 ExportedObj/
 .consulo/
 *.csproj
 *.unityproj
 *.sln
+*.slnx
 *.suo
 *.tmp
 *.user
@@ -30,6 +38,7 @@ ExportedObj/
 *.mdb
 *.opendb
 *.VC.db
+*.DotSettings.user
 
 # Unity3D generated meta files
 *.pidb.meta
