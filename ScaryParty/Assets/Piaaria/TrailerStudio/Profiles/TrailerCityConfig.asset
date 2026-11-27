@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: feac8bcb4368c4f4aa9d4af8784768cc, type: 3}
   m_Name: TrailerCityConfig
   m_EditorClassIdentifier: Assembly-CSharp::CityConfig
-  gerarEmTempoReal: 1
+  gerarEmTempoReal: 0
   generateBorderWalls: 1
   generateSolidCore: 0
   fillBlockGroundInRoadMesh: 1
@@ -51,15 +51,15 @@ MonoBehaviour:
   maximumDeliveryPoints: 50
   minDeliverySeparation: 8
   preferZoneDistribution: 1
-  enablePedestrians: 1
+  enablePedestrians: 0
   populationBase: 8
   populationDensity: 0.15
   maxActivePedestrians: 40
   pedestrianCrossingTime: 8
   pedestrianWaitTrafficLight: 1
-  maxTrafficVehicles: 10
+  maxTrafficVehicles: 0
   trafficBaseSpeed: 8
   trafficLightProbability: 0.5
-  minEventInterval: 30
-  maxEventInterval: 90
+  minEventInterval: 9999
+  maxEventInterval: 9999
   blockadeDuration: 45

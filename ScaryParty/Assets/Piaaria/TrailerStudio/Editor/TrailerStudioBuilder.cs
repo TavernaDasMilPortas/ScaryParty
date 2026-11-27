@@ -22,7 +22,7 @@ namespace Piaaria.TrailerStudio.Editor
         private const string ProfilePath = ProfilesFolder + "/TrailerStudioProfile.asset";
         private const string CityConfigCopyPath = ProfilesFolder + "/TrailerCityConfig.asset";
 
-        [MenuItem("Tools/P.I.A.R.I.A/Trailer Studio/Build or Update Scene", priority = 100)]
+        [MenuItem("Tools/Scary Party/Uso Comum/Trailer Studio/Construir ou Atualizar Cena", false, 192)]
         public static void BuildOrUpdateScene()
         {
             EnsureFolders();
@@ -111,30 +111,42 @@ namespace Piaaria.TrailerStudio.Editor
                 profile.calabresaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Ingredient_Calabresa.prefab");
             if (profile.cheesePrefab == null)
                 profile.cheesePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Ingredient_Cheese.prefab");
+            if (profile.itemCatalog == null)
+                profile.itemCatalog = AssetDatabase.LoadAssetAtPath<ScaryParty.Pizzeria.Presentation.ItemPresentationCatalog>("Assets/Piaaria/ScriptableObjects/Pizzeria/ItemPresentationCatalog.asset");
+            if (profile.openDoughPrefab == null)
+                profile.openDoughPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_Ingredient_MassaAberta.prefab");
+            if (profile.saucePrefab == null)
+                profile.saucePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_Ingredient_Sauce.prefab");
+            if (profile.gratedCheesePrefab == null)
+                profile.gratedCheesePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_Ingredient_GratedCheese.prefab");
+            if (profile.slicedCalabresaPrefab == null)
+                profile.slicedCalabresaPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_Ingredient_SlicedPepperoni.prefab");
+            if (profile.deliveryBagVisualPrefab == null)
+                profile.deliveryBagVisualPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Piaaria/Prefabs/Pizzeria/Visuals/Visual_DeliveryBag.prefab");
         }
 
         private static void PopulateTakeDefinitions(TrailerStudioProfile profile)
         {
-            var specs = new (TrailerTakeId id, string name, float dur, bool hasB, float fovA, TrailerAnchorKey focus)[]
+            var names = new (TrailerTakeId id, string name)[]
             {
-                (TrailerTakeId.T01_CityReveal, "T01_CityReveal", 8f, false, 58f, TrailerAnchorKey.FACADE),
-                (TrailerTakeId.T02_KitchenTeam, "T02_KitchenTeam", 10f, true, 60f, TrailerAnchorKey.ASSEMBLY),
-                (TrailerTakeId.T03_Dough, "T03_Dough", 6f, true, 42f, TrailerAnchorKey.PREP_DOUGH),
-                (TrailerTakeId.T04_Ingredients, "T04_Ingredients", 6f, false, 40f, TrailerAnchorKey.PREP_CUT),
-                (TrailerTakeId.T05_Assembly, "T05_Assembly", 8f, true, 42f, TrailerAnchorKey.ASSEMBLY),
-                (TrailerTakeId.T06_Oven, "T06_Oven", 6f, false, 45f, TrailerAnchorKey.OVEN_ENTRY),
-                (TrailerTakeId.T07_Packaging, "T07_Packaging", 6f, true, 42f, TrailerAnchorKey.PACKAGING),
-                (TrailerTakeId.T08_Tickets, "T08_Tickets", 5f, false, 44f, TrailerAnchorKey.TICKETS),
-                (TrailerTakeId.T09_KitchenChaos, "T09_KitchenChaos", 10f, true, 58f, TrailerAnchorKey.ASSEMBLY),
-                (TrailerTakeId.T10_BurntPizza, "T10_BurntPizza", 6f, false, 48f, TrailerAnchorKey.OVEN_ENTRY),
-                (TrailerTakeId.T11_Backpack, "T11_Backpack", 6f, false, 50f, TrailerAnchorKey.DISPATCH),
-                (TrailerTakeId.T12_MotorcycleStart, "T12_MotorcycleStart", 8f, false, 55f, TrailerAnchorKey.PARKING),
-                (TrailerTakeId.T13_CityRide, "T13_CityRide", 10f, true, 58f, TrailerAnchorKey.ROUTE_START),
-                (TrailerTakeId.T14_Delivery, "T14_Delivery", 8f, false, 50f, TrailerAnchorKey.DELIVERY),
-                (TrailerTakeId.T15_FinalGag, "T15_FinalGag", 6f, false, 45f, TrailerAnchorKey.DISPATCH),
+                (TrailerTakeId.T01_CityReveal, "T01_CityReveal"),
+                (TrailerTakeId.T02_KitchenTeam, "T02_KitchenTeam"),
+                (TrailerTakeId.T03_Dough, "T03_Dough"),
+                (TrailerTakeId.T04_Ingredients, "T04_Ingredients"),
+                (TrailerTakeId.T05_Assembly, "T05_Assembly"),
+                (TrailerTakeId.T06_Oven, "T06_Oven"),
+                (TrailerTakeId.T07_Packaging, "T07_Packaging"),
+                (TrailerTakeId.T08_Tickets, "T08_Tickets"),
+                (TrailerTakeId.T09_KitchenChaos, "T09_KitchenChaos"),
+                (TrailerTakeId.T10_BurntPizza, "T10_BurntPizza"),
+                (TrailerTakeId.T11_Backpack, "T11_Backpack"),
+                (TrailerTakeId.T12_MotorcycleStart, "T12_MotorcycleStart"),
+                (TrailerTakeId.T13_CityRide, "T13_CityRide"),
+                (TrailerTakeId.T14_Delivery, "T14_Delivery"),
+                (TrailerTakeId.T15_FinalGag, "T15_FinalGag"),
             };
 
-            foreach (var s in specs)
+            foreach (var s in names)
             {
                 var def = profile.GetTake(s.id);
                 if (def == null)
@@ -143,61 +155,8 @@ namespace Piaaria.TrailerStudio.Editor
                     profile.takes.Add(def);
                 }
                 def.displayName = s.name;
-                def.actionDuration = s.dur;
-                def.preRoll = 0.75f;
-                def.postRoll = 0.75f;
-                def.hasCameraB = s.hasB;
-                def.cameraAFov = s.fovA;
-                def.focusAnchor = s.focus;
-
-                if (s.id == TrailerTakeId.T03_Dough)
-                {
-                    def.cameraAStartOffset = new Vector3(0.9f, 0.65f, 1.15f);
-                    def.cameraAEndOffset = new Vector3(0.55f, 0.55f, 0.95f);
-                    def.cameraBOffset = new Vector3(0f, 1.8f, 0.12f);
-                }
-                else if (s.id == TrailerTakeId.T07_Packaging)
-                {
-                    def.cameraAStartOffset = new Vector3(1.0f, 0.75f, 1.25f);
-                    def.cameraAEndOffset = new Vector3(0.8f, 0.65f, 1.1f);
-                }
-                else if (s.id == TrailerTakeId.T12_MotorcycleStart)
-                {
-                    def.cameraAStartOffset = new Vector3(-2.5f, 0.4f, 2.5f);
-                    def.cameraAEndOffset = new Vector3(-1.8f, 0.5f, 2.0f);
-                }
-                else if (def.cameraAStartOffset == Vector3.zero)
-                {
-                    def.cameraAStartOffset = new Vector3(1.2f, 0.9f, 2.0f);
-                    def.cameraAEndOffset = new Vector3(0.8f, 0.8f, 1.6f);
-                }
-
-                if (def.cues == null || def.cues.Count == 0)
-                {
-                    def.cues = BuildDefaultCues(s.id);
-                }
+                TrailerStudioProfile.ApplyTakeDefaultsIfMissing(def);
             }
-        }
-
-        private static List<TrailerActionCue> BuildDefaultCues(TrailerTakeId id)
-        {
-            var list = new List<TrailerActionCue>();
-            if (id == TrailerTakeId.T03_Dough)
-            {
-                list.Add(new TrailerActionCue { time = 0.8f, actor = TrailerActorId.ActorA, actionType = TrailerActionType.SetPreparing, boolValue = true });
-                list.Add(new TrailerActionCue { time = 4.2f, actor = TrailerActorId.ActorA, actionType = TrailerActionType.SetPreparing, boolValue = false });
-            }
-            else if (id == TrailerTakeId.T07_Packaging)
-            {
-                list.Add(new TrailerActionCue { time = 1.0f, actor = TrailerActorId.ActorC, actionType = TrailerActionType.SetPreparing, boolValue = true });
-                list.Add(new TrailerActionCue { time = 3.5f, actor = TrailerActorId.ActorC, actionType = TrailerActionType.SetPreparing, boolValue = false });
-            }
-            else if (id == TrailerTakeId.T12_MotorcycleStart)
-            {
-                list.Add(new TrailerActionCue { time = 0.0f, actor = TrailerActorId.ActorD, actionType = TrailerActionType.MoveToAnchor, anchorKey = TrailerAnchorKey.PARKING, duration = 1.8f });
-                list.Add(new TrailerActionCue { time = 1.8f, actor = TrailerActorId.ActorD, actionType = TrailerActionType.SetSitting, boolValue = true });
-            }
-            return list;
         }
 
         private static void CreateOrUpdateTimelines(TrailerStudioProfile profile)

@@ -5,6 +5,16 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-27] — Correção e Completação do Trailer Studio (`T01`–`T15`)
+- **Escopo:** `TrailerTake.cs`, `TrailerStudioProfile.cs`, `TrailerActor.cs`, `TrailerStageHelper.cs`, `TrailerDirector.cs`, `TrailerStudioBuilder.cs`, `TrailerStudioValidator.cs`, `TrailerStudioProfile.asset`, `TrailerCityConfig.asset`, `TrailerStudioTests.cs`, `README_GRAVACAO.md`.
+- **Resumo:**
+  - `TrailerDirector` passou a distinguir cidade existente verificada de falha de geração (`TryGenerateOfflineWithSeed`), bloquear `Play()` quando `PrepareTake()` detecta erro/âncora ausente (sem fallback para `(0,0,0)`), isolar elenco/moto/props por take, garantir disparo exact-once de cues inclusive na borda de `actionDuration`, e sincronizar ações contínuas (rolo/massa, faca/corte, arco do forno, rota da moto/rodas, queda da caixa e câmeras A/B).
+  - `TrailerStageHelper` resolve estações na pizzaria única (`PizzeriaRoot` + `PizzeriaAuthoringBindings` + `NpcWorkPoint` + `PizzeriaParkingLotBuilder`), separa `ObjectPoint`/`StandPoint`/`FocusPoint`, instancia visuais reais (`ItemPresentationCatalog` + `PizzaVisualComposer` + `Visual_DeliveryBag` + `TicketSheetView`) e gera rotas viárias válidas para `T12`, `T13` e `T14`.
+  - `[MenuItem]`s movidos para `Tools/Scary Party/Uso Comum/Trailer Studio/` (`192`/`193`); `TrailerCityConfig.asset` isolado com eventos/tráfego/pedestres globais desligados.
+- **Pendências (L2/Editor):** Abrir `TrailerStudio.unity` no Unity Editor `6000.3.6f1` e validar visualmente os 15 takes na Game View `16:9` (`UNITY_EXECUTION=MANUAL_ONLY`).
+
+---
+
 ## [2026-11-26] — Correção do Handoff Loading → Cutscene, Unload de CutScene e Z-Order UI Toolkit
 - **Escopo:** `PizzeriaSceneLoadingCoordinator.cs`, `GameplayIntroCutsceneFlow.cs`, `CutscenePlaybackService.cs`, `CutsceneOverlayPresenter.cs`.
 - **Resumo:**

@@ -1,9 +1,8 @@
 # Estado Atual do Projeto — ScaryParty
 
-**Última Revisão:** 26/11/2026
-**Versão Unity:** Unity 6000.3.6f1
-**Branch Atual:** `main`
-**Último Bloco Concluído:** **Etapas A–E do `PLANO_IMPLEMENTACAO_UI_PIARIA_ATUALIZADO.md` + estabilização da sequência de entrada em `GameScene` (`PizzeriaSceneLoadingCoordinator` com `IsWaitingForPresentationHandoff` sem deadlock de 15s, `GameplayIntroCutsceneFlow` sincronizado após prontidão real, `CutscenePlaybackService` com cleanup/unload garantido mesmo durante abort/preload e `RebuildLookup` em `"Cutscenes"`, e `CutsceneOverlayPresenter` migrado para UI Toolkit `sortingOrder = 4000` abaixo apenas do Loading `5000` e com botão/atalhos de skip). Validação em Editor/PlayMode/Host+Cliente pendente (`UNITY_EXECUTION=MANUAL_ONLY`).**
+**Última Revisão:** 27/11/2026
+**Branch Atual:** `main` (`c9fccd25` + Trailer Studio offline)
+**Último Bloco Concluído:** **Correção completa do Trailer Studio (`Assets/Piaaria/TrailerStudio/`): bootstrap/validação estrita de cidade e âncoras sem fallback `(0,0,0)`, resolução determinística por função/pátio/rotas viárias, elenco e moto filtrados por take, relógio local exact-once com `0.75 s` de pré/pós-roll e cobertura dos 15 takes (`T01`–`T15`) incluindo pilotos `T03`/`T07`/`T12`. Validação visual no Unity Editor aberto pendente (`UNITY_EXECUTION=MANUAL_ONLY`).**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
 ---

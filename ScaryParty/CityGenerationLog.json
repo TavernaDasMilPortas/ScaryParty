@@ -2,8 +2,122 @@
     "blocks": [
         {
             "blockIndex": 0,
-            "area": 6734.08251953125,
+            "area": 19748.666015625,
+            "vertexCount": 9,
+            "edges": []
+        },
+        {
+            "blockIndex": 1,
+            "area": 7514.8623046875,
+            "vertexCount": 6,
+            "edges": []
+        },
+        {
+            "blockIndex": 2,
+            "area": 2882.649658203125,
             "vertexCount": 5,
+            "edges": []
+        },
+        {
+            "blockIndex": 3,
+            "area": 4726.60009765625,
+            "vertexCount": 7,
+            "edges": []
+        },
+        {
+            "blockIndex": 4,
+            "area": 1669.5909423828125,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 5,
+            "area": 13396.052734375,
+            "vertexCount": 6,
+            "edges": []
+        },
+        {
+            "blockIndex": 6,
+            "area": 3223.9267578125,
+            "vertexCount": 6,
+            "edges": []
+        },
+        {
+            "blockIndex": 7,
+            "area": 24220.884765625,
+            "vertexCount": 24,
+            "edges": []
+        },
+        {
+            "blockIndex": 8,
+            "area": 1998.4759521484375,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 9,
+            "area": 3043.064453125,
+            "vertexCount": 5,
+            "edges": []
+        },
+        {
+            "blockIndex": 10,
+            "area": 4105.3037109375,
+            "vertexCount": 5,
+            "edges": []
+        },
+        {
+            "blockIndex": 11,
+            "area": 991.07373046875,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 12,
+            "area": 3428.01416015625,
+            "vertexCount": 7,
+            "edges": []
+        },
+        {
+            "blockIndex": 13,
+            "area": 5391.5634765625,
+            "vertexCount": 6,
+            "edges": []
+        },
+        {
+            "blockIndex": 14,
+            "area": 839.0719604492188,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 15,
+            "area": 2165.422119140625,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 16,
+            "area": 4307.73388671875,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 17,
+            "area": 2642.7890625,
+            "vertexCount": 4,
+            "edges": []
+        },
+        {
+            "blockIndex": 18,
+            "area": 2641.139404296875,
+            "vertexCount": 5,
+            "edges": []
+        },
+        {
+            "blockIndex": 19,
+            "area": 942.4201049804688,
+            "vertexCount": 4,
             "edges": []
         }
     ]

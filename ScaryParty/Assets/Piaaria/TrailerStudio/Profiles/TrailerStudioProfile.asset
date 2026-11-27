@@ -24,6 +24,12 @@ MonoBehaviour:
   knifePrefab: {fileID: 1198092872071062560, guid: 136d95048042f5b438b121ed314556e6, type: 3}
   calabresaPrefab: {fileID: 6659788359894402159, guid: 0b4713dbc3fe5ca478f303e88df93e9f, type: 3}
   cheesePrefab: {fileID: 5220987321227752152, guid: 9ab69ae344fa78c4babd67bf4a945d12, type: 3}
+  itemCatalog: {fileID: 11400000, guid: 8ab051e2454dde5419dc47aa8365e66d, type: 2}
+  openDoughPrefab: {fileID: 1000000011, guid: 50330bb3be2c46468a973efbce8e1862, type: 3}
+  saucePrefab: {fileID: 1000000023, guid: 6f00d9b5be2f47818c86b953a27da0d4, type: 3}
+  gratedCheesePrefab: {fileID: 1000000047, guid: 75911d39ab9042b9b90366e89878b9c8, type: 3}
+  slicedCalabresaPrefab: {fileID: 1000000071, guid: 5d50dbc038eb4994a8e567f09ba47a7a, type: 3}
+  deliveryBagVisualPrefab: {fileID: 9153489371436407525, guid: 4e3a2888158d62c43892138fc7510423, type: 3}
   actorColors:
   - {r: 0.2, g: 0.55, b: 0.95, a: 1}
   - {r: 0.92, g: 0.25, b: 0.25, a: 1}
@@ -37,13 +43,41 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: b68d5905fb60e3a4388ab429207dc173, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: -6, y: 10.5, z: 14.5}
+    cameraAEndOffset: {x: 3.2, y: 2.6, z: 9.8}
     cameraAFov: 58
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 13
-    cues: []
+    activeActors: 03000000
+    showMotorcycle: 1
+    showTrafficDecor: 1
+    requiredAnchors: 0d0000000c0000000e000000
+    cues:
+    - time: 4.6
+      duration: 3
+      actor: 3
+      actionType: 1
+      anchorKey: 12
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 7.7
+      duration: 0
+      actor: 3
+      actionType: 2
+      anchorKey: 13
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 1
     displayName: T02_KitchenTeam
     actionDuration: 10
@@ -51,28 +85,18 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 6935dd93ebc757c478726c4423d2e0b1, type: 2}
     hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: -2.6, y: 1.85, z: 4.2}
+    cameraAEndOffset: {x: 2.4, y: 1.55, z: 4.2}
     cameraAFov: 60
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
+    cameraBOffset: {x: 0, y: 1.52, z: 0.25}
+    cameraBFov: 68
     focusAnchor: 3
-    cues: []
-  - id: 2
-    displayName: T03_Dough
-    actionDuration: 6
-    preRoll: 0.75
-    postRoll: 0.75
-    timelineAsset: {fileID: 11400000, guid: b56d7e74f963b5846afcef4818af531f, type: 2}
-    hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 42
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
-    focusAnchor: 1
+    activeActors: 00000000010000000200000003000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 010000000300000004000000060000000700000015000000
     cues:
-    - time: 0.8
+    - time: 0.3
       duration: 0
       actor: 0
       actionType: 3
@@ -82,6 +106,426 @@ MonoBehaviour:
       soundKey: 
       fxKey: 
       boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.6
+      duration: 0
+      actor: 0
+      actionType: 7
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: dough_open
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5
+      duration: 0
+      actor: 0
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.2
+      duration: 0
+      actor: 0
+      actionType: 5
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: dough_open
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.6
+      duration: 2.2
+      actor: 0
+      actionType: 1
+      anchorKey: 21
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 8
+      duration: 0
+      actor: 0
+      actionType: 6
+      anchorKey: 21
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.5
+      duration: 0
+      actor: 1
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.2
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_2_cheese
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.8
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_3_calabresa
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 7.2
+      duration: 0
+      actor: 1
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.6
+      duration: 0
+      actor: 2
+      actionType: 17
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1
+      duration: 0.45
+      actor: 2
+      actionType: 8
+      anchorKey: 4
+      targetAnchorKey: 5
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.6
+      duration: 0
+      actor: 2
+      actionType: 17
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2
+      duration: 1.6
+      actor: 2
+      actionType: 1
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.7
+      duration: 0
+      actor: 2
+      actionType: 6
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.1
+      duration: 0
+      actor: 2
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 6.2
+      duration: 0
+      actor: 2
+      actionType: 9
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 6.8
+      duration: 0
+      actor: 2
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 7.2
+      duration: 0
+      actor: 2
+      actionType: 5
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: pizza_box
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.2
+      duration: 0
+      actor: 3
+      actionType: 19
+      anchorKey: 7
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 1
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.2
+      duration: 0
+      actor: 3
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: OrderInspected
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.4
+      duration: 2.4
+      actor: 3
+      actionType: 1
+      anchorKey: 20
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2.1
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 8
+      duration: 0
+      actor: 3
+      actionType: 2
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+  - id: 2
+    displayName: T03_Dough
+    actionDuration: 6
+    preRoll: 0.75
+    postRoll: 0.75
+    timelineAsset: {fileID: 11400000, guid: b56d7e74f963b5846afcef4818af531f, type: 2}
+    hasCameraB: 1
+    cameraAStartOffset: {x: 1.25, y: 0.72, z: 0.28}
+    cameraAEndOffset: {x: 0.98, y: 0.62, z: 0.22}
+    cameraAFov: 44
+    cameraBOffset: {x: 0, y: 1.48, z: -0.1}
+    cameraBFov: 44
+    focusAnchor: 1
+    activeActors: 00000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 01000000
+    cues:
+    - time: 0.35
+      duration: 0
+      actor: 0
+      actionType: 5
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: rolling_pin
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.8
+      duration: 3.4
+      actor: 0
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.1
+      duration: 0
+      actor: 0
+      actionType: 14
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: dough_roll
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.2
+      duration: 0
+      actor: 0
+      actionType: 7
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: dough_open
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.35
+      duration: 0
+      actor: 0
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.75
+      duration: 0
+      actor: 0
+      actionType: 6
+      anchorKey: 1
+      targetAnchorKey: 0
+      propKey: rolling_pin_side
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+  - id: 3
+    displayName: T04_Ingredients
+    actionDuration: 6
+    preRoll: 0.75
+    postRoll: 0.75
+    timelineAsset: {fileID: 11400000, guid: abc1cb66b43ebbb40a3641b1e27c73d2, type: 2}
+    hasCameraB: 0
+    cameraAStartOffset: {x: -1.22, y: 0.7, z: 0.26}
+    cameraAEndOffset: {x: -0.95, y: 0.6, z: 0.2}
+    cameraAFov: 44
+    cameraBOffset: {x: 0, y: 0, z: 0}
+    cameraBFov: 45
+    focusAnchor: 2
+    activeActors: 00000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 02000000
+    cues:
+    - time: 0.45
+      duration: 0
+      actor: 0
+      actionType: 5
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: knife
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.8
+      duration: 3.1
+      actor: 0
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1
+      duration: 0
+      actor: 0
+      actionType: 14
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: cut_calabresa
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.9
+      duration: 0
+      actor: 0
+      actionType: 7
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: calabresa_sliced
+      soundKey: 
+      fxKey: 
+      boolValue: 0
       floatValue: 0
       vectorValue: {x: 0, y: 0, z: 0}
     - time: 4.2
@@ -96,20 +540,18 @@ MonoBehaviour:
       boolValue: 0
       floatValue: 0
       vectorValue: {x: 0, y: 0, z: 0}
-  - id: 3
-    displayName: T04_Ingredients
-    actionDuration: 6
-    preRoll: 0.75
-    postRoll: 0.75
-    timelineAsset: {fileID: 11400000, guid: abc1cb66b43ebbb40a3641b1e27c73d2, type: 2}
-    hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 40
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
-    focusAnchor: 2
-    cues: []
+    - time: 4.65
+      duration: 0
+      actor: 0
+      actionType: 6
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: knife_side
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 4
     displayName: T05_Assembly
     actionDuration: 8
@@ -117,13 +559,89 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: b750b14ab15ae9d4fa9149577004d3ac, type: 2}
     hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: 0.04, y: 1.72, z: -0.08}
+    cameraAEndOffset: {x: 0.04, y: 1.48, z: -0.08}
     cameraAFov: 42
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
+    cameraBOffset: {x: 0, y: 1.5, z: 0.18}
+    cameraBFov: 65
     focusAnchor: 3
-    cues: []
+    activeActors: 01000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 03000000
+    cues:
+    - time: 1
+      duration: 0
+      actor: 1
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.2
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_1_sauce
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.8
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_2_cheese
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.4
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_3_calabresa
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.9
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_4_full
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 6.7
+      duration: 0
+      actor: 1
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 5
     displayName: T06_Oven
     actionDuration: 6
@@ -131,13 +649,77 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 74641e2da43113f4fb992cec6bf79ed6, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 45
+    cameraAStartOffset: {x: 0.68, y: 0.42, z: 1.85}
+    cameraAEndOffset: {x: 0.42, y: 0.3, z: 1.42}
+    cameraAFov: 46
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 5
-    cues: []
+    activeActors: 02000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 050000000400000017000000
+    cues:
+    - time: 0.8
+      duration: 0
+      actor: 2
+      actionType: 17
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.05
+      duration: 0.45
+      actor: 2
+      actionType: 8
+      anchorKey: 4
+      targetAnchorKey: 5
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.6
+      duration: 0
+      actor: 2
+      actionType: 17
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.8
+      duration: 0
+      actor: 2
+      actionType: 14
+      anchorKey: 4
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: oven_bake_start
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.5
+      duration: 0
+      actor: 2
+      actionType: 2
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 6
     displayName: T07_Packaging
     actionDuration: 6
@@ -145,12 +727,16 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: cae2e1fa2f36f0744a003e6c42fc18f7, type: 2}
     hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 42
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
+    cameraAStartOffset: {x: 1.32, y: 0.75, z: 0.3}
+    cameraAEndOffset: {x: 1.12, y: 0.68, z: 0.26}
+    cameraAFov: 46
+    cameraBOffset: {x: -1.28, y: 0.82, z: 0.32}
+    cameraBFov: 52
     focusAnchor: 6
+    activeActors: 02000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 060000000a000000
     cues:
     - time: 1
       duration: 0
@@ -164,11 +750,47 @@ MonoBehaviour:
       boolValue: 1
       floatValue: 0
       vectorValue: {x: 0, y: 0, z: 0}
-    - time: 3.5
+    - time: 2.95
+      duration: 0
+      actor: 2
+      actionType: 9
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.15
       duration: 0
       actor: 2
       actionType: 3
       anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.45
+      duration: 0
+      actor: 2
+      actionType: 5
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: pizza_box
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.2
+      duration: 0
+      actor: 2
+      actionType: 2
+      anchorKey: 10
       targetAnchorKey: 0
       propKey: 
       soundKey: 
@@ -183,13 +805,77 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 83a0435cb3c45a5409a6ee5ebafd1066, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 44
+    cameraAStartOffset: {x: 0.28, y: -0.04, z: 1.28}
+    cameraAEndOffset: {x: 0.12, y: -0.02, z: 0.92}
+    cameraAFov: 46
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 7
-    cues: []
+    activeActors: 03000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 0700000003000000
+    cues:
+    - time: 1
+      duration: 0
+      actor: 3
+      actionType: 19
+      anchorKey: 7
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 1
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.7
+      duration: 0
+      actor: 3
+      actionType: 19
+      anchorKey: 7
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.4
+      duration: 0
+      actor: 3
+      actionType: 19
+      anchorKey: 7
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 3
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.65
+      duration: 0
+      actor: 3
+      actionType: 2
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.4
+      duration: 0
+      actor: 3
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: OrderDeadlineWarning
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 8
     displayName: T09_KitchenChaos
     actionDuration: 10
@@ -197,13 +883,245 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 3a60c5098cd35a342b74a761585280bc, type: 2}
     hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: 1.75, y: 1.15, z: 2.35}
+    cameraAEndOffset: {x: 1.55, y: 1.05, z: 2.15}
     cameraAFov: 58
-    cameraBOffset: {x: 0, y: 0, z: 0}
-    cameraBFov: 60
+    cameraBOffset: {x: 0, y: 1.52, z: 0.22}
+    cameraBFov: 68
     focusAnchor: 3
-    cues: []
+    activeActors: 00000000010000000200000003000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 08000000020000000300000004000000060000000700000015000000
+    cues:
+    - time: 0.2
+      duration: 0
+      actor: 0
+      actionType: 5
+      anchorKey: 8
+      targetAnchorKey: 0
+      propKey: calabresa_whole
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.4
+      duration: 2.6
+      actor: 0
+      actionType: 1
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2.8
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.1
+      duration: 0
+      actor: 0
+      actionType: 6
+      anchorKey: 2
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.4
+      duration: 0
+      actor: 0
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.8
+      duration: 0
+      actor: 3
+      actionType: 19
+      anchorKey: 7
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 1
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.4
+      duration: 2.7
+      actor: 3
+      actionType: 1
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 4.2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.3
+      duration: 0
+      actor: 3
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: ActionRejected
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.4
+      duration: 2.8
+      actor: 3
+      actionType: 1
+      anchorKey: 21
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 4
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 8.4
+      duration: 0
+      actor: 3
+      actionType: 2
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 0.5
+      duration: 0
+      actor: 1
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.4
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_2_cheese
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5
+      duration: 0
+      actor: 1
+      actionType: 21
+      anchorKey: 3
+      targetAnchorKey: 0
+      propKey: pizza_stage_4_full
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 6.2
+      duration: 0
+      actor: 1
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: ProcessCompleted
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1
+      duration: 0
+      actor: 2
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.4
+      duration: 0
+      actor: 2
+      actionType: 9
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4
+      duration: 0
+      actor: 2
+      actionType: 3
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.3
+      duration: 0
+      actor: 2
+      actionType: 5
+      anchorKey: 6
+      targetAnchorKey: 0
+      propKey: pizza_box
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.8
+      duration: 2.6
+      actor: 2
+      actionType: 1
+      anchorKey: 21
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 3.2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 7.6
+      duration: 0
+      actor: 2
+      actionType: 6
+      anchorKey: 21
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 9
     displayName: T10_BurntPizza
     actionDuration: 6
@@ -211,13 +1129,101 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: cd114459b9722ef4f83e7b7cac158a7a, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: 0.75, y: 0.48, z: 1.95}
+    cameraAEndOffset: {x: 1.05, y: 0.68, z: 2.35}
     cameraAFov: 48
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 5
-    cues: []
+    activeActors: 0100000002000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 05000000040000001700000003000000
+    cues:
+    - time: 0.9
+      duration: 0
+      actor: 2
+      actionType: 14
+      anchorKey: 4
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: oven_smoke_start
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.2
+      duration: 0
+      actor: 2
+      actionType: 2
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.35
+      duration: 0.6
+      actor: 2
+      actionType: 1
+      anchorKey: 23
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2.4
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3
+      duration: 0
+      actor: 2
+      actionType: 17
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.3
+      duration: 0.45
+      actor: 2
+      actionType: 8
+      anchorKey: 4
+      targetAnchorKey: 5
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.85
+      duration: 0
+      actor: 2
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: OvenBurned
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.1
+      duration: 0
+      actor: 1
+      actionType: 2
+      anchorKey: 5
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 10
     displayName: T11_Backpack
     actionDuration: 6
@@ -225,13 +1231,65 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 64b6b8b8a286b284c9474c5790670dd1, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 50
+    cameraAStartOffset: {x: 2.15, y: 0.62, z: 1.15}
+    cameraAEndOffset: {x: 1.85, y: 0.68, z: -0.45}
+    cameraAFov: 52
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 10
-    cues: []
+    activeActors: 03000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 0a0000000c000000
+    cues:
+    - time: 0.3
+      duration: 0
+      actor: 3
+      actionType: 10
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.2
+      duration: 0
+      actor: 3
+      actionType: 5
+      anchorKey: 10
+      targetAnchorKey: 0
+      propKey: pizza_box
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.4
+      duration: 0
+      actor: 3
+      actionType: 22
+      anchorKey: 10
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 3.7
+      duration: 2.2
+      actor: 3
+      actionType: 1
+      anchorKey: 12
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 3.8
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 11
     displayName: T12_MotorcycleStart
     actionDuration: 8
@@ -239,17 +1297,33 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 301e88fdbe53373479511bb1a4cf45f9, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: -2.55, y: 0.45, z: 2.45}
+    cameraAEndOffset: {x: -1.85, y: 0.65, z: 1.95}
     cameraAFov: 55
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 14
+    activeActors: 03000000
+    showMotorcycle: 1
+    showTrafficDecor: 0
+    requiredAnchors: 0e000000160000000f000000
     cues:
     - time: 0
-      duration: 1.8
+      duration: 1.65
       actor: 3
       actionType: 1
+      anchorKey: 22
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2.2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.8
+      duration: 0
+      actor: 3
+      actionType: 11
       anchorKey: 14
       targetAnchorKey: 0
       propKey: 
@@ -258,16 +1332,16 @@ MonoBehaviour:
       boolValue: 0
       floatValue: 0
       vectorValue: {x: 0, y: 0, z: 0}
-    - time: 1.8
-      duration: 0
+    - time: 3.3
+      duration: 4.5
       actor: 3
-      actionType: 4
-      anchorKey: 0
-      targetAnchorKey: 0
+      actionType: 12
+      anchorKey: 14
+      targetAnchorKey: 15
       propKey: 
       soundKey: 
       fxKey: 
-      boolValue: 1
+      boolValue: 0
       floatValue: 0
       vectorValue: {x: 0, y: 0, z: 0}
   - id: 12
@@ -277,13 +1351,29 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: e5fee895c340bd44da5250fd8ec1dc2e, type: 2}
     hasCameraB: 1
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: 3.4, y: 1.15, z: -1.6}
+    cameraAEndOffset: {x: 3.4, y: 1.15, z: -1.6}
     cameraAFov: 58
-    cameraBOffset: {x: 0, y: 0, z: 0}
+    cameraBOffset: {x: 0.55, y: 1.55, z: -4.1}
     cameraBFov: 60
     focusAnchor: 17
-    cues: []
+    activeActors: 03000000
+    showMotorcycle: 1
+    showTrafficDecor: 1
+    requiredAnchors: 1100000012000000
+    cues:
+    - time: 0
+      duration: 9.8
+      actor: 3
+      actionType: 12
+      anchorKey: 17
+      targetAnchorKey: 18
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 13
     displayName: T14_Delivery
     actionDuration: 8
@@ -291,13 +1381,89 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 598dd88c2a890ef47bfb883bc306a115, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
+    cameraAStartOffset: {x: 2.25, y: 0.85, z: 2.65}
+    cameraAEndOffset: {x: 1.65, y: 0.72, z: 2.15}
     cameraAFov: 50
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 16
-    cues: []
+    activeActors: 0200000003000000
+    showMotorcycle: 1
+    showTrafficDecor: 1
+    requiredAnchors: 10000000
+    cues:
+    - time: 0
+      duration: 1.3
+      actor: 3
+      actionType: 12
+      anchorKey: 16
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 1
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.5
+      duration: 0
+      actor: 3
+      actionType: 18
+      anchorKey: 16
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.15
+      duration: 1.95
+      actor: 3
+      actionType: 1
+      anchorKey: 16
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 2.2
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4.3
+      duration: 0
+      actor: 3
+      actionType: 23
+      anchorKey: 16
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.35
+      duration: 0
+      actor: 3
+      actionType: 20
+      anchorKey: 16
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 5.95
+      duration: 0
+      actor: 3
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: DeliverySuccess
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
   - id: 14
     displayName: T15_FinalGag
     actionDuration: 6
@@ -305,10 +1471,62 @@ MonoBehaviour:
     postRoll: 0.75
     timelineAsset: {fileID: 11400000, guid: 06bdd50cac117c94bb35d804a58e093f, type: 2}
     hasCameraB: 0
-    cameraAStartOffset: {x: 0, y: 0, z: 0}
-    cameraAEndOffset: {x: 0, y: 0, z: 0}
-    cameraAFov: 45
+    cameraAStartOffset: {x: 1.45, y: 0.58, z: 2.25}
+    cameraAEndOffset: {x: 1.15, y: 0.48, z: 1.85}
+    cameraAFov: 48
     cameraBOffset: {x: 0, y: 0, z: 0}
     cameraBFov: 60
     focusAnchor: 10
-    cues: []
+    activeActors: 03000000
+    showMotorcycle: 0
+    showTrafficDecor: 0
+    requiredAnchors: 0a0000000c000000
+    cues:
+    - time: 0
+      duration: 1.15
+      actor: 3
+      actionType: 1
+      anchorKey: 12
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 1.9
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 1.2
+      duration: 0.65
+      actor: 3
+      actionType: 16
+      anchorKey: 10
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 2.5
+      duration: 0
+      actor: 3
+      actionType: 13
+      anchorKey: 0
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: ActionRejected
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
+    - time: 4
+      duration: 0
+      actor: 3
+      actionType: 24
+      anchorKey: 13
+      targetAnchorKey: 0
+      propKey: 
+      soundKey: 
+      fxKey: 
+      boolValue: 0
+      floatValue: 0
+      vectorValue: {x: 0, y: 0, z: 0}
