@@ -393,6 +393,8 @@ namespace ScaryParty.Pizzeria.Presentation
                             ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
 
+                        if (profile != null) socket = BoneAttachmentBinding.ResolveRemote(socket, profile.RemoteAttachment(tool.SlotId), ref pose);
+
                         wrapper.AttachTo(socket, pose, 0);
                     }
                 }
@@ -404,6 +406,8 @@ namespace ScaryParty.Pizzeria.Presentation
                         var pose = tool.SlotId == 0
                             ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        if (profile != null) socket = BoneAttachmentBinding.ResolveRemote(socket, profile.RemoteAttachment(tool.SlotId), ref pose);
 
                         wrapper.AttachTo(socket, pose, 0);
                     }
@@ -728,6 +732,8 @@ namespace ScaryParty.Pizzeria.Presentation
                             ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
 
+                        if (profile != null) socket = BoneAttachmentBinding.ResolveRemote(socket, profile.RemoteAttachment(item.SlotId), ref pose);
+
                         wrapper.AttachTo(socket, pose, 0, useSupportPoint: false);
                     }
                 }
@@ -739,6 +745,8 @@ namespace ScaryParty.Pizzeria.Presentation
                         var pose = item.SlotId == 0
                             ? (profile != null ? profile.remoteLeftHandPose : ItemPoseOffset.Identity)
                             : (profile != null ? profile.remoteRightHandPose : ItemPoseOffset.Identity);
+
+                        if (profile != null) socket = BoneAttachmentBinding.ResolveRemote(socket, profile.RemoteAttachment(item.SlotId), ref pose);
 
                         wrapper.AttachTo(socket, pose, 0, useSupportPoint: false);
                     }

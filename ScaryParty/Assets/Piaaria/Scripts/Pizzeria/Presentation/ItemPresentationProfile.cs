@@ -55,6 +55,13 @@ namespace ScaryParty.Pizzeria.Presentation
         public ItemPoseOffset remoteLeftHandPose = ItemPoseOffset.Identity;
         public ItemPoseOffset remoteRightHandPose = ItemPoseOffset.Identity;
 
+        [Header("Âncoras opcionais de terceira pessoa")]
+        public BoneAttachmentBinding remoteLeftAttachment;
+        public BoneAttachmentBinding remoteRightAttachment;
+
+        public BoneAttachmentBinding RemoteAttachment(int handIndex) =>
+            handIndex == 0 ? remoteLeftAttachment : remoteRightAttachment;
+
         [Header("Pose de Bancada (Ajuste sobre âncora de slot da estação)")]
         public ItemPoseOffset stationSlotPose = ItemPoseOffset.Identity;
 
