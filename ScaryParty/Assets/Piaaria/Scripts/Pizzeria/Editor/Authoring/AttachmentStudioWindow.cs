@@ -140,7 +140,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         private bool ShowBones => IsRemote && overrideBone;
         private bool ShowTail => ShowBones && endpoint==AttachmentEndpoint.Tail;
         private bool ShowCustom => ShowBones && endpoint==AttachmentEndpoint.Custom;
-        private bool CanSave => Profile!=null && (!ShowBones || ResolveSelectedBone()!=null) && pose.scale.x>0 && pose.scale.y>0 && pose.scale.z>0;
+        private bool CanSave => Profile!=null && (!ShowBones || ResolveSelectedBone()!=null && rigRoot.GetComponent<CharacterVisualController>()!=null) && pose.scale.x>0 && pose.scale.y>0 && pose.scale.z>0;
         private BoneAttachmentBinding binding => CurrentBinding;
         private BoneAttachmentBinding CurrentBinding => new BoneAttachmentBinding{enabled=overrideBone,bonePath=bonePath,endpoint=endpoint,tailLocal=tailLocal,customLocal=customLocal};
 

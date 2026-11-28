@@ -96,6 +96,17 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
         {
             _cameraTarget = new Vector3(0f, 0.45f, 0f);
             _cameraDistance = 1.35f;
+            if (_previewRoot != null)
+            {
+                var renderers = _previewRoot.GetComponentsInChildren<Renderer>(true);
+                if (renderers.Length > 0)
+                {
+                    Bounds bounds = renderers[0].bounds;
+                    foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                    _cameraTarget = bounds.center;
+                    _cameraDistance = Mathf.Clamp(bounds.extents.magnitude / Mathf.Tan(17f * Mathf.Deg2Rad) * 1.2f, .2f, 40f);
+                }
+            }
             _cameraPitch = 38f;
             _cameraYaw = 30f;
         }
@@ -337,7 +348,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             {
                 Rect scaleRect = new Rect(rect.xMax - 130, rect.y + 10, 120, 24);
                 EditorGUI.DrawRect(scaleRect, new Color(0.1f, 0.1f, 0.12f, 0.75f));
-                GUI.Label(scaleRect, "  📏 Escala: 1.0 m", EditorStyles.miniLabel);
+                GUI.Label(scaleRect, $"  Distância: {_cameraDistance:F2} m", EditorStyles.miniLabel);
             }
         }
 
@@ -390,13 +401,13 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 case EventType.ScrollWheel:
                     if (rect.Contains(evt.mousePosition))
                     {
-                        _cameraDistance = Mathf.Clamp(_cameraDistance + evt.delta.y * 0.05f, 0.2f, 6.0f);
+                        _cameraDistance = Mathf.Clamp(_cameraDistance * Mathf.Exp(evt.delta.y * .07f), 0.2f, 40f);
                         evt.Use();
                     }
                     break;
 
                 case EventType.KeyDown:
-                    if (evt.keyCode == KeyCode.F)
+                    if (evt.keyCode == KeyCode.F && rect.Contains(evt.mousePosition) && !EditorGUIUtility.editingTextField)
                     {
                         FrameSelection();
                         evt.Use();

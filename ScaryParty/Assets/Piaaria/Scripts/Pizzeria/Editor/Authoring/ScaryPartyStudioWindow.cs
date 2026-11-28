@@ -214,7 +214,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 using(new EditorGUI.DisabledScope(prop.name=="id"))
                     DrawProperty(prop);
             }
-            so.ApplyModifiedProperties();
+            if (so.ApplyModifiedProperties()) PizzeriaContentStudioSession.NotifySessionChanged();
         }
         private static void DrawProperty(SerializedProperty prop)
         {

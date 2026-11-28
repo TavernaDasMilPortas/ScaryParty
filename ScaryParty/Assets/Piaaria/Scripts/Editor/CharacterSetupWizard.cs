@@ -1202,6 +1202,12 @@ namespace ScaryParty.EditorScripts
                 return;
             }
 
+            if (!Application.isPlaying)
+            {
+                _report = "Preview de contexto requer Play Mode. Para amostrar clipes em Edit Mode, use Attachment Studio.";
+                _reportType = MessageType.Info;
+                return;
+            }
             Undo.RecordObject(anim, "Apply Character Context Preview");
             bool isRiding = contextIndex == 1;
             int weaponMode = contextIndex switch
@@ -1235,6 +1241,7 @@ namespace ScaryParty.EditorScripts
                 return;
             }
 
+            if (!EditorUtility.DisplayDialog("Alterar Transform?", "Este comando modifica diretamente o osso ou âncora. Para posicionar itens, use o Attachment Studio.", "Alterar", "Cancelar")) return;
             Undo.RecordObject(targetBone, "Apply Character Bone Offset");
             targetBone.localPosition += posDelta;
             targetBone.localRotation *= Quaternion.Euler(rotDelta);

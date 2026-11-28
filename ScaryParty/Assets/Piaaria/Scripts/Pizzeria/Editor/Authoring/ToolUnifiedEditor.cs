@@ -158,13 +158,18 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
                 : "ℹ️ Utensílio com capacidade configurada.");
         #endregion
 
+        [TabGroup("Abas", "✋ Poses & Suporte")]
+        [ShowIf("@PresentationProfile != null")]
+        [Button("Abrir prévia 3D de encaixe", ButtonSizes.Large)]
+        private void OpenAttachmentStudio() => AttachmentStudioWindow.OpenFor(PresentationProfile);
+
         private void ResolvePresentationProfile()
         {
             if (Definition == null) return;
             var catalog = AssetDatabase.LoadAssetAtPath<ItemPresentationCatalog>("Assets/Piaaria/ScriptableObjects/Pizzeria/ItemPresentationCatalog.asset");
             if (catalog != null)
             {
-                PresentationProfile = catalog.FindProfile(ItemCategory.Tool, Definition.id, true, false);
+                PresentationProfile = catalog.profiles.Find(p => p != null && p.isTool && p.definitionId == Definition.id);
             }
         }
 

@@ -164,6 +164,12 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             CriarPerfilApresentacaoGenerico();
         }
 
+        [TabGroup("Abas", "✋ Item na Mão")]
+        [ShowIf("@PerfilApresentacaoMao != null")]
+        [Button("Abrir prévia 3D de encaixe", ButtonSizes.Large)]
+        [Tooltip("Ajuste o item no personagem real, sem modificar os bones do prefab.")]
+        private void OpenAttachmentStudio() => AttachmentStudioWindow.OpenFor(PerfilApresentacaoMao);
+
         private void SaveHandChanges()
         {
             if (PerfilApresentacaoMao != null)
@@ -246,7 +252,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             string dir = "Assets/Piaaria/ScriptableObjects/Pizzeria/Profiles";
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
-            string assetPath = $"{dir}/Profile_Ingredient_{Definition.name}.asset";
+            string assetPath = AssetDatabase.GenerateUniqueAssetPath($"{dir}/Profile_Ingredient_{Definition.name}.asset");
             var pres = ScriptableObject.CreateInstance<ItemPresentationProfile>();
             pres.presentationKey = $"Ingredient_{Definition.id}";
             pres.definitionId = Definition.id;
@@ -258,6 +264,14 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
 
             AssetDatabase.CreateAsset(pres, assetPath);
             AssetDatabase.SaveAssets();
+            var catalog = AssetDatabase.LoadAssetAtPath<ItemPresentationCatalog>("Assets/Piaaria/ScriptableObjects/Pizzeria/ItemPresentationCatalog.asset");
+            if (catalog != null && !catalog.profiles.Contains(pres))
+            {
+                Undo.RecordObject(catalog, "Registrar perfil visual");
+                catalog.profiles.Add(pres);
+                EditorUtility.SetDirty(catalog);
+                AssetDatabase.SaveAssets();
+            }
             PerfilApresentacaoMao = pres;
             PerfilApresentacaoBancada = pres;
         }

@@ -88,6 +88,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             if (_viewport != null && viewportRect.width > 20 && viewportRect.height > 20)
             {
                 _viewport.DrawViewportGUI(viewportRect);
+                if (Event.current.type == EventType.MouseDrag || Event.current.type == EventType.ScrollWheel || Event.current.type == EventType.Used) Repaint();
             }
 
             EditorGUILayout.EndHorizontal();
@@ -119,15 +120,15 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             GUILayout.Space(10);
 
             // Câmera
-            if (GUILayout.Button("Enquadrar [F]", EditorStyles.toolbarButton, GUILayout.Width(85)))
+            if (GUILayout.Button(new GUIContent("Enquadrar [F]", "Enquadra os modelos visíveis."), EditorStyles.toolbarButton, GUILayout.Width(85)))
             {
                 _viewport?.FrameSelection();
             }
-            if (GUILayout.Button("Vista Superior", EditorStyles.toolbarButton, GUILayout.Width(90)))
+            if (GUILayout.Button(new GUIContent("Vista Superior", "Vista de cima para conferir os slots."), EditorStyles.toolbarButton, GUILayout.Width(90)))
             {
                 _viewport?.SetTopView();
             }
-            if (GUILayout.Button("Vista Frontal", EditorStyles.toolbarButton, GUILayout.Width(85)))
+            if (GUILayout.Button(new GUIContent("Vista Frontal", "Vista frontal para avaliar alturas."), EditorStyles.toolbarButton, GUILayout.Width(85)))
             {
                 _viewport?.SetFrontView();
             }
@@ -164,7 +165,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             }
 
             var prevDef = session.pinnedStationDef;
-            session.pinnedStationDef = (StationDef)EditorGUILayout.ObjectField(session.pinnedStationDef, typeof(StationDef), false);
+            session.pinnedStationDef = StudioAssetPicker.Draw(new GUIContent("Definição", "Selecione pelo tipo, sem procurar nas pastas."), session.pinnedStationDef);
             if (session.pinnedStationDef != prevDef)
             {
                 _viewport?.RebuildPreviewScene();
@@ -198,7 +199,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // 3. Ingrediente Apoiado
             EditorGUILayout.LabelField("3. Ingrediente no Slot", EditorStyles.miniBoldLabel);
             var prevIng = session.pinnedIngredient;
-            session.pinnedIngredient = (IngredientDef)EditorGUILayout.ObjectField(session.pinnedIngredient, typeof(IngredientDef), false);
+            session.pinnedIngredient = StudioAssetPicker.Draw(new GUIContent("Ingrediente", "Selecione pelo tipo, sem procurar nas pastas."), session.pinnedIngredient);
             if (session.pinnedIngredient != prevIng)
             {
                 _viewport?.RebuildPreviewScene();
@@ -208,7 +209,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("4. Utensílio / Faca", EditorStyles.miniBoldLabel);
             var prevTool = session.pinnedTool;
-            session.pinnedTool = (ToolDef)EditorGUILayout.ObjectField(session.pinnedTool, typeof(ToolDef), false);
+            session.pinnedTool = StudioAssetPicker.Draw(new GUIContent("Utensílio", "Selecione pelo tipo, sem procurar nas pastas."), session.pinnedTool);
             if (session.pinnedTool != prevTool)
             {
                 _viewport?.RebuildPreviewScene();
@@ -217,7 +218,7 @@ namespace ScaryParty.Pizzeria.Editor.Authoring
             // 5. Processo
             EditorGUILayout.Space(4);
             EditorGUILayout.LabelField("5. Processo Culinário", EditorStyles.miniBoldLabel);
-            session.pinnedProcess = (ProcessDef)EditorGUILayout.ObjectField(session.pinnedProcess, typeof(ProcessDef), false);
+            session.pinnedProcess = StudioAssetPicker.Draw(new GUIContent("Processo", "Selecione pelo tipo, sem procurar nas pastas."), session.pinnedProcess);
 
             EditorGUILayout.Space(8);
 
