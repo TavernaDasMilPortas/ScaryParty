@@ -14,6 +14,9 @@ Este índice reúne a documentação técnica do projeto com links relativos e d
 
 ---
 
+
+- [Animation Studio 3D](../../Tools/AnimationStudio/README.md) — Visualizador interativo externo e pipeline Blender/GLB de revisão de poses e animações.
+
 ## 2. Documentação Técnica dos Módulos (`ScaryParty/Docs/`)
 - [AnimationSystem.md](AnimationSystem.md) — Sistema de animação de personagens, transições e sincronização de rede.
 - [CityGeneration.md](CityGeneration.md) — Arquitetura de geração da cidade procedural, lotes, ruas e determinismo por seed.

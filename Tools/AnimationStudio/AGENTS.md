@@ -1,0 +1,11 @@
+# Animation Studio — instruções locais
+- Trabalhe exclusivamente com os modelos reais. Não use geração de imagens como substituto para um render de asset.
+- Preserve o .blend original. Use studio.py inspect para descobrir nomes e proporções reais antes de montar pose; não invente nomes de ossos.
+- Scripts de pose devem ficar em WorkScenes/ ou em arquivos versionados explicitamente revisados. Use --script e --save-copy para produzir a cópia editável. Nunca chame save no original.
+- Para unir personagem e moto, use --append ou uma cena preparada; ajuste escala, orientação, quadril, mãos e pés com base nos pontos reais. Append não alinha automaticamente.
+- Publique uma versão distinta por revisão. Modo pose congela a geometria avaliada (sem ossos no GLB); modo animation mantém o rig e clipes exportáveis. Verifique ambos quando necessário.
+- Abra a URL local indicada pelo servidor no browser do Antigravity se disponível; caso não consiga, informe o usuário para abrir no navegador normal. Não afirme que a imagem foi inspecionada sem realmente vê-la.
+- A biblioteca atualiza a cada 5 segundos; use vista A/B para comparação, e informe os nomes das versões. Para feedback, use capturas PNG do viewport.
+- Não execute Unity, builds ou headless browser. O Blender em background é usado apenas nos comandos expressamente solicitados de inspeção/publicação.
+- Não publique modelos, previews, cópias ou texturas privadas no Git; as pastas locais são ignoradas.
+- Não instale servidores MCP, não exponha o servidor na rede, não adicione endpoints para executar código remotamente.

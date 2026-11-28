@@ -5,6 +5,14 @@ Para alterações rotineiras de código, consulte o histórico do Git (`git log`
 
 ---
 
+## [2026-11-28] — Animation Studio 3D (ferramenta externa)
+- Visualizador WebGL local (Three.js), biblioteca de GLBs, câmera compartilhada A/B, playback/scrubbing, grade, wireframe, ossos e PNG.
+- CLI Blender/Python para inventário de rig e pesos, importação de objetos, script de pose explícito, cópias editáveis e exportação de pose avaliada ou animação. Originais preservados; arquivos locais ignorados pelo Git.
+- Sem modificações nos assets ou scripts Unity. Testes locais de sintaxe/HTTP, Blender e WebGL pendentes; instruções em [Animation Studio](../../Tools/AnimationStudio/README.md).
+
+---
+
+
 ## [2026-11-27] — Correção e Completação do Trailer Studio (`T01`–`T15`)
 - **Escopo:** `TrailerTake.cs`, `TrailerStudioProfile.cs`, `TrailerActor.cs`, `TrailerStageHelper.cs`, `TrailerDirector.cs`, `TrailerStudioBuilder.cs`, `TrailerStudioValidator.cs`, `TrailerStudioProfile.asset`, `TrailerCityConfig.asset`, `TrailerStudioTests.cs`, `README_GRAVACAO.md`.
 - **Resumo:**

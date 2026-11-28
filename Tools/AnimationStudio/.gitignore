@@ -1,0 +1,6 @@
+node_modules/
+Previews/
+WorkScenes/
+SourceModels/
+__pycache__/
+*.pyc
