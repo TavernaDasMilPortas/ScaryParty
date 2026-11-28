@@ -5,6 +5,9 @@
 **Último Bloco Concluído:** **Correção completa do Trailer Studio (`Assets/Piaaria/TrailerStudio/`): bootstrap/validação estrita de cidade e âncoras sem fallback `(0,0,0)`, resolução determinística por função/pátio/rotas viárias, elenco e moto filtrados por take, relógio local exact-once com `0.75 s` de pré/pós-roll e cobertura dos 15 takes (`T01`–`T15`) incluindo pilotos `T03`/`T07`/`T12`. Validação visual no Unity Editor aberto pendente (`UNITY_EXECUTION=MANUAL_ONLY`).**
 **Pipeline de Renderização:** Universal Render Pipeline (URP) com Cel Shading / Toon Shader
 
+
+
+**Ferramenta externa (28/11/2026):** `Tools/AnimationStudio/` adiciona inspeção de rigs/pesos via Blender, publicação versionada de GLB e visualizador WebGL local com comparação A/B e timeline. Não altera a Unity; validação local Blender/WebGL pendente. Consulte [README](../../Tools/AnimationStudio/README.md).
 ---
 
 ## 1. Visão Geral dos Módulos

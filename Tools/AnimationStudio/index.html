@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ScaryParty · Animation Studio</title><link rel="stylesheet" href="/style.css">
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script></head>
+<body>
+<header><div><small>SCARYPARTY / FERRAMENTAS</small><h1>Animation Studio <span>3D</span></h1></div><div class="toolbar"><button id="refresh">Atualizar biblioteca</button><button id="compare" aria-pressed="false">Comparar versões</button></div></header>
+<main>
+<aside><h2>Biblioteca local</h2><p>Previews reais exportados do Blender. Arraste um GLB para uma vista ou abra um arquivo local.</p><div id="library"></div><label class="file">Abrir GLB na vista A<input type="file" id="fileA" accept=".glb"></label><label class="file" id="fileBLabel" hidden>Abrir GLB na vista B<input type="file" id="fileB" accept=".glb"></label><p id="status" role="status" aria-live="polite"></p></aside>
+<section class="workspace">
+<div class="toolbar views"><button data-view="perspective">Perspectiva</button><button data-view="front">Frente</button><button data-view="side">Lado</button><button data-view="back">Costas</button><button data-view="top">Topo</button><button id="fit">Enquadrar</button><label><input type="checkbox" id="grid" checked> Grade</label><label><input type="checkbox" id="bones"> Ossos</label><label><input type="checkbox" id="wire"> Wireframe</label><button id="capture">PNG da vista A</button></div>
+<div id="panels" class="panels">
+<article class="panel" id="panelA"><div class="panelbar"><strong id="titleA">A · Nenhum modelo</strong><select id="clipA" aria-label="Clipe A" disabled></select></div><div class="viewport" id="viewA"><div class="empty">Selecione ou arraste um GLB</div></div><div class="info" id="infoA"></div></article>
+<article class="panel" id="panelB" hidden><div class="panelbar"><strong id="titleB">B · Nenhum modelo</strong><select id="clipB" aria-label="Clipe B" disabled></select></div><div class="viewport" id="viewB"><div class="empty">Selecione uma segunda versão</div></div><div class="info" id="infoB"></div></article>
+</div>
+<div class="timeline"><button id="play" disabled>Reproduzir</button><button id="reset">⏮</button><input type="range" id="seek" min="0" max="1" value="0" step="0.001" aria-label="Tempo da animação" disabled><output id="time">0.00 / 0.00 s</output><label>Velocidade <select id="speed"><option value=".25">0,25×</option><option value=".5">0,5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><label><input type="checkbox" id="loop" checked> Loop</label></div>
+<footer>Arraste para orbitar · scroll para zoom · botão direito para mover · comparação com câmeras e tempo sincronizados</footer>
+</section></main><script type="module" src="/viewer.mjs"></script></body></html>
